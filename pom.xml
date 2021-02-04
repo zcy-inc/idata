@@ -2,16 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>idata-commons</module>
-    </modules>
     <groupId>cn.zhengcaiyun.bigdata.idata</groupId>
     <artifactId>idata-parent</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-
     <name>${project.artifactId}</name>
-    <description>The parent project of idata</description>
+    <description>The parent project of IData</description>
     <url>https://github.com/zcy-inc/idata</url>
     <scm>
         <url>https://github.com/zcy-inc/idata</url>
@@ -35,43 +31,43 @@
         <url>https://zcygov.cn</url>
     </organization>
 
+    <modules>
+        <module>idata-commons</module>
+        <module>idata-user-center</module>
+        <module>idata-portal-server</module>
+    </modules>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.3.8.RELEASE</version>
+        <relativePath/>
     </parent>
-
     <properties>
-        <java.version>11</java.version>
         <revision>1.0.0-SNAPSHOT</revision>
+        <java.version>11</java.version>
+        <flyway.version>7.5.2</flyway.version>
+        <mysql-connector.version>8.0.20</mysql-connector.version>
+        <mybatis-dynamic-sql.version>1.2.1</mybatis-dynamic-sql.version>
+        <mybatis-generator-plugin.version>1.4.0</mybatis-generator-plugin.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-            </dependency>
-            <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <scope>test</scope>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql-connector.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.dynamic-sql</groupId>
+                <artifactId>mybatis-dynamic-sql</artifactId>
+                <version>${mybatis-dynamic-sql.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
