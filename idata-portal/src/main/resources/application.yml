@@ -1,0 +1,5 @@
+server:
+  port: 9527
+logging:
+  file:
+    path: logs

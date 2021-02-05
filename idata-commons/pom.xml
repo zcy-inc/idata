@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>idata-parent</artifactId>
-        <groupId>cn.zhengcaiyun.bigdata.idata</groupId>
+        <groupId>cn.zhengcaiyun.idata</groupId>
         <version>${revision}</version>
     </parent>
     <artifactId>idata-commons</artifactId>
