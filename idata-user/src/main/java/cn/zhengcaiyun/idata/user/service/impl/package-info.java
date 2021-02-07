@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 /**
- * Controller层实现类
+ * 业务层实现类
  * @author shiyin
  * @date 2021-02-04 23:07
  */

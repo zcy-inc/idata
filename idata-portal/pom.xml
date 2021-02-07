@@ -11,13 +11,11 @@
     <description>IData project portal server</description>
 
     <dependencies>
-
         <dependency>
-            <groupId>cn.zhengcaiyun.idata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>idata-migration</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>idata-user</artifactId>
@@ -28,7 +26,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

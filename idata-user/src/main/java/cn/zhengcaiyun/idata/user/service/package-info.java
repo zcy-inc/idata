@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 /**
- * 业务逻辑层
+ * 业务层接口定义
  * @author shiyin
  * @date 2021-02-04 23:11
  */

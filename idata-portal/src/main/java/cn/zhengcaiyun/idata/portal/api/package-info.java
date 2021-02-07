@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.api;
 /**
- * http接口层，只能依赖controller层代码
+ * http接口层，只能依赖业务层代码
  * @author shiyin
  * @date 2021-02-04 23:12
  */
