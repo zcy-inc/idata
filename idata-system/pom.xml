@@ -7,18 +7,13 @@
         <groupId>cn.zhengcaiyun.idata</groupId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>idata-user</artifactId>
-    <description>IData project User Access Control module</description>
+    <artifactId>idata-system</artifactId>
+    <description>IData project System module</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>idata-commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>idata-dto</artifactId>
             <version>${project.version}</version>
         </dependency>
 

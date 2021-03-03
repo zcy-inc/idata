@@ -5,8 +5,9 @@
     <parent>
         <artifactId>idata-parent</artifactId>
         <groupId>cn.zhengcaiyun.idata</groupId>
-        <version>${revision}</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>idata-commons</artifactId>
-    <description>IData project common lib</description>
+    <description>IData project common class lib</description>
+
 </project>

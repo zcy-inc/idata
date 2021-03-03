@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.zhengcaiyun.idata</groupId>
     <artifactId>idata-parent</artifactId>
-    <version>${revision}</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>The parent project of IData</description>
@@ -34,8 +34,11 @@
     <modules>
         <module>idata-commons</module>
         <module>idata-portal</module>
-        <module>idata-user</module>
         <module>idata-migration</module>
+        <module>idata-dto</module>
+        <module>idata-system</module>
+        <module>idata-user</module>
+        <module>idata-develop</module>
     </modules>
 
     <parent>
@@ -45,10 +48,13 @@
         <relativePath/>
     </parent>
     <properties>
-        <revision>1.0.0-SNAPSHOT</revision>
+<!--        <revision>1.0.0</revision>-->
         <java.version>11</java.version>
         <mybatis-dynamic-sql.version>1.2.1</mybatis-dynamic-sql.version>
         <mybatis-generator-plugin.version>1.4.0</mybatis-generator-plugin.version>
+        <mybatis-spring-boot.version>2.1.2</mybatis-spring-boot.version>
+        <swagger.version>2.9.2</swagger.version>
+        <fastjson.version>1.2.46</fastjson.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -56,6 +62,21 @@
                 <groupId>org.mybatis.dynamic-sql</groupId>
                 <artifactId>mybatis-dynamic-sql</artifactId>
                 <version>${mybatis-dynamic-sql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -14,26 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal;
-
-import org.mybatis.spring.annotation.MapperScan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package cn.zhengcaiyun.idata.dto.user;
 
 /**
  * @author shiyin
- * @date 2021-02-04 18:00
+ * @date 2021-03-03 00:06
  */
-@SpringBootApplication(scanBasePackages={"cn.zhengcaiyun.idata"})
-@MapperScan("cn.zhengcaiyun.idata.user.dal.dao")
-public class PortalApplication {
+public class SignInDto {
+    private String username;
+    private String password;
 
-    private static final Logger log = LoggerFactory.getLogger(PortalApplication.class);
+    // GaS
+    public String getUsername() {
+        return username;
+    }
 
-    public static void main(String[] args) {
-        SpringApplication.run(PortalApplication.class, args);
-        log.info("IData portal server started successfully...");
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

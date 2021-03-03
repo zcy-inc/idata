@@ -14,26 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal;
-
-import org.mybatis.spring.annotation.MapperScan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package cn.zhengcaiyun.idata.dto.system;
 
 /**
  * @author shiyin
- * @date 2021-02-04 18:00
+ * @date 2021-03-09 10:38
  */
-@SpringBootApplication(scanBasePackages={"cn.zhengcaiyun.idata"})
-@MapperScan("cn.zhengcaiyun.idata.user.dal.dao")
-public class PortalApplication {
-
-    private static final Logger log = LoggerFactory.getLogger(PortalApplication.class);
-
-    public static void main(String[] args) {
-        SpringApplication.run(PortalApplication.class, args);
-        log.info("IData portal server started successfully...");
-    }
+public enum TreeNodeTypeEnum {
+    // feature type
+    MENU,
+    OTHER_FEATURE,
+    // resource type
+    FOLDER;
 }

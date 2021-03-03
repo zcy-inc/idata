@@ -7,17 +7,13 @@
         <groupId>cn.zhengcaiyun.idata</groupId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>idata-migration</artifactId>
-    <description>IData project db migration module</description>
+    <artifactId>idata-dto</artifactId>
+    <description>IData project Data Transfer Object lib</description>
 
     <dependencies>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
         </dependency>
     </dependencies>
 </project>

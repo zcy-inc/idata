@@ -2,11 +2,3 @@ spring:
   flyway:
     enabled: true
     clean-disabled: true
-    locations: classpath:db/migration
-    table: flyway_schema_history
-    baseline-on-migrate: true
-    baseline-version: 0
-    encoding: UTF-8
-    out-of-order: false
-    schemas: flyway
-    validate-on-migrate: true

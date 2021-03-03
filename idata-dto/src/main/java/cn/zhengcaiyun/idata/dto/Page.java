@@ -14,9 +14,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.dto;
+package cn.zhengcaiyun.idata.dto;
+
+import io.swagger.annotations.ApiModelProperty;
+
+import java.util.List;
+
 /**
- * DTO类
  * @author shiyin
- * @date 2021-02-04 23:09
+ * @date 2021-03-03 00:23
  */
+public class Page<T> {
+    @ApiModelProperty(required = true)
+    private List<T> content;
+    @ApiModelProperty(required = true)
+    private int total;
+
+    public static <T> Page newOne(List<T> content, int total) {
+        Page<T> p = new Page<>();
+        p.setContent(content);
+        p.setTotal(total);
+        return p;
+    }
+
+    // GaS
+    public List<T> getContent() {
+        return content;
+    }
+
+    public void setContent(List<T> content) {
+        this.content = content;
+    }
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
+    }
+}
