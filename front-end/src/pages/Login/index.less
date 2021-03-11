@@ -58,14 +58,14 @@
     }
 
     .ant-radio-wrapper-checked .ant-radio-inner {
-      background-color: #3b77fa;
+      background-color: var(--primary-color);
     }
     .ant-radio-inner::after {
       top: 4px;
       left: 4px;
-      background-color: #fff;
       width: 6px;
       height: 6px;
+      background-color: #fff;
     }
   }
 }
@@ -76,6 +76,22 @@
   margin-bottom: 50px;
 }
 
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 90px;
+  > img {
+    width: 172px;
+    height: 136px;
+    margin-bottom: 10px;
+  }
+  > p {
+    margin-bottom: 0;
+    color: #9aa4c6;
+    line-height: 20px;
+  }
+}
 
 // TODO: component style should be consistent
 .loginBtnWrap {
@@ -94,7 +110,7 @@
       background: #2341ed;
     }
     .ant-btn.ant-btn-primary:not(:focus) {
-      background: #304ffe;
+      background: var(--primary-color);
       box-shadow: 0 8px 16px 0 #cfd7ff;
     }
   }

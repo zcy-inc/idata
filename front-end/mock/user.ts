@@ -99,7 +99,7 @@ export default {
         updateTime: '2020-12-18 19:29:16',
         del: false,
         userName: 'dengjiajie',
-        nickName: '百里',
+        nickname: '百里',
         employeeId: 'C00640',
         realName: '邓佳杰',
         avatar: 'https://static-legacy.dingtalk.com/media/lADPD3Irse4l4lnNAlnNAlk_601_601.jpg',

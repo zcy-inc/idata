@@ -29,7 +29,7 @@ function FeatureList(props: {
               />
             )}
           </H5>
-          {Array.isArray(node.children) && node.children.length > 0 && (
+          {Array.isArray(node.children) && node.enable && node.children.length > 0 && (
             <div className={styles.contentWrap}>
               {Array.isArray(node.children) &&
                 node.children.map((child) => (

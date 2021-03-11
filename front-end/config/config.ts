@@ -1,4 +1,3 @@
-// FIXME: 该文件的代码执行了两次
 // https://umijs.org/config/
 import { defineConfig } from 'umi';
 import defaultSettings from './defaultSettings';
@@ -17,7 +16,6 @@ export default defineConfig({
     hmr: true,
   },
   layout: {
-    // name: 'IData',
     siderWidth: 220,
     ...defaultSettings,
   },
@@ -38,11 +36,11 @@ export default defineConfig({
   routes,
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
   theme: {
-    'primary-color': defaultSettings.primaryColor,
-    'text-color': '#223345',
+    'primary-color': '#304FFE',
+    'text-color': '#2D3956',
     'border-radius-base': '4px',
-    'border-color-base': '#dbe4e9',
-    'input-placeholder-color': '#adbbc4',
+    'border-color-base': '#EBEDF3',
+    'input-placeholder-color': '#BFC4D5',
   },
   esbuild: {},
   title: false,
@@ -52,7 +50,7 @@ export default defineConfig({
     basePath: '/',
   },
   // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector', '@zcy-data/plugin-proxy'],
+  plugins: ['react-dev-inspector/plugins/umi/react-inspector'],
   inspectorConfig: {
     // loader options type and docs see below
     exclude: [],
@@ -61,5 +59,5 @@ export default defineConfig({
   },
   resolve: {
     includes: ['src/components'],
-  }
+  },
 });

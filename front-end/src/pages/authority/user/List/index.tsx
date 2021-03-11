@@ -30,7 +30,6 @@ const List: React.FC = () => {
     setAddVisible(false);
   };
   const onCloseEditModal = () => {
-    setCurrentRecord(undefined);
     setEditVisible(false);
   };
   const onEditClick = (row: Tuser) => {

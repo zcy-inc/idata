@@ -36,11 +36,34 @@
   }
 }
 
+.featureTree {
+  :global {
+    .ant-tree-switcher {
+      color: #c0c4da;
+    }
+    .ant-tree-treenode {
+      color: #2d3956;
+      font-weight: 500;
+      font-size: 16px;
+      font-family: PingFangSC-Medium, PingFang SC;
+      line-height: 22px;
+    }
+    .ant-tree-node-content-wrapper.ant-tree-node-selected {
+      color: var(--primary-color);
+      background: none;
+    }
+    .ant-tree-node-content-wrapper:hover {
+      background: none;
+    }
+  }
+}
+
 .folderTree {
   :global {
     .ant-tree-switcher {
       color: #c0c4da;
     }
+
     .menu.ant-tree-treenode {
       color: #2d3956;
       font-weight: 500;
@@ -54,6 +77,14 @@
       font-size: 14px;
       font-family: PingFangSC-Medium, PingFang SC;
       line-height: 20px;
+    }
+
+    .ant-tree-node-content-wrapper.ant-tree-node-selected {
+      color: var(--primary-color);
+      background: none;
+    }
+    .ant-tree-node-content-wrapper:hover {
+      background: none;
     }
   }
 }

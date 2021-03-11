@@ -2,8 +2,8 @@ import React, { useCallback } from 'react';
 import { LogoutOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { Menu, Spin, Avatar } from 'antd';
 import { useModel } from 'umi';
-import { outLogin } from '@/services/login';
-import { skip2Login } from '@zcy-data/idata-utils';
+import { outLogin } from '@/services/user';
+import { skip2Login } from '@/utils/utils';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 
@@ -65,7 +65,7 @@ const AvatarDropdown: React.FC = () => {
     <HeaderDropdown overlay={menuHeaderDropdown}>
       <div className={`${styles.action}`}>
         <Avatar src={currentUser.avatar} />
-        <span className={styles.nickName}>{currentUser.nickName}</span>
+        <span className={styles.nickname}>{currentUser.nickname}</span>
         <CaretDownOutlined className={styles.downIcon} />
       </div>
     </HeaderDropdown>

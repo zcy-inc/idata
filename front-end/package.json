@@ -51,7 +51,6 @@
     "@ant-design/pro-layout": "^6.5.0",
     "@ant-design/pro-table": "^2.9.16",
     "@umijs/route-utils": "^1.0.33",
-    "@zcy-data/idata-utils": "^1.0.1",
     "@zcy-data/plugin-proxy": "^1.0.4",
     "antd": "^4.8.6",
     "classnames": "^2.2.6",

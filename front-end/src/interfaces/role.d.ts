@@ -1,5 +1,5 @@
 export interface Trole {
     id: number;
-    name: string;
+    roleName: string;
     editor?: string;
 }

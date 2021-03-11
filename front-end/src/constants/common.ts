@@ -3,7 +3,7 @@ export const wsStorageKey = 'workspace__idata__pro';
 // export const userStorageKey = 'USER_INFO';
 // export const hasUserManageStorageKey = 'HAS_USER_MANAGE';
 
-export const mainPublicPath = '/idata/';
+export const mainPublicPath = '/';
 
 export const defaultWs = 'zcy'; // 默认环境
 

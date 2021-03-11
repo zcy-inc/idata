@@ -1,26 +1,20 @@
 import React, { Fragment, useState } from 'react';
 import { Button, Form, notification, Tabs, Radio } from 'antd';
 import { omit } from 'lodash';
-import { useLocation } from 'umi';
+import { useLocation, useModel } from 'umi';
 import { ValidateStatus } from 'antd/es/form/FormItem';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { mainPublicPath } from '@/constants/common';
-// import { persistUserInfo } from '@/utils/utils';
 import { OutlinedInput, OutlinedPassword } from '@/components';
-import { queryLogin } from '@/services/login';
+import { queryRegister, queryLogin } from '@/services/user';
 
 import styles from './index.less';
 
 const { TabPane } = Tabs;
-// enum pwInputTypeEnum {
-//   TEXT = 'text',
-//   PASSWORD = 'password',
-// }
 enum errCodeEnum {
   USER = 'userName.is.wrong',
   PW = 'psw.is.wrong',
 }
-
 const getValidateMsg = (msg: string) => (
   <Fragment>
     <InfoCircleOutlined /> {msg}
@@ -53,10 +47,23 @@ type TvalidateInfo = {
   password?: TvalidateObj;
 };
 
+const Empty = () => {
+  return (
+    <div className={styles.empty}>
+      <img
+        alt="illustration"
+        src="https://sitecdn.zcycdn.com/f2e-assets/680a5a36-da31-41f5-a601-fcecf67ba8a2.svg"
+      />
+      <p>管理员已关闭注册通道</p>
+      <p>请联系管理员~</p>
+    </div>
+  );
+};
+
 const Login = () => {
   const { query: { redirect } = {} } = useLocation() as { query?: { redirect?: string } };
+  const { initialState } = useModel('@@initialState');
   const [btnLoading, setBtnLoading] = useState(false);
-  // const [pwInputType, setPwInputType] = useState(pwInputTypeEnum.PASSWORD);
   const [validateInfo, setValidateInfo] = useState<TvalidateInfo>({});
   const [form1] = Form.useForm();
   const [form2] = Form.useForm();
@@ -64,7 +71,7 @@ const Login = () => {
   const onLogin = async () => {
     const values = await form1.validateFields();
     setBtnLoading(true);
-    const { success, msg, code, data } = await queryLogin(values);
+    const { success, msg, code } = await queryLogin(values);
     if (!success) {
       setBtnLoading(false);
       const newValidateInfo = getValidateInfo(code, msg);
@@ -79,14 +86,19 @@ const Login = () => {
       return;
     }
 
-    // TODO: 待优化
-    // persistUserInfo(data); // 兼容其他项目
-
     if (redirect) {
       window.location.href = redirect;
       return;
     }
     window.location.href = mainPublicPath;
+  };
+
+  const onRegister = async () => {
+    const values = await form2.validateFields();
+    const { success } = await queryRegister(values);
+    if (success) {
+      window.location.href = mainPublicPath;
+    }
   };
 
   const clearUserValidateState = () => {
@@ -118,8 +130,8 @@ const Login = () => {
           <Tabs defaultActiveKey="1" size="large">
             <TabPane tab="登录" key="1">
               <Form form={form1}>
-                <Form.Item name="method">
-                  <Radio.Group>
+                <Form.Item>
+                  <Radio.Group defaultValue={1}>
                     <Radio value={1}>LDAP</Radio>
                     <Radio value={2}>普通登录</Radio>
                   </Radio.Group>
@@ -138,11 +150,7 @@ const Login = () => {
                   validateStatus={validateInfo?.password?.status || undefined}
                   help={validateInfo?.password?.help || undefined}
                 >
-                  <OutlinedPassword
-                    // type={pwInputType}
-                    label="请输入密码"
-                    onChange={clearPwValidateState}
-                  />
+                  <OutlinedPassword label="请输入密码" onChange={clearPwValidateState} />
                 </Form.Item>
                 <div className={styles.loginBtnWrap}>
                   <Button
@@ -157,53 +165,62 @@ const Login = () => {
               </Form>
             </TabPane>
             <TabPane tab="注册" key="2">
-              <Form form={form2}>
-                <Form.Item
-                  rules={[{ required: true, message: getValidateMsg('请输入账号') }]}
-                  validateStatus={validateInfo?.username?.status || undefined}
-                  help={validateInfo?.username?.help || undefined}
-                >
-                  <OutlinedInput label="请输入账号" onChange={clearUserValidateState} />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: getValidateMsg('请输入密码') }]}
-                  validateStatus={validateInfo?.username?.status || undefined}
-                  help={validateInfo?.username?.help || undefined}
-                >
-                  <OutlinedPassword label="请输入密码" onChange={clearUserValidateState} />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: getValidateMsg('请输入名称') }]}
-                  validateStatus={validateInfo?.username?.status || undefined}
-                  help={validateInfo?.username?.help || undefined}
-                >
-                  <OutlinedInput label="请输入名称" onChange={clearUserValidateState} />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: getValidateMsg('请输入手机号') }]}
-                  validateStatus={validateInfo?.username?.status || undefined}
-                  help={validateInfo?.username?.help || undefined}
-                >
-                  <OutlinedInput label="请输入手机号" onChange={clearUserValidateState} />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: getValidateMsg('请输入部门') }]}
-                  validateStatus={validateInfo?.username?.status || undefined}
-                  help={validateInfo?.username?.help || undefined}
-                >
-                  <OutlinedInput label="请输入部门" onChange={clearUserValidateState} />
-                </Form.Item>
-                <div className={styles.loginBtnWrap}>
-                  <Button
-                    loading={btnLoading}
-                    type="primary"
-                    style={{ width: 360 }}
-                    onClick={onLogin}
+              {initialState?.systemState?.registerEnable ? (
+                <Form form={form2}>
+                  <Form.Item
+                    name="username"
+                    rules={[{ required: true, message: getValidateMsg('请输入账号') }]}
+                    validateStatus={validateInfo?.username?.status || undefined}
+                    help={validateInfo?.username?.help || undefined}
                   >
-                    注册并登录
-                  </Button>
-                </div>
-              </Form>
+                    <OutlinedInput label="请输入账号" onChange={clearUserValidateState} />
+                  </Form.Item>
+                  <Form.Item
+                    name="password"
+                    rules={[{ required: true, message: getValidateMsg('请输入密码') }]}
+                    validateStatus={validateInfo?.username?.status || undefined}
+                    help={validateInfo?.username?.help || undefined}
+                  >
+                    <OutlinedPassword label="请输入密码" onChange={clearUserValidateState} />
+                  </Form.Item>
+                  <Form.Item
+                    name="nickname"
+                    rules={[{ required: true, message: getValidateMsg('请输入名称') }]}
+                    validateStatus={validateInfo?.username?.status || undefined}
+                    help={validateInfo?.username?.help || undefined}
+                  >
+                    <OutlinedInput label="请输入名称" onChange={clearUserValidateState} />
+                  </Form.Item>
+                  <Form.Item
+                    name="mobile"
+                    rules={[{ required: true, message: getValidateMsg('请输入手机号') }]}
+                    validateStatus={validateInfo?.username?.status || undefined}
+                    help={validateInfo?.username?.help || undefined}
+                  >
+                    <OutlinedInput label="请输入手机号" onChange={clearUserValidateState} />
+                  </Form.Item>
+                  <Form.Item
+                    name="department"
+                    rules={[{ required: true, message: getValidateMsg('请输入部门') }]}
+                    validateStatus={validateInfo?.username?.status || undefined}
+                    help={validateInfo?.username?.help || undefined}
+                  >
+                    <OutlinedInput label="请输入部门" onChange={clearUserValidateState} />
+                  </Form.Item>
+                  <div className={styles.loginBtnWrap}>
+                    <Button
+                      loading={btnLoading}
+                      type="primary"
+                      style={{ width: 360 }}
+                      onClick={onRegister}
+                    >
+                      注册并登录
+                    </Button>
+                  </div>
+                </Form>
+              ) : (
+                <Empty />
+              )}
             </TabPane>
           </Tabs>
         </div>

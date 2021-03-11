@@ -20,7 +20,7 @@ export interface CurrentUser {
   employeeId: string;
   avatar?: string;
   userName?: string;
-  nickName?: string;
+  nickname?: string;
   realName?: string;
   mail?: string;
   mobile?: string;

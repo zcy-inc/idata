@@ -87,6 +87,7 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
           <TabPane tab="功能" key="1">
             <Tree
+              className={styles.featureTree}
               treeData={featureTree}
               autoExpandParent={autoExpandParent}
               onExpand={onFeatureExpand}

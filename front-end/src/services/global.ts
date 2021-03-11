@@ -1,13 +1,13 @@
 import { request } from 'umi';
 
-export async function getHrefUrl() {
-  return request<{ data: Record<string, string> }>('/api/v1/idata/hrefUrl');
-}
-
 export async function getSystemFeatureTree() {
-  return request('/api/p0/sys/systemFeatureTree');
+  return request('/api/p1/sys/featureTree');
 }
 
 export async function getSystemFolderTree() {
-  return request('/api/p0/sys/systemFolderTree');
+  return request('/api/p1/sys/folderTree');
+}
+
+export async function getSystemState() {
+  return request('/api/p0/sys/state');
 }

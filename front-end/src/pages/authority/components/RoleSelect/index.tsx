@@ -10,7 +10,7 @@ const RoleSelect: React.FC<SelectProps<number[]>> = (props) => {
   return (
     <Select mode="multiple" {...props}>
       {data?.content.map((item) => (
-        <Option key={item.id} value={item.id}>{item.name}</Option>
+        <Option key={item.id} value={item.id}>{item.roleName}</Option>
       ))}
     </Select>
   );

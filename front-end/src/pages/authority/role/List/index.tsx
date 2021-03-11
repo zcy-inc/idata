@@ -15,7 +15,7 @@ const List: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [roleId, setRoleId] = useState<number>();
   const skip2Edit = (record: Trole) =>
-    history.push(`/authority/role/edit/${record.id}/${record.name}`);
+    history.push(`/authority/role/edit/${record.id}/${record.roleName}`);
   const onDelete = getDeleteFn(deleteRole, refresh);
   const skip2Add = () => history.push('/authority/role/create');
   const showAuth = (id: number) => {
@@ -26,7 +26,7 @@ const List: React.FC = () => {
   const columns: ColumnsType<Trole> = [
     {
       title: '角色名称',
-      dataIndex: 'name',
+      dataIndex: 'roleName',
     },
     {
       title: '最近编辑人',

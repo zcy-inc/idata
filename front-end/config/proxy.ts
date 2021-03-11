@@ -7,8 +7,9 @@
  */
 export default {
   dev: {
-    '/zcy/api/**/*': {
+    '/api/**/*': {
       target: 'http://idata-staging.cai-inc.com/',
+      // target: 'http://10.201.74.37:9527',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

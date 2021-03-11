@@ -2,7 +2,7 @@ import { request } from 'umi';
 import type { Trole } from '@/interfaces/role';
 
 export async function getRoleList(params: PaginatedParams) {
-  return request<{ data: PaginatedData<Trole> }>('/api/p1/uc/roles', { params });
+  return request<{ data: PaginatedData<Trole> }>('/api/p1/uac/roles', { params });
 }
 
 export async function deleteRole(roleId: number) {

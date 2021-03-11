@@ -4,13 +4,11 @@ import { notification } from 'antd';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { history } from 'umi';
 import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-// import type { Tws } from '@/interfaces/global.d';
 import type { CurrentUser } from '@/interfaces/user';
 import type { ResponseError } from 'umi-request';
 import { RightContent } from '@/components';
-// import CustomLayout from '@/layouts/CustomLayout';
-// import { getReqUrl } from '@/utils/utils';
-import { skip2Login } from '@zcy-data/idata-utils';
+import { skip2Login } from '@/utils/utils';
+import { getSystemState } from '@/services/global';
 import { queryCurrent } from '@/services/user';
 import defaultSettings from '../config/defaultSettings';
 
@@ -23,6 +21,7 @@ const fetchCurrentUser = async () => {
   }
   return undefined;
 };
+
 /**
  * 获取用户信息比较慢的时候会展示一个 loading
  */
@@ -32,22 +31,21 @@ export const initialStateConfig = {
 
 export async function getInitialState(): Promise<{
   settings?: LayoutSettings;
-  // workspaces?: Tws[];
+  systemState?: { registerEnable?: boolean };
   currentUser?: CurrentUser;
 }> {
+  const { data: systemState } = await getSystemState();
   // 如果是登录页面，不执行
   if (history.location.pathname !== '/login') {
-    const [currentUser] = await Promise.all([
-      fetchCurrentUser(),
-      // queryWorkspaces(),
-    ]);
+    const currentUser = await fetchCurrentUser();
     return {
       currentUser,
-      // workspaces,
+      systemState,
       settings: defaultSettings,
     };
   }
   return {
+    systemState,
     settings: defaultSettings,
   };
 }
@@ -59,11 +57,9 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     onPageChange: () => {
       // 如果没有登录，重定向到 login
       if (!initialState?.currentUser) {
-        // skip2Login();
+        skip2Login();
       }
     },
-    // headerContentRender: () => <WsSelect />,
-    // childrenRender: (children) => <CustomLayout>{children}</CustomLayout>,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     ...initialState?.settings,
@@ -124,10 +120,4 @@ export const request: RequestConfig = {
       };
     },
   },
-  // requestInterceptors: [
-  //   (url, options) => {
-  //     const obj = { url: getReqUrl(url), options: { ...options, interceptors: true } };
-  //     return obj;
-  //   },
-  // ],
 };

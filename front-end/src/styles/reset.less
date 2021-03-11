@@ -2,8 +2,8 @@ body {
   // Button 按钮
   .ant-btn.ant-btn-primary {
     color: #fff;
-    background: #3b77fa;
-    border-color: #3b77fa;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
   }
 
   .ant-btn-primary:focus,
@@ -29,8 +29,8 @@ body {
   }
 
   .ant-btn {
-    color: #3b77fa;
-    border: 1px solid #3b77fa;
+    color: #15172F;
+    border: 1px solid var(--border-color-base);
     border-radius: 4px;
   }
   .ant-btn-text {
@@ -40,9 +40,9 @@ body {
 
   .ant-btn:focus,
   .ant-btn:hover {
-    color: #3b77fa;
+    color: var(--primary-color);
     background: #ecf2ff;
-    border: 1px solid #3b77fa;
+    border: 1px solid var(--primary-color);
   }
 
   .ant-btn:active {
@@ -62,6 +62,10 @@ body {
   .ant-btn > .anticon + span,
   .ant-btn > span + .anticon {
     margin-left: 6px;
+  }
+
+  .ant-switch-checked {
+    background: var(--success-color);
   }
 
   // Modal 对话框
@@ -114,11 +118,11 @@ body {
   .ant-input-affix-wrapper {
     color: #adbbc4;
     &::after {
-      border-color: #3b77fa;
+      border-color: var(--primary-color);
       border-radius: 4px;
     }
     &:focus {
-      border-color: #3b77fa;
+      border-color: var(--primary-color);
       border-radius: 4px;
     }
   }
@@ -152,7 +156,7 @@ body {
       color: #c0c4cc;
       border-radius: 4px;
       &:hover {
-        color: #304ffe;
+        color: var(--primary-color);
         background: #eff5ff;
       }
     }
@@ -202,8 +206,8 @@ body {
     }
     .ant-tabs-nav .ant-tabs-tab-active {
       color: #fff;
-      background: #3b77fa;
-      border-color: #3177fd;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
     }
     .ant-tabs-nav .ant-tabs-tab-active .ant-tabs-tab-btn {
       color: #fff;
