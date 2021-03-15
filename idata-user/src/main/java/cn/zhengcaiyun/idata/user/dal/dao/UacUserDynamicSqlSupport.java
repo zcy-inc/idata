@@ -61,7 +61,7 @@ public final class UacUserDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   是否系统管理员(0:否,1、2:是)
+     *   是否系统管理员(0:否,1:是,2:其他系统管理员)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.sys_admin")
     public static final SqlColumn<Short> sysAdmin = uacUser.sysAdmin;

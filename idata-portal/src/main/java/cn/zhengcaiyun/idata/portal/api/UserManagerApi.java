@@ -16,13 +16,17 @@
  */
 package cn.zhengcaiyun.idata.portal.api;
 
-import cn.zhengcaiyun.idata.dto.Page;
-import cn.zhengcaiyun.idata.dto.RestResult;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserManagerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -33,16 +37,16 @@ import java.util.List;
 @RequestMapping(path = "/p1/uac")
 public class UserManagerApi {
 
-    @GetMapping("currentUser")
-    public RestResult<UserInfoDto> getCurrentUser() {
-        return RestResult.success();
-    }
+    @Autowired
+    private UserManagerService userManagerService;
+    @Autowired
+    private TokenService tokenService;
 
     @GetMapping("users")
-    public RestResult<Page<UserInfoDto>> findUsers(@RequestParam("name") String name,
+    public RestResult<Page<UserInfoDto>> findUsers(@RequestParam(value = "name", required = false) String name,
                                                    @RequestParam(value = "limit", required = false) Integer limit,
                                                    @RequestParam(value = "offset", required = false) Integer offset) {
-        return RestResult.success();
+        return RestResult.success(userManagerService.findUsers(name, limit, offset));
     }
 
     @GetMapping("userFeatureTree/{userId}")
@@ -56,22 +60,28 @@ public class UserManagerApi {
     }
 
     @PostMapping("user")
-    public RestResult<UserInfoDto> create(@RequestBody UserInfoDto userInfoDto) {
-        return RestResult.success();
+    public RestResult<UserInfoDto> create(@RequestBody UserInfoDto userInfoDto,
+                                          HttpServletRequest request) {
+        return RestResult.success(userManagerService.create(userInfoDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("user")
-    public RestResult<UserInfoDto> edit(@RequestBody UserInfoDto userInfoDto) {
-        return RestResult.success();
+    public RestResult<UserInfoDto> edit(@RequestBody UserInfoDto userInfoDto,
+                                        HttpServletRequest request) {
+        return RestResult.success(userManagerService.edit(userInfoDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("resetUserPassword/{userId}")
-    public RestResult resetUserPassword(@PathVariable("userId") Long userId) {
+    public RestResult resetUserPassword(@PathVariable("userId") Long userId,
+                                        HttpServletRequest request) {
+        userManagerService.resetUserPassword(userId, tokenService.getNickname(request));
         return RestResult.success();
     }
 
     @DeleteMapping("user/{userId}")
-    public RestResult delete(@PathVariable("userId") Long userId) {
+    public RestResult delete(@PathVariable("userId") Long userId,
+                             HttpServletRequest request) {
+        userManagerService.delete(userId, tokenService.getNickname(request));
         return RestResult.success();
     }
 

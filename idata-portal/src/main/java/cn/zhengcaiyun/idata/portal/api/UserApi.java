@@ -16,35 +16,87 @@
  */
 package cn.zhengcaiyun.idata.portal.api;
 
-import cn.zhengcaiyun.idata.dto.RestResult;
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.user.SignInDto;
 import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserManagerService;
+import cn.zhengcaiyun.idata.user.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author shiyin
  * @date 2021-03-01 22:12
  */
 @RestController
-@RequestMapping(path = "/p0/uac")
 public class UserApi {
 
-    @PostMapping("signIn")
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserManagerService userManagerService;
+    @Autowired
+    private TokenService tokenService;
+
+    @PostMapping("/p0/uac/register")
+    public RestResult<UserInfoDto> register(@RequestBody UserInfoDto userInfoDto,
+                                            HttpServletResponse response) {
+        UserInfoDto userInfo = userService.register(userInfoDto, false, null);
+        Cookie cookie = new Cookie("Authorization", userInfo.getToken());
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return RestResult.success(userInfo);
+    }
+
+    @PostMapping("/p0/uac/signIn")
     public RestResult<UserInfoDto> signIn(@RequestBody SignInDto signInDto,
                                           HttpServletResponse response) {
+        UserInfoDto userInfo = userService.signIn(signInDto);
+        Cookie cookie = new Cookie("Authorization", userInfo.getToken());
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return RestResult.success(userInfo);
+    }
+
+    @GetMapping("/p1/uac/currentUser")
+    public RestResult<UserInfoDto> getCurrentUser(HttpServletRequest request) {
+        return RestResult.success(userManagerService.getUserInfo(tokenService.getUserId(request)));
+    }
+
+    @GetMapping("/p1/uac/checkCurrentAccess")
+    public RestResult<Boolean> checkCurrentAccess(@RequestParam(value = "accessCode", required = false) String accessCode,
+                                                  @RequestParam(value = "accessType", required = false) String accessType,
+                                                  @RequestParam(value = "accessKey", required = false) String accessKey,
+                                                  HttpServletRequest request) {
+        if (accessCode != null) {
+            return RestResult.success(userManagerService.checkAccess(tokenService.getUserId(request), accessCode));
+        }
+        else {
+            return RestResult.success(userManagerService.checkAccess(tokenService.getUserId(request), accessType, accessKey));
+        }
+    }
+
+    @GetMapping("/p1/uac/currentFeatureTree")
+    public RestResult<List<FeatureTreeNodeDto>> getCurrentFeatureTree(HttpServletRequest request) {
         return RestResult.success();
     }
 
-    @PostMapping("signOut")
+    @GetMapping("/p1/uac/currentFolderTree")
+    public RestResult<List<FolderTreeNodeDto>> getCurrentFolderTree(HttpServletRequest request) {
+        return RestResult.success();
+    }
+
+    @PostMapping("/p1/uac/signOut")
     public RestResult signOut(HttpServletRequest request) {
-        return RestResult.success();
-    }
-
-    @PostMapping("register")
-    public RestResult<UserInfoDto> register(@RequestBody UserInfoDto userInfoDto) {
+        userService.signOut(tokenService.getToken(request));
         return RestResult.success();
     }
 }

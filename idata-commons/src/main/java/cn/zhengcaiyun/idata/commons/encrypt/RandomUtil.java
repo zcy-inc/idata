@@ -14,32 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.commons.encrypt;
 
-import java.util.Date;
+import java.util.Random;
 
 /**
  * @author shiyin
- * @date 2021-03-02 23:55
+ * @date 2021-03-11 20:19
  */
-public class SystemStateDto {
-    private Date sysStartTime;
-    private Boolean registerEnable;
+public class RandomUtil {
 
-    // GaS
-    public Boolean getRegisterEnable() {
-        return registerEnable;
+    public static String randomStr(int length) {
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        return new Random().ints(leftLimit, rightLimit + 1)
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
-    public void setRegisterEnable(Boolean registerEnable) {
-        this.registerEnable = registerEnable;
-    }
-
-    public Date getSysStartTime() {
-        return sysStartTime;
-    }
-
-    public void setSysStartTime(Date sysStartTime) {
-        this.sysStartTime = sysStartTime;
-    }
 }

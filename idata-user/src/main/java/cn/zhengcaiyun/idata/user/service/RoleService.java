@@ -14,43 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto;
+package cn.zhengcaiyun.idata.user.service;
 
-import io.swagger.annotations.ApiModelProperty;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.user.RoleDto;
 
 import java.util.List;
 
 /**
  * @author shiyin
- * @date 2021-03-03 00:23
+ * @date 2021-03-13 21:58
  */
-public class Page<T> {
-    @ApiModelProperty(required = true)
-    private List<T> content;
-    @ApiModelProperty(required = true)
-    private int total;
-
-    public static <T> Page newOne(List<T> content, int total) {
-        Page<T> p = new Page<>();
-        p.setContent(content);
-        p.setTotal(total);
-        return p;
-    }
-
-    // GaS
-    public List<T> getContent() {
-        return content;
-    }
-
-    public void setContent(List<T> content) {
-        this.content = content;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    public void setTotal(int total) {
-        this.total = total;
-    }
+public interface RoleService {
+    Page<RoleDto> findRoles(Integer limit, Integer offset);
+    List<FeatureTreeNodeDto> getRoleFeatureTree(Long roleId);
+    List<FolderTreeNodeDto> getRoleFolderTree(Long roleId);
+    RoleDto create(RoleDto roleDto, String creator);
+    RoleDto edit(RoleDto roleDto, String editor);
+    boolean delete(Long roleId, String editor);
 }

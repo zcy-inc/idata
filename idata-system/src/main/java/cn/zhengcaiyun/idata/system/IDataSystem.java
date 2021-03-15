@@ -14,32 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.system;
 
 import java.util.Date;
 
 /**
  * @author shiyin
- * @date 2021-03-02 23:55
+ * @date 2021-03-16 15:28
  */
-public class SystemStateDto {
-    private Date sysStartTime;
-    private Boolean registerEnable;
+public class IDataSystem {
 
-    // GaS
-    public Boolean getRegisterEnable() {
-        return registerEnable;
+    private final Date sysStartTime;
+    private static IDataSystem iDataSystem;
+
+    private IDataSystem() {
+        sysStartTime = new Date();
     }
 
-    public void setRegisterEnable(Boolean registerEnable) {
-        this.registerEnable = registerEnable;
+    public static void init() {
+        iDataSystem = new IDataSystem();
     }
 
-    public Date getSysStartTime() {
-        return sysStartTime;
-    }
-
-    public void setSysStartTime(Date sysStartTime) {
-        this.sysStartTime = sysStartTime;
+    public static Date getSysStartTime() {
+        return iDataSystem.sysStartTime;
     }
 }

@@ -16,9 +16,11 @@
  */
 package cn.zhengcaiyun.idata.portal;
 
+import cn.zhengcaiyun.idata.system.IDataSystem;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -27,13 +29,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @date 2021-02-04 18:00
  */
 @SpringBootApplication(scanBasePackages={"cn.zhengcaiyun.idata"})
-@MapperScan("cn.zhengcaiyun.idata.user.dal.dao")
-public class PortalApplication {
+@MapperScan("cn.zhengcaiyun.idata.*.dal.dao")
+public class PortalApplication implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(PortalApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(PortalApplication.class, args);
         log.info("IData portal server started successfully...");
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        IDataSystem.init();
     }
 }

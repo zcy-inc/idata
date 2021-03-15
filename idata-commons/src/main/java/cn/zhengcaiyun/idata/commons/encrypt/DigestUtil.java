@@ -14,32 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.commons.encrypt;
 
-import java.util.Date;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author shiyin
- * @date 2021-03-02 23:55
+ * @date 2021-03-11 19:53
  */
-public class SystemStateDto {
-    private Date sysStartTime;
-    private Boolean registerEnable;
+public class DigestUtil {
 
-    // GaS
-    public Boolean getRegisterEnable() {
-        return registerEnable;
+    // not thread-safe
+    public static String md5(String msg) {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        md5.update(StandardCharsets.UTF_8.encode(msg));
+        return String.format("%032x", new BigInteger(1, md5.digest()));
     }
 
-    public void setRegisterEnable(Boolean registerEnable) {
-        this.registerEnable = registerEnable;
+    public static String md5WithSalt(String msg, String salt) {
+        return md5(msg + salt);
     }
 
-    public Date getSysStartTime() {
-        return sysStartTime;
-    }
-
-    public void setSysStartTime(Date sysStartTime) {
-        this.sysStartTime = sysStartTime;
-    }
 }

@@ -16,12 +16,13 @@
  */
 package cn.zhengcaiyun.idata.portal.api;
 
-import cn.zhengcaiyun.idata.dto.RestResult;
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.system.SystemStateDto;
+import cn.zhengcaiyun.idata.system.service.SystemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,21 +32,23 @@ import java.util.List;
  * @date 2021-03-02 11:02
  */
 @RestController
-@RequestMapping(path = "/p0/sys")
 public class SystemApi {
 
-    @GetMapping("systemState")
+    @Autowired
+    private SystemService systemService;
+
+    @GetMapping("/p0/sys/state")
     public RestResult<SystemStateDto> getSystemState() {
-        return RestResult.success();
+        return RestResult.success(systemService.getSystemState());
     }
 
-    @GetMapping("systemFeatureTree")
+    @GetMapping("/p1/sys/featureTree")
     public RestResult<List<FeatureTreeNodeDto>> getSystemFeatureTree() {
-        return RestResult.success();
+        return RestResult.success(systemService.getSystemFeatureTree());
     }
 
-    @GetMapping("systemFolderTree")
+    @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success();
+        return RestResult.success(systemService.getSystemFolderTree());
     }
 }

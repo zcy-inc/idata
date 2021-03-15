@@ -16,6 +16,9 @@
  */
 package cn.zhengcaiyun.idata.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +26,7 @@ import java.util.List;
  * @author shiyin
  * @date 2021-03-03 00:08
  */
+@JsonIgnoreProperties({"token"})
 public class UserInfoDto {
     private Long id;
     private Short del;
@@ -31,9 +35,11 @@ public class UserInfoDto {
     private String editor;
     private Date editTime;
     private String username;
+    @ApiModelProperty(value = "是否系统管理员，0：否，1：是，2：其他系统管理员")
     private Short sysAdmin;
-    private SignInAuthTypeEnum authType;
-//    private String password;
+    private String authType;
+    private String password;
+    private String token;
     private String nickname;
     private String employeeId;
     private String department;
@@ -181,11 +187,27 @@ public class UserInfoDto {
         this.roleNames = roleNames;
     }
 
-    public SignInAuthTypeEnum getAuthType() {
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAuthType() {
         return authType;
     }
 
-    public void setAuthType(SignInAuthTypeEnum authType) {
+    public void setAuthType(String authType) {
         this.authType = authType;
     }
 }

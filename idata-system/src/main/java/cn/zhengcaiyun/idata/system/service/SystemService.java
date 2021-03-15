@@ -14,32 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.system.service;
 
-import java.util.Date;
+import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.system.SystemStateDto;
+
+import java.util.List;
 
 /**
  * @author shiyin
- * @date 2021-03-02 23:55
+ * @date 2021-03-13 22:53
  */
-public class SystemStateDto {
-    private Date sysStartTime;
-    private Boolean registerEnable;
-
-    // GaS
-    public Boolean getRegisterEnable() {
-        return registerEnable;
-    }
-
-    public void setRegisterEnable(Boolean registerEnable) {
-        this.registerEnable = registerEnable;
-    }
-
-    public Date getSysStartTime() {
-        return sysStartTime;
-    }
-
-    public void setSysStartTime(Date sysStartTime) {
-        this.sysStartTime = sysStartTime;
-    }
+public interface SystemService {
+    SystemStateDto getSystemState();
+    List<FeatureTreeNodeDto> getSystemFeatureTree();
+    List<FolderTreeNodeDto> getSystemFolderTree();
 }
