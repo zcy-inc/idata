@@ -25,5 +25,9 @@ public enum TreeNodeTypeEnum {
     MENU,
     OTHER_FEATURE,
     // resource type
-    FOLDER;
+    DW_DEVELOP_DIR,
+    JOB_DIR,
+    FILE_RESOURCE_DIR,
+    SPARK_UDF_DIR,
+    DATAPI_DIR;
 }
