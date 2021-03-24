@@ -58,7 +58,7 @@ public interface UacRoleDao {
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
     @Results(id="UacRoleResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
-        @Result(column="del", property="del", jdbcType=JdbcType.SMALLINT),
+        @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),

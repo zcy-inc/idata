@@ -19,10 +19,10 @@ public final class SysFeatureDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.del")
-    public static final SqlColumn<Short> del = sysFeature.del;
+    public static final SqlColumn<Integer> del = sysFeature.del;
 
     /**
      * Database Column Remarks:
@@ -70,7 +70,7 @@ public final class SysFeatureDynamicSqlSupport {
     public static final class SysFeature extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
 
-        public final SqlColumn<Short> del = column("del", JDBCType.SMALLINT);
+        public final SqlColumn<Integer> del = column("del", JDBCType.TINYINT);
 
         public final SqlColumn<Date> createTime = column("create_time", JDBCType.TIMESTAMP);
 

@@ -14,11 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api;
+package cn.zhengcaiyun.idata.portal.api.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.user.SignInDto;
 import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -71,27 +70,28 @@ public class UserApi {
         return RestResult.success(userManagerService.getUserInfo(tokenService.getUserId(request)));
     }
 
+    @GetMapping("/p1/uac/currentFeatureTree")
+    public RestResult<List<FeatureTreeNodeDto>> getCurrentFeatureTree(HttpServletRequest request) {
+        return RestResult.success(userManagerService.getUserFeatureTree(tokenService.getUserId(request)));
+    }
+
     @GetMapping("/p1/uac/checkCurrentAccess")
     public RestResult<Boolean> checkCurrentAccess(@RequestParam(value = "accessCode", required = false) String accessCode,
-                                                  @RequestParam(value = "accessType", required = false) String accessType,
+                                                  @RequestParam(value = "accessTypes", required = false) List<String> accessTypes,
                                                   @RequestParam(value = "accessKey", required = false) String accessKey,
                                                   HttpServletRequest request) {
         if (accessCode != null) {
             return RestResult.success(userManagerService.checkAccess(tokenService.getUserId(request), accessCode));
         }
         else {
-            return RestResult.success(userManagerService.checkAccess(tokenService.getUserId(request), accessType, accessKey));
+            return RestResult.success(userManagerService.checkAccess(tokenService.getUserId(request), accessTypes, accessKey));
         }
     }
 
-    @GetMapping("/p1/uac/currentFeatureTree")
-    public RestResult<List<FeatureTreeNodeDto>> getCurrentFeatureTree(HttpServletRequest request) {
-        return RestResult.success();
-    }
-
-    @GetMapping("/p1/uac/currentFolderTree")
-    public RestResult<List<FolderTreeNodeDto>> getCurrentFolderTree(HttpServletRequest request) {
-        return RestResult.success();
+    @GetMapping("/p1/uac/currentAccessKeys")
+    public RestResult<List<String>> findCurrentAccessKeys(@RequestParam("accessType") String accessType,
+                                                          HttpServletRequest request) {
+        return RestResult.success(userManagerService.getAccessKeys(tokenService.getUserId(request), accessType));
     }
 
     @PostMapping("/p1/uac/signOut")

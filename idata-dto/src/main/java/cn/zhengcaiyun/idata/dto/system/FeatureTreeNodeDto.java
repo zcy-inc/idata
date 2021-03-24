@@ -25,30 +25,37 @@ import java.util.List;
  * @date 2021-03-08 09:30
  */
 public class FeatureTreeNodeDto {
-    @ApiModelProperty(value = "MENU | OTHER_FEATURE")
-    private String featureType;
+    @ApiModelProperty(value = "F_MENU | F_ICON")
+    private String type;
+    private String name;
     private String featureCode;
-    private String featureName;
     private String parentCode;
-    private String accessCode;
     private Boolean enable;
     private List<FeatureTreeNodeDto> children;
 
     // GaS
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getFeatureCode() {
         return featureCode;
     }
 
     public void setFeatureCode(String featureCode) {
         this.featureCode = featureCode;
-    }
-
-    public String getFeatureName() {
-        return featureName;
-    }
-
-    public void setFeatureName(String featureName) {
-        this.featureName = featureName;
     }
 
     public String getParentCode() {
@@ -59,22 +66,6 @@ public class FeatureTreeNodeDto {
         this.parentCode = parentCode;
     }
 
-    public String getAccessCode() {
-        return accessCode;
-    }
-
-    public void setAccessCode(String accessCode) {
-        this.accessCode = accessCode;
-    }
-
-    public List<FeatureTreeNodeDto> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<FeatureTreeNodeDto> children) {
-        this.children = children;
-    }
-
     public Boolean getEnable() {
         return enable;
     }
@@ -83,11 +74,11 @@ public class FeatureTreeNodeDto {
         this.enable = enable;
     }
 
-    public String getFeatureType() {
-        return featureType;
+    public List<FeatureTreeNodeDto> getChildren() {
+        return children;
     }
 
-    public void setFeatureType(String featureType) {
-        this.featureType = featureType;
+    public void setChildren(List<FeatureTreeNodeDto> children) {
+        this.children = children;
     }
 }

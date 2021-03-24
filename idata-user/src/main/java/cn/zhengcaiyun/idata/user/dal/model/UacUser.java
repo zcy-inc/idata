@@ -18,10 +18,10 @@ public class UacUser {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.del")
-    private Short del;
+    private Integer del;
 
     /**
      * Database Column Remarks:
@@ -63,7 +63,7 @@ public class UacUser {
      *   是否系统管理员(0:否,1:是,2:其他系统管理员)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.sys_admin")
-    private Short sysAdmin;
+    private Integer sysAdmin;
 
     /**
      * Database Column Remarks:
@@ -139,12 +139,12 @@ public class UacUser {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.del")
-    public Short getDel() {
+    public Integer getDel() {
         return del;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.del")
-    public void setDel(Short del) {
+    public void setDel(Integer del) {
         this.del = del;
     }
 
@@ -199,12 +199,12 @@ public class UacUser {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.sys_admin")
-    public Short getSysAdmin() {
+    public Integer getSysAdmin() {
         return sysAdmin;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.sys_admin")
-    public void setSysAdmin(Short sysAdmin) {
+    public void setSysAdmin(Integer sysAdmin) {
         this.sysAdmin = sysAdmin;
     }
 

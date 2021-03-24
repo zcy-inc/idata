@@ -19,10 +19,10 @@ public final class UacRoleDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role.del")
-    public static final SqlColumn<Short> del = uacRole.del;
+    public static final SqlColumn<Integer> del = uacRole.del;
 
     /**
      * Database Column Remarks:
@@ -70,7 +70,7 @@ public final class UacRoleDynamicSqlSupport {
     public static final class UacRole extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
 
-        public final SqlColumn<Short> del = column("del", JDBCType.SMALLINT);
+        public final SqlColumn<Integer> del = column("del", JDBCType.TINYINT);
 
         public final SqlColumn<String> creator = column("creator", JDBCType.VARCHAR);
 

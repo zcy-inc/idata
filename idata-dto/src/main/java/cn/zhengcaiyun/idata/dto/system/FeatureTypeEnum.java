@@ -14,33 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.commons.encrypt;
-
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+package cn.zhengcaiyun.idata.dto.system;
 
 /**
  * @author shiyin
- * @date 2021-03-11 19:53
+ * @date 2021-03-24 13:47
  */
-public class DigestUtil {
-
-    public static String md5(String msg) {
-        // not thread-safe
-        MessageDigest md5;
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        md5.update(StandardCharsets.UTF_8.encode(msg));
-        return String.format("%032x", new BigInteger(1, md5.digest()));
-    }
-
-    public static String md5WithSalt(String msg, String salt) {
-        return md5(msg + salt);
-    }
-
+public enum FeatureTypeEnum {
+    F_MENU,
+    F_ICON;
 }

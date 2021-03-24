@@ -17,9 +17,11 @@
 
         <table tableName="sys_config" mapperName="SysConfigDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
         <table tableName="sys_feature" mapperName="SysFeatureDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
     </context>
 </generatorConfiguration>

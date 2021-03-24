@@ -18,10 +18,10 @@ public class UacUserRole {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user_role.del")
-    private Short del;
+    private Integer del;
 
     /**
      * Database Column Remarks:
@@ -76,12 +76,12 @@ public class UacUserRole {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user_role.del")
-    public Short getDel() {
+    public Integer getDel() {
         return del;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user_role.del")
-    public void setDel(Short del) {
+    public void setDel(Integer del) {
         this.del = del;
     }
 

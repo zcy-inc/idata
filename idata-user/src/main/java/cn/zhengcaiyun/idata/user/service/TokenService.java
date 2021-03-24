@@ -74,9 +74,9 @@ public class TokenService {
                 .signWith(SignatureAlgorithm.HS512, jwtSecurity)
                 .compact();
         userToken.setToken(DigestUtil.md5(token));
-        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo((short) 1)
+        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
                 .where(uacUserToken.userId, isEqualTo(userInfo.getId()),
-                        and(uacUserToken.del, isNotEqualTo((short) 1))));
+                        and(uacUserToken.del, isNotEqualTo(1))));
         uacUserTokenDao.insertSelective(userToken);
         return token;
     }
@@ -118,7 +118,7 @@ public class TokenService {
     private UacUserToken findByToken(String token) {
         String tokenMd5 = DigestUtil.md5(token);
         return uacUserTokenDao.selectOne(c -> c.where(uacUserToken.token, isEqualTo(tokenMd5),
-                and(uacUserToken.del, isNotEqualTo((short) 1)))).orElse(null);
+                and(uacUserToken.del, isNotEqualTo(1)))).orElse(null);
     }
 
     public String getNickname(HttpServletRequest request) {
@@ -141,15 +141,15 @@ public class TokenService {
     @Transactional(rollbackFor = Throwable.class)
     public boolean destroyToken(String token) {
         String tokenMd5 = DigestUtil.md5(token);
-        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo((short) 1)
-                .where(uacUserToken.del, isNotEqualTo((short) 1), and(uacUserToken.token, isEqualTo(tokenMd5))));
+        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
+                .where(uacUserToken.del, isNotEqualTo(1), and(uacUserToken.token, isEqualTo(tokenMd5))));
         return true;
     }
 
     @Transactional(rollbackFor = Throwable.class)
     public boolean destroyUserToken(Long userId) {
-        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo((short) 1)
-                .where(uacUserToken.del, isNotEqualTo((short) 1), and(uacUserToken.userId, isEqualTo(userId))));
+        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
+                .where(uacUserToken.del, isNotEqualTo(1), and(uacUserToken.userId, isEqualTo(userId))));
         return true;
     }
 }

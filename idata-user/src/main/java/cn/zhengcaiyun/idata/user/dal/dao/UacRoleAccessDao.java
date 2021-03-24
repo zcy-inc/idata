@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface UacRoleAccessDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_role_access")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, roleCode, accessCode);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, roleCode, accessCode, accessType, accessKey);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_role_access")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -58,13 +58,15 @@ public interface UacRoleAccessDao {
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
     @Results(id="UacRoleAccessResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
-        @Result(column="del", property="del", jdbcType=JdbcType.SMALLINT),
+        @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="role_code", property="roleCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="access_code", property="accessCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="access_code", property="accessCode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="access_type", property="accessType", jdbcType=JdbcType.VARCHAR),
+        @Result(column="access_key", property="accessKey", jdbcType=JdbcType.VARCHAR)
     })
     List<UacRoleAccess> selectMany(SelectStatementProvider selectStatement);
 
@@ -99,6 +101,8 @@ public interface UacRoleAccessDao {
             .map(editTime).toProperty("editTime")
             .map(roleCode).toProperty("roleCode")
             .map(accessCode).toProperty("accessCode")
+            .map(accessType).toProperty("accessType")
+            .map(accessKey).toProperty("accessKey")
         );
     }
 
@@ -112,6 +116,8 @@ public interface UacRoleAccessDao {
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(roleCode).toPropertyWhenPresent("roleCode", record::getRoleCode)
             .map(accessCode).toPropertyWhenPresent("accessCode", record::getAccessCode)
+            .map(accessType).toPropertyWhenPresent("accessType", record::getAccessType)
+            .map(accessKey).toPropertyWhenPresent("accessKey", record::getAccessKey)
         );
     }
 
@@ -150,7 +156,9 @@ public interface UacRoleAccessDao {
                 .set(editor).equalTo(record::getEditor)
                 .set(editTime).equalTo(record::getEditTime)
                 .set(roleCode).equalTo(record::getRoleCode)
-                .set(accessCode).equalTo(record::getAccessCode);
+                .set(accessCode).equalTo(record::getAccessCode)
+                .set(accessType).equalTo(record::getAccessType)
+                .set(accessKey).equalTo(record::getAccessKey);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_role_access")
@@ -161,7 +169,9 @@ public interface UacRoleAccessDao {
                 .set(editor).equalToWhenPresent(record::getEditor)
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(roleCode).equalToWhenPresent(record::getRoleCode)
-                .set(accessCode).equalToWhenPresent(record::getAccessCode);
+                .set(accessCode).equalToWhenPresent(record::getAccessCode)
+                .set(accessType).equalToWhenPresent(record::getAccessType)
+                .set(accessKey).equalToWhenPresent(record::getAccessKey);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_role_access")
@@ -174,6 +184,8 @@ public interface UacRoleAccessDao {
             .set(editTime).equalTo(record::getEditTime)
             .set(roleCode).equalTo(record::getRoleCode)
             .set(accessCode).equalTo(record::getAccessCode)
+            .set(accessType).equalTo(record::getAccessType)
+            .set(accessKey).equalTo(record::getAccessKey)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -188,6 +200,8 @@ public interface UacRoleAccessDao {
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(roleCode).equalToWhenPresent(record::getRoleCode)
             .set(accessCode).equalToWhenPresent(record::getAccessCode)
+            .set(accessType).equalToWhenPresent(record::getAccessType)
+            .set(accessKey).equalToWhenPresent(record::getAccessKey)
             .where(id, isEqualTo(record::getId))
         );
     }

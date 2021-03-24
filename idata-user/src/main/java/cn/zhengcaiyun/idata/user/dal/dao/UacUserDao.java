@@ -58,13 +58,13 @@ public interface UacUserDao {
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
     @Results(id="UacUserResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
-        @Result(column="del", property="del", jdbcType=JdbcType.SMALLINT),
+        @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="username", property="username", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_admin", property="sysAdmin", jdbcType=JdbcType.SMALLINT),
+        @Result(column="sys_admin", property="sysAdmin", jdbcType=JdbcType.TINYINT),
         @Result(column="auth_type", property="authType", jdbcType=JdbcType.VARCHAR),
         @Result(column="password", property="password", jdbcType=JdbcType.VARCHAR),
         @Result(column="nickname", property="nickname", jdbcType=JdbcType.VARCHAR),

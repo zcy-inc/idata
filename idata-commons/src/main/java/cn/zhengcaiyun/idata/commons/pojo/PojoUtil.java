@@ -16,6 +16,9 @@
  */
 package cn.zhengcaiyun.idata.commons.pojo;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -113,6 +116,11 @@ public class PojoUtil {
             }
             return getFieldByName(clazz.getSuperclass(), fieldName);
         }
+    }
+
+    public static <T> T castType(Object sObject, TypeReference<T> typeReference) {
+        if (sObject == null) return null;
+        return JSON.parseObject(JSON.toJSONString(sObject), typeReference);
     }
 
 }

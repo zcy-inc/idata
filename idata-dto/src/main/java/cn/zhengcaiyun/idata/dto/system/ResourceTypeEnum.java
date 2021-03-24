@@ -20,14 +20,10 @@ package cn.zhengcaiyun.idata.dto.system;
  * @author shiyin
  * @date 2021-03-09 10:38
  */
-public enum TreeNodeTypeEnum {
-    // feature type
-    MENU,
-    OTHER_FEATURE,
-    // resource type
-    DW_DEVELOP_DIR,
-    JOB_DIR,
-    FILE_RESOURCE_DIR,
-    SPARK_UDF_DIR,
-    DATAPI_DIR;
+public enum ResourceTypeEnum {
+    R_DW_DESIGN_DIR,
+    R_JOB_MANAGE_DIR,
+    R_RESOURCE_MANAGE_DIR,
+    R_FUNCTION_MANAGE_DIR,
+    R_API_DEVELOP_DIR;
 }

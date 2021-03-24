@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api;
+package cn.zhengcaiyun.idata.portal.api.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -51,12 +51,12 @@ public class UserManagerApi {
 
     @GetMapping("userFeatureTree/{userId}")
     public RestResult<List<FeatureTreeNodeDto>> getUserFeatureTree(@PathVariable("userId") Long userId) {
-        return RestResult.success();
+        return RestResult.success(userManagerService.getUserFeatureTree(userId));
     }
 
     @GetMapping("userFolderTree/{userId}")
     public RestResult<List<FolderTreeNodeDto>> getUserFolderTree(@PathVariable("userId") Long userId) {
-        return RestResult.success();
+        return RestResult.success(userManagerService.getUserFolderTree(userId));
     }
 
     @PostMapping("user")

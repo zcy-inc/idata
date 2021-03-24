@@ -21,13 +21,26 @@ import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.system.SystemStateDto;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author shiyin
  * @date 2021-03-13 22:53
  */
 public interface SystemService {
+
     SystemStateDto getSystemState();
-    List<FeatureTreeNodeDto> getSystemFeatureTree();
-    List<FolderTreeNodeDto> getSystemFolderTree();
+
+    enum FeatureTreeMode {
+        FULL, // 返回全部节点功能树
+        FULL_ENABLE, // 返回全部节点功能树并且全部使能
+        PART // 只返回使能节点相关的功能树
+    }
+    List<FeatureTreeNodeDto> getFeatureTree(FeatureTreeMode mode, Set<String> enableFeatureCodes);
+
+    /**
+     * @param folderPermissionMap key：resource type + access key; value: filePermission
+     */
+    List<FolderTreeNodeDto> getFolderTree(Map<String, Integer> folderPermissionMap);
 }

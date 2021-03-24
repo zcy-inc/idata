@@ -18,10 +18,10 @@ public class UacRoleAccess {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.del")
-    private Short del;
+    private Integer del;
 
     /**
      * Database Column Remarks:
@@ -65,6 +65,20 @@ public class UacRoleAccess {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_code")
     private String accessCode;
 
+    /**
+     * Database Column Remarks:
+     *   权限类型
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_type")
+    private String accessType;
+
+    /**
+     * Database Column Remarks:
+     *   权限对应的ID或编码
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_key")
+    private String accessKey;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.id")
     public Long getId() {
         return id;
@@ -76,12 +90,12 @@ public class UacRoleAccess {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.del")
-    public Short getDel() {
+    public Integer getDel() {
         return del;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.del")
-    public void setDel(Short del) {
+    public void setDel(Integer del) {
         this.del = del;
     }
 
@@ -143,5 +157,25 @@ public class UacRoleAccess {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_code")
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_type")
+    public String getAccessType() {
+        return accessType;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_type")
+    public void setAccessType(String accessType) {
+        this.accessType = accessType;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_key")
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_key")
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
     }
 }

@@ -14,33 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.commons.encrypt;
+package cn.zhengcaiyun.idata.dto.user;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author shiyin
- * @date 2021-03-11 19:53
+ * @date 2021-03-24 13:49
  */
-public class DigestUtil {
-
-    public static String md5(String msg) {
-        // not thread-safe
-        MessageDigest md5;
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        md5.update(StandardCharsets.UTF_8.encode(msg));
-        return String.format("%032x", new BigInteger(1, md5.digest()));
+public class AccessDto {
+    @ApiModelProperty(value = "R_DW_DESIGN_DIR | R_JOB_MANAGE_DIR | " +
+            "R_RESOURCE_MANAGE_DIR | R_FUNCTION_MANAGE_DIR | " +
+            "R_API_DEVELOP_DIR")
+    private String resourceType;
+    private String accessKey;
+    // GaS
+    public String getResourceType() {
+        return resourceType;
     }
 
-    public static String md5WithSalt(String msg, String salt) {
-        return md5(msg + salt);
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
     }
 
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
 }

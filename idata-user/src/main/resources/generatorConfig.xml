@@ -17,21 +17,24 @@
 
         <table tableName="uac_user" mapperName="UacUserDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+            <columnOverride column="sys_admin" javaType="java.lang.Integer"/>
         </table>
         <table tableName="uac_user_token" mapperName="UacUserTokenDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
         <table tableName="uac_role" mapperName="UacRoleDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
         <table tableName="uac_user_role" mapperName="UacUserRoleDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
-        </table>
-        <table tableName="uac_access" mapperName="UacAccessDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
         <table tableName="uac_role_access" mapperName="UacRoleAccessDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
     </context>
 </generatorConfiguration>

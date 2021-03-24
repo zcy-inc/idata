@@ -25,16 +25,19 @@ import java.util.List;
  * @date 2021-03-08 09:39
  */
 public class FolderTreeNodeDto {
-    @ApiModelProperty(value = "MENU | DW_DEVELOP_DIR | JOB_DIR | FILE_RESOURCE_DIR | SPARK_UDF_DIR | DATAPI_DIR")
+    @ApiModelProperty(value = "F_MENU | R_DW_DESIGN_DIR | R_JOB_MANAGE_DIR | " +
+            "R_RESOURCE_MANAGE_DIR | R_FUNCTION_MANAGE_DIR | R_API_DEVELOP_DIR")
     private String type;
     private String name;
+    // menu feature
     private String featureCode;
     private String parentCode;
+    // dir resource
     private String folderId;
     private String parentId;
-    private String accessCode;
     @ApiModelProperty(value = "二进制数字位表示：001 读，010 写，100 删，可以组合加和；十进制读写")
-    private Short filePermission;
+    private Integer filePermission;
+
     private List<FolderTreeNodeDto> children;
 
     // GaS
@@ -86,14 +89,6 @@ public class FolderTreeNodeDto {
         this.parentId = parentId;
     }
 
-    public String getAccessCode() {
-        return accessCode;
-    }
-
-    public void setAccessCode(String accessCode) {
-        this.accessCode = accessCode;
-    }
-
     public List<FolderTreeNodeDto> getChildren() {
         return children;
     }
@@ -102,11 +97,11 @@ public class FolderTreeNodeDto {
         this.children = children;
     }
 
-    public Short getFilePermission() {
+    public Integer getFilePermission() {
         return filePermission;
     }
 
-    public void setFilePermission(Short filePermission) {
+    public void setFilePermission(Integer filePermission) {
         this.filePermission = filePermission;
     }
 }

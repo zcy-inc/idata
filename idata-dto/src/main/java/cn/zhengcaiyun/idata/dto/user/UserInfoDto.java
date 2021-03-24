@@ -29,14 +29,14 @@ import java.util.List;
 @JsonIgnoreProperties({"token"})
 public class UserInfoDto {
     private Long id;
-    private Short del;
+    private Integer del;
     private String creator;
     private Date createTime;
     private String editor;
     private Date editTime;
     private String username;
     @ApiModelProperty(value = "是否系统管理员，0：否，1：是，2：其他系统管理员")
-    private Short sysAdmin;
+    private Integer sysAdmin;
     private String authType;
     private String password;
     private String token;
@@ -59,11 +59,11 @@ public class UserInfoDto {
         this.id = id;
     }
 
-    public Short getDel() {
+    public Integer getDel() {
         return del;
     }
 
-    public void setDel(Short del) {
+    public void setDel(Integer del) {
         this.del = del;
     }
 
@@ -107,11 +107,11 @@ public class UserInfoDto {
         this.username = username;
     }
 
-    public Short getSysAdmin() {
+    public Integer getSysAdmin() {
         return sysAdmin;
     }
 
-    public void setSysAdmin(Short sysAdmin) {
+    public void setSysAdmin(Integer sysAdmin) {
         this.sysAdmin = sysAdmin;
     }
 

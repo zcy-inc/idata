@@ -14,7 +14,7 @@ sys\_：系统表前缀。系统会初始化系统表中的数据，表结构和
 |通用字段名|是否必须|字段类型约束|使用场景|
 |---|---|---|---|
 |id|是<div style="width:100px"/>|id bigint unsigned not null auto\_increment comment '主键', primary key(id)|自增主键，必须有|
-|del|否|del smallint not null default 0 comment '是否删除(1:是,其他:否)'|用户在系统生成的数据一般需要逻辑删除|
+|del|否|del tinyint not null default 0 comment '是否删除(1:是,0:否)'|用户在系统生成的数据一般需要逻辑删除|
 |creator|否|creator varchar(20) not null comment '创建者'|用户在系统生成的数据一般需要记录创建者名称（这里不是用户id，忽略修改用户名的情况）|
 |create\_time|是|create\_time datetime(3) not null default current\_timestamp(3) comment '创建时间'|数据行创建时间，必须有|
 |editor|否|editor varchar(20) not null default '' comment '修改者'|用户在系统生成的数据一般需要记录修改者（这里不是用户id，忽略修改用户名的情况）|
@@ -25,7 +25,7 @@ sys\_：系统表前缀。系统会初始化系统表中的数据，表结构和
 ````
 create table if not exists db_name.ddl_example (
   id          bigint unsigned not null auto_increment comment '主键', primary key(id),
-  del         smallint        not null default 0 comment '是否删除(1:是,其他:否)',
+  del         tinyint         not null default 0 comment '是否删除(1:是,0:否)',
   creator     varchar(20)     not null comment '创建者',
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor      varchar(20)     not null default '' comment '修改者',

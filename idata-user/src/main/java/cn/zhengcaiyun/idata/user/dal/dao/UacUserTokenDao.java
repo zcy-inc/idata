@@ -58,7 +58,7 @@ public interface UacUserTokenDao {
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
     @Results(id="UacUserTokenResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
-        @Result(column="del", property="del", jdbcType=JdbcType.SMALLINT),
+        @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="user_id", property="userId", jdbcType=JdbcType.BIGINT),

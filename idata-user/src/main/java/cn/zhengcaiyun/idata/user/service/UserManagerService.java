@@ -32,8 +32,9 @@ public interface UserManagerService {
     UserInfoDto getUserInfo(Long userId);
     List<FeatureTreeNodeDto> getUserFeatureTree(Long userId);
     List<FolderTreeNodeDto> getUserFolderTree(Long userId);
+    List<String> getAccessKeys(Long userId, String accessType);
     boolean checkAccess(Long userId, String accessCode);
-    boolean checkAccess(Long userId, String accessType, String accessKey);
+    boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
     UserInfoDto create(UserInfoDto userInfoDto, String creator);
     UserInfoDto edit(UserInfoDto userInfoDto, String editor);
     boolean resetUserPassword(Long userId, String editor);

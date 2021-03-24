@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class RoleDto {
     private Long id;
-    private Short del;
+    private Integer del;
     private String creator;
     private Date createTime;
     private String editor;
@@ -47,11 +47,11 @@ public class RoleDto {
         this.id = id;
     }
 
-    public Short getDel() {
+    public Integer getDel() {
         return del;
     }
 
-    public void setDel(Short del) {
+    public void setDel(Integer del) {
         this.del = del;
     }
 

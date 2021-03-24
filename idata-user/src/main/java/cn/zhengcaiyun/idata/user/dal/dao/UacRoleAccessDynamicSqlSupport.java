@@ -19,10 +19,10 @@ public final class UacRoleAccessDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.del")
-    public static final SqlColumn<Short> del = uacRoleAccess.del;
+    public static final SqlColumn<Integer> del = uacRoleAccess.del;
 
     /**
      * Database Column Remarks:
@@ -66,11 +66,25 @@ public final class UacRoleAccessDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_code")
     public static final SqlColumn<String> accessCode = uacRoleAccess.accessCode;
 
+    /**
+     * Database Column Remarks:
+     *   权限类型
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_type")
+    public static final SqlColumn<String> accessType = uacRoleAccess.accessType;
+
+    /**
+     * Database Column Remarks:
+     *   权限对应的ID或编码
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_role_access.access_key")
+    public static final SqlColumn<String> accessKey = uacRoleAccess.accessKey;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_role_access")
     public static final class UacRoleAccess extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
 
-        public final SqlColumn<Short> del = column("del", JDBCType.SMALLINT);
+        public final SqlColumn<Integer> del = column("del", JDBCType.TINYINT);
 
         public final SqlColumn<String> creator = column("creator", JDBCType.VARCHAR);
 
@@ -83,6 +97,10 @@ public final class UacRoleAccessDynamicSqlSupport {
         public final SqlColumn<String> roleCode = column("role_code", JDBCType.VARCHAR);
 
         public final SqlColumn<String> accessCode = column("access_code", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> accessType = column("access_type", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> accessKey = column("access_key", JDBCType.VARCHAR);
 
         public UacRoleAccess() {
             super("uac_role_access");

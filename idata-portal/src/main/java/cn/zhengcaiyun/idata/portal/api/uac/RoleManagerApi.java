@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api;
+package cn.zhengcaiyun.idata.portal.api.uac;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -51,12 +51,12 @@ public class RoleManagerApi {
 
     @GetMapping("roleFeatureTree/{roleId}")
     public RestResult<List<FeatureTreeNodeDto>> getRoleFeatureTree(@PathVariable("roleId") Long roleId) {
-        return RestResult.success();
+        return RestResult.success(roleService.getRoleFeatureTree(roleId));
     }
 
     @GetMapping("roleFolderTree/{roleId}")
     public RestResult<List<FolderTreeNodeDto>> getRoleFolderTree(@PathVariable("roleId") Long roleId) {
-        return RestResult.success();
+        return RestResult.success(roleService.getRoleFolderTree(roleId));
     }
 
     @PostMapping("role")

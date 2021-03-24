@@ -19,10 +19,10 @@ public final class UacUserDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   是否删除(1:是,其他:否)
+     *   是否删除(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.del")
-    public static final SqlColumn<Short> del = uacUser.del;
+    public static final SqlColumn<Integer> del = uacUser.del;
 
     /**
      * Database Column Remarks:
@@ -64,7 +64,7 @@ public final class UacUserDynamicSqlSupport {
      *   是否系统管理员(0:否,1:是,2:其他系统管理员)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_user.sys_admin")
-    public static final SqlColumn<Short> sysAdmin = uacUser.sysAdmin;
+    public static final SqlColumn<Integer> sysAdmin = uacUser.sysAdmin;
 
     /**
      * Database Column Remarks:
@@ -133,7 +133,7 @@ public final class UacUserDynamicSqlSupport {
     public static final class UacUser extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
 
-        public final SqlColumn<Short> del = column("del", JDBCType.SMALLINT);
+        public final SqlColumn<Integer> del = column("del", JDBCType.TINYINT);
 
         public final SqlColumn<String> creator = column("creator", JDBCType.VARCHAR);
 
@@ -145,7 +145,7 @@ public final class UacUserDynamicSqlSupport {
 
         public final SqlColumn<String> username = column("username", JDBCType.VARCHAR);
 
-        public final SqlColumn<Short> sysAdmin = column("sys_admin", JDBCType.SMALLINT);
+        public final SqlColumn<Integer> sysAdmin = column("sys_admin", JDBCType.TINYINT);
 
         public final SqlColumn<String> authType = column("auth_type", JDBCType.VARCHAR);
 

@@ -16,32 +16,31 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
+import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.user.RoleDto;
-import cn.zhengcaiyun.idata.user.dal.dao.UacAccessDao;
+import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleDao;
-import cn.zhengcaiyun.idata.user.dal.model.UacAccess;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacRole;
 import cn.zhengcaiyun.idata.user.dal.model.UacRoleAccess;
 import cn.zhengcaiyun.idata.user.service.RoleService;
-import org.mybatis.dynamic.sql.SqlBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.user.dal.dao.UacAccessDynamicSqlSupport.uacAccess;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDynamicSqlSupport.uacRoleAccess;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleDynamicSqlSupport.uacRole;
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDynamicSqlSupport.uacUserRole;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 import static org.mybatis.dynamic.sql.select.SelectDSL.select;
@@ -53,21 +52,19 @@ import static org.mybatis.dynamic.sql.select.SelectDSL.select;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    private static final String READ = "R";
-    private static final String WRITE = "W";
-    private static final String DEL = "D";
-
     @Autowired
     private UacRoleDao uacRoleDao;
     @Autowired
-    private UacAccessDao uacAccessDao;
+    private UacUserRoleDao uacUserRoleDao;
     @Autowired
     private UacRoleAccessDao uacRoleAccessDao;
+    @Autowired
+    private SystemService systemService;
 
     @Override
     public Page<RoleDto> findRoles(Integer limit, Integer offset) {
-        var builder = select(uacRole.allColumns()).from(uacRole).where(uacRole.del, isNotEqualTo((short) 1));
-        var countBuilder = select(count()).from(uacRole).where(uacRole.del, isNotEqualTo((short) 1));
+        var builder = select(uacRole.allColumns()).from(uacRole).where(uacRole.del, isNotEqualTo(1));
+        var countBuilder = select(count()).from(uacRole).where(uacRole.del, isNotEqualTo(1));
         long total = uacRoleDao.count(countBuilder.build().render(RenderingStrategies.MYBATIS3));
         builder.orderBy(uacRole.editTime.descending()).limit(Page.limitCheck(limit)).offset(Page.offsetCheck(offset));
         List<UacRole> roles = uacRoleDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
@@ -76,12 +73,50 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<FeatureTreeNodeDto> getRoleFeatureTree(Long roleId) {
-        return null;
+        UacRole role = uacRoleDao.selectOne(c -> c.where(uacRole.id, isEqualTo(roleId),
+                and(uacRole.del, isNotEqualTo(1)))).orElse(null);
+        checkArgument(role != null, "角色不存在");
+        Set<String> enableFeatureCodes = uacRoleAccessDao.select(c ->
+                c.where(uacRoleAccess.roleCode, isEqualTo(role.getRoleCode()),
+                        and(uacRoleAccess.accessCode, isLike("F_%")),
+                        and(uacRoleAccess.del, isNotEqualTo(1))))
+                .stream().map(UacRoleAccess::getAccessCode).collect(Collectors.toSet());
+        return systemService.getFeatureTree(SystemService.FeatureTreeMode.FULL, enableFeatureCodes);
     }
 
     @Override
     public List<FolderTreeNodeDto> getRoleFolderTree(Long roleId) {
-        return null;
+        checkArgument(roleId != null, "角色ID不能为空");
+        UacRole oneRole = uacRoleDao.selectOne(c -> c.where(uacRole.id, isEqualTo(roleId),
+                and(uacRole.del, isNotEqualTo(1)))).orElse(null);
+        checkArgument(oneRole != null, "角色不存在");
+        Map<String, Integer> folderPermissionMap = new HashMap<>();
+        uacRoleAccessDao.select(c ->
+                c.where(uacRoleAccess.roleCode, isEqualTo(oneRole.getRoleCode()),
+                        and(uacRoleAccess.accessType, isLike("R_%")),
+                        and(uacRoleAccess.del, isNotEqualTo(1))))
+                .forEach(roleAccess -> {
+                    String key = roleAccess.getAccessType().substring(0, roleAccess.getAccessType().length() - 2)
+                            + roleAccess.getAccessKey();
+                    Integer value = folderPermissionMap.get(key);
+                    int add = 0;
+                    if (roleAccess.getAccessType().endsWith("R")) {
+                        add = 1;
+                    }
+                    else if (roleAccess.getAccessType().endsWith("W")) {
+                        add = 2;
+                    }
+                    else if (roleAccess.getAccessType().endsWith("D")) {
+                        add = 4;
+                    }
+                    if (value != null) {
+                        folderPermissionMap.put(key, value + add);
+                    }
+                    else {
+                        folderPermissionMap.put(key, add);
+                    }
+                });
+        return systemService.getFolderTree(folderPermissionMap);
     }
 
     @Override
@@ -93,37 +128,67 @@ public class RoleServiceImpl implements RoleService {
         checkArgument(oneRole == null, "角色编码已存在");
         checkArgument(roleDto.getRoleName() != null, "角色名称不能为空");
         checkArgument(creator != null, "创建者不能为空");
-
+        // 插入角色表
         UacRole role = PojoUtil.copyOne(roleDto, UacRole.class, "roleCode", "roleName");
         role.setCreator(creator);
         uacRoleDao.insertSelective(role);
+        // 插入角色权限表
+        Set<String> accessCodes = getFeatureCodes(roleDto.getFeatureTree());
+        accessCodes.addAll(getFolderAccessCodes(roleDto.getFolderTree()));
+        accessCodes.forEach(accessCode -> {
+            UacRoleAccess roleAccess = new UacRoleAccess();
+            roleAccess.setAccessCode(accessCode);
+            roleAccess.setRoleCode(roleDto.getRoleCode());
+            roleAccess.setCreator(creator);
+            uacRoleAccessDao.insertSelective(roleAccess);
+        });
+        return PojoUtil.copyOne(uacRoleDao.selectByPrimaryKey(role.getId()).get(), RoleDto.class);
+    }
 
-        // 角色权限关系表插入
-        List<FeatureTreeNodeDto> featureTreeNodeList = roleDto.getFeatureTree() != null && roleDto.getFeatureTree().size() > 0
-                ? roleDto.getFeatureTree() : null;
-        List<FolderTreeNodeDto> folderTreeNodeList =
-                roleDto.getFolderTree() != null && roleDto.getFolderTree().size() > 0
-                        ? roleDto.getFolderTree() : null;
-        RoleDto echo = PojoUtil.copyOne(uacRoleDao.selectByPrimaryKey(role.getId()).get(), RoleDto.class);
-        String roleCode = echo.getRoleCode();
-        List<UacRoleAccess> roleAccessList = new ArrayList<>();
-        // 功能权限
-        if (featureTreeNodeList != null) {
-            roleAccessList = getFeatureRoleAccessList(featureTreeNodeList, roleCode, creator);
-        }
-        // 文件夹权限
-        if (folderTreeNodeList != null) {
-            roleAccessList = getFolderRoleAccessList(folderTreeNodeList, roleCode, creator);
-        }
+    private Set<String> getFeatureCodes(List<FeatureTreeNodeDto> featureTree) {
+        Set<String> featureCodes = new HashSet<>();
+        if (featureTree == null) return featureCodes;
+        featureTree.forEach(featureTreeNode -> addFeatureCodes(featureTreeNode, featureCodes));
+        return featureCodes;
+    }
 
-        if (roleAccessList.size() > 0) {
-            for (UacRoleAccess roleAccess : roleAccessList) {
-                uacRoleAccessDao.insertSelective(roleAccess);
+    private void addFeatureCodes(FeatureTreeNodeDto featureTreeNode, Set<String> featureCodes) {
+        if (featureTreeNode.getEnable() != null
+                && featureTreeNode.getEnable()
+                && StringUtils.isNotEmpty(featureTreeNode.getFeatureCode())) {
+            featureCodes.add(featureTreeNode.getFeatureCode());
+            if (featureTreeNode.getChildren() != null) {
+                featureTreeNode.getChildren().forEach(childFeatureNode -> addFeatureCodes(childFeatureNode, featureCodes));
             }
         }
+    }
 
-        return echo;
+    private Set<String> getFolderAccessCodes(List<FolderTreeNodeDto> folderTree) {
+        Set<String> folderAccessCodes = new HashSet<>();
+        if (folderTree == null) return folderAccessCodes;
+        folderTree.forEach(folderTreeNode -> addFolderAccessCodes(folderTreeNode, folderAccessCodes));
+        return folderAccessCodes;
+    }
 
+    private void addFolderAccessCodes(FolderTreeNodeDto folderTreeNode, Set<String> folderAccessCodes) {
+        if (folderTreeNode.getFolderId() != null
+                && folderTreeNode.getType() != null
+                && folderTreeNode.getFilePermission() != null
+                && folderTreeNode.getFilePermission() > 0
+                && folderTreeNode.getFilePermission() < 8) {
+            if (folderTreeNode.getFilePermission() % 2 == 1) {
+                folderAccessCodes.add(DigestUtil.md5(folderTreeNode.getType() + "_R" + folderTreeNode.getFolderId()));
+            }
+            if (folderTreeNode.getFilePermission() / 2 % 2 == 1) {
+                folderAccessCodes.add(DigestUtil.md5(folderTreeNode.getType() + "_W" + folderTreeNode.getFolderId()));
+            }
+            if (folderTreeNode.getFilePermission() / 4 % 2 == 1) {
+                folderAccessCodes.add(DigestUtil.md5(folderTreeNode.getType() + "_D" + folderTreeNode.getFolderId()));
+            }
+        }
+        if (folderTreeNode.getChildren() != null) {
+            folderTreeNode.getChildren().forEach(childFolderTreeNode -> addFolderAccessCodes(childFolderTreeNode, folderAccessCodes));
+        }
     }
 
     @Override
@@ -131,199 +196,61 @@ public class RoleServiceImpl implements RoleService {
     public RoleDto edit(RoleDto roleDto, String editor) {
         checkArgument(roleDto.getId() != null, "角色ID不能为空");
         UacRole oneRole = uacRoleDao.selectOne(c -> c.where(uacRole.id, isEqualTo(roleDto.getId()),
-                and(uacRole.del, isNotEqualTo((short) 1)))).orElse(null);
+                and(uacRole.del, isNotEqualTo(1)))).orElse(null);
         checkArgument(oneRole != null, "角色不存在");
         checkArgument(editor != null, "修改者不能为空");
-
+        // 修改角色表
         UacRole role = PojoUtil.copyOne(roleDto, UacRole.class, "id", "roleName");
         role.setEditor(editor);
         uacRoleDao.updateByPrimaryKeySelective(role);
-
-        // 角色权限关系表更新
-        List<FeatureTreeNodeDto> featureTreeNodeList = roleDto.getFeatureTree() != null && roleDto.getFeatureTree().size() > 0
-                ? roleDto.getFeatureTree() : null;
-        List<FolderTreeNodeDto> folderTreeNodeList = roleDto.getFolderTree() != null && roleDto.getFolderTree().size() > 0
-                ? roleDto.getFolderTree() : null;
-        RoleDto echo = PojoUtil.copyOne(uacRoleDao.selectByPrimaryKey(role.getId()).get(), RoleDto.class);
-        if (featureTreeNodeList == null && folderTreeNodeList == null) {
-            return echo;
-        }
-        String roleCode = echo.getRoleCode();
-        List<UacRoleAccess> roleAccessList = uacRoleAccessDao.selectMany(select(uacRoleAccess.allColumns()).from(uacRoleAccess)
-                .where(uacRoleAccess.del, isNotEqualTo((short) 1), and(uacRoleAccess.roleCode, isEqualTo(roleCode)))
-                .build().render(RenderingStrategies.MYBATIS3));
-        List<String> originalAccessCodeList = new ArrayList<>();
-        for (UacRoleAccess roleAccess : roleAccessList) {
-            originalAccessCodeList.add(roleAccess.getAccessCode());
-        }
-        List<UacRoleAccess> insertRoleAccessList = new ArrayList<>();
-        List<UacRoleAccess> delRoleAccessList = new ArrayList<>();
-        List<String> updateAccessCodeList = new ArrayList<>();
-        // 功能权限
-        if (featureTreeNodeList != null) {
-            for (FeatureTreeNodeDto featureTreeNode : featureTreeNodeList) {
-                updateAccessCodeList = getFeatureAccessCodeList(featureTreeNode, updateAccessCodeList);
-            }
-        }
-        if (folderTreeNodeList != null) {
-            for (FolderTreeNodeDto folderTreeNode : folderTreeNodeList) {
-                updateAccessCodeList = getFolderAccessCodeList(folderTreeNode, updateAccessCodeList);
-            }
-        }
-        // 判断原始list和修改list的内容差异在哪里
-        Map<String, Integer> accessCodeMap = new LinkedHashMap<>();
-        for (String accessCode : originalAccessCodeList) {
-            accessCodeMap.put(accessCode, 1);
-        }
-        for (String accessCode : updateAccessCodeList) {
-            Integer accessCodeNum = accessCodeMap.get(accessCode);
-            if (accessCodeNum != null) {
-                accessCodeMap.put(accessCode, accessCodeNum + 1);
-            }
-            else {
-                UacRoleAccess roleAccess = new UacRoleAccess();
-                roleAccess.setCreator(editor);
-                roleAccess.setAccessCode(accessCode);
-                roleAccess.setRoleCode(roleCode);
-                insertRoleAccessList.add(roleAccess);
-            }
-        }
-        for (Map.Entry<String, Integer> entry : accessCodeMap.entrySet()) {
-            if (entry.getValue() == 1) {
-                delRoleAccessList.add(roleAccessList.get(originalAccessCodeList.indexOf(entry.getKey())));
-            }
-        }
-
-        if (delRoleAccessList.size() > 0) {
-            for (UacRoleAccess roleAccess : delRoleAccessList) {
-                uacRoleAccessDao.deleteByPrimaryKey(roleAccess.getId());
-            }
-        }
-        if (updateAccessCodeList.size() > 0) {
-            for (UacRoleAccess roleAccess : insertRoleAccessList) {
-                uacRoleAccessDao.insertSelective(roleAccess);
-            }
-        }
-
-        return echo;
+        // 修改角色权限表
+        Set<String> newAccessCodes = getFeatureCodes(roleDto.getFeatureTree());
+        newAccessCodes.addAll(getFolderAccessCodes(roleDto.getFolderTree()));
+        Set<String> curAccessCodes = uacRoleAccessDao.select(c -> c.where(uacRoleAccess.roleCode, isEqualTo(oneRole.getRoleCode()),
+                and(uacRoleAccess.del, isNotEqualTo(1)))).stream().map(UacRoleAccess::getAccessCode)
+                .collect(Collectors.toSet());
+        Set<String> delAccessCodes = new HashSet<>(curAccessCodes);
+        delAccessCodes.removeAll(newAccessCodes);
+        delAccessCodes.forEach(accessCode -> uacRoleAccessDao.update(c -> c.set(uacRoleAccess.del).equalTo(1)
+                .set(uacRoleAccess.editor).equalTo(editor)
+                .where(uacRoleAccess.del, isNotEqualTo(1),
+                        and(uacRoleAccess.roleCode, isEqualTo(oneRole.getRoleCode())),
+                        and(uacRoleAccess.accessCode, isEqualTo(accessCode)))));
+        Set<String> addAccessCodes = new HashSet<>(newAccessCodes);
+        addAccessCodes.removeAll(curAccessCodes);
+        addAccessCodes.forEach(addAccessCode -> {
+            UacRoleAccess roleAccess = new UacRoleAccess();
+            roleAccess.setAccessCode(addAccessCode);
+            roleAccess.setRoleCode(roleDto.getRoleCode());
+            roleAccess.setCreator(editor);
+            uacRoleAccessDao.insertSelective(roleAccess);
+        });
+        return PojoUtil.copyOne(uacRoleDao.selectByPrimaryKey(role.getId()).get(), RoleDto.class);
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public boolean delete(Long roleId, String editor) {
         checkArgument(roleId != null, "角色ID不能为空");
         UacRole oneRole = uacRoleDao.selectOne(c -> c.where(uacRole.id, isEqualTo(roleId),
-                and(uacRole.del, isNotEqualTo((short) 1)))).orElse(null);
+                and(uacRole.del, isNotEqualTo(1)))).orElse(null);
         checkArgument(oneRole != null, "角色不存在");
         checkArgument(editor != null, "修改者不能为空");
-
-        uacRoleDao.update(c -> c.set(uacRole.del).equalTo((short) 1)
+        // 删除角色表记录
+        uacRoleDao.update(c -> c.set(uacRole.del).equalTo(1)
                 .set(uacRole.editor).equalTo(editor)
-                .where(uacRole.id, isEqualTo(roleId)));
+                .where(uacRole.id, isEqualTo(roleId),
+                        and(uacRole.del, isNotEqualTo(1))));
+        // 删除用户角色表记录
+        uacUserRoleDao.update(c -> c.set(uacUserRole.del).equalTo(1)
+                .set(uacUserRole.editor).equalTo(editor)
+                .where(uacUserRole.roleCode, isEqualTo(oneRole.getRoleCode()),
+                        and(uacUserRole.del, isNotEqualTo(1))));
+        // 删除角色权限表记录
+        uacRoleAccessDao.update(c -> c.set(uacRoleAccess.del).equalTo(1)
+                .set(uacRoleAccess.editor).equalTo(editor)
+                .where(uacRoleAccess.roleCode, isEqualTo(oneRole.getRoleCode()),
+                        and(uacRoleAccess.del, isNotEqualTo(1))));
         return true;
     }
-
-    private List<UacRoleAccess> getFeatureRoleAccessList(List<FeatureTreeNodeDto> featureTreeNodeList,
-                                                         String roleCode, String creator) {
-        List<UacRoleAccess> roleAccessList = new ArrayList<>();
-        for (FeatureTreeNodeDto featureTreeNode : featureTreeNodeList) {
-            List<String> accessCodeList = new ArrayList<>();
-            accessCodeList = getFeatureAccessCodeList(featureTreeNode, accessCodeList);
-            for (String accessCode : accessCodeList) {
-                UacRoleAccess roleAccess = new UacRoleAccess();
-                roleAccess.setRoleCode(roleCode);
-                roleAccess.setAccessCode(accessCode);
-                roleAccess.setCreator(creator);
-                roleAccessList.add(roleAccess);
-            }
-        }
-        return roleAccessList;
-    }
-
-    private List<String> getFeatureAccessCodeList(FeatureTreeNodeDto featureTreeNode,
-                                                  List<String> featureAccessCodeList) {
-        if (featureTreeNode.getEnable() != null && featureTreeNode.getEnable()) {
-            featureAccessCodeList.add(featureTreeNode.getFeatureCode());
-            if (featureTreeNode.getChildren() != null && featureTreeNode.getChildren().size() > 0) {
-                for (FeatureTreeNodeDto childFeatureTreeNode : featureTreeNode.getChildren()) {
-                    featureAccessCodeList = getFeatureAccessCodeList(childFeatureTreeNode, featureAccessCodeList);
-                }
-            }
-        }
-        return featureAccessCodeList;
-    }
-
-    private List<UacRoleAccess> getFolderRoleAccessList(List<FolderTreeNodeDto> folderTreeNodeList,
-                                                        String roleCode, String creator) {
-        List<UacRoleAccess> roleAccessList = new ArrayList<>();
-        for (FolderTreeNodeDto folderTreeNode : folderTreeNodeList) {
-            List<String> accessCodeList = new ArrayList<>();
-            accessCodeList = getFolderAccessCodeList(folderTreeNode, accessCodeList);
-            for (String accessCode : accessCodeList) {
-                UacRoleAccess roleAccess = new UacRoleAccess();
-                roleAccess.setRoleCode(roleCode);
-                roleAccess.setAccessCode(accessCode);
-                roleAccess.setCreator(creator);
-                roleAccessList.add(roleAccess);
-            }
-        }
-        return roleAccessList;
-    }
-
-    private List<String> getFolderAccessCodeList(FolderTreeNodeDto folderTreeNode, List<String> folderAccessCodeList) {
-        List<String> filePermissionList;
-        if (folderTreeNode.getFilePermission() != null && folderTreeNode.getFilePermission() > 0
-                && folderTreeNode.getFilePermission() <= 7) {
-            filePermissionList = getFilePermissionList(folderTreeNode.getFilePermission());
-        }
-        else {
-            return folderAccessCodeList;
-        }
-
-        var builder = SqlBuilder.select(uacAccess.accessCode).from(uacAccess)
-                .where(uacAccess.del, isNotEqualTo((short) 1), and(uacAccess.accessType,
-                        isLike(folderTreeNode.getType() + "%")),
-                        and(uacAccess.accessKey, isEqualTo(folderTreeNode.getFolderId())));
-        if (filePermissionList.size() == 1) {
-            builder.where(uacAccess.accessType, isLike("%" + filePermissionList.get(0)));
-        }
-        else if (filePermissionList.size() == 2) {
-            builder.where(uacAccess.accessType, isLike("%" + filePermissionList.get(0)),
-                    or(uacAccess.accessType, isLike("%" + filePermissionList.get(1))));
-        }
-        else if (filePermissionList.size() == 3) {
-            builder.where(uacAccess.accessType, isLike("%" + filePermissionList.get(0)),
-                    or(uacAccess.accessType, isLike("%" + filePermissionList.get(1))),
-                    or(uacAccess.accessType, isLike("%" + filePermissionList.get(2))));
-        }
-        List<UacAccess> folderAccess = uacAccessDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
-        if (folderAccess == null) {
-            return folderAccessCodeList;
-        }
-        for (UacAccess access : folderAccess) {
-            folderAccessCodeList.add(access.getAccessCode());
-        }
-
-        if (folderTreeNode.getChildren() != null && folderTreeNode.getChildren().size() > 0) {
-            for (FolderTreeNodeDto childFolderTreeNode : folderTreeNode.getChildren()) {
-                folderAccessCodeList = getFolderAccessCodeList(childFolderTreeNode, folderAccessCodeList);
-            }
-        }
-
-        return folderAccessCodeList;
-    }
-
-    private List<String> getFilePermissionList(Short filePermission) {
-        List<String> filePermissionList = new ArrayList<>();
-        if ((filePermission % 2) == 1) {
-            filePermissionList.add(READ);
-        }
-        else if ((filePermission % 4) == 2 || (filePermission % 4) == 3) {
-            filePermissionList.add(WRITE);
-        }
-        else if ((filePermission / 4) == 1) {
-            filePermissionList.add(DEL);
-        }
-        return filePermissionList;
-    }
-
 }

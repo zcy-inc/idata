@@ -29,6 +29,10 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+zcy:
+  idata:
+    baseUri: http://localhost:2000
+
 auth:
   jwt:
     security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt

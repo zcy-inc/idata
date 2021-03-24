@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api;
+package cn.zhengcaiyun.idata.portal.api.sys;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -44,11 +45,11 @@ public class SystemApi {
 
     @GetMapping("/p1/sys/featureTree")
     public RestResult<List<FeatureTreeNodeDto>> getSystemFeatureTree() {
-        return RestResult.success(systemService.getSystemFeatureTree());
+        return RestResult.success(systemService.getFeatureTree(SystemService.FeatureTreeMode.FULL, null));
     }
 
     @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success(systemService.getSystemFolderTree());
+        return RestResult.success(systemService.getFolderTree(new HashMap<>()));
     }
 }
