@@ -7,7 +7,7 @@ export interface TreeNode {
 }
 
 export interface FeatureTreeNode extends TreeNode {
-  featureName: string;
+  name: string;
   featureCode: string;
   enable?: boolean;
   children?: FeatureTreeNode[];

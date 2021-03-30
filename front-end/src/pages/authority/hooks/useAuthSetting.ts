@@ -60,7 +60,7 @@ export default (params?: { roleId?: number; userId?: number }) => {
       // 功能树格式转换
       let featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
         const extObj: Partial<DataNode> = {};
-        extObj.title = node.featureName;
+        extObj.title = node.name;
         extObj.key = node.featureCode;
         return extObj;
       }) as unknown) as DataNode[];
