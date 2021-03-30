@@ -7,7 +7,7 @@ import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
 import type { CurrentUser } from '@/interfaces/user';
 import type { ResponseError } from 'umi-request';
 import { RightContent } from '@/components';
-import { skip2Login } from '@/utils/utils';
+import { skip2Login } from '@zcy-data/idata-utils';
 import { getSystemState } from '@/services/global';
 import { queryCurrent } from '@/services/user';
 import defaultSettings from '../config/defaultSettings';

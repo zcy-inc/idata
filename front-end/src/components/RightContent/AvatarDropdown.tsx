@@ -3,7 +3,7 @@ import { LogoutOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { Menu, Spin, Avatar } from 'antd';
 import { useModel } from 'umi';
 import { outLogin } from '@/services/user';
-import { skip2Login } from '@/utils/utils';
+import { skip2Login } from '@zcy-data/idata-utils';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
 

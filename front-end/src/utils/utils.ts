@@ -24,18 +24,6 @@ export const isAntDesignProOrDev = (): boolean => {
   return isAntDesignPro();
 };
 
-// 跳转登录页
-export const skip2Login = async (param?: { redirect?: boolean; redirectUrl?: string }) => {
-  const { redirect, redirectUrl = window.location.href } = param || {};
-  setTimeout(() => {
-    let path = '/#/login';
-    if (redirect) {
-      path += `?redirect=${encodeURIComponent(redirectUrl)}`;
-    }
-    window.location.href = path;
-  }, 10);
-};
-
 export const boolToInt = (bool: boolean) => {
   if (bool) {
     return 1;
