@@ -5,35 +5,28 @@ import { boolToInt } from '@/utils/utils';
 import type { FolderNode } from '@/interfaces/global';
 import styles from './index.less';
 
-type TauthListItem = { title: string; value: boolean };
+type TauthListItem = { title: string; type: string; value: boolean };
 type TauthTuple = [TauthListItem, TauthListItem, TauthListItem];
 
-const decodeAuth = (filePermission: number) => {
-  const splitArr = parseInt(String(filePermission)).toString(2).split('');
-  let readable = false,
-    writable = false,
-    deletable = false;
-    
-  if (typeof splitArr[0] !== undefined) {
-    readable = Boolean(Number(splitArr[0]));
+const decodeAuth = (filePermission: number = 0) => {
+  let str = parseInt(String(filePermission)).toString(2);
+  while (str.length < 3) {
+    str = '0' + str;
   }
-  if (typeof splitArr[1] !== undefined) {
-    writable = Boolean(Number(splitArr[1]));
-  }
-  if (typeof splitArr[2] !== undefined) {
-    deletable = Boolean(Number(splitArr[2]));
-  }
+  const readable = Boolean(Number(str[0]));
+  const writable = Boolean(Number(str[1]));
+  const deletable = Boolean(Number(str[2]));
   const authTuple: TauthTuple = [
-    { title: '查看', value: readable },
-    { title: '编辑', value: writable },
-    { title: '删除', value: deletable },
+    { title: '查看', type: 'readable', value: readable },
+    { title: '编辑', type: 'writable', value: writable },
+    { title: '删除', type: 'deletable', value: deletable },
   ];
   return authTuple;
 };
 
 const encodeAuth = (authTuple: TauthTuple) => {
   const [{ value: readable }, { value: writable }, { value: deletable }] = authTuple;
-  const filePermission = [boolToInt(deletable), boolToInt(writable), boolToInt(readable)].join('');
+  const filePermission = [boolToInt(readable), boolToInt(writable), boolToInt(deletable)].join('');
   return Number(parseInt(filePermission, 2).toString(10));
 };
 
@@ -43,6 +36,7 @@ const FolderListItem: React.FC<{
   onChange?: (node: FolderNode) => void;
 }> = ({ nodeData, readonly, onChange }) => {
   const { filePermission } = nodeData;
+
   const [authTuple, setAuthTuple] = useState<TauthTuple>();
   useEffect(() => {
     setAuthTuple(decodeAuth(filePermission));
