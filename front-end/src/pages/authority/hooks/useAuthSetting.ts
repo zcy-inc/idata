@@ -58,20 +58,20 @@ export default (params?: { roleId?: number; userId?: number }) => {
         }
       }
       // 功能树格式转换
-      let featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
+      const featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
         const extObj: Partial<DataNode> = {};
         extObj.title = node.name;
         extObj.key = node.featureCode;
         return extObj;
       }) as unknown) as DataNode[];
-      featureTreeHolder = cutTreeData(featureTreeHolder, 3) as DataNode[]; // 截取3层
+      // featureTreeHolder = cutTreeData(featureTreeHolder, 3) as DataNode[]; // 截取3层
 
       // 资源树格式转换
       const folderTreeHolder = (formatTreeData(tree2, (node: FolderTreeNode) => {
         const extObj: Partial<DataNode> = {};
         extObj.title = node.name;
         if (node.type === folderTreeNodeType.MENU) {
-          extObj.key = `${node.type}-${node.featureCode}`;
+          extObj.key = node.featureCode;
           extObj.className = 'menu';
         } else {
           extObj.key = `${node.type}-${node.folderId}`;

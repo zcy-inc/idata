@@ -33,7 +33,7 @@ const List: React.FC = () => {
     setEditVisible(false);
   };
   const onEditClick = (row: Tuser) => {
-    const partial = pick(row, ['realName', 'mobile', 'roleCodes', 'department']);
+    const partial = pick(row, ['nickname', 'mobile', 'roleCodes', 'department']);
     setCurrentRecord(row);
     editForm.setFieldsValue(partial);
     setEditVisible(true);
@@ -79,6 +79,7 @@ const List: React.FC = () => {
     {
       title: '所属角色',
       dataIndex: 'roleNames',
+      render: (roleNames) => Array.isArray(roleNames) ? roleNames.join('、') : '',
     },
     {
       title: '所属部门',
@@ -154,7 +155,7 @@ const List: React.FC = () => {
           <Form.Item label="所属角色" name="roleCodes" rules={[{ required: true }]}>
             <RoleSelect style={{ width: 300 }} />
           </Form.Item>
-          <Form.Item label="员工姓名" name="realName" rules={[{ required: true }]}>
+          <Form.Item label="员工昵称" name="nickname" rules={[{ required: true }]}>
             <Input style={{ width: 300 }} />
           </Form.Item>
           <Form.Item label="所属部门" name="department" rules={[{ required: true }]}>
@@ -186,7 +187,7 @@ const List: React.FC = () => {
           <Form.Item label="所属角色" name="roleCodes" rules={[{ required: true }]}>
             <RoleSelect style={{ width: 300 }} />
           </Form.Item>
-          <Form.Item label="员工姓名" name="realName" rules={[{ required: true }]}>
+          <Form.Item label="员工昵称" name="nickname" rules={[{ required: true }]}>
             <Input style={{ width: 300 }} />
           </Form.Item>
           <Form.Item label="所属部门" name="department" rules={[{ required: true }]}>

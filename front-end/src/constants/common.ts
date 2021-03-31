@@ -13,8 +13,8 @@ export enum authTypeEnum {
 }
 
 export enum folderTreeNodeType {
-  MENU = 'MENU',
-  FOLDER = 'FOLDER',
+  MENU = 'F_MENU',
+  FOLDER = 'F_ICON',
 }
 
 export enum operatorEnum {

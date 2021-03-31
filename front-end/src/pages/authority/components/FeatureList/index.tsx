@@ -19,7 +19,7 @@ function FeatureList(props: {
       {data.map((node) => (
         <div key={node.featureCode} className={styles.listItemWrap}>
           <H5>
-            {node.featureName}
+            {node.name}
             {!readonly && (
               <Switch
                 size="small"
@@ -39,7 +39,7 @@ function FeatureList(props: {
                     checked={!!child.enable}
                     onChange={() => handleChange(child)}
                   >
-                    {child.featureName}
+                    {child.name}
                   </Checkbox>
                 ))}
             </div>
