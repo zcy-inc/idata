@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'umi';
+import { useParams, history } from 'umi';
 import { Form } from 'antd';
 import { editRole } from '@/services/role';
 import { saveFn } from '@/utils/utils';
@@ -26,6 +26,7 @@ const Edit = () => {
         id: Number(params.id),
       }),
     );
+    history.push('/authority/role/list');
   };
   const roleConfProps = {
     authSettingProps,
