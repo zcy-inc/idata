@@ -9,7 +9,7 @@ const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   hash: true,
   history: { type: 'hash' },
-  publicPath: './',
+  publicPath: '/idata-portal/',
   antd: {},
   favicon: 'https://sitecdn.zcycdn.com/zcy/desktop/media/img/favicon.ico',
   dva: {
