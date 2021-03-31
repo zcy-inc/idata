@@ -25,7 +25,9 @@ import com.alibaba.fastjson.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +41,10 @@ public class ZcyService {
     private String ZCY_IDATA_BASE_URI;
 
     public List<FolderTreeNodeDto> getFolders(ResourceTypeEnum resourceType) {
+        Map<String, String> queryParamMap = new HashMap<>();
+        queryParamMap.put("resourceType", resourceType.name());
         return HttpUtil.executeHttpRequest(new HttpInput().setMethod("GET").setServerName("ZCY IData")
+                .setQueryParamMap(queryParamMap)
                 .setUri(ZCY_IDATA_BASE_URI + "/outbound/folders"),
                 new TypeReference<RestResult<List<FolderTreeNodeDto>>>(){}).getData()
                 .stream().peek(folderTreeNode -> folderTreeNode.setType(resourceType.name()))

@@ -173,7 +173,7 @@ public class SystemServiceImpl implements SystemService {
     }
 
     private List<FolderTreeNodeDto> getFolderChildren(String parentId, List<FolderTreeNodeDto> folderTreeNodes) {
-        return folderTreeNodes.stream().filter(f -> (f.getParentCode() != null && f.getParentCode().equals(parentId)))
+        return folderTreeNodes.stream().filter(f -> (f.getParentId() != null && f.getParentId().equals(parentId)))
                 .peek(folderTreeNode -> folderTreeNode.setChildren(getFolderChildren(folderTreeNode.getFolderId(), folderTreeNodes)))
                 .collect(Collectors.toList());
     }

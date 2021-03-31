@@ -16,18 +16,19 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
+
+import java.util.List;
 
 /**
  * @author shiyin
- * @date 2021-03-12 11:14
+ * @date 2021-03-30 20:22
  */
-public interface UserManagerService {
-    Page<UserInfoDto> findUsers(String name, Integer limit, Integer offset);
-    UserInfoDto getUserInfo(Long userId);
-    UserInfoDto create(UserInfoDto userInfoDto, String creator);
-    UserInfoDto edit(UserInfoDto userInfoDto, String editor);
-    boolean resetUserPassword(Long userId, String editor);
-    boolean delete(Long userId, String editor);
+public interface UserAccessService {
+    List<FeatureTreeNodeDto> getUserFeatureTree(Long userId);
+    List<FolderTreeNodeDto> getUserFolderTree(Long userId);
+    List<String> getAccessKeys(Long userId, String accessType);
+    boolean checkAccess(Long userId, String accessCode);
+    boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
 }

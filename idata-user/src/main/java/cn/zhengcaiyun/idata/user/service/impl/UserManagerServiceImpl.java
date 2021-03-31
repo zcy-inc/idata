@@ -19,13 +19,13 @@ package cn.zhengcaiyun.idata.user.service.impl;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
-import cn.zhengcaiyun.idata.system.service.SystemService;
-import cn.zhengcaiyun.idata.user.dal.dao.*;
-import cn.zhengcaiyun.idata.user.dal.model.*;
+import cn.zhengcaiyun.idata.user.dal.dao.UacRoleDao;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacRole;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
+import cn.zhengcaiyun.idata.user.dal.model.UacUserRole;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserManagerService;
 import cn.zhengcaiyun.idata.user.service.UserService;
@@ -34,11 +34,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDynamicSqlSupport.uacRoleAccess;
-import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleDynamicSqlSupport.uacRole;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDynamicSqlSupport.uacUserRole;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -59,13 +61,9 @@ public class UserManagerServiceImpl implements UserManagerService {
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private SystemService systemService;
-    @Autowired
     private UacUserDao uacUserDao;
     @Autowired
     private UacUserRoleDao uacUserRoleDao;
-    @Autowired
-    private UacRoleAccessDao uacRoleAccessDao;
     @Autowired
     private UacRoleDao uacRoleDao;
 
@@ -116,130 +114,6 @@ public class UserManagerServiceImpl implements UserManagerService {
         }
         userInfo.setRoleCodes(roleCodes);
         userInfo.setRoleNames(roleNames);
-    }
-
-    @Override
-    public List<FeatureTreeNodeDto> getUserFeatureTree(Long userId) {
-        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
-                and(uacUser.del, isNotEqualTo(1)))).orElse(null);
-        checkArgument(user != null, "用户不存在");
-        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) {
-            return systemService.getFeatureTree(SystemService.FeatureTreeMode.FULL_ENABLE, null);
-        }
-        Set<String> roleCodes = uacUserRoleDao.select(c ->
-                c.where(uacUserRole.userId, isEqualTo(userId),
-                        and(uacUserRole.del, isNotEqualTo(1))))
-                .stream().map(UacUserRole::getRoleCode).collect(Collectors.toSet());
-        if (roleCodes.size() == 0) return new ArrayList<>();
-        Set<String> enableFeatureCodes = uacRoleAccessDao.select(c ->
-                c.where(uacRoleAccess.roleCode, isIn(roleCodes),
-                        and(uacRoleAccess.del, isNotEqualTo(1)),
-                        and(uacRoleAccess.accessCode, isLike("F_%"))))
-                .stream().map(UacRoleAccess::getAccessCode).collect(Collectors.toSet());
-        return systemService.getFeatureTree(SystemService.FeatureTreeMode.PART, enableFeatureCodes);
-    }
-
-    @Override
-    public List<FolderTreeNodeDto> getUserFolderTree(Long userId) {
-        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
-                and(uacUser.del, isNotEqualTo(1)))).orElse(null);
-        checkArgument(user != null, "用户不存在");
-        Set<String> roleCodes = uacUserRoleDao.select(c ->
-                c.where(uacUserRole.userId, isEqualTo(userId),
-                        and(uacUserRole.del, isNotEqualTo(1))))
-                .stream().map(UacUserRole::getRoleCode).collect(Collectors.toSet());
-        if (roleCodes.size() == 0) return new ArrayList<>();
-        Map<String, Integer> folderPermissionMap = new HashMap<>();
-        uacRoleAccessDao.select(c ->
-                c.where(uacRoleAccess.roleCode, isIn(roleCodes),
-                        and(uacRoleAccess.accessType, isLike("R_%")),
-                        and(uacRoleAccess.del, isNotEqualTo(1))))
-                .forEach(roleAccess -> {
-                    String key = roleAccess.getAccessType().substring(0, roleAccess.getAccessType().length() - 2)
-                            + roleAccess.getAccessKey();
-                    Integer value = folderPermissionMap.get(key);
-                    int add = 0;
-                    if (roleAccess.getAccessType().endsWith("R")) {
-                        add = 1;
-                    }
-                    else if (roleAccess.getAccessType().endsWith("W")) {
-                        add = 2;
-                    }
-                    else if (roleAccess.getAccessType().endsWith("D")) {
-                        add = 4;
-                    }
-                    if (value != null) {
-                        folderPermissionMap.put(key, value + add);
-                    }
-                    else {
-                        folderPermissionMap.put(key, add);
-                    }
-                });
-        return systemService.getFolderTree(folderPermissionMap);
-    }
-
-    @Override
-    public List<String> getAccessKeys(Long userId, String accessType) {
-        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
-                and(uacUser.del, isNotEqualTo(1)))).orElse(null);
-        checkArgument(user != null, "用户不存在");
-        List<String> roleCodes = uacUserRoleDao.select(c ->
-                c.where(uacUserRole.userId, isEqualTo(userId),
-                        and(uacUserRole.del, isNotEqualTo(1))))
-                .stream().map(UacUserRole::getRoleCode).collect(Collectors.toList());
-        if (roleCodes.size() == 0) return new ArrayList<>();
-        return uacRoleAccessDao.select(c ->
-                c.where(uacRoleAccess.roleCode, isIn(roleCodes),
-                        and(uacRoleAccess.accessType, isEqualTo(accessType)),
-                        and(uacRoleAccess.del, isNotEqualTo(1))))
-                .stream().map(UacRoleAccess::getAccessKey).collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean checkAccess(Long userId, String accessCode) {
-        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
-                and(uacUser.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
-        checkArgument(accessCode != null, "权限编码不能为空");
-        List<String> roleCodes = uacUserRoleDao.select(c -> c.where(uacUserRole.userId, isEqualTo(userId),
-                and(uacUserRole.del, isNotEqualTo(1)))).stream().map(UacUserRole::getRoleCode)
-                .collect(Collectors.toList());
-        if (roleCodes.size() == 0) {
-            return false;
-        }
-        UacRoleAccess roleAccess = uacRoleAccessDao.selectOne(c -> c.where(uacRoleAccess.accessCode, isEqualTo(accessCode),
-                and(uacRoleAccess.del, isNotEqualTo(1)), and(uacRoleAccess.roleCode, isIn(roleCodes))))
-                .orElse(null);
-        if (roleAccess != null) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean checkAccess(Long userId, List<String> accessTypes, String accessKey) {
-        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
-                and(uacUser.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
-        checkArgument(accessTypes != null && accessTypes.size() > 0, "权限类型不能为空");
-        checkArgument(accessKey != null, "权限资源键不能为空");
-        List<String> roleCodes = uacUserRoleDao.select(c -> c.where(uacUserRole.userId, isEqualTo(userId),
-                and(uacUserRole.del, isNotEqualTo(1)))).stream().map(UacUserRole::getRoleCode)
-                .collect(Collectors.toList());
-        if (roleCodes.size() == 0) {
-            return false;
-        }
-        Set<String> accessCodes = accessTypes.stream().map(accessType ->
-                DigestUtil.md5(accessType + accessKey)).collect(Collectors.toSet());
-        List<UacRoleAccess> roleAccesses = uacRoleAccessDao.select(c -> c.where(uacRoleAccess.roleCode, isIn(roleCodes),
-                and(uacRoleAccess.accessCode, isIn(accessCodes)),
-                and(uacRoleAccess.del, isNotEqualTo(1))));
-        if (roleAccesses.size() == accessCodes.size()) {
-            return true;
-        }
-        return false;
     }
 
     @Override
