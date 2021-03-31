@@ -8,19 +8,20 @@ import styles from './index.less';
 type TauthListItem = { title: string; value: boolean };
 type TauthTuple = [TauthListItem, TauthListItem, TauthListItem];
 
-const decodeAuth = (filePermission: string) => {
-  const splitArr = filePermission.split('');
-  let deletable = false,
+const decodeAuth = (filePermission: number) => {
+  const splitArr = parseInt(String(filePermission)).toString(2).split('');
+  let readable = false,
     writable = false,
-    readable = false;
+    deletable = false;
+    
   if (typeof splitArr[0] !== undefined) {
-    deletable = Boolean(Number(splitArr[0]));
+    readable = Boolean(Number(splitArr[0]));
   }
   if (typeof splitArr[1] !== undefined) {
     writable = Boolean(Number(splitArr[1]));
   }
   if (typeof splitArr[2] !== undefined) {
-    readable = Boolean(Number(splitArr[2]));
+    deletable = Boolean(Number(splitArr[2]));
   }
   const authTuple: TauthTuple = [
     { title: '查看', value: readable },
@@ -33,7 +34,7 @@ const decodeAuth = (filePermission: string) => {
 const encodeAuth = (authTuple: TauthTuple) => {
   const [{ value: readable }, { value: writable }, { value: deletable }] = authTuple;
   const filePermission = [boolToInt(deletable), boolToInt(writable), boolToInt(readable)].join('');
-  return filePermission;
+  return Number(parseInt(filePermission, 2).toString(10));
 };
 
 const FolderListItem: React.FC<{
@@ -83,9 +84,9 @@ const FolderList: React.FC<{
   return (
     <Fragment>
       {data?.map((node) => (
-        <div key={node.folderId} className={styles.listItemWrap}>
+        <div key={`${node.type}-${node.folderId}`} className={styles.listItemWrap}>
           <H5>{node.name}</H5>
-          {typeof node.filePermission === 'string' && (
+          {typeof node.filePermission === 'number' && (
             <FolderListItem nodeData={node} readonly={readonly} onChange={onChange} />
           )}
         </div>

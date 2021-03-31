@@ -3,7 +3,6 @@ import { getRoleFeatureTree, getRoleFolderTree } from '@/services/role';
 import { getUserFeatureTree, getUserFolderTree } from '@/services/user';
 import { getSystemFeatureTree, getSystemFolderTree } from '@/services/global';
 import {
-  cutTreeData,
   formatTreeData,
   getTreeNode,
   updateTreeNode,
@@ -16,7 +15,7 @@ import type {
   FolderTreeNode,
   FolderDataNode,
 } from '@/interfaces/global';
-import { folderTreeNodeType } from '@/constants/common';
+import { folderTreeNodeType, folderTypes } from '@/constants/common';
 
 export default (params?: { roleId?: number; userId?: number }) => {
   const [origFeatureTree, setOrigFeatureTree] = useState<FeatureTreeNode[]>([]);
@@ -70,7 +69,7 @@ export default (params?: { roleId?: number; userId?: number }) => {
       const folderTreeHolder = (formatTreeData(tree2, (node: FolderTreeNode) => {
         const extObj: Partial<DataNode> = {};
         extObj.title = node.name;
-        if (node.type === folderTreeNodeType.MENU) {
+        if (node.type === folderTreeNodeType.F_MENU) {
           extObj.key = node.featureCode;
           extObj.className = 'menu';
         } else {
@@ -134,12 +133,12 @@ export default (params?: { roleId?: number; userId?: number }) => {
       (node: FolderDataNode) => node.key === selectedFolderKey,
     );
     // 选中菜单节点时筛选出所有子节点中的文件夹节点；选中文件夹节点时展示自身
-    if (selectFolderNode?.type === folderTreeNodeType.MENU) {
-      return getFlattenChildren(
-        selectFolderNode as FolderTreeNode,
-        (node) => node.type === folderTreeNodeType.FOLDER,
+    if (selectFolderNode?.type === folderTreeNodeType.F_MENU) {
+      const a = getFlattenChildren(selectFolderNode as FolderTreeNode, (node) =>
+      folderTypes.includes(node.type),
       ) as FolderNode[];
-    } else if (selectFolderNode?.type === folderTreeNodeType.FOLDER) {
+      return a;
+    } else if (selectFolderNode && folderTypes.includes(selectFolderNode.type)) {
       return [selectFolderNode];
     }
     return [];

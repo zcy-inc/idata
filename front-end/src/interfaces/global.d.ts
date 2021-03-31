@@ -16,15 +16,15 @@ export interface FeatureTreeNode extends TreeNode {
 export interface MenuNode extends TreeNode {
   featureCode: string;
   name: string;
-  type: folderTreeNodeType.MENU;
+  type: folderTreeNodeType.F_MENU;
   children: FolderTreeNode[];
 }
 
 export interface FolderNode extends TreeNode {
-  filePermission: string; //二进制数字位表示：001 读，010 写，100 删，可以组合加和；十进制读写
+  filePermission: number; //二进制数字位表示：001 读，010 写，100 删，可以组合加和；十进制读写
   folderId: string;
   name: string;
-  type: folderTreeNodeType.FOLDER;
+  type: folderTreeNodeType;
   children: FolderNode[];
 }
 

@@ -13,9 +13,21 @@ export enum authTypeEnum {
 }
 
 export enum folderTreeNodeType {
-  MENU = 'F_MENU',
-  FOLDER = 'F_ICON',
+  F_MENU = 'F_MENU',
+  R_DW_DESIGN_DIR = 'R_DW_DESIGN_DIR',
+  R_JOB_MANAGE_DIR = 'R_JOB_MANAGE_DIR',
+  R_RESOURCE_MANAGE_DIR = 'R_RESOURCE_MANAGE_DIR',
+  R_FUNCTION_MANAGE_DIR = 'R_FUNCTION_MANAGE_DIR',
+  R_API_DEVELOP_DIR = 'R_API_DEVELOP_DIR',
 }
+
+export const folderTypes = [
+  folderTreeNodeType.R_API_DEVELOP_DIR,
+  folderTreeNodeType.R_DW_DESIGN_DIR,
+  folderTreeNodeType.R_FUNCTION_MANAGE_DIR,
+  folderTreeNodeType.R_JOB_MANAGE_DIR,
+  folderTreeNodeType.R_RESOURCE_MANAGE_DIR,
+];
 
 export enum operatorEnum {
   BETWEEN = 'between',
