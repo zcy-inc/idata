@@ -2,12 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { getRoleFeatureTree, getRoleFolderTree } from '@/services/role';
 import { getUserFeatureTree, getUserFolderTree } from '@/services/user';
 import { getSystemFeatureTree, getSystemFolderTree } from '@/services/global';
-import {
-  formatTreeData,
-  getTreeNode,
-  updateTreeNode,
-  getFlattenChildren,
-} from '@/utils/utils';
+import { formatTreeData, getTreeNode, updateTreeNode, getFlattenChildren } from '@/utils/utils';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import type {
   FeatureTreeNode,
@@ -123,7 +118,11 @@ export default (params?: { roleId?: number; userId?: number }) => {
       (node: FeatureTreeNode) => node.featureCode === selectedFeatureKey,
     );
     if (selectFeatureNode) {
-      return selectFeatureNode.children || [];
+      if (Array.isArray(selectFeatureNode.children) && selectFeatureNode.children.length > 0) {
+        return selectFeatureNode.children;
+      } else {
+        return [selectFeatureNode];
+      }
     }
     return [];
   }, [selectedFeatureKey, origFeatureTree]);
@@ -135,7 +134,7 @@ export default (params?: { roleId?: number; userId?: number }) => {
     // 选中菜单节点时筛选出所有子节点中的文件夹节点；选中文件夹节点时展示自身
     if (selectFolderNode?.type === folderTreeNodeType.F_MENU) {
       const a = getFlattenChildren(selectFolderNode as FolderTreeNode, (node) =>
-      folderTypes.includes(node.type),
+        folderTypes.includes(node.type),
       ) as FolderNode[];
       return a;
     } else if (selectFolderNode && folderTypes.includes(selectFolderNode.type)) {

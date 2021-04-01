@@ -13,10 +13,11 @@ function FeatureList(props: {
   const handleChange = (node: FeatureTreeNode) => {
     const newNode = { ...node, enable: !node.enable };
     onChange?.(newNode);
-  }
+  };
+  const showData = readonly ? data.filter((n) => n.enable) : data;
   return (
     <Fragment>
-      {data.map((node) => (
+      {showData.map((node) => (
         <div key={node.featureCode} className={styles.listItemWrap}>
           <H5>
             {node.name}
