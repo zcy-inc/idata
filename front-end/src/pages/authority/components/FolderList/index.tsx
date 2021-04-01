@@ -13,9 +13,9 @@ const decodeAuth = (filePermission: number = 0) => {
   while (str.length < 3) {
     str = '0' + str;
   }
-  const readable = Boolean(Number(str[0]));
+  const deletable = Boolean(Number(str[0]));
   const writable = Boolean(Number(str[1]));
-  const deletable = Boolean(Number(str[2]));
+  const readable = Boolean(Number(str[2]));
   const authTuple: TauthTuple = [
     { title: '查看', type: 'readable', value: readable },
     { title: '编辑', type: 'writable', value: writable },
@@ -26,7 +26,7 @@ const decodeAuth = (filePermission: number = 0) => {
 
 const encodeAuth = (authTuple: TauthTuple) => {
   const [{ value: readable }, { value: writable }, { value: deletable }] = authTuple;
-  const filePermission = [boolToInt(readable), boolToInt(writable), boolToInt(deletable)].join('');
+  const filePermission = [boolToInt(deletable), boolToInt(writable), boolToInt(readable)].join('');
   return Number(parseInt(filePermission, 2).toString(10));
 };
 
