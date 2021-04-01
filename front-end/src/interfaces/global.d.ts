@@ -21,7 +21,7 @@ export interface MenuNode extends TreeNode {
 }
 
 export interface FolderNode extends TreeNode {
-  filePermission: number; //二进制数字位表示：001 读，010 写，100 删，可以组合加和；十进制读写
+  filePermission: number; // 0~7的数字
   folderId: string;
   name: string;
   type: folderTreeNodeType;

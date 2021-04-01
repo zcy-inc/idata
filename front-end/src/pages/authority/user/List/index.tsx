@@ -77,9 +77,14 @@ const List: React.FC = () => {
       dataIndex: 'nickname',
     },
     {
+      title: '系统管理员',
+      dataIndex: 'sysAdmin',
+      render: (sysAdmin) => (typeof sysAdmin === 'number' && sysAdmin > 0 ? '是' : '否'),
+    },
+    {
       title: '所属角色',
       dataIndex: 'roleNames',
-      render: (roleNames) => Array.isArray(roleNames) ? roleNames.join('、') : '',
+      render: (roleNames) => (Array.isArray(roleNames) ? roleNames.join('、') : ''),
     },
     {
       title: '所属部门',
@@ -127,7 +132,7 @@ const List: React.FC = () => {
         columns={columns}
         {...tableProps}
       />
-      
+
       <Modal
         title="权限查看"
         width={1200}
