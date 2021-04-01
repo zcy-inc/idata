@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { getRoleFeatureTree, getRoleFolderTree } from '@/services/role';
 import { getUserFeatureTree, getUserFolderTree } from '@/services/user';
 import { getSystemFeatureTree, getSystemFolderTree } from '@/services/global';
@@ -12,72 +12,69 @@ import type {
 } from '@/interfaces/global';
 import { folderTreeNodeType, folderTypes } from '@/constants/common';
 
-export default (params?: { roleId?: number; userId?: number }) => {
+export default () => {
   const [origFeatureTree, setOrigFeatureTree] = useState<FeatureTreeNode[]>([]);
   const [featureTree, setFeatureTree] = useState<DataNode[]>([]); // 功能树
   const [folderTree, setFolderTree] = useState<FolderDataNode[]>([]); // 资源树
   const [selectedFeatureKey, setSelectedFeatureKey] = useState<React.Key>();
   const [selectedFolderKey, setSelectedFolderKey] = useState<React.Key>();
 
-  useEffect(() => {
-    (async function () {
-      let tree1: FeatureTreeNode[] = [];
-      let tree2: FolderTreeNode[] = [];
-      if (typeof params?.roleId === 'number') {
-        const [{ data: data1 }, { data: data2 }] = await Promise.all([
-          getRoleFeatureTree(params.roleId),
-          getRoleFolderTree(params.roleId),
-        ]);
-        if (Array.isArray(data1) && Array.isArray(data2)) {
-          tree1 = data1;
-          tree2 = data2;
-        }
-      } else if (typeof params?.userId === 'number') {
-        const [{ data: data1 }, { data: data2 }] = await Promise.all([
-          getUserFeatureTree(params.userId),
-          getUserFolderTree(params.userId),
-        ]);
-        if (Array.isArray(data1) && Array.isArray(data2)) {
-          tree1 = data1;
-          tree2 = data2;
-        }
-      } else {
-        const [{ data: data1 }, { data: data2 }] = await Promise.all([
-          getSystemFeatureTree(),
-          getSystemFolderTree(),
-        ]);
-        if (Array.isArray(data1) && Array.isArray(data2)) {
-          tree1 = data1;
-          tree2 = data2;
-        }
+  const fetchData = async function (params?: { roleId?: number; userId?: number }) {
+    let tree1: FeatureTreeNode[] = [];
+    let tree2: FolderTreeNode[] = [];
+    if (typeof params?.roleId === 'number') {
+      const [{ data: data1 }, { data: data2 }] = await Promise.all([
+        getRoleFeatureTree(params.roleId),
+        getRoleFolderTree(params.roleId),
+      ]);
+      if (Array.isArray(data1) && Array.isArray(data2)) {
+        tree1 = data1;
+        tree2 = data2;
       }
-      // 功能树格式转换
-      const featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
-        const extObj: Partial<DataNode> = {};
-        extObj.title = node.name;
-        extObj.key = node.featureCode;
-        return extObj;
-      }) as unknown) as DataNode[];
-      // featureTreeHolder = cutTreeData(featureTreeHolder, 3) as DataNode[]; // 截取3层
+    } else if (typeof params?.userId === 'number') {
+      const [{ data: data1 }, { data: data2 }] = await Promise.all([
+        getUserFeatureTree(params.userId),
+        getUserFolderTree(params.userId),
+      ]);
+      if (Array.isArray(data1) && Array.isArray(data2)) {
+        tree1 = data1;
+        tree2 = data2;
+      }
+    } else {
+      const [{ data: data1 }, { data: data2 }] = await Promise.all([
+        getSystemFeatureTree(),
+        getSystemFolderTree(),
+      ]);
+      if (Array.isArray(data1) && Array.isArray(data2)) {
+        tree1 = data1;
+        tree2 = data2;
+      }
+    }
+    // 功能树格式转换
+    const featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
+      const extObj: Partial<DataNode> = {};
+      extObj.title = node.name;
+      extObj.key = node.featureCode;
+      return extObj;
+    }) as unknown) as DataNode[];
 
-      // 资源树格式转换
-      const folderTreeHolder = (formatTreeData(tree2, (node: FolderTreeNode) => {
-        const extObj: Partial<DataNode> = {};
-        extObj.title = node.name;
-        if (node.type === folderTreeNodeType.F_MENU) {
-          extObj.key = node.featureCode;
-          extObj.className = 'menu';
-        } else {
-          extObj.key = `${node.type}-${node.folderId}`;
-          extObj.className = 'folder';
-        }
-        return extObj;
-      }) as unknown) as FolderDataNode[];
-      setOrigFeatureTree(tree1);
-      setFeatureTree(featureTreeHolder);
-      setFolderTree(folderTreeHolder);
-    })();
-  }, [params?.roleId, params?.userId]);
+    // 资源树格式转换
+    const folderTreeHolder = (formatTreeData(tree2, (node: FolderTreeNode) => {
+      const extObj: Partial<DataNode> = {};
+      extObj.title = node.name;
+      if (node.type === folderTreeNodeType.F_MENU) {
+        extObj.key = node.featureCode;
+        extObj.className = 'menu';
+      } else {
+        extObj.key = `${node.type}-${node.folderId}`;
+        extObj.className = 'folder';
+      }
+      return extObj;
+    }) as unknown) as FolderDataNode[];
+    setOrigFeatureTree(tree1);
+    setFeatureTree(featureTreeHolder);
+    setFolderTree(folderTreeHolder);
+  };
 
   const onFeatureTreeSelect: TreeProps['onSelect'] = (selectedKeys) => {
     if (selectedKeys.length !== 1) {
@@ -148,14 +145,17 @@ export default (params?: { roleId?: number; userId?: number }) => {
   }, [selectedFolderKey, folderTree]);
 
   return {
-    origFeatureTree,
-    featureTree,
-    folderTree,
-    featureList,
-    folderList,
-    onFeatureTreeSelect,
-    onFolderTreeSelect,
-    onFeatureEnableChange,
-    onFolderAuthChange,
+    fetchData,
+    authSettingProps: {
+      origFeatureTree,
+      featureTree,
+      folderTree,
+      featureList,
+      folderList,
+      onFeatureTreeSelect,
+      onFolderTreeSelect,
+      onFeatureEnableChange,
+      onFolderAuthChange,
+    },
   };
 };

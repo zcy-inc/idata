@@ -9,12 +9,15 @@ import RoleConf from '../../components/RoleConf';
 const Edit = () => {
   const params = useParams<{ id: string; name: string }>();
   const [form] = Form.useForm();
+  const { fetchData, authSettingProps } = useAuthSetting();
+  const roleId = Number(params.id);
+  useEffect(() => {
+    fetchData({ roleId })
+  }, [roleId])
   useEffect(() => {
     form.setFieldsValue({ roleName: params.name });
   }, [params.name, form]);
-  const roleId = Number(params.id);
-  const authSettingProps = useAuthSetting({ roleId });
-
+  
   const onSave = async () => {
     const values = await form.validateFields();
     const { folderTree, origFeatureTree } = authSettingProps;

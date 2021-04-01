@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form } from 'antd';
 import { history } from 'umi';
 import { createRole } from '@/services/role';
@@ -8,7 +8,11 @@ import RoleConf from '../../components/RoleConf';
 
 const Create = () => {
   const [form] = Form.useForm();
-  const authSettingProps = useAuthSetting();
+  const { fetchData, authSettingProps } = useAuthSetting();
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const onSave = async () => {
     const values = await form.validateFields();
     const { folderTree, origFeatureTree } = authSettingProps;

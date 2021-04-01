@@ -13,16 +13,16 @@ import useAuthSetting from '../../hooks/useAuthSetting';
 const List: React.FC = () => {
   const { tableProps, refresh } = usePaginated(getRoleList);
   const [visible, setVisible] = useState(false);
-  const [roleId, setRoleId] = useState<number>();
+  const { fetchData, authSettingProps } = useAuthSetting();
+
   const skip2Edit = (record: Trole) =>
     history.push(`/authority/role/edit/${record.id}/${record.roleName}`);
   const onDelete = getDeleteFn(deleteRole, refresh);
   const skip2Add = () => history.push('/authority/role/create');
   const showAuth = (id: number) => {
-    setRoleId(id);
+    fetchData({ roleId: id });
     setVisible(true);
   };
-  const authSettingProps = useAuthSetting({ roleId });
   const columns: ColumnsType<Trole> = [
     {
       title: '角色名称',

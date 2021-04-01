@@ -16,6 +16,7 @@ const List: React.FC = () => {
   const [name, setName] = useState();
   const [addVisible, setAddVisible] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<Tuser>();
+  const { fetchData, authSettingProps } = useAuthSetting();
   const [editVisible, setEditVisible] = useState(false);
   const [authVisible, setAuthVisible] = useState(false);
   const [addForm] = Form.useForm();
@@ -23,7 +24,6 @@ const List: React.FC = () => {
   const { tableProps, refresh } = usePaginated((params) => getUserList({ ...params, name }), {
     refreshDeps: [name],
   });
-  const authSettingProps = useAuthSetting({ userId: currentRecord?.id });
 
   const onCloseAddModal = () => {
     addForm.resetFields();
@@ -55,7 +55,7 @@ const List: React.FC = () => {
   const onDelete = getDeleteFn(deleteUser, refresh);
 
   const onShowAuth = (row: Tuser) => {
-    setCurrentRecord(row);
+    fetchData({ userId: row.id });
     setAuthVisible(true);
   };
 
