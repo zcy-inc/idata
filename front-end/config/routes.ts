@@ -8,7 +8,7 @@
   {
     path: '/authority',
     name: '权限管理',
-    icon: 'icon-shujuzhiliangtubiao',
+    icon: 'icon-quanxianguanli',
     routes: [
       { path: '/authority', redirect: '/authority/role' },
       {
