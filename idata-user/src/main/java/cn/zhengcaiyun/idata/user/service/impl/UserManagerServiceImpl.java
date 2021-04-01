@@ -107,11 +107,6 @@ public class UserManagerServiceImpl implements UserManagerService {
             roleNames = uacRoleDao.select(c -> c.where(uacRole.roleCode, isIn(roleCodes),
                     and(uacRole.del, isNotEqualTo(1)))).stream().map(UacRole::getRoleName).collect(Collectors.toList());
         }
-        // 系统管理员需要当一个角色展示
-        if (userInfo.getSysAdmin() == 1 || userInfo.getSysAdmin() == 2) {
-            roleCodes.add(0, "admin");
-            roleNames.add(0, "系统管理员");
-        }
         userInfo.setRoleCodes(roleCodes);
         userInfo.setRoleNames(roleNames);
     }
@@ -184,6 +179,7 @@ public class UserManagerServiceImpl implements UserManagerService {
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1)))).orElse(null);
         checkArgument(user != null, "用户不存在");
+        checkArgument(user.getSysAdmin() != 1, "不能重置初始系统管理员的密码");
         uacUserDao.update(c -> c.set(uacUser.password).equalTo(DigestUtil.md5WithSalt(DEFAULT_PASSWORD, SALT))
                 .set(uacUser.editor).equalTo(editor)
                 .where(uacUser.id, isEqualTo(userId)));
@@ -197,6 +193,7 @@ public class UserManagerServiceImpl implements UserManagerService {
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1)))).orElse(null);
         checkArgument(user != null, "用户不存在");
+        checkArgument(user.getSysAdmin() != 1, "不能删除初始系统管理员");
         uacUserDao.update(c -> c.set(uacUser.del).equalTo(1)
                 .set(uacUser.editor).equalTo(editor)
                 .where(uacUser.id, isEqualTo(userId)));

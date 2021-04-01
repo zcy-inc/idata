@@ -17,7 +17,7 @@ values ('系统管理员', 'ADMIN', 'F_MENU_DATA_RD', 'F_MENU', 'DATA_RD');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
 values ('系统管理员', 'ADMIN', 'F_MENU_DW_DESIGN', 'F_MENU', 'DW_DESIGN');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
-values ('系统管理员', 'ADMIN', 'F_MENO_JOB_MANAGE', 'F_MENU', 'JOB_MANAGE');
+values ('系统管理员', 'ADMIN', 'F_MENU_JOB_MANAGE', 'F_MENU', 'JOB_MANAGE');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
 values ('系统管理员', 'ADMIN', 'F_MENU_RESOURCE_MANAGE', 'F_MENU', 'RESOURCE_MANAGE');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
@@ -72,7 +72,7 @@ values ('系统管理员', 'DW_DEVELOPER', 'F_MENU_DATA_RD', 'F_MENU', 'DATA_RD'
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
 values ('系统管理员', 'DW_DEVELOPER', 'F_MENU_DW_DESIGN', 'F_MENU', 'DW_DESIGN');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
-values ('系统管理员', 'DW_DEVELOPER', 'F_MENO_JOB_MANAGE', 'F_MENU', 'JOB_MANAGE');
+values ('系统管理员', 'DW_DEVELOPER', 'F_MENU_JOB_MANAGE', 'F_MENU', 'JOB_MANAGE');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)
 values ('系统管理员', 'DW_DEVELOPER', 'F_MENU_RESOURCE_MANAGE', 'F_MENU', 'RESOURCE_MANAGE');
 insert into idata.uac_role_access (creator, role_code, access_code, access_type, access_key)

@@ -64,6 +64,7 @@ public class SystemServiceImpl implements SystemService {
         else {
             systemStateDto.setRegisterEnable(false);
         }
+        systemStateDto.setVersion("0.1.0");
         return systemStateDto;
     }
 

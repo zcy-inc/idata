@@ -42,8 +42,10 @@ public class ErrorHandler {
     public RestResult exceptionHandler(Exception error, HttpServletRequest req) {
         log.error("uri: {}, method: {}, stack: {}", req.getRequestURI(), req.getMethod(),
                 ExceptionUtils.getStackTrace(error));
-        if (error instanceof IllegalArgumentException
-                || error instanceof HttpMessageNotReadableException
+        if (error instanceof IllegalArgumentException) {
+            return RestResult.error(RestResult.INPUT_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof HttpMessageNotReadableException
                 || error instanceof HttpRequestMethodNotSupportedException) {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, "接口输入错误", ExceptionUtils.getRootCauseMessage(error));
         }

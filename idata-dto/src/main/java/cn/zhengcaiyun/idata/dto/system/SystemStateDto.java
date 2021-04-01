@@ -25,6 +25,7 @@ import java.util.Date;
 public class SystemStateDto {
     private Date sysStartTime;
     private Boolean registerEnable;
+    private String version;
 
     // GaS
     public Boolean getRegisterEnable() {
@@ -41,5 +42,13 @@ public class SystemStateDto {
 
     public void setSysStartTime(Date sysStartTime) {
         this.sysStartTime = sysStartTime;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
