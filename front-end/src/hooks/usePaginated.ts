@@ -56,7 +56,7 @@ export default <T>(service: TpaginatedFn<T>, options?: { refreshDeps?: any[] }) 
       dataSource: data.content,
       loading,
       onChange: changeTable,
-      pagination: {
+      pagination: data.total <= pageSize ? false : {
         total: data.total,
         showQuickJumper: true,
         showSizeChanger: true,
