@@ -96,7 +96,7 @@ const List: React.FC = () => {
     },
     {
       title: '信息来源',
-      dataIndex: 'authtype',
+      dataIndex: 'authType',
     },
     {
       title: '最近编辑人',
