@@ -23,10 +23,10 @@ function FeatureList(props: {
             {node.name}
             {!readonly && (
               <Switch
+                className={styles.switchBtn}
                 size="small"
                 checked={!!node.enable}
                 onChange={() => handleChange(node)}
-                style={{ marginLeft: 8 }}
               />
             )}
           </H5>

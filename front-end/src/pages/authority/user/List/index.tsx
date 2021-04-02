@@ -185,6 +185,7 @@ const List: React.FC = () => {
             <Button
               disabled={currentRecord?.authType !== authTypeEnum.REGISTER}
               onClick={onResetPsd}
+              style={{ paddingTop: 4, paddingBottom: 4, height: 32 }}
             >
               重置密码
             </Button>

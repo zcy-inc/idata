@@ -1,5 +1,9 @@
 body {
   // Button 按钮
+  .ant-btn {
+    height: 40px;
+    padding: 8px 23px;
+  }
   .ant-btn.ant-btn-primary {
     color: #fff;
     background: var(--primary-color);
@@ -29,7 +33,7 @@ body {
   }
 
   .ant-btn {
-    color: #15172F;
+    color: #15172f;
     border: 1px solid var(--border-color-base);
     border-radius: 4px;
   }
@@ -55,15 +59,30 @@ body {
   .ant-btn[disabled]:active,
   .ant-btn[disabled]:focus,
   .ant-btn[disabled]:hover {
-    color: #999;
+    color: #737b96;
     background: #e8e8e8;
-    border-color: #dcdfe6;
   }
   .ant-btn > .anticon + span,
   .ant-btn > span + .anticon {
     margin-left: 6px;
   }
 
+  // Switch
+  .ant-switch {
+    background-color: #cfd3e1;
+  }
+  .ant-switch-small {
+    min-width: 38px;
+    height: 18px;
+    line-height: 18px;
+  }
+  .ant-switch-small .ant-switch-handle {
+    width: 14px;
+    height: 14px;
+  }
+  .ant-switch-small.ant-switch-checked .ant-switch-handle {
+    left: calc(100% - 14px - 2px);
+  }
   .ant-switch-checked {
     background: var(--success-color);
   }
@@ -79,16 +98,16 @@ body {
     padding: 32px;
   }
   .ant-modal-title {
-    color: #223345;
+    color: #737b96;
     font-size: 14px;
   }
   .ant-modal-close {
-    color: #5f6266;
+    color: #bfc4d5;
   }
   .ant-modal-footer {
     padding: 10px 16px 8px;
     background: #f7f9fa;
-    border: 1px solid #e9e9e9;
+    border-top: none;
 
     .ant-btn:first-child:not(:hover) {
       color: #5f6266;
@@ -99,6 +118,12 @@ body {
     .ant-btn.ant-btn-primary {
       margin-left: 16px;
     }
+  }
+
+  // Input
+  .ant-input {
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   // Input - TextArea 输入框 - 文本域
@@ -116,6 +141,8 @@ body {
 
   // Input - Search 输入框 - 搜索框
   .ant-input-affix-wrapper {
+    padding-top: 8px;
+    padding-bottom: 8px;
     color: #adbbc4;
     &::after {
       border-color: var(--primary-color);
@@ -125,6 +152,25 @@ body {
       border-color: var(--primary-color);
       border-radius: 4px;
     }
+  }
+
+  // Select
+  .ant-select-multiple .ant-select-selector {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background-color: #eff5ff;
+  }
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #eff5ff;
+  }
+  .ant-select-multiple .ant-select-selection-item {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: #737b96;
+    border: none;
+    border-radius: 2px;
   }
 
   // Checkbox
@@ -170,8 +216,8 @@ body {
 
   // Table - 表格
   .ant-table .ant-table-thead > tr > th {
-    padding: 16px 24px;
-    color: #223345;
+    padding: 12px 24px;
+    color: #737b96;
     border-radius: 4px 4px 0 0;
   }
   .ant-table-tbody > tr > td {
@@ -221,13 +267,17 @@ body {
     }
   }
 
+  // Form.Item
+  .ant-form-item-label > label {
+    height: 40px;
+  }
+
   .ant-form-item-label
     > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
     margin-right: 2px;
     font-weight: 500;
   }
 
-  // Form.Item
   .ant-form-item-explain {
     padding-top: 1px;
     font-size: 12px;
@@ -245,6 +295,7 @@ body {
 
   // pro-layout
   .ant-pro-global-header-layout-mix {
+    padding-left: 30px;
     background: #141736;
   }
   .ant-pro-basicLayout-content {

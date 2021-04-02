@@ -7,7 +7,7 @@ import styles from './index.less';
 const bodyHeightVarName = '--tbl-body-height';
 const paginationHeight = 64;
 const bottomPaddingHeight = 16;
-const tableHeaderHeight = 55;
+const tableHeaderHeight = 47;
 
 interface TiledTableProps<RecordType> extends TableProps<RecordType> {
   height?: number;
