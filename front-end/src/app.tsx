@@ -55,9 +55,9 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     disableContentMargin: false,
     onPageChange: () => {
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser) {
-        skip2Login();
-      }
+      // if (!initialState?.currentUser) {
+      //   skip2Login();
+      // }
     },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
