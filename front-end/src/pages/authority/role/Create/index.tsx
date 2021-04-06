@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Form } from 'antd';
 import { history } from 'umi';
 import { createRole } from '@/services/role';
-// import { saveFn } from '@/utils/utils';
 import useSave from '@/hooks/useSave';
 import useAuthSetting from '../../hooks/useAuthSetting';
 import RoleConf from '../../components/RoleConf';
