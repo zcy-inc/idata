@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Input, Modal, Form, message } from 'antd';
 import { pick } from 'lodash';
 import { TiledTable, Operation, PageContainer, SearchPanel } from '@/components';
-import { usePaginated } from '@/hooks';
+import { usePaginated, useSave } from '@/hooks';
 import type { ColumnsType } from 'antd/es/table';
 import { getUserList, deleteUser, addUser, editUser, resetUserPassword } from '@/services/user';
 import type { Tuser } from '@/interfaces/user';
@@ -24,6 +24,26 @@ const List: React.FC = () => {
   const { tableProps, refresh } = usePaginated((params) => getUserList({ ...params, name }), {
     refreshDeps: [name],
   });
+  const { run: onAdd } = useSave(
+    async () => {
+      const values = await addForm.validateFields();
+      return addUser(values);
+    },
+    () => {
+      setAddVisible(false);
+      refresh();
+    },
+  );
+  const { run: onEdit } = useSave(
+    async () => {
+      const values = await editForm.validateFields();
+      return editUser({ ...values, id: currentRecord?.id });
+    },
+    () => {
+      setEditVisible(false);
+      refresh();
+    },
+  );
 
   const onCloseAddModal = () => {
     addForm.resetFields();
@@ -38,18 +58,7 @@ const List: React.FC = () => {
     editForm.setFieldsValue(partial);
     setEditVisible(true);
   };
-  const onAdd = async () => {
-    const values = await addForm.validateFields();
-    await addUser(values);
-    setAddVisible(false);
-    refresh();
-  };
-  const onEdit = async () => {
-    const values = await editForm.validateFields();
-    await editUser({ ...values, id: currentRecord?.id });
-    setEditVisible(false);
-    refresh();
-  };
+
   const onSearch = (e: React.KeyboardEvent<HTMLInputElement>) => setName((e.target as any).value);
 
   const onDelete = getDeleteFn(deleteUser, refresh);

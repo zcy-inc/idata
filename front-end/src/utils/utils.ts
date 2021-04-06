@@ -1,5 +1,4 @@
 import { Modal, message } from 'antd';
-import { debounce } from 'lodash';
 import { reqUrlWhiteList, wsStorageKey, defaultWs } from '@/constants/common';
 import { cloneDeep, omit } from 'lodash';
 import type { TreeNode } from '@/interfaces/global';
@@ -55,7 +54,7 @@ export const getDeleteFn = <T = any>(
     });
 };
 
-export const getSuccessReqFn = (msg: string) => debounce(async <R>(
+export const getSuccessReqFn = (msg: string) => async <R>(
   service: () => Promise<Tresponse<R>>,
   cb?: (result?: Tresponse<R>) => void,
 ) => {
@@ -63,13 +62,8 @@ export const getSuccessReqFn = (msg: string) => debounce(async <R>(
   message.success(msg);
   cb?.(res);
   return res;
-}, 300);
+};
 
-export const saveFn = getSuccessReqFn('保存成功');
-
-export const enableFn = getSuccessReqFn('启用成功');
-
-export const disableFn = getSuccessReqFn('停用成功');
 
 // 从本地存储获取当前工作区
 export const getCachedWs = () => {

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, history } from 'umi';
 import { Form } from 'antd';
 import { editRole } from '@/services/role';
-import { saveFn } from '@/utils/utils';
+import { useSave } from '@/hooks';
 import useAuthSetting from '../../hooks/useAuthSetting';
 import RoleConf from '../../components/RoleConf';
 
@@ -12,29 +12,30 @@ const Edit = () => {
   const { fetchData, authSettingProps } = useAuthSetting();
   const roleId = Number(params.id);
   useEffect(() => {
-    fetchData({ roleId })
-  }, [roleId])
+    fetchData({ roleId });
+  }, [roleId]);
   useEffect(() => {
     form.setFieldsValue({ roleName: params.name });
   }, [params.name, form]);
-  
-  const onSave = async () => {
-    const values = await form.validateFields();
-    const { folderTree, origFeatureTree } = authSettingProps;
-    await saveFn(() =>
-      editRole({
+
+  const { btnProps } = useSave(
+    async () => {
+      const values = await form.validateFields();
+      const { folderTree, origFeatureTree } = authSettingProps;
+      return editRole({
         folderTree,
         featureTree: origFeatureTree,
         roleName: values.roleName,
         id: Number(params.id),
-      }),
-    );
-    history.push('/authority/role/list');
-  };
+      });
+    },
+    () => history.push('/authority/role/list'),
+  );
+
   const roleConfProps = {
     authSettingProps,
     form,
-    onSave,
+    saveBtnProps: btnProps
   };
   return <RoleConf {...roleConfProps} />;
 };
