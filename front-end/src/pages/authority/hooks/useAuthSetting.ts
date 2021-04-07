@@ -115,11 +115,11 @@ export default () => {
       (node: FeatureTreeNode) => node.featureCode === selectedFeatureKey,
     );
     if (selectFeatureNode) {
+      const nodeList = [selectFeatureNode]
       if (Array.isArray(selectFeatureNode.children) && selectFeatureNode.children.length > 0) {
-        return selectFeatureNode.children;
-      } else {
-        return [selectFeatureNode];
-      }
+        return nodeList.concat(selectFeatureNode.children);
+      } 
+      return nodeList;
     }
     return [];
   }, [selectedFeatureKey, origFeatureTree]);
