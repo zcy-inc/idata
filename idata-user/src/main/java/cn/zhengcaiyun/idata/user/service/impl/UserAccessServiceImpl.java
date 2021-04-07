@@ -166,9 +166,10 @@ public class UserAccessServiceImpl implements UserAccessService {
         }
         Set<String> accessCodes = accessTypes.stream().map(accessType ->
                 DigestUtil.md5(accessType + accessKey)).collect(Collectors.toSet());
-        List<UacRoleAccess> roleAccesses = uacRoleAccessDao.select(c -> c.where(uacRoleAccess.roleCode, isIn(roleCodes),
+        Set<String> roleAccessCodes = uacRoleAccessDao.select(c -> c.where(uacRoleAccess.roleCode, isIn(roleCodes),
                 and(uacRoleAccess.accessCode, isIn(accessCodes)),
-                and(uacRoleAccess.del, isNotEqualTo(1))));
-        return roleAccesses.size() == accessCodes.size();
+                and(uacRoleAccess.del, isNotEqualTo(1)))).stream().map(UacRoleAccess::getAccessCode)
+                .collect(Collectors.toSet());
+        return roleAccessCodes.size() == accessCodes.size();
     }
 }
