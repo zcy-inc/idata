@@ -14,15 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
+package cn.zhengcaiyun.idata.dto.develop.label;
 
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * @author caizhedong
- * @date 2021-05-26 11:12
+ * @author shiyin
+ * @date 2021-05-27 16:11
  */
-
-public interface TableRelationApi {
-    TableRelationDto getTableRelations(Long tableId);
+public class AttributeDto {
+    private String attributeKey;
+    @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
+    private String attributeType;
+    private String attributeValue;
+    // 枚举名称或者枚举值字面值
+    private String enumNameOrValue;
 }

@@ -16,9 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
-import cn.zhengcaiyun.idata.dto.dev.label.LabelDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 
 /**
  * @author caizhedong
@@ -26,8 +25,9 @@ import java.util.List;
  */
 
 public interface LabelService {
-//    List<LabelDto> getLabels(String labelCode);
-    LabelDto createLabel(LabelDto labelDto, String creator);
-    LabelDto editLabel(LabelDto labelDto, String editor);
-    boolean deleteLabel(String labelCode, String editor);
+    LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator);
+    LabelDefineDto getDefine(String labelCode);
+    boolean deleteDefine(String labelCode, String operator);
+    LabelDto label(LabelDto labelDto, String operator);
+    boolean removeLabel(LabelDto labelDto, String operator);
 }

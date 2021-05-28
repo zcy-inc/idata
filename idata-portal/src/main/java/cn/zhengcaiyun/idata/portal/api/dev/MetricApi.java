@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.dev.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
 import org.springframework.web.bind.annotation.*;
 
 /**

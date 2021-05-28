@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.dev.label.EnumDto;
+import cn.zhengcaiyun.idata.dto.develop.label.EnumDto;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;

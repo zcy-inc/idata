@@ -44,7 +44,7 @@ create table if not exists idata.dev_label_define (
   label_tag          varchar(30)     comment '标签的标签',
   label_param_type   varchar(30)     comment '标签参数类型',
   label_attributes   varchar(500)    not null default '[]' comment '标签属性',
-  special_attributes varchar(500)    not null default '[]' comment '标签特定属性',
+  special_attributes varchar(500)    not null default '[]' comment '特定标签属性，根据标签的标签字段变化',
   subject_type       varchar(20)     comment '打标主体类型',
   label_index        integer         comment '标签序号',
   label_required     boolean         not null default 0 comment '是否必须打标(1:是,0:否)',
@@ -60,7 +60,8 @@ create table if not exists idata.dev_label (
   editor            varchar(20)     not null default '' comment '修改者',
   edit_time         datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   label_code        varchar(30)     not null comment '标签唯一标识',
-  subject_code      varchar(30)     not null comment '标签主体ID或标识', unique uk_labelCode_subjectCode(label_code, subject_code),
+  table_id          bigint          comment '打标主体表ID',
+  column_name       varchar(30)     comment '打标主体字段名', unique uk_labelCode_tableId_columnName(label_code, table_id, column_name),
   label_param_value varchar(200)    comment '标签参数值'
 ) engine=innodb default charset=utf8mb4 comment='标签表';
 
@@ -84,7 +85,7 @@ create table if not exists idata.dev_enum_value (
   editor          varchar(20)     not null default '' comment '修改者',
   edit_time       datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   enum_code       varchar(30)     not null comment '枚举标识',
-  value_code      varchar(30)     not null comment '枚举值标识', unique uk_enumCode_valueCode(enum_code, value_code),
+  value_code      varchar(30)     not null comment '枚举值标识', unique uk_value_code(value_code),
   enum_value      varchar(100)    not null comment '枚举值字面值',
   enum_attributes varchar(1000)   not null default '[]' comment '枚举值属性',
   parent_code     varchar(30)     comment '上级枚举值标识,null表示最上级'

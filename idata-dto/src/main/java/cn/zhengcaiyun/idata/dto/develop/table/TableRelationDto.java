@@ -14,15 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
+package cn.zhengcaiyun.idata.dto.develop.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-26 11:12
+ * @date 2021-05-19 16:29
  */
 
-public interface TableRelationApi {
-    TableRelationDto getTableRelations(Long tableId);
+public class TableRelationDto {
+    private List<TableNodeDto> tables;
+    private List<TableEdgeDto> edges;
+
+    // GaS
+    public List<TableNodeDto> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<TableNodeDto> tables) {
+        this.tables = tables;
+    }
+
+    public List<TableEdgeDto> getEdges() {
+        return edges;
+    }
+
+    public void setEdges(List<TableEdgeDto> edges) {
+        this.edges = edges;
+    }
 }

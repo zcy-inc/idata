@@ -14,15 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
+package cn.zhengcaiyun.idata.dto.develop.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-26 11:12
+ * @date 2021-05-19 16:26
  */
 
-public interface TableRelationApi {
-    TableRelationDto getTableRelations(Long tableId);
+public class TableNodeDto extends TableInfoDto {
+    private String key;
+    private List<ColumnInfoDto> columns;
+
+    // GaS
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public List<ColumnInfoDto> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<ColumnInfoDto> columns) {
+        this.columns = columns;
+    }
 }
