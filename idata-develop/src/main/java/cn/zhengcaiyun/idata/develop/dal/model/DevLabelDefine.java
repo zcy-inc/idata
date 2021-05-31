@@ -112,7 +112,7 @@ public class DevLabelDefine {
      *   是否必须打标(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.label_required")
-    private Boolean labelRequired;
+    private Integer labelRequired;
 
     /**
      * Database Column Remarks:
@@ -269,12 +269,12 @@ public class DevLabelDefine {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.label_required")
-    public Boolean getLabelRequired() {
+    public Integer getLabelRequired() {
         return labelRequired;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.label_required")
-    public void setLabelRequired(Boolean labelRequired) {
+    public void setLabelRequired(Integer labelRequired) {
         this.labelRequired = labelRequired;
     }
 

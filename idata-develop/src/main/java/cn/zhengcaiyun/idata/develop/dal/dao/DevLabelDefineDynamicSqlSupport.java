@@ -113,7 +113,7 @@ public final class DevLabelDefineDynamicSqlSupport {
      *   是否必须打标(1:是,0:否)
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.label_required")
-    public static final SqlColumn<Boolean> labelRequired = devLabelDefine.labelRequired;
+    public static final SqlColumn<Integer> labelRequired = devLabelDefine.labelRequired;
 
     /**
      * Database Column Remarks:
@@ -159,7 +159,7 @@ public final class DevLabelDefineDynamicSqlSupport {
 
         public final SqlColumn<Integer> labelIndex = column("label_index", JDBCType.INTEGER);
 
-        public final SqlColumn<Boolean> labelRequired = column("label_required", JDBCType.BIT);
+        public final SqlColumn<Integer> labelRequired = column("label_required", JDBCType.TINYINT);
 
         public final SqlColumn<Long> labelScope = column("label_scope", JDBCType.BIGINT);
 

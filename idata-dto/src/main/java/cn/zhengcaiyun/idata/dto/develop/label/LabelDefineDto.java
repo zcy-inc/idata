@@ -40,7 +40,7 @@ public class LabelDefineDto {
             "ATOMIC_METRIC_LABEL | DERIVE_METRIC_LABEL | COMPLEX_METRIC_LABEL | " +
             "MODIFIER_LABEL | DIMENSION_LABEL_DISABLE | ATOMIC_METRIC_LABEL_DISABLE | " +
             "DERIVE_METRIC_LABEL_DISABLE | COMPLEX_METRIC_LABEL_DISABLE | MODIFIER_LABEL_DISABLE")
-    private LabelTagEnum labelTag;
+    private String labelTag;
     @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
     private String labelParamType;
     private List<SpecialAttributeDto> specialAttributes;
@@ -48,7 +48,8 @@ public class LabelDefineDto {
     @ApiModelProperty(value = "TABLE | COLUMN")
     private String subjectType;
     private Integer labelIndex;
-    private Boolean labelRequired;
+    @ApiModelProperty(value = "是否必须打标(1:是,0:否)")
+    private Integer labelRequired;
     private Long labelScope;
     private Long folderId;
 
@@ -117,11 +118,11 @@ public class LabelDefineDto {
         this.labelName = labelName;
     }
 
-    public LabelTagEnum getLabelTag() {
+    public String getLabelTag() {
         return labelTag;
     }
 
-    public void setLabelTag(LabelTagEnum labelTag) {
+    public void setLabelTag(String labelTag) {
         this.labelTag = labelTag;
     }
 
@@ -165,11 +166,11 @@ public class LabelDefineDto {
         this.labelIndex = labelIndex;
     }
 
-    public Boolean getLabelRequired() {
+    public Integer getLabelRequired() {
         return labelRequired;
     }
 
-    public void setLabelRequired(Boolean labelRequired) {
+    public void setLabelRequired(Integer labelRequired) {
         this.labelRequired = labelRequired;
     }
 

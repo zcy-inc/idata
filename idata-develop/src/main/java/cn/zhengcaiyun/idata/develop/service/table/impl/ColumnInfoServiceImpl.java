@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 import cn.zhengcaiyun.idata.dto.develop.table.ColumnInfoDto;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -40,6 +41,7 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
  * @author caizhedong
  * @date 2021-05-28 15:34
  */
+@Service
 public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     @Autowired

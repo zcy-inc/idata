@@ -30,6 +30,7 @@
         <table tableName="dev_label_define" mapperName="DevLabelDefineDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
+            <columnOverride column="label_required" javaType="java.lang.Integer"/>
         </table>
         <table tableName="dev_label" mapperName="DevLabelDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />

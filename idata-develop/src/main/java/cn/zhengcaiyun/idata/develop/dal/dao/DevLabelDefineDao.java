@@ -71,7 +71,7 @@ public interface DevLabelDefineDao {
         @Result(column="special_attributes", property="specialAttributes", jdbcType=JdbcType.VARCHAR),
         @Result(column="subject_type", property="subjectType", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_index", property="labelIndex", jdbcType=JdbcType.INTEGER),
-        @Result(column="label_required", property="labelRequired", jdbcType=JdbcType.BIT),
+        @Result(column="label_required", property="labelRequired", jdbcType=JdbcType.TINYINT),
         @Result(column="label_scope", property="labelScope", jdbcType=JdbcType.BIGINT),
         @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT)
     })

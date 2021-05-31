@@ -47,7 +47,7 @@ create table if not exists idata.dev_label_define (
   special_attributes varchar(500)    not null default '[]' comment '特定标签属性，根据标签的标签字段变化',
   subject_type       varchar(20)     comment '打标主体类型',
   label_index        integer         comment '标签序号',
-  label_required     boolean         not null default 0 comment '是否必须打标(1:是,0:否)',
+  label_required     tinyint         not null default 0 comment '是否必须打标(1:是,0:否)',
   label_scope        bigint          comment '标签作用域;null:全局,folder_id:特定文件夹域',
   folder_id          bigint          comment '文件夹ID,null表示最外层文件夹'
 ) engine=innodb default charset=utf8mb4 comment='标签定义表';
