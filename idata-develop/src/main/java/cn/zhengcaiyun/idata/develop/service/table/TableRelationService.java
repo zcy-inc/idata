@@ -16,19 +16,13 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.ColumnInfoDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 16:10
+ * @date 2021-05-26 11:12
  */
 
-public interface ColumnInfoService {
-    ColumnInfoDto getColumnInfo(Long tableId, String columnName);
-    List<ColumnInfoDto> getColumns(Long tableId);
-    ColumnInfoDto create(ColumnInfoDto columnInfoDto, String operator);
-    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
-    boolean delete(Long columnId, String operator);
+public interface TableRelationService {
+    TableRelationDto getTableRelations(Long tableId);
 }

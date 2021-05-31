@@ -14,15 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
+package cn.zhengcaiyun.idata.develop.service.table.impl;
 
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
+import cn.zhengcaiyun.idata.dto.develop.table.ForeignKeyDto;
+
+import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-26 11:12
+ * @date 2021-05-28 15:36
  */
+public class ForeignKeyServiceImpl implements ForeignKeyService {
 
-public interface TableRelationApi {
-    TableRelationDto getTableRelations(Long tableId);
+    @Override
+    public List<ForeignKeyDto> getForeignKeys(Long tableId) {
+        return null;
+    }
+
+    @Override
+    public ForeignKeyDto create(ForeignKeyDto foreignKeyDto, String creator) {
+        return null;
+    }
+
+    @Override
+    public ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String editor) {
+        return null;
+    }
+
+    @Override
+    public boolean delete(Long foreignKeyId, String editor) {
+        return false;
+    }
 }

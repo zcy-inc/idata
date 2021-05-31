@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.dto.develop.folder;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,12 +27,15 @@ import java.util.List;
  */
 
 public class FolderTreeNodeDto {
-    @ApiModelProperty(value = "FOLDER | TABLE | LABEL | ENUM | | |")
+    @ApiModelProperty(value = "TABLE | LABEL | ENUM_VALUE")
     private String type;
     // cId
     private String name;
     private Long folderId;
+    private Long parentId;
+    @ApiModelProperty(value = "table_id | enum_code | label_code")
     private String fileCode;
+
     private List<FolderTreeNodeDto> children;
 
     // GaS
@@ -57,6 +61,14 @@ public class FolderTreeNodeDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     public String getFileCode() {
