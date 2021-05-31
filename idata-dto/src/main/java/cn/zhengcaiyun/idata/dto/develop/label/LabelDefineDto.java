@@ -35,15 +35,15 @@ public class LabelDefineDto {
     private Date editTime;
     private String labelCode;
     private String labelName;
-    @ApiModelProperty(value = "STRING_LABEL | BOOLEAN_LABEL | USER_LABEL | ENUM_LABEL | ENUM_VALUE_LABEL " +
-            "| ATTRIBUTE_LABEL " +
-            "| DIMENSION_LABEL | ATOMIC_METRIC_LABEL | DERIVE_METRIC_LABEL | COMPLEX_METRIC_LABEL | MODIFIER_LABEL " +
-            "| DIMENSION_LABEL_DISABLE | ATOMIC_METRIC_LABEL_DISABLE | DERIVE_METRIC_LABEL_DISABLE " +
-            "| COMPLEX_METRIC_LABEL_DISABLE | MODIFIER_LABEL_DISABLE")
+    @ApiModelProperty(value = "STRING_LABEL | BOOLEAN_LABEL | USER_LABEL | " +
+            "ENUM_LABEL | ENUM_VALUE_LABEL | ATTRIBUTE_LABEL | DIMENSION_LABEL | " +
+            "ATOMIC_METRIC_LABEL | DERIVE_METRIC_LABEL | COMPLEX_METRIC_LABEL | " +
+            "MODIFIER_LABEL | DIMENSION_LABEL_DISABLE | ATOMIC_METRIC_LABEL_DISABLE | " +
+            "DERIVE_METRIC_LABEL_DISABLE | COMPLEX_METRIC_LABEL_DISABLE | MODIFIER_LABEL_DISABLE")
     private LabelTagEnum labelTag;
     @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
     private String labelParamType;
-    private List<SpecialAttributeDto> specialParams;
+    private List<SpecialAttributeDto> specialAttributes;
     private List<AttributeDto> labelAttributes;
     @ApiModelProperty(value = "TABLE | COLUMN")
     private String subjectType;
@@ -133,6 +133,22 @@ public class LabelDefineDto {
         this.labelParamType = labelParamType;
     }
 
+    public List<SpecialAttributeDto> getSpecialAttributes() {
+        return specialAttributes;
+    }
+
+    public void setSpecialAttributes(List<SpecialAttributeDto> specialAttributes) {
+        this.specialAttributes = specialAttributes;
+    }
+
+    public List<AttributeDto> getLabelAttributes() {
+        return labelAttributes;
+    }
+
+    public void setLabelAttributes(List<AttributeDto> labelAttributes) {
+        this.labelAttributes = labelAttributes;
+    }
+
     public String getSubjectType() {
         return subjectType;
     }
@@ -171,13 +187,5 @@ public class LabelDefineDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
-    }
-
-    public List<SpecialAttributeDto> getSpecialParams() {
-        return specialParams;
-    }
-
-    public void setSpecialParams(List<SpecialAttributeDto> specialParams) {
-        this.specialParams = specialParams;
     }
 }

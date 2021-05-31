@@ -19,6 +19,9 @@ package cn.zhengcaiyun.idata.develop.service.label;
 import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author caizhedong
  * @date 2021-05-25 14:44
@@ -26,8 +29,11 @@ import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 
 public interface LabelService {
     LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator);
-    LabelDefineDto getDefine(String labelCode);
+    LabelDefineDto findDefine(String labelCode);
+    List<LabelDefineDto> findDefines(String subjectType, String labelTag);
     boolean deleteDefine(String labelCode, String operator);
     LabelDto label(LabelDto labelDto, String operator);
+    List<LabelDto> findLabels(Long tableId, String columnName);
+    Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
     boolean removeLabel(LabelDto labelDto, String operator);
 }

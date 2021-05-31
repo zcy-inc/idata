@@ -29,4 +29,37 @@ public class AttributeDto {
     private String attributeValue;
     // 枚举名称或者枚举值字面值
     private String enumNameOrValue;
+
+    // GaS
+    public String getAttributeKey() {
+        return attributeKey;
+    }
+
+    public void setAttributeKey(String attributeKey) {
+        this.attributeKey = attributeKey;
+    }
+
+    public String getAttributeType() {
+        return attributeType;
+    }
+
+    public void setAttributeType(String attributeType) {
+        this.attributeType = attributeType;
+    }
+
+    public String getAttributeValue() {
+        return attributeValue;
+    }
+
+    public void setAttributeValue(String attributeValue) {
+        this.attributeValue = attributeValue;
+    }
+
+    public String getEnumNameOrValue() {
+        return enumNameOrValue;
+    }
+
+    public void setEnumNameOrValue(String enumNameOrValue) {
+        this.enumNameOrValue = enumNameOrValue;
+    }
 }

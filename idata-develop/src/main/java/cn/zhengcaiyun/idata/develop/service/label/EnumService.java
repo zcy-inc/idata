@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.label;
 
 import cn.zhengcaiyun.idata.dto.develop.label.EnumDto;
+import cn.zhengcaiyun.idata.dto.develop.label.EnumValueDto;
 
 import java.util.List;
 
@@ -26,9 +27,9 @@ import java.util.List;
  */
 
 public interface EnumService {
-    EnumDto getEnum(String enumCode);
+    EnumDto createOrEdit(EnumDto enumDto, String operator);
+    EnumDto findEnum(String enumCode);
     List<EnumDto> getEnumNames();
-    EnumDto create(EnumDto enumDto, String operator);
-    EnumDto edit(EnumDto enumDto, String operator);
+    List<EnumValueDto> getEnumValues(String enumCode);
     boolean delete(String enumCode, String operator);
 }

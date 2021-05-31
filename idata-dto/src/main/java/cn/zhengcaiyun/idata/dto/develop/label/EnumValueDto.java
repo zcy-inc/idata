@@ -100,6 +100,14 @@ public class EnumValueDto {
         this.enumValue = enumValue;
     }
 
+    public List<AttributeDto> getEnumAttributes() {
+        return enumAttributes;
+    }
+
+    public void setEnumAttributes(List<AttributeDto> enumAttributes) {
+        this.enumAttributes = enumAttributes;
+    }
+
     public String getParentCode() {
         return parentCode;
     }

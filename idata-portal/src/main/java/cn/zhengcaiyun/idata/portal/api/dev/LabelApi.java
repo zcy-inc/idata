@@ -17,7 +17,10 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,31 +35,31 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev")
 public class LabelApi {
 
-    @GetMapping("label/{labelDefineId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("labelDefineId") Long labelDefineId) {
-        return RestResult.success();
+    @Autowired
+    private LabelService labelService;
+    @Autowired
+    private TokenService tokenService;
+
+    @GetMapping("labelDefine")
+    public RestResult<LabelDefineDto> findDefine(@RequestParam("labelCode") String labelCode) {
+        return RestResult.success(labelService.findDefine(labelCode));
     }
 
-    @GetMapping("labels")
-    public RestResult<List<LabelDefineDto>> findLabels(@RequestParam(value = "labelTag", required = false) String labelTag) {
-        return RestResult.success();
+    @GetMapping("labelDefines")
+    public RestResult<List<LabelDefineDto>> findDefines(@RequestParam(value = "subjectType", required = false) String subjectType,
+                                                        @RequestParam(value = "labelTag", required = false) String labelTag) {
+        return RestResult.success(labelService.findDefines(subjectType, labelTag));
     }
 
-    @PostMapping("label")
-    public RestResult<LabelDefineDto> addLabel(@RequestBody LabelDefineDto labelDefineDto,
-                                               HttpServletRequest request) {
-        return RestResult.success();
-    }
-
-    @PutMapping("label")
-    public RestResult<LabelDefineDto> updateLabel(@RequestBody LabelDefineDto labelDefineDto,
+    @PostMapping("labelDefine")
+    public RestResult<LabelDefineDto> defineLabel(@RequestBody LabelDefineDto labelDefineDto,
                                                   HttpServletRequest request) {
-        return RestResult.success();
+        return RestResult.success(labelService.defineLabel(labelDefineDto, tokenService.getNickname(request)));
     }
 
-    @DeleteMapping("label/{labelDefineId}")
-    public RestResult deleteLabel(@PathVariable("labelDefineId") Long labelDefineId,
-                                  HttpServletRequest request) {
-        return RestResult.success();
+    @DeleteMapping("labelDefine")
+    public RestResult deleteDefine(@RequestParam("labelCode") String labelCode,
+                                   HttpServletRequest request) {
+        return RestResult.success(labelService.deleteDefine(labelCode, tokenService.getNickname(request)));
     }
 }

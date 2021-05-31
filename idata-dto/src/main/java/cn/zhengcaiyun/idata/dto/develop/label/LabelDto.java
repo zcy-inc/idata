@@ -113,11 +113,43 @@ public class LabelDto {
         this.labelName = labelName;
     }
 
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public String getLabelParamType() {
+        return labelParamType;
+    }
+
+    public void setLabelParamType(String labelParamType) {
+        this.labelParamType = labelParamType;
+    }
+
     public String getLabelParamValue() {
         return labelParamValue;
     }
 
     public void setLabelParamValue(String labelParamValue) {
         this.labelParamValue = labelParamValue;
+    }
+
+    public String getEnumNameOrValue() {
+        return enumNameOrValue;
+    }
+
+    public void setEnumNameOrValue(String enumNameOrValue) {
+        this.enumNameOrValue = enumNameOrValue;
     }
 }
