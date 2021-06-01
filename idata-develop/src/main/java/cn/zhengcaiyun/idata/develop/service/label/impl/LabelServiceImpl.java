@@ -16,13 +16,28 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label.impl;
 
+import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
+import cn.zhengcaiyun.idata.dto.develop.label.*;
+import org.mybatis.dynamic.sql.render.RenderingStrategies;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author shiyin
@@ -31,44 +46,208 @@ import java.util.Map;
 @Service
 public class LabelServiceImpl implements LabelService {
 
+    @Autowired
+    private DevLabelDefineDao devLabelDefineDao;
+    @Autowired
+    private DevLabelDao devLabelDao;
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator) {
-        return null;
+        if (labelDefineDto.getLabelCode() == null) {
+            labelDefineDto.setLabelCode(RandomUtil.randomStr(10));
+            checkArgument(labelDefineDto.getLabelName() != null, "labelName不能为空");
+            checkArgument(labelDefineDto.getLabelTag() != null, "labelTag不能为空");
+            LabelTagEnum labelTagEnum = LabelTagEnum.valueOf(labelDefineDto.getLabelTag());
+            checkLabelParamType(labelTagEnum, labelDefineDto.getLabelParamType());
+            if (LabelTagEnum.ATTRIBUTE_LABEL.equals(labelTagEnum)
+                    || LabelTagEnum.DIMENSION_LABEL.equals(labelTagEnum)
+                    || LabelTagEnum.MODIFIER_LABEL.equals(labelTagEnum)
+                    || LabelTagEnum.ATOMIC_METRIC_LABEL.equals(labelTagEnum)
+                    || LabelTagEnum.DERIVE_METRIC_LABEL.equals(labelTagEnum)
+                    || LabelTagEnum.COMPLEX_METRIC_LABEL.equals(labelTagEnum)) {
+                labelDefineDto.setLabelParamType(null);
+            }
+            // TODO labelAttributes, specialAttributes, folderId没有校验
+            checkArgument(labelDefineDto.getSubjectType() != null, "subjectType不能为空");
+            SubjectTypeEnum.valueOf(labelDefineDto.getSubjectType());
+            // 标签作用域暂时不做，都是全局的
+            labelDefineDto.setLabelScope(null);
+            if (labelDefineDto.getLabelIndex() != null && labelDefineDto.getLabelIndex() < 0) {
+                labelDefineDto.setLabelIndex(null);
+            }
+            if (labelDefineDto.getLabelRequired() != null) {
+                if (labelDefineDto.getLabelRequired() < 0) {
+                    labelDefineDto.setLabelRequired(null);
+                }
+                if (labelDefineDto.getLabelRequired() > 1) {
+                    labelDefineDto.setLabelRequired(1);
+                }
+            }
+            labelDefineDto.setCreator(operator);
+
+            devLabelDefineDao.insertSelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
+                    "labelCode", "labelName", "labelTag", "labelParamType",
+                    "labelAttributes", "specialAttributes", "subjectType", "labelIndex",
+                    "labelRequired", "labelScope", "folderId"));
+        }
+        else {
+            DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
+                    c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()),
+                            and(devLabelDefine.del, isNotEqualTo(1)))).orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+            labelDefineDto.setId(labelDefine.getId());
+            devLabelDefineDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
+                    "labelName", "labelAttributes", "specialAttributes", "labelIndex",
+                    "labelRequired", "folderId"));
+        }
+        return PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
+                        c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
+                LabelDefineDto.class);
+    }
+
+    private void checkLabelParamType(LabelTagEnum labelTagEnum, String labelParamType) {
+        if (LabelTagEnum.STRING_LABEL.equals(labelTagEnum)) {
+            checkArgument(MetaTypeEnum.STRING.name().equals(labelParamType),
+                    "labelParamType与labelTag不符");
+        }
+        if (LabelTagEnum.BOOLEAN_LABEL.equals(labelTagEnum)) {
+            checkArgument(MetaTypeEnum.BOOLEAN.name().equals(labelParamType),
+                    "labelParamType与labelTag不符");
+        }
+        if (LabelTagEnum.USER_LABEL.equals(labelTagEnum)) {
+            checkArgument(MetaTypeEnum.WHOLE.name().equals(labelParamType),
+                    "labelParamType与labelTag不符");
+        }
+        if (LabelTagEnum.ENUM_LABEL.equals(labelTagEnum)) {
+            checkArgument(MetaTypeEnum.ENUM.name().equals(labelParamType),
+                    "labelParamType与labelTag不符");
+        }
+        if (LabelTagEnum.ENUM_VALUE_LABEL.equals(labelTagEnum)) {
+            checkArgument(labelParamType != null
+                            && labelParamType.endsWith(":" + MetaTypeEnum.ENUM.name()),
+                    "labelParamType与labelTag不符");
+        }
     }
 
     @Override
     public LabelDefineDto findDefine(String labelCode) {
-        return null;
+        DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
+                c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
+                        and(devLabelDefine.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+        return PojoUtil.copyOne(labelDefine, LabelDefineDto.class);
     }
 
     @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
-        return null;
+        checkArgument(subjectType != null || labelTag != null,
+                "subjectType和labelTag不能同时为空");
+        if (subjectType != null) {
+            SubjectTypeEnum.valueOf(subjectType);
+        }
+        if (labelTag != null) {
+            LabelTagEnum.valueOf(labelTag);
+        }
+        var builder = select(devLabelDefine.allColumns()).from(devLabelDefine).where();
+        if (subjectType != null) {
+            builder.and(devLabelDefine.subjectType, isEqualTo(subjectType));
+        }
+        if (labelTag != null) {
+            builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
+        }
+        return PojoUtil.copyList(devLabelDefineDao.selectMany(builder.build()
+                        .render(RenderingStrategies.MYBATIS3)), LabelDefineDto.class);
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public boolean deleteDefine(String labelCode, String operator) {
-        return false;
+        devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
+                and(devLabelDefine.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+        // TODO 没有考虑依赖
+        devLabelDefineDao.update(c -> c.set(devLabelDefine.del).equalTo(1)
+                .set(devLabelDefine.editor).equalTo(operator)
+                .where(devLabelDefine.labelCode, isEqualTo(labelCode),
+                        and(devLabelDefine.del, isNotEqualTo(1))));
+        return true;
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public LabelDto label(LabelDto labelDto, String operator) {
-        return null;
+        checkArgument(labelDto.getLabelCode() != null, "labelCode不能为空");
+        DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelDto.getLabelCode()),
+                and(devLabelDefine.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+        checkArgument(labelDto.getTableId() != null, "tableId不能为空");
+        if (SubjectTypeEnum.COLUMN.name().equals(labelDefine.getSubjectType())) {
+            checkArgument(labelDto.getColumnName() != null, "columnName不能为空");
+        }
+        if (LabelTagEnum.STRING_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.BOOLEAN_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.USER_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.ENUM_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())) {
+                checkArgument(labelDto.getLabelParamValue() != null, "labelParamValue不能为空");
+        }
+
+        devLabelDao.insertSelective(PojoUtil.copyOne(labelDto, DevLabel.class,
+                "labelCode", "tableId", "columnName", "labelParamValue"));
+        return PojoUtil.copyOne(devLabelDao.selectOne(c ->
+                        c.where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
+                                and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
+                                and(devLabel.columnName, isEqualTo(labelDto.getColumnName()))))
+                        .get(),
+                LabelDto.class);
     }
 
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
-        return null;
+        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+        return devLabelDao.select(c ->
+                c.where(devLabel.tableId, isEqualTo(tableId),
+                        and(devLabel.columnName, isEqualTo(columnName)),
+                        and(devLabel.del, isNotEqualTo(1))))
+                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }
 
     @Override
     public Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames) {
-        return null;
+        checkArgument(columnNames != null && columnNames.size() > 0, "columnNames不能为空");
+        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+        return devLabelDao.select(c -> c.where(devLabel.tableId, isEqualTo(tableId),
+                and(devLabel.columnName, isIn(columnNames)),
+                and(devLabel.del, isNotEqualTo(1))))
+                .stream().collect(Collectors.groupingBy(DevLabel::getColumnName,
+                        Collectors.mapping(devLabel -> toLabelDto(devLabel, labelDefineMap), Collectors.toList())));
+    }
+
+    private LabelDto toLabelDto(DevLabel devLabel, Map<String, DevLabelDefine> labelDefineMap) {
+        LabelDto labelDto = PojoUtil.copyOne(devLabel, LabelDto.class);
+        DevLabelDefine labelDefine = labelDefineMap.get(devLabel.getLabelCode());
+        if (labelDefine != null) {
+            labelDto.setLabelName(labelDefine.getLabelName());
+            labelDto.setLabelParamType(labelDefine.getLabelParamType());
+            labelDto.setLabelTag(labelDefine.getLabelTag());
+        }
+        return labelDto;
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public boolean removeLabel(LabelDto labelDto, String operator) {
-        return false;
+        checkArgument(labelDto.getLabelCode() != null, "labelCode不能为空");
+        checkArgument(labelDto.getTableId() != null, "tableId不能为空");
+        devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
+                .where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
+                        and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
+                        and(devLabel.columnName, isEqualTo(labelDto.getColumnName())),
+                        and(devLabel.del, isNotEqualTo(1))));
+        return true;
     }
 }

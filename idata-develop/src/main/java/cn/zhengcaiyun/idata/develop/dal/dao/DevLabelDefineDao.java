@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.develop.dal.dao;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
+import cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import java.util.List;
 import java.util.Optional;
@@ -67,8 +68,8 @@ public interface DevLabelDefineDao {
         @Result(column="label_name", property="labelName", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_tag", property="labelTag", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_param_type", property="labelParamType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="label_attributes", property="labelAttributes", jdbcType=JdbcType.VARCHAR),
-        @Result(column="special_attributes", property="specialAttributes", jdbcType=JdbcType.VARCHAR),
+        @Result(column="label_attributes", property="labelAttributes", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
+        @Result(column="special_attributes", property="specialAttributes", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
         @Result(column="subject_type", property="subjectType", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_index", property="labelIndex", jdbcType=JdbcType.INTEGER),
         @Result(column="label_required", property="labelRequired", jdbcType=JdbcType.TINYINT),

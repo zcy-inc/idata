@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.develop.dal.dao;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
+import cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler;
 import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public interface DevEnumValueDao {
         @Result(column="enum_code", property="enumCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="value_code", property="valueCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="enum_value", property="enumValue", jdbcType=JdbcType.VARCHAR),
-        @Result(column="enum_attributes", property="enumAttributes", jdbcType=JdbcType.VARCHAR),
+        @Result(column="enum_attributes", property="enumAttributes", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
         @Result(column="parent_code", property="parentCode", jdbcType=JdbcType.VARCHAR)
     })
     List<DevEnumValue> selectMany(SelectStatementProvider selectStatement);

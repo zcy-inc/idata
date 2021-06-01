@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dal.model;
 
 import java.util.Date;
+import java.util.List;
 import javax.annotation.Generated;
 
 /**
@@ -77,7 +78,7 @@ public class DevEnumValue {
      *   枚举值属性
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_enum_value.enum_attributes")
-    private String enumAttributes;
+    private List enumAttributes;
 
     /**
      * Database Column Remarks:
@@ -177,12 +178,12 @@ public class DevEnumValue {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_enum_value.enum_attributes")
-    public String getEnumAttributes() {
+    public List getEnumAttributes() {
         return enumAttributes;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_enum_value.enum_attributes")
-    public void setEnumAttributes(String enumAttributes) {
+    public void setEnumAttributes(List enumAttributes) {
         this.enumAttributes = enumAttributes;
     }
 

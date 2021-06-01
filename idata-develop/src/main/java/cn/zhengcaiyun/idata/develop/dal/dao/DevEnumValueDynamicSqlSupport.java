@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.dal.dao;
 
 import java.sql.JDBCType;
 import java.util.Date;
+import java.util.List;
 import javax.annotation.Generated;
 import org.mybatis.dynamic.sql.SqlColumn;
 import org.mybatis.dynamic.sql.SqlTable;
@@ -78,7 +79,7 @@ public final class DevEnumValueDynamicSqlSupport {
      *   枚举值属性
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_enum_value.enum_attributes")
-    public static final SqlColumn<String> enumAttributes = devEnumValue.enumAttributes;
+    public static final SqlColumn<List> enumAttributes = devEnumValue.enumAttributes;
 
     /**
      * Database Column Remarks:
@@ -107,7 +108,7 @@ public final class DevEnumValueDynamicSqlSupport {
 
         public final SqlColumn<String> enumValue = column("enum_value", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> enumAttributes = column("enum_attributes", JDBCType.VARCHAR);
+        public final SqlColumn<List> enumAttributes = column("enum_attributes", JDBCType.VARCHAR, "cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler");
 
         public final SqlColumn<String> parentCode = column("parent_code", JDBCType.VARCHAR);
 

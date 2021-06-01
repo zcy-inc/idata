@@ -43,12 +43,12 @@ public class LabelDefineDto {
     private String labelTag;
     @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
     private String labelParamType;
+    private List<EnumValueDto> enumValues;
     private List<SpecialAttributeDto> specialAttributes;
     private List<AttributeDto> labelAttributes;
     @ApiModelProperty(value = "TABLE | COLUMN")
     private String subjectType;
     private Integer labelIndex;
-    @ApiModelProperty(value = "是否必须打标(1:是,0:否)")
     private Integer labelRequired;
     private Long labelScope;
     private Long folderId;
@@ -132,6 +132,14 @@ public class LabelDefineDto {
 
     public void setLabelParamType(String labelParamType) {
         this.labelParamType = labelParamType;
+    }
+
+    public List<EnumValueDto> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(List<EnumValueDto> enumValues) {
+        this.enumValues = enumValues;
     }
 
     public List<SpecialAttributeDto> getSpecialAttributes() {

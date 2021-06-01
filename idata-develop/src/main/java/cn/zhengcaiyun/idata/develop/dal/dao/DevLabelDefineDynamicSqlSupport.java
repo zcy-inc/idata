@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.dal.dao;
 
 import java.sql.JDBCType;
 import java.util.Date;
+import java.util.List;
 import javax.annotation.Generated;
 import org.mybatis.dynamic.sql.SqlColumn;
 import org.mybatis.dynamic.sql.SqlTable;
@@ -85,14 +86,14 @@ public final class DevLabelDefineDynamicSqlSupport {
      *   标签属性
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.label_attributes")
-    public static final SqlColumn<String> labelAttributes = devLabelDefine.labelAttributes;
+    public static final SqlColumn<List> labelAttributes = devLabelDefine.labelAttributes;
 
     /**
      * Database Column Remarks:
      *   特定标签属性，根据标签的标签字段变化
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attributes")
-    public static final SqlColumn<String> specialAttributes = devLabelDefine.specialAttributes;
+    public static final SqlColumn<List> specialAttributes = devLabelDefine.specialAttributes;
 
     /**
      * Database Column Remarks:
@@ -151,9 +152,9 @@ public final class DevLabelDefineDynamicSqlSupport {
 
         public final SqlColumn<String> labelParamType = column("label_param_type", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> labelAttributes = column("label_attributes", JDBCType.VARCHAR);
+        public final SqlColumn<List> labelAttributes = column("label_attributes", JDBCType.VARCHAR, "cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler");
 
-        public final SqlColumn<String> specialAttributes = column("special_attributes", JDBCType.VARCHAR);
+        public final SqlColumn<List> specialAttributes = column("special_attributes", JDBCType.VARCHAR, "cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler");
 
         public final SqlColumn<String> subjectType = column("subject_type", JDBCType.VARCHAR);
 
