@@ -33,7 +33,10 @@ public class ForeignKeyDto {
     private String columnNames;
     private Long referTableId;
     private String referColumnNames;
+    private String referDbName;
     private String erType;
+    private String tableName;
+    private String referTableName;
 
     // GaS
     public Long getId() {
@@ -100,6 +103,14 @@ public class ForeignKeyDto {
         this.columnNames = columnNames;
     }
 
+    public String getReferDbName() {
+        return referDbName;
+    }
+
+    public void setReferDbName(String referDbName) {
+        this.referDbName = referDbName;
+    }
+
     public Long getReferTableId() {
         return referTableId;
     }
@@ -122,5 +133,21 @@ public class ForeignKeyDto {
 
     public void setErType(String erType) {
         this.erType = erType;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getReferTableName() {
+        return referTableName;
+    }
+
+    public void setReferTableName(String referTableName) {
+        this.referTableName = referTableName;
     }
 }

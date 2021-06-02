@@ -18,7 +18,6 @@ package cn.zhengcaiyun.idata.dto.develop.folder;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,17 +25,17 @@ import java.util.List;
  * @date 2021-05-18 19:20
  */
 
-public class FolderTreeNodeDto {
-    @ApiModelProperty(value = "TABLE | LABEL | ENUM_VALUE")
+public class DevelopFolderTreeNodeDto {
+    @ApiModelProperty(value = "TABLE | LABEL | ENUM")
     private String type;
-    // cId
-    private String name;
+    private String folderName;
     private Long folderId;
     private Long parentId;
     @ApiModelProperty(value = "table_id | enum_code | label_code")
     private String fileCode;
+    private String fileName;
 
-    private List<FolderTreeNodeDto> children;
+    private List<DevelopFolderTreeNodeDto> children;
 
     // GaS
     public String getType() {
@@ -47,12 +46,12 @@ public class FolderTreeNodeDto {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public String getFolderName() {
+        return folderName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
     }
 
     public Long getFolderId() {
@@ -79,11 +78,19 @@ public class FolderTreeNodeDto {
         this.fileCode = fileCode;
     }
 
-    public List<FolderTreeNodeDto> getChildren() {
+    public List<DevelopFolderTreeNodeDto> getChildren() {
         return children;
     }
 
-    public void setChildren(List<FolderTreeNodeDto> children) {
+    public void setChildren(List<DevelopFolderTreeNodeDto> children) {
         this.children = children;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

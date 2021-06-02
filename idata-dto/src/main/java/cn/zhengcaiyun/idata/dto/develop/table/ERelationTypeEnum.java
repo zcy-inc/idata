@@ -16,22 +16,11 @@
  */
 package cn.zhengcaiyun.idata.dto.develop.table;
 
-import java.util.List;
-
 /**
  * @author caizhedong
- * @date 2021-05-19 16:26
+ * @date 2021-06-01 10:54
  */
 
-public class TableNodeDto extends TableInfoDto {
-    private String key;
-
-    // GaS
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
+public enum ERelationTypeEnum {
+    I2I, I2N, N2I, M2N;
 }

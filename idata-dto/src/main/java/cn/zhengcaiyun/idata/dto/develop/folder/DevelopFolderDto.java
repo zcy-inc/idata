@@ -23,7 +23,7 @@ import java.util.Date;
  * @date 2021-05-18 17:44
  */
 
-public class DevFolderDto {
+public class DevelopFolderDto {
     private Long id;
     private Integer del;
     private String creator;

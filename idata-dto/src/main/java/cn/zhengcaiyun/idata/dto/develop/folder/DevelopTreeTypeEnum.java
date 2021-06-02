@@ -5,10 +5,11 @@ package cn.zhengcaiyun.idata.dto.develop.folder;
  * @date 2021-05-24 22:01
  */
 
-public enum DevTreeTypeEnum {
+public enum DevelopTreeTypeEnum {
+    FOLDER,
     TABLE,
     LABEL,
-    ENUM_VALUE,
+    ENUM,
     DIMENSION,
     METRIC,
     MODIFIER;

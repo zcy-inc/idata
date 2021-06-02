@@ -16,8 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.service;
 
-import cn.zhengcaiyun.idata.dto.develop.folder.DevFolderDto;
-import cn.zhengcaiyun.idata.dto.develop.folder.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderDto;
+import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderTreeNodeDto;
 
 import java.util.List;
 
@@ -27,8 +27,9 @@ import java.util.List;
  */
 
 public interface DevFolderService {
-    List<FolderTreeNodeDto> getDevFolderTree(String devFolderType);
-    DevFolderDto create(DevFolderDto devFolderDto, String creator);
-    DevFolderDto edit(DevFolderDto devFolderDto, String editor);
-    boolean delete(Long devFolderId, String editor);
+    List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devFolderType);
+    List<DevelopFolderDto> getDevelopFolders(String folderName);
+    DevelopFolderDto create(DevelopFolderDto developFolderDto, String operator);
+    DevelopFolderDto edit(DevelopFolderDto developFolderDto, String operator);
+    boolean delete(Long devFolderId, String operator);
 }

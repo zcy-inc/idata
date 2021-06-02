@@ -17,11 +17,15 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.develop.folder.DevFolderDto;
-import cn.zhengcaiyun.idata.dto.develop.folder.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.service.DevFolderService;
+import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderDto;
+import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -32,33 +36,43 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(path = "/p1/dev")
 public class DevelopFolderApi {
 
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
+    private DevFolderService devFolderService;
+
     @GetMapping("devFolderTree")
-    public RestResult<FolderTreeNodeDto> getDevFolderTree(@RequestParam(value = "devTreeType", required = false) String devTreeType) {
-        return RestResult.success();
+    public RestResult<List<DevelopFolderTreeNodeDto>> getDevFolderTree(@RequestParam(value = "devTreeType", required = false) String devTreeType) {
+        return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType));
     }
 
-    @GetMapping("devFolder/{folderId}")
-    public RestResult<DevFolderDto> findById(@PathVariable("folderId") Long folderId) {
-        return RestResult.success();
+    @GetMapping("devFolderTree")
+    public RestResult<List<DevelopFolderDto>> getDevFolders(@RequestParam(value = "folderName", required = false) String folderName) {
+        return RestResult.success(devFolderService.getDevelopFolders(folderName));
     }
+
+//    @GetMapping("devFolder/{folderId}")
+//    public RestResult<DevelopFolderDto> findById(@PathVariable("folderId") Long folderId) {
+//        return RestResult.success();
+//    }
 
 
     @PostMapping("devFolder")
-    public RestResult<DevFolderDto> addDevFolder(@RequestBody DevFolderDto devFolderDto,
-                                                 HttpServletRequest request) {
-        return RestResult.success();
+    public RestResult<DevelopFolderDto> addDevFolder(@RequestBody DevelopFolderDto developFolderDto,
+                                                     HttpServletRequest request) {
+        return RestResult.success(devFolderService.create(developFolderDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("devFolder")
-    public RestResult<DevFolderDto> updateDevFolder(@RequestBody DevFolderDto devFolderDto,
-                                                    HttpServletRequest request) {
-        return RestResult.success();
+    public RestResult<DevelopFolderDto> updateDevFolder(@RequestBody DevelopFolderDto developFolderDto,
+                                                        HttpServletRequest request) {
+        return RestResult.success(devFolderService.edit(developFolderDto, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("devFolder/{folderId}")
     public RestResult deleteDevFolder(@PathVariable("folderId") Long folderId,
                                       HttpServletRequest request) {
-        return RestResult.success();
+        return RestResult.success(devFolderService.delete(folderId, tokenService.getNickname(request)));
     }
 
 }

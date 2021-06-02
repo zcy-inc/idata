@@ -17,7 +17,10 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.dto.develop.table.TableInfoDto;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,20 +34,32 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(path = "/p1/dev")
 public class TableInfoApi {
 
+    @Autowired
+    private TokenService tokenService;
+    @Autowired
+    private TableInfoService tableInfoService;
+
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
-        return RestResult.success();
+        return RestResult.success(tableInfoService.getTableInfo(tableId));
     }
 
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) {
-        return RestResult.success();
+        TableInfoDto echoTableInfo;
+        if (tableInfoDto.getId() != null) {
+            echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
+        }
+        else {
+            echoTableInfo = tableInfoService.create(tableInfoDto, tokenService.getNickname(request));
+        }
+        return RestResult.success(echoTableInfo);
     }
 
     @DeleteMapping("tableInfo/{tableId}")
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
                                   HttpServletRequest request) {
-        return RestResult.success();
+        return RestResult.success(tableInfoService.delete(tableId, tokenService.getNickname(request)));
     }
 }
