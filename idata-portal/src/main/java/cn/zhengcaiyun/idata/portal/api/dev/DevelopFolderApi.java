@@ -46,7 +46,7 @@ public class DevelopFolderApi {
         return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType));
     }
 
-    @GetMapping("devFolderTree")
+    @GetMapping("devFolders")
     public RestResult<List<DevelopFolderDto>> getDevFolders(@RequestParam(value = "folderName", required = false) String folderName) {
         return RestResult.success(devFolderService.getDevelopFolders(folderName));
     }
