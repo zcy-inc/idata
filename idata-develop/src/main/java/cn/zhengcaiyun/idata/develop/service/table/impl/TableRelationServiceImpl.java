@@ -63,8 +63,6 @@ public class TableRelationServiceImpl implements TableRelationService {
     @Autowired
     private ForeignKeyService foreignKeyService;
 
-    private final String[] tableInfoFields = {"id", "del", "creator", "create_time", "editor", "edit_time",
-            "table_name", "folder_id"};
     private final String[] foreignKeyFields = {"column_names", "refer_column_names", "er_type",
             "table_name", "refer_table_id", "table_id"};
     private final String db_name = "db_name";
@@ -103,7 +101,7 @@ public class TableRelationServiceImpl implements TableRelationService {
     private TableNodeDto findTableNodeById(Long tableId) {
         TableNodeDto tableNodeDto = PojoUtil.copyOne(devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isEqualTo(tableId)))).get(),
-                TableNodeDto.class, tableInfoFields);
+                TableNodeDto.class);
         tableNodeDto.setKey(getDbName(tableId) + "." + tableNodeDto.getTableName());
         tableNodeDto.setColumnInfos(columnInfoService.getColumns(tableId));
         return tableNodeDto;

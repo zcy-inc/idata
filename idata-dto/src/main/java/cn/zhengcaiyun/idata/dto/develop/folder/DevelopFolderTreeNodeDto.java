@@ -31,13 +31,14 @@ public class DevelopFolderTreeNodeDto {
     private String folderName;
     private Long folderId;
     private Long parentId;
-    @ApiModelProperty(value = "table_id | enum_code | label_code")
+    @ApiModelProperty(value = "table_id | enum_code | label_code | folder_id")
     private String fileCode;
     private String fileName;
 
     private List<DevelopFolderTreeNodeDto> children;
 
     // GaS
+
     public String getType() {
         return type;
     }

@@ -80,7 +80,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
                 c.where(devForeignKey.del, isNotEqualTo(1),
                         and(devForeignKey.tableId, isEqualTo(foreignKeyDto.getTableId()))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkDevForeignKey == null, "该表中已存在该外键");
 
         foreignKeyDto.setCreator(operator);
@@ -88,7 +88,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         devForeignKeyDao.insertSelective(foreignKey);
 
         ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()),
-                ForeignKeyDto.class, foreignKeyFields);
+                ForeignKeyDto.class);
         echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
         return echoForeignKeyDto;
     }
@@ -101,7 +101,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
                 c.where(devForeignKey.del, isNotEqualTo(1),
                         and(devForeignKey.id, isEqualTo(foreignKeyDto.getId()))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkDevForeignKey != null, "外键不存在");
         checkArgument(checkDevForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
 
@@ -110,7 +110,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
 
         ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()),
-                ForeignKeyDto.class, foreignKeyFields);
+                ForeignKeyDto.class);
         echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
         return echoForeignKeyDto;
     }
@@ -122,7 +122,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         checkArgument(foreignKeyId != null, "外键ID不能为空");
         DevForeignKey checkForeignKey = devForeignKeyDao.selectOne(c ->
                 c.where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.id, isEqualTo(foreignKeyId))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkForeignKey != null, "外键不存在");
 
         devForeignKeyDao.update(c -> c.set(devForeignKey.del).equalTo(1)

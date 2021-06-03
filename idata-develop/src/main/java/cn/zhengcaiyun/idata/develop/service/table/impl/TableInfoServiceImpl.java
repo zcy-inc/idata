@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
@@ -64,8 +65,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Autowired
     private ForeignKeyService foreignKeyService;
 
-    private final String[] tableInfoFields = {"id", "del", "creator", "create_time", "editor", "edit_time",
-            "table_name", "folder_id"};
+    private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
+            "tableName", "folderId"};
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -97,7 +98,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)),
                         and(devLabel.labelParamValue, isEqualTo(labelValue)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        return PojoUtil.copyList(tableInfoList, TableInfoDto.class, tableInfoFields);
+        return PojoUtil.copyList(tableInfoList, TableInfoDto.class);
     }
 
     @Override
@@ -108,14 +109,15 @@ public class TableInfoServiceImpl implements TableInfoService {
         DevTableInfo checkTableInfo = devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.del, isNotEqualTo(1),
                         and(devTableInfo.tableName, isEqualTo(tableInfoDto.getTableName()))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkTableInfo == null, "表已存在，新建失败");
 
         // 插入tableInfo表
         tableInfoDto.setCreator(operator);
-        DevTableInfo tableInfo = PojoUtil.copyOne(tableInfoDto, DevTableInfo.class, tableInfoFields);
+        DevTableInfo tableInfo = PojoUtil.copyOne(tableInfoDto, DevTableInfo.class,
+                "tableName", "folderId", "creator");
         devTableInfoDao.insertSelective(tableInfo);
-        TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()),
+        TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()).get(),
                 TableInfoDto.class, tableInfoFields);
         // 字段相关表操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
@@ -144,14 +146,15 @@ public class TableInfoServiceImpl implements TableInfoService {
         checkArgument(tableInfoDto.getId() != null, "表ID不能为空");
         DevTableInfo checkTableInfo = devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.id, isEqualTo(tableInfoDto.getId()), and(devTableInfo.del, isNotEqualTo(1))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkTableInfo != null, "表不存在");
 
         // 更新tableInfo表
         tableInfoDto.setEditor(operator);
-        DevTableInfo tableInfo = PojoUtil.copyOne(tableInfoDto, DevTableInfo.class, tableInfoFields);
+        DevTableInfo tableInfo = PojoUtil.copyOne(tableInfoDto, DevTableInfo.class, "id",
+                "tableName", "folderId", "editor");
         devTableInfoDao.updateByPrimaryKeySelective(tableInfo);
-        TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()),
+        TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()).get(),
                 TableInfoDto.class, tableInfoFields);
         // 字段表相关操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
@@ -181,7 +184,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.del, isNotEqualTo(1),
                         and(devTableInfo.id, isEqualTo(tableId))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(tableInfo != null, "表不存在");
 
         // 删除tableInfo表记录

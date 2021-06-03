@@ -17,10 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.service.DevFolderService;
 import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderDto;
@@ -39,6 +36,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.folderName;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -61,66 +59,22 @@ public class DevFolderServiceImpl implements DevFolderService {
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
     private DevEnumDao devEnumDao;
+    @Autowired
+    private DevFolderMyDao devFolderMyDao;
 
     private final String[] folderFields = {"id", "del", "creator", "create_time", "editor", "edit_time", "folder_name", "parent_id"};
     private final String[] folderTreeFields = {"type", "folder_name", "folder_id", "paren_id", "file_code", "file_name"};
 
     @Override
     public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devFolderType) {
-        List<DevelopFolderTreeNodeDto> folderTreeList = PojoUtil.copyList(devFolderDao.selectMany(
-                select(devFolder.folderName.as("folder_name"), devFolder.id.as("folder_id"),
-                        devFolder.parentId.as("parent_id"))
-                        .from(devFolder)
-                        .where(devFolder.del, isNotEqualTo(1))
-                        .build().render(RenderingStrategies.MYBATIS3)),
-                DevelopFolderTreeNodeDto.class, folderTreeFields);
-        folderTreeList = folderTreeList.stream().peek(folderTree -> folderTree.setType(DevelopTreeTypeEnum.FOLDER.name()))
-                .collect(Collectors.toList());
-        List<DevelopFolderTreeNodeDto> childFolderTreeList = new ArrayList<>();
-        if (DevelopTreeTypeEnum.TABLE.name().equals(devFolderType)) {
-            childFolderTreeList = PojoUtil.copyList(devTableInfoDao.selectMany(
-                    select(devTableInfo.tableName.as("file_name"), devTableInfo.id.as("file_code"),
-                            devTableInfo.folderId.as("parent_id"))
-                            .from(devTableInfo)
-                            .where(devTableInfo.del, isNotEqualTo(1))
-                            .build().render(RenderingStrategies.MYBATIS3)),
-                    DevelopFolderTreeNodeDto.class, folderTreeFields);
-            childFolderTreeList = childFolderTreeList.stream().peek(folderTreeNode ->
-                    folderTreeNode.setType(DevelopTreeTypeEnum.TABLE.name()))
-                    .collect(Collectors.toList());
-        }
-        else if (DevelopTreeTypeEnum.LABEL.name().equals(devFolderType)) {
-            childFolderTreeList = PojoUtil.copyList(devLabelDefineDao.selectMany(
-                    select(devLabelDefine.labelName.as("file_name"), devLabelDefine.labelCode.as("file_code"),
-                            devLabelDefine.folderId.as("parent_id"))
-                            .from(devLabelDefine)
-                            .where(devLabelDefine.del, isNotEqualTo(1))
-                            .build().render(RenderingStrategies.MYBATIS3)),
-                    DevelopFolderTreeNodeDto.class, folderTreeFields);
-            childFolderTreeList = childFolderTreeList.stream().peek(folderTreeNode ->
-                    folderTreeNode.setType(DevelopTreeTypeEnum.LABEL.name()))
-                    .collect(Collectors.toList());
-        }
-        else if (DevelopTreeTypeEnum.ENUM.name().equals(devFolderType)) {
-            childFolderTreeList = PojoUtil.copyList(devEnumDao.selectMany(
-                    select(devEnum.enumName.as("file_name"), devEnum.enumCode.as("file_code"),
-                            devEnum.folderId.as("parent_id"))
-                            .from(devEnum)
-                            .where(devEnum.del, isNotEqualTo(1))
-                            .build().render(RenderingStrategies.MYBATIS3)),
-                    DevelopFolderTreeNodeDto.class, folderTreeFields);
-            childFolderTreeList = childFolderTreeList.stream().peek(folderTreeNode ->
-                    folderTreeNode.setType(DevelopTreeTypeEnum.ENUM.name()))
-                    .collect(Collectors.toList());
-        }
-        folderTreeList.addAll(childFolderTreeList);
+        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devFolderType);
         return getFolderTreeNodeList(null, true, folderTreeList);
     }
 
     private List<DevelopFolderTreeNodeDto> getFolderTreeNodeList(Long parentId, boolean isRecursive,
                                                                  List<DevelopFolderTreeNodeDto> folderTreeNodeList) {
         List<DevelopFolderTreeNodeDto> echo = folderTreeNodeList.stream()
-                .filter(folderTreeNode -> parentId.equals(folderTreeNode.getParentId()))
+                .filter(folderTreeNode -> parentId == folderTreeNode.getParentId())
                 .map(folderTreeNode -> {
                     DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class);
                     if (isRecursive && DevelopTreeTypeEnum.FOLDER.name().equals(folderTreeNode.getType())) {
@@ -139,7 +93,7 @@ public class DevFolderServiceImpl implements DevFolderService {
         }
 
         return PojoUtil.copyList(devFolderDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3)),
-                DevelopFolderDto.class, folderFields);
+                DevelopFolderDto.class);
     }
 
     @Override
@@ -150,13 +104,13 @@ public class DevFolderServiceImpl implements DevFolderService {
         DevFolder checkFolder = devFolderDao.selectOne(c ->
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.folderName,
                         isEqualTo(developFolderDto.getFolderName()))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkFolder == null, "文件夹名称已存在");
 
         developFolderDto.setCreator(operator);
-        DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class, folderFields);
+        DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class);
         devFolderDao.insertSelective(folder);
-        return PojoUtil.copyOne(devFolderDao.selectByPrimaryKey(folder.getId()).get(), DevelopFolderDto.class, folderFields);
+        return PojoUtil.copyOne(devFolderDao.selectByPrimaryKey(folder.getId()).get(), DevelopFolderDto.class);
     }
 
     @Override
@@ -166,13 +120,13 @@ public class DevFolderServiceImpl implements DevFolderService {
         checkArgument(developFolderDto.getId() != null, "文件夹ID不能为空");
         DevFolder checkFolder = devFolderDao.selectOne(c ->
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isEqualTo(developFolderDto.getId()))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkFolder != null, "文件夹不存在");
 
         developFolderDto.setEditor(operator);
-        DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class, folderFields);
+        DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class);
         devFolderDao.updateByPrimaryKeySelective(folder);
-        return PojoUtil.copyOne(devFolderDao.selectByPrimaryKey(folder.getId()).get(), DevelopFolderDto.class, folderFields);
+        return PojoUtil.copyOne(devFolderDao.selectByPrimaryKey(folder.getId()).get(), DevelopFolderDto.class);
     }
 
     @Override
@@ -182,7 +136,7 @@ public class DevFolderServiceImpl implements DevFolderService {
         checkArgument(devFolderId != null, "文件夹ID不能为空");
         DevFolder checkFolder = devFolderDao.selectOne(c ->
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isEqualTo(devFolderId))))
-                .orElseGet(null);
+                .orElse(null);
         checkArgument(checkFolder != null, "文件夹不存在");
 
         devFolderDao.update(c -> c.set(devFolder.del).equalTo(1)
