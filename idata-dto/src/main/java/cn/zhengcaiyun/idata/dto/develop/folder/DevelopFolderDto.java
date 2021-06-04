@@ -33,6 +33,7 @@ public class DevelopFolderDto {
     private String folderName;
     private Long parentId;
 
+    // GaS
     public Long getId() {
         return id;
     }

@@ -28,17 +28,17 @@ import java.util.List;
 public class DevelopFolderTreeNodeDto {
     @ApiModelProperty(value = "TABLE | LABEL | ENUM")
     private String type;
-    private String folderName;
-    private Long folderId;
-    private Long parentId;
-    @ApiModelProperty(value = "table_id | enum_code | label_code | folder_id")
-    private String fileCode;
-    private String fileName;
+    @ApiModelProperty(value = "T_table_id | E_enum_code | L_label_code | F_folder_id")
+    private String cid;
+    private String name;
 
+    private Long folderId;
+    private String fileCode;
+
+    private Long parentId;
     private List<DevelopFolderTreeNodeDto> children;
 
     // GaS
-
     public String getType() {
         return type;
     }
@@ -47,12 +47,20 @@ public class DevelopFolderTreeNodeDto {
         this.type = type;
     }
 
-    public String getFolderName() {
-        return folderName;
+    public String getCid() {
+        return cid;
     }
 
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getFolderId() {
@@ -63,14 +71,6 @@ public class DevelopFolderTreeNodeDto {
         this.folderId = folderId;
     }
 
-    public Long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
-    }
-
     public String getFileCode() {
         return fileCode;
     }
@@ -79,19 +79,19 @@ public class DevelopFolderTreeNodeDto {
         this.fileCode = fileCode;
     }
 
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
     public List<DevelopFolderTreeNodeDto> getChildren() {
         return children;
     }
 
     public void setChildren(List<DevelopFolderTreeNodeDto> children) {
         this.children = children;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 }

@@ -54,20 +54,11 @@ public class DevFolderServiceImpl implements DevFolderService {
     @Autowired
     private DevFolderDao devFolderDao;
     @Autowired
-    private DevTableInfoDao devTableInfoDao;
-    @Autowired
-    private DevLabelDefineDao devLabelDefineDao;
-    @Autowired
-    private DevEnumDao devEnumDao;
-    @Autowired
     private DevFolderMyDao devFolderMyDao;
 
-    private final String[] folderFields = {"id", "del", "creator", "create_time", "editor", "edit_time", "folder_name", "parent_id"};
-    private final String[] folderTreeFields = {"type", "folder_name", "folder_id", "paren_id", "file_code", "file_name"};
-
     @Override
-    public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devFolderType) {
-        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devFolderType);
+    public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType) {
+        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType);
         return getFolderTreeNodeList(null, true, folderTreeList);
     }
 
@@ -76,7 +67,8 @@ public class DevFolderServiceImpl implements DevFolderService {
         List<DevelopFolderTreeNodeDto> echo = folderTreeNodeList.stream()
                 .filter(folderTreeNode -> parentId == folderTreeNode.getParentId())
                 .map(folderTreeNode -> {
-                    DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class);
+                    DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class,
+                            "type", "name", "cid", "fileCode", "folderId");
                     if (isRecursive && DevelopTreeTypeEnum.FOLDER.name().equals(folderTreeNode.getType())) {
                         echoFolderTreeNode.setChildren(getFolderTreeNodeList(folderTreeNode.getFolderId(), true, folderTreeNodeList));
                     }

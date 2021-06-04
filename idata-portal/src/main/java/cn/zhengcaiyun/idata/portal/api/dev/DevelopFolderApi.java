@@ -51,12 +51,6 @@ public class DevelopFolderApi {
         return RestResult.success(devFolderService.getDevelopFolders(folderName));
     }
 
-//    @GetMapping("devFolder/{folderId}")
-//    public RestResult<DevelopFolderDto> findById(@PathVariable("folderId") Long folderId) {
-//        return RestResult.success();
-//    }
-
-
     @PostMapping("devFolder")
     public RestResult<DevelopFolderDto> addDevFolder(@RequestBody DevelopFolderDto developFolderDto,
                                                      HttpServletRequest request) {

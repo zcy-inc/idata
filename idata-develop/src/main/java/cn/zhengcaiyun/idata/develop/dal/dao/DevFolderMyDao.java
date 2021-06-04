@@ -31,50 +31,48 @@ import java.util.List;
 public interface DevFolderMyDao {
 
     @Select("<script>" +
-                "SELECT id AS folderId, folder_name AS folderName, (@type := 'FOLDER') AS type, " +
-                    "folder_name AS fileName, id AS fileCode, parent_id AS parentId " +
+                "SELECT id AS folderId, folder_name AS name, (@type := 'FOLDER') AS type, " +
+                    "(@fileCode := null) AS fileCode, parent_id AS parentId, (@cid := concat('F_', id)) AS cid " +
                 "FROM dev_folder " +
                 "WHERE del = 0 " +
-                "<choose>" +
-                    "<when test = 'devFolderType != null and \"TABLE\" == devFolderType'>" +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'TABLE') AS type, table_name AS fileName, id AS fileCode, folder_id AS parentId " +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"TABLE\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +
+                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
-                    "</when>" +
-                    "<when test = 'devFolderType != null and \"LABEL\" == devFolderType'>" +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'LABEL') AS type, label_name AS fileName, label_code AS fileCode, folder_id AS parentId " +
+                "</if>" +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"LABEL\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0" +
-                    "</when>" +
-                    "<when test = 'devFolderType != null and \"ENUM\" == devFolderType'>" +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'ENUM') AS type, enum_name AS fileName, enum_code AS fileCode,  folder_id AS parentId " +
+                "</if>" +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"ENUM\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
+                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
                         "FROM dev_enum " +
                         "WHERE del = 0" +
-                    "</when>" +
-                    "<otherwise>" +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'TABLE') AS type, table_name AS fileName, id AS fileCode, folder_id AS parentId " +
+                "</if>" +
+                "<if test = 'devTreeType == null or \"\" == devTreeType'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +
+                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'LABEL') AS type, label_name AS fileName, label_code AS fileCode, folder_id AS parentId " +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 " +
-                        "UNION ALL " +
-                        "SELECT (@folderId := null) AS folderId, (@folderName := null) AS folderName, " +
-                            "(@type := 'ENUM') AS type, enum_name AS fileName, enum_code AS fileCode,  folder_id AS parentId " +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
+                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
                         "FROM dev_enum " +
                         "WHERE del = 0" +
-                    "</otherwise>" +
-                "</choose>" +
+                "</if>" +
             "</script>")
-    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devFolderType);
+    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType);
 }
