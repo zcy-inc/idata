@@ -123,16 +123,20 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;
         if (columnInfoDtoList != null) {
-            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoDtoList.stream().map(columnInfoDto ->
-                    columnInfoService.create(columnInfoDto, operator)).collect(Collectors.toList());
+            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoDtoList.stream().map(columnInfoDto ->{
+                columnInfoDto.setTableId(tableInfo.getId());
+                return columnInfoService.create(columnInfoDto, operator);
+            }).collect(Collectors.toList());
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
         }
         // 外键表操作
         List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
                 ? tableInfoDto.getForeignKeys() : null;
         if (foreignKeyDtoList != null) {
-            List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto ->
-                    foreignKeyService.create(foreignKeyDto, operator)).collect(Collectors.toList());
+            List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
+                foreignKeyDto.setTableId(tableInfo.getId());
+                return foreignKeyService.create(foreignKeyDto, operator);
+            }).collect(Collectors.toList());
             echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
         }
 
