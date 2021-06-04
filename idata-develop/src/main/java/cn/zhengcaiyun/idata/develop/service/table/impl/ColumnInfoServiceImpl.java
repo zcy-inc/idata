@@ -50,8 +50,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Autowired
     private LabelService labelService;
 
-    private final String[] columnInfoFields = {"id", "del", "creator", "create_time", "editor", "edit_time",
-            "column_name", "table_id", "column_index"};
+    private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
+            "columnName", "tableId", "columnIndex"};
 
     @Override
     public ColumnInfoDto getColumnInfo(Long tableId, String columnName) {
@@ -69,7 +69,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Override
     public List<ColumnInfoDto> getColumns(Long tableId) {
         List<ColumnInfoDto> echoList = new ArrayList<>();
-                List<DevColumnInfo> columnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.columnName)
+        List<DevColumnInfo> columnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
                 .from(devColumnInfo)
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));

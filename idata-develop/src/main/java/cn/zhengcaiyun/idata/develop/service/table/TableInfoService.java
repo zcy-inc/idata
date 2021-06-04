@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
+import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 import cn.zhengcaiyun.idata.dto.develop.table.TableInfoDto;
 
 import java.util.List;
@@ -27,7 +28,8 @@ import java.util.List;
 
 public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
-    List<TableInfoDto> getTables(String labelCode, String database);
+    List<TableInfoDto> getTables(String database);
+    List<LabelDto> getDbNames();
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
     TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
     boolean delete(Long tableId, String editor);

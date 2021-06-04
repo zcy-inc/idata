@@ -17,13 +17,17 @@
 package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
+import cn.zhengcaiyun.idata.dto.develop.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.dto.develop.table.TableInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -38,10 +42,27 @@ public class TableInfoApi {
     private TokenService tokenService;
     @Autowired
     private TableInfoService tableInfoService;
+    @Autowired
+    private ColumnInfoService columnInfoService;
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableInfoService.getTableInfo(tableId));
+    }
+
+    @GetMapping("referTables")
+    public RestResult<List<TableInfoDto>> getReferTables(@RequestParam("labelValue") String labelValue) {
+        return RestResult.success(tableInfoService.getTables(labelValue));
+    }
+
+    @GetMapping("dbNames")
+    public RestResult<List<LabelDto>> getDbNames() {
+        return RestResult.success(tableInfoService.getDbNames());
+    }
+
+    @GetMapping("columnInfos/{tableId}")
+    public RestResult<List<ColumnInfoDto>> getColumns(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(columnInfoService.getColumns(tableId));
     }
 
     @PostMapping("tableInfo")

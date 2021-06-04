@@ -63,10 +63,13 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
     @Autowired
+    private DevLabelDao devLabelDao;
+    @Autowired
     private ForeignKeyService foreignKeyService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
+    private final String DB_NAME_LABEL = "dbName";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -91,14 +94,23 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public List<TableInfoDto> getTables(String labelCode, String labelValue) {
+    public List<TableInfoDto> getTables(String labelValue) {
         List<DevTableInfo> tableInfoList = devTableInfoDao.selectMany(select(devTableInfo.allColumns())
                 .from(devTableInfo)
                 .leftJoin(devLabel).on(devTableInfo.id, equalTo(devLabel.tableId))
-                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)),
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.labelParamValue, isEqualTo(labelValue)))
                 .build().render(RenderingStrategies.MYBATIS3));
         return PojoUtil.copyList(tableInfoList, TableInfoDto.class);
+    }
+
+    @Override
+    public List<LabelDto> getDbNames() {
+        return PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)))
+                        .build().render(RenderingStrategies.MYBATIS3)),
+                LabelDto.class, "labelCode", "labelParamValue");
     }
 
     @Override
