@@ -131,6 +131,16 @@ public class TableInfoServiceImpl implements TableInfoService {
         devTableInfoDao.insertSelective(tableInfo);
         TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()).get(),
                 TableInfoDto.class, tableInfoFields);
+        // 插入label表
+        List<LabelDto> tableLabelDtoList = tableInfoDto.getTableLabels() != null && tableInfoDto.getTableLabels().size() > 0 ?
+                        tableInfoDto.getTableLabels() : null;
+        if (tableLabelDtoList != null) {
+            List<LabelDto> echoTableLabelDtoList = tableLabelDtoList.stream().map(tableLabelDto -> {
+                tableLabelDto.setTableId(tableInfo.getId());
+                return labelService.label(tableLabelDto, operator);
+            }).collect(Collectors.toList());
+            echoTableInfoDto.setTableLabels(echoTableLabelDtoList);
+        }
         // 字段相关表操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;
@@ -172,6 +182,16 @@ public class TableInfoServiceImpl implements TableInfoService {
         devTableInfoDao.updateByPrimaryKeySelective(tableInfo);
         TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()).get(),
                 TableInfoDto.class, tableInfoFields);
+        // 插入label表
+        List<LabelDto> tableLabelDtoList = tableInfoDto.getTableLabels() != null && tableInfoDto.getTableLabels().size() > 0 ?
+                tableInfoDto.getTableLabels() : null;
+        if (tableLabelDtoList != null) {
+            List<LabelDto> echoTableLabelDtoList = tableLabelDtoList.stream().map(tableLabelDto -> {
+                tableLabelDto.setTableId(tableInfo.getId());
+                return labelService.label(tableLabelDto, operator);
+            }).collect(Collectors.toList());
+            echoTableInfoDto.setTableLabels(echoTableLabelDtoList);
+        }
         // 字段表相关操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                 ? tableInfoDto.getColumnInfos() : null;
@@ -206,9 +226,13 @@ public class TableInfoServiceImpl implements TableInfoService {
         // 删除tableInfo表记录
         devTableInfoDao.update(c -> c.set(devTableInfo.del).equalTo(1).set(devTableInfo.editor).equalTo(operator)
                 .where(devTableInfo.id, isEqualTo(tableId)));
+        // 删除label表记录
+        List<LabelDto> tableLabelDtoList = labelService.findLabels(tableId, null);
+        boolean deleteSuccess = tableLabelDtoList.stream().allMatch(tableLabelDto ->
+                labelService.removeLabel(tableLabelDto, operator));
         // 删除columnInfo表记录
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
-        boolean deleteSuccess = columnInfoDtoList.stream().allMatch(columnInfoDto ->
+        deleteSuccess = deleteSuccess && columnInfoDtoList.stream().allMatch(columnInfoDto ->
                 columnInfoService.delete(columnInfoDto.getId(), operator));
         // 删除外键表记录
         List<ForeignKeyDto> foreignKeyDtoList = foreignKeyService.getForeignKeys(tableId);
