@@ -63,8 +63,7 @@ public class TableRelationServiceImpl implements TableRelationService {
     @Autowired
     private ForeignKeyService foreignKeyService;
 
-    private final String[] foreignKeyFields = {"column_names", "refer_column_names", "er_type",
-            "table_name", "refer_table_id", "table_id"};
+    private final String[] foreignKeyFields = {"columnNames", "referColumnNames", "erType", "referTableId", "tableId"};
     private final String db_name = "dbName";
 
     @Override
@@ -131,17 +130,19 @@ public class TableRelationServiceImpl implements TableRelationService {
 //        tableEdgeDto.setText(getToTextFromErType(ERelationTypeEnum.valueOf(
 //                String.valueOf(selectStatement.getParameters().get("erType")))));
         ForeignKeyDto foreignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectOne(
-                select(devForeignKey.columnNames, devForeignKey.referColumnNames, devForeignKey.erType,
-                        devForeignKey.tableId, devForeignKey.referTableId, devTableInfo.tableName.as("table_name"))
+                select(devForeignKey.allColumns())
                         .from(devForeignKey)
                         .leftJoin(devTableInfo).on(devForeignKey.tableId, equalTo(devTableInfo.id))
                         .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.id, isEqualTo(foreignKeyId)))
-                        .build().render(RenderingStrategies.MYBATIS3)),
+                        .build().render(RenderingStrategies.MYBATIS3)).get(),
                 ForeignKeyDto.class, foreignKeyFields);
+        foreignKeyDto.setTableName(devTableInfoDao.selectOne(c -> c
+                .where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isEqualTo(foreignKeyDto.getTableId())))).get()
+                .getTableName());
         TableInfoDto referTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectOne(select(devTableInfo.tableName)
                 .from(devTableInfo)
                 .where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isEqualTo(foreignKeyDto.getReferTableId())))
-                .build().render(RenderingStrategies.MYBATIS3)), TableInfoDto.class, "table_name");
+                .build().render(RenderingStrategies.MYBATIS3)).get(), TableInfoDto.class, "tableName");
         TableEdgeDto tableEdgeDto = new TableEdgeDto();
         tableEdgeDto.setFrom(getDbName(foreignKeyDto.getTableId()) + "." + foreignKeyDto.getTableName());
         tableEdgeDto.setTo(getDbName(foreignKeyDto.getReferTableId()) + "." + referTableInfoDto.getTableName());
