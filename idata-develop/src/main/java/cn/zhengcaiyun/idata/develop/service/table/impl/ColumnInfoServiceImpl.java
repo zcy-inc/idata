@@ -101,7 +101,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         // 插入字段表
         columnInfoDto.setCreator(operator);
         DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-                "table_id", "column_name", "column_index");
+                "tableId", "columnName", "columnIndex");
         devColumnInfoDao.insertSelective(columnInfo);
         ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                 ColumnInfoDto.class);
@@ -132,7 +132,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         // 更新字段表
         columnInfoDto.setEditor(operator);
         DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-                "id", "column_name", "column_index");
+                "id", "columnName", "columnIndex");
         devColumnInfoDao.updateByPrimaryKeySelective(columnInfo);
         ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                 ColumnInfoDto.class);

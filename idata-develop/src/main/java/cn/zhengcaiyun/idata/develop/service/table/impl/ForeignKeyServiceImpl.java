@@ -49,8 +49,8 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
     @Autowired
     private DevLabelDao devLabelDao;
 
-    private String[] foreignKeyFields = {"id", "del", "creator", "create_time", "editor", "edit_time",
-            "table_id", "column_names", "refer_table_id", "refer_column_names", "er_type"};
+    private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
+            "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String db_name = "db_name";
 
     @Override
