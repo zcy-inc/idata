@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,7 +47,8 @@ public class ErrorHandler {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
         }
         if (error instanceof HttpMessageNotReadableException
-                || error instanceof HttpRequestMethodNotSupportedException) {
+                || error instanceof HttpRequestMethodNotSupportedException
+                || error instanceof MissingServletRequestParameterException) {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, "接口输入错误", ExceptionUtils.getRootCauseMessage(error));
         }
         return RestResult.error("服务器内部错误", ExceptionUtils.getRootCauseMessage(error));

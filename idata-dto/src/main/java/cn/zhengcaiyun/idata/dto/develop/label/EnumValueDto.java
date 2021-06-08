@@ -30,10 +30,12 @@ public class EnumValueDto {
     private Date createTime;
     private String editor;
     private Date editTime;
+    private String enumCode;
     private String valueCode;
     private String enumValue;
     private List<AttributeDto> enumAttributes;
     private String parentCode;
+    private String parentValue;
 
     // GaS
     public Long getId() {
@@ -84,6 +86,14 @@ public class EnumValueDto {
         this.editTime = editTime;
     }
 
+    public String getEnumCode() {
+        return enumCode;
+    }
+
+    public void setEnumCode(String enumCode) {
+        this.enumCode = enumCode;
+    }
+
     public String getValueCode() {
         return valueCode;
     }
@@ -114,5 +124,13 @@ public class EnumValueDto {
 
     public void setParentCode(String parentCode) {
         this.parentCode = parentCode;
+    }
+
+    public String getParentValue() {
+        return parentValue;
+    }
+
+    public void setParentValue(String parentValue) {
+        this.parentValue = parentValue;
     }
 }

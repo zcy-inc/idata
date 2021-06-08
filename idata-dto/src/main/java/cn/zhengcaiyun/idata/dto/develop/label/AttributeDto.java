@@ -27,8 +27,8 @@ public class AttributeDto {
     @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
     private String attributeType;
     private String attributeValue;
-    // 枚举名称或者枚举值字面值
-    private String enumNameOrValue;
+    private String enumName;
+    private String enumValue;
 
     // GaS
     public String getAttributeKey() {
@@ -55,11 +55,19 @@ public class AttributeDto {
         this.attributeValue = attributeValue;
     }
 
-    public String getEnumNameOrValue() {
-        return enumNameOrValue;
+    public String getEnumName() {
+        return enumName;
     }
 
-    public void setEnumNameOrValue(String enumNameOrValue) {
-        this.enumNameOrValue = enumNameOrValue;
+    public void setEnumName(String enumName) {
+        this.enumName = enumName;
+    }
+
+    public String getEnumValue() {
+        return enumValue;
+    }
+
+    public void setEnumValue(String enumValue) {
+        this.enumValue = enumValue;
     }
 }

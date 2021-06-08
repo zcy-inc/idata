@@ -22,8 +22,10 @@ import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.dto.develop.label.*;
+import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,8 @@ public class LabelServiceImpl implements LabelService {
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
     private DevLabelDao devLabelDao;
+    @Autowired
+    private EnumService enumService;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -68,7 +72,21 @@ public class LabelServiceImpl implements LabelService {
                     || LabelTagEnum.COMPLEX_METRIC_LABEL.equals(labelTagEnum)) {
                 labelDefineDto.setLabelParamType(null);
             }
-            // TODO labelAttributes, specialAttributes, folderId没有校验
+            // TODO specialAttributes, folderId没有校验
+            if (labelDefineDto.getLabelAttributes() != null) {
+                labelDefineDto.getLabelAttributes().forEach(attributeDto -> {
+                    checkArgument(attributeDto.getAttributeKey() != null, "attributeKey不能为空");
+                    checkArgument(attributeDto.getAttributeType() != null, "attributeType不能为空");
+                    checkArgument(attributeDto.getAttributeValue() != null, "attributeValue不能为空");
+                    if (attributeDto.getAttributeType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
+                        enumService.getEnumName(attributeDto.getAttributeType().replace(":" + MetaTypeEnum.ENUM.name(), ""));
+                        enumService.getEnumValue(attributeDto.getAttributeValue());
+                    }
+                    if (MetaTypeEnum.ENUM.name().equals(attributeDto.getAttributeType())) {
+                        enumService.getEnumName(attributeDto.getAttributeValue());
+                    }
+                });
+            }
             checkArgument(labelDefineDto.getSubjectType() != null, "subjectType不能为空");
             SubjectTypeEnum.valueOf(labelDefineDto.getSubjectType());
             // 标签作用域暂时不做，都是全局的
@@ -85,20 +103,20 @@ public class LabelServiceImpl implements LabelService {
                 }
             }
             labelDefineDto.setCreator(operator);
-
             devLabelDefineDao.insertSelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
                     "labelCode", "labelName", "labelTag", "labelParamType",
                     "labelAttributes", "specialAttributes", "subjectType", "labelIndex",
-                    "labelRequired", "labelScope", "folderId"));
+                    "labelRequired", "labelScope", "folderId", "creator"));
         }
         else {
             DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
                     c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()),
                             and(devLabelDefine.del, isNotEqualTo(1)))).orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
             labelDefineDto.setId(labelDefine.getId());
+            labelDefineDto.setEditor(operator);
             devLabelDefineDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
-                    "labelName", "labelAttributes", "specialAttributes", "labelIndex",
-                    "labelRequired", "folderId"));
+                    "id", "labelName", "labelAttributes", "specialAttributes", "labelIndex",
+                    "labelRequired", "folderId", "editor"));
         }
         return PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
                         c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
@@ -135,7 +153,23 @@ public class LabelServiceImpl implements LabelService {
                 c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
                         and(devLabelDefine.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
-        return PojoUtil.copyOne(labelDefine, LabelDefineDto.class);
+        LabelDefineDto labelDefineDto = PojoUtil.copyOne(labelDefine, LabelDefineDto.class);
+        if (labelDefineDto.getLabelAttributes() != null) {
+            labelDefineDto.getLabelAttributes().forEach(attributeDto -> {
+                if (attributeDto.getAttributeType() != null
+                        && attributeDto.getAttributeType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
+                    attributeDto.setEnumName(enumService.getEnumName(attributeDto.getAttributeType()
+                            .replace(":" + MetaTypeEnum.ENUM.name(), "")));
+                    if (attributeDto.getAttributeValue() != null) {
+                        attributeDto.setEnumValue(enumService.getEnumValue(attributeDto.getAttributeValue()));
+                    }
+                }
+                if (MetaTypeEnum.ENUM.name().equals(attributeDto.getAttributeType())) {
+                    attributeDto.setEnumName(enumService.getEnumName(attributeDto.getAttributeValue()));
+                }
+            });
+        }
+        return labelDefineDto;
     }
 
     @Override
@@ -148,15 +182,28 @@ public class LabelServiceImpl implements LabelService {
         if (labelTag != null) {
             LabelTagEnum.valueOf(labelTag);
         }
-        var builder = select(devLabelDefine.allColumns()).from(devLabelDefine).where();
+        var builder = select(devLabelDefine.allColumns()).from(devLabelDefine)
+                .where(devLabelDefine.del, isNotEqualTo(1));
         if (subjectType != null) {
             builder.and(devLabelDefine.subjectType, isEqualTo(subjectType));
         }
         if (labelTag != null) {
             builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
         }
-        return PojoUtil.copyList(devLabelDefineDao.selectMany(builder.build()
-                        .render(RenderingStrategies.MYBATIS3)), LabelDefineDto.class);
+        return devLabelDefineDao.selectMany(builder.build()
+                        .render(RenderingStrategies.MYBATIS3))
+                .stream().map(devLabelDefine -> {
+                    LabelDefineDto labelDefineDto = PojoUtil.copyOne(devLabelDefine, LabelDefineDto.class);
+                    if (labelDefineDto.getLabelParamType() != null
+                            && labelDefineDto.getLabelParamType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
+                        labelDefineDto.setEnumValues(
+                                enumService.getEnumValues(
+                                        labelDefineDto.getLabelParamType()
+                                                .replace(":" + MetaTypeEnum.ENUM.name(), "")));
+                    }
+                    return labelDefineDto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -191,15 +238,43 @@ public class LabelServiceImpl implements LabelService {
                 || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())) {
                 checkArgument(labelDto.getLabelParamValue() != null, "labelParamValue不能为空");
         }
-
-        devLabelDao.insertSelective(PojoUtil.copyOne(labelDto, DevLabel.class,
-                "labelCode", "tableId", "columnName", "labelParamValue"));
+        else {
+            labelDto.setLabelParamValue(null);
+        }
+        List<DevLabel> labels = devLabelDao.select(c -> c.where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
+                and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
+                and(devLabel.columnName, isEqual(labelDto.getColumnName())),
+                and(devLabel.del, isNotEqualTo(1))));
+        if (labels.size() == 0) {
+            labelDto.setCreator(operator);
+            devLabelDao.insertSelective(PojoUtil.copyOne(labelDto, DevLabel.class,
+                    "creator", "labelCode", "tableId", "columnName", "labelParamValue"));
+        }
+        else if (labels.size() == 1) {
+            labelDto.setId(labels.get(0).getId());
+            labelDto.setEditor(operator);
+            devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDto, DevLabel.class,
+                    "editor", "labelParamValue"));
+        }
+        else {
+            throw new IllegalArgumentException("元数据标签状态异常");
+        }
         return PojoUtil.copyOne(devLabelDao.selectOne(c ->
                         c.where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
                                 and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
-                                and(devLabel.columnName, isEqualTo(labelDto.getColumnName()))))
+                                and(devLabel.columnName, isEqual(labelDto.getColumnName())),
+                                and(devLabel.del, isNotEqualTo(1))))
                         .get(),
                 LabelDto.class);
+    }
+
+    private VisitableCondition<String> isEqual(String columnName) {
+        if (columnName != null) {
+            return isEqualTo(columnName);
+        }
+        else {
+            return isNull();
+        }
     }
 
     @Override
@@ -234,6 +309,15 @@ public class LabelServiceImpl implements LabelService {
             labelDto.setLabelName(labelDefine.getLabelName());
             labelDto.setLabelParamType(labelDefine.getLabelParamType());
             labelDto.setLabelTag(labelDefine.getLabelTag());
+            if (labelDto.getLabelParamType() != null
+                    && labelDto.getLabelParamType().endsWith(":" + MetaTypeEnum.ENUM.name())
+                    && labelDto.getLabelParamValue() != null) {
+                labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
+            }
+            if (MetaTypeEnum.ENUM.name().equals(labelDto.getLabelParamType())
+                    && labelDto.getLabelParamValue() != null) {
+                labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
+            }
         }
         return labelDto;
     }
@@ -246,7 +330,7 @@ public class LabelServiceImpl implements LabelService {
         devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
                 .where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
                         and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
-                        and(devLabel.columnName, isEqualTo(labelDto.getColumnName())),
+                        and(devLabel.columnName, isEqual(labelDto.getColumnName())),
                         and(devLabel.del, isNotEqualTo(1))));
         return true;
     }
