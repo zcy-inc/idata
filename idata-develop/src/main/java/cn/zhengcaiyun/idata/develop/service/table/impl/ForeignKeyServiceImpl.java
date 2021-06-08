@@ -87,7 +87,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
         devForeignKeyDao.insertSelective(foreignKey);
 
-        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()),
+        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
                 ForeignKeyDto.class);
         echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
         return echoForeignKeyDto;
@@ -109,7 +109,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
         devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
 
-        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()),
+        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
                 ForeignKeyDto.class);
         echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
         return echoForeignKeyDto;

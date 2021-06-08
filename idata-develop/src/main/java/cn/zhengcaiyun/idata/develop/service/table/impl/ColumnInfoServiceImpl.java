@@ -101,7 +101,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         // 插入字段表
         columnInfoDto.setCreator(operator);
         DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-                "tableId", "columnName", "columnIndex");
+                "tableId", "columnName", "columnIndex", "creator");
         devColumnInfoDao.insertSelective(columnInfo);
         ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                 ColumnInfoDto.class);
@@ -110,7 +110,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 ? columnInfoDto.getColumnLabels() : null;
         if (columnLabelList != null) {
             List<LabelDto> echoColumnLabelList = columnLabelList.stream()
-                    .map(columnLabel -> labelService.label(columnLabel, operator))
+                    .map(columnLabel ->  {
+                        columnLabel.setTableId(columnInfoDto.getTableId());
+                        return labelService.label(columnLabel, operator);})
                     .collect(Collectors.toList());
             echoColumnInfoDto.setColumnLabels(echoColumnLabelList);
         }
@@ -132,7 +134,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         // 更新字段表
         columnInfoDto.setEditor(operator);
         DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-                "id", "columnName", "columnIndex");
+                "id", "columnName", "columnIndex", "creator");
         devColumnInfoDao.updateByPrimaryKeySelective(columnInfo);
         ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                 ColumnInfoDto.class);
@@ -141,7 +143,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 ? columnInfoDto.getColumnLabels() : null;
         if (columnLabelList != null) {
             List<LabelDto> echoColumnLabelList = columnLabelList.stream()
-                    .map(columnLabel -> labelService.label(columnLabel, operator))
+                    .map(columnLabel -> {
+                        columnLabel.setTableId(columnInfoDto.getTableId());
+                        return labelService.label(columnLabel, operator);})
                     .collect(Collectors.toList());
             echoColumnInfoDto.setColumnLabels(echoColumnLabelList);
         }
