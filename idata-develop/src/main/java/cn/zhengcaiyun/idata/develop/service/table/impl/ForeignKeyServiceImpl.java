@@ -89,7 +89,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
         ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
                 ForeignKeyDto.class);
-        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
+        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getReferTableId()));
         return echoForeignKeyDto;
     }
 
