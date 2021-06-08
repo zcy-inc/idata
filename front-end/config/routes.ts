@@ -6,6 +6,15 @@
   },
   { path: '/', redirect: '/authority' },
   {
+    path: '/datapi',
+    name: '数据研发',
+    icon: 'icon-quanxianguanli',
+    routes: [
+      { path: '/datapi', redirect: '/datapi/tablemanage' },
+      { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/tablemanage' },
+    ],
+  },
+  {
     path: '/authority',
     name: '权限管理',
     icon: 'icon-quanxianguanli',

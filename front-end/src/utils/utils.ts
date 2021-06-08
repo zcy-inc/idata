@@ -4,7 +4,8 @@ import { cloneDeep, omit } from 'lodash';
 import type { TreeNode } from '@/interfaces/global';
 
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
-const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+const reg =
+  /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
 
 export const isUrl = (path: string): boolean => reg.test(path);
 
@@ -54,16 +55,14 @@ export const getDeleteFn = <T = any>(
     });
 };
 
-export const getSuccessReqFn = (msg: string) => async <R>(
-  service: () => Promise<Tresponse<R>>,
-  cb?: (result?: Tresponse<R>) => void,
-) => {
-  const res = await service();
-  message.success(msg);
-  cb?.(res);
-  return res;
-};
-
+export const getSuccessReqFn =
+  (msg: string) =>
+  async <R>(service: () => Promise<Tresponse<R>>, cb?: (result?: Tresponse<R>) => void) => {
+    const res = await service();
+    message.success(msg);
+    cb?.(res);
+    return res;
+  };
 
 // 从本地存储获取当前工作区
 export const getCachedWs = () => {
@@ -241,3 +240,16 @@ export const getAllParentsKey = <T extends TreeNode>(
   }
   return arr;
 };
+
+/**
+ * 生成随机[a-z]的字符串
+ * @param len 字符串长度
+ * @returns string
+ */
+export function getRandomStr(len: number) {
+  let str = '';
+  for (let i = 0; i < len - 1; i++) {
+    str += String.fromCharCode(Math.random() * (122 - 97) + 97);
+  }
+  return str;
+}

@@ -6,19 +6,24 @@ import styles from './index.less';
 
 interface PageContainerProps {
   className?: string;
+  contentClassName?: string;
   extra?: React.ReactNode;
 }
 
-const PageContainer: React.FC<PageContainerProps> = ({ children, className, extra }) => {
+const PageContainer: React.FC<PageContainerProps> = ({
+  children,
+  className,
+  contentClassName,
+  extra,
+}) => {
   const value = useContext(RouteContext);
   const { currentMenu } = value;
   // hide breadcrumbs and page title when layout is false in router config file
   if (currentMenu && (currentMenu as any).layout === false) {
     return <Fragment>{children}</Fragment>;
   }
-  const wrapCls = cls(styles.pageContainer, {
-    className,
-  });
+  const wrapCls = cls(styles.pageContainer, className);
+  const contentCls = cls(styles.content, contentClassName);
   return (
     <div className={wrapCls}>
       <dl>
@@ -28,7 +33,7 @@ const PageContainer: React.FC<PageContainerProps> = ({ children, className, extr
         </dt>
         <dd>{extra}</dd>
       </dl>
-      <div className={styles.content}>{children}</div>
+      <div className={contentCls}>{children}</div>
     </div>
   );
 };
