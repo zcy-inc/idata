@@ -51,7 +51,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
-    private final String db_name = "db_name";
+    private final String db_name = "dbName";
 
     @Override
     public List<ForeignKeyDto> getForeignKeys(Long tableId) {
@@ -63,7 +63,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
         List<ForeignKeyDto> echoForeignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, foreignKeyFields)
                 .stream().peek(
-                        foreignKeyDto -> foreignKeyDto.setReferDbName(getDbName(foreignKeyDto.getTableId())))
+                        foreignKeyDto -> foreignKeyDto.setReferDbName(getDbName(foreignKeyDto.getReferTableId())))
                 .collect(Collectors.toList());
         return echoForeignKeyDtoList;
     }

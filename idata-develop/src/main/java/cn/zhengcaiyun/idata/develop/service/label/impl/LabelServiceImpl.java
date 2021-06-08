@@ -284,7 +284,7 @@ public class LabelServiceImpl implements LabelService {
                 .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
         return devLabelDao.select(c ->
                 c.where(devLabel.tableId, isEqualTo(tableId),
-                        and(devLabel.columnName, isEqualTo(columnName)),
+                        and(devLabel.columnName, isEqual(columnName)),
                         and(devLabel.del, isNotEqualTo(1))))
                 .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }

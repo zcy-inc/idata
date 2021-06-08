@@ -69,6 +69,8 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
+    private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
+            "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String DB_NAME_LABEL = "dbName";
 
     @Override
@@ -82,7 +84,10 @@ public class TableInfoServiceImpl implements TableInfoService {
                 select(devForeignKey.allColumns()).from(devForeignKey)
                         .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        List<ForeignKeyDto> foreignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, tableInfoFields);
+        List<ForeignKeyDto> foreignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, foreignKeyFields);
+        foreignKeyDtoList.stream().peek(foreignKeyDto -> foreignKeyDto.setReferTableName(devTableInfoDao.selectOne(c ->
+                c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id,
+                        isEqualTo(foreignKeyDto.getReferTableId())))).get().getTableName()));
         List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
 

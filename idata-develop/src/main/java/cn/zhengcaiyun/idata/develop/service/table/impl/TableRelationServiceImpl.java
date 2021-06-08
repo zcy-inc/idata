@@ -65,7 +65,7 @@ public class TableRelationServiceImpl implements TableRelationService {
 
     private final String[] foreignKeyFields = {"column_names", "refer_column_names", "er_type",
             "table_name", "refer_table_id", "table_id"};
-    private final String db_name = "db_name";
+    private final String db_name = "dbName";
 
     @Override
     public TableRelationDto getTableRelations(Long tableId) {
