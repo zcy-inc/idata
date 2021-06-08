@@ -7,7 +7,7 @@ create table if not exists idata.dev_folder (
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   folder_name varchar(30)     not null comment '文件夹名称',
   parent_id   bigint          comment '上级文件夹ID,null表示最外层文件夹'
-) engine=innodb default charset=utf8mb4 comment='文件夹表';
+) engine=innodb auto_increment=21 default charset=utf8mb4 comment='文件夹表';
 
 create table if not exists idata.dev_table_info (
   id          bigint unsigned not null auto_increment comment '主键', primary key(id),
