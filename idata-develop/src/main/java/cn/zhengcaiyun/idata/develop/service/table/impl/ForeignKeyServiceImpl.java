@@ -52,7 +52,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
-    private final String db_name = "dbName";
+    private final String DB_NAME_LABEL = "dbName";
 
     @Override
     public List<ForeignKeyDto> getForeignKeys(Long tableId) {
@@ -151,7 +151,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
     private String getDbName(Long tableId) {
         return devLabelDao.selectOne(c -> c
-                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(db_name)),
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.tableId, isEqualTo(tableId))))
                 .get().getLabelParamValue();
     }

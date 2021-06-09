@@ -23,6 +23,7 @@ package cn.zhengcaiyun.idata.develop.dto.table;
 
 public class TableNodeDto extends TableInfoDto {
     private String key;
+    private String tableComment;
 
     // GaS
     public String getKey() {
@@ -31,5 +32,13 @@ public class TableNodeDto extends TableInfoDto {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getTableComment() {
+        return tableComment;
+    }
+
+    public void setTableComment(String tableComment) {
+        this.tableComment = tableComment;
     }
 }

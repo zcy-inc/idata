@@ -17,9 +17,12 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.service.table.TableRelationService;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
@@ -52,12 +56,19 @@ public class TableRelationServiceImpl implements TableRelationService {
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
     @Autowired
+    private DevColumnInfoDao devColumnInfoDao;
+    @Autowired
     private ColumnInfoService columnInfoService;
     @Autowired
     private ForeignKeyService foreignKeyService;
 
     private final String[] foreignKeyFields = {"columnNames", "referColumnNames", "erType", "referTableId", "tableId"};
-    private final String db_name = "dbName";
+    private final String DB_NAME_LABEL = "dbName";
+    private final String TBL_COMMENT_LABEL = "tblComment";
+    private final String PK_LABEL = "pk";
+    private final String COLUMN_TYPE_LABEL = "columnType";
+    private final String COLUMN_COMMENT_LABEL = "columnComment";
+    private final String[] columnLabelCodes = {PK_LABEL, COLUMN_TYPE_LABEL, COLUMN_COMMENT_LABEL};
 
     @Override
     public TableRelationDto getTableRelations(Long tableId) {
@@ -95,33 +106,38 @@ public class TableRelationServiceImpl implements TableRelationService {
                 c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isEqualTo(tableId)))).get(),
                 TableNodeDto.class);
         tableNodeDto.setKey(getDbName(tableId) + "." + tableNodeDto.getTableName());
-        tableNodeDto.setColumnInfos(columnInfoService.getColumns(tableId));
+        var builder = select(devLabel.labelParamValue, devLabel.labelCode, devLabel.columnName)
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)));
+        List<ColumnInfoDto> columnInfoDtoList = devColumnInfoDao.selectMany(
+                select(devColumnInfo.allColumns()).from(devColumnInfo)
+                        .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
+                        .build().render(RenderingStrategies.MYBATIS3))
+                        .stream().map(devColumnInfoDto -> {
+                    List<DevLabel> columnLabelList = devLabelDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
+                    ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDto, ColumnInfoDto.class);
+                    for (DevLabel columnLabel : columnLabelList) {
+                        if (PK_LABEL.equals(columnLabel.getLabelCode())
+                                && devColumnInfoDto.getColumnName().equals(columnLabel.getColumnName())) {
+                            echoColumnInfoDto.setPk(Boolean.valueOf(columnLabel.getLabelParamValue()));
+                        } else if (COLUMN_COMMENT_LABEL.equals(columnLabel.getLabelCode())
+                                && devColumnInfoDto.getColumnName().equals(columnLabel.getColumnName())) {
+                            echoColumnInfoDto.setColumnComment(columnLabel.getLabelParamValue());
+                        } else if (COLUMN_TYPE_LABEL.equals(columnLabel.getLabelCode())
+                                && devColumnInfoDto.getColumnName().equals(columnLabel.getColumnName())) {
+                            echoColumnInfoDto.setColumnType(columnLabel.getLabelParamValue());
+                        }
+                    }
+                    return echoColumnInfoDto;
+        }).collect(Collectors.toList());
+        tableNodeDto.setColumnInfos(columnInfoDtoList);
+        DevLabel devLabelDto = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.tableId, isEqualTo(tableId)), and(devLabel.labelCode, isEqualTo(TBL_COMMENT_LABEL)))).get();
+        tableNodeDto.setTableComment(devLabelDto.getLabelParamValue());
         return tableNodeDto;
     }
 
     private TableEdgeDto findTableEdgeById(Long foreignKeyId) {
-//        SqlColumn tableName = devTableInfo.tableName.as("tableName");
-//        SqlColumn tableId = devTableInfo.id.as("tableId");
-//        SqlColumn referTableName = devTableInfo.tableName.as("referTableName");
-//        SqlColumn referTableId = devTableInfo.id.as("referTableId");
-//        SelectStatementProvider selectStatement = SqlBuilder.select(devForeignKey.id, devForeignKey.columnNames,
-//                devForeignKey.referColumnNames, devForeignKey.erType, tableName, tableId, referTableName, referTableId)
-//                .from(devForeignKey)
-//                .leftJoin(devTableInfo).on(devForeignKey.tableId, equalTo(tableId))
-//                .leftJoin(devTableInfo).on(devForeignKey.referTableId, equalTo(referTableId))
-//                .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.id, isEqualTo(foreignKeyId)))
-//                .build().render(RenderingStrategies.MYBATIS3);
-//        TableEdgeDto tableEdgeDto = new TableEdgeDto();
-//        tableEdgeDto.setFrom(getDbName((Long) selectStatement.getParameters().get("tableId")) + "." +
-//                selectStatement.getParameters().get("tableName"));
-//        tableEdgeDto.setColumnNames(String.valueOf(selectStatement.getParameters().get("columnNames")));
-//        tableEdgeDto.setTo(getDbName((Long) selectStatement.getParameters().get("referTableId")) + "." +
-//                selectStatement.getParameters().get("referTableName"));
-//        tableEdgeDto.setReferColumnNames(String.valueOf(selectStatement.getParameters().get("referColumnNames")));
-//        tableEdgeDto.setText(getTextFromErType(ERelationTypeEnum.valueOf(
-//                String.valueOf(selectStatement.getParameters().get("erType")))));
-//        tableEdgeDto.setText(getToTextFromErType(ERelationTypeEnum.valueOf(
-//                String.valueOf(selectStatement.getParameters().get("erType")))));
         ForeignKeyDto foreignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectOne(
                 select(devForeignKey.allColumns())
                         .from(devForeignKey)
@@ -148,7 +164,7 @@ public class TableRelationServiceImpl implements TableRelationService {
 
     private String getDbName(Long tableId) {
         return devLabelDao.selectOne(c -> c
-                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(db_name)),
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.tableId, isEqualTo(tableId))))
                 .get().getLabelParamValue();
     }

@@ -37,6 +37,9 @@ public class ColumnInfoDto {
     private Long tableId;
     private Integer columnIndex;
     private List<LabelDto> columnLabels;
+    private Boolean pk;
+    private String columnComment;
+    private String columnType;
 
     // GaS
     public Long getId() {
@@ -117,5 +120,29 @@ public class ColumnInfoDto {
 
     public void setColumnLabels(List<LabelDto> columnLabels) {
         this.columnLabels = columnLabels;
+    }
+
+    public Boolean getPk() {
+        return pk;
+    }
+
+    public void setPk(Boolean pk) {
+        this.pk = pk;
+    }
+
+    public String getColumnComment() {
+        return columnComment;
+    }
+
+    public void setColumnComment(String columnComment) {
+        this.columnComment = columnComment;
+    }
+
+    public String getColumnType() {
+        return columnType;
+    }
+
+    public void setColumnType(String columnType) {
+        this.columnType = columnType;
     }
 }

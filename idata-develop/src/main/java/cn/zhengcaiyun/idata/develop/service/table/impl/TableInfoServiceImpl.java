@@ -84,9 +84,13 @@ public class TableInfoServiceImpl implements TableInfoService {
                         .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
         List<ForeignKeyDto> foreignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, foreignKeyFields);
-        foreignKeyDtoList.stream().peek(foreignKeyDto -> foreignKeyDto.setReferTableName(devTableInfoDao.selectOne(c ->
+        foreignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
+                foreignKeyDto.setReferTableName(devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id,
-                        isEqualTo(foreignKeyDto.getReferTableId())))).get().getTableName()));
+                        isEqualTo(foreignKeyDto.getReferTableId())))).get().getTableName());
+                foreignKeyDto.setReferDbName(getDbName(tableId));
+                return foreignKeyDto;
+        }).collect(Collectors.toList());
         List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
 
@@ -244,5 +248,12 @@ public class TableInfoServiceImpl implements TableInfoService {
                 foreignKeyService.delete(foreignKeyDto.getId(), operator));
 
         return deleteSuccess;
+    }
+
+    private String getDbName(Long tableId) {
+        return devLabelDao.selectOne(c -> c
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
+                        and(devLabel.tableId, isEqualTo(tableId))))
+                .get().getLabelParamValue();
     }
 }
