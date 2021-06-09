@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
+import cn.zhengcaiyun.idata.dto.develop.table.ERelationTypeEnum;
 import cn.zhengcaiyun.idata.dto.develop.table.ForeignKeyDto;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,12 +77,10 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
         checkArgument(isNotEmpty(foreignKeyDto.getColumnNames()), "外键列名不能为空");
         checkArgument(foreignKeyDto.getReferTableId() != null, "外键引用表ID不能为空");
         checkArgument(isNotEmpty(foreignKeyDto.getReferColumnNames()), "外键引用列名称不能为空");
+        checkArgument(foreignKeyDto.getColumnNames().split(",").length
+                == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
         checkArgument(isNotEmpty(foreignKeyDto.getErType()), "ER联系类别不能为空");
-        DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
-                c.where(devForeignKey.del, isNotEqualTo(1),
-                        and(devForeignKey.tableId, isEqualTo(foreignKeyDto.getTableId()))))
-                .orElse(null);
-        checkArgument(checkDevForeignKey == null, "该表中已存在该外键");
+        ERelationTypeEnum.valueOf(foreignKeyDto.getErType());
 
         foreignKeyDto.setCreator(operator);
         DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
@@ -104,6 +103,24 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
                 .orElse(null);
         checkArgument(checkDevForeignKey != null, "外键不存在");
         checkArgument(checkDevForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
+        if (isNotEmpty(foreignKeyDto.getColumnNames())) {
+            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+                checkArgument(foreignKeyDto.getColumnNames().split(",").length
+                        == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+            }
+            else {
+                checkArgument(checkDevForeignKey.getReferColumnNames().split(",").length
+                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+            }
+            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+            }
+            else {
+                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+                        == checkDevForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+            }
+        }
 
         foreignKeyDto.setEditor(operator);
         DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
