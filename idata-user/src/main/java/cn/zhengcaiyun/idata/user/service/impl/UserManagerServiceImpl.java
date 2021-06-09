@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.user.service.impl;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDao;

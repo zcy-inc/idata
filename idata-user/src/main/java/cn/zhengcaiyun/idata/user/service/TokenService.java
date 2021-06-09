@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.user.service;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserTokenDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUserToken;
 import com.alibaba.fastjson.JSON;

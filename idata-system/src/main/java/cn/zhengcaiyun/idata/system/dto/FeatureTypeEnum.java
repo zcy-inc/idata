@@ -14,17 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
-
-import cn.zhengcaiyun.idata.user.dto.SignInDto;
-import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
+package cn.zhengcaiyun.idata.system.dto;
 
 /**
  * @author shiyin
- * @date 2021-03-09 15:04
+ * @date 2021-03-24 13:47
  */
-public interface UserService {
-    UserInfoDto register(UserInfoDto userInfoDto, boolean isManagerMode, String creator);
-    UserInfoDto signIn(SignInDto signInDto);
-    boolean signOut(String token);
+public enum FeatureTypeEnum {
+    F_MENU,
+    F_ICON;
 }

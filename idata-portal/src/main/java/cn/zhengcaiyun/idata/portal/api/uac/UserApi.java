@@ -17,8 +17,8 @@
 package cn.zhengcaiyun.idata.portal.api.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.user.SignInDto;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.SignInDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

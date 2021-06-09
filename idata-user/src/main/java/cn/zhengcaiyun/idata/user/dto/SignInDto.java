@@ -14,34 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.user;
-
-import io.swagger.annotations.ApiModelProperty;
+package cn.zhengcaiyun.idata.user.dto;
 
 /**
  * @author shiyin
- * @date 2021-03-24 13:49
+ * @date 2021-03-03 00:06
  */
-public class AccessDto {
-    @ApiModelProperty(value = "R_DW_DESIGN_DIR | R_JOB_MANAGE_DIR | " +
-            "R_RESOURCE_MANAGE_DIR | R_FUNCTION_MANAGE_DIR | " +
-            "R_API_DEVELOP_DIR")
-    private String resourceType;
-    private String accessKey;
+public class SignInDto {
+    private String username;
+    private String password;
+
     // GaS
-    public String getResourceType() {
-        return resourceType;
+    public String getUsername() {
+        return username;
     }
 
-    public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getAccessKey() {
-        return accessKey;
+    public String getPassword() {
+        return password;
     }
 
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

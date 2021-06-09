@@ -17,9 +17,9 @@
 package cn.zhengcaiyun.idata.portal.api.sys;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.SystemStateDto;
+import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.SystemStateDto;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

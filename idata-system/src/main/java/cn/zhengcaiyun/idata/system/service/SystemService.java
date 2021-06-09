@@ -16,9 +16,9 @@
  */
 package cn.zhengcaiyun.idata.system.service;
 
-import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.SystemStateDto;
+import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.SystemStateDto;
 
 import java.util.List;
 import java.util.Map;

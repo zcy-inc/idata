@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.system.dto;
 
 /**
  * @author shiyin

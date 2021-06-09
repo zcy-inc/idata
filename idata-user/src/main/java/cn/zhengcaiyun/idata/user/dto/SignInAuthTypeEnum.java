@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
+package cn.zhengcaiyun.idata.user.dto;
 
 /**
  * @author shiyin
- * @date 2021-03-24 13:47
+ * @date 2021-03-09 11:14
  */
-public enum FeatureTypeEnum {
-    F_MENU,
-    F_ICON;
+public enum SignInAuthTypeEnum {
+    LDAP,
+    REGISTER;
 }

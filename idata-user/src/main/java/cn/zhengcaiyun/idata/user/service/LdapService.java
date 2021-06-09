@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;

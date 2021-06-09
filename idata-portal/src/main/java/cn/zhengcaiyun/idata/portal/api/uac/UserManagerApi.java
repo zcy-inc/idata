@@ -18,9 +18,9 @@ package cn.zhengcaiyun.idata.portal.api.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import cn.zhengcaiyun.idata.user.service.UserManagerService;

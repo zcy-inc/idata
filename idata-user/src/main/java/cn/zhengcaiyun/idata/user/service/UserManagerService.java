@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.user.service;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 
 /**
  * @author shiyin

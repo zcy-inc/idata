@@ -18,9 +18,9 @@ package cn.zhengcaiyun.idata.user.service.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.dto.user.SignInAuthTypeEnum;
-import cn.zhengcaiyun.idata.dto.user.SignInDto;
-import cn.zhengcaiyun.idata.dto.user.UserInfoDto;
+import cn.zhengcaiyun.idata.user.dto.SignInAuthTypeEnum;
+import cn.zhengcaiyun.idata.user.dto.SignInDto;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.LdapService;

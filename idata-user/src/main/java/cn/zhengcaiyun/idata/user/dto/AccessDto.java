@@ -14,13 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.user;
+package cn.zhengcaiyun.idata.user.dto;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author shiyin
- * @date 2021-03-09 11:14
+ * @date 2021-03-24 13:49
  */
-public enum SignInAuthTypeEnum {
-    LDAP,
-    REGISTER;
+public class AccessDto {
+    @ApiModelProperty(value = "R_DW_DESIGN_DIR | R_JOB_MANAGE_DIR | " +
+            "R_RESOURCE_MANAGE_DIR | R_FUNCTION_MANAGE_DIR | " +
+            "R_API_DEVELOP_DIR")
+    private String resourceType;
+    private String accessKey;
+    // GaS
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
 }

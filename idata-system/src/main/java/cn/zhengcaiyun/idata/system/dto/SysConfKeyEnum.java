@@ -14,41 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.system;
-
-import java.util.Date;
+package cn.zhengcaiyun.idata.system.dto;
 
 /**
  * @author shiyin
- * @date 2021-03-02 23:55
+ * @date 2021-03-11 17:17
  */
-public class SystemStateDto {
-    private Date sysStartTime;
-    private Boolean registerEnable;
-    private String version;
-
-    // GaS
-    public Boolean getRegisterEnable() {
-        return registerEnable;
-    }
-
-    public void setRegisterEnable(Boolean registerEnable) {
-        this.registerEnable = registerEnable;
-    }
-
-    public Date getSysStartTime() {
-        return sysStartTime;
-    }
-
-    public void setSysStartTime(Date sysStartTime) {
-        this.sysStartTime = sysStartTime;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
+public enum SysConfKeyEnum {
+    LDAP_CONFIG,
+    REGISTER_ENABLE;
 }

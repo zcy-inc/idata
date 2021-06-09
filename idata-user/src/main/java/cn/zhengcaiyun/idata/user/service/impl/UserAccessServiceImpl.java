@@ -17,8 +17,8 @@
 package cn.zhengcaiyun.idata.user.service.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
-import cn.zhengcaiyun.idata.dto.system.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.system.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
