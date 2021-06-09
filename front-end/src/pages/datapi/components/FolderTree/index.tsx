@@ -40,20 +40,18 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [autoExpandParent, { setTrue: autoExpandON, setFalse: autoExpandOFF }] = useBoolean(true);
-
   const flatTree = useRef<FlatTreeNode[]>([]);
 
-  const { tree, getTree, onCreateEnum, onCreateTable, onViewTree, showLabel } = useModel(
-    'tabalmanage',
-    (ret) => ({
+  const { setCurPath, tree, getTree, onCreateEnum, onCreateTable, onViewTree, showLabel } =
+    useModel('tabalmanage', (ret) => ({
+      setCurPath: ret.setCurPath,
       tree: ret.tree,
       getTree: ret.getTree,
       onCreateEnum: ret.onCreateEnum,
       onCreateTable: ret.onCreateTable,
       onViewTree: ret.onViewTree,
       showLabel: ret.showLabel,
-    }),
-  );
+    }));
 
   useEffect(() => {
     getTree('TABLE');
@@ -65,7 +63,8 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
 
   const menu = (
     <Menu
-      onClick={({ key }) => {
+      onClick={(node) => {
+        const key = node.key;
         switch (key) {
           case 'folder':
             actions.showFolder();
@@ -91,14 +90,17 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
   );
 
   // 组装数据，并高亮检索结果
-  const loop = (data: any[]): any => {
+  const loop = (data: any[], parentId?: string): any => {
     return data.map((_) => {
       const { name, type, cid } = _;
       const i = name.indexOf(searchValue);
+      const node = { ..._, key: cid };
       let title = name;
-      let tmpType = type;
+      let _type = type;
       // 判断文件夹类型的节点是否展开
-      if (type === 'FOLDER' && expandedKeys.indexOf(cid) > -1) tmpType = 'FOLDEROPEN';
+      if (type === 'FOLDER' && expandedKeys.indexOf(cid) > -1) {
+        _type = 'FOLDEROPEN';
+      }
       // 给检索命中的title加高亮
       if (i > -1) {
         const beforeStr = name.substring(0, i);
@@ -111,10 +113,10 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
           </span>
         );
       }
+      node.title = [NodeTypeIcon[_type], title];
+      parentId && (node.parentId = parentId);
 
-      return _.children
-        ? { ..._, title: [NodeTypeIcon[tmpType], title], key: cid, children: loop(_.children) }
-        : { ..._, title: [NodeTypeIcon[tmpType], title], key: cid };
+      return _.children ? { ...node, children: loop(_.children, cid) } : { ...node };
     });
   };
 
@@ -160,7 +162,11 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
           onChange={onFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont type="icon-tianjia" className={styles['icon-plus']} />
+          <IconFont
+            type="icon-tianjia"
+            className={styles['icon-plus']}
+            onClick={() => setCurPath(null)}
+          />
         </Dropdown>
       </div>
       <Tabs defaultActiveKey="TABLE" onChange={(key) => getTree(key)}>
@@ -176,12 +182,14 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
           autoExpandParent={autoExpandParent}
           treeData={loop(tree)}
           onRightClick={({ event, node }) => {
-            // TODO dropdown的新建
+            const _: any = node;
+            const folderId =
+              _.type === 'FOLDER' ? _.cid?.split('_')[1] : _.parentId?.split('_')[1] || null;
+            setCurPath(`${folderId}`);
           }}
           onSelect={(selectedKeys, { node, selectedNodes }) => {
-            if (node.type !== 'FOLDER') {
-              onViewTree(node);
-            }
+            const _: any = node;
+            _.type !== 'FOLDER' && onViewTree(node);
           }}
         />
       </Dropdown>

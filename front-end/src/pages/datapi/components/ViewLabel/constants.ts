@@ -10,7 +10,16 @@ export const LabelTagMap = {
 export const LabelRequiredMap = { 0: '否', 1: '是' };
 export const ExLabelTag = ['ENUM_VALUE_LABEL', 'ATTRIBUTE_LABEL'];
 export const ExLabelTagTitle = { ENUM_VALUE_LABEL: '枚举值', ATTRIBUTE_LABEL: '属性值' };
-export const initialColumns = [
+export const InitialColumns = [
   { title: '枚举值', dataIndex: 'enumValue', key: 'enumValue' },
-  { title: '父级枚举值', dataIndex: 'parentValue', key: 'parentValue' },
+  {
+    title: '父级枚举值',
+    dataIndex: 'parentValue',
+    key: 'parentValue',
+    render: (_: any) => _ || '-',
+  },
 ];
+export const AttributeTypeMap = {
+  STRING: '文本',
+  BOOLEAN: '布尔',
+};

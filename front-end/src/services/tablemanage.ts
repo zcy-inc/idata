@@ -67,6 +67,14 @@ export async function getTableReferTbs(params: { labelValue: string }) {
 export async function getTableReferStr(params: { tableId: string }) {
   return request(`/api/p1/dev/columnInfos/${params.tableId}`, { method: 'GET', params });
 }
+// 表 数仓所属人
+export async function getDWOwner() {
+  return request('/api/p1/uac/users', { method: 'GET' });
+}
+// 表 查看
+export async function getTable(params: { tableId: any }) {
+  return request(`/api/p1/dev/tableInfo/${params.tableId}`, { method: 'GET', params });
+}
 // 表 获取关系预览图
 export async function getTableRelations(params: { tableId: string }) {
   return request('/api/p0/dev/tableRelations', { method: 'GET', params });
@@ -74,8 +82,4 @@ export async function getTableRelations(params: { tableId: string }) {
 // 表 删除
 export async function delTable(data: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${data.tableId}`, { method: 'DELETE', data });
-}
-// 表 查看
-export async function getTable(params: { tableId: any }) {
-  return request(`/api/p1/dev/tableInfo/${params.tableId}`, { method: 'GET', params });
 }

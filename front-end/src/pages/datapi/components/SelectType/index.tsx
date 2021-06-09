@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
 import { getEnumNames } from '@/services/tablemanage';
+import { isEnumType } from '../../utils';
 
 interface SelectTypeProps {
   value?: string;
@@ -24,8 +25,6 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
     isEnumType(value) ? getNames() : setEnum(value);
   }, []);
 
-  const isEnumType = (v: any) => v !== 'STRING' && v !== 'BOOLEAN';
-
   const getNames = () =>
     getEnumNames()
       .then((res) => {
@@ -33,7 +32,7 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
         const ops = data.map((_: any) => ({ label: _.enumName, value: _.enumCode }));
         setEnum('ENUM');
         setEnumOps(ops);
-        onEnumValueChange(value.length === 10 ? value : ops[0]?.value);
+        onEnumValueChange(isEnumType(value) ? value : ops[0]?.value);
       })
       .catch((err) => {});
 
@@ -63,9 +62,9 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
         value={_enum}
         onChange={onEnumChange}
         options={enumOptions}
-        style={{ width: value.length === 10 ? '50%' : '100%' }}
+        style={{ width: isEnumType(value) ? '50%' : '100%' }}
       />
-      {value.length === 10 && (
+      {isEnumType(value) && (
         <Select
           key="enumValue"
           disabled={disabled}

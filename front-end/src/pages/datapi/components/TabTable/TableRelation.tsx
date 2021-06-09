@@ -19,8 +19,8 @@ const handleDataTransform = (tables: any[], tedges: any[]) => {
     ...node,
     id: `${node.dbName}.${node.tblName}`,
     key: node.dbName,
-    attrs: node.columns.map((_: any) => ({ ..._, key: _.colName })),
-    label: node.dbName,
+    attrs: node.columnInfos.map((_: any) => ({ ..._, key: _.colName })),
+    label: `${node.key}.${node.tableComment}`,
   }));
   const edges = tedges.map((edge) => ({
     ...edge,
@@ -259,8 +259,8 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             fill: '#eee',
             radius: [0, 0, boxStyle.radius, boxStyle.radius],
             cursor: 'pointer',
-            draggable: true,
           },
+          draggable: true,
           name: collapsed ? 'expand' : 'collapse',
         });
         // 绘制收起展开行的文本
@@ -274,6 +274,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             radius: [0, 0, boxStyle.radius, boxStyle.radius],
             cursor: 'pointer',
           },
+          draggable: true,
           name: collapsed ? 'expand' : 'collapse',
         });
         // 绘制收起展开行的 边框 ？
@@ -390,6 +391,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
                 fontWeight: isSelected ? 500 : 100,
                 cursor: 'pointer',
               },
+              draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
           });

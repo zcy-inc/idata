@@ -7,7 +7,7 @@ import styles from '../../tablemanage/index.less';
 import ViewEnum from './ViewEnum';
 import EditEnum from './EditEnum';
 import { createEnum, delEnum, getEnum } from '@/services/tablemanage';
-import { initialColumns } from './constants';
+import { isEnumType } from '../../utils';
 
 export interface TabEnumProps {
   initialMode: 'view' | 'edit';
@@ -20,8 +20,6 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   const [form] = Form.useForm();
 
   const [data, setData] = useState<any>({});
-  const [columns, setColumns] = useState<any[]>(initialColumns);
-  const [dataSource, setDateSource] = useState<any[]>([]);
 
   const { getTree, onRemovePane, replacePaneKey } = useModel('tabalmanage', (ret) => ({
     getTree: ret.getTree,
@@ -37,34 +35,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   const getEnumInfo = (enumCode: string) => {
     getEnum({ enumCode })
       .then((res) => {
-        const enumValues = Array.isArray(res.data.enumValues) ? res.data.enumValues : [];
-        const attrs = Array.isArray(enumValues[0]?.enumAttributes)
-          ? enumValues[0]?.enumAttributes
-          : [];
-        // 格式化枚举参数生成的列
-        const exCols = attrs.map((_: any) => ({
-          title: _.attributeKey,
-          dataIndex: _.attributeType.endsWith('ENUM')
-            ? [_.attributeKey, 'value']
-            : [_.attributeKey, 'code'],
-          key: _.attributeKey,
-          type: _.attributeType.endsWith('ENUM') ? _.attributeType.split(':')[0] : _.attributeType,
-        }));
-        // 格式化dataSource
-        const dt = enumValues.map((_: any) => {
-          const tmp = {
-            enumValue: { value: _.enumValue, code: _.valueCode },
-            parentValue: _.parentValue,
-          };
-          _.enumAttributes.forEach(
-            (_enum: any) =>
-              (tmp[_enum.attributeKey] = { value: _enum.enumValue, code: _enum.attributeValue }),
-          );
-          return tmp;
-        });
         setData(res.data);
-        setColumns(initialColumns.concat(exCols));
-        setDateSource(dt);
       })
       .catch((err) => {});
   };
@@ -82,7 +53,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
           parentCode: _.parentCode,
           enumAttributes: values.enumValues.columns.map((col: any) => ({
             attributeKey: col.title,
-            attributeType: col.type.length === 10 ? `${col.type}:ENUM` : col.type,
+            attributeType: isEnumType(col.type) ? `${col.type}:ENUM` : col.type,
             attributeValue: _[col.title],
           })),
         })),
@@ -117,13 +88,8 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewEnum info={{ data, columns, dataSource }} />}
-      {mode === 'edit' && (
-        <EditEnum
-          form={form}
-          initialValue={fileCode === 'newEnum' ? undefined : { data, columns, dataSource }}
-        />
-      )}
+      {mode === 'view' && <ViewEnum data={data} />}
+      {mode === 'edit' && <EditEnum form={form} data={fileCode === 'newEnum' ? undefined : data} />}
       <div className={styles.submit}>
         {mode === 'view' && [
           <Button key="edit" type="primary" onClick={() => setMode('edit')}>
@@ -147,8 +113,12 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
           <Button
             key="cancel"
             onClick={() => {
-              setMode('view');
-              getEnumInfo(fileCode);
+              if (fileCode === 'newEnum') {
+                onRemovePane('newEnum');
+              } else {
+                setMode('view');
+                getEnumInfo(fileCode);
+              }
             }}
           >
             取消

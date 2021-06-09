@@ -5,15 +5,15 @@ import ProForm, {
   ProFormSelect,
   ProFormCheckbox,
 } from '@ant-design/pro-form';
-import { Checkbox, Popover } from 'antd';
+import { Checkbox, Popover, Tooltip, Typography } from 'antd';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../Title';
-import { initialLabel } from './constants';
-import { getTableLabels } from '@/services/tablemanage';
+import { InitialLabel } from './constants';
+import { getTableLabels, getDWOwner } from '@/services/tablemanage';
 
 export type EnumValueType = { enumValue: string; valueCode: string };
 export interface LabelProps {
@@ -25,13 +25,23 @@ export interface LabelProps {
   [key: string]: any;
 }
 export interface TableLabelsProps {
-  refs: FormInstance;
+  form: FormInstance;
+  initial: any;
 }
 
 const CheckboxGroup = Checkbox.Group;
+const { Text } = Typography;
 const rules = [{ required: true, message: '必填' }];
 
-const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
+const FormLabel: FC = ({ children }) => {
+  return (
+    <Tooltip title={children}>
+      <Text ellipsis>{children}</Text>
+    </Tooltip>
+  );
+};
+
+const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
   const [checkedList, setCheckedList] = useState<string[]>([]);
   const [allChecked, setAllChecked] = useState(true); // 是否全选
   const [indeterminate, setIndeterminate] = useState(false); // 一个样式
@@ -42,33 +52,50 @@ const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
 
   useEffect(() => {
     getTableLabels({ subjectType: 'TABLE' }).then((res) => {
-      const map = new Map(); // 快速检索用的map, [labelCode, _]
-      const list: string[] = []; // 选中的checkedlist, labelCode[]
-      // ops, 用以渲染checklist.group
-      const ops = [initialLabel, ...res.data].map((_: LabelProps) => {
-        const tmp: any = {
-          ..._,
-          label: _.labelName,
-          value: _.labelCode,
-          disabled: _.labelRequired,
-        };
-        // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
-        if (_.labelTag !== 'ATTRIBUTE_LABEL') {
-          if (_.labelParamType?.endsWith('ENUM')) {
-            // TODO 数仓所属人的ops需要单独调取接口
-            tmp.enums = _.enumValues.map((item: any) => ({
-              label: item.enumValue,
-              value: item.valueCode,
-            }));
+      getDWOwner()
+        .then((owners) => {
+          const map = new Map(); // 快速检索用的map, [labelCode, _]
+          const list: string[] = []; // 选中的checkedlist, labelCode[]
+          // ops, 用以渲染checklist.group
+          const ops = [InitialLabel, ...res.data].map((_: LabelProps) => {
+            const tmp: any = {
+              ..._,
+              label: _.labelName,
+              value: _.labelCode,
+              disabled: _.labelRequired,
+            };
+            // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
+            if (_.labelTag !== 'ATTRIBUTE_LABEL') {
+              if (_.labelCode === 'dwOwnerId') {
+                tmp.enums = owners.data.content.map((_: any) => ({
+                  label: _.nickname,
+                  value: _.id,
+                }));
+              }
+              if (_.labelParamType?.endsWith('ENUM')) {
+                tmp.enums = _.enumValues.map((item: any) => ({
+                  label: item.enumValue,
+                  value: item.valueCode,
+                }));
+              }
+            }
+            map.set(_.labelCode, tmp);
+            list.push(_.labelCode);
+            return tmp;
+          });
+
+          if (initial) {
+            const tableLabels = initial.tableLabels;
+            const initialValue = { tableName: initial.tableName };
+            tableLabels.forEach((_: any) => (initialValue[_.labelCode] = _.labelParamValue));
+            form.setFieldsValue(initialValue);
           }
-        }
-        map.set(_.labelCode, tmp);
-        list.push(_.labelCode);
-        return tmp;
-      });
-      setLabelsMap(map);
-      setCheckedList(list);
-      setLabels(ops);
+
+          setLabelsMap(map);
+          setCheckedList(list);
+          setLabels(ops);
+        })
+        .catch((err) => []);
     });
   }, []);
 
@@ -97,7 +124,7 @@ const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
             <ProFormText
               key={_.value}
               name={_.labelCode}
-              label={_.labelName}
+              label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               placeholder="请输入"
@@ -108,21 +135,22 @@ const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
             <ProFormRadio.Group
               key={_.value}
               name={_.labelCode}
-              label={_.labelName}
+              label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               options={[
-                { label: '是', value: true },
-                { label: '否', value: false },
+                { label: '是', value: 'true' },
+                { label: '否', value: 'false' },
               ]}
             />
           );
         case 'ENUM_VALUE_LABEL':
+        case 'USER_LABEL':
           return (
             <ProFormSelect
               key={_.value}
               name={_.labelCode}
-              label={_.labelName}
+              label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               options={_.enums}
@@ -134,7 +162,7 @@ const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
             <ProFormCheckbox.Group
               key={_.value}
               name={_.labelCode}
-              label={_.labelName}
+              label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
               options={[{ label: null, value: _.labelCode }]}
             />
@@ -176,7 +204,7 @@ const TableLabels: FC<TableLabelsProps> = ({ refs }) => {
         className={`${styles.reset} ${styles['reset-inline']}`}
         layout="inline"
         colon={false}
-        form={refs}
+        form={form}
         submitter={false}
       >
         {renderFormList()}

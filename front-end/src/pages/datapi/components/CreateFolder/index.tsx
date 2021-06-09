@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form';
+import { message } from 'antd';
+import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
 
 import { createFolder, getFolders } from '@/services/tablemanage';
-import { message } from 'antd';
 
 export interface CreateFolderProps {
   visible: boolean;
@@ -16,10 +17,14 @@ const rules = [{ required: true, message: '必填' }];
 const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   const [folders, setFolders] = useState<any[]>([]);
 
+  const { curPath } = useModel('tabalmanage', (ret) => ({
+    curPath: ret.curPath,
+  }));
+
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -51,7 +56,13 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       }}
     >
       <ProFormText name="folderName" label="文件夹名称" rules={rules} placeholder="请输入名称" />
-      <ProFormSelect name="parentId" label="位置" placeholder="根目录" options={folders} />
+      <ProFormSelect
+        name="parentId"
+        label="位置"
+        placeholder="根目录"
+        options={folders}
+        initialValue={curPath}
+      />
     </ModalForm>
   );
 };

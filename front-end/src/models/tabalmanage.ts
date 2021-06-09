@@ -22,6 +22,7 @@ const newTable = {
 };
 
 export default () => {
+  const [curPath, setCurPath] = useState<any>();
   const [tree, setTree] = useState([]);
   const [panes, setPanes] = useState<IPane[]>([]);
   const [activeKey, setActiveKey] = useState('');
@@ -34,7 +35,6 @@ export default () => {
       setTree(res.data);
     });
   };
-  // 生成树的平铺数组, 用以检索
   // 切换Tab
   const onChangeTab = useCallback((key) => setActiveKey(key), [panes]);
   // 新建枚举
@@ -50,7 +50,6 @@ export default () => {
   // 点击树节点联动工作区新增tab
   const onViewTree = useCallback(
     (node) => {
-      console.log(node);
       const { cid, name, fileCode, type } = node;
       if (!panes.some((_) => _.key === cid)) {
         setPanes([...panes, { key: cid, title: name, code: fileCode, type, mode: 'view' }]);
@@ -93,6 +92,8 @@ export default () => {
   };
 
   return {
+    curPath,
+    setCurPath,
     tree,
     getTree,
     panes,

@@ -12,8 +12,10 @@ import {
   LabelRequiredMap,
   ExLabelTag,
   ExLabelTagTitle,
-  initialColumns,
+  InitialColumns,
+  AttributeTypeMap,
 } from './constants';
+import { isEnumType } from '../../utils';
 
 export interface ViewLabelProps {
   fileCode: string;
@@ -23,7 +25,7 @@ const { Item } = Descriptions;
 
 const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
   const [data, setData] = useState<any>({});
-  const [columns, setColumns] = useState<any[]>(initialColumns);
+  const [columns, setColumns] = useState<any[]>(InitialColumns);
   const [dataSource, setDateSource] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +64,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
           });
           return tmp;
         });
-        setColumns(initialColumns.concat(exCols));
+        setColumns(InitialColumns.concat(exCols));
         setDateSource(data); // TODO 缺少parentValue
       })
       .catch((err) => {});
@@ -72,8 +74,17 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
   const renderAttribute = (res: any) => {
     const cols = [
       { title: '名称', dataIndex: 'attributeKey', key: 'attributeKey' },
-      { title: '类型', dataIndex: 'enumName', key: 'enumName' },
-      { title: '内容', dataIndex: 'enumValue', key: 'enumValue' },
+      {
+        title: '类型',
+        key: 'attributeType',
+        render: (_: any) =>
+          isEnumType(_.attributeType) ? _.enumName : AttributeTypeMap[_.attributeType],
+      },
+      {
+        title: '内容',
+        key: 'enumValue',
+        render: (_: any) => (isEnumType(_.attributeType) ? _.enumValue : _.attributeValue),
+      },
     ];
     const attrs = Array.isArray(res.data.labelAttributes) ? res.data.labelAttributes : [];
     setColumns(cols);
@@ -106,7 +117,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
         <Descriptions colon={false} labelStyle={{ color: '#8A8FAE' }} layout="vertical">
           <Item label={ExLabelTagTitle[data.labelTag]} contentStyle={{ display: 'block' }}>
             <Table
-              rowKey="attributeKey"
+              rowKey={(_) => _.id || _.attributeKey}
               columns={columns}
               dataSource={dataSource}
               pagination={false}

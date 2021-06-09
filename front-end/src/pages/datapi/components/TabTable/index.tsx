@@ -6,7 +6,7 @@ import styles from '../../tablemanage/index.less';
 
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';
-import { createTable, delTable, getTable } from '@/services/tablemanage';
+import { createTable, delTable, getTable, getTableRelations } from '@/services/tablemanage';
 
 export interface TabTableProps {
   initialMode: 'view' | 'edit';
@@ -46,6 +46,9 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
         setData(res.data);
       })
       .catch((err) => {});
+    getTableRelations({ tableId })
+      .then((res) => {})
+      .catch((err) => {});
   };
 
   const onSubmit = () => {
@@ -77,21 +80,23 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
             columnInfos: columnInfos.map((_: any, i: number) => {
               const columnLabels = [];
               for (let key of Object.keys(_)) {
-                if (key !== 'id' && key !== 'stringName' && _[key] !== null) {
+                if (key !== 'id' && key !== 'columnName' && _[key] !== null) {
                   columnLabels.push({
-                    columnName: _.stringName,
+                    columnName: _.columnName,
                     labelCode: key,
                     labelParamValue: _[key],
                   });
                 }
               }
-              return { columnIndex: i, columnName: _.stringName, columnLabels };
+              return { columnIndex: i, columnName: _.columnName, columnLabels };
             }),
             foreignKeys: foreignKeys.map((_: any) => {
               return {
-                ..._,
                 columnNames: _.columnNames.join(','),
+                referDbName: _.referDbName,
+                referTableId: _.referTableId,
                 referColumnNames: _.referColumnNames.join(','),
+                erType: _.erType,
               };
             }),
           };
@@ -101,6 +106,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
                 message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
                 setMode('view');
                 getTableInfo(res.data.id);
+                getTree('TABLE');
               }
             })
             .catch((err) => {})
@@ -124,7 +130,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewTable info={{ data }} />}
+      {mode === 'view' && <ViewTable data={data} />}
       {mode === 'edit' && (
         <EditTable
           ref={refTable}
@@ -152,7 +158,19 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
             保存
           </Button>,
-          <Button key="cancel">取消</Button>,
+          <Button
+            key="cancel"
+            onClick={() => {
+              if (fileCode === 'newTable') {
+                onRemovePane('newTable');
+              } else {
+                setMode('view');
+                getTableInfo(fileCode);
+              }
+            }}
+          >
+            取消
+          </Button>,
         ]}
       </div>
     </Fragment>

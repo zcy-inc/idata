@@ -1,13 +1,13 @@
-export const initialLabel = {
+export const InitialLabel = {
   labelName: '表名称',
   labelCode: 'tableName',
   labelRequired: 1,
   labelTag: 'STRING_LABEL',
 };
 
-export const initialColumn = {
+export const InitialColumn = {
   labelName: '字段英文名',
-  labelCode: 'stringName',
+  labelCode: 'columnName',
   labelRequired: 1,
   labelTag: 'STRING_LABEL',
 };
@@ -19,6 +19,6 @@ export const EROPs = [
   { label: 'M:N', value: 'M2N' },
 ];
 
-export const initialColumnView = [
+export const ViewInitialColumns = [
   { title: '字段英文名', dataIndex: 'columnName', key: 'columnName' },
 ];

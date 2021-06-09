@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormText, ProFormSelect } from '@ant-design/pro-form';
+import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
@@ -9,18 +10,22 @@ import { getFolders } from '@/services/tablemanage';
 
 export interface EditEnumProps {
   form: FormInstance;
-  initialValue?: { data: any; columns: any[]; dataSource: any[] };
+  data?: any;
 }
 
 const rules = [{ required: true, message: '必填' }];
 
-const EditEnum: FC<EditEnumProps> = ({ form, initialValue }) => {
+const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   const [folders, setFolders] = useState<any[]>([]);
+
+  const { curPath } = useModel('tabalmanage', (ret) => ({
+    curPath: ret.curPath,
+  }));
 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -40,7 +45,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, initialValue }) => {
         width="md"
         placeholder="请输入"
         rules={rules}
-        initialValue={initialValue?.data.enumName}
+        initialValue={data?.enumName}
       />
       <ProForm.Item
         label="枚举值"
@@ -53,7 +58,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, initialValue }) => {
         {/* 虽然确实卸载了这个组件, 但是不知道为什么value值仍然生效 */}
         {/* initialValue和value、onChange一样是内部已存在的属性名, 受控于内部逻辑 */}
         {/* 所以这里使用额外的属性initial来传递view模式下的初始值 */}
-        <EnumTable initial={initialValue} />
+        <EnumTable initial={data} />
       </ProForm.Item>
       <ProFormSelect
         name="folderId"
@@ -61,7 +66,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, initialValue }) => {
         width="md"
         placeholder="根目录"
         options={folders}
-        initialValue={initialValue?.data.folderId}
+        initialValue={data?.folderId.toString() || curPath}
       />
     </ProForm>
   );

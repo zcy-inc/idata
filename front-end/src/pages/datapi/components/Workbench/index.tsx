@@ -27,7 +27,7 @@ const Workbench: FC = ({}) => {
       activeKey={activeKey}
       onEdit={(key, action) => action === 'remove' && onRemovePane(key)}
       tabBarGutter={0}
-      tabBarStyle={{ background: '#f1f3f9' }}
+      tabBarStyle={{ background: '#f0f2f5' }}
       hideAdd
     >
       {panes.map((pane) => {

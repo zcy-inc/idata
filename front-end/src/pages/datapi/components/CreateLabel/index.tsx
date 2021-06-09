@@ -18,7 +18,6 @@ import {
   EditorBoolOps,
   initialEnumTypeCols,
 } from './constants';
-
 import {
   createTag,
   getEnumNames,
@@ -26,6 +25,7 @@ import {
   getFolders,
   getLabel,
 } from '@/services/tablemanage';
+import { isEnumType } from '../../utils';
 
 export interface CreateTagProps {
   visible: boolean;
@@ -47,7 +47,8 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
   // edit mode
   const [form] = Form.useForm();
 
-  const { getTree, hideLabel, curLabel } = useModel('tabalmanage', (ret) => ({
+  const { curPath, getTree, hideLabel, curLabel } = useModel('tabalmanage', (ret) => ({
+    curPath: ret.curPath,
     getTree: ret.getTree,
     hideLabel: ret.hideLabel,
     curLabel: ret.curLabel,
@@ -63,7 +64,7 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
       renderFormItem: (schema: any) => (
         <SelectType
           onChange={(value) => {
-            if (value.length === 10) {
+            if (isEnumType(value)) {
               getEnumValues({ enumCode: value })
                 .then((res) => {
                   const data = Array.isArray(res.data) ? res.data : [];
@@ -103,11 +104,11 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
   }, []);
 
   useEffect(() => {
-    !!curLabel && getLabelInfo();
+    !!curLabel && getLabelInfo(curLabel);
   }, [curLabel]);
 
-  const getLabelInfo = () => {
-    getLabel({ labelCode: curLabel })
+  const getLabelInfo = (labelCode: string) => {
+    getLabel({ labelCode })
       .then((res) => {
         const _ = res.data;
         let values = {
@@ -116,7 +117,7 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
           subjectType: _.subjectType,
           labelRequired: _.labelRequired,
           labelIndex: _.labelIndex,
-          folderId: _.folderId,
+          folderId: _.folderId || curPath,
         };
         if (_.labelTag === 'ENUM_VALUE_LABEL') {
           const enumCode = _.labelParamType.split(':')[0];
@@ -125,13 +126,14 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
           onChangeEnumTypeOps(enumCode);
         }
         if (_.labelTag === 'ATTRIBUTE_LABEL') {
-          const labelAttributes = _.labelAttributes.map((item: any) => ({
+          const labelAttributes = _.labelAttributes.map((item: any, i: number) => ({
             ...item,
-            id: Date.now(),
-            attributeType: item.attributeType.endsWith('ENUM')
+            id: i,
+            attributeType: isEnumType(item.attributeType)
               ? item.attributeType.split(':')[0]
               : item.attributeType,
           }));
+
           Object.assign(values, { labelAttributes });
           setEditableRowKeys(labelAttributes.map((item: any) => item.id));
           onChangeLableTag('ATTRIBUTE_LABEL');
@@ -161,7 +163,12 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
         // 处理列
         const cols: ProColumns[] = [
           { title: '枚举值', dataIndex: 'enumValue', key: 'enumValue' },
-          { title: '父级枚举值', dataIndex: 'parentValue', key: 'parentValue' },
+          {
+            title: '父级枚举值',
+            dataIndex: 'parentValue',
+            key: 'parentValue',
+            render: (_) => _ || '-',
+          },
         ];
         const exCols = Array.isArray(data[0]?.enumAttributes) ? data[0]?.enumAttributes : [];
         exCols.forEach((_: any) => {
@@ -200,7 +207,9 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
           labelParamType: TagToParamMap[values.labelTag],
           labelAttributes: values.labelAttributes?.map((_: any) => ({
             ..._,
-            attributeType: `${_.attributeType}:ENUM`,
+            attributeType: isEnumType(_.attributeType)
+              ? `${_.attributeType}:ENUM`
+              : _.attributeType,
           })),
         };
         if (values.enumCode) params.labelParamType = `${values.enumCode}:ENUM`;
@@ -211,7 +220,7 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
               message.success(curLabel ? '修改标签成功' : '新建标签成功');
               hideLabel();
               getTree('LABEL');
-              getLabelInfo();
+              getLabelInfo(res.data.labelCode);
             }
           })
           .catch((err) => message.error('新建标签失败'))

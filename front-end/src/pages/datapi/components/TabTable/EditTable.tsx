@@ -10,7 +10,7 @@ import IconFont from '@/components/IconFont';
 import TableLabels from './TableLabels';
 import TableRelation from './TableRelation';
 import Title from '../Title';
-import { initialColumn, EROPs } from './constants';
+import { InitialColumn, EROPs } from './constants';
 
 import {
   getTableLabels,
@@ -46,28 +46,20 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
   const [fkData, setFkData] = useState<any[]>([]);
   const [fkKeys, setFkKeys] = useState<React.Key[]>([]);
   const [dbs, setDbs] = useState<any[]>([]);
-  const [tbs, setTbs] = useState<any[]>([]);
-  const [str, setStr] = useState<any[]>([]);
+  const [tbs, setTbs] = useState<any[][]>([]);
+  const [str, setStr] = useState<any[][]>([]);
 
-  useImperativeHandle(ref, () => ({
-    structData,
-    fkData,
-  }));
+  useImperativeHandle(ref, () => ({ structData, fkData }));
 
   useEffect(() => {
     getTableLabels({ subjectType: 'COLUMN' }).then((res) => {
       const map = new Map(); // 检索用的map
       const list: string[] = []; // checked list
       // check.group 用的ops
-      const ops = [initialColumn, ...res.data]
+      const ops = [InitialColumn, ...res.data]
         .filter((_: any) => _.labelTag !== 'ATTRIBUTE_LABEL')
         .map((_: any) => {
-          const tmp = {
-            ..._,
-            label: _.labelName,
-            value: _.labelCode,
-            disabled: _.labelRequired,
-          };
+          const tmp = { ..._, label: _.labelName, value: _.labelCode, disabled: _.labelRequired };
           if (_.labelTag === 'ENUM_VALUE_LABEL') {
             tmp.enums = _.enumValues.map((item: any) => ({
               label: item.enumValue,
@@ -92,6 +84,60 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       })
       .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    console.log(initial);
+    if (initial) {
+      const columnsInfo = initial.columnInfos;
+      const kc: React.Key[] = [];
+      const dtc = columnsInfo.map((_: any) => {
+        const t = { id: _.createTime, columnName: _.columnName };
+        _.columnLabels.forEach((l: any) => {
+          let v = l.labelParamValue;
+          l.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true' ? true : false);
+          t[l.labelCode] = v;
+        });
+        kc.push(_.createTime);
+        return t;
+      });
+      setStructData(dtc);
+      setStructKeys(kc);
+
+      const foreignKeys = initial.foreignKeys;
+      const promisesT: Promise<any>[] = [];
+      const promisesC: Promise<any>[] = [];
+      const kf: React.Key[] = [];
+      const dtf = foreignKeys.map((_: any, i: number) => {
+        console.log({ _ });
+
+        kf.push(_.createTime);
+        // promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
+        // promisesC[i] = getTableReferStr({ tableId: _.referTableId });
+        return {
+          id: _.createTime,
+          columnNames: _.columnNames.split(','),
+          referDbName: _.referDbName,
+          referTableId: _.referTableId,
+          referColumnNames: _.referColumnNames.split(','),
+          erType: _.erType,
+        };
+      });
+      // Promise.all(promisesT).then((resT) => {
+      //   Promise.all(promisesC).then((resC) => {
+      //     resT.forEach((_T: any, i: number) => {
+      //       tbs[i] = _T.data.map((_: any) => ({ label: _.tableName, value: _.id }));
+      //     });
+      //     resC.forEach((_C: any, i: number) => {
+      //       str[i] = _C.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+      //     });
+      //     setTbs([...tbs]);
+      //     setStr([...str]);
+      //   });
+      // });
+      // setFkData(dtf);
+      // setFkKeys(kf);
+    }
+  }, [initial]);
 
   // 单选
   const onCheck = (list: any[]) => {
@@ -134,16 +180,18 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       if (schema.dataIndex === 'referDbName') {
         getTableReferTbs({ labelValue: value })
           .then((res) => {
-            const tbs = res.data.map((_: any) => ({ label: _.tableName, value: _.id }));
-            setTbs(tbs);
+            const tmp = res.data.map((_: any) => ({ label: _.tableName, value: _.id }));
+            tbs[schema.index] = tmp;
+            setTbs([...tbs]);
           })
           .catch((err) => {});
       }
       if (schema.dataIndex === 'referTableId') {
         getTableReferStr({ tableId: value })
           .then((res) => {
-            const str = res.data.map((_: any) => ({ label: _.columnName, value: _.id }));
-            setStr(str);
+            const tmp = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+            str[schema.index] = tmp;
+            setStr([...str]);
           })
           .catch((err) => {});
       }
@@ -257,11 +305,11 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       key: 'referTableId',
       valueType: 'select',
       width: 200,
-      renderFormItem: (schema) => (
+      renderFormItem: (schema: any) => (
         <Select
           allowClear
           placeholder="请选择"
-          options={tbs}
+          options={tbs[schema.index]}
           onChange={(value) => setValue(schema, value, 'fk')}
         />
       ),
@@ -271,13 +319,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       dataIndex: 'referColumnNames',
       key: 'referColumnNames',
       width: 200,
-      renderFormItem: (schema) => (
+      renderFormItem: (schema: any) => (
         <Select
           mode="multiple"
           allowClear
           placeholder="请选择"
           maxTagCount="responsive"
-          options={str}
+          options={str[schema.index]}
           onChange={(value) => setValue(schema, value, 'fk')}
         />
       ),
@@ -310,13 +358,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
 
   return (
     <Fragment>
-      <TableLabels refs={refs.label} />
+      <TableLabels form={refs.label} initial={initial} />
       <Tabs
         className={`${styles.reset} ${styles['reset-tabs']}`}
         defaultActiveKey="struct"
         onChange={(key) => {
-          // 切换到外键的时候，保存表结构字段，生成Select的ops
           if (key === 'fk') {
+            // 切换到外键的时候，保存表结构字段，生成Select的ops
             const dataIndex = columns[0].labelCode;
             const ops = structData.map((_) => ({ label: _[dataIndex], value: _[dataIndex] }));
             setStrOps(ops);
@@ -421,8 +469,8 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
             <IconFont type="icon-tianjia" />
             添加外键
           </Link>
-          <Title>关系图预览</Title>
-          {/* <TableRelation id={1} /> */}
+          {/* <Title>关系图预览</Title>
+          <TableRelation id={1} /> */}
         </TabPane>
       </Tabs>
     </Fragment>

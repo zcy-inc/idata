@@ -3,18 +3,18 @@ import { Descriptions, Table, Tabs } from 'antd';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
 
-import { initialColumnView } from './constants';
+import { ViewInitialColumns } from './constants';
 import Title from '../Title';
 import TableRelation from './TableRelation';
 
 export interface ViewTableProps {
-  info: { data: any };
+  data: any;
 }
 
 const { Item } = Descriptions;
 const { TabPane } = Tabs;
 
-const ViewTable: FC<ViewTableProps> = ({ info: { data } }) => {
+const ViewTable: FC<ViewTableProps> = ({ data }) => {
   const [columns, setColumns] = useState<any[]>([]);
   const [dataSource, setDataSource] = useState<any[]>([]);
 
@@ -32,7 +32,7 @@ const ViewTable: FC<ViewTableProps> = ({ info: { data } }) => {
         _.columnLabels.forEach((item: any) => (tmp[item.labelCode] = transformLabelValue(item)));
         return tmp;
       });
-      setColumns(initialColumnView.concat(exCols));
+      setColumns(ViewInitialColumns.concat(exCols));
       setDataSource(dt);
     }
   }, [data]);
@@ -63,7 +63,7 @@ const ViewTable: FC<ViewTableProps> = ({ info: { data } }) => {
       <Tabs className={`${styles.reset} ${styles['reset-tabs']}`}>
         <TabPane key="struct" tab="表结构设计" style={{ paddingTop: 24 }}>
           <Table
-            rowKey="id"
+            rowKey="columnName"
             columns={columns}
             dataSource={dataSource}
             pagination={false}

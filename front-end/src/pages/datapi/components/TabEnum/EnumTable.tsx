@@ -8,9 +8,10 @@ import IconFont from '@/components/IconFont';
 import SelectType from '../SelectType';
 import { getRandomStr } from '@/utils/utils';
 import { getEnumNames, getEnumValues } from '@/services/tablemanage';
+import { isEnumType } from '../../utils';
 
 export interface EnumTableProps {
-  initial?: { data: any; columns: any[]; dataSource: any[] };
+  initial?: any;
   onChange?: (value: any) => void;
 }
 
@@ -27,40 +28,48 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
 
   useEffect(() => {
     if (initial) {
-      const cols = [...initial?.columns] || [];
-      cols.splice(0, 2); // 去掉前两列[枚举值, 父级枚举值]
-      // 对参数类型是枚举的列, 需要获取其code对应的names
-      const promises: Promise<any>[] = [];
-      cols.forEach((_: any, i: number) => {
-        _.type.length === 10 && (promises[i] = getEnumNames({ enumCode: _.type }));
-        cols[i].dataIndex = _.dataIndex[0];
+      const enumValues = Array.isArray(initial.enumValues) ? initial.enumValues : []; // 传入的datsSource
+      const attrs = Array.isArray(enumValues[0]?.enumAttributes)
+        ? enumValues[0]?.enumAttributes
+        : []; // datsSource第一项的enumAttributes, 用以生成自定义参数的列
+      const pOps: any[] = []; // 存储父级枚举值
+      const promises: Promise<any>[] = []; // // 对参数类型是枚举的列, 需要使用getEnumNames获取列表
+      // 生成自定义参数的列
+      const exCols = attrs.map((_: any, i: number) => {
+        let type = _.attributeType;
+        if (isEnumType(_.attributeType)) {
+          type = _.attributeType.split(':')[0];
+          promises[i] = getEnumNames({ enumCode: type });
+        }
+        return { id: i, title: _.attributeKey, type };
       });
-      Promise.all([...promises]).then((res) => {
+      // 格式化datsSource
+      const dt = enumValues.map((_: any, i: number) => {
+        const tmp = {
+          enumValue: { code: _.valueCode, value: _.enumValue },
+          parentCode: _.parentCode,
+        };
+        _.enumAttributes.forEach((attr: any) => (tmp[attr.attributeKey] = attr.attributeValue));
+        pOps[i] = { label: _.enumValue, value: _.valueCode };
+
+        return tmp;
+      });
+      Promise.all(promises).then((res) => {
         res.forEach(
           (_: any, i: number) =>
             _ &&
-            (cols[i].enumValues = _.data.map((_enum: any) => ({
+            (exCols[i].enumValues = _.data.map((_enum: any) => ({
               label: _enum.enumValue,
               value: _enum.valueCode,
             }))),
         );
-
-        // TODO 更新时自定义列未更新
-        const dt = initial?.dataSource.map((_: any) => {
-          for (let [key, value] of Object.entries(_)) {
-            if (key !== 'enumValue' && key !== 'parentValue') {
-              _[key] = value.code;
-            }
-          }
-          return _;
-        });
-
-        setColumns(cols);
+        setColumns(exCols);
         setEnums(dt);
-        onChange?.({ columns: cols, enums: dt });
+        setParentOps(pOps);
+        onChange?.({ columns: exCols, enums: dt });
       });
     }
-  }, []);
+  }, [initial]);
 
   // 触发作为表单组件onChange事件
   const triggerChange = () => {
@@ -168,10 +177,8 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
                   style={{ width: 150 }}
                   value={_.type}
                   onChange={(type) => {
-                    console.log(type);
-
                     columns[i].type = type;
-                    if (type.length === 10) {
+                    if (isEnumType(type)) {
                       getEnumValues({ enumCode: type })
                         .then((res) => {
                           columns[i].enumValues = res.data.map((_: any) => ({
@@ -199,7 +206,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
         </div>
         {/* dataSource */}
         {enums.map((_, i) => (
-          <div key={_.id} className={styles.enum}>
+          <div key={_.id || i} className={styles.enum}>
             {/* 枚举值 */}
             <div className={styles['enum-cell']}>
               <Input
