@@ -18,8 +18,8 @@ package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
-import cn.zhengcaiyun.idata.dto.develop.label.EnumDto;
-import cn.zhengcaiyun.idata.dto.develop.label.EnumValueDto;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

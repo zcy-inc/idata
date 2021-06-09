@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.dto.develop.label;
+package cn.zhengcaiyun.idata.develop.dto.label;
 
 /**
  * @author caizhedong

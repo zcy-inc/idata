@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableRelationDto;
 
 /**
  * @author caizhedong

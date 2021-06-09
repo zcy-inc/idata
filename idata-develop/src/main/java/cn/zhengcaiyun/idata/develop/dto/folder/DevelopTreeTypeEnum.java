@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.dto.develop.folder;
+package cn.zhengcaiyun.idata.develop.dto.folder;
 
 /**
  * @author caizhedong

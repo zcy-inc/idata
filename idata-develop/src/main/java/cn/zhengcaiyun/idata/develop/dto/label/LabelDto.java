@@ -14,28 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.develop.label;
+package cn.zhengcaiyun.idata.develop.dto.label;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-18 19:03
+ * @date 2021-05-18 18:53
  */
-public class EnumValueDto {
+
+public class LabelDto {
     private Long id;
     private Integer del;
     private String creator;
     private Date createTime;
     private String editor;
     private Date editTime;
-    private String enumCode;
-    private String valueCode;
-    private String enumValue;
-    private List<AttributeDto> enumAttributes;
-    private String parentCode;
-    private String parentValue;
+    private String labelTag;
+    private String labelCode;
+    private String labelName;
+    private Long tableId;
+    private String columnName;
+    private String labelParamType;
+    private String labelParamValue;
+    // 枚举名称或者枚举值字面值
+    private String enumNameOrValue;
 
     // GaS
     public Long getId() {
@@ -86,51 +89,67 @@ public class EnumValueDto {
         this.editTime = editTime;
     }
 
-    public String getEnumCode() {
-        return enumCode;
+    public String getLabelTag() {
+        return labelTag;
     }
 
-    public void setEnumCode(String enumCode) {
-        this.enumCode = enumCode;
+    public void setLabelTag(String labelTag) {
+        this.labelTag = labelTag;
     }
 
-    public String getValueCode() {
-        return valueCode;
+    public String getLabelCode() {
+        return labelCode;
     }
 
-    public void setValueCode(String valueCode) {
-        this.valueCode = valueCode;
+    public void setLabelCode(String labelCode) {
+        this.labelCode = labelCode;
     }
 
-    public String getEnumValue() {
-        return enumValue;
+    public String getLabelName() {
+        return labelName;
     }
 
-    public void setEnumValue(String enumValue) {
-        this.enumValue = enumValue;
+    public void setLabelName(String labelName) {
+        this.labelName = labelName;
     }
 
-    public List<AttributeDto> getEnumAttributes() {
-        return enumAttributes;
+    public Long getTableId() {
+        return tableId;
     }
 
-    public void setEnumAttributes(List<AttributeDto> enumAttributes) {
-        this.enumAttributes = enumAttributes;
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
     }
 
-    public String getParentCode() {
-        return parentCode;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setParentCode(String parentCode) {
-        this.parentCode = parentCode;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
-    public String getParentValue() {
-        return parentValue;
+    public String getLabelParamType() {
+        return labelParamType;
     }
 
-    public void setParentValue(String parentValue) {
-        this.parentValue = parentValue;
+    public void setLabelParamType(String labelParamType) {
+        this.labelParamType = labelParamType;
+    }
+
+    public String getLabelParamValue() {
+        return labelParamValue;
+    }
+
+    public void setLabelParamValue(String labelParamValue) {
+        this.labelParamValue = labelParamValue;
+    }
+
+    public String getEnumNameOrValue() {
+        return enumNameOrValue;
+    }
+
+    public void setEnumNameOrValue(String enumNameOrValue) {
+        this.enumNameOrValue = enumNameOrValue;
     }
 }

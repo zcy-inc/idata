@@ -14,24 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.develop.folder;
+package cn.zhengcaiyun.idata.develop.dto.label;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-18 17:44
+ * @date 2021-05-18 19:03
  */
-
-public class DevelopFolderDto {
+public class EnumValueDto {
     private Long id;
     private Integer del;
     private String creator;
     private Date createTime;
     private String editor;
     private Date editTime;
-    private String folderName;
-    private Long parentId;
+    private String enumCode;
+    private String valueCode;
+    private String enumValue;
+    private List<AttributeDto> enumAttributes;
+    private String parentCode;
+    private String parentValue;
 
     // GaS
     public Long getId() {
@@ -82,20 +86,51 @@ public class DevelopFolderDto {
         this.editTime = editTime;
     }
 
-    public String getFolderName() {
-        return folderName;
+    public String getEnumCode() {
+        return enumCode;
     }
 
-    public void setFolderName(String folderName) {
-        this.folderName = folderName;
+    public void setEnumCode(String enumCode) {
+        this.enumCode = enumCode;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public String getValueCode() {
+        return valueCode;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setValueCode(String valueCode) {
+        this.valueCode = valueCode;
     }
 
+    public String getEnumValue() {
+        return enumValue;
+    }
+
+    public void setEnumValue(String enumValue) {
+        this.enumValue = enumValue;
+    }
+
+    public List<AttributeDto> getEnumAttributes() {
+        return enumAttributes;
+    }
+
+    public void setEnumAttributes(List<AttributeDto> enumAttributes) {
+        this.enumAttributes = enumAttributes;
+    }
+
+    public String getParentCode() {
+        return parentCode;
+    }
+
+    public void setParentCode(String parentCode) {
+        this.parentCode = parentCode;
+    }
+
+    public String getParentValue() {
+        return parentValue;
+    }
+
+    public void setParentValue(String parentValue) {
+        this.parentValue = parentValue;
+    }
 }

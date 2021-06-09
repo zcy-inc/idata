@@ -16,8 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.dal;
 
-import cn.zhengcaiyun.idata.dto.develop.label.AttributeDto;
-import cn.zhengcaiyun.idata.dto.develop.label.SpecialAttributeDto;
+import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
+import cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.ibatis.type.JdbcType;

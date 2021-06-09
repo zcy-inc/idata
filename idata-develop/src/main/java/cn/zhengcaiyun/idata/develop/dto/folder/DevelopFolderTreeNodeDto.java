@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.develop.folder;
+package cn.zhengcaiyun.idata.develop.dto.folder;
 
 import io.swagger.annotations.ApiModelProperty;
 

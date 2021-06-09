@@ -16,8 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
-import cn.zhengcaiyun.idata.dto.develop.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
 

@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.dao;
 
-import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

@@ -14,29 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.develop.table;
+package cn.zhengcaiyun.idata.develop.dto.label;
 
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
 
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-05-18 18:44
+ * @date 2021-05-18 18:58
  */
-
-public class ColumnInfoDto {
+public class EnumDto {
     private Long id;
     private Integer del;
     private String creator;
     private Date createTime;
     private String editor;
     private Date editTime;
-    private String columnName;
-    private Long tableId;
-    private Integer columnIndex;
-    private List<LabelDto> columnLabels;
+    private String enumCode;
+    private String enumName;
+    private Long folderId;
+    private List<EnumValueDto> enumValues;
 
     // GaS
     public Long getId() {
@@ -87,35 +85,35 @@ public class ColumnInfoDto {
         this.editTime = editTime;
     }
 
-    public String getColumnName() {
-        return columnName;
+    public String getEnumCode() {
+        return enumCode;
     }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    public void setEnumCode(String enumCode) {
+        this.enumCode = enumCode;
     }
 
-    public Long getTableId() {
-        return tableId;
+    public String getEnumName() {
+        return enumName;
     }
 
-    public void setTableId(Long tableId) {
-        this.tableId = tableId;
+    public void setEnumName(String enumName) {
+        this.enumName = enumName;
     }
 
-    public Integer getColumnIndex() {
-        return columnIndex;
+    public Long getFolderId() {
+        return folderId;
     }
 
-    public void setColumnIndex(Integer columnIndex) {
-        this.columnIndex = columnIndex;
+    public void setFolderId(Long folderId) {
+        this.folderId = folderId;
     }
 
-    public List<LabelDto> getColumnLabels() {
-        return columnLabels;
+    public List<EnumValueDto> getEnumValues() {
+        return enumValues;
     }
 
-    public void setColumnLabels(List<LabelDto> columnLabels) {
-        this.columnLabels = columnLabels;
+    public void setEnumValues(List<EnumValueDto> enumValues) {
+        this.enumValues = enumValues;
     }
 }

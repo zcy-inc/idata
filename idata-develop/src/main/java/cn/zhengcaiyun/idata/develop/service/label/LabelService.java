@@ -16,8 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDefineDto;
-import cn.zhengcaiyun.idata.dto.develop.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 
 import java.util.List;
 import java.util.Map;

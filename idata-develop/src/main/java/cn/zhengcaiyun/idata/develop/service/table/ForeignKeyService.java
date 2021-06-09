@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.ForeignKeyDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 
 import java.util.List;
 

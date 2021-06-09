@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.dto.develop.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 
 import java.util.List;
 

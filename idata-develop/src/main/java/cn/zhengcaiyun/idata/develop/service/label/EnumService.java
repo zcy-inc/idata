@@ -16,8 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
-import cn.zhengcaiyun.idata.dto.develop.label.EnumDto;
-import cn.zhengcaiyun.idata.dto.develop.label.EnumValueDto;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 
 import java.util.List;
 

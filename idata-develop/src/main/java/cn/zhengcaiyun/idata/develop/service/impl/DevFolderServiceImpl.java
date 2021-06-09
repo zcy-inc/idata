@@ -20,25 +20,18 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.service.DevFolderService;
-import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderDto;
-import cn.zhengcaiyun.idata.dto.develop.folder.DevelopFolderTreeNodeDto;
-import cn.zhengcaiyun.idata.dto.develop.folder.DevelopTreeTypeEnum;
-import org.mybatis.dynamic.sql.SqlColumn;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
-import org.mybatis.dynamic.sql.render.RenderingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.folderName;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;

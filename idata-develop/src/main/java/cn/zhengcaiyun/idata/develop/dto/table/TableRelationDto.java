@@ -14,13 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.dto.develop.table;
+package cn.zhengcaiyun.idata.develop.dto.table;
+
+import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-06-01 10:54
+ * @date 2021-05-19 16:29
  */
 
-public enum ERelationTypeEnum {
-    I2I, I2N, N2I, M2N;
+public class TableRelationDto {
+    private List<TableNodeDto> tables;
+    private List<TableEdgeDto> edges;
+
+    // GaS
+    public List<TableNodeDto> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<TableNodeDto> tables) {
+        this.tables = tables;
+    }
+
+    public List<TableEdgeDto> getEdges() {
+        return edges;
+    }
+
+    public void setEdges(List<TableEdgeDto> edges) {
+        this.edges = edges;
+    }
 }

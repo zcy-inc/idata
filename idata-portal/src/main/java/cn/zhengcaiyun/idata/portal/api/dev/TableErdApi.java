@@ -18,7 +18,7 @@ package cn.zhengcaiyun.idata.portal.api.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.service.table.TableRelationService;
-import cn.zhengcaiyun.idata.dto.develop.table.TableRelationDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableRelationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
