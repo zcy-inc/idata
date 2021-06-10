@@ -67,7 +67,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
             columns={columns}
             dataSource={dataSource}
             pagination={false}
-            size="middle"
+            size="small"
           />
         </TabPane>
         <TabPane key="fk" tab="关系" style={{ paddingTop: 24 }}>

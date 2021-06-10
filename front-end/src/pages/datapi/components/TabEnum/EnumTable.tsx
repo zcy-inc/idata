@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Input, Radio, Select, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
@@ -25,6 +25,8 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   const [columns, setColumns] = useState<any[]>([]); // {id, title, type}
   const [enums, setEnums] = useState<any[]>([]); // {[title]: value}
   const [parentOps, setParentOps] = useState<any[]>([]);
+  const [isShadowL, setIsShadowL] = useState(false);
+  const [isShadowR, setIsShadowR] = useState(false);
 
   useEffect(() => {
     if (initial) {
@@ -135,130 +137,150 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
     enums[i].parentCode = null;
     setEnums([...enums]);
   };
+  // shadow
+  const setShadow = (t: any) => {
+    if (t.scrollLeft > 0) {
+      !isShadowL && setIsShadowL(true);
+    } else {
+      isShadowL && setIsShadowL(false);
+    }
+    if (t.scrollLeft + t.clientWidth < t.scrollWidth) {
+      !isShadowR && setIsShadowR(true);
+    } else {
+      isShadowR && setIsShadowR(false);
+    }
+  };
 
   return (
     <Fragment>
-      <div className={styles['enum-table']}>
-        {/* title */}
-        <div className={styles['columns']}>
-          {/* 枚举值 */}
-          <div className={styles.cell}>
-            <div className={styles.title}>枚举值</div>
-            <div className={styles.type}>
-              <SelectType style={{ width: 150 }} disabled />
-            </div>
-          </div>
-          {/* 父级枚举值 */}
-          <div className={styles.cell}>
-            <div className={styles.title}>父级枚举值</div>
-            <div className={styles.type}>
-              <SelectType style={{ width: 150 }} disabled />
-            </div>
-          </div>
-          {/* 额外的参数列 */}
-          {columns.map((_, i) => (
-            <div key={_.id || _.title} className={styles.cell}>
-              <div className={styles.title}>
-                <Input
-                  style={{ width: 120, marginRight: 16 }}
-                  placeholder="请输入"
-                  value={columns[i].title}
-                  onChange={({ target: { value } }) => {
-                    columns[i].title = value;
-                    setColumns([...columns]);
-                  }}
-                />
-                <Link onClick={() => delColunm(i)}>
-                  <IconFont type="icon-shanchuchanggui" style={{ color: 'red' }} />
-                </Link>
-              </div>
-              <div className={styles.type}>
-                <SelectType
-                  style={{ width: 150 }}
-                  value={_.type}
-                  onChange={(type) => {
-                    columns[i].type = type;
-                    if (isEnumType(type)) {
-                      getEnumValues({ enumCode: type })
-                        .then((res) => {
-                          columns[i].enumValues = res.data.map((_: any) => ({
-                            label: _.enumValue,
-                            value: _.valueCode,
-                          }));
-                          setColumns([...columns]);
-                        })
-                        .catch((err) => {});
-                    } else {
-                      setColumns([...columns]);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-          {/* 操作：添加参数 */}
-          <div className={styles['cell-ops']} onClick={addColumn}>
-            <Link>
-              <PlusCircleOutlined />
-              添加参数
-            </Link>
-          </div>
-        </div>
-        {/* dataSource */}
-        {enums.map((_, i) => (
-          <div key={_.id || i} className={styles.enum}>
+      <div className={styles['enum-table-shadowbox']}>
+        <div
+          className={`${styles['enum-table']} ${isShadowL && styles['enum-table-left-shadow']} ${
+            isShadowR && styles['enum-table-right-shadow']
+          }`}
+          onScroll={({ target }) => setShadow(target)}
+        >
+          {/* title */}
+          <div className={styles['columns']}>
             {/* 枚举值 */}
-            <div className={styles['enum-cell']}>
-              <Input
-                placeholder="请输入"
-                value={enums[i].enumValue.value}
-                onChange={({ target: { value } }) => onChangeEnumValue(value, i)}
-              />
+            <div className={styles.cell}>
+              <div className={styles.title}>枚举值</div>
+              <div className={styles.type}>
+                <SelectType style={{ width: 150 }} disabled />
+              </div>
             </div>
             {/* 父级枚举值 */}
-            <div className={styles['enum-cell']}>
-              <Select
-                allowClear
-                placeholder="请选择"
-                value={enums[i].parentCode}
-                options={renderParentOps(i)}
-                onSelect={(value) => onChangeParentCode(value, i)}
-                onClear={() => onClearParentCode(i)}
-              />
+            <div className={styles.cell}>
+              <div className={styles.title}>父级枚举值</div>
+              <div className={styles.type}>
+                <SelectType style={{ width: 150 }} disabled />
+              </div>
             </div>
             {/* 额外的参数列 */}
-            {columns.map((col, colI) => (
-              <div key={col.id} className={styles['enum-cell']}>
-                {col.type === 'STRING' ? (
+            {columns.map((_, i) => (
+              <div key={_.id || _.title} className={styles.cell}>
+                <div className={styles.title}>
                   <Input
+                    style={{ width: 120, marginRight: 16 }}
                     placeholder="请输入"
-                    value={enums[i][columns[colI].title]}
-                    onChange={({ target: { value } }) => onChangeEnumParam(value, i, colI)}
+                    value={columns[i].title}
+                    onChange={({ target: { value } }) => {
+                      columns[i].title = value;
+                      setColumns([...columns]);
+                    }}
                   />
-                ) : col.type === 'BOOLEAN' ? (
-                  <Radio.Group
-                    options={RadioOps}
-                    value={enums[i][columns[colI].title]}
-                    onChange={({ target: { value } }) => onChangeEnumParam(value, i, colI)}
+                  <Link onClick={() => delColunm(i)}>
+                    <IconFont type="icon-shanchuchanggui" style={{ color: 'red' }} />
+                  </Link>
+                </div>
+                <div className={styles.type}>
+                  <SelectType
+                    style={{ width: 150 }}
+                    value={_.type}
+                    onChange={(type) => {
+                      columns[i].type = type;
+                      if (isEnumType(type)) {
+                        getEnumValues({ enumCode: type })
+                          .then((res) => {
+                            columns[i].enumValues = res.data.map((_: any) => ({
+                              label: _.enumValue,
+                              value: _.valueCode,
+                            }));
+                            setColumns([...columns]);
+                          })
+                          .catch((err) => {});
+                      } else {
+                        setColumns([...columns]);
+                      }
+                    }}
                   />
-                ) : (
-                  <Select
-                    placeholder="请选择"
-                    options={columns[colI].enumValues}
-                    value={enums[i][columns[colI].title]}
-                    onChange={(value) => onChangeEnumParam(value, i, colI)}
-                  />
-                )}
+                </div>
               </div>
             ))}
-            {/* 操作：删除当前行 */}
-            <div className={styles['enum-cell-ops']} onClick={() => delEnum(i)}>
+            {/* 操作：添加参数 */}
+            <div className={styles['cell-ops']} onClick={addColumn}>
               <Link>
-                <IconFont type="icon-shanchuchanggui" />
+                <PlusCircleOutlined />
+                添加参数
               </Link>
             </div>
           </div>
-        ))}
+          {/* dataSource */}
+          {enums.map((_, i) => (
+            <div key={_.id || i} className={styles.enum}>
+              {/* 枚举值 */}
+              <div className={styles['enum-cell']}>
+                <Input
+                  placeholder="请输入"
+                  value={enums[i].enumValue.value}
+                  onChange={({ target: { value } }) => onChangeEnumValue(value, i)}
+                />
+              </div>
+              {/* 父级枚举值 */}
+              <div className={styles['enum-cell']}>
+                <Select
+                  allowClear
+                  placeholder="请选择"
+                  value={enums[i].parentCode}
+                  options={renderParentOps(i)}
+                  onSelect={(value) => onChangeParentCode(value, i)}
+                  onClear={() => onClearParentCode(i)}
+                />
+              </div>
+              {/* 额外的参数列 */}
+              {columns.map((col, colI) => (
+                <div key={col.id} className={styles['enum-cell']}>
+                  {col.type === 'STRING' ? (
+                    <Input
+                      placeholder="请输入"
+                      value={enums[i][columns[colI].title]}
+                      onChange={({ target: { value } }) => onChangeEnumParam(value, i, colI)}
+                    />
+                  ) : col.type === 'BOOLEAN' ? (
+                    <Radio.Group
+                      options={RadioOps}
+                      value={enums[i][columns[colI].title]}
+                      onChange={({ target: { value } }) => onChangeEnumParam(value, i, colI)}
+                    />
+                  ) : (
+                    <Select
+                      placeholder="请选择"
+                      options={columns[colI].enumValues}
+                      value={enums[i][columns[colI].title]}
+                      onChange={(value) => onChangeEnumParam(value, i, colI)}
+                    />
+                  )}
+                </div>
+              ))}
+              {/* 操作：删除当前行 */}
+              <div className={styles['enum-cell-ops']} onClick={() => delEnum(i)}>
+                <Link>
+                  <IconFont type="icon-shanchuchanggui" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
       {/* 操作：添加 dataSource */}
       <Link className={styles['plus-enum']} onClick={addEnum}>

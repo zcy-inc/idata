@@ -91,9 +91,10 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
 
   // 组装数据，并高亮检索结果
   const loop = (data: any[], parentId?: string): any => {
-    return data.map((_) => {
+    const n = data.length;
+    return data.map((_, i) => {
       const { name, type, cid } = _;
-      const i = name.indexOf(searchValue);
+      const _i = name.indexOf(searchValue);
       const node = { ..._, key: cid };
       let title = name;
       let _type = type;
@@ -102,11 +103,16 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
         _type = 'FOLDEROPEN';
       }
       // 给检索命中的title加高亮
-      if (i > -1) {
-        const beforeStr = name.substring(0, i);
-        const afterStr = name.substring(i + searchValue?.length);
+      if (_i > -1) {
+        const beforeStr = name.substring(0, _i);
+        const afterStr = name.substring(_i + searchValue?.length);
         title = (
-          <span key="title">
+          <span
+            key="title"
+            className={`${(type === 'FOLDER' || i === n - 1) && styles['folder-margin']} ${
+              !parentId && type === 'FOLDER' && styles['folder-root']
+            }`}
+          >
             {beforeStr}
             <span className={styles['search-match']}>{searchValue}</span>
             {afterStr}
@@ -163,7 +169,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
           <IconFont
-            type="icon-tianjia"
+            type="icon-xinjian"
             className={styles['icon-plus']}
             onClick={() => setCurPath(null)}
           />
@@ -187,7 +193,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
               _.type === 'FOLDER' ? _.cid?.split('_')[1] : _.parentId?.split('_')[1] || null;
             setCurPath(`${folderId}`);
           }}
-          onSelect={(selectedKeys, { node, selectedNodes }) => {
+          onSelect={(selectedKeys, { node }) => {
             const _: any = node;
             _.type !== 'FOLDER' && onViewTree(node);
           }}

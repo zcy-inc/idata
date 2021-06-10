@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
-import { Checkbox, Popover, Tabs, Typography, Select, Input, Switch } from 'antd';
+import { Checkbox, Popover, Tabs, Typography, Select, Input, Switch, Divider } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { FormInstance } from 'antd';
@@ -48,6 +48,8 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
   const [dbs, setDbs] = useState<any[]>([]);
   const [tbs, setTbs] = useState<any[][]>([]);
   const [str, setStr] = useState<any[][]>([]);
+
+  console.log(initial);
 
   useImperativeHandle(ref, () => ({ structData, fkData }));
 
@@ -223,6 +225,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
             break;
           case 'BOOLEAN_LABEL':
             Object.assign(column, {
+              width: 'auto',
               renderFormItem: (schema: any) => (
                 <Switch
                   checked={structData[schema.index][schema.dataIndex]}
@@ -376,6 +379,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
           tab={[
             '表结构设计',
             <Popover
+              overlayClassName={styles['reset-popover']}
               key="setting"
               trigger="click"
               placement="bottomRight"
@@ -403,12 +407,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
           ]}
         >
           <EditableProTable
+            className={styles.struct}
             rowKey="id"
             columns={renderColumns()}
             value={structData}
             bordered
             scroll={{ x: 'max-content' }}
-            style={{ padding: 24 }}
+            style={{ paddingTop: 24 }}
             recordCreatorProps={false}
             editable={{
               type: 'multiple',
@@ -420,6 +425,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
                   <Link key="del" onClick={() => onStructAction(row, _, 'del')}>
                     删除
                   </Link>,
+                  <Divider type="vertical" />,
                   <Link
                     key="up"
                     disabled={row.index === 0}
@@ -427,6 +433,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
                   >
                     上移
                   </Link>,
+                  <Divider type="vertical" />,
                   <Link
                     key="down"
                     disabled={row.index === (_.editableKeys?.length || 1) - 1}
@@ -445,13 +452,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
         </TabPane>
         <TabPane tab="关系" key="fk">
           <EditableProTable
-            className={styles.reset}
+            className={`${styles.reset} ${styles.fk}`}
             rowKey="id"
             columns={fkColumns}
             value={fkData}
             bordered
             scroll={{ x: 'max-content' }}
-            style={{ padding: 24 }}
+            style={{ padding: '24px 0' }}
             recordCreatorProps={false}
             editable={{
               type: 'multiple',
@@ -469,8 +476,12 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
             <IconFont type="icon-tianjia" />
             添加外键
           </Link>
-          {/* <Title>关系图预览</Title>
-          <TableRelation id={1} /> */}
+          {initial && (
+            <Fragment>
+              <Title>关系图预览</Title>
+              <TableRelation id={initial.id} />
+            </Fragment>
+          )}
         </TabPane>
       </Tabs>
     </Fragment>

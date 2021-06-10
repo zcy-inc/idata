@@ -176,6 +176,8 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
       <Title>
         <span>基本信息</span>
         <Popover
+          overlayClassName={styles['reset-popover']}
+          className={styles.popover}
           trigger="click"
           placement="bottomRight"
           onVisibleChange={(v) => setIconType(v ? 'icon-shezhijihuo' : 'icon-shezhi')}

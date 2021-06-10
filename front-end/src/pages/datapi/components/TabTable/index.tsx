@@ -46,9 +46,6 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
         setData(res.data);
       })
       .catch((err) => {});
-    getTableRelations({ tableId })
-      .then((res) => {})
-      .catch((err) => {});
   };
 
   const onSubmit = () => {

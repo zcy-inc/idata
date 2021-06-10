@@ -55,7 +55,11 @@ const ViewEnum: FC<ViewEnumProps> = ({ data = {} }) => {
         <Item label="创建人">{data?.creator}</Item>
       </Descriptions>
       <Descriptions colon={false} labelStyle={{ color: '#8A8FAE' }} layout="vertical">
-        <Item label="枚举值" contentStyle={{ display: 'block' }}>
+        <Item
+          label="枚举值"
+          labelStyle={{ fontWeight: 'bold', color: '#15172f', fontSize: 16, marginTop: 16 }}
+          contentStyle={{ display: 'block' }}
+        >
           <Table
             rowKey={(row) => row.enumValue.code}
             columns={columns}

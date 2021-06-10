@@ -17,9 +17,9 @@ const fontFamily =
 const handleDataTransform = (tables: any[], tedges: any[]) => {
   const nodes = tables.map((node) => ({
     ...node,
-    id: `${node.dbName}.${node.tblName}`,
-    key: node.dbName,
-    attrs: node.columnInfos.map((_: any) => ({ ..._, key: _.colName })),
+    id: `${node.key}`,
+    key: `${node.key}`,
+    attrs: node.columnInfos.map((_: any) => ({ ..._, key: _.columnName })),
     label: `${node.key}.${node.tableComment}`,
   }));
   const edges = tedges.map((edge) => ({
@@ -113,7 +113,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         const edge = group.cfg.item;
         const sourceNode = edge.getSource().getModel();
         const targetNode = edge.getTarget().getModel();
-        const sourceIndex = sourceNode.attrs.findIndex((e) => e.key === cfg.sourceKey);
+        const sourceIndex = sourceNode.attrs.findIndex((e) => e.columnName === cfg.sourceKey);
         const sourceStartIndex = sourceNode.startIndex || 0;
 
         let sourceY = 15;
@@ -333,10 +333,8 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         if (afterList) {
           afterList.forEach((e: any, i: any) => {
             const isSelected = Math.floor(startIndex) + i === Number(selectedIndex);
-            let { key = '', type, colName, colComment, colType } = e;
-            if (type) key = `${key} - ${type}`; // 组装每一行的文本
-            // const label = key.length > 26 ? key.slice(0, 24) + '...' : key; // 手动ellipsis
-            const label = `${colName} ${colComment} ${colType}`;
+            let { key = '', type, columnName = '-', columnComment = '-', columnType = '-', pk } = e;
+            if (type) key = `${key} - ${type}`; // 组装key
             // 绘制行
             listContainer.addShape('rect', {
               attrs: {
@@ -378,19 +376,39 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
                 },
               });
             }
-            // 绘制行的文字
+            const textAttrs = {
+              x: 32,
+              y: i * itemHeight + offsetY + 6,
+              text: '-',
+              fontSize: 12,
+              fill: '#15172F',
+              fontFamily,
+              full: e,
+              fontWeight: isSelected ? 500 : 100,
+              cursor: 'pointer',
+            };
+            // 绘制行
+            // 主键的钥匙
             listContainer.addShape('text', {
-              attrs: {
-                x: 12,
-                y: i * itemHeight + offsetY + 6,
-                text: label,
-                fontSize: 12,
-                fill: '#15172F',
-                fontFamily,
-                full: e,
-                fontWeight: isSelected ? 500 : 100,
-                cursor: 'pointer',
-              },
+              attrs: { ...textAttrs, x: 8, text: pk && '🔑' },
+              draggable: true,
+              name: `item-${Math.floor(startIndex) + i}`,
+            });
+            // 列名
+            listContainer.addShape('text', {
+              attrs: { ...textAttrs, x: 32, text: columnName },
+              draggable: true,
+              name: `item-${Math.floor(startIndex) + i}`,
+            });
+            // 备注？
+            listContainer.addShape('text', {
+              attrs: { ...textAttrs, x: 120, text: columnComment },
+              draggable: true,
+              name: `item-${Math.floor(startIndex) + i}`,
+            });
+            // 类型
+            listContainer.addShape('text', {
+              attrs: { ...textAttrs, x: 180, text: columnType },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
@@ -410,7 +428,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
     const container: any = findDOMNode(ref.current);
 
     const width = container.scrollWidth;
-    const height = (container.scrollHeight || 500) - 20;
+    const height = (container.scrollHeight || 1000) - 20;
     const toolbar = new G6.ToolBar({
       className: styles.toolbar,
     });

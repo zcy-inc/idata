@@ -40,14 +40,17 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
       submitter={false}
     >
       <ProFormText
+        className={styles.test}
         label="枚举类型名称"
         name="enumName"
         width="md"
         placeholder="请输入"
         rules={rules}
         initialValue={data?.enumName}
+        style={{ color: 'red' }}
       />
       <ProForm.Item
+        className={`${styles['label']} ${styles['bold-label']}`}
         label="枚举值"
         name="enumValues"
         trigger="onChange"
@@ -61,6 +64,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         <EnumTable initial={data} />
       </ProForm.Item>
       <ProFormSelect
+        className={styles['label']}
         name="folderId"
         label="位置"
         width="md"
