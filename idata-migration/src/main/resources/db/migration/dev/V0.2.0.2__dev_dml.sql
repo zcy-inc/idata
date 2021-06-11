@@ -25,7 +25,7 @@ values ('系统管理员', 'dwLayer', '数仓分层', 'ENUM_VALUE_LABEL', 'dwLay
 
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
-values ('系统管理员', 'tblComment', '表中文名称', 'STRING_LABEL', 'STRING', 'TABLE', 0, 2);
+values ('系统管理员', 'tblComment', '表中文名称', 'STRING_LABEL', 'STRING', 'TABLE', 1, 2);
 
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
@@ -38,11 +38,11 @@ values ('系统管理员', 'pwOwnerId', '业务所属人', 'STRING_LABEL', 'STRI
 -- 字段：主键、字段类型、安全等级、字段中文名称、是否分区字段
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
-values ('系统管理员', 'pk', '是否主键', 'BOOLEAN_LABEL', 'BOOLEAN', 'COLUMN', 0, 2);
+values ('系统管理员', 'pk', '是否主键', 'BOOLEAN_LABEL', 'BOOLEAN', 'COLUMN', 1, 2);
 
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
-values ('系统管理员', 'columnType', '字段类型', 'STRING_LABEL', 'STRING', 'COLUMN', 1, 2);
+values ('系统管理员', 'columnType', '字段类型', 'ENUM_VALUE_LABEL', 'hiveColTypeEnum:ENUM', 'COLUMN', 1, 2);
 
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
@@ -54,7 +54,7 @@ values ('系统管理员', 'columnComment', '字段中文名称', 'STRING_LABEL'
 
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
 label_required, folder_id)
-values ('系统管理员', 'partitionedCol', '是否分区字段', 'BOOLEAN_LABEL', 'BOOLEAN', 'COLUMN', 0, 2);
+values ('系统管理员', 'partitionedCol', '是否分区字段', 'BOOLEAN_LABEL', 'BOOLEAN', 'COLUMN', 1, 2);
 --
 -- dev_enum、dev_enum_value
 -- 数据域、业务过程、数仓分层、安全等级、hive字段类型、聚合方式

@@ -26,7 +26,7 @@ import java.util.List;
  */
 
 public interface ColumnInfoService {
-    ColumnInfoDto getColumnInfo(Long tableId, String columnName);
+//    ColumnInfoDto getColumnInfo(Long tableId, String columnName);
     List<ColumnInfoDto> getColumns(Long tableId);
     ColumnInfoDto create(ColumnInfoDto columnInfoDto, String operator);
     ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);

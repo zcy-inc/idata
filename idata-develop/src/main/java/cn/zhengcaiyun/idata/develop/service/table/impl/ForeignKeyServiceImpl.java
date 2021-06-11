@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.dto.table.ERelationTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;

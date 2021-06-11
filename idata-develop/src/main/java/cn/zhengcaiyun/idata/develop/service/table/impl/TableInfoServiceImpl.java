@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
@@ -71,6 +73,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String DB_NAME_LABEL = "dbName";
+    private final String TABLE_SUBJECT = "TABLE";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -131,6 +134,19 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devTableInfo.tableName, isEqualTo(tableInfoDto.getTableName()))))
                 .orElse(null);
         checkArgument(checkTableInfo == null, "表已存在，新建失败");
+        List<LabelDefineDto> tableLabelDefineDtoList = labelService.findDefines(TABLE_SUBJECT, null)
+                .stream()
+                .filter(labelDefineDto -> labelDefineDto.getLabelRequired().equals(1))
+                .collect(Collectors.toList());
+        Map<String, String> tableLabelDefineMap = tableLabelDefineDtoList
+                .stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode, LabelDefineDto::getLabelName));
+        checkArgument(tableInfoDto.getTableLabels() != null && tableInfoDto.getTableLabels().size() > 0, "缺少表必要信息");
+        List<LabelDto> tableLabelDtoList = tableInfoDto.getTableLabels();
+        List<String> tableLabelCodeList = tableLabelDtoList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
+        for (Map.Entry<String, String> entry : tableLabelDefineMap.entrySet()) {
+            checkArgument(tableLabelCodeList.contains(entry.getKey()), entry.getValue() + "不能为空");
+        }
 
         // 插入tableInfo表
         tableInfoDto.setCreator(operator);
@@ -140,15 +156,11 @@ public class TableInfoServiceImpl implements TableInfoService {
         TableInfoDto echoTableInfoDto = PojoUtil.copyOne(devTableInfoDao.selectByPrimaryKey(tableInfo.getId()).get(),
                 TableInfoDto.class, tableInfoFields);
         // 插入label表
-        List<LabelDto> tableLabelDtoList = tableInfoDto.getTableLabels() != null && tableInfoDto.getTableLabels().size() > 0 ?
-                        tableInfoDto.getTableLabels() : null;
-        if (tableLabelDtoList != null) {
-            List<LabelDto> echoTableLabelDtoList = tableLabelDtoList.stream().map(tableLabelDto -> {
-                tableLabelDto.setTableId(tableInfo.getId());
-                return labelService.label(tableLabelDto, operator);
-            }).collect(Collectors.toList());
-            echoTableInfoDto.setTableLabels(echoTableLabelDtoList);
-        }
+        List<LabelDto> echoTableLabelDtoList = tableLabelDtoList.stream().map(tableLabelDto -> {
+            tableLabelDto.setTableId(tableInfo.getId());
+            return labelService.label(tableLabelDto, operator);
+        }).collect(Collectors.toList());
+        echoTableInfoDto.setTableLabels(echoTableLabelDtoList);
         // 字段相关表操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;

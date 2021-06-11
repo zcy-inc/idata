@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -52,19 +53,20 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
+    private final String COLUMN_SUBJECT = "COLUMN";
 
-    @Override
-    public ColumnInfoDto getColumnInfo(Long tableId, String columnName) {
-        DevColumnInfo columnInfo = devColumnInfoDao.selectOne(c ->
-                c.where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)),
-                                and(devColumnInfo.columnName, isEqualTo(columnName))))
-                .orElseThrow(() -> new IllegalArgumentException("字段不存在"));
-        List<LabelDto> columnLabelList = labelService.findLabels(tableId, columnName);
-
-        ColumnInfoDto echo = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class, columnInfoFields);
-        echo.setColumnLabels(columnLabelList);
-        return echo;
-    }
+//    @Override
+//    public ColumnInfoDto getColumnInfo(Long tableId, String columnName) {
+//        DevColumnInfo columnInfo = devColumnInfoDao.selectOne(c ->
+//                c.where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)),
+//                                and(devColumnInfo.columnName, isEqualTo(columnName))))
+//                .orElseThrow(() -> new IllegalArgumentException("字段不存在"));
+//        List<LabelDto> columnLabelList = labelService.findLabels(tableId, columnName);
+//
+//        ColumnInfoDto echo = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class, columnInfoFields);
+//        echo.setColumnLabels(columnLabelList);
+//        return echo;
+//    }
 
     @Override
     public List<ColumnInfoDto> getColumns(Long tableId) {
@@ -97,6 +99,20 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                         and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                 .orElse(null);
         checkArgument(checkDevColumn == null, "该表中已存在该字段");
+        List<LabelDefineDto> columnLabelDefineDtoList = labelService.findDefines(COLUMN_SUBJECT, null)
+                .stream()
+                .filter(labelDefineDto -> labelDefineDto.getLabelRequired().equals(1))
+                .collect(Collectors.toList());
+        Map<String, String> columnLabelDefineMap = columnLabelDefineDtoList
+                .stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode, LabelDefineDto::getLabelName));
+        checkArgument(columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0,
+                "缺少字段必要信息");
+        List<LabelDto> columnLabelList = columnInfoDto.getColumnLabels();
+        List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
+        for (Map.Entry<String, String> entry : columnLabelDefineMap.entrySet()) {
+            checkArgument(columnLabelCodeList.contains(entry.getKey()), entry.getValue() + "不能为空");
+        }
 
         // 插入字段表
         columnInfoDto.setCreator(operator);
@@ -106,16 +122,12 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                 ColumnInfoDto.class);
         // 插入label表
-        List<LabelDto> columnLabelList = columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0
-                ? columnInfoDto.getColumnLabels() : null;
-        if (columnLabelList != null) {
-            List<LabelDto> echoColumnLabelList = columnLabelList.stream()
-                    .map(columnLabel ->  {
-                        columnLabel.setTableId(columnInfoDto.getTableId());
-                        return labelService.label(columnLabel, operator);})
-                    .collect(Collectors.toList());
-            echoColumnInfoDto.setColumnLabels(echoColumnLabelList);
-        }
+        List<LabelDto> echoColumnLabelList = columnLabelList.stream()
+                .map(columnLabel ->  {
+                    columnLabel.setTableId(columnInfoDto.getTableId());
+                    return labelService.label(columnLabel, operator);})
+                .collect(Collectors.toList());
+        echoColumnInfoDto.setColumnLabels(echoColumnLabelList);
         return echoColumnInfoDto;
     }
 
