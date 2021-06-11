@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -54,19 +55,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
     private final String COLUMN_SUBJECT = "COLUMN";
-
-//    @Override
-//    public ColumnInfoDto getColumnInfo(Long tableId, String columnName) {
-//        DevColumnInfo columnInfo = devColumnInfoDao.selectOne(c ->
-//                c.where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)),
-//                                and(devColumnInfo.columnName, isEqualTo(columnName))))
-//                .orElseThrow(() -> new IllegalArgumentException("字段不存在"));
-//        List<LabelDto> columnLabelList = labelService.findLabels(tableId, columnName);
-//
-//        ColumnInfoDto echo = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class, columnInfoFields);
-//        echo.setColumnLabels(columnLabelList);
-//        return echo;
-//    }
+    private final String[] columnLabelTags = {LabelTagEnum.STRING_LABEL.name(), LabelTagEnum.BOOLEAN_LABEL.name(),
+    LabelTagEnum.USER_LABEL.name(), LabelTagEnum.ENUM_LABEL.name(), LabelTagEnum.ENUM_VALUE_LABEL.name()};
 
     @Override
     public List<ColumnInfoDto> getColumns(Long tableId) {
@@ -102,6 +92,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         List<LabelDefineDto> columnLabelDefineDtoList = labelService.findDefines(COLUMN_SUBJECT, null)
                 .stream()
                 .filter(labelDefineDto -> labelDefineDto.getLabelRequired().equals(1))
+                .filter(labelDefineDto -> Arrays.asList(columnLabelTags).contains(labelDefineDto.getLabelTag()))
                 .collect(Collectors.toList());
         Map<String, String> columnLabelDefineMap = columnLabelDefineDtoList
                 .stream()

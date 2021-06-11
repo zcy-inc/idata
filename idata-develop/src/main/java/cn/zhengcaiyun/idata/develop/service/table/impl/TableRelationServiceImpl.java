@@ -17,10 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
@@ -37,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
@@ -59,7 +57,7 @@ public class TableRelationServiceImpl implements TableRelationService {
     @Autowired
     private DevColumnInfoDao devColumnInfoDao;
     @Autowired
-    private ColumnInfoService columnInfoService;
+    private DevEnumValueDao devEnumValueDao;
     @Autowired
     private ForeignKeyService foreignKeyService;
 
@@ -131,7 +129,10 @@ public class TableRelationServiceImpl implements TableRelationService {
                         }
                         else if (COLUMN_TYPE_LABEL.equals(columnLabel.getLabelCode())
                                 && devColumnInfoDto.getColumnName().equals(columnLabel.getColumnName())) {
-                            echoColumnInfoDto.setColumnType(columnLabel.getLabelParamValue());
+                            echoColumnInfoDto.setColumnType(devEnumValueDao.selectOne(c ->
+                                    c.where(devEnumValue.del, isEqualTo(1),
+                                            and(devEnumValue.valueCode, isEqualTo(columnLabel.getLabelParamValue()))))
+                                    .get().getEnumValue());
                         }
                     }
                     return echoColumnInfoDto;

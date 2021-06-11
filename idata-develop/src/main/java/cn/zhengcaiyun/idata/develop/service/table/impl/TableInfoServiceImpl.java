@@ -121,7 +121,8 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .from(devLabel)
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)))
                         .build().render(RenderingStrategies.MYBATIS3)),
-                LabelDto.class, "labelCode", "labelParamValue");
+                LabelDto.class, "labelCode", "labelParamValue")
+                .stream().distinct().collect(Collectors.toList());
     }
 
     @Override
