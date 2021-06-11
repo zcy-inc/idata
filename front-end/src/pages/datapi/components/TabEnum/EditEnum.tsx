@@ -18,8 +18,8 @@ const rules = [{ required: true, message: '必填' }];
 const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   const [folders, setFolders] = useState<any[]>([]);
 
-  const { curPath } = useModel('tabalmanage', (ret) => ({
-    curPath: ret.curPath,
+  const { curFolder } = useModel('tabalmanage', (ret) => ({
+    curFolder: ret.curFolder,
   }));
 
   useEffect(() => {
@@ -70,7 +70,19 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         width="md"
         placeholder="根目录"
         options={folders}
-        initialValue={data?.folderId.toString() || curPath}
+        initialValue={
+          // data? 判断新建和编辑
+          // curFolder? 判断加号还是右键新建
+          // curFolder.type === 'FOLDER' 判断右键点在文件夹或文件上
+          // 这逻辑有时间再整理
+          data
+            ? data.folderId?.toString() || null
+            : curFolder
+            ? curFolder.type === 'FOLDER'
+              ? curFolder?.folderId
+              : curFolder?.parentId
+            : null
+        }
       />
     </ProForm>
   );

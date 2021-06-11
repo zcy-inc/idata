@@ -6,7 +6,7 @@ import styles from '../../tablemanage/index.less';
 
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';
-import { createTable, delTable, getTable, getTableRelations } from '@/services/tablemanage';
+import { createTable, delTable, getTable } from '@/services/tablemanage';
 
 export interface TabTableProps {
   initialMode: 'view' | 'edit';
@@ -20,14 +20,11 @@ export interface EditTableExportProps {
 const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [loading, setLoading] = useState<boolean>(false);
-
   const [data, setData] = useState<any>();
 
   const [label] = Form.useForm();
-  const [column] = Form.useForm();
-  const [FK] = Form.useForm();
 
-  const refs = { label, column, FK };
+  const refs = { label };
   const refTable = useRef<EditTableExportProps>();
 
   const { getTree, onRemovePane } = useModel('tabalmanage', (ret) => ({
@@ -51,65 +48,69 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const onSubmit = () => {
     setLoading(true);
     label.validateFields().then(() => {
-      column.validateFields().then(() => {
-        FK.validateFields().then(() => {
-          const labels = label.getFieldsValue();
-          let tableName = '';
-          let tableLabels = [];
-          let columnInfos = refTable?.current?.structData || [];
-          let foreignKeys = refTable?.current?.fkData || [];
-          for (let key of Object.keys(labels)) {
-            if (labels[key]) {
-              if (key === 'tableName') {
-                tableName = labels[key];
-              } else {
-                if (Array.isArray(labels[key])) {
-                  tableLabels.push({ labelCode: key });
-                } else {
-                  tableLabels.push({ labelCode: key, labelParamValue: labels[key] });
-                }
-              }
+      const labels = label.getFieldsValue();
+      let folderId = null;
+      let tableName = '';
+      let tableLabels = [];
+      let columnInfos = refTable?.current?.structData || [];
+      let foreignKeys = refTable?.current?.fkData || [];
+      console.log({ labels, columnInfos, foreignKeys });
+      for (let key of Object.keys(labels)) {
+        if (labels[key]) {
+          if (key === 'tableName') {
+            tableName = labels[key];
+          } else if (key === 'folderId') {
+            folderId = labels[key];
+          } else {
+            if (Array.isArray(labels[key])) {
+              tableLabels.push({ labelCode: key });
+            } else {
+              tableLabels.push({ labelCode: key, labelParamValue: labels[key] });
             }
           }
-          const data = {
-            tableName,
-            tableLabels,
-            columnInfos: columnInfos.map((_: any, i: number) => {
-              const columnLabels = [];
-              for (let key of Object.keys(_)) {
-                if (key !== 'id' && key !== 'columnName' && _[key] !== null) {
-                  columnLabels.push({
-                    columnName: _.columnName,
-                    labelCode: key,
-                    labelParamValue: _[key],
-                  });
-                }
-              }
-              return { columnIndex: i, columnName: _.columnName, columnLabels };
-            }),
-            foreignKeys: foreignKeys.map((_: any) => {
-              return {
-                columnNames: _.columnNames.join(','),
-                referDbName: _.referDbName,
-                referTableId: _.referTableId,
-                referColumnNames: _.referColumnNames.join(','),
-                erType: _.erType,
-              };
-            }),
+        }
+      }
+      const params = {
+        folderId,
+        tableName,
+        tableLabels,
+        columnInfos: columnInfos.map((_: any, i: number) => {
+          const columnLabels = [];
+          for (let key of Object.keys(_)) {
+            if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
+              columnLabels.push({
+                columnName: _.columnName,
+                labelCode: key,
+                labelParamValue: _[key],
+              });
+            }
+          }
+          return { columnIndex: i, columnName: _.columnName, columnLabels };
+        }),
+        foreignKeys: foreignKeys.map((_: any) => {
+          return {
+            columnNames: _.columnNames.join(','),
+            referDbName: _.referDbName,
+            referTableId: _.referTableId,
+            referColumnNames: _.referColumnNames.join(','),
+            erType: _.erType,
           };
-          createTable(data)
-            .then((res) => {
-              if (res.success) {
-                message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
-                setMode('view');
-                getTableInfo(res.data.id);
-                getTree('TABLE');
-              }
-            })
-            .catch((err) => {})
-            .finally(() => setLoading(false));
-        });
-      });
+        }),
+      };
+      if (data) {
+        Object.assign(params, { id: data.id });
+      }
+      createTable(params)
+        .then((res) => {
+          if (res.success) {
+            message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
+            setMode('view');
+            getTableInfo(res.data.id);
+            getTree('TABLE');
+          }
+        })
+        .catch((err) => {})
+        .finally(() => setLoading(false));
     });
   };
 

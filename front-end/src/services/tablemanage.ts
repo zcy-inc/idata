@@ -12,6 +12,14 @@ export async function getFolders(params?: {}) {
 export async function createFolder(data: { folderName: string; parentId: string }) {
   return request('/api/p1/dev/devFolder', { method: 'POST', data });
 }
+// 文件夹 更新
+export async function updateFolder(data: { folderName: string; parentId: string; id: string }) {
+  return request('/api/p1/dev/devFolder', { method: 'PUT', data });
+}
+// 文件夹 删除
+export async function deleteFolder(params: { folderId: string }) {
+  return request(`/api/p1/dev/devFolder/${params.folderId}`, { method: 'DELETE', params });
+}
 // 标签 创建
 export async function createTag(data: {}) {
   return request('/api/p1/dev/labelDefine', { method: 'POST', data });

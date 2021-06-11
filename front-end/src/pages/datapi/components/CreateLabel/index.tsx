@@ -27,11 +27,9 @@ import {
 } from '@/services/tablemanage';
 import { isEnumType } from '../../utils';
 
-export interface CreateTagProps {
-  visible: boolean;
-}
+export interface CreateTagProps {}
 
-const CreateTag: FC<CreateTagProps> = ({ visible }) => {
+const CreateTag: FC<CreateTagProps> = ({}) => {
   // 标签类型
   const [tagType, setTagType] = useState('');
   const [folders, setFolders] = useState<any[]>([]);
@@ -47,11 +45,12 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
   // edit mode
   const [form] = Form.useForm();
 
-  const { curPath, getTree, hideLabel, curLabel } = useModel('tabalmanage', (ret) => ({
-    curPath: ret.curPath,
+  const { curFolder, getTree, hideLabel, curLabel, visible } = useModel('tabalmanage', (ret) => ({
+    curFolder: ret.curFolder,
     getTree: ret.getTree,
     hideLabel: ret.hideLabel,
     curLabel: ret.curLabel,
+    visible: ret.visibleLabel,
   }));
 
   const cloumns: ProColumns[] = [
@@ -104,7 +103,19 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
   }, []);
 
   useEffect(() => {
-    !!curLabel && getLabelInfo(curLabel);
+    if (curLabel) {
+      // 编辑
+      getLabelInfo(curLabel);
+    } else {
+      // 新建, 要给位置赋值, 参阅 EditEnum 的注释
+      const folderId = curFolder
+        ? curFolder.type === 'FOLDER'
+          ? Number(curFolder.folderId)
+          : curFolder.parentId
+        : null;
+
+      form.setFieldsValue({ folderId });
+    }
   }, [curLabel]);
 
   const getLabelInfo = (labelCode: string) => {
@@ -117,7 +128,7 @@ const CreateTag: FC<CreateTagProps> = ({ visible }) => {
           subjectType: _.subjectType,
           labelRequired: _.labelRequired,
           labelIndex: _.labelIndex,
-          folderId: _.folderId || curPath,
+          folderId: _.folderId || null,
         };
         if (_.labelTag === 'ENUM_VALUE_LABEL') {
           const enumCode = _.labelParamType.split(':')[0];

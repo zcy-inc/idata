@@ -49,8 +49,6 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
   const [tbs, setTbs] = useState<any[][]>([]);
   const [str, setStr] = useState<any[][]>([]);
 
-  console.log(initial);
-
   useImperativeHandle(ref, () => ({ structData, fkData }));
 
   useEffect(() => {
@@ -110,11 +108,9 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       const promisesC: Promise<any>[] = [];
       const kf: React.Key[] = [];
       const dtf = foreignKeys.map((_: any, i: number) => {
-        console.log({ _ });
-
         kf.push(_.createTime);
-        // promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
-        // promisesC[i] = getTableReferStr({ tableId: _.referTableId });
+        promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
+        promisesC[i] = getTableReferStr({ tableId: _.referTableId });
         return {
           id: _.createTime,
           columnNames: _.columnNames.split(','),
@@ -124,20 +120,20 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
           erType: _.erType,
         };
       });
-      // Promise.all(promisesT).then((resT) => {
-      //   Promise.all(promisesC).then((resC) => {
-      //     resT.forEach((_T: any, i: number) => {
-      //       tbs[i] = _T.data.map((_: any) => ({ label: _.tableName, value: _.id }));
-      //     });
-      //     resC.forEach((_C: any, i: number) => {
-      //       str[i] = _C.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
-      //     });
-      //     setTbs([...tbs]);
-      //     setStr([...str]);
-      //   });
-      // });
-      // setFkData(dtf);
-      // setFkKeys(kf);
+      Promise.all(promisesT).then((resT) => {
+        Promise.all(promisesC).then((resC) => {
+          resT.forEach((_T: any, i: number) => {
+            tbs[i] = _T.data.map((_: any) => ({ label: _.tableName, value: _.id }));
+          });
+          resC.forEach((_C: any, i: number) => {
+            str[i] = _C.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          });
+          setTbs([...tbs]);
+          setStr([...str]);
+        });
+      });
+      setFkData(dtf);
+      setFkKeys(kf);
     }
   }, [initial]);
 
@@ -418,14 +414,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
             editable={{
               type: 'multiple',
               editableKeys: structKeys,
-              form: refs.column,
               onChange: setStructKeys,
               actionRender: (row, _) => {
                 return [
                   <Link key="del" onClick={() => onStructAction(row, _, 'del')}>
                     删除
                   </Link>,
-                  <Divider type="vertical" />,
+                  <Divider key="div1" type="vertical" />,
                   <Link
                     key="up"
                     disabled={row.index === 0}
@@ -433,7 +428,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
                   >
                     上移
                   </Link>,
-                  <Divider type="vertical" />,
+                  <Divider key="div2" type="vertical" />,
                   <Link
                     key="down"
                     disabled={row.index === (_.editableKeys?.length || 1) - 1}
@@ -463,7 +458,6 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
             editable={{
               type: 'multiple',
               editableKeys: fkKeys,
-              form: refs.FK,
               onChange: setFkKeys,
               actionRender: (row, _) => [
                 <Link key="del" onClick={() => onFKAction(row, _)}>

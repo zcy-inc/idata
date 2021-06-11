@@ -22,15 +22,18 @@ const newTable = {
 };
 
 export default () => {
-  const [curPath, setCurPath] = useState<any>();
-  const [tree, setTree] = useState([]);
-  const [panes, setPanes] = useState<IPane[]>([]);
-  const [activeKey, setActiveKey] = useState('');
+  const [curTreeType, setCurTreeType] = useState<string>('TABLE'); // 当前树的类型
+  const [curFolder, setCurFolder] = useState<any>(); // 存储文件夹数据, 编辑的时候赋值
+  const [folderMode, setFolderMode] = useState<'create' | 'edit'>('create');
+  const [tree, setTree] = useState([]); // 当前树的数据
+  const [panes, setPanes] = useState<IPane[]>([]); // 右侧tabs的list
+  const [activeKey, setActiveKey] = useState(''); // 右侧tabs的activeKey
   const [visibleLabel, setVisibleLabel] = useState<boolean>(false);
-  const [curLabel, setCurLabel] = useState('');
+  const [curLabel, setCurLabel] = useState(''); // 用来判断新建和编辑
 
   // 获取树
   const getTree = (devTreeType: any) => {
+    setCurTreeType(devTreeType);
     getFolderTree({ devTreeType }).then((res) => {
       setTree(res.data);
     });
@@ -92,8 +95,11 @@ export default () => {
   };
 
   return {
-    curPath,
-    setCurPath,
+    folderMode,
+    setFolderMode,
+    curFolder,
+    setCurFolder,
+    curTreeType,
     tree,
     getTree,
     panes,

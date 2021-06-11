@@ -56,7 +56,13 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         <Item label="表名称">{data?.tableName}</Item>
         {data?.tableLabels?.map((_: any) => (
           <Item key={_.id} label={_.labelName}>
-            {_.labelTag === 'ENUM_VALUE_LABEL' ? _.enumNameOrValue : _.labelParamValue}
+            {_.labelTag === 'ENUM_VALUE_LABEL'
+              ? _.enumNameOrValue
+              : _.labelTag === 'BOOLEAN_LABEL'
+              ? _.labelParamValue === 'true'
+                ? '是'
+                : '否'
+              : _.labelParamValue}
           </Item>
         ))}
       </Descriptions>

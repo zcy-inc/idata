@@ -31,7 +31,7 @@ const TableManage: FC = () => {
         </div>
       </div>
       {visibleFolder && <CreateFolder visible={visibleFolder} onCancel={hideFolder} />}
-      {visibleLabel && <CreateLabel visible={visibleLabel} />}
+      {visibleLabel && <CreateLabel />}
     </PageContainer>
   );
 };

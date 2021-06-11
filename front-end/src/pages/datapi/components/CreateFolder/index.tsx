@@ -5,7 +5,7 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
 
-import { createFolder, getFolders } from '@/services/tablemanage';
+import { createFolder, getFolders, updateFolder } from '@/services/tablemanage';
 
 export interface CreateFolderProps {
   visible: boolean;
@@ -17,8 +17,11 @@ const rules = [{ required: true, message: '必填' }];
 const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   const [folders, setFolders] = useState<any[]>([]);
 
-  const { curPath } = useModel('tabalmanage', (ret) => ({
-    curPath: ret.curPath,
+  const { folderMode, curFolder, curTreeType, getTree } = useModel('tabalmanage', (ret) => ({
+    folderMode: ret.folderMode,
+    curFolder: ret.curFolder,
+    curTreeType: ret.curTreeType,
+    getTree: ret.getTree,
   }));
 
   useEffect(() => {
@@ -43,25 +46,47 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       visible={visible}
       onFinish={async (values) => {
         const params = { folderName: values.folderName, parentId: values.parentId };
-        createFolder(params)
-          .then((res) => {
-            if (res.success) {
-              message.success('创建文件夹成功');
-              onCancel();
-            }
-          })
-          .catch((err) => {
-            message.error(err);
-          });
+        if (curFolder) {
+          Object.assign(params, { id: curFolder.folderId });
+          updateFolder(params)
+            .then((res) => {
+              if (res.success) {
+                message.success('编辑文件夹成功');
+                onCancel();
+                getTree(curTreeType);
+              }
+            })
+            .catch((err) => {});
+        } else {
+          createFolder(params)
+            .then((res) => {
+              if (res.success) {
+                message.success('创建文件夹成功');
+                onCancel();
+                getTree(curTreeType);
+              }
+            })
+            .catch((err) => {});
+        }
       }}
     >
-      <ProFormText name="folderName" label="文件夹名称" rules={rules} placeholder="请输入名称" />
+      <ProFormText
+        name="folderName"
+        label="文件夹名称"
+        rules={rules}
+        placeholder="请输入名称"
+        initialValue={folderMode === 'create' ? '' : curFolder?.name}
+      />
       <ProFormSelect
         name="parentId"
         label="位置"
         placeholder="根目录"
         options={folders}
-        initialValue={curPath}
+        initialValue={
+          folderMode === 'create' && curFolder?.type === 'FOLDER'
+            ? curFolder?.folderId
+            : curFolder?.parentId
+        }
       />
     </ModalForm>
   );

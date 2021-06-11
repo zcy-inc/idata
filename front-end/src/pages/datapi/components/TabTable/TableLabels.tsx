@@ -6,6 +6,7 @@ import ProForm, {
   ProFormCheckbox,
 } from '@ant-design/pro-form';
 import { Checkbox, Popover, Tooltip, Typography } from 'antd';
+import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
@@ -13,7 +14,7 @@ import styles from '../../tablemanage/index.less';
 import IconFont from '@/components/IconFont';
 import Title from '../Title';
 import { InitialLabel } from './constants';
-import { getTableLabels, getDWOwner } from '@/services/tablemanage';
+import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 
 export type EnumValueType = { enumValue: string; valueCode: string };
 export interface LabelProps {
@@ -42,6 +43,8 @@ const FormLabel: FC = ({ children }) => {
 };
 
 const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
+  const [folders, setFolders] = useState<any[]>([]);
+
   const [checkedList, setCheckedList] = useState<string[]>([]);
   const [allChecked, setAllChecked] = useState(true); // 是否全选
   const [indeterminate, setIndeterminate] = useState(false); // 一个样式
@@ -49,6 +52,10 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
 
   const [labels, setLabels] = useState<any[]>([]);
   const [labelsMap, setLabelsMap] = useState<Map<string, any>>(new Map());
+
+  const { curFolder } = useModel('tabalmanage', (ret) => ({
+    curFolder: ret.curFolder,
+  }));
 
   useEffect(() => {
     getTableLabels({ subjectType: 'TABLE' }).then((res) => {
@@ -87,7 +94,11 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
-            tableLabels.forEach((_: any) => (initialValue[_.labelCode] = _.labelParamValue));
+            tableLabels.forEach(
+              (_: any) =>
+                (initialValue[_.labelCode] =
+                  _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue),
+            );
             form.setFieldsValue(initialValue);
           }
 
@@ -97,6 +108,12 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
         })
         .catch((err) => []);
     });
+    getFolders()
+      .then((res) => {
+        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        setFolders(fd);
+      })
+      .catch((err) => {});
   }, []);
 
   // 单选
@@ -164,6 +181,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               name={_.labelCode}
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
+              rules={!!_.labelRequired ? rules : []}
               options={[{ label: null, value: _.labelCode }]}
             />
           );
@@ -210,6 +228,26 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
         submitter={false}
       >
         {renderFormList()}
+        <ProFormSelect
+          name="folderId"
+          label="位置"
+          width="md"
+          placeholder="根目录"
+          options={folders}
+          initialValue={
+            // data? 判断新建和编辑
+            // curFolder? 判断加号还是右键新建
+            // curFolder.type === 'FOLDER' 判断右键点在文件夹或文件上
+            // 这逻辑有时间再整理
+            initial
+              ? initial.folderId?.toString() || null
+              : curFolder
+              ? curFolder.type === 'FOLDER'
+                ? curFolder?.folderId
+                : curFolder?.parentId
+              : null
+          }
+        />
       </ProForm>
     </Fragment>
   );
