@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
@@ -72,70 +73,153 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public ForeignKeyDto create(ForeignKeyDto foreignKeyDto, String operator) {
-        checkArgument(isNotEmpty(operator), "创建者不能为空");
-        checkArgument(foreignKeyDto.getTableId() != null, "外键所属表ID不能为空");
-        checkArgument(isNotEmpty(foreignKeyDto.getColumnNames()), "外键列名不能为空");
-        checkArgument(foreignKeyDto.getReferTableId() != null, "外键引用表ID不能为空");
-        checkArgument(isNotEmpty(foreignKeyDto.getReferColumnNames()), "外键引用列名称不能为空");
-        checkArgument(foreignKeyDto.getColumnNames().split(",").length
-                == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
-        checkArgument(isNotEmpty(foreignKeyDto.getErType()), "ER联系类别不能为空");
-        ERelationTypeEnum.valueOf(foreignKeyDto.getErType());
+    public List<ForeignKeyDto> createOrEdit(List<ForeignKeyDto> foreignKeyDtoList, Long tableId, String operator) {
+//        checkArgument(isNotEmpty(operator), "创建者不能为空");
+//        checkArgument(foreignKeyDto.getTableId() != null, "外键所属表ID不能为空");
+//        checkArgument(isNotEmpty(foreignKeyDto.getColumnNames()), "外键列名不能为空");
+//        checkArgument(foreignKeyDto.getReferTableId() != null, "外键引用表ID不能为空");
+//        checkArgument(isNotEmpty(foreignKeyDto.getReferColumnNames()), "外键引用列名称不能为空");
+//        checkArgument(foreignKeyDto.getColumnNames().split(",").length
+//                == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+//        checkArgument(isNotEmpty(foreignKeyDto.getErType()), "ER联系类别不能为空");
+//        ERelationTypeEnum.valueOf(foreignKeyDto.getErType());
+//
+//        foreignKeyDto.setCreator(operator);
+//        DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
+//        devForeignKeyDao.insertSelective(foreignKey);
+//
+//        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
+//                ForeignKeyDto.class);
+//        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getReferTableId()));
+//        return echoForeignKeyDto;
+        List<DevForeignKey> existForeignKeyList = devForeignKeyDao.selectMany(select(devForeignKey.allColumns())
+                .from(devForeignKey)
+                .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
+                .build().render(RenderingStrategies.MYBATIS3));
+        List<Long> foreignKeyIdList = foreignKeyDtoList.stream().map(ForeignKeyDto::getId).collect(Collectors.toList());
+        List<DevForeignKey> deleteForeignKeyList = existForeignKeyList.stream()
+                .filter(devForeignKeyDto -> !foreignKeyIdList.contains(devForeignKeyDto.getId())).collect(Collectors.toList());
+        deleteForeignKeyList.forEach(deleteForeignKey -> deleteForeignKey(deleteForeignKey.getId(), operator));
 
-        foreignKeyDto.setCreator(operator);
-        DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
-        devForeignKeyDao.insertSelective(foreignKey);
-
-        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
-                ForeignKeyDto.class);
-        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getReferTableId()));
-        return echoForeignKeyDto;
+        List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
+            foreignKeyDto.setTableId(tableId);
+            return createOrUpdateForeignKey(foreignKeyDto, operator);}).collect(Collectors.toList());
+        return echoForeignKeyDtoList;
     }
 
-    @Override
-    @Transactional(rollbackFor = Throwable.class)
-    public ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String operator) {
-        checkArgument(isNotEmpty(operator), "修改者不能为空");
-        checkArgument(foreignKeyDto.getId() != null, "外键ID不能为空");
-        DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
-                c.where(devForeignKey.del, isNotEqualTo(1),
-                        and(devForeignKey.id, isEqualTo(foreignKeyDto.getId()))))
-                .orElse(null);
-        checkArgument(checkDevForeignKey != null, "外键不存在");
-        checkArgument(checkDevForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
-        if (isNotEmpty(foreignKeyDto.getColumnNames())) {
-            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
-                checkArgument(foreignKeyDto.getColumnNames().split(",").length
-                        == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
-            }
-            else {
-                checkArgument(checkDevForeignKey.getReferColumnNames().split(",").length
-                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
-            }
-            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
-                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
-                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
-            }
-            else {
-                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
-                        == checkDevForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
-            }
+//    @Override
+//    @Transactional(rollbackFor = Throwable.class)
+//    public ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String operator) {
+//        checkArgument(isNotEmpty(operator), "修改者不能为空");
+//        checkArgument(foreignKeyDto.getId() != null, "外键ID不能为空");
+//        DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
+//                c.where(devForeignKey.del, isNotEqualTo(1),
+//                        and(devForeignKey.id, isEqualTo(foreignKeyDto.getId()))))
+//                .orElse(null);
+//        checkArgument(checkDevForeignKey != null, "外键不存在");
+//        checkArgument(checkDevForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
+//        if (isNotEmpty(foreignKeyDto.getColumnNames())) {
+//            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+//                checkArgument(foreignKeyDto.getColumnNames().split(",").length
+//                        == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+//            } else {
+//                checkArgument(checkDevForeignKey.getReferColumnNames().split(",").length
+//                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+//            }
+//        }
+//        if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+//            if (isNotEmpty(foreignKeyDto.getColumnNames())) {
+//                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+//                        == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+//            } else {
+//                checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+//                        == checkDevForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+//            }
+//        }
+//
+//
+//        foreignKeyDto.setEditor(operator);
+//        DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
+//        devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
+//
+//        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
+//                ForeignKeyDto.class);
+//        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
+//        return echoForeignKeyDto;
+//    }
+
+    private ForeignKeyDto createOrUpdateForeignKey(ForeignKeyDto foreignKeyDto, String operator) {
+        ForeignKeyDto echoForeignKey;
+        if (foreignKeyDto.getId() == null) {
+            checkArgument(foreignKeyDto.getTableId() != null, "外键所属表ID不能为空");
+            checkArgument(isNotEmpty(foreignKeyDto.getColumnNames()), "外键列名不能为空");
+            checkArgument(foreignKeyDto.getReferTableId() != null, "外键引用表ID不能为空");
+            checkArgument(isNotEmpty(foreignKeyDto.getReferColumnNames()), "外键引用列名称不能为空");
+            checkArgument(foreignKeyDto.getColumnNames().split(",").length
+                    == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+            checkArgument(isNotEmpty(foreignKeyDto.getErType()), "ER联系类别不能为空");
+            ERelationTypeEnum.valueOf(foreignKeyDto.getErType());
+            DevForeignKey checkForeignKey = devForeignKeyDao.selectOne(c ->
+                    c.where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId,
+                            isEqualTo(foreignKeyDto.getTableId()),
+                            and(devForeignKey.columnNames, isEqualTo(foreignKeyDto.getColumnNames())),
+                            and(devForeignKey.referTableId, isEqualTo(foreignKeyDto.getReferTableId())),
+                            and(devForeignKey.referColumnNames, isEqualTo(foreignKeyDto.getReferColumnNames())),
+                            and(devForeignKey.erType, isEqualTo(foreignKeyDto.getErType()))))).orElse(null);
+            checkArgument(checkForeignKey == null, "外键已存在");
+
+            foreignKeyDto.setCreator(operator);
+            DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
+            devForeignKeyDao.insertSelective(foreignKey);
+
+            echoForeignKey = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
+                    ForeignKeyDto.class);
+            echoForeignKey.setReferDbName(getDbName(echoForeignKey.getReferTableId()));
         }
+        else {
+            DevForeignKey checkDevForeignKey = devForeignKeyDao.selectOne(c ->
+                    c.where(devForeignKey.del, isNotEqualTo(1),
+                            and(devForeignKey.id, isEqualTo(foreignKeyDto.getId()))))
+                    .orElse(null);
+            checkArgument(checkDevForeignKey != null, "外键不存在");
+            checkArgument(checkDevForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
+            if (isNotEmpty(foreignKeyDto.getColumnNames())) {
+                if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+                    checkArgument(foreignKeyDto.getColumnNames().split(",").length
+                            == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+                } else {
+                    checkArgument(checkDevForeignKey.getReferColumnNames().split(",").length
+                            == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+                }
+            }
+            if (isNotEmpty(foreignKeyDto.getReferColumnNames())) {
+                if (isNotEmpty(foreignKeyDto.getColumnNames())) {
+                    checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+                            == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+                } else {
+                    checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
+                            == checkDevForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+                }
+            }
 
-        foreignKeyDto.setEditor(operator);
-        DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
-        devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
+            foreignKeyDto.setEditor(operator);
+            DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
+            devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
 
-        ForeignKeyDto echoForeignKeyDto = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
-                ForeignKeyDto.class);
-        echoForeignKeyDto.setReferDbName(getDbName(echoForeignKeyDto.getTableId()));
-        return echoForeignKeyDto;
+            echoForeignKey = PojoUtil.copyOne(devForeignKeyDao.selectByPrimaryKey(foreignKey.getId()).get(),
+                    ForeignKeyDto.class);
+            echoForeignKey.setReferDbName(getDbName(echoForeignKey.getTableId()));
+        }
+        return echoForeignKey;
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public boolean delete(Long foreignKeyId, String operator) {
+        return deleteForeignKey(foreignKeyId, operator);
+    }
+
+    private boolean deleteForeignKey(Long foreignKeyId, String operator) {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(foreignKeyId != null, "外键ID不能为空");
         DevForeignKey checkForeignKey = devForeignKeyDao.selectOne(c ->

@@ -254,7 +254,7 @@ public class LabelServiceImpl implements LabelService {
             labelDto.setId(labels.get(0).getId());
             labelDto.setEditor(operator);
             devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDto, DevLabel.class,
-                    "editor", "labelParamValue"));
+                    "id", "editor", "labelParamValue"));
         }
         else {
             throw new IllegalArgumentException("元数据标签状态异常");

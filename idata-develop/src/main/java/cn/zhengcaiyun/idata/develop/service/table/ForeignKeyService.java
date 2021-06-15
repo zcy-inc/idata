@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface ForeignKeyService {
     List<ForeignKeyDto> getForeignKeys(Long tableId);
-    ForeignKeyDto create(ForeignKeyDto foreignKeyDto, String operator);
-    ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String operator);
+    List<ForeignKeyDto> createOrEdit(List<ForeignKeyDto> foreignKeyDtoList, Long tableId, String operator);
+//    ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String operator);
     boolean delete(Long foreignKeyId, String operator);
 }
