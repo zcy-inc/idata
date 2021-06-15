@@ -23,8 +23,8 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const [data, setData] = useState<any>();
 
   const [label] = Form.useForm();
-
   const refs = { label };
+
   const refTable = useRef<EditTableExportProps>();
 
   const { getTree, onRemovePane } = useModel('tabalmanage', (ret) => ({
@@ -47,71 +47,81 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
 
   const onSubmit = () => {
     setLoading(true);
-    label.validateFields().then(() => {
-      const labels = label.getFieldsValue();
-      let folderId = null;
-      let tableName = '';
-      let tableLabels = [];
-      let columnInfos = refTable?.current?.structData || [];
-      let foreignKeys = refTable?.current?.fkData || [];
-      console.log({ labels, columnInfos, foreignKeys });
-      for (let key of Object.keys(labels)) {
-        if (labels[key]) {
-          if (key === 'tableName') {
-            tableName = labels[key];
-          } else if (key === 'folderId') {
-            folderId = labels[key];
-          } else {
-            if (Array.isArray(labels[key])) {
-              tableLabels.push({ labelCode: key });
+    label
+      .validateFields()
+      .then(() => {
+        const labels = label.getFieldsValue();
+        let folderId = null;
+        let tableName = '';
+        let tableLabels = [];
+        let columnInfos = refTable?.current?.structData || [];
+        let foreignKeys = refTable?.current?.fkData || [];
+        for (let _ of foreignKeys) {
+          if (_.columnNames.length !== _.referColumnNames.length) {
+            message.error('字段与参考字段的长度不一致');
+            return;
+          }
+        }
+        console.log({ labels, columnInfos, foreignKeys });
+        for (let key of Object.keys(labels)) {
+          if (labels[key]) {
+            if (key === 'tableName') {
+              tableName = labels[key];
+            } else if (key === 'folderId') {
+              folderId = labels[key];
             } else {
-              tableLabels.push({ labelCode: key, labelParamValue: labels[key] });
+              if (Array.isArray(labels[key])) {
+                tableLabels.push({ labelCode: key });
+              } else {
+                tableLabels.push({ labelCode: key, labelParamValue: labels[key] });
+              }
             }
           }
         }
-      }
-      const params = {
-        folderId,
-        tableName,
-        tableLabels,
-        columnInfos: columnInfos.map((_: any, i: number) => {
-          const columnLabels = [];
-          for (let key of Object.keys(_)) {
-            if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
-              columnLabels.push({
-                columnName: _.columnName,
-                labelCode: key,
-                labelParamValue: _[key],
-              });
+        const params = {
+          folderId,
+          tableName,
+          tableLabels,
+          columnInfos: columnInfos.map((_: any, i: number) => {
+            const columnLabels = [];
+            for (let key of Object.keys(_)) {
+              if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
+                columnLabels.push({
+                  columnName: _.columnName,
+                  labelCode: key,
+                  labelParamValue: _[key],
+                });
+              }
             }
-          }
-          return { columnIndex: i, columnName: _.columnName, columnLabels };
-        }),
-        foreignKeys: foreignKeys.map((_: any) => {
-          return {
-            columnNames: _.columnNames.join(','),
-            referDbName: _.referDbName,
-            referTableId: _.referTableId,
-            referColumnNames: _.referColumnNames.join(','),
-            erType: _.erType,
-          };
-        }),
-      };
-      if (data) {
-        Object.assign(params, { id: data.id });
-      }
-      createTable(params)
-        .then((res) => {
-          if (res.success) {
-            message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
-            setMode('view');
-            getTableInfo(res.data.id);
-            getTree('TABLE');
-          }
-        })
-        .catch((err) => {})
-        .finally(() => setLoading(false));
-    });
+            return { id: _.id, columnIndex: i, columnName: _.columnName, columnLabels };
+          }),
+          foreignKeys: foreignKeys.map((_: any) => {
+            return {
+              id: _.id,
+              columnNames: _.columnNames.join(','),
+              referDbName: _.referDbName,
+              referTableId: _.referTableId,
+              referColumnNames: _.referColumnNames.join(','),
+              erType: _.erType,
+            };
+          }),
+        };
+        if (data) {
+          Object.assign(params, { id: data.id });
+        }
+        createTable(params)
+          .then((res) => {
+            if (res.success) {
+              message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
+              setMode('view');
+              getTableInfo(res.data.id);
+              getTree('TABLE');
+            }
+          })
+          .catch((err) => {})
+          .finally(() => setLoading(false));
+      })
+      .finally(() => setLoading(false));
   };
 
   const onDelete = () => {

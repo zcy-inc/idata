@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Input, Radio, Select, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
@@ -129,9 +129,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   // 生成父级枚举值的ops
   // 找出 parentOps 中与第 i 项枚举值的code相等的项, disable之
   const renderParentOps = (i: number) =>
-    parentOps.map((_) => {
-      return { ..._, disabled: _.value === enums[i].enumValue.code };
-    });
+    parentOps.map((_) => ({ ..._, disabled: _.value === enums[i].enumValue.code }));
   // 置空父级枚举值
   const onClearParentCode = (i: number) => {
     enums[i].parentCode = null;
@@ -139,11 +137,13 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   };
   // shadow
   const setShadow = (t: any) => {
+    // 左侧的阴影
     if (t.scrollLeft > 0) {
       !isShadowL && setIsShadowL(true);
     } else {
       isShadowL && setIsShadowL(false);
     }
+    // 右侧的阴影
     if (t.scrollLeft + t.clientWidth < t.scrollWidth) {
       !isShadowR && setIsShadowR(true);
     } else {

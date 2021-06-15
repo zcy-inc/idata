@@ -219,7 +219,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
     // 注册自定义的Node dice-er-box
     registerNode('dice-er-box', {
       draw(cfg: any, group: any) {
-        const width = 250;
+        const width = 320;
         const height = 316;
         const itemCount = 10;
         const boxStyle: any = { stroke: '#3F88FE' }; // 控制node的主色
@@ -377,7 +377,6 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
               });
             }
             const textAttrs = {
-              x: 32,
               y: i * itemHeight + offsetY + 6,
               text: '-',
               fontSize: 12,
@@ -402,13 +401,13 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             });
             // 备注？
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 120, text: columnComment },
+              attrs: { ...textAttrs, x: 80, text: columnComment },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
             // 类型
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 180, text: columnType },
+              attrs: { ...textAttrs, x: 120, text: columnType },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });

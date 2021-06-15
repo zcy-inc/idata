@@ -8,3 +8,5 @@ export const ViewInitialColumns = [
     render: (_: any) => _ || '-',
   },
 ];
+
+export const rules = [{ required: true, message: '必填' }];

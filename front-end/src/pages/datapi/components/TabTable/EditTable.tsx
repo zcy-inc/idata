@@ -10,7 +10,7 @@ import IconFont from '@/components/IconFont';
 import TableLabels from './TableLabels';
 import TableRelation from './TableRelation';
 import Title from '../Title';
-import { InitialColumn, EROPs } from './constants';
+import { InitialColumn, EROps } from './constants';
 
 import {
   getTableLabels,
@@ -49,6 +49,8 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
   const [tbs, setTbs] = useState<any[][]>([]);
   const [str, setStr] = useState<any[][]>([]);
 
+  // 暴露表结构和外键的数据给父组件
+  // 这儿还有一种做法是用表单的formRef来获取, 但是这样拿不到index, 所以用useImperativeHandle
   useImperativeHandle(ref, () => ({ structData, fkData }));
 
   useEffect(() => {
@@ -91,13 +93,13 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       const columnsInfo = initial.columnInfos;
       const kc: React.Key[] = [];
       const dtc = columnsInfo.map((_: any) => {
-        const t = { id: _.createTime, columnName: _.columnName };
+        const t = { id: _.id, columnName: _.columnName };
         _.columnLabels.forEach((l: any) => {
           let v = l.labelParamValue;
           l.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true' ? true : false);
           t[l.labelCode] = v;
         });
-        kc.push(_.createTime);
+        kc.push(_.id);
         return t;
       });
       setStructData(dtc);
@@ -108,11 +110,11 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
       const promisesC: Promise<any>[] = [];
       const kf: React.Key[] = [];
       const dtf = foreignKeys.map((_: any, i: number) => {
-        kf.push(_.createTime);
+        kf.push(_.id);
         promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
         promisesC[i] = getTableReferStr({ tableId: _.referTableId });
         return {
-          id: _.createTime,
+          id: _.id,
           columnNames: _.columnNames.split(','),
           referDbName: _.referDbName,
           referTableId: _.referTableId,
@@ -339,7 +341,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
         <Select
           allowClear
           placeholder="请选择"
-          options={EROPs}
+          options={EROps}
           onChange={(value) => setValue(schema, value, 'fk')}
         />
       ),

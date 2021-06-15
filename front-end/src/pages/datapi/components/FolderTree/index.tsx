@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Dropdown, Input, Menu, message, Popconfirm, Tabs, Tree, Modal } from 'antd';
+import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
 import { useBoolean } from 'ahooks';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent } from 'react';
@@ -140,7 +140,6 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
               })
               .catch((err) => {}),
         });
-
         break;
       default:
         break;
@@ -184,7 +183,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
     });
   };
 
-  // 生成检索用的平铺
+  // 将树平铺, 用以检索
   const flat = (data: any[], parentId?: string) => {
     for (let i = 0; i < data.length; i++) {
       const node = data[i];

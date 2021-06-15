@@ -3,7 +3,7 @@ import { Descriptions, Table, Tabs } from 'antd';
 import type { FC } from 'react';
 import styles from '../../tablemanage/index.less';
 
-import { ViewInitialColumns } from './constants';
+import { ViewInitialColumns, TransformBoolean } from './constants';
 import Title from '../Title';
 import TableRelation from './TableRelation';
 
@@ -37,14 +37,8 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
     }
   }, [data]);
 
-  const transformLabelValue = (_: any) => {
-    switch (_.labelTag) {
-      case 'ENUM_VALUE_LABEL':
-        return _.enumNameOrValue;
-      default:
-        return _.labelParamValue;
-    }
-  };
+  const transformLabelValue = (_: any) =>
+    _.labelTag === 'ENUM_VALUE_LABEL' ? _.enumNameOrValue : _.labelParamValue;
 
   return (
     <Fragment>
@@ -59,9 +53,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
             {_.labelTag === 'ENUM_VALUE_LABEL'
               ? _.enumNameOrValue
               : _.labelTag === 'BOOLEAN_LABEL'
-              ? _.labelParamValue === 'true'
-                ? '是'
-                : '否'
+              ? TransformBoolean[_.labelParamValue]
               : _.labelParamValue}
           </Item>
         ))}

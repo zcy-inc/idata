@@ -13,7 +13,7 @@ import styles from '../../tablemanage/index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../Title';
-import { InitialLabel } from './constants';
+import { InitialLabel, RadioOps } from './constants';
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 
 export type EnumValueType = { enumValue: string; valueCode: string };
@@ -43,22 +43,22 @@ const FormLabel: FC = ({ children }) => {
 };
 
 const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
-  const [folders, setFolders] = useState<any[]>([]);
-
-  const [checkedList, setCheckedList] = useState<string[]>([]);
+  const [folders, setFolders] = useState<any[]>([]); // 平铺的目录树, 用于表单的位置
+  const [checkedList, setCheckedList] = useState<string[]>([]); // 齿轮那儿选中的项
   const [allChecked, setAllChecked] = useState(true); // 是否全选
-  const [indeterminate, setIndeterminate] = useState(false); // 一个样式
+  const [indeterminate, setIndeterminate] = useState(false); // 全选的一个样式开关
   const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
-
-  const [labels, setLabels] = useState<any[]>([]);
-  const [labelsMap, setLabelsMap] = useState<Map<string, any>>(new Map());
+  const [labels, setLabels] = useState<any[]>([]); // 基本信息的项
+  const [labelsMap, setLabelsMap] = useState<Map<string, any>>(new Map()); // 方便检索做的map
 
   const { curFolder } = useModel('tabalmanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
 
   useEffect(() => {
+    // 获取基本信息的labels
     getTableLabels({ subjectType: 'TABLE' }).then((res) => {
+      // 获取数仓管理人
       getDWOwner()
         .then((owners) => {
           const map = new Map(); // 快速检索用的map, [labelCode, _]
@@ -73,12 +73,14 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
             };
             // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
             if (_.labelTag !== 'ATTRIBUTE_LABEL') {
+              // 处理数仓管理人的ops
               if (_.labelCode === 'dwOwnerId') {
                 tmp.enums = owners.data.content.map((_: any) => ({
                   label: _.nickname,
                   value: _.id,
                 }));
               }
+              // 处理枚举类型的ops
               if (_.labelParamType?.endsWith('ENUM')) {
                 tmp.enums = _.enumValues.map((item: any) => ({
                   label: item.enumValue,
@@ -90,7 +92,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
             list.push(_.labelCode);
             return tmp;
           });
-
+          // 如果有初始值, 就进行赋值操作
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
@@ -108,6 +110,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
         })
         .catch((err) => []);
     });
+    // 获取平铺的目录树
     getFolders()
       .then((res) => {
         const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
@@ -155,10 +158,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
               rules={!!_.labelRequired ? rules : []}
-              options={[
-                { label: '是', value: 'true' },
-                { label: '否', value: 'false' },
-              ]}
+              options={RadioOps}
             />
           );
         case 'ENUM_VALUE_LABEL':
@@ -238,7 +238,6 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
             // data? 判断新建和编辑
             // curFolder? 判断加号还是右键新建
             // curFolder.type === 'FOLDER' 判断右键点在文件夹或文件上
-            // 这逻辑有时间再整理
             initial
               ? initial.folderId?.toString() || null
               : curFolder

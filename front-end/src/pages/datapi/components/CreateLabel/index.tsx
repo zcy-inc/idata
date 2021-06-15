@@ -223,8 +223,12 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
               : _.attributeType,
           })),
         };
-        if (values.enumCode) params.labelParamType = `${values.enumCode}:ENUM`;
-        if (curLabel) params.labelCode = curLabel;
+        if (values.enumCode) {
+          params.labelParamType = `${values.enumCode}:ENUM`;
+        }
+        if (curLabel) {
+          params.labelCode = curLabel;
+        }
         createTag(params)
           .then((res) => {
             if (res.success) {
