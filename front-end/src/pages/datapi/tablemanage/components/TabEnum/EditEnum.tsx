@@ -3,7 +3,7 @@ import ProForm, { ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import EnumTable from './EnumTable';
 import { getFolders } from '@/services/tablemanage';

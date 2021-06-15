@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions, Table } from 'antd';
 import type { FC } from 'react';
 
-import Title from '../Title';
+import Title from '../../../components/Title';
 import { ViewInitialColumns } from './constants';
 
 export interface ViewEnumProps {

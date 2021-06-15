@@ -9,10 +9,10 @@ import { Checkbox, Popover, Tooltip, Typography } from 'antd';
 import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
-import Title from '../Title';
+import Title from '../../../components/Title';
 import { InitialLabel, RadioOps } from './constants';
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 

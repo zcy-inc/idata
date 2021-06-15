@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Button, Form, message, Popconfirm } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';

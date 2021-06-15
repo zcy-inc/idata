@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import G6 from '@antv/g6';
 import { findDOMNode } from 'react-dom';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import { getTableRelations } from '@/services/tablemanage';
 

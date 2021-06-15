@@ -2,7 +2,7 @@ import React from 'react';
 import { useModel } from 'umi';
 import { Empty, Tabs } from 'antd';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import { IconFont } from '@/components';
 import ViewLabel from '../ViewLabel';
@@ -21,7 +21,6 @@ const Workbench: FC = ({}) => {
 
   return panes.length ? (
     <Tabs
-      className={styles.tabs}
       type="editable-card"
       onChange={(key) => onChangeTab(key)}
       activeKey={activeKey}
@@ -30,24 +29,22 @@ const Workbench: FC = ({}) => {
       tabBarStyle={{ background: '#F1F3F9' }}
       hideAdd
     >
-      {panes.map((pane) => {
-        return (
-          <TabPane
-            className={styles['tab-pane']}
-            tab={pane.title}
-            key={pane.key}
-            closeIcon={<IconFont type="icon-guanbichanggui" />}
-          >
-            {pane.type === 'ENUM' ? (
-              <TabEnum initialMode={pane.mode} fileCode={pane.code} />
-            ) : pane.type === 'TABLE' ? (
-              <TabTable initialMode={pane.mode} fileCode={pane.code} />
-            ) : (
-              <ViewLabel fileCode={pane.code} />
-            )}
-          </TabPane>
-        );
-      })}
+      {panes.map((pane) => (
+        <TabPane
+          className={styles['tab-pane']}
+          tab={pane.title}
+          key={pane.key}
+          closeIcon={<IconFont type="icon-guanbichanggui" />}
+        >
+          {pane.type === 'ENUM' ? (
+            <TabEnum initialMode={pane.mode} fileCode={pane.code} />
+          ) : pane.type === 'TABLE' ? (
+            <TabTable initialMode={pane.mode} fileCode={pane.code} />
+          ) : (
+            <ViewLabel fileCode={pane.code} />
+          )}
+        </TabPane>
+      ))}
     </Tabs>
   ) : (
     <Empty />

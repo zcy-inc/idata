@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
 import { getEnumNames } from '@/services/tablemanage';
-import { isEnumType } from '../../utils';
+import { isEnumType } from '../../../utils';
 
 interface SelectTypeProps {
   value?: string;

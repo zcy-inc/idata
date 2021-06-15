@@ -2,13 +2,13 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Input, Radio, Select, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
 import SelectType from '../SelectType';
 import { getRandomStr } from '@/utils/utils';
 import { getEnumNames, getEnumValues } from '@/services/tablemanage';
-import { isEnumType } from '../../utils';
+import { isEnumType } from '../../../utils';
 
 export interface EnumTableProps {
   initial?: any;

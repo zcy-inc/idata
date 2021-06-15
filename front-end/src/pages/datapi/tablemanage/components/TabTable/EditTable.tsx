@@ -4,12 +4,12 @@ import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
 import TableLabels from './TableLabels';
 import TableRelation from './TableRelation';
-import Title from '../Title';
+import Title from '../../../components/Title';
 import { InitialColumn, EROps } from './constants';
 
 import {

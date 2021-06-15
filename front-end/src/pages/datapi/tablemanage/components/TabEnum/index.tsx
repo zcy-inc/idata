@@ -2,12 +2,12 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Button, Form, message, Popconfirm } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import ViewEnum from './ViewEnum';
 import EditEnum from './EditEnum';
 import { createEnum, delEnum, getEnum } from '@/services/tablemanage';
-import { isEnumType } from '../../utils';
+import { isEnumType } from '../../../utils';
 
 export interface TabEnumProps {
   initialMode: 'view' | 'edit';
@@ -65,6 +65,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
             message.success(fileCode === 'newEnum' ? '新建枚举成功' : '更新枚举成功');
             getTree('ENUM');
             getEnumInfo(res.data.enumCode);
+            // setData(res.data);
             setMode('view');
             // replacePaneKey(`E_${res.data.id}`);
           }

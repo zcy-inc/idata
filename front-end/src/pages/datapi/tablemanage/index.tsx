@@ -5,10 +5,10 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from './index.less';
 
-import FolderTree from '../components/FolderTree';
-import CreateFolder from '../components/CreateFolder';
-import CreateLabel from '../components/CreateLabel';
-import Workbench from '../components/Workbench';
+import CreateFolder from './components/CreateFolder';
+import CreateLabel from './components/CreateLabel';
+import FolderTree from './components/FolderTree';
+import Workbench from './components/Workbench';
 
 const TableManage: FC = () => {
   const [visibleFolder, { setTrue: showFolder, setFalse: hideFolder }] = useBoolean(false);

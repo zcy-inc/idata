@@ -3,7 +3,7 @@ import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import { message } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import { createFolder, getFolders, updateFolder } from '@/services/tablemanage';
 

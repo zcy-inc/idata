@@ -2,10 +2,10 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Button, Descriptions, message, Popconfirm, Table } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import { getLabel, getEnumValues, delLabel } from '@/services/tablemanage';
-import Title from '../Title';
+import Title from '../../../components/Title';
 import {
   SubjectTypeMap,
   LabelTagMap,
@@ -15,7 +15,7 @@ import {
   InitialColumns,
   AttributeTypeMap,
 } from './constants';
-import { isEnumType } from '../../utils';
+import { isEnumType } from '../../../utils';
 
 export interface ViewLabelProps {
   fileCode: string;

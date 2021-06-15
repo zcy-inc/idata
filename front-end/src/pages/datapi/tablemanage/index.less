@@ -3,11 +3,12 @@
   .board {
     display: flex;
     height: 100%;
-
     .divider {
       border-right: solid 1px #f0f2f5;
     }
     .left {
+      width: 300px;
+      padding: 16px;
       :global {
         .ant-tabs-tab {
           margin-left: 0;
@@ -24,8 +25,6 @@
           font-size: 15px;
         }
       }
-      width: 300px;
-      padding: 16px;
       .search {
         display: flex;
         align-items: center;
@@ -41,7 +40,6 @@
         }
       }
       .folder-margin {
-        display: inline-block;
         margin-bottom: 8px;
       }
       .folder-root {

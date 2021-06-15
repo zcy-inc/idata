@@ -1,10 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions, Table, Tabs } from 'antd';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import { ViewInitialColumns, TransformBoolean } from './constants';
-import Title from '../Title';
+import Title from '../../../components/Title';
 import TableRelation from './TableRelation';
 
 export interface ViewTableProps {

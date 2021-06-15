@@ -5,10 +5,10 @@ import { EditableProTable } from '@ant-design/pro-table';
 import { useModel } from 'umi';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { FC } from 'react';
-import styles from '../../tablemanage/index.less';
+import styles from '../../index.less';
 
 import SelectType from '../SelectType';
-import Title from '../Title';
+import Title from '../../../components/Title';
 import {
   rules,
   SubTypeOps,
@@ -25,7 +25,7 @@ import {
   getFolders,
   getLabel,
 } from '@/services/tablemanage';
-import { isEnumType } from '../../utils';
+import { isEnumType } from '../../../utils';
 
 export interface CreateTagProps {}
 
