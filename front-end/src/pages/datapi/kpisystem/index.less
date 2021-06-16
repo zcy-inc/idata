@@ -90,6 +90,30 @@
         height: 100%;
         padding: 24px;
       }
+      .reset-tabs {
+        :global {
+          .ant-tabs-nav {
+            border-bottom: 1px solid #f0f0f0;
+            .ant-tabs-tab {
+              margin-left: 0;
+              padding: 12px 24px;
+            }
+            .ant-tabs-tab-active {
+              font-weight: bold;
+              background: #fff;
+              .ant-tabs-tab-btn {
+                color: #304ffe;
+              }
+            }
+          }
+          .ant-card-body {
+            padding: 0;
+          }
+          .ant-space-item {
+            margin-right: 0 !important;
+          }
+        }
+      }
       .submit {
         position: absolute;
         right: 0;
@@ -106,6 +130,47 @@
           }
         }
       }
+    }
+  }
+}
+
+.reset {
+  :global {
+    .ant-form-item-label > label {
+      height: 32px;
+    }
+    .ant-input,
+    .ant-input-affix-wrapper {
+      padding-top: 4px;
+      padding-bottom: 4px;
+    }
+    .ant-btn {
+      height: 32px;
+      padding: 4px 15px;
+    }
+    .ant-select-multiple .ant-select-selector {
+      padding-top: 1px;
+      padding-bottom: 1px;
+    }
+    .ant-form-item-no-colon {
+      color: #7f85a2;
+    }
+  }
+  .bold-label {
+    :global {
+      .ant-form-item-no-colon {
+        color: rgba(0, 0, 0, 0.85);
+        font-weight: bold;
+      }
+    }
+  }
+}
+.reset-inline {
+  margin-top: 12px;
+  :global {
+    .ant-form-item-label > label {
+      justify-content: flex-end;
+      width: 90px;
     }
   }
 }

@@ -65,7 +65,6 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
             message.success(fileCode === 'newEnum' ? '新建枚举成功' : '更新枚举成功');
             getTree('ENUM');
             getEnumInfo(res.data.enumCode);
-            // setData(res.data);
             setMode('view');
             // replacePaneKey(`E_${res.data.id}`);
           }

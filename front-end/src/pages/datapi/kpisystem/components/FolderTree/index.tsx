@@ -137,15 +137,16 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       if (_i > -1) {
         const beforeStr = name.substring(0, _i);
         const afterStr = name.substring(_i + searchValue?.length);
+        const className = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
         title = (
-          <span key="title" className={!parentId && type === 'FOLDER' && styles['folder-root']}>
+          <span key="title" className={className}>
             {beforeStr}
             <span className={styles['search-match']}>{searchValue}</span>
             {afterStr}
           </span>
         );
       }
-      node.className = (type === 'FOLDER' || i === n - 1) && styles['folder-margin'];
+      (type === 'FOLDER' || i === n - 1) && (node.className = styles['folder-margin']);
       node.title = [NodeTypeIcon[_type], title];
       parentId && (node.parentId = parentId);
 
@@ -188,8 +189,6 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     setExpandedKeys(keys);
     setAutoExpandParent(false);
   };
-
-  console.log(tree);
 
   return (
     <Fragment>

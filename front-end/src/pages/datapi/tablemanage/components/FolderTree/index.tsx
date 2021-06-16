@@ -168,8 +168,9 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
       if (_i > -1) {
         const beforeStr = name.substring(0, _i);
         const afterStr = name.substring(_i + searchValue?.length);
+        const className = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
         title = (
-          <span key="title" className={!parentId && type === 'FOLDER' && styles['folder-root']}>
+          <span key="title" className={className}>
             {beforeStr}
             <span className={styles['search-match']}>{searchValue}</span>
             {afterStr}

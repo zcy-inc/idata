@@ -13,7 +13,8 @@ export interface TabTableProps {
   fileCode: string;
 }
 export interface EditTableExportProps {
-  structData: any;
+  labels: any;
+  stData: any;
   fkData: any;
 }
 
@@ -50,69 +51,74 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
     label
       .validateFields()
       .then(() => {
-        const labels = label.getFieldsValue();
         let folderId = null;
         let tableName = '';
         let tableLabels = [];
-        let columnInfos = refTable?.current?.structData || [];
-        let foreignKeys = refTable?.current?.fkData || [];
+        let labels = refTable.current?.labels || new Map();
+        let columnInfos = refTable.current?.stData || [];
+        let foreignKeys = refTable.current?.fkData || [];
+        let params = {};
+        
+        // 检查外键字段与参考字段的长度是否一致
         for (let _ of foreignKeys) {
           if (_.columnNames.length !== _.referColumnNames.length) {
             message.error('字段与参考字段的长度不一致');
             return;
           }
         }
-        console.log({ labels, columnInfos, foreignKeys });
-        for (let key of Object.keys(labels)) {
-          if (labels[key]) {
-            if (key === 'tableName') {
-              tableName = labels[key];
-            } else if (key === 'folderId') {
-              folderId = labels[key];
-            } else {
-              if (Array.isArray(labels[key])) {
-                tableLabels.push({ labelCode: key });
-              } else {
-                tableLabels.push({ labelCode: key, labelParamValue: labels[key] });
-              }
+        // 处理tableLabels的入参格式
+        for (let [key, value] of labels.entries()) {
+          if (!value) {
+            continue;
+          }
+          if (key === 'tableName') {
+            tableName = value;
+            continue;
+          }
+          if (key === 'folderId') {
+            folderId = value;
+            continue;
+          }
+          const item = { labelCode: key, labelParamValue: value };
+          if (Array.isArray(value)) {
+            Reflect.deleteProperty(item, 'labelParamValue');
+          }
+          tableLabels.push(item);
+        }
+        // 处理columnInfos的入参格式
+        columnInfos = columnInfos.map((_: any, i: number) => {
+          const columnLabels = [];
+          for (let key of Object.keys(_)) {
+            if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
+              columnLabels.push({
+                columnName: _.columnName,
+                labelCode: key,
+                labelParamValue: _[key],
+              });
             }
           }
-        }
-        const params = {
-          folderId,
-          tableName,
-          tableLabels,
-          columnInfos: columnInfos.map((_: any, i: number) => {
-            const columnLabels = [];
-            for (let key of Object.keys(_)) {
-              if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
-                columnLabels.push({
-                  columnName: _.columnName,
-                  labelCode: key,
-                  labelParamValue: _[key],
-                });
-              }
-            }
-            return { id: _.id, columnIndex: i, columnName: _.columnName, columnLabels };
-          }),
-          foreignKeys: foreignKeys.map((_: any) => {
-            return {
-              id: _.id,
-              columnNames: _.columnNames.join(','),
-              referDbName: _.referDbName,
-              referTableId: _.referTableId,
-              referColumnNames: _.referColumnNames.join(','),
-              erType: _.erType,
-            };
-          }),
-        };
-        if (data) {
-          Object.assign(params, { id: data.id });
-        }
+          return { id: _.id, columnIndex: i, columnName: _.columnName, columnLabels };
+        });
+        // 处理foreignKeys的入参格式
+        foreignKeys = foreignKeys.map((_: any) => {
+          return {
+            id: _.id,
+            columnNames: _.columnNames.join(','),
+            referDbName: _.referDbName,
+            referTableId: _.referTableId,
+            referColumnNames: _.referColumnNames.join(','),
+            erType: _.erType,
+          };
+        });
+        params = { folderId, tableName, tableLabels, columnInfos, foreignKeys };
+        // 如果data有值, 本次提交为更新, 增加id字段
+        data && Object.assign(params, { id: data.id });
+
         createTable(params)
           .then((res) => {
             if (res.success) {
-              message.success(fileCode === 'newTable' ? '创建表成功' : '修改表成功');
+              const msg = fileCode === 'newTable' ? '创建表成功' : '修改表成功';
+              message.success(msg);
               setMode('view');
               getTableInfo(res.data.id);
               getTree('TABLE');
@@ -134,6 +140,15 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
       })
       .catch((err) => {})
       .finally(() => setLoading(false));
+  };
+
+  const onCancel = () => {
+    if (fileCode === 'newTable') {
+      onRemovePane('newTable');
+    } else {
+      setMode('view');
+      getTableInfo(fileCode);
+    }
   };
 
   return (
@@ -166,17 +181,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
             保存
           </Button>,
-          <Button
-            key="cancel"
-            onClick={() => {
-              if (fileCode === 'newTable') {
-                onRemovePane('newTable');
-              } else {
-                setMode('view');
-                getTableInfo(fileCode);
-              }
-            }}
-          >
+          <Button key="cancel" onClick={onCancel}>
             取消
           </Button>,
         ]}

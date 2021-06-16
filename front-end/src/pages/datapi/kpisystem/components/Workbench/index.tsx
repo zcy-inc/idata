@@ -5,6 +5,9 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { IconFont } from '@/components';
+import TabDIM from '../TabDIM';
+import TabModifier from '../TabModifier';
+import TabMetric from '../TabMetric';
 
 const { TabPane } = Tabs;
 
@@ -15,6 +18,18 @@ const Workbench: FC = ({}) => {
     setActiveTab: _.setActiveTab,
     removeTab: _.removeTab,
   }));
+
+  const renderTab = (tab: any) => {
+    switch (tab.type) {
+      case 'TABLE':
+        return <TabDIM initialMode={tab.mode} fileCode={tab.code} />;
+      case 'LABEL':
+        return <TabModifier initialMode={tab.mode} fileCode={tab.code} />;
+      case 'ENUM':
+      default:
+        return <TabMetric initialMode={tab.mode} fileCode={tab.code} />;
+    }
+  };
 
   return tabs.length ? (
     <Tabs
@@ -33,7 +48,7 @@ const Workbench: FC = ({}) => {
           key={tab.key}
           closeIcon={<IconFont type="icon-guanbichanggui" />}
         >
-          <div>???</div>
+          {renderTab(tab)}
         </TabPane>
       ))}
     </Tabs>

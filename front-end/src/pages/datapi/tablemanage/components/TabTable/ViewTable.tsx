@@ -5,7 +5,7 @@ import styles from '../../index.less';
 
 import { ViewInitialColumns, TransformBoolean } from './constants';
 import Title from '../../../components/Title';
-import TableRelation from './TableRelation';
+import TableRelation from './components/TableRelation';
 
 export interface ViewTableProps {
   data: any;

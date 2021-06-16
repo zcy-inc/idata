@@ -1,4 +1,11 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, {
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  forwardRef,
+} from 'react';
 import ProForm, {
   ProFormText,
   ProFormRadio,
@@ -9,14 +16,17 @@ import { Checkbox, Popover, Tooltip, Typography } from 'antd';
 import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { FC } from 'react';
-import styles from '../../index.less';
+import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
-import Title from '../../../components/Title';
-import { InitialLabel, RadioOps } from './constants';
+import Title from '../../../../components/Title';
+import { InitialLabel, RadioOps } from '../constants';
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 
-export type EnumValueType = { enumValue: string; valueCode: string };
+export type EnumValueType = {
+  enumValue: string;
+  valueCode: string;
+};
 export interface LabelProps {
   labelName: string;
   labelCode: string;
@@ -42,18 +52,21 @@ const FormLabel: FC = ({ children }) => {
   );
 };
 
-const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
+const TableLabels: FC<TableLabelsProps> = ({ form, initial }, ref) => {
   const [folders, setFolders] = useState<any[]>([]); // 平铺的目录树, 用于表单的位置
   const [checkedList, setCheckedList] = useState<string[]>([]); // 齿轮那儿选中的项
   const [allChecked, setAllChecked] = useState(true); // 是否全选
   const [indeterminate, setIndeterminate] = useState(false); // 全选的一个样式开关
   const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
-  const [labels, setLabels] = useState<any[]>([]); // 基本信息的项
-  const [labelsMap, setLabelsMap] = useState<Map<string, any>>(new Map()); // 方便检索做的map
+  const [labels, setLabels] = useState<any[]>([]); // 用以渲染checklist的完整obj
+  const labelsMap = useRef(new Map()); // 方便检索做的map
+  const labelValues = useRef(new Map()); // 表单的数据（应要求checklist只做显隐, 数据还是全量）
 
   const { curFolder } = useModel('tabalmanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
+
+  useImperativeHandle(ref, () => ({ labels: labelValues.current }));
 
   useEffect(() => {
     // 获取基本信息的labels
@@ -61,7 +74,6 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
       // 获取数仓管理人
       getDWOwner()
         .then((owners) => {
-          const map = new Map(); // 快速检索用的map, [labelCode, _]
           const list: string[] = []; // 选中的checkedlist, labelCode[]
           // ops, 用以渲染checklist.group
           const ops = [InitialLabel, ...res.data].map((_: LabelProps) => {
@@ -88,7 +100,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
                 }));
               }
             }
-            map.set(_.labelCode, tmp);
+            labelsMap.current.set(_.labelCode, tmp);
             list.push(_.labelCode);
             return tmp;
           });
@@ -96,15 +108,13 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
-            tableLabels.forEach(
-              (_: any) =>
-                (initialValue[_.labelCode] =
-                  _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue),
-            );
+            tableLabels.forEach((_: any) => {
+              const v = _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue;
+              labelValues.current.set(_.labelCode, v);
+              initialValue[_.labelCode] = v;
+            });
             form.setFieldsValue(initialValue);
           }
-
-          setLabelsMap(map);
           setCheckedList(list);
           setLabels(ops);
         })
@@ -125,6 +135,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
     setAllChecked(list.length === labels.length);
     setIndeterminate(!!list.length && list.length < labels.length);
   };
+
   // 全选
   const onAllCheck = (checked: boolean) => {
     const list = checked
@@ -134,10 +145,11 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
     setAllChecked(checked);
     setIndeterminate(!checked);
   };
+
   // 渲染checklist的每一项
   const renderFormList = () => {
     return checkedList.map((labelCode) => {
-      const _ = labelsMap.get(labelCode);
+      const _ = labelsMap.current.get(labelCode);
       switch (_.labelTag) {
         case 'STRING_LABEL':
           return (
@@ -148,6 +160,9 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               placeholder="请输入"
+              fieldProps={{
+                onChange: ({ target: { value } }) => labelValues.current.set(_.labelCode, value),
+              }}
             />
           );
         case 'BOOLEAN_LABEL':
@@ -159,6 +174,9 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               options={RadioOps}
+              fieldProps={{
+                onChange: ({ target: { value } }) => labelValues.current.set(_.labelCode, value),
+              }}
             />
           );
         case 'ENUM_VALUE_LABEL':
@@ -171,6 +189,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               options={_.enums}
+              fieldProps={{ onChange: (v) => labelValues.current.set(_.labelCode, v) }}
             />
           );
         case 'ATTRIBUTE_LABEL':
@@ -183,6 +202,7 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               width="sm"
               rules={!!_.labelRequired ? rules : []}
               options={[{ label: null, value: _.labelCode }]}
+              fieldProps={{ onChange: (v) => labelValues.current.set(_.labelCode, v) }}
             />
           );
       }
@@ -242,8 +262,8 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
               ? initial.folderId?.toString() || null
               : curFolder
               ? curFolder.type === 'FOLDER'
-                ? curFolder?.folderId
-                : curFolder?.parentId
+                ? curFolder.folderId
+                : curFolder.parentId
               : null
           }
         />
@@ -252,4 +272,4 @@ const TableLabels: FC<TableLabelsProps> = ({ form, initial }) => {
   );
 };
 
-export default TableLabels;
+export default forwardRef(TableLabels);

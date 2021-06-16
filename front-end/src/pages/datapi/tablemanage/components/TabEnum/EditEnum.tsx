@@ -5,7 +5,7 @@ import type { FormInstance } from 'antd';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
-import EnumTable from './EnumTable';
+import EnumTable from './components/EnumTable';
 import { getFolders } from '@/services/tablemanage';
 import { rules } from './constants';
 
