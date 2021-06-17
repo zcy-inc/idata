@@ -70,7 +70,9 @@ public class TableRelationServiceImpl implements TableRelationService {
 
     @Override
     public TableRelationDto getTableRelations(Long tableId) {
-        List<ForeignKeyDto> foreignKeyDtoList = foreignKeyService.getForeignKeys(null);
+        TableRelationDto echoTableRelation = new TableRelationDto();
+        List<ForeignKeyDto> foreignKeyDtoList = foreignKeyService.getForeignKeys(tableId);
+        if (foreignKeyDtoList.size() == 0) {return echoTableRelation;}
         Set<Long> foreignKeyIds = new HashSet<>();
         Set<Long> tableIds = new HashSet<>();
         findTableRelationsByTableId(tableId, null, foreignKeyDtoList, tableIds, foreignKeyIds);
@@ -95,7 +97,6 @@ public class TableRelationServiceImpl implements TableRelationService {
                 }
             }
         }
-        TableRelationDto echoTableRelation = new TableRelationDto();
         echoTableRelation.setTables(tables);
         echoTableRelation.setEdges(edges);
         return echoTableRelation;
@@ -130,7 +131,7 @@ public class TableRelationServiceImpl implements TableRelationService {
                         else if (COLUMN_TYPE_LABEL.equals(columnLabel.getLabelCode())
                                 && devColumnInfoDto.getColumnName().equals(columnLabel.getColumnName())) {
                             echoColumnInfoDto.setColumnType(devEnumValueDao.selectOne(c ->
-                                    c.where(devEnumValue.del, isEqualTo(1),
+                                    c.where(devEnumValue.del, isNotEqualTo(1),
                                             and(devEnumValue.valueCode, isEqualTo(columnLabel.getLabelParamValue()))))
                                     .get().getEnumValue());
                         }

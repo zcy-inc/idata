@@ -117,12 +117,13 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     public List<LabelDto> getDbNames() {
-        return PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
-                .from(devLabel)
-                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)))
+        List<LabelDto> dbLabelDtoList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.labelCode, devLabel.labelParamValue)
+                        .from(devLabel)
+                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)))
+                        .groupBy(devLabel.labelParamValue)
                         .build().render(RenderingStrategies.MYBATIS3)),
-                LabelDto.class, "labelCode", "labelParamValue")
-                .stream().distinct().collect(Collectors.toList());
+                LabelDto.class, "labelCode", "labelParamValue");
+        return dbLabelDtoList;
     }
 
     @Override
@@ -166,16 +167,18 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;
         if (columnInfoDtoList != null) {
-            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList, tableInfo.getId(), operator);
+            List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
+            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
+                    tableInfo.getId(), columnNameList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
-        }
-        // 外键表操作
-        List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
-                ? tableInfoDto.getForeignKeys() : null;
-        if (foreignKeyDtoList != null) {
-            List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyService.createOrEdit(foreignKeyDtoList,
-                    tableInfo.getId(), operator);
-            echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
+            // 外键表操作
+            List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
+                    ? tableInfoDto.getForeignKeys() : null;
+            if (foreignKeyDtoList != null) {
+                List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyService.createOrEdit(foreignKeyDtoList,
+                        tableInfo.getId(), columnNameList, operator);
+                echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
+            }
         }
 
         return echoTableInfoDto;
@@ -202,6 +205,18 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<LabelDto> tableLabelDtoList = tableInfoDto.getTableLabels() != null && tableInfoDto.getTableLabels().size() > 0 ?
                 tableInfoDto.getTableLabels() : null;
         if (tableLabelDtoList != null) {
+            List<LabelDto> existTableLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+                    .from(devLabel).where(devLabel.del, isNotEqualTo(1),
+                            and(devLabel.tableId, isEqualTo(tableInfo.getId())),
+                            and(devLabel.columnName, isNull(), or(devLabel.columnName, isEqualTo(""))))
+                            .build().render(RenderingStrategies.MYBATIS3)),
+                    LabelDto.class, "id", "tableId", "labelCode");
+            List<String> tableLabelCodeList = tableLabelDtoList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
+            List<LabelDto> deleteTableLabelList = existTableLabelList.stream()
+                    .filter(existColumnLabel -> !tableLabelCodeList.contains(existColumnLabel.getLabelCode()))
+                    .collect(Collectors.toList());
+            // 删除表不再打标的记录
+            deleteTableLabelList.forEach(deleteTableLabel -> labelService.removeLabel(deleteTableLabel, operator));
             List<LabelDto> echoTableLabelDtoList = tableLabelDtoList.stream().map(tableLabelDto -> {
                 tableLabelDto.setTableId(tableInfo.getId());
                 return labelService.label(tableLabelDto, operator);
@@ -212,16 +227,18 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                 ? tableInfoDto.getColumnInfos() : null;
         if (columnInfoDtoList != null) {
-            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList, tableInfo.getId(), operator);
+            List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
+            List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
+                    tableInfo.getId(), columnNameList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
-        }
-        // 外键表操作
-        List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
-                ? tableInfoDto.getForeignKeys() : null;
-        if (foreignKeyDtoList != null) {
-            List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyService.createOrEdit(foreignKeyDtoList,
-                    tableInfo.getId(), operator);
-            echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
+            // 外键表操作
+            List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
+                    ? tableInfoDto.getForeignKeys() : null;
+            if (foreignKeyDtoList != null) {
+                List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyService.createOrEdit(foreignKeyDtoList,
+                        tableInfo.getId(), columnNameList, operator);
+                echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
+            }
         }
 
         return echoTableInfoDto;

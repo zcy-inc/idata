@@ -14,20 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
+package cn.zhengcaiyun.idata.develop.dal.dao;
 
-import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
+import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 21:48
+ * @date 2021-06-17 18:33
  */
 
-public interface ForeignKeyService {
-    List<ForeignKeyDto> getForeignKeys(Long tableId);
-    List<ForeignKeyDto> createOrEdit(List<ForeignKeyDto> foreignKeyDtoList, Long tableId, List<String> columnNameList, String operator);
-//    ForeignKeyDto edit(ForeignKeyDto foreignKeyDto, String operator);
-    boolean delete(Long foreignKeyId, String operator);
+@Mapper
+public interface DevForeignKeyMyDao {
+
+    @Select("<script>" +
+            "SELECT * " +
+            "FROM dev_foreign_key " +
+            "WHERE dev_foreign_key.del != 1 " +
+                "AND dev_foreign_key.refer_table_id = #{tableId} " +
+                "AND FIND_IN_SET(dev_foreign_key.refer_column_names, #{columnName}) " +
+            "</script>")
+    Optional<DevForeignKey> selectForeignKeyByRefer(Long tableId, String columnName);
 }

@@ -18,8 +18,11 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
@@ -37,7 +40,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.tableId;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -55,6 +60,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private DevColumnInfoDao devColumnInfoDao;
     @Autowired
     private DevLabelDao devLabelDao;
+    @Autowired
+    private DevForeignKeyMyDao devForeignKeyMyDaoDao;
     @Autowired
     private LabelService labelService;
 
@@ -85,7 +92,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, String operator) {
+    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList,
+                                            String operator) {
 //        checkArgument(isNotEmpty(operator), "创建者不能为空");
 //        checkArgument(columnInfoDto.getTableId() != null, "字段所属表ID不能为空");
 //        checkArgument(isNotEmpty(columnInfoDto.getColumnName()), "字段名不能为空");
@@ -136,21 +144,14 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         Map<String, String> columnLabelDefineMap = columnLabelDefineDtoList
                 .stream()
                 .collect(Collectors.toMap(LabelDefineDto::getLabelCode, LabelDefineDto::getLabelName));
-        List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
-                .from(devLabel)
-                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)),
-                        and(devLabel.columnName, isNotNull()), and(devLabel.columnName, isNotEqualTo("")))
-                .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class,
-                "id", "columnName", "tableId", "labelCode");
-        Map<String, List<LabelDto>> existColumnLabelMap = existColumnLabelList
-                .stream().collect(Collectors.groupingBy(LabelDto::getColumnName));
-        List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
-        for (Map.Entry<String, List<LabelDto>> entry : existColumnLabelMap.entrySet()) {
-            if (!columnNameList.contains(entry.getKey())) {
-                entry.getValue().forEach(columnLabel -> labelService.removeLabel(columnLabel, operator));
-            }
-        }
-
+        List<DevColumnInfo> existColumnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
+                .from(devColumnInfo)
+                .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
+                .build().render(RenderingStrategies.MYBATIS3));
+        List<DevColumnInfo> deleteColumnInfoList = existColumnInfoList.stream()
+                .filter(devColumnInfoDto -> !columnNameList.contains(devColumnInfoDto.getColumnName())).collect(Collectors.toList());
+        // 与已存在字段比较，删除未传字段记录
+        deleteColumnInfoList.forEach(deleteColumnInfo -> deleteColumnInfo(deleteColumnInfo.getId(), operator));
 
         List<ColumnInfoDto> echoColumnInfoList = columnInfoDtoList.stream().map(columnInfoDto -> {
             checkArgument(isNotEmpty(columnInfoDto.getColumnName()), "字段名不能为空");
@@ -167,6 +168,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                             and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                     .ifPresent(checkDevColumn -> columnInfoDto.setId(checkDevColumn.getId()));
             columnInfoDto.setTableId(tableId);
+
             return createOrUpdateColumn(columnInfoDto, columnLabelList, operator);
         }).collect(Collectors.toList());
         return echoColumnInfoList;
@@ -208,15 +210,15 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private ColumnInfoDto createOrUpdateColumn(ColumnInfoDto columnInfoDto, List<LabelDto> columnLabelList, String operator) {
         ColumnInfoDto echoColumnInfoDto;
         List<LabelDto> echoColumnLabelList;
-        if (columnInfoDto.getId() == null) {
+        DevColumnInfo checkColumnInfo = devColumnInfoDao.selectOne(c ->
+                c.where(devColumnInfo.del, isNotEqualTo(1),
+                        and(devColumnInfo.tableId, isEqualTo(columnInfoDto.getTableId()),
+                                and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName())))))
+                .orElse(null);
+        if (checkColumnInfo == null) {
             columnInfoDto.setCreator(operator);
             DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
                     "tableId", "columnName", "columnIndex", "creator");
-            DevColumnInfo checkColumnInfo = devColumnInfoDao.selectOne(c ->
-                    c.where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId,
-                            isEqualTo(columnInfoDto.getTableId()), and(devColumnInfo.columnName,
-                                    isEqualTo(columnInfoDto.getColumnName()))))).orElse(null);
-            checkArgument(checkColumnInfo == null, "字段已存在");
             devColumnInfoDao.insertSelective(columnInfo);
             echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                     ColumnInfoDto.class);
@@ -230,8 +232,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         }
         else {
             columnInfoDto.setEditor(operator);
+            columnInfoDto.setId(checkColumnInfo.getId());
             DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-                    "id", "columnName", "columnIndex", "creator");
+                    "id", "columnName", "columnIndex", "editor");
             devColumnInfoDao.updateByPrimaryKeySelective(columnInfo);
             echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
                     ColumnInfoDto.class);
@@ -239,6 +242,18 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             columnLabelList = columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0
                     ? columnInfoDto.getColumnLabels() : null;
             if (columnLabelList != null) {
+                List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+                        .from(devLabel)
+                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)),
+                                and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())))
+                        .build().render(RenderingStrategies.MYBATIS3)),
+                        LabelDto.class, "id", "tableId", "labelCode", "columnName");
+                List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
+                List<LabelDto> deleteColumnLabelList = existColumnLabelList.stream()
+                        .filter(existColumnLabel -> !columnLabelCodeList.contains(existColumnLabel.getLabelCode()))
+                        .collect(Collectors.toList());
+                // 删除字段不再打标的记录
+                deleteColumnLabelList.forEach(deleteColumnLabel -> labelService.removeLabel(deleteColumnLabel, operator));
                 echoColumnLabelList = columnLabelList.stream()
                         .map(columnLabel -> {
                             columnLabel.setTableId(columnInfoDto.getTableId());
@@ -254,6 +269,10 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public boolean delete(Long columnId, String operator) {
+        return deleteColumnInfo(columnId, operator);
+    }
+
+    private boolean deleteColumnInfo(Long columnId, String operator) {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(columnId != null, "字段ID不能为空");
         DevColumnInfo columnInfo = devColumnInfoDao.selectOne(c ->
@@ -261,6 +280,12 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                         and(devColumnInfo.id, isEqualTo(columnId))))
                 .orElse(null);
         checkArgument(columnInfo != null, "字段不存在");
+        DevForeignKey checkForeignKey = devForeignKeyMyDaoDao.selectForeignKeyByRefer(columnInfo.getTableId(),
+                columnInfo.getColumnName())
+                .orElse(null);
+        if (checkForeignKey != null) {
+            throw new IllegalArgumentException("字段被表" + checkForeignKey.getTableId() + "外键字段依赖，不能删除");
+        }
 
         // 删除字段表记录
         devColumnInfoDao.update(c -> c.set(devColumnInfo.del).equalTo(1)

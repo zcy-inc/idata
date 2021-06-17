@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface ColumnInfoService {
     List<ColumnInfoDto> getColumns(Long tableId);
-    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, String operator);
+    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
     boolean delete(Long columnId, String operator);
 }
