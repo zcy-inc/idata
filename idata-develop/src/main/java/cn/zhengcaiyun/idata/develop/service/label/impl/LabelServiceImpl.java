@@ -59,7 +59,7 @@ public class LabelServiceImpl implements LabelService {
     @Transactional(rollbackFor = Throwable.class)
     public LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator) {
         if (labelDefineDto.getLabelCode() == null) {
-            labelDefineDto.setLabelCode(RandomUtil.randomStr(10));
+            labelDefineDto.setLabelCode(RandomUtil.randomStr(10) + ":LABEL");
             checkArgument(labelDefineDto.getLabelName() != null, "labelName不能为空");
             checkArgument(labelDefineDto.getLabelTag() != null, "labelTag不能为空");
             LabelTagEnum labelTagEnum = LabelTagEnum.valueOf(labelDefineDto.getLabelTag());
@@ -78,8 +78,8 @@ public class LabelServiceImpl implements LabelService {
                     checkArgument(attributeDto.getAttributeKey() != null, "attributeKey不能为空");
                     checkArgument(attributeDto.getAttributeType() != null, "attributeType不能为空");
                     checkArgument(attributeDto.getAttributeValue() != null, "attributeValue不能为空");
-                    if (attributeDto.getAttributeType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
-                        enumService.getEnumName(attributeDto.getAttributeType().replace(":" + MetaTypeEnum.ENUM.name(), ""));
+                    if (attributeDto.getAttributeType().endsWith(":ENUM")) {
+                        enumService.getEnumName(attributeDto.getAttributeType());
                         enumService.getEnumValue(attributeDto.getAttributeValue());
                     }
                     if (MetaTypeEnum.ENUM.name().equals(attributeDto.getAttributeType())) {
@@ -111,7 +111,8 @@ public class LabelServiceImpl implements LabelService {
         else {
             DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
                     c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()),
-                            and(devLabelDefine.del, isNotEqualTo(1)))).orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+                            and(devLabelDefine.del, isNotEqualTo(1)))).orElseThrow(
+                                    () -> new IllegalArgumentException("labelCode不存在, " + labelDefineDto.getLabelCode()));
             labelDefineDto.setId(labelDefine.getId());
             labelDefineDto.setEditor(operator);
             devLabelDefineDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
@@ -142,7 +143,7 @@ public class LabelServiceImpl implements LabelService {
         }
         if (LabelTagEnum.ENUM_VALUE_LABEL.equals(labelTagEnum)) {
             checkArgument(labelParamType != null
-                            && labelParamType.endsWith(":" + MetaTypeEnum.ENUM.name()),
+                            && labelParamType.endsWith(":ENUM"),
                     "labelParamType与labelTag不符");
         }
     }
@@ -152,14 +153,13 @@ public class LabelServiceImpl implements LabelService {
         DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
                 c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
                         and(devLabelDefine.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelCode));
         LabelDefineDto labelDefineDto = PojoUtil.copyOne(labelDefine, LabelDefineDto.class);
         if (labelDefineDto.getLabelAttributes() != null) {
             labelDefineDto.getLabelAttributes().forEach(attributeDto -> {
                 if (attributeDto.getAttributeType() != null
-                        && attributeDto.getAttributeType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
-                    attributeDto.setEnumName(enumService.getEnumName(attributeDto.getAttributeType()
-                            .replace(":" + MetaTypeEnum.ENUM.name(), "")));
+                        && attributeDto.getAttributeType().endsWith(":ENUM")) {
+                    attributeDto.setEnumName(enumService.getEnumName(attributeDto.getAttributeType()));
                     if (attributeDto.getAttributeValue() != null) {
                         attributeDto.setEnumValue(enumService.getEnumValue(attributeDto.getAttributeValue()));
                     }
@@ -195,11 +195,10 @@ public class LabelServiceImpl implements LabelService {
                 .stream().map(devLabelDefine -> {
                     LabelDefineDto labelDefineDto = PojoUtil.copyOne(devLabelDefine, LabelDefineDto.class);
                     if (labelDefineDto.getLabelParamType() != null
-                            && labelDefineDto.getLabelParamType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
+                            && labelDefineDto.getLabelParamType().endsWith(":ENUM")) {
                         labelDefineDto.setEnumValues(
                                 enumService.getEnumValues(
-                                        labelDefineDto.getLabelParamType()
-                                                .replace(":" + MetaTypeEnum.ENUM.name(), "")));
+                                        labelDefineDto.getLabelParamType()));
                     }
                     return labelDefineDto;
                 })
@@ -209,14 +208,18 @@ public class LabelServiceImpl implements LabelService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public boolean deleteDefine(String labelCode, String operator) {
-        devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
+        DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
                 and(devLabelDefine.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
-        // TODO 没有考虑依赖
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelCode));
+        // TODO 系统依赖的标签不能删除。
+        checkArgument(Integer.valueOf(0).equals(labelDefine.getLabelRequired()), "必须打标的标签不能删除");
         devLabelDefineDao.update(c -> c.set(devLabelDefine.del).equalTo(1)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.labelCode, isEqualTo(labelCode),
                         and(devLabelDefine.del, isNotEqualTo(1))));
+        devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
+                .where(devLabel.labelCode, isEqualTo(labelCode),
+                        and(devLabel.del, isNotEqualTo(1))));
         return true;
     }
 
@@ -226,7 +229,7 @@ public class LabelServiceImpl implements LabelService {
         checkArgument(labelDto.getLabelCode() != null, "labelCode不能为空");
         DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelDto.getLabelCode()),
                 and(devLabelDefine.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在"));
+                .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelDto.getLabelCode()));
         checkArgument(labelDto.getTableId() != null, "tableId不能为空");
         if (SubjectTypeEnum.COLUMN.name().equals(labelDefine.getSubjectType())) {
             checkArgument(labelDto.getColumnName() != null, "columnName不能为空");
@@ -310,7 +313,7 @@ public class LabelServiceImpl implements LabelService {
             labelDto.setLabelParamType(labelDefine.getLabelParamType());
             labelDto.setLabelTag(labelDefine.getLabelTag());
             if (labelDto.getLabelParamType() != null
-                    && labelDto.getLabelParamType().endsWith(":" + MetaTypeEnum.ENUM.name())
+                    && labelDto.getLabelParamType().endsWith(":ENUM")
                     && labelDto.getLabelParamValue() != null) {
                 labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
             }

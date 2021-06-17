@@ -18,10 +18,8 @@ package cn.zhengcaiyun.idata.develop.service.label.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
@@ -37,6 +35,9 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -51,13 +52,21 @@ public class EnumServiceImpl implements EnumService {
     private DevEnumDao devEnumDao;
     @Autowired
     private DevEnumValueDao devEnumValueDao;
+    @Autowired
+    private DevLabelDao devLabelDao;
+    @Autowired
+    private DevLabelDefineDao devLabelDefineDao;
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
+    @Autowired
+    private DevLabelDefineMyDao devLabelDefineMyDao;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public EnumDto createOrEdit(EnumDto enumDto, String operator) {
         if (enumDto.getEnumCode() == null) {
             checkArgument(enumDto.getEnumName() != null, "enumName不能为空");
-            enumDto.setEnumCode(RandomUtil.randomStr(10));
+            enumDto.setEnumCode(RandomUtil.randomStr(10) + ":ENUM");
             enumDto.setCreator(operator);
             devEnumDao.insertSelective(PojoUtil.copyOne(enumDto, DevEnum.class,
                     "creator", "enumCode", "enumName", "folderId"));
@@ -71,7 +80,7 @@ public class EnumServiceImpl implements EnumService {
         else {
             DevEnum enumRecord = devEnumDao.selectOne(c -> c.where(devEnum.enumCode, isEqualTo(enumDto.getEnumCode()),
                     and(devEnum.del, isNotEqualTo(1))))
-                    .orElseThrow(() -> new IllegalArgumentException("enumCode不存在"));
+                    .orElseThrow(() -> new IllegalArgumentException("enumCode不存在, " + enumDto.getEnumCode()));
             enumDto.setId(enumRecord.getId());
             enumDto.setEditor(operator);
             devEnumDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumDto, DevEnum.class,
@@ -104,7 +113,7 @@ public class EnumServiceImpl implements EnumService {
         DevEnumValue enumValue = devEnumValueDao.selectOne(c ->
                 c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
                         and(devEnumValue.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("valueCode不存在"));
+                .orElseThrow(() -> new IllegalArgumentException("valueCode不存在, " + enumValueDto.getValueCode()));
         enumValueDto.setId(enumValue.getId());
         enumValueDto.setEditor(operator);
         devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
@@ -117,7 +126,7 @@ public class EnumServiceImpl implements EnumService {
         EnumDto enumDto = PojoUtil.copyOne(devEnumDao.selectOne(c ->
                 c.where(devEnum.enumCode, isEqualTo(enumCode),
                         and(devEnum.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("enumCode不存在")), EnumDto.class);
+                .orElseThrow(() -> new IllegalArgumentException("enumCode不存在, " + enumCode)), EnumDto.class);
 
         enumDto.setEnumValues(getEnumValues(enumCode));
         return enumDto;
@@ -144,9 +153,8 @@ public class EnumServiceImpl implements EnumService {
             if (enumValue.getEnumAttributes() != null) {
                 enumValue.getEnumAttributes().forEach(attributeDto -> {
                     if (attributeDto.getAttributeType() != null
-                            && attributeDto.getAttributeType().endsWith(":" + MetaTypeEnum.ENUM.name())) {
-                        attributeDto.setEnumName(getEnumName(attributeDto.getAttributeType()
-                                .replace(":" + MetaTypeEnum.ENUM.name(), "")));
+                            && attributeDto.getAttributeType().endsWith(":ENUM")) {
+                        attributeDto.setEnumName(getEnumName(attributeDto.getAttributeType()));
                         if (attributeDto.getAttributeValue() != null) {
                             attributeDto.setEnumValue(getEnumValue(attributeDto.getAttributeValue()));
                         }
@@ -182,8 +190,21 @@ public class EnumServiceImpl implements EnumService {
         checkArgument(enumCode != null, "enumCode不能为空");
         devEnumDao.selectOne(c -> c.where(devEnum.enumCode, isEqualTo(enumCode),
                 and(devEnum.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("enumCode不存在"));
-        // TODO 依赖没有判断
+                .orElseThrow(() -> new IllegalArgumentException("enumCode不存在, " + enumCode));
+        // TODO special_attributes字段的依赖暂时未判断
+        List<DevLabelDefine> labelDefines = devLabelDefineMyDao.selectLabelDefineByEnumCode(enumCode);
+        if (labelDefines.size() > 0) {
+            throw new IllegalArgumentException(labelDefines.get(0).getLabelName() + "标签依赖此枚举，不能删除");
+        }
+        List<DevLabel> labels = devLabelDao.select(c ->
+                c.where(devLabel.del, isNotEqualTo(1),
+                        and(devLabel.labelParamValue, isEqualTo(enumCode))));
+        if (labels.size() > 0) {
+            List<DevTableInfo> tableInfos = devTableInfoDao.select(c -> c.where(devTableInfo.id, isEqualTo(labels.get(0).getTableId())));
+            if (tableInfos.size() > 0) {
+                throw new IllegalArgumentException(tableInfos.get(0).getTableName() + "表依赖此枚举，不能删除");
+            }
+        }
         devEnumDao.update(c -> c.set(devEnum.del).equalTo(1)
                 .set(devEnum.editor).equalTo(operator)
                 .where(devEnum.enumCode, isEqualTo(enumCode),
