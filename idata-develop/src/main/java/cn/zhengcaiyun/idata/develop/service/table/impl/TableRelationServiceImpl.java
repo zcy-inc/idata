@@ -72,7 +72,12 @@ public class TableRelationServiceImpl implements TableRelationService {
     public TableRelationDto getTableRelations(Long tableId) {
         TableRelationDto echoTableRelation = new TableRelationDto();
         List<ForeignKeyDto> foreignKeyDtoList = foreignKeyService.getForeignKeys(tableId);
-        if (foreignKeyDtoList.size() == 0) {return echoTableRelation;}
+        List<TableNodeDto> tables = new ArrayList<>();
+        if (foreignKeyDtoList.size() == 0) {
+            tables.add(findTableNodeById(tableId));
+            echoTableRelation.setTables(tables);
+            return echoTableRelation;
+        }
         Set<Long> foreignKeyIds = new HashSet<>();
         Set<Long> tableIds = new HashSet<>();
         findTableRelationsByTableId(tableId, null, foreignKeyDtoList, tableIds, foreignKeyIds);
@@ -81,7 +86,7 @@ public class TableRelationServiceImpl implements TableRelationService {
             tableIds.add(foreignKeyDto.getTableId());
         });
 
-        List<TableNodeDto> tables = tableIds.stream().map(tblId -> findTableNodeById(tblId)).collect(Collectors.toList());
+        tables = tableIds.stream().map(tblId -> findTableNodeById(tblId)).collect(Collectors.toList());
         List<TableEdgeDto> tEdges = foreignKeyIds.stream().map(fkId -> findTableEdgeById(fkId)).collect(Collectors.toList());
         List<TableEdgeDto> edges = new ArrayList<>();
         if (tEdges.size() > 0) {
