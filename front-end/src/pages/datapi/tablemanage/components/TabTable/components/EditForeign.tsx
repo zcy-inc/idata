@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState, useImperativeHandle, forwardRef }
 import { Typography, Select } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -19,7 +19,10 @@ export interface EditForeignProps {
 
 const { Link } = Typography;
 
-const EditForeign: FC<EditForeignProps> = ({ initial, _props: { strOps } }, ref) => {
+const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
+  { initial, _props: { strOps } },
+  ref,
+) => {
   const [data, setData] = useState<any[]>([]);
   const [keys, setKeys] = useState<React.Key[]>([]);
   const [dbs, setDbs] = useState<any[]>([]);
@@ -51,6 +54,7 @@ const EditForeign: FC<EditForeignProps> = ({ initial, _props: { strOps } }, ref)
         promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
         promisesC[i] = getTableReferStr({ tableId: _.referTableId });
         return {
+          key: _.id,
           id: _.id,
           columnNames: _.columnNames.split(','),
           referDbName: _.referDbName,
@@ -78,10 +82,10 @@ const EditForeign: FC<EditForeignProps> = ({ initial, _props: { strOps } }, ref)
 
   // 添加一行数据
   const addData = () => {
-    const id = Date.now();
-    const item = { id };
+    const key = Date.now();
+    const item = { key };
     setData([...data, item]);
-    setKeys([...keys, id]);
+    setKeys([...keys, key]);
   };
 
   // 录入数据
@@ -192,7 +196,7 @@ const EditForeign: FC<EditForeignProps> = ({ initial, _props: { strOps } }, ref)
 
   // 外键表的操作
   const onAction = (row: any, _: any) => {
-    const i = data.findIndex((_) => _.id === row.id);
+    const i = data.findIndex((_) => _.key === row.key);
     data.splice(i, 1);
     keys.splice(i, 1);
     setData([...data]);
@@ -203,7 +207,7 @@ const EditForeign: FC<EditForeignProps> = ({ initial, _props: { strOps } }, ref)
     <Fragment>
       <EditableProTable
         className={`${styles.reset} ${styles.fk}`}
-        rowKey="id"
+        rowKey="key"
         columns={fkColumns}
         value={data}
         bordered

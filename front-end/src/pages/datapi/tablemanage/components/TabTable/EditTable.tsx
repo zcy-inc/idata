@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { Checkbox, Popover, Tabs } from 'antd';
 import type { FormInstance } from 'antd';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -16,31 +16,32 @@ import EditLabels from './components/EditLabels';
 import EditColsInfo from './components/EditColsInfo';
 import EditForeign from './components/EditForeign';
 
+import { TableInfo, ForeignKey } from './type';
 import { InitialColumn } from './constants';
 import { getTableLabels } from '@/services/tablemanage';
 
 export interface EditTableProps {
   refs: { [key: string]: FormInstance };
-  initial?: any;
+  initial?: TableInfo;
 }
 export interface LabelsExportProps {
-  labels: any;
+  labels: Map<string, any>;
 }
 export interface ColumnsExportProps {
-  data: any;
+  data: { [key: string]: any }[];
 }
 export interface ForeignExportProps {
-  data: any;
+  data: ForeignKey[];
 }
 
 const CheckboxGroup = Checkbox.Group;
 const { TabPane } = Tabs;
 
-const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
+const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, initial }, ref) => {
   // 表结构可选列设置
   const [checkedList, setCheckedList] = useState<string[]>([]);
-  const [allChecked, setAllChecked] = useState(true);
-  const [indeterminate, setIndeterminate] = useState(false);
+  const [allChecked, setAllChecked] = useState<boolean>(true);
+  const [indeterminate, setIndeterminate] = useState<boolean>(false);
   const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
   // 表结构的列与检索表
   const [columns, setColumns] = useState<any[]>([]);
@@ -56,6 +57,7 @@ const EditTable: FC<EditTableProps> = ({ refs, initial }, ref) => {
     labels: refLabel.current?.labels,
     stData: refColumns.current?.data,
     fkData: refForeign.current?.data,
+    columnsMap: columnsMap.current,
   }));
 
   useEffect(() => {

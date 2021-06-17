@@ -4,10 +4,12 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
+import { createEnum, delEnum, getEnum } from '@/services/tablemanage';
+import { isEnumType } from '@/utils/tablemanage';
+import { Enum } from '@/types/tablemanage';
+
 import ViewEnum from './ViewEnum';
 import EditEnum from './EditEnum';
-import { createEnum, delEnum, getEnum } from '@/services/tablemanage';
-import { isEnumType } from '../../../utils';
 
 export interface TabEnumProps {
   initialMode: 'view' | 'edit';
@@ -19,12 +21,11 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
 
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<Enum>();
 
-  const { getTree, onRemovePane, replacePaneKey } = useModel('tabalmanage', (ret) => ({
+  const { getTree, onRemovePane } = useModel('tabalmanage', (ret) => ({
     getTree: ret.getTree,
     onRemovePane: ret.onRemovePane,
-    replacePaneKey: ret.replacePaneKey,
   }));
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
     form.validateFields().then(() => {
       setLoading(true);
       const values = form.getFieldsValue();
-      const data: any = {
+      const data = {
         enumName: values.enumName,
         folderId: values.folderId,
         enumValues: values.enumValues.enums.map((_: any) => ({
@@ -58,7 +59,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
           })),
         })),
       };
-      fileCode !== 'newEnum' && (data.enumCode = fileCode);
+      fileCode !== 'newEnum' && Object.assign(data, { enumCode: fileCode });
       createEnum(data)
         .then((res) => {
           if (res.success) {
@@ -66,7 +67,6 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
             getTree('ENUM');
             getEnumInfo(res.data.enumCode);
             setMode('view');
-            // replacePaneKey(`E_${res.data.id}`);
           }
         })
         .catch((err) => [])

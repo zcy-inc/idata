@@ -8,7 +8,7 @@ import IconFont from '@/components/IconFont';
 import SelectType from '../../SelectType';
 import { getRandomStr } from '@/utils/utils';
 import { getEnumNames, getEnumValues } from '@/services/tablemanage';
-import { isEnumType } from '../../../../utils';
+import { isEnumType } from '@/utils/tablemanage';
 
 export interface EnumTableProps {
   initial?: any;

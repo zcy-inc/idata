@@ -4,7 +4,8 @@ import { Input, Table, Radio, Select, Row, Col, message, Form } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import { useModel } from 'umi';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { TableColumnType } from 'antd';
+import type { FC, Key } from 'react';
 import styles from '../../index.less';
 
 import SelectType from '../SelectType';
@@ -25,23 +26,24 @@ import {
   getFolders,
   getLabel,
 } from '@/services/tablemanage';
-import { isEnumType } from '../../../utils';
+import { EnumName, EnumValue, FLatTreeNode, LabelAttribute } from '@/types/tablemanage';
+import { isEnumType } from '@/utils/tablemanage';
 
 export interface CreateTagProps {}
 
 const CreateTag: FC<CreateTagProps> = ({}) => {
   // 标签类型
   const [tagType, setTagType] = useState('');
-  const [folders, setFolders] = useState<any[]>([]);
+  const [folders, setFolders] = useState([]);
   // 标签类型为枚举标签时
-  const [enumTypeOps, setEnumTypeOps] = useState<any[]>([]);
-  const [enumTypeCols, setEnumTypeCols] = useState<any[]>(initialEnumTypeCols);
-  const [enumTypeDt, setEnumTypeDt] = useState<any[]>([]);
+  const [enumTypeOps, setEnumTypeOps] = useState([]);
+  const [enumTypeCols, setEnumTypeCols] = useState<TableColumnType<{}>[]>(initialEnumTypeCols);
+  const [enumTypeData, setEnumTypeData] = useState([]);
   // 标签类型为属性标签时
-  const [propEnumOps, setPropEnumOps] = useState<any[][]>([]);
-  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>();
+  const [propEnumOps, setPropEnumOps] = useState([]);
+  const [editableKeys, setEditableRowKeys] = useState<Key[]>();
   // submit loading
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   // edit mode
   const [form] = Form.useForm();
 
@@ -60,14 +62,17 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
       dataIndex: 'attributeType',
       key: 'attributeType',
       formItemProps: { rules },
-      renderFormItem: (schema: any) => (
+      renderFormItem: (schema) => (
         <SelectType
           onChange={(value) => {
             if (isEnumType(value)) {
               getEnumValues({ enumCode: value })
                 .then((res) => {
                   const data = Array.isArray(res.data) ? res.data : [];
-                  const ops = data.map((_: any) => ({ label: _.enumValue, value: _.valueCode }));
+                  const ops = data.map((_: EnumValue) => ({
+                    label: _.enumValue,
+                    value: _.valueCode,
+                  }));
                   propEnumOps[schema.index] = ops;
                   setPropEnumOps([...propEnumOps]);
                 })
@@ -82,7 +87,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
       dataIndex: 'attributeValue',
       key: 'attributeValue',
       formItemProps: { rules },
-      renderFormItem: (schema: any) => {
+      renderFormItem: (schema) => {
         const type = schema.entry.attributeType;
         if (!type) return '-';
         if (type === 'STRING') return <Input placeholder="请输入" />;
@@ -96,7 +101,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data.map((_: FLatTreeNode) => ({ label: _.folderName, value: _.id }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -137,7 +142,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
           onChangeEnumTypeOps(enumCode);
         }
         if (_.labelTag === 'ATTRIBUTE_LABEL') {
-          const labelAttributes = _.labelAttributes.map((item: any, i: number) => ({
+          const labelAttributes = _.labelAttributes.map((item: LabelAttribute, i: number) => ({
             ...item,
             id: i,
             attributeType: isEnumType(item.attributeType)
@@ -146,7 +151,9 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
           }));
 
           Object.assign(values, { labelAttributes });
-          setEditableRowKeys(labelAttributes.map((item: any) => item.id));
+          setEditableRowKeys(
+            labelAttributes.map((item: LabelAttribute & { id: number }) => item.id),
+          );
           onChangeLableTag('ATTRIBUTE_LABEL');
         }
         form.setFieldsValue(values);
@@ -155,24 +162,25 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
   };
 
   // 改变标签类型的时候获取枚举值ops
-  const onChangeLableTag = (value: any) => {
+  const onChangeLableTag = (value: string) => {
     setTagType(value);
     if (value === 'ENUM_VALUE_LABEL') {
-      getEnumNames({})
+      getEnumNames()
         .then((res) => {
-          const ops = Array.isArray(res.data) ? res.data : [];
-          setEnumTypeOps(ops.map((_: any) => ({ label: _.enumName, value: _.enumCode })));
+          let ops = Array.isArray(res.data) ? res.data : [];
+          ops = ops.map((_: EnumName) => ({ label: _.enumName, value: _.enumCode }));
+          setEnumTypeOps(ops);
         })
         .catch((err) => {});
     }
   };
   // 改变枚举值的时候修改预览表格
-  const onChangeEnumTypeOps = (value: any) => {
+  const onChangeEnumTypeOps = (value: string) => {
     getEnumValues({ enumCode: value })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         // 处理列
-        const cols: ProColumns[] = [
+        const cols: TableColumnType<{}>[] = [
           { title: '枚举值', dataIndex: 'enumValue', key: 'enumValue' },
           {
             title: '父级枚举值',
@@ -182,19 +190,19 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
           },
         ];
         const exCols = Array.isArray(data[0]?.enumAttributes) ? data[0]?.enumAttributes : [];
-        exCols.forEach((_: any) => {
+        exCols.forEach((_: LabelAttribute) => {
           cols.push({ title: _.attributeKey, dataIndex: _.attributeKey, key: _.attributeKey });
         });
         setEnumTypeCols(cols);
         // 处理数据
-        const dt = data.map((_: any) => {
+        const dt = data.map((_: EnumValue) => {
           const d = { key: _.id, enumValue: _.enumValue, parentValue: _.parentValue };
           const _exCols = Array.isArray(_.enumAttributes) ? _.enumAttributes : [];
-          _exCols.forEach((col: any) => (d[col.attributeKey] = col.attributeValue));
+          _exCols.forEach((col: LabelAttribute) => (d[col.attributeKey] = col.attributeValue));
           return d;
         });
 
-        setEnumTypeDt(dt);
+        setEnumTypeData(dt);
       })
       .catch((err) => {});
   };
@@ -216,7 +224,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         const params = {
           ...values,
           labelParamType: TagToParamMap[values.labelTag],
-          labelAttributes: values.labelAttributes?.map((_: any) => ({
+          labelAttributes: values.labelAttributes?.map((_: LabelAttribute) => ({
             ..._,
             attributeType: isEnumType(_.attributeType)
               ? `${_.attributeType}:ENUM`
@@ -282,7 +290,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         <Table
           key="table"
           columns={enumTypeCols}
-          dataSource={enumTypeDt}
+          dataSource={enumTypeData}
           pagination={false}
           size="small"
           scroll={{ x: 'max-content' }}

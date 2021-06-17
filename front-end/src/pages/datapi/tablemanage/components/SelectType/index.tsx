@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
+import type { CSSProperties } from 'react';
+
 import { getEnumNames } from '@/services/tablemanage';
-import { isEnumType } from '../../../utils';
+import { EnumName } from '@/types/tablemanage';
+import { isEnumType } from '@/utils/tablemanage';
 
 interface SelectTypeProps {
   value?: string;
-  onChange?: (value: string) => void;
   disabled?: boolean;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
+  onChange?: (value: string) => void;
 }
 
 const enumOptions = [
@@ -17,20 +20,20 @@ const enumOptions = [
 ];
 
 const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, disabled, style }) => {
-  const [_enum, setEnum] = useState<any>(null);
-  const [enumValue, setEnumValue] = useState<any>(null);
-  const [enumOps, setEnumOps] = useState<any[]>([]);
+  const [enumName, setEnumName] = useState<string>();
+  const [enumValue, setEnumValue] = useState<string>();
+  const [enumOps, setEnumOps] = useState([]);
 
   useEffect(() => {
-    isEnumType(value) ? getNames() : setEnum(value);
+    isEnumType(value) ? getNames() : setEnumName(value);
   }, []);
 
   const getNames = () =>
     getEnumNames()
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
-        const ops = data.map((_: any) => ({ label: _.enumName, value: _.enumCode }));
-        setEnum('ENUM');
+        const ops = data.map((_: EnumName) => ({ label: _.enumName, value: _.enumCode }));
+        setEnumName('ENUM');
         setEnumOps(ops);
         onEnumValueChange(isEnumType(value) ? value : ops[0]?.value);
       })
@@ -41,7 +44,7 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
   };
 
   const onEnumChange = (v: string) => {
-    setEnum(v);
+    setEnumName(v);
     triggerChange(v);
     if (isEnumType(v)) {
       getNames();
@@ -59,7 +62,7 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
         key="enum"
         disabled={disabled}
         placeholder="请选择"
-        value={_enum}
+        value={enumName}
         onChange={onEnumChange}
         options={enumOptions}
         style={{ width: isEnumType(value) ? '50%' : '100%' }}

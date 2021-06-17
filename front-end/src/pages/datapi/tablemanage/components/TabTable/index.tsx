@@ -13,9 +13,10 @@ export interface TabTableProps {
   fileCode: string;
 }
 export interface EditTableExportProps {
-  labels: any;
-  stData: any;
-  fkData: any;
+  labels: Map<string, any>;
+  stData: any[];
+  fkData: any[];
+  columnsMap: Map<string, any>;
 }
 
 const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
@@ -55,10 +56,11 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
         let tableName = '';
         let tableLabels = [];
         let labels = refTable.current?.labels || new Map();
-        let columnInfos = refTable.current?.stData || [];
+        let stData = refTable.current?.stData || [];
+        let colsInfoMap = refTable.current?.columnsMap || new Map();
+        let columnInfos = [];
         let foreignKeys = refTable.current?.fkData || [];
         let params = {};
-        
         // 检查外键字段与参考字段的长度是否一致
         for (let _ of foreignKeys) {
           if (_.columnNames.length !== _.referColumnNames.length) {
@@ -86,34 +88,35 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           tableLabels.push(item);
         }
         // 处理columnInfos的入参格式
-        columnInfos = columnInfos.map((_: any, i: number) => {
+        for (let [i, _] of stData.entries()) {
+          const item = { columnIndex: i, columnName: _.columnName };
           const columnLabels = [];
-          for (let key of Object.keys(_)) {
-            if (key !== 'id' && key !== 'columnName' && key !== 'folderId' && _[key] !== null) {
+          for (let [key, value] of Object.entries(_)) {
+            if (key === 'key' || key === 'id') {
+              continue;
+            }
+            // 检查表结构的必填项
+            const tmp = colsInfoMap.get(key);
+            if (value === null && tmp.labelRequired === 1) {
+              message.error(`表结构-${tmp.labelName}为必填项`);
+              return;
+            }
+            if (key !== 'key' && key !== 'columnName' && key !== 'folderId' && value !== null) {
               columnLabels.push({
                 columnName: _.columnName,
                 labelCode: key,
-                labelParamValue: _[key],
+                labelParamValue: value,
               });
             }
           }
-          return { id: _.id, columnIndex: i, columnName: _.columnName, columnLabels };
-        });
+          Object.assign(item, { columnLabels });
+          _.id && Object.assign(item, { id: _.id }); // 当id存在时带上其id表示更新该条数据
+          columnInfos[i] = item;
+        }
         // 处理foreignKeys的入参格式
-        foreignKeys = foreignKeys.map((_: any) => {
-          return {
-            id: _.id,
-            columnNames: _.columnNames.join(','),
-            referDbName: _.referDbName,
-            referTableId: _.referTableId,
-            referColumnNames: _.referColumnNames.join(','),
-            erType: _.erType,
-          };
-        });
         params = { folderId, tableName, tableLabels, columnInfos, foreignKeys };
         // 如果data有值, 本次提交为更新, 增加id字段
         data && Object.assign(params, { id: data.id });
-
         createTable(params)
           .then((res) => {
             if (res.success) {

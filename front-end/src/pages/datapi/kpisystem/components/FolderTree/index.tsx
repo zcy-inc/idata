@@ -5,6 +5,8 @@ import type { FC, ChangeEvent } from 'react';
 import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
+import CreateFolder from './components/CreateFolder';
+
 import { deleteFolder } from '@/services/kpisystem';
 
 export type Key = string | number;
@@ -40,14 +42,20 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const flatTree = useRef<FlatTreeNode[]>([]);
 
-  const { tree, getTree, treeType, curNode, setCurNode, addTab } = useModel('kpisystem', (_) => ({
-    tree: _.tree,
-    getTree: _.getTree,
-    treeType: _.treeType,
-    curNode: _.curNode,
-    setCurNode: _.setCurNode,
-    addTab: _.addTab,
-  }));
+  const [visible, setVisible] = useState(false);
+
+  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, addTab } = useModel(
+    'kpisystem',
+    (_) => ({
+      tree: _.tree,
+      getTree: _.getTree,
+      treeType: _.treeType,
+      curNode: _.curNode,
+      setCurNode: _.setCurNode,
+      setFolderMode: _.setFolderMode,
+      addTab: _.addTab,
+    }),
+  );
 
   useEffect(() => {
     getTree('TABLE');
@@ -65,6 +73,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       <Menu.Item key="table">新建指标</Menu.Item>
     </Menu>
   );
+
   const renderTypeMenu = () => {
     switch (treeType) {
       case 'TABLE':
@@ -76,6 +85,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         return <Menu.Item key="enum">新建指标</Menu.Item>;
     }
   };
+
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
       {renderTypeMenu()}
@@ -94,27 +104,34 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const onMenuActions = (key: Key) => {
     switch (key) {
       case 'folder':
+        setFolderMode('create');
+        setVisible(true);
         break;
       case 'edit':
+        setFolderMode('edit');
+        setVisible(true);
         break;
       case 'delete':
-        confirm({
-          title: '您确定要删除该文件夹吗？',
-          onOk: () =>
-            deleteFolder({ folderId: curNode?.folderId })
-              .then((res) => {
-                if (res.success) {
-                  message.success('删除文件夹成功');
-                  getTree(treeType);
-                }
-              })
-              .catch((err) => {}),
-        });
+        onDeleteFolder();
         break;
       default:
         break;
     }
   };
+
+  const onDeleteFolder = () =>
+    confirm({
+      title: '您确定要删除该文件夹吗？',
+      onOk: () =>
+        deleteFolder({ folderId: curNode?.folderId })
+          .then((res) => {
+            if (res.success) {
+              message.success('删除文件夹成功');
+              getTree(treeType);
+            }
+          })
+          .catch((err) => {}),
+    });
 
   // 组装数据，并高亮检索结果
   const loop = (data: any[], parentId?: string): any => {
@@ -218,22 +235,17 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           onExpand={(keys) => onExpand(keys)}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
-          onRightClick={({ node }) => {
-            console.log(node);
-
-            const _: any = node;
-            const parentId = _.parentId?.split('_')[1] || null;
-            const folderId = `${_.folderId}`;
+          onRightClick={({ node }: any) => {
+            const parentId = node.parentId?.split('_')[1] || null;
+            const folderId = `${node.folderId}`;
             setCurNode({ ...node, folderId, parentId });
           }}
-          onSelect={(selectedKeys, { node }) => {
-            const _: any = node;
-            _.type !== 'FOLDER' && addTab(node);
-          }}
+          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && addTab(node)}
         >
           {loop(tree)}
         </Tree>
       </Dropdown>
+      <CreateFolder visible={visible} onCancel={() => setVisible(false)} />
     </Fragment>
   );
 };

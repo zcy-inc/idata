@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState, useImperativeHandle, forwardRef }
 import { Typography, Select, Input, Switch, Divider } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -19,7 +19,7 @@ export interface EditColsInfoProps {
 
 const { Link } = Typography;
 
-const EditColsInfo: FC<EditColsInfoProps> = (
+const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
   { initial, _props: { checkedList, columns, columnsMap } },
   ref,
 ) => {
@@ -36,7 +36,7 @@ const EditColsInfo: FC<EditColsInfoProps> = (
       const columnsInfo = initial.columnInfos;
       const _keys: React.Key[] = [];
       const _data = columnsInfo.map((_: any) => {
-        const t = { id: _.id, columnName: _.columnName };
+        const t = { key: _.id, id: _.id, columnName: _.columnName };
         _.columnLabels.forEach((l: any) => {
           let v = l.labelParamValue;
           l.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
@@ -52,13 +52,13 @@ const EditColsInfo: FC<EditColsInfoProps> = (
 
   // 添加一行数据
   const addData = () => {
-    const id = Date.now();
-    const item = { id };
+    const key = Date.now();
+    const item = { key };
     columns.forEach(
       (_: any) => (item[_.labelCode] = _.labelTag === 'BOOLEAN_LABEL' ? false : null),
     );
     setData([...data, item]);
-    setKeys([...keys, id]);
+    setKeys([...keys, key]);
   };
 
   // 因为是自己维护的data, 所以手动录入数据
@@ -77,6 +77,7 @@ const EditColsInfo: FC<EditColsInfoProps> = (
           dataIndex: _.labelCode,
           key: _.labelCode,
           width: 200,
+          // labelRequired,
         };
         switch (_.labelTag) {
           case 'STRING_LABEL':
@@ -85,6 +86,7 @@ const EditColsInfo: FC<EditColsInfoProps> = (
                 <Input
                   placeholder="请输入"
                   onChange={({ target: { value } }) => setValue(schema, value)}
+                  required
                 />
               ),
             });
@@ -119,7 +121,7 @@ const EditColsInfo: FC<EditColsInfoProps> = (
 
   // 表结构的操作栏事件处理
   const onStructAction = (row: any, _: any, type: StructAction) => {
-    const i = data.findIndex((_) => _.id === row.id);
+    const i = data.findIndex((_) => _.key === row.key);
     if (type === 'del') {
       data.splice(i, 1);
       keys.splice(i, 1);
@@ -140,7 +142,7 @@ const EditColsInfo: FC<EditColsInfoProps> = (
     <Fragment>
       <EditableProTable
         className={styles.struct}
-        rowKey="id"
+        rowKey="key"
         columns={renderColumns()}
         value={data}
         bordered

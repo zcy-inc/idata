@@ -7,16 +7,17 @@ import styles from '../../index.less';
 
 import EnumTable from './components/EnumTable';
 import { getFolders } from '@/services/tablemanage';
-import { rules } from './constants';
+import { rules } from '@/constants/tablemanage';
 
 export interface EditEnumProps {
   form: FormInstance;
   data?: any;
 }
 
+const { require } = rules;
+
 const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   const [folders, setFolders] = useState<any[]>([]);
-
   const { curFolder } = useModel('tabalmanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
@@ -44,7 +45,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         name="enumName"
         width="md"
         placeholder="请输入"
-        rules={rules}
+        rules={require}
         initialValue={data?.enumName}
         style={{ color: 'red' }}
       />
@@ -53,7 +54,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         label="枚举值"
         name="enumValues"
         trigger="onChange"
-        rules={rules}
+        rules={require}
         labelCol={{ span: 24 }}
       >
         {/* 这儿使用form提供的initialValue时只会在第一次的时候传递, 之后由自定义组件自身的value接管而失效 */}

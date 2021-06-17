@@ -14,6 +14,8 @@ export default () => {
   const [tree, setTree] = useState([]);
   const [treeType, setTreeType] = useState('');
   const [curNode, setCurNode] = useState<any>(null);
+  // 当点击节点为文件夹且是新建的时候, 需要该变量来赋值name值
+  const [folderMode, setFolderMode] = useState<'create' | 'edit'>('create');
   // workbench
   const [tabs, setTabs] = useState<ITab[]>([]);
   const [activeTab, setActiveTab] = useState('');
@@ -25,6 +27,7 @@ export default () => {
       setTree(res.data);
     });
   };
+
   // 增加一个tab
   const addTab = (node: any) => {
     const { cid, name, fileCode, type } = node;
@@ -33,19 +36,13 @@ export default () => {
     }
     setActiveTab(cid);
   };
+
   // 关闭一个tab
   const removeTab = (key: any) => {
     const curPanes = tabs.filter((_) => _.key !== key);
     let curActiveKey = activeTab;
-    let lastIndex = tabs.length - 1;
+    let lastIndex = tabs.findIndex((_) => _.key === key) - 1;
 
-    tabs.find((_, i) => {
-      if (_.key === key) {
-        lastIndex = i - 1;
-        return true;
-      }
-      return false;
-    });
     if (curPanes.length && curActiveKey === key) {
       curActiveKey = curPanes[lastIndex > 0 ? lastIndex : 0].key;
     }
@@ -60,6 +57,9 @@ export default () => {
     getTree,
     curNode,
     setCurNode,
+    // create or edit folder
+    folderMode,
+    setFolderMode,
     // workbench
     tabs,
     activeTab,

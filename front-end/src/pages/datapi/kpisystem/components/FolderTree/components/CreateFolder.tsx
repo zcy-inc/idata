@@ -3,10 +3,9 @@ import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import { message } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../index.less';
+import styles from '../../../index.less';
 
 import { createFolder, getFolders, updateFolder } from '@/services/tablemanage';
-import { FLatTreeNode } from '@/types/tablemanage';
 
 export interface CreateFolderProps {
   visible: boolean;
@@ -16,23 +15,20 @@ export interface CreateFolderProps {
 const rules = [{ required: true, message: '必填' }];
 
 const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
-  const [folders, setFolders] = useState([]);
+  const [folders, setFolders] = useState<any[]>([]);
 
-  const { folderMode, curFolder, curTreeType, getTree } = useModel('tabalmanage', (ret) => ({
+  const { folderMode, curNode, treeType, getTree } = useModel('kpisystem', (ret) => ({
     folderMode: ret.folderMode,
-    curFolder: ret.curFolder,
-    curTreeType: ret.curTreeType,
+    curNode: ret.curNode,
+    treeType: ret.treeType,
     getTree: ret.getTree,
   }));
 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const folderOps = res.data.map((_: FLatTreeNode) => ({
-          label: _.folderName,
-          value: `${_.id}`,
-        }));
-        setFolders(folderOps);
+        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        setFolders(fd);
       })
       .catch((err) => {});
   }, []);
@@ -49,30 +45,25 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       modalProps={{ onCancel, maskClosable: false, destroyOnClose: true }}
       visible={visible}
       onFinish={async (values) => {
-        if (curFolder) {
-          updateFolder({
-            id: curFolder.folderId,
-            folderName: values.folderName,
-            parentId: values.parentId,
-          })
+        const params: any = { folderName: values.folderName, parentId: values.parentId };
+        if (curNode) {
+          Object.assign(params, { id: curNode.folderId });
+          updateFolder(params)
             .then((res) => {
               if (res.success) {
                 message.success('编辑文件夹成功');
                 onCancel();
-                getTree(curTreeType);
+                getTree(treeType);
               }
             })
             .catch((err) => {});
         } else {
-          createFolder({
-            folderName: values.folderName,
-            parentId: values.parentId,
-          })
+          createFolder(params)
             .then((res) => {
               if (res.success) {
                 message.success('创建文件夹成功');
                 onCancel();
-                getTree(curTreeType);
+                getTree(treeType);
               }
             })
             .catch((err) => {});
@@ -84,7 +75,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
         label="文件夹名称"
         rules={rules}
         placeholder="请输入名称"
-        initialValue={folderMode === 'create' ? '' : curFolder?.name}
+        initialValue={folderMode === 'create' ? '' : curNode?.name}
       />
       <ProFormSelect
         name="parentId"
@@ -92,9 +83,9 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
         placeholder="根目录"
         options={folders}
         initialValue={
-          folderMode === 'create' && curFolder?.type === 'FOLDER'
-            ? curFolder?.folderId
-            : curFolder?.parentId
+          folderMode === 'create' && curNode?.type === 'FOLDER'
+            ? curNode?.folderId
+            : curNode?.parentId
         }
       />
     </ModalForm>

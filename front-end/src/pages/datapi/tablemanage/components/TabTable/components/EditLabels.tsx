@@ -15,7 +15,7 @@ import ProForm, {
 import { Checkbox, Popover, Tooltip, Typography } from 'antd';
 import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
-import type { FC } from 'react';
+import type { FC, ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -52,7 +52,10 @@ const FormLabel: FC = ({ children }) => {
   );
 };
 
-const TableLabels: FC<TableLabelsProps> = ({ form, initial }, ref) => {
+const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
+  { form, initial },
+  ref,
+) => {
   const [folders, setFolders] = useState<any[]>([]); // 平铺的目录树, 用于表单的位置
   const [checkedList, setCheckedList] = useState<string[]>([]); // 齿轮那儿选中的项
   const [allChecked, setAllChecked] = useState(true); // 是否全选

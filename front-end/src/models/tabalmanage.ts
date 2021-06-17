@@ -38,18 +38,22 @@ export default () => {
       setTree(res.data);
     });
   };
+
   // 切换Tab
   const onChangeTab = useCallback((key) => setActiveKey(key), [panes]);
+
   // 新建枚举
   const onCreateEnum = useCallback(() => {
     !panes.some((_) => _.key === 'newEnum') && setPanes([...panes, newEnum]);
     setActiveKey('newEnum');
   }, [panes]);
+
   // 新建表
   const onCreateTable = useCallback(() => {
     !panes.some((_) => _.key === 'newTable') && setPanes([...panes, newTable]);
     setActiveKey('newTable');
   }, [panes]);
+
   // 点击树节点联动工作区新增tab
   const onViewTree = useCallback(
     (node) => {
@@ -61,22 +65,17 @@ export default () => {
     },
     [panes],
   );
+
   // edit模式切换到view模式时, 检索key以替换pane的title
   const replacePaneKey = (key: string, title: string) => {};
+
   // 关闭Tab
   const onRemovePane = useCallback(
     (key) => {
-      let curActiveKey = activeKey;
-      let lastIndex = panes.length - 1;
-      // 找到当前关闭项的前面一项, 置其active
-      panes.find((_, i) => {
-        if (_.key === key) {
-          lastIndex = i - 1;
-          return true;
-        }
-        return false;
-      });
       const curPanes = panes.filter((_) => _.key !== key);
+      let curActiveKey = activeKey;
+      let lastIndex = panes.findIndex((_, i) => _.key === key) - 1;
+
       if (curPanes.length && curActiveKey === key) {
         curActiveKey = curPanes[lastIndex > 0 ? lastIndex : 0].key;
       }
@@ -85,10 +84,12 @@ export default () => {
     },
     [panes],
   );
+
   const showLabel = (fileCode?: string) => {
     fileCode && setCurLabel(fileCode);
     setVisibleLabel(true);
   };
+  
   const hideLabel = () => {
     setCurLabel('');
     setVisibleLabel(false);

@@ -15,7 +15,7 @@ import {
   InitialColumns,
   AttributeTypeMap,
 } from './constants';
-import { isEnumType } from '../../../utils';
+import { isEnumType } from '@/utils/tablemanage';
 
 export interface ViewLabelProps {
   fileCode: string;

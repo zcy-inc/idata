@@ -1,30 +1,22 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
-import { useBoolean } from 'ahooks';
 import { useModel } from 'umi';
-import type { FC, ChangeEvent } from 'react';
+import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
-import { deleteFolder } from '@/services/tablemanage';
+import CreateFolder from '../CreateFolder';
 
-export type Key = string | number;
-export interface FolderTreeProps {
-  actions: { showFolder: () => void };
-}
-export interface TreeNode {
-  name: string;
-  type: string;
-  folderId: string;
-  parentId: string;
-  children?: TreeNode[];
-  [key: string]: any;
-}
-export interface FlatTreeNode {
+import { deleteFolder } from '@/services/tablemanage';
+import { TreeNode as ITreeNode } from '@/types/tablemanage';
+import { TreeNodeType } from '@/constants/tablemanage';
+
+interface SearchTreeNode {
   key: string;
   name: string;
   parentId?: string;
 }
+type TreeNodeIcon = 'FOLDER' | 'FOLDEROPEN' | 'LABEL' | 'ENUM' | 'TABLE';
 
 const { TreeNode } = Tree;
 const { TabPane } = Tabs;
@@ -37,11 +29,14 @@ const NodeTypeIcon = {
   TABLE: <IconFont type="icon-biao" key="table" />,
 };
 
-const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
-  const [searchValue, setSearchValue] = useState('');
-  const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
-  const [autoExpandParent, { setTrue: autoExpandON, setFalse: autoExpandOFF }] = useBoolean(true);
-  const flatTree = useRef<FlatTreeNode[]>([]);
+const FolderTree: FC = () => {
+  const [search, setSearch] = useState('');
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
+  const [autoExpand, setAutoExpand] = useState(true);
+
+  const [visible, setVisible] = useState(false);
+
+  const flatTree = useRef<SearchTreeNode[]>([]);
 
   const {
     setFolderMode,
@@ -113,7 +108,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
     switch (key) {
       case 'folder':
         setFolderMode('create');
-        actions.showFolder();
+        setVisible(true);
         break;
       case 'label':
         showLabel();
@@ -126,7 +121,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
         break;
       case 'edit':
         setFolderMode('edit');
-        actions.showFolder();
+        setVisible(true);
         break;
       case 'delete':
         confirm({
@@ -148,37 +143,40 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
   };
 
   // 组装数据，并高亮检索结果
-  const loop = (data: any[], parentId?: string): any => {
+  const loop = (data: ITreeNode[], parentId?: string): any => {
     const n = data.length;
     return data.map((_, i) => {
       const { name, type, cid } = _;
-      const _i = name.indexOf(searchValue);
-      const node = { ..._, key: cid };
-      let _type = type;
+      const _i = name.indexOf(search);
+      const bold = !parentId && type === TreeNodeType.FOLDER && styles['folder-root'];
+      let iconType: TreeNodeIcon = type;
       let title = (
-        <span key="title" className={!parentId && type === 'FOLDER' && styles['folder-root']}>
+        <span key="title" className={bold}>
           {name}
         </span>
       );
       // 判断文件夹类型的节点是否展开以赋值icon类型
-      if (type === 'FOLDER' && expandedKeys.indexOf(cid) > -1) {
-        _type = 'FOLDEROPEN';
+      if (type === TreeNodeType.FOLDER && expandedKeys.indexOf(cid) > -1) {
+        iconType = 'FOLDEROPEN';
       }
       // 给检索命中的title加高亮
       if (_i > -1) {
-        const beforeStr = name.substring(0, _i);
-        const afterStr = name.substring(_i + searchValue?.length);
-        const className = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
+        const pre = name.substring(0, _i);
+        const suf = name.substring(_i + search?.length);
+        const className =
+          (!parentId && type === TreeNodeType.FOLDER && styles['folder-root']) || '';
         title = (
           <span key="title" className={className}>
-            {beforeStr}
-            <span className={styles['search-match']}>{searchValue}</span>
-            {afterStr}
+            {pre}
+            <span className={styles['search-match']}>{search}</span>
+            {suf}
           </span>
         );
       }
-      node.className = (type === 'FOLDER' || i === n - 1) && styles['folder-margin'];
-      node.title = [NodeTypeIcon[_type], title];
+
+      const node: any = { ..._, key: cid };
+      node.className = (type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin'];
+      node.title = [NodeTypeIcon[iconType], title];
       parentId && (node.parentId = parentId);
 
       return _.children ? (
@@ -205,20 +203,21 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
   const onFilterTree = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
     if (!value) {
       setExpandedKeys([]);
-      setSearchValue('');
+      setSearch('');
       return;
     }
     const keys = flatTree.current
-      .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
-      .filter((_) => !!_);
+      .filter((_) => _.name.indexOf(value) > -1 && _.parentId)
+      .map((_) => _.parentId);
+
     setExpandedKeys(keys);
-    setSearchValue(value);
-    autoExpandON();
+    setSearch(value);
+    setAutoExpand(true);
   };
 
-  const onExpand = (keys: Key[] = []) => {
+  const onExpand = (keys: Key[]) => {
     setExpandedKeys(keys);
-    autoExpandOFF();
+    setAutoExpand(false);
   };
 
   return (
@@ -246,9 +245,9 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
           blockNode
-          onExpand={(keys) => onExpand(keys)}
+          onExpand={onExpand}
           expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
+          autoExpandParent={autoExpand}
           onRightClick={({ node }) => {
             const _: any = node;
             const parentId = _.parentId?.split('_')[1] || null;
@@ -263,6 +262,7 @@ const FolderTree: FC<FolderTreeProps> = ({ actions }) => {
           {loop(tree)}
         </Tree>
       </Dropdown>
+      {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
     </Fragment>
   );
 };

@@ -33,8 +33,8 @@ export async function delLabel(params: { labelCode: string }) {
   return request('/api/p1/dev/labelDefine', { method: 'DELETE', params });
 }
 // 枚举 获取names
-export async function getEnumNames(params?: {}) {
-  return request('/api/p1/dev/enumNames', { method: 'GET', params });
+export async function getEnumNames() {
+  return request('/api/p1/dev/enumNames', { method: 'GET' });
 }
 // 枚举 获取values
 export async function getEnumValues(params: { enumCode: string }) {

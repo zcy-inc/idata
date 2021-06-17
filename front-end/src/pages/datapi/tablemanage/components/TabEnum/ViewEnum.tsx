@@ -2,24 +2,43 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions, Table } from 'antd';
 import type { FC } from 'react';
 
+import { Enum, EnumValue, LabelAttribute } from '@/types/tablemanage';
 import Title from '../../../components/Title';
-import { ViewInitialColumns } from './constants';
 
 export interface ViewEnumProps {
-  data: any;
+  data: Enum;
+}
+
+interface EnumListItem {
+  parentValue: string;
+  enumValue: {
+    code: string;
+    value: string;
+  };
+  [index: string]: any; // TODO
 }
 
 const { Item } = Descriptions;
+const ViewInitialColumns = [
+  { title: '枚举值', dataIndex: ['enumValue', 'value'], key: 'enumValue', type: 'STRING' },
+  {
+    title: '父级枚举值',
+    dataIndex: 'parentValue',
+    key: 'parentValue',
+    type: 'STRING',
+    render: (_: any) => _ || '-',
+  },
+];
 
-const ViewEnum: FC<ViewEnumProps> = ({ data = {} }) => {
-  const [columns, setColumns] = useState<any[]>(ViewInitialColumns);
-  const [dataSource, setDateSource] = useState<any[]>([]);
+const ViewEnum: FC<ViewEnumProps> = ({ data }) => {
+  const [columns, setColumns] = useState(ViewInitialColumns);
+  const [dataSource, setDateSource] = useState<EnumListItem[]>();
 
   useEffect(() => {
-    const enumValues = Array.isArray(data.enumValues) ? data.enumValues : [];
+    const enumValues = Array.isArray(data?.enumValues) ? data.enumValues : [];
     const attrs = Array.isArray(enumValues[0]?.enumAttributes) ? enumValues[0]?.enumAttributes : [];
     // 格式化枚举参数生成的列
-    const exCols = attrs.map((_: any) => ({
+    const exCols = attrs.map((_: LabelAttribute) => ({
       title: _.attributeKey,
       dataIndex: _.attributeType.endsWith('ENUM')
         ? [_.attributeKey, 'value']
@@ -28,14 +47,20 @@ const ViewEnum: FC<ViewEnumProps> = ({ data = {} }) => {
       type: _.attributeType.endsWith('ENUM') ? _.attributeType.split(':')[0] : _.attributeType,
     }));
     // 格式化dataSource
-    const dt = enumValues.map((_: any) => {
-      const tmp = {
-        enumValue: { value: _.enumValue, code: _.valueCode },
-        parentValue: _.parentValue,
+    const dt = enumValues.map((_: EnumValue) => {
+      const tmp: EnumListItem = {
+        parentValue: _.parentValue || '-',
+        enumValue: {
+          value: _.enumValue,
+          code: _.valueCode,
+        },
       };
       _.enumAttributes.forEach(
-        (_enum: any) =>
-          (tmp[_enum.attributeKey] = { value: _enum.enumValue, code: _enum.attributeValue }),
+        (_enum: LabelAttribute) =>
+          (tmp[_enum.attributeKey] = {
+            value: _enum.enumValue || '-',
+            code: _enum.attributeValue,
+          }),
       );
       return tmp;
     });
