@@ -39,7 +39,7 @@ create table if not exists idata.dev_label_define (
   create_time        datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor             varchar(20)     not null default '' comment '修改者',
   edit_time          datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  label_code         varchar(30)     not null comment '标签唯一标识', unique uk_label_code(label_code),
+  label_code         varchar(50)     not null comment '标签唯一标识', unique uk_label_code(label_code),
   label_name         varchar(30)     not null comment '标签名称',
   label_tag          varchar(30)     comment '标签的标签',
   label_param_type   varchar(30)     comment '标签参数类型',
@@ -59,7 +59,7 @@ create table if not exists idata.dev_label (
   create_time       datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor            varchar(20)     not null default '' comment '修改者',
   edit_time         datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  label_code        varchar(30)     not null comment '标签唯一标识',
+  label_code        varchar(50)     not null comment '标签唯一标识',
   table_id          bigint          comment '打标主体表ID',
   column_name       varchar(30)     comment '打标主体字段名', unique uk_labelCode_tableId_columnName(label_code, table_id, column_name),
   label_param_value varchar(200)    comment '标签参数值'
@@ -72,7 +72,7 @@ create table if not exists idata.dev_enum (
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor      varchar(20)     not null default '' comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  enum_code   varchar(30)     not null comment '枚举标识', unique uk_enumCode(enum_code),
+  enum_code   varchar(50)     not null comment '枚举标识', unique uk_enumCode(enum_code),
   enum_name   varchar(30)     not null comment '枚举名称',
   folder_id   bigint          comment '文件夹ID,null表示最外层文件夹'
 ) engine=innodb default charset=utf8mb4 comment='枚举表';
@@ -84,8 +84,8 @@ create table if not exists idata.dev_enum_value (
   create_time     datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor          varchar(20)     not null default '' comment '修改者',
   edit_time       datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  enum_code       varchar(30)     not null comment '枚举标识',
-  value_code      varchar(30)     not null comment '枚举值标识', unique uk_value_code(value_code),
+  enum_code       varchar(50)     not null comment '枚举标识',
+  value_code      varchar(50)     not null comment '枚举值标识', unique uk_value_code(value_code),
   enum_value      varchar(100)    not null comment '枚举值字面值',
   enum_attributes varchar(1000)   not null default '[]' comment '枚举值属性',
   parent_code     varchar(30)     comment '上级枚举值标识,null表示最上级'
