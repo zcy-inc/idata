@@ -1,4 +1,4 @@
-import { TreeNodeType, LabelTag, ERType } from '@/constants/tablemanage';
+import { TreeNodeType, LabelRequired, LabelTag, ERType } from '@/constants/tablemanage';
 
 export interface FlatTreeNode {
   id: number;
@@ -21,6 +21,7 @@ export interface Label {
   labelParamValue: string;
   labelTag: LabelTag;
   enumNameOrValue?: string;
+  labelRequired: LabelRequired;
 }
 export interface EnumValue {
   id: number;
@@ -56,6 +57,7 @@ export interface Enum {
 export interface TableLable extends Label {
   tableId: number;
   columnName: string;
+  enumValues: EnumValue[];
 }
 export interface ColumnLabel extends TableLable {
   columnType: string;
@@ -74,6 +76,12 @@ export interface ForeignKey {
   referTableId: number;
   referColumnNames: string;
   erType: ERType;
+}
+export interface User {
+  id: number;
+  username: string;
+  nickname: string;
+  realName: string;
 }
 export interface Table {
   id: number;

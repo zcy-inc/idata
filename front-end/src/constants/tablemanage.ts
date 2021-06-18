@@ -5,12 +5,17 @@ export enum TreeNodeType {
   LABEL = 'LABEL',
   ENUM = 'ENUM',
 }
+export enum LabelRequired {
+  NOT_REQUIRED = 0,
+  REQUIRED = 1,
+}
 export enum LabelTag {
   STRING_LABEL = 'STRING_LABEL',
   BOOLEAN_LABEL = 'BOOLEAN_LABEL',
   ENUM_LABEL = 'ENUM_LABEL',
   ENUM_VALUE_LABEL = 'ENUM_VALUE_LABEL',
   ATTRIBUTE_LABEL = 'ATTRIBUTE_LABEL',
+  USER_LABEL = 'USER_LABEL',
 }
 export enum ERType {
   I2I = 'I2I',

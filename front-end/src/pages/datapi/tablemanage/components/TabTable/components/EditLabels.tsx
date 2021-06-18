@@ -18,31 +18,22 @@ import type { FormInstance } from 'antd';
 import type { FC, ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
+import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
+import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/tablemanage';
+import { rules } from '@/constants/tablemanage';
+import { InitialLabel, RadioOps } from '../constants';
+
 import IconFont from '@/components/IconFont';
 import Title from '../../../../components/Title';
-import { InitialLabel, RadioOps } from '../constants';
-import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 
-export type EnumValueType = {
-  enumValue: string;
-  valueCode: string;
-};
-export interface LabelProps {
-  labelName: string;
-  labelCode: string;
-  labelParamType: string;
-  labelRequired: 0 | 1;
-  enumValues: EnumValueType[];
-  [key: string]: any;
-}
-export interface TableLabelsProps {
+export interface EditLabelsProps {
   form: FormInstance;
-  initial: any;
+  initial: Table;
 }
 
 const CheckboxGroup = Checkbox.Group;
 const { Text } = Typography;
-const rules = [{ required: true, message: '必填' }];
+const { require } = rules;
 
 const FormLabel: FC = ({ children }) => {
   return (
@@ -52,15 +43,15 @@ const FormLabel: FC = ({ children }) => {
   );
 };
 
-const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
-  { form, initial },
-  ref,
-) => {
-  const [folders, setFolders] = useState<any[]>([]); // 平铺的目录树, 用于表单的位置
+const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, initial }, ref) => {
+  // 平铺的目录树, 用于表单的位置
+  const [folders, setFolders] = useState<any[]>([]);
+  // checklist
+  const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
   const [checkedList, setCheckedList] = useState<string[]>([]); // 齿轮那儿选中的项
   const [allChecked, setAllChecked] = useState(true); // 是否全选
   const [indeterminate, setIndeterminate] = useState(false); // 全选的一个样式开关
-  const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
+  // labels
   const [labels, setLabels] = useState<any[]>([]); // 用以渲染checklist的完整obj
   const labelsMap = useRef(new Map()); // 方便检索做的map
   const labelValues = useRef(new Map()); // 表单的数据（应要求checklist只做显隐, 数据还是全量）
@@ -79,8 +70,8 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
         .then((owners) => {
           const list: string[] = []; // 选中的checkedlist, labelCode[]
           // ops, 用以渲染checklist.group
-          const ops = [InitialLabel, ...res.data].map((_: LabelProps) => {
-            const tmp: any = {
+          const ops = [InitialLabel, ...res.data].map((_: TableLable) => {
+            const tmp = {
               ..._,
               label: _.labelName,
               value: _.labelCode,
@@ -88,20 +79,22 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
             };
             // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
             if (_.labelTag !== 'ATTRIBUTE_LABEL') {
+              let enums = [];
               // 处理数仓管理人的ops
               if (_.labelTag === 'USER_LABEL') {
-                tmp.enums = owners.data.content.map((_: any) => ({
+                enums = owners.data.content.map((_: User) => ({
                   label: _.nickname,
                   value: _.id,
                 }));
               }
               // 处理枚举类型的ops
               if (_.labelParamType?.endsWith('ENUM')) {
-                tmp.enums = _.enumValues.map((item: any) => ({
+                enums = _.enumValues.map((item: EnumValue) => ({
                   label: item.enumValue,
                   value: item.valueCode,
                 }));
               }
+              Object.assign(tmp, { enums });
             }
             labelsMap.current.set(_.labelCode, tmp);
             list.push(_.labelCode);
@@ -112,7 +105,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
-            tableLabels.forEach((_: any) => {
+            tableLabels.forEach((_: TableLable) => {
               const v = _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue;
               labelValues.current.set(_.labelCode, v);
               initialValue[_.labelCode] = v;
@@ -127,14 +120,24 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
     // 获取平铺的目录树
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: FlatTreeNode) => ({ label: _.folderName, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});
   }, []);
 
+  useEffect(() => {
+    let folderId = null;
+    if (initial) {
+      folderId = initial.folderId?.toString();
+    } else if (curFolder) {
+      folderId = curFolder.type === 'FOLDER' ? curFolder.folderId : curFolder.parentId;
+    }
+    form.setFieldsValue({ folderId });
+  }, [initial, curFolder]);
+
   // 单选
-  const onCheck = (list: any[]) => {
+  const onCheck = (list) => {
     setCheckedList(list);
     setAllChecked(list.length === labels.length);
     setIndeterminate(!!list.length && list.length < labels.length);
@@ -162,7 +165,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
               name={_.labelCode}
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
-              rules={!!_.labelRequired ? rules : []}
+              rules={!!_.labelRequired ? require : []}
               placeholder="请输入"
               fieldProps={{
                 onChange: ({ target: { value } }) => labelValues.current.set(_.labelCode, value),
@@ -176,7 +179,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
               name={_.labelCode}
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
-              rules={!!_.labelRequired ? rules : []}
+              rules={!!_.labelRequired ? require : []}
               options={RadioOps}
               fieldProps={{
                 onChange: ({ target: { value } }) => labelValues.current.set(_.labelCode, value),
@@ -191,7 +194,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
               name={_.labelCode}
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
-              rules={!!_.labelRequired ? rules : []}
+              rules={!!_.labelRequired ? require : []}
               options={_.enums}
               fieldProps={{ onChange: (v) => labelValues.current.set(_.labelCode, v) }}
             />
@@ -204,7 +207,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
               name={_.labelCode}
               label={<FormLabel>{_.labelName}</FormLabel>}
               width="sm"
-              rules={!!_.labelRequired ? rules : []}
+              rules={!!_.labelRequired ? require : []}
               options={[{ label: null, value: _.labelCode }]}
               fieldProps={{ onChange: (v) => labelValues.current.set(_.labelCode, v) }}
             />
@@ -236,7 +239,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
             <CheckboxGroup
               options={labels}
               value={checkedList}
-              onChange={(checked) => onCheck(checked)}
+              onChange={onCheck}
               style={{ display: 'flex', flexDirection: 'column' }}
             />
           }
@@ -258,22 +261,10 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
           width="md"
           placeholder="根目录"
           options={folders}
-          initialValue={
-            // data? 判断新建和编辑
-            // curFolder? 判断加号还是右键新建
-            // curFolder.type === 'FOLDER' 判断右键点在文件夹或文件上
-            initial
-              ? initial.folderId?.toString() || null
-              : curFolder
-              ? curFolder.type === 'FOLDER'
-                ? curFolder.folderId
-                : curFolder.parentId
-              : null
-          }
         />
       </ProForm>
     </Fragment>
   );
 };
 
-export default forwardRef(TableLabels);
+export default forwardRef(EditLabels);

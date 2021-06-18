@@ -62,6 +62,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
 
   useEffect(() => {
     getTableLabels({ subjectType: 'COLUMN' }).then((res) => {
+      // 这里和TableLabels一样调用了getDWOwner(), 要做上级数据管理吗?
       getDWOwner()
         .then((owners) => {
           // const map = new Map(); // 检索用的map
