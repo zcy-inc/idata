@@ -115,7 +115,21 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           columnInfos[i] = item;
         }
         // 处理foreignKeys的入参格式
-        params = { folderId, tableName, tableLabels, columnInfos, foreignKeys };
+        foreignKeys = foreignKeys.map((_: any) => {
+          return {
+            ..._,
+            columnNames: _.columnNames.join(','),
+            referColumnNames: _.referColumnNames.join(','),
+          };
+        });
+        //组装入参
+        params = {
+          folderId,
+          tableName,
+          tableLabels,
+          columnInfos,
+          foreignKeys,
+        };
         // 如果data有值, 本次提交为更新, 增加id字段
         data && Object.assign(params, { id: data.id });
         createTable(params)

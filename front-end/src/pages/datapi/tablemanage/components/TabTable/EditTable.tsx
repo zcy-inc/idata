@@ -121,9 +121,9 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
       <EditLabels ref={refLabel} form={refs.label} initial={initial} />
       <Tabs
         className={`${styles.reset} ${styles['reset-tabs']}`}
-        defaultActiveKey="struct"
+        defaultActiveKey="columnInfos"
         onChange={(key) => {
-          if (key === 'fk') {
+          if (key === 'foreignKey') {
             // 切换到外键的时候，保存表结构字段，生成Select的ops
             const dataIndex = columns[0].labelCode;
             const stData = refColumns.current?.data || [];
@@ -133,7 +133,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
         }}
       >
         <TabPane
-          key="struct"
+          key="columnInfos"
           tab={[
             '表结构设计',
             <Popover
@@ -174,7 +174,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
             }}
           />
         </TabPane>
-        <TabPane tab="关系" key="fk">
+        <TabPane tab="关系" key="foreignKey">
           <EditForeign ref={refForeign} initial={initial} _props={{ strOps }} />
         </TabPane>
       </Tabs>

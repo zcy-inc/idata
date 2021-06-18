@@ -3,7 +3,11 @@ import { Descriptions, Table, Tabs } from 'antd';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
+import { getDWOwner } from '@/services/tablemanage';
+import { User } from '@/types/tablemanage';
+import { LabelTag } from '@/constants/tablemanage';
 import { ViewInitialColumns, TransformBoolean } from './constants';
+
 import Title from '../../../components/Title';
 import TableRelation from './components/TableRelation';
 
@@ -17,6 +21,15 @@ const { TabPane } = Tabs;
 const ViewTable: FC<ViewTableProps> = ({ data }) => {
   const [columns, setColumns] = useState<any[]>([]);
   const [dataSource, setDataSource] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>();
+
+  useEffect(() => {
+    getDWOwner()
+      .then((res) => {
+        setUsers(res.data.content);
+      })
+      .catch((err) => {});
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -32,13 +45,25 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         _.columnLabels.forEach((item: any) => (tmp[item.labelCode] = transformLabelValue(item)));
         return tmp;
       });
+      console.log(dt);
+
       setColumns(ViewInitialColumns.concat(exCols));
       setDataSource(dt);
     }
   }, [data]);
 
-  const transformLabelValue = (_: any) =>
-    _.labelTag === 'ENUM_VALUE_LABEL' ? _.enumNameOrValue : _.labelParamValue;
+  const transformLabelValue = (_: any) => {
+    switch (_.labelTag) {
+      case LabelTag.ENUM_VALUE_LABEL:
+        return _.enumNameOrValue;
+      case LabelTag.BOOLEAN_LABEL:
+        return TransformBoolean[_.labelParamValue];
+      case LabelTag.USER_LABEL:
+        return users?.find((user) => `${user.id}` === _.labelParamValue)?.nickname || '-';
+      default:
+        return _.labelParamValue;
+    }
+  };
 
   return (
     <Fragment>
@@ -50,11 +75,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         <Item label="表名称">{data?.tableName}</Item>
         {data?.tableLabels?.map((_: any) => (
           <Item key={_.id} label={_.labelName}>
-            {_.labelTag === 'ENUM_VALUE_LABEL'
-              ? _.enumNameOrValue
-              : _.labelTag === 'BOOLEAN_LABEL'
-              ? TransformBoolean[_.labelParamValue]
-              : _.labelParamValue}
+            {transformLabelValue(_)}
           </Item>
         ))}
       </Descriptions>

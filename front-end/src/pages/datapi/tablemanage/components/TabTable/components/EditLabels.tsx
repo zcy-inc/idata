@@ -28,7 +28,7 @@ import Title from '../../../../components/Title';
 
 export interface EditLabelsProps {
   form: FormInstance;
-  initial: Table;
+  initial?: Table;
 }
 
 const CheckboxGroup = Checkbox.Group;

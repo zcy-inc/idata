@@ -460,7 +460,9 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
     });
 
     getTableRelations({ tableId: id }).then((res) => {
-      graph.data(handleDataTransform(res.data.tables, res.data.edges));
+      const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
+      const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
+      graph.data(handleDataTransform(tables, edges));
       graph.render();
     });
   }, []);

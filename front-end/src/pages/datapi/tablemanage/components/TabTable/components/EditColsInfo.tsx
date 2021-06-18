@@ -6,10 +6,11 @@ import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
+import { ColumnLabel, Table, TableLable } from '@/types/tablemanage';
 
 export type StructAction = 'del' | 'up' | 'down';
 export interface EditColsInfoProps {
-  initial?: any;
+  initial?: Table;
   _props: {
     checkedList: string[];
     columns: any[];
@@ -35,10 +36,10 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     if (initial) {
       const columnsInfo = initial.columnInfos;
       const _keys: React.Key[] = [];
-      const _data = columnsInfo.map((_: any) => {
+      const _data = columnsInfo.map((_: ColumnLabel) => {
         const t = { key: _.id, id: _.id, columnName: _.columnName };
-        _.columnLabels.forEach((l: any) => {
-          let v = l.labelParamValue;
+        _.columnLabels.forEach((l: TableLable) => {
+          let v: string | boolean = l.labelParamValue;
           l.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
           t[l.labelCode] = v;
         });
