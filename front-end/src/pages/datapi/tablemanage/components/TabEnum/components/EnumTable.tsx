@@ -35,13 +35,13 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
         ? enumValues[0]?.enumAttributes
         : []; // datsSource第一项的enumAttributes, 用以生成自定义参数的列
       const pOps: any[] = []; // 存储父级枚举值
-      const promises: Promise<any>[] = []; // // 对参数类型是枚举的列, 需要使用getEnumNames获取列表
+      const promises: Promise<any>[] = []; // 对参数类型是枚举的列, 需要使用getEnumNames获取列表
       // 生成自定义参数的列
       const exCols = attrs.map((_: any, i: number) => {
         let type = _.attributeType;
         if (isEnumType(_.attributeType)) {
           type = _.attributeType.split(':')[0];
-          promises[i] = getEnumNames({ enumCode: type });
+          promises[i] = getEnumNames();
         }
         return { id: i, title: _.attributeKey, type };
       });
@@ -104,7 +104,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   // 修改行数据的枚举值列, 新增下需要生成10位code
   const onChangeEnumValue = (v: any, i: number) => {
     if (!enums[i].enumValue.code) {
-      const unicode = getRandomStr(10);
+      const unicode = getRandomStr(10) + ':ENUM_VALUE';
       enums[i].enumValue = { code: unicode };
       parentOps[i] = { value: unicode };
     }

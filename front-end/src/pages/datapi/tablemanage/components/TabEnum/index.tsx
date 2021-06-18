@@ -54,7 +54,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
           parentCode: _.parentCode,
           enumAttributes: values.enumValues.columns.map((col: any) => ({
             attributeKey: col.title,
-            attributeType: isEnumType(col.type) ? `${col.type}:ENUM` : col.type,
+            attributeType: col.type,
             attributeValue: _[col.title],
           })),
         })),

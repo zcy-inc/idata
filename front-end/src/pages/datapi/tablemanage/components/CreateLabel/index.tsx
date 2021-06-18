@@ -224,15 +224,9 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         const params = {
           ...values,
           labelParamType: TagToParamMap[values.labelTag],
-          labelAttributes: values.labelAttributes?.map((_: LabelAttribute) => ({
-            ..._,
-            attributeType: isEnumType(_.attributeType)
-              ? `${_.attributeType}:ENUM`
-              : _.attributeType,
-          })),
         };
         if (values.enumCode) {
-          params.labelParamType = `${values.enumCode}:ENUM`;
+          params.labelParamType = values.enumCode;
         }
         if (curLabel) {
           params.labelCode = curLabel;

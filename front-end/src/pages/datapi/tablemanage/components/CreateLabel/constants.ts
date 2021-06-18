@@ -18,13 +18,13 @@ export const LabelTagOps = {
 };
 // 当标签类型不等于 ATTRIBUTE_LABEL 时, 需要 labelParamType 参数
 // 当 labelTag 不等于 ENUM_VALUE_LABEL 时，为下文定义当常量
-// 当 labelTag 等于 ENUM_VALUE_LABEL 时, 需要组装 code:ENUM, code 为枚举值的code
+// 当 labelTag 等于 ENUM_VALUE_LABEL 时, 为10位随机小写字符串
 export const TagToParamMap = {
   STRING_LABEL: 'STRING',
   BOOLEAN_LABEL: 'BOOLEAN',
   USER_LABEL: 'WHOLE',
   ENUM_LABEL: 'ENUM',
-  ENUM_VALUE_LABEL: 'code:ENUM',
+  // ENUM_VALUE_LABEL: 'random(10)',
 };
 export const EditorBoolOps = [
   { label: 'True', value: 'true' },
