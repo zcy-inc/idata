@@ -62,11 +62,11 @@ public class TableRelationServiceImpl implements TableRelationService {
     private ForeignKeyService foreignKeyService;
 
     private final String[] foreignKeyFields = {"columnNames", "referColumnNames", "erType", "referTableId", "tableId"};
-    private final String DB_NAME_LABEL = "dbName";
-    private final String TBL_COMMENT_LABEL = "tblComment";
-    private final String PK_LABEL = "pk";
-    private final String COLUMN_TYPE_LABEL = "columnType";
-    private final String COLUMN_COMMENT_LABEL = "columnComment";
+    private final String DB_NAME_LABEL = "dbName:LABEL";
+    private final String TBL_COMMENT_LABEL = "tblComment:LABEL";
+    private final String PK_LABEL = "pk:LABEL";
+    private final String COLUMN_TYPE_LABEL = "columnType:LABEL";
+    private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
 
     @Override
     public TableRelationDto getTableRelations(Long tableId) {

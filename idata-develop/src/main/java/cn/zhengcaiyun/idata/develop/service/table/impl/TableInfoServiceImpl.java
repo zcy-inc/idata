@@ -72,7 +72,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             "tableName", "folderId"};
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
-    private final String DB_NAME_LABEL = "dbName";
+    private final String DB_NAME_LABEL = "dbName:LABEL";
     private final String TABLE_SUBJECT = "TABLE";
 
     @Override

@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.checkSysLabelCode;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -211,8 +212,9 @@ public class LabelServiceImpl implements LabelService {
         DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.labelCode, isEqualTo(labelCode),
                 and(devLabelDefine.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelCode));
-        // TODO 系统依赖的标签不能删除。
+
         checkArgument(Integer.valueOf(0).equals(labelDefine.getLabelRequired()), "必须打标的标签不能删除");
+        checkArgument(!checkSysLabelCode(labelCode), "系统依赖的标签不能删除");
         devLabelDefineDao.update(c -> c.set(devLabelDefine.del).equalTo(1)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.labelCode, isEqualTo(labelCode),
@@ -330,7 +332,7 @@ public class LabelServiceImpl implements LabelService {
     public boolean removeLabel(LabelDto labelDto, String operator) {
         checkArgument(labelDto.getLabelCode() != null, "labelCode不能为空");
         checkArgument(labelDto.getTableId() != null, "tableId不能为空");
-        devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
+        devLabelDao.update(c -> c.set(devLabel.del).equalTo(1).set(devLabel.editor).equalTo(operator)
                 .where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
                         and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
                         and(devLabel.columnName, isEqual(labelDto.getColumnName())),

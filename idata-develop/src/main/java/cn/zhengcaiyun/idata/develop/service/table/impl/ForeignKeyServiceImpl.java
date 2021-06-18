@@ -56,7 +56,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
-    private final String DB_NAME_LABEL = "dbName";
+    private final String DB_NAME_LABEL = "dbName:LABEL";
 
     @Override
     public List<ForeignKeyDto> getForeignKeys(Long tableId) {
@@ -117,7 +117,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
             foreignKeyDto.setTableId(tableId);
             String foreignKeyStr = tableId + foreignKeyDto.getColumnNames() + foreignKeyDto.getReferTableId()
                     + foreignKeyDto.getReferColumnNames();
-            boolean isCreate = existForeignKeyMap.containsKey(foreignKeyStr);
+            boolean isCreate = !existForeignKeyMap.containsKey(foreignKeyStr);
             return createOrUpdateForeignKey(foreignKeyDto, columnNameList, isCreate,
                     existForeignKeyMap.get(foreignKeyStr), operator);
         }).collect(Collectors.toList());

@@ -170,7 +170,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                             and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                     .ifPresent(checkDevColumn -> columnInfoDto.setId(checkDevColumn.getId()));
             columnInfoDto.setTableId(tableId);
-            boolean isCreate = existColumnInfoMap.containsKey(columnInfoDto.getColumnName());
+            boolean isCreate = !existColumnInfoMap.containsKey(columnInfoDto.getColumnName());
             if (!isCreate) {
                 columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getColumnName()).getId());
             }
