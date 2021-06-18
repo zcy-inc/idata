@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form';
-import { message } from 'antd';
+import { Form, message } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { createFolder, getFolders, updateFolder } from '@/services/tablemanage';
-import { FLatTreeNode } from '@/types/tablemanage';
+import { FlatTreeNode } from '@/types/tablemanage';
 
 export interface CreateFolderProps {
   visible: boolean;
@@ -17,7 +17,7 @@ const rules = [{ required: true, message: '必填' }];
 
 const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   const [folders, setFolders] = useState([]);
-
+  const [form] = Form.useForm();
   const { folderMode, curFolder, curTreeType, getTree } = useModel('tabalmanage', (ret) => ({
     folderMode: ret.folderMode,
     curFolder: ret.curFolder,
@@ -28,7 +28,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const folderOps = res.data.map((_: FLatTreeNode) => ({
+        const folderOps = res.data.map((_: FlatTreeNode) => ({
           label: _.folderName,
           value: `${_.id}`,
         }));
@@ -36,6 +36,18 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       })
       .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    let folderName = '';
+    let parentId = null;
+    if (folderMode === 'create') {
+      parentId = curFolder?.type === 'FOLDER' ? curFolder?.folderId : curFolder?.parentId;
+    } else {
+      folderName = curFolder?.name;
+      parentId = curFolder?.parentId;
+    }
+    form.setFieldsValue({ folderName, parentId });
+  }, [folderMode, curFolder]);
 
   return (
     <ModalForm
@@ -48,6 +60,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       width={540}
       modalProps={{ onCancel, maskClosable: false, destroyOnClose: true }}
       visible={visible}
+      form={form}
       onFinish={async (values) => {
         if (folderMode === 'edit') {
           updateFolder({
@@ -79,24 +92,8 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
         }
       }}
     >
-      <ProFormText
-        name="folderName"
-        label="文件夹名称"
-        rules={rules}
-        placeholder="请输入名称"
-        initialValue={folderMode === 'create' ? '' : curFolder?.name}
-      />
-      <ProFormSelect
-        name="parentId"
-        label="位置"
-        placeholder="根目录"
-        options={folders}
-        initialValue={
-          folderMode === 'create' && curFolder?.type === 'FOLDER'
-            ? curFolder?.folderId
-            : curFolder?.parentId
-        }
-      />
+      <ProFormText name="folderName" label="文件夹名称" placeholder="请输入名称" rules={rules} />
+      <ProFormSelect name="parentId" label="位置" placeholder="根目录" options={folders} />
     </ModalForm>
   );
 };

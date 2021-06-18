@@ -4,25 +4,26 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
+import { createTable, delTable, getTable } from '@/services/tablemanage';
+import { Table, ForeignKey } from '@/types/tablemanage';
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';
-import { createTable, delTable, getTable } from '@/services/tablemanage';
 
 export interface TabTableProps {
   initialMode: 'view' | 'edit';
   fileCode: string;
 }
-export interface EditTableExportProps {
+interface EditTableExportProps {
   labels: Map<string, any>;
   stData: any[];
-  fkData: any[];
+  fkData: ForeignKey[];
   columnsMap: Map<string, any>;
 }
 
 const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [data, setData] = useState<Table>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>();
 
   const [label] = Form.useForm();
   const refs = { label };
@@ -157,13 +158,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   return (
     <Fragment>
       {mode === 'view' && <ViewTable data={data} />}
-      {mode === 'edit' && (
-        <EditTable
-          ref={refTable}
-          refs={refs}
-          initial={fileCode === 'newTable' ? undefined : data}
-        />
-      )}
+      {mode === 'edit' && <EditTable ref={refTable} refs={refs} initial={data} />}
       <div className={styles.submit}>
         {mode === 'view' && [
           <Button key="edit" type="primary" onClick={() => setMode('edit')}>

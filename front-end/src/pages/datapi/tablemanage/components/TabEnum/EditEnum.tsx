@@ -7,7 +7,7 @@ import styles from '../../index.less';
 
 import { getFolders } from '@/services/tablemanage';
 import { rules } from '@/constants/tablemanage';
-import { Enum, FLatTreeNode } from '@/types/tablemanage';
+import { Enum, FlatTreeNode } from '@/types/tablemanage';
 import EnumTable from './components/EnumTable';
 
 export interface EditEnumProps {
@@ -26,7 +26,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FLatTreeNode) => ({
+        const fd = res.data.map((_: FlatTreeNode) => ({
           label: _.folderName,
           value: `${_.id}`,
         }));
@@ -34,6 +34,16 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
       })
       .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    let folderId = null;
+    if (data) {
+      folderId = data.folderId?.toString();
+    } else if (curFolder) {
+      folderId = curFolder.type === 'FOLDER' ? curFolder.folderId : curFolder.parentId;
+    }
+    form.setFieldsValue({ folderId });
+  }, [data, curFolder]);
 
   return (
     <ProForm
@@ -74,18 +84,6 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         width="md"
         placeholder="根目录"
         options={folders}
-        initialValue={
-          // data? 判断新建和编辑
-          // curFolder? 判断加号还是右键新建
-          // curFolder.type === 'FOLDER' 判断右键点在文件夹或文件上
-          data
-            ? data.folderId?.toString() || null
-            : curFolder
-            ? curFolder.type === 'FOLDER'
-              ? curFolder?.folderId
-              : curFolder?.parentId
-            : null
-        }
       />
     </ProForm>
   );

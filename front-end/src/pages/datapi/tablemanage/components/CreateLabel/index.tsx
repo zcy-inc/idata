@@ -26,7 +26,7 @@ import {
   getFolders,
   getLabel,
 } from '@/services/tablemanage';
-import { EnumName, EnumValue, FLatTreeNode, LabelAttribute } from '@/types/tablemanage';
+import { EnumName, EnumValue, FlatTreeNode, LabelAttribute } from '@/types/tablemanage';
 import { isEnumType } from '@/utils/tablemanage';
 
 export interface CreateTagProps {}
@@ -101,7 +101,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FLatTreeNode) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data.map((_: FlatTreeNode) => ({ label: _.folderName, value: _.id }));
         setFolders(fd);
       })
       .catch((err) => {});

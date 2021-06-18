@@ -11,18 +11,18 @@ import type { FormInstance } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
+import { getDWOwner, getTableLabels } from '@/services/tablemanage';
+import { Table, ForeignKey } from '@/types/tablemanage';
+import { InitialColumn } from './constants';
+
 import IconFont from '@/components/IconFont';
 import EditLabels from './components/EditLabels';
 import EditColsInfo from './components/EditColsInfo';
 import EditForeign from './components/EditForeign';
 
-import { TableInfo, ForeignKey } from './type';
-import { InitialColumn } from './constants';
-import { getTableLabels } from '@/services/tablemanage';
-
 export interface EditTableProps {
   refs: { [key: string]: FormInstance };
-  initial?: TableInfo;
+  initial?: Table;
 }
 export interface LabelsExportProps {
   labels: Map<string, any>;
@@ -62,25 +62,40 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
 
   useEffect(() => {
     getTableLabels({ subjectType: 'COLUMN' }).then((res) => {
-      // const map = new Map(); // 检索用的map
-      const list: string[] = []; // checked list
-      // check.group 用的ops
-      const ops = [InitialColumn, ...res.data]
-        .filter((_: any) => _.labelTag !== 'ATTRIBUTE_LABEL')
-        .map((_: any) => {
-          const tmp = { ..._, label: _.labelName, value: _.labelCode, disabled: _.labelRequired };
-          if (_.labelTag === 'ENUM_VALUE_LABEL') {
-            tmp.enums = _.enumValues.map((item: any) => ({
-              label: item.enumValue,
-              value: item.valueCode,
-            }));
-          }
-          columnsMap.current.set(_.labelCode, tmp);
-          list.push(_.labelCode);
-          return tmp;
-        });
-      setCheckedList(list);
-      setColumns(ops);
+      getDWOwner()
+        .then((owners) => {
+          // const map = new Map(); // 检索用的map
+          const list: string[] = []; // checked list
+          // check.group 用的ops
+          const ops = [InitialColumn, ...res.data]
+            .filter((_: any) => _.labelTag !== 'ATTRIBUTE_LABEL')
+            .map((_: any) => {
+              const tmp = {
+                ..._,
+                label: _.labelName,
+                value: _.labelCode,
+                disabled: _.labelRequired,
+              };
+              if (_.labelTag === 'USER_LABEL') {
+                tmp.enums = owners.data.content.map((_: any) => ({
+                  label: _.nickname,
+                  value: _.id,
+                }));
+              }
+              if (_.labelTag === 'ENUM_VALUE_LABEL') {
+                tmp.enums = _.enumValues.map((item: any) => ({
+                  label: item.enumValue,
+                  value: item.valueCode,
+                }));
+              }
+              columnsMap.current.set(_.labelCode, tmp);
+              list.push(_.labelCode);
+              return tmp;
+            });
+          setCheckedList(list);
+          setColumns(ops);
+        })
+        .catch((err) => {});
     });
   }, []);
 

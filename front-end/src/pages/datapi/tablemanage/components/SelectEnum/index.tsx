@@ -21,7 +21,7 @@ const enumOptions = [
 ];
 
 function SelectEnum<VT extends SelectValue = SelectValue>({
-  value,
+  value = 'STRING',
   onChange,
   disabled,
   style,
@@ -31,7 +31,7 @@ function SelectEnum<VT extends SelectValue = SelectValue>({
   const [enumOps, setEnumOps] = useState([]);
 
   useEffect(() => {
-    isEnumType(value as any) ? getNames() : setEnumName(value as any);
+    isEnumType(value) ? getNames() : setEnumName(value);
   }, []);
 
   const getNames = () =>

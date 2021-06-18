@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { getLabel, getEnumValues, delLabel } from '@/services/tablemanage';
-import Title from '../../../components/Title';
+import { isEnumType } from '@/utils/tablemanage';
 import {
   SubjectTypeMap,
   LabelTagMap,
@@ -15,7 +15,7 @@ import {
   InitialColumns,
   AttributeTypeMap,
 } from './constants';
-import { isEnumType } from '@/utils/tablemanage';
+import Title from '../../../components/Title';
 
 export interface ViewLabelProps {
   fileCode: string;

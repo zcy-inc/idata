@@ -1,6 +1,6 @@
-import { TreeNodeType, LabelTag } from '@/constants/tablemanage';
+import { TreeNodeType, LabelTag, ERType } from '@/constants/tablemanage';
 
-export interface FLatTreeNode {
+export interface FlatTreeNode {
   id: number;
   folderName: string;
 }
@@ -51,4 +51,36 @@ export interface Enum {
   enumName: string;
   enumCode: string;
   enumValues: EnumValue[];
+}
+
+export interface TableLable extends Label {
+  tableId: number;
+  columnName: string;
+}
+export interface ColumnLabel extends TableLable {
+  columnType: string;
+  columnIndex: number;
+  columnComment: string;
+  columnLabels: TableLable[];
+  pk: boolean;
+}
+export interface ForeignKey {
+  id: number;
+  tableId: number;
+  tableName: string;
+  columnNames: string;
+  referDbName: string;
+  referTableName: string;
+  referTableId: number;
+  referColumnNames: string;
+  erType: ERType;
+}
+export interface Table {
+  id: number;
+  folderId?: number;
+  creator: string;
+  tableName: string;
+  tableLabels: TableLable[];
+  columnInfos: ColumnLabel[];
+  foreignKeys: ForeignKey[];
 }
