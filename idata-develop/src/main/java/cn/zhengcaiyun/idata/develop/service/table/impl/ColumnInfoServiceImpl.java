@@ -148,6 +148,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .from(devColumnInfo)
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
+        Map<String, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
+                .collect(Collectors.toMap(DevColumnInfo::getColumnName, existColumnInfo -> existColumnInfo));
         List<DevColumnInfo> deleteColumnInfoList = existColumnInfoList.stream()
                 .filter(devColumnInfoDto -> !columnNameList.contains(devColumnInfoDto.getColumnName())).collect(Collectors.toList());
         // 与已存在字段比较，删除未传字段记录
@@ -168,8 +170,12 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                             and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                     .ifPresent(checkDevColumn -> columnInfoDto.setId(checkDevColumn.getId()));
             columnInfoDto.setTableId(tableId);
+            boolean isCreate = existColumnInfoMap.containsKey(columnInfoDto.getColumnName());
+            if (!isCreate) {
+                columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getColumnName()).getId());
+            }
 
-            return createOrUpdateColumn(columnInfoDto, columnLabelList, operator);
+            return createOrUpdateColumn(columnInfoDto, columnLabelList, isCreate, operator);
         }).collect(Collectors.toList());
         return echoColumnInfoList;
     }
@@ -207,15 +213,11 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 //        return echoColumnInfoDto;
 //    }
 
-    private ColumnInfoDto createOrUpdateColumn(ColumnInfoDto columnInfoDto, List<LabelDto> columnLabelList, String operator) {
+    private ColumnInfoDto createOrUpdateColumn(ColumnInfoDto columnInfoDto, List<LabelDto> columnLabelList,
+                                               Boolean isCreate, String operator) {
         ColumnInfoDto echoColumnInfoDto;
         List<LabelDto> echoColumnLabelList;
-        DevColumnInfo checkColumnInfo = devColumnInfoDao.selectOne(c ->
-                c.where(devColumnInfo.del, isNotEqualTo(1),
-                        and(devColumnInfo.tableId, isEqualTo(columnInfoDto.getTableId()),
-                                and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName())))))
-                .orElse(null);
-        if (checkColumnInfo == null) {
+        if (isCreate) {
             columnInfoDto.setCreator(operator);
             DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
                     "tableId", "columnName", "columnIndex", "creator");
@@ -232,7 +234,6 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         }
         else {
             columnInfoDto.setEditor(operator);
-            columnInfoDto.setId(checkColumnInfo.getId());
             DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
                     "id", "columnName", "columnIndex", "editor");
             devColumnInfoDao.updateByPrimaryKeySelective(columnInfo);

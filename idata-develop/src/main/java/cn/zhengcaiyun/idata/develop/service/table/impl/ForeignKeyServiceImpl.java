@@ -99,24 +99,28 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
                 .from(devForeignKey)
                 .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        Map<String, Long> existForeignKeyMap = existForeignKeyList.stream().collect(Collectors.toMap(existForeignKey ->
+        Map<String, DevForeignKey> existForeignKeyMap = existForeignKeyList.stream().collect(Collectors.toMap(existForeignKey ->
                         existForeignKey.getTableId() + existForeignKey.getColumnNames()
                                 + existForeignKey.getReferTableId() + existForeignKey.getReferColumnNames(),
-                        DevForeignKey::getId));
+                        existForeignKey -> existForeignKey));
         List<String> foreignKeyStrList = foreignKeyDtoList.stream().map(foreignKeyDto ->
                 tableId + foreignKeyDto.getColumnNames() + foreignKeyDto.getReferTableId() + foreignKeyDto.getReferColumnNames())
                 .collect(Collectors.toList());
-        List<Long> deleteForeignKeyIdList = existForeignKeyMap.entrySet().stream()
+        List<DevForeignKey> deleteForeignKeyList = existForeignKeyMap.entrySet().stream()
                 .filter(existForeignKeyStr -> !foreignKeyStrList.contains(existForeignKeyStr.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
         // 删除不再是外键的记录
-        deleteForeignKeyIdList.forEach(deleteForeignKeyId -> deleteForeignKey(deleteForeignKeyId, operator));
+        deleteForeignKeyList.forEach(deleteForeignKey -> deleteForeignKey(deleteForeignKey.getId(), operator));
 
         List<ForeignKeyDto> echoForeignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
             foreignKeyDto.setTableId(tableId);
-            return createOrUpdateForeignKey(foreignKeyDto, columnNameList, operator);})
-                .collect(Collectors.toList());
+            String foreignKeyStr = tableId + foreignKeyDto.getColumnNames() + foreignKeyDto.getReferTableId()
+                    + foreignKeyDto.getReferColumnNames();
+            boolean isCreate = existForeignKeyMap.containsKey(foreignKeyStr);
+            return createOrUpdateForeignKey(foreignKeyDto, columnNameList, isCreate,
+                    existForeignKeyMap.get(foreignKeyStr), operator);
+        }).collect(Collectors.toList());
         return echoForeignKeyDtoList;
     }
 
@@ -161,17 +165,10 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
 //        return echoForeignKeyDto;
 //    }
 
-    private ForeignKeyDto createOrUpdateForeignKey(ForeignKeyDto foreignKeyDto, List<String> columnNameList, String operator) {
+    private ForeignKeyDto createOrUpdateForeignKey(ForeignKeyDto foreignKeyDto, List<String> columnNameList,
+                                                   Boolean isCreate, DevForeignKey existForeignKey, String operator) {
         ForeignKeyDto echoForeignKey;
-        DevForeignKey checkForeignKey = devForeignKeyDao.selectOne(c ->
-                c.where(devForeignKey.del, isNotEqualTo(1),
-                        and(devForeignKey.tableId, isEqualTo(foreignKeyDto.getTableId()),
-                        and(devForeignKey.columnNames, isEqualTo(foreignKeyDto.getColumnNames())),
-                        and(devForeignKey.referTableId, isEqualTo(foreignKeyDto.getReferTableId())),
-                        and(devForeignKey.referColumnNames, isEqualTo(foreignKeyDto.getReferColumnNames())),
-                        and(devForeignKey.erType, isEqualTo(foreignKeyDto.getErType())))))
-                .orElse(null);
-        if (checkForeignKey == null) {
+        if (isCreate) {
             checkArgument(foreignKeyDto.getTableId() != null, "外键所属表ID不能为空");
             checkArgument(isNotEmpty(foreignKeyDto.getColumnNames()), "外键列名不能为空");
             checkArgument(foreignKeyDto.getReferTableId() != null, "外键引用表ID不能为空");
@@ -193,7 +190,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
             echoForeignKey.setReferDbName(getDbName(echoForeignKey.getReferTableId()));
         }
         else {
-            checkArgument(checkForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
+            checkArgument(existForeignKey.getTableId().equals(foreignKeyDto.getTableId()), "外键所属表不允许修改");
             if (isNotEmpty(foreignKeyDto.getColumnNames())) {
                 // 校验列名是否存在
                 checkArgument(columnNameList.containsAll(Arrays.asList(foreignKeyDto.getColumnNames().split(","))),
@@ -202,7 +199,7 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
                     checkArgument(foreignKeyDto.getColumnNames().split(",").length
                             == foreignKeyDto.getReferColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
                 } else {
-                    checkArgument(checkForeignKey.getReferColumnNames().split(",").length
+                    checkArgument(existForeignKey.getReferColumnNames().split(",").length
                             == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
                 }
             }
@@ -215,12 +212,12 @@ public class ForeignKeyServiceImpl implements ForeignKeyService {
                             == foreignKeyDto.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
                 } else {
                     checkArgument(foreignKeyDto.getReferColumnNames().split(",").length
-                            == checkForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
+                            == existForeignKey.getColumnNames().split(",").length, "外键列数量和外键引用列数量需一致");
                 }
             }
 
             foreignKeyDto.setEditor(operator);
-            foreignKeyDto.setId(checkForeignKey.getId());
+            foreignKeyDto.setId(existForeignKey.getId());
             DevForeignKey foreignKey = PojoUtil.copyOne(foreignKeyDto, DevForeignKey.class, foreignKeyFields);
             devForeignKeyDao.updateByPrimaryKeySelective(foreignKey);
 
