@@ -8,6 +8,6 @@ public enum MetaTypeEnum {
     BOOLEAN,
     WHOLE,
     STRING,
-    // enum_code(动态):ENUM,
+    // enum_code(动态，约定以:ENUM结尾),
     ENUM;
 }

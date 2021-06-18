@@ -41,7 +41,7 @@ public class LabelDefineDto {
             "MODIFIER_LABEL | DIMENSION_LABEL_DISABLE | ATOMIC_METRIC_LABEL_DISABLE | " +
             "DERIVE_METRIC_LABEL_DISABLE | COMPLEX_METRIC_LABEL_DISABLE | MODIFIER_LABEL_DISABLE")
     private String labelTag;
-    @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
+    @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态，约定以:ENUM结尾) | ENUM")
     private String labelParamType;
     private List<EnumValueDto> enumValues;
     private List<SpecialAttributeDto> specialAttributes;

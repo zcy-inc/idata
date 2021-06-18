@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class AttributeDto {
     private String attributeKey;
-    @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态):ENUM | ENUM")
+    @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态，约定以:ENUM结尾) | ENUM")
     private String attributeType;
     private String attributeValue;
     private String enumName;
