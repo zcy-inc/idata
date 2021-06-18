@@ -6,7 +6,7 @@ import { Enum, EnumValue, LabelAttribute } from '@/types/tablemanage';
 import Title from '../../../components/Title';
 
 export interface ViewEnumProps {
-  data: Enum;
+  data?: Enum;
 }
 
 interface EnumListItem {
@@ -35,7 +35,7 @@ const ViewEnum: FC<ViewEnumProps> = ({ data }) => {
   const [dataSource, setDateSource] = useState<EnumListItem[]>();
 
   useEffect(() => {
-    const enumValues = Array.isArray(data?.enumValues) ? data.enumValues : [];
+    const enumValues = Array.isArray(data?.enumValues) ? data?.enumValues : [];
     const attrs = Array.isArray(enumValues[0]?.enumAttributes) ? enumValues[0]?.enumAttributes : [];
     // 格式化枚举参数生成的列
     const exCols = attrs.map((_: LabelAttribute) => ({

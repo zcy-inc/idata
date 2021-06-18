@@ -8,7 +8,7 @@ import type { TableColumnType } from 'antd';
 import type { FC, Key } from 'react';
 import styles from '../../index.less';
 
-import SelectType from '../SelectType';
+import SelectEnum from '../SelectEnum';
 import Title from '../../../components/Title';
 import {
   rules,
@@ -63,7 +63,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
       key: 'attributeType',
       formItemProps: { rules },
       renderFormItem: (schema) => (
-        <SelectType
+        <SelectEnum
           onChange={(value) => {
             if (isEnumType(value)) {
               getEnumValues({ enumCode: value })

@@ -5,7 +5,6 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { createEnum, delEnum, getEnum } from '@/services/tablemanage';
-import { isEnumType } from '@/utils/tablemanage';
 import { Enum } from '@/types/tablemanage';
 
 import ViewEnum from './ViewEnum';

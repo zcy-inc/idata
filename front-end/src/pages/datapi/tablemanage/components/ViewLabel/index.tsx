@@ -47,7 +47,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
 
   // labelTag === 'ENUM_VALUE_LABEL'
   const renderEnumValues = (res: any) => {
-    const enumCode = res.data.labelParamType.split(':')[0];
+    const enumCode = res.data.labelParamType;
     getEnumValues({ enumCode })
       .then((_res) => {
         const values = Array.isArray(_res.data) ? _res.data : [];
@@ -65,7 +65,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
           return tmp;
         });
         setColumns(InitialColumns.concat(exCols));
-        setDateSource(data); // TODO 缺少parentValue
+        setDateSource(data);
       })
       .catch((err) => {});
   };

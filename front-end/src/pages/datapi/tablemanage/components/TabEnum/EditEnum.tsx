@@ -5,19 +5,20 @@ import type { FormInstance } from 'antd';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
-import EnumTable from './components/EnumTable';
 import { getFolders } from '@/services/tablemanage';
 import { rules } from '@/constants/tablemanage';
+import { Enum, FLatTreeNode } from '@/types/tablemanage';
+import EnumTable from './components/EnumTable';
 
 export interface EditEnumProps {
   form: FormInstance;
-  data?: any;
+  data?: Enum;
 }
 
 const { require } = rules;
 
 const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
-  const [folders, setFolders] = useState<any[]>([]);
+  const [folders, setFolders] = useState([]);
   const { curFolder } = useModel('tabalmanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
@@ -25,7 +26,10 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: FLatTreeNode) => ({
+          label: _.folderName,
+          value: `${_.id}`,
+        }));
         setFolders(fd);
       })
       .catch((err) => {});

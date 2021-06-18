@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
 import type { CSSProperties } from 'react';
+import { SelectValue } from 'antd/es/select';
 
 import { getEnumNames } from '@/services/tablemanage';
 import { EnumName } from '@/types/tablemanage';
 import { isEnumType } from '@/utils/tablemanage';
 
-interface SelectTypeProps {
-  value?: string;
+interface SelectEnumProps<VT> {
+  value?: VT;
   disabled?: boolean;
   style?: CSSProperties;
-  onChange?: (value: string) => void;
+  onChange?: (value: VT) => void;
 }
 
 const enumOptions = [
@@ -19,13 +20,18 @@ const enumOptions = [
   { label: '枚举', value: 'ENUM' },
 ];
 
-const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, disabled, style }) => {
-  const [enumName, setEnumName] = useState<string>();
-  const [enumValue, setEnumValue] = useState<string>();
+function SelectEnum<VT extends SelectValue = SelectValue>({
+  value,
+  onChange,
+  disabled,
+  style,
+}: SelectEnumProps<VT>) {
+  const [enumName, setEnumName] = useState<VT>();
+  const [enumValue, setEnumValue] = useState<VT>();
   const [enumOps, setEnumOps] = useState([]);
 
   useEffect(() => {
-    isEnumType(value) ? getNames() : setEnumName(value);
+    isEnumType(value as any) ? getNames() : setEnumName(value as any);
   }, []);
 
   const getNames = () =>
@@ -33,17 +39,17 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         const ops = data.map((_: EnumName) => ({ label: _.enumName, value: _.enumCode }));
-        setEnumName('ENUM');
+        setEnumName('ENUM' as any);
         setEnumOps(ops);
         onEnumValueChange(isEnumType(value) ? value : ops[0]?.value);
       })
       .catch((err) => {});
 
-  const triggerChange = (v: string) => {
+  const triggerChange = (v: VT) => {
     onChange?.(v);
   };
 
-  const onEnumChange = (v: string) => {
+  const onEnumChange = (v: VT) => {
     setEnumName(v);
     triggerChange(v);
     if (isEnumType(v)) {
@@ -51,14 +57,14 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
     }
   };
 
-  const onEnumValueChange = (v: string) => {
+  const onEnumValueChange = (v: VT) => {
     setEnumValue(v);
     triggerChange(v);
   };
 
   return (
     <div style={{ display: 'flex', ...style }}>
-      <Select
+      <Select<VT>
         key="enum"
         disabled={disabled}
         placeholder="请选择"
@@ -79,6 +85,6 @@ const SelectType: React.FC<SelectTypeProps> = ({ value = 'STRING', onChange, dis
       )}
     </div>
   );
-};
+}
 
-export default SelectType;
+export default SelectEnum;

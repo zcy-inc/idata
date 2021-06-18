@@ -89,7 +89,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
             // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
             if (_.labelTag !== 'ATTRIBUTE_LABEL') {
               // 处理数仓管理人的ops
-              if (_.labelCode === 'dwOwnerId') {
+              if (_.labelTag === 'USER_LABEL') {
                 tmp.enums = owners.data.content.map((_: any) => ({
                   label: _.nickname,
                   value: _.id,
@@ -107,6 +107,7 @@ const TableLabels: ForwardRefRenderFunction<unknown, TableLabelsProps> = (
             list.push(_.labelCode);
             return tmp;
           });
+
           // 如果有初始值, 就进行赋值操作
           if (initial) {
             const tableLabels = initial.tableLabels;

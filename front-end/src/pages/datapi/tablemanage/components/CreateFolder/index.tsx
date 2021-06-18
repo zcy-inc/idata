@@ -49,7 +49,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       modalProps={{ onCancel, maskClosable: false, destroyOnClose: true }}
       visible={visible}
       onFinish={async (values) => {
-        if (curFolder) {
+        if (folderMode === 'edit') {
           updateFolder({
             id: curFolder.folderId,
             folderName: values.folderName,

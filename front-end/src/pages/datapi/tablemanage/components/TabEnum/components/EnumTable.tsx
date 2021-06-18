@@ -5,14 +5,21 @@ import type { FC } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
-import SelectType from '../../SelectType';
-import { getRandomStr } from '@/utils/utils';
 import { getEnumNames, getEnumValues } from '@/services/tablemanage';
-import { isEnumType } from '@/utils/tablemanage';
+import { getRandomStr, isEnumType } from '@/utils/tablemanage';
+import { Enum, EnumValue } from '@/types/tablemanage';
+import SelectEnum from '../../SelectEnum';
 
 export interface EnumTableProps {
-  initial?: any;
+  initial?: Enum;
   onChange?: (value: any) => void;
+}
+type EnumColumnType = 'STRING' | 'BOOLEAN' | '';
+interface EnumColumn {
+  id: number;
+  title: string;
+  type: EnumColumnType;
+  enumValues?: EnumValue[];
 }
 
 const { Link } = Typography;
@@ -22,7 +29,7 @@ const RadioOps = [
 ];
 
 const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
-  const [columns, setColumns] = useState<any[]>([]); // {id, title, type}
+  const [columns, setColumns] = useState<EnumColumn[]>([]);
   const [enums, setEnums] = useState<any[]>([]); // {[title]: value}
   const [parentOps, setParentOps] = useState<any[]>([]);
   const [isShadowL, setIsShadowL] = useState(false);
@@ -34,13 +41,13 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
       const attrs = Array.isArray(enumValues[0]?.enumAttributes)
         ? enumValues[0]?.enumAttributes
         : []; // datsSource第一项的enumAttributes, 用以生成自定义参数的列
-      const pOps: any[] = []; // 存储父级枚举值
+      const pOps: { label: string; value: string }[] = []; // 存储父级枚举值
       const promises: Promise<any>[] = []; // 对参数类型是枚举的列, 需要使用getEnumNames获取列表
       // 生成自定义参数的列
-      const exCols = attrs.map((_: any, i: number) => {
+      const exCols: EnumColumn[] = attrs.map((_: any, i: number) => {
         let type = _.attributeType;
         if (isEnumType(_.attributeType)) {
-          type = _.attributeType.split(':')[0];
+          type = _.attributeType.split(':')[0]; // TODO 这里的值若只是10位字符串, 就去掉split
           promises[i] = getEnumNames();
         }
         return { id: i, title: _.attributeKey, type };
@@ -60,7 +67,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
         res.forEach(
           (_: any, i: number) =>
             _ &&
-            (exCols[i].enumValues = _.data.map((_enum: any) => ({
+            (exCols[i].enumValues = _.data.map((_enum: EnumValue) => ({
               label: _enum.enumValue,
               value: _enum.valueCode,
             }))),
@@ -166,14 +173,14 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
             <div className={styles.cell}>
               <div className={styles.title}>枚举值</div>
               <div className={styles.type}>
-                <SelectType style={{ width: 150 }} disabled />
+                <SelectEnum style={{ width: 150 }} disabled />
               </div>
             </div>
             {/* 父级枚举值 */}
             <div className={styles.cell}>
               <div className={styles.title}>父级枚举值</div>
               <div className={styles.type}>
-                <SelectType style={{ width: 150 }} disabled />
+                <SelectEnum style={{ width: 150 }} disabled />
               </div>
             </div>
             {/* 额外的参数列 */}
@@ -194,7 +201,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
                   </Link>
                 </div>
                 <div className={styles.type}>
-                  <SelectType
+                  <SelectEnum
                     style={{ width: 150 }}
                     value={_.type}
                     onChange={(type) => {
