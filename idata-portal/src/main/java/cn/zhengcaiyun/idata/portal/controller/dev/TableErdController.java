@@ -14,33 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.uac;
+package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.user.service.AccessManagerService;
-import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.develop.service.table.TableRelationService;
+import cn.zhengcaiyun.idata.develop.dto.table.TableRelationDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author shiyin
- * @date 2021-03-24 11:54
+ * @author caizhedong
+ * @date 2021-05-19 16:33
  */
+
 @RestController
-public class AccessManagerApi {
+@RequestMapping(path = "/p0/dev")
+public class TableErdController {
 
     @Autowired
-    private AccessManagerService accessManagerService;
-    @Autowired
-    private TokenService tokenService;
+    private TableRelationService tableRelationService;
 
-    @DeleteMapping("/p1/uac/resourceAccess")
-    public RestResult deleteResourceAccess(@RequestParam("resourceType") String resourceType,
-                                           @RequestParam("accessKey") String accessKey,
-                                           HttpServletRequest request) {
-        return RestResult.success(accessManagerService.deleteResourceAccess(resourceType, accessKey,
-                tokenService.getNickname(request)));
+    @GetMapping("tableRelations")
+    public RestResult<TableRelationDto> getTableRelations(@RequestParam("tableId") Long tableId) {
+        return RestResult.success(tableRelationService.getTableRelations(tableId));
     }
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.uac;
+package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 @RestController
 @RequestMapping("p1/uac")
-public class RoleManagerApi {
+public class RoleManagerController {
 
     @Autowired
     private TokenService tokenService;

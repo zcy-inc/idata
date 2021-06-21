@@ -14,31 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.dev;
+package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.service.table.TableRelationService;
-import cn.zhengcaiyun.idata.develop.dto.table.TableRelationDto;
+import cn.zhengcaiyun.idata.user.service.AccessManagerService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author caizhedong
- * @date 2021-05-19 16:33
+ * @author shiyin
+ * @date 2021-03-24 11:54
  */
-
 @RestController
-@RequestMapping(path = "/p0/dev")
-public class TableErdApi {
+public class AccessManagerController {
 
     @Autowired
-    private TableRelationService tableRelationService;
+    private AccessManagerService accessManagerService;
+    @Autowired
+    private TokenService tokenService;
 
-    @GetMapping("tableRelations")
-    public RestResult<TableRelationDto> getTableRelations(@RequestParam("tableId") Long tableId) {
-        return RestResult.success(tableRelationService.getTableRelations(tableId));
+    @DeleteMapping("/p1/uac/resourceAccess")
+    public RestResult deleteResourceAccess(@RequestParam("resourceType") String resourceType,
+                                           @RequestParam("accessKey") String accessKey,
+                                           HttpServletRequest request) {
+        return RestResult.success(accessManagerService.deleteResourceAccess(resourceType, accessKey,
+                tokenService.getNickname(request)));
     }
 }

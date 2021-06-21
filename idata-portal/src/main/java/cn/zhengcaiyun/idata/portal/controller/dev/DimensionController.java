@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.dev;
+package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
@@ -22,26 +22,26 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @author caizhedong
- * @date 2021-05-26 21:34
+ * @date 2021-05-25 11:10
  */
 
 @RestController
 @RequestMapping(path = "/p1/dev")
-public class MetricApi {
+public class DimensionController {
 
-    @GetMapping("metric/{metricId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("metricId") Long metricId) {
+    @GetMapping("dimension/{dimensionId}")
+    public RestResult<LabelDefineDto> findById(@PathVariable("dimensionId") Long dimensionId) {
         return RestResult.success();
     }
 
-    @PostMapping("metric")
-    public RestResult<LabelDefineDto> addOrUpdateMetric(LabelDefineDto labelDefineDto,
+    @PostMapping("dimension")
+    public RestResult<LabelDefineDto> addOrUpdateDimension(LabelDefineDto labelDefineDto,
                                                            String creator) {
         return RestResult.success();
     }
 
-    @DeleteMapping("dimension/{metricId}")
-    public RestResult deleteMetric(@PathVariable("metricId") Long metricId,
+    @DeleteMapping("dimension/{dimensionId}")
+    public RestResult deleteDimension(@PathVariable("dimensionId") Long dimensionId,
                                       String editor) {
         return RestResult.success();
     }

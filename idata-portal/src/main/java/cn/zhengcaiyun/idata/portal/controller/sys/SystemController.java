@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.sys;
+package cn.zhengcaiyun.idata.portal.controller.sys;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
@@ -33,7 +33,7 @@ import java.util.List;
  * @date 2021-03-02 11:02
  */
 @RestController
-public class SystemApi {
+public class SystemController {
 
     @Autowired
     private SystemService systemService;

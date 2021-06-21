@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.uac;
+package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.user.dto.SignInDto;
@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2021-03-01 22:12
  */
 @RestController
-public class UserApi {
+public class UserController {
 
     @Autowired
     private UserService userService;

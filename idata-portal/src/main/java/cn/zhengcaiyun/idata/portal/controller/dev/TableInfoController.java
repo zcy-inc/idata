@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.dev;
+package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -36,7 +36,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/p1/dev")
-public class TableInfoApi {
+public class TableInfoController {
 
     @Autowired
     private TokenService tokenService;

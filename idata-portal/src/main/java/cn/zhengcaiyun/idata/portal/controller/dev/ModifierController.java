@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.dev;
+package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
@@ -22,27 +22,27 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 11:10
+ * @date 2021-05-26 21:35
  */
 
 @RestController
 @RequestMapping(path = "/p1/dev")
-public class DimensionApi {
+public class ModifierController {
 
-    @GetMapping("dimension/{dimensionId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("dimensionId") Long dimensionId) {
+    @GetMapping("modifier/{modifierId}")
+    public RestResult<LabelDefineDto> findById(@PathVariable("modifierId") Long modifierId) {
         return RestResult.success();
     }
 
-    @PostMapping("dimension")
-    public RestResult<LabelDefineDto> addOrUpdateDimension(LabelDefineDto labelDefineDto,
+    @PostMapping("modifier")
+    public RestResult<LabelDefineDto> addOrUpdateModifier(LabelDefineDto labelDefineDto,
                                                            String creator) {
         return RestResult.success();
     }
 
-    @DeleteMapping("dimension/{dimensionId}")
-    public RestResult deleteDimension(@PathVariable("dimensionId") Long dimensionId,
-                                      String editor) {
+    @DeleteMapping("modifier/{modifierId}")
+    public RestResult deleteModifier(@PathVariable("modifierId") Long modifierId,
+                                   String editor) {
         return RestResult.success();
     }
 }

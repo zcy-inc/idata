@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.api.uac;
+package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
@@ -37,7 +37,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(path = "/p1/uac")
-public class UserAccessApi {
+public class UserAccessController {
 
     @Autowired
     private TokenService tokenService;
