@@ -38,6 +38,7 @@
         <module>idata-system</module>
         <module>idata-user</module>
         <module>idata-develop</module>
+        <module>idata-label</module>
     </modules>
 
     <parent>
