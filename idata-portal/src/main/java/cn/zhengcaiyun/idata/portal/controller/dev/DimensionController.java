@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.target.TargetDto;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -30,19 +31,19 @@ import org.springframework.web.bind.annotation.*;
 public class DimensionController {
 
     @GetMapping("dimension/{dimensionId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("dimensionId") Long dimensionId) {
+    public RestResult<TargetDto> findById(@PathVariable("dimensionId") Long dimensionId) {
         return RestResult.success();
     }
 
     @PostMapping("dimension")
-    public RestResult<LabelDefineDto> addOrUpdateDimension(LabelDefineDto labelDefineDto,
-                                                           String creator) {
+    public RestResult<TargetDto> addOrUpdateDimension(TargetDto targetDto,
+                                                      String operator) {
         return RestResult.success();
     }
 
     @DeleteMapping("dimension/{dimensionId}")
     public RestResult deleteDimension(@PathVariable("dimensionId") Long dimensionId,
-                                      String editor) {
+                                      String operator) {
         return RestResult.success();
     }
 }
