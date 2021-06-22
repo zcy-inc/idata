@@ -11,11 +11,11 @@
     <description>IData project object label module</description>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>${project.groupId}</groupId>-->
-<!--            <artifactId>idata-commons</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>idata-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
