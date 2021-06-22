@@ -16,6 +16,12 @@
     ],
   },
   {
+    path: '/objectLabel',
+    name: '数据标签',
+    icon: 'icon-quanxianguanli',
+    component: './ObjectLabel',
+  },
+  {
     path: '/authority',
     name: '权限管理',
     icon: 'icon-quanxianguanli',

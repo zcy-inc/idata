@@ -219,13 +219,12 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
     // 注册自定义的Node dice-er-box
     registerNode('dice-er-box', {
       draw(cfg: any, group: any) {
-        const width = 320;
+        const width = 260;
         const height = 316;
         const itemCount = 10;
         const boxStyle: any = { stroke: '#3F88FE' }; // 控制node的主色
 
-        const { attrs = [], startIndex = 0, selectedIndex, collapsed, icon } = cfg;
-
+        const { attrs = [], startIndex = 0, selectedIndex, collapsed } = cfg;
         const list = attrs; // data传入的完整list
 
         // 当前container中显示的list
@@ -242,11 +241,6 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         });
 
         let fontLeft = 12;
-        // 这个是什么？
-        if (icon && icon.show !== false) {
-          group.addShape('image', { attrs: { x: 8, y: 8, height: 16, width: 16, ...icon } });
-          fontLeft += 18;
-        }
         // 绘制标题的文本
         group.addShape('text', { attrs: { y: 22, x: fontLeft, fill: '#fff', text: cfg.label } });
         // 绘制收起展开的行
@@ -395,19 +389,30 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             });
             // 列名
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 32, text: columnName },
+              attrs: {
+                ...textAttrs,
+                x: 32,
+                text: columnName.length > 7 ? columnName.substring(0, 7) + '...' : columnName,
+              },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
             // 备注？
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 80, text: columnComment },
+              attrs: {
+                ...textAttrs,
+                x: 88,
+                text:
+                  columnComment.length > 15
+                    ? columnComment.substring(0, 12) + '...'
+                    : columnComment,
+              },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
             // 类型
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 120, text: columnType },
+              attrs: { ...textAttrs, x: 200, text: columnType },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });
@@ -427,7 +432,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
     const container: any = findDOMNode(ref.current);
 
     const width = container.scrollWidth;
-    const height = (container.scrollHeight || 1000) - 20;
+    const height = (container.scrollHeight || 800) - 20;
     const toolbar = new G6.ToolBar({
       className: styles.toolbar,
     });

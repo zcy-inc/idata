@@ -1,4 +1,4 @@
-.kpi-system {
+.object-label {
   padding: 0 !important;
   .board {
     display: flex;
@@ -8,14 +8,9 @@
     }
     .left {
       width: 300px;
-      padding: 16px;
       :global {
-        .ant-tabs-tab {
-          margin-left: 0;
-          padding: 12px 24px;
-        }
-        .ant-tabs-tab-active {
-          font-weight: bold;
+        .ant-tree {
+          padding: 16px;
         }
         .ant-tree-switcher {
           color: #c0c4da;
@@ -29,6 +24,8 @@
         display: flex;
         align-items: center;
         width: 100%;
+        padding: 16px;
+        border-bottom: solid 1px #f0f2f5;
         .search-input {
           padding-top: 4px;
           padding-bottom: 4px;
@@ -89,13 +86,13 @@
         height: 100%;
         padding: 24px;
       }
-      .reset-tabs {
+      .content {
+        margin-top: 16px;
         :global {
           .ant-tabs-nav {
-            border-bottom: 1px solid #f0f0f0;
             .ant-tabs-tab {
               margin-left: 0;
-              padding: 12px 24px;
+              padding: 12px;
             }
             .ant-tabs-tab-active {
               font-weight: bold;
@@ -105,11 +102,53 @@
               }
             }
           }
-          .ant-card-body {
+          .ant-form {
+            .ant-form-item {
+              margin-bottom: 0;
+            }
+          }
+          .ant-pro-table {
+            .ant-card-body {
+              padding: 0;
+            }
+          }
+        }
+      }
+      .edit-content {
+        margin-top: 16px;
+        :global {
+          .ant-btn-default {
+            height: 32px;
+            padding: 4px 15px;
+          }
+          .ant-btn-dashed {
+            height: 32px;
+            padding: 4px 15px;
+            border: dashed 1px #ebedf3;
+          }
+          .ant-dropdown-trigger {
             padding: 0;
           }
-          .ant-space-item {
-            margin-right: 0 !important;
+          .ant-input {
+            padding-top: 4px;
+            padding-bottom: 4px;
+          }
+        }
+        .layer-active {
+          :global {
+            .ant-btn-default {
+              color: var(--primary-color);
+              border: 1px solid var(--primary-color);
+            }
+          }
+        }
+        .title-bar {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 16px;
+          .title {
+            font-weight: bold;
+            font-size: 16px;
           }
         }
       }

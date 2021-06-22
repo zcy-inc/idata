@@ -45,7 +45,6 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         _.columnLabels.forEach((item: any) => (tmp[item.labelCode] = transformLabelValue(item)));
         return tmp;
       });
-      console.log(dt);
 
       setColumns(ViewInitialColumns.concat(exCols));
       setDataSource(dt);

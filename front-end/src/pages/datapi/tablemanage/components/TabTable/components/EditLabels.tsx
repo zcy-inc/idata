@@ -105,6 +105,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
+            labelValues.current.set('tableName', initial.tableName);
             tableLabels.forEach((_: TableLable) => {
               const v = _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue;
               labelValues.current.set(_.labelCode, v);

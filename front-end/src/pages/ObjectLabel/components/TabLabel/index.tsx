@@ -1,53 +1,31 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Modal, message } from 'antd';
+import React, { Fragment, useState } from 'react';
+import { Button, Modal } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
-import ViewDIM from './ViewDIM';
-import EditDIM from './EditDIM';
-import { createDimension, getDimension } from '@/services/kpisystem';
-import { Dimension } from '@/types/kpisystem';
+import ViewLabel from './ViewLabel';
+import EditLabel from './EditLabel';
 
-export interface TabDIMProps {
+export interface TabEnumProps {
   initialMode: 'view' | 'edit';
   fileCode: string;
 }
 
 const { confirm } = Modal;
 
-const TabDIM: FC<TabDIMProps> = ({ initialMode = 'view', fileCode }) => {
+const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('edit');
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [data, setData] = useState<Dimension>();
-
-  const { getTree, removeTab } = useModel('kpisystem', (_) => ({
+  const { getTree, removeTab } = useModel('objectlabel', (_) => ({
     getTree: _.getTree,
     removeTab: _.removeTab,
   }));
 
-  useEffect(() => {
-    setMode(initialMode);
-    fileCode !== 'newDIM' && getDIMInfo(fileCode);
-  }, []);
+  const getDIMInfo = (code: string) => {};
 
-  const getDIMInfo = (dimensionId: string) => {
-    getDimension({ dimensionId })
-      .then((res) => {
-        setData(res.data);
-      })
-      .catch((err) => {});
-  };
-
-  const onSubmit = () => {
-    setLoading(true);
-    createDimension({})
-      .then((res) => {})
-      .catch((err) => {})
-      .finally(() => setLoading(false));
-    getTree('DIMENSION_LABEL');
-  };
+  const onSubmit = () => {};
 
   const onDelete = () =>
     confirm({
@@ -66,8 +44,8 @@ const TabDIM: FC<TabDIMProps> = ({ initialMode = 'view', fileCode }) => {
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewDIM />}
-      {mode === 'edit' && <EditDIM />}
+      {mode === 'view' && <ViewLabel />}
+      {mode === 'edit' && <EditLabel />}
       <div className={styles.submit}>
         {mode === 'view' && [
           <Button key="edit" type="primary" onClick={() => setMode('edit')}>
@@ -88,4 +66,4 @@ const TabDIM: FC<TabDIMProps> = ({ initialMode = 'view', fileCode }) => {
   );
 };
 
-export default TabDIM;
+export default TabEnum;

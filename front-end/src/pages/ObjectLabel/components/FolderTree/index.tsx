@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
+import { Dropdown, Input, Menu, message, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent } from 'react';
 import styles from '../../index.less';
@@ -7,8 +7,7 @@ import styles from '../../index.less';
 import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
 
-import { deleteFolder } from '@/services/kpisystem';
-import { TreeNodeType } from '@/types/kpisystem';
+import { deleteFolder } from '@/services/objectlabel';
 
 export type Key = string | number;
 export interface FolderTreeProps {}
@@ -27,14 +26,13 @@ export interface FlatTreeNode {
 }
 
 const { TreeNode } = Tree;
-const { TabPane } = Tabs;
 const { confirm } = Modal;
 const NodeTypeIcon = {
   FOLDER: <IconFont type="icon-wenjianjia" key="folder" />,
   FOLDEROPEN: <IconFont type="icon-wenjianjiazhankai" key="folderopen" />,
-  LABEL: <IconFont type="icon-biaoqian1" key="dimension" />,
-  ENUM: <IconFont type="icon-meiju" key="modifier" />,
-  TABLE: <IconFont type="icon-biao" key="metric" />,
+  LABEL: <IconFont type="icon-biaoqian1" key="label" />,
+  ENUM: <IconFont type="icon-meiju" key="enum" />,
+  TABLE: <IconFont type="icon-biao" key="table" />,
 };
 
 const FolderTree: FC<FolderTreeProps> = ({}) => {
@@ -45,12 +43,11 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const [visible, setVisible] = useState(false);
 
-  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, addTab } = useModel(
-    'kpisystem',
+  const { tree, getTree, curNode, setCurNode, setFolderMode, addTab } = useModel(
+    'objectlabel',
     (_) => ({
       tree: _.tree,
       getTree: _.getTree,
-      treeType: _.treeType,
       curNode: _.curNode,
       setCurNode: _.setCurNode,
       setFolderMode: _.setFolderMode,
@@ -59,7 +56,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   );
 
   useEffect(() => {
-    getTree('DIMENSION_LABEL');
+    getTree();
   }, []);
 
   useEffect(() => {
@@ -69,27 +66,13 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const menu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
       <Menu.Item key="folder">新建文件夹</Menu.Item>
-      <Menu.Item key="dimension">新建维度</Menu.Item>
-      <Menu.Item key="modifier">新建修饰词</Menu.Item>
-      <Menu.Item key="metric">新建指标</Menu.Item>
+      <Menu.Item key="label">新建数据标签</Menu.Item>
     </Menu>
   );
 
-  const renderTypeMenu = () => {
-    switch (treeType) {
-      case 'DIMENSION_LABEL':
-        return <Menu.Item key="dimension">新建维度</Menu.Item>;
-      case 'MODIFIER_LABEL':
-        return <Menu.Item key="modifier">新建修饰词</Menu.Item>;
-      case 'METRIC_LABEL':
-      default:
-        return <Menu.Item key="metric">新建指标</Menu.Item>;
-    }
-  };
-
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      {renderTypeMenu()}
+      <Menu.Item key="label">新建数据标签</Menu.Item>
       <Menu.Divider />
       <Menu.Item key="folder">新建文件夹</Menu.Item>
       {curNode?.type === 'FOLDER' && (
@@ -128,7 +111,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           .then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
-              getTree(treeType);
+              getTree();
             }
           })
           .catch((err) => {}),
@@ -225,11 +208,6 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           />
         </Dropdown>
       </div>
-      <Tabs activeKey={treeType} onChange={(key) => getTree(key as TreeNodeType)}>
-        <TabPane tab="维度" key="DIMENSION_LABEL" />
-        <TabPane tab="修饰词" key="MODIFIER_LABEL" />
-        <TabPane tab="指标" key="METRIC_LABEL" />
-      </Tabs>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
           blockNode

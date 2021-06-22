@@ -46,6 +46,8 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         _keys.push(_.id);
         return t;
       });
+      console.log(_data);
+
       setData(_data);
       setKeys(_keys);
     }

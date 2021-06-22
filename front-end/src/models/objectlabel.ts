@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { getFolderTree } from '@/services/kpisystem';
-import { TreeNodeType } from '@/types/kpisystem';
+import { getFolderTree } from '@/services/objectlabel';
 
 interface ITab {
   key: string;
@@ -13,7 +12,6 @@ interface ITab {
 export default () => {
   // tree
   const [tree, setTree] = useState([]);
-  const [treeType, setTreeType] = useState<TreeNodeType>('DIMENSION_LABEL');
   const [curNode, setCurNode] = useState<any>(null);
   // 当点击节点为文件夹且是新建的时候, 需要该变量来赋值name值
   const [folderMode, setFolderMode] = useState<'create' | 'edit'>('create');
@@ -22,9 +20,8 @@ export default () => {
   const [activeTab, setActiveTab] = useState('');
 
   // 获取树
-  const getTree = (devTreeType: TreeNodeType) => {
-    setTreeType(devTreeType);
-    getFolderTree({ devTreeType }).then((res) => {
+  const getTree = () => {
+    getFolderTree().then((res) => {
       setTree(res.data);
     });
   };
@@ -54,7 +51,6 @@ export default () => {
   return {
     // tree
     tree,
-    treeType,
     getTree,
     curNode,
     setCurNode,

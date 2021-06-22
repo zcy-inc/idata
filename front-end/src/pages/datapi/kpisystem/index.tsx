@@ -8,7 +8,7 @@ import Workbench from './components/Workbench';
 
 const KpiSystem: FC = () => {
   return (
-    <PageContainer contentClassName={styles.content}>
+    <PageContainer contentClassName={styles['kpi-system']}>
       <div className={styles.board}>
         <div className={styles.left}>
           <FolderTree />
