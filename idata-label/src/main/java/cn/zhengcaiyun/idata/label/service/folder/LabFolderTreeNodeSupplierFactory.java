@@ -10,7 +10,7 @@ import java.util.Map;
  * @author: yangjianhua
  * @create: 2021-06-22 11:51
  **/
-public class LabFolderTreeNodeSuppliers {
+public class LabFolderTreeNodeSupplierFactory {
 
     private static final Map<String, LabFolderTreeNodeSupplier> supplierMap = Maps.newConcurrentMap();
 

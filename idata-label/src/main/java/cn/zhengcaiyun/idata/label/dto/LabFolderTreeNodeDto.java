@@ -19,7 +19,8 @@ public class LabFolderTreeNodeDto {
     private String name;
     /**
      * 树节点类型，文件夹：FOLDER，数据标签：LABEL
-     * 详见：ref: FolderTreeNodeTypeEnum
+     *
+     * @see cn.zhengcaiyun.idata.label.enums.FolderTreeNodeTypeEnum
      */
     private String type;
     /**

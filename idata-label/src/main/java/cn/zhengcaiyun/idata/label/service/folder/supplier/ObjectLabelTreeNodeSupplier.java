@@ -5,7 +5,7 @@ import cn.zhengcaiyun.idata.label.dal.model.LabObjectLabel;
 import cn.zhengcaiyun.idata.label.dto.LabFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.label.enums.FolderTreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplier;
-import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSuppliers;
+import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplierFactory;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDynamicSqlSupport.labObjectLabel;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
@@ -29,12 +30,17 @@ public class ObjectLabelTreeNodeSupplier implements LabFolderTreeNodeSupplier {
 
     private static final String BELONG = "lab";
 
+    private final LabObjectLabelDao objectLabelDao;
+
     @Autowired
-    private LabObjectLabelDao objectLabelDao;
+    public ObjectLabelTreeNodeSupplier(LabObjectLabelDao objectLabelDao) {
+        checkNotNull(objectLabelDao, "objectLabelDao must not be null.");
+        this.objectLabelDao = objectLabelDao;
+    }
 
     @PostConstruct
     public void register() {
-        LabFolderTreeNodeSuppliers.register(BELONG, this);
+        LabFolderTreeNodeSupplierFactory.register(BELONG, this);
     }
 
     /**

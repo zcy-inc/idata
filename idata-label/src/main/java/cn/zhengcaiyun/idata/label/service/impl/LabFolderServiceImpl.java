@@ -8,7 +8,7 @@ import cn.zhengcaiyun.idata.label.enums.FolderTreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.label.service.LabFolderService;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderManager;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplier;
-import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSuppliers;
+import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplierFactory;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -150,7 +150,7 @@ public class LabFolderServiceImpl implements LabFolderService {
     }
 
     private List<LabFolderTreeNodeDto> getBizEntityTreeNodes(String belong) {
-        LabFolderTreeNodeSupplier supplier = LabFolderTreeNodeSuppliers.getSupplier(belong);
+        LabFolderTreeNodeSupplier supplier = LabFolderTreeNodeSupplierFactory.getSupplier(belong);
         return supplier == null ? Lists.newArrayList() : supplier.get();
     }
 

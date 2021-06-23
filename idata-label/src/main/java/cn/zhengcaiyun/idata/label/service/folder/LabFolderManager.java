@@ -10,8 +10,7 @@ import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
@@ -23,10 +22,12 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
  **/
 @Component
 public class LabFolderManager {
+
     private final LabFolderDao folderDao;
 
     @Autowired
     public LabFolderManager(LabFolderDao folderDao) {
+        checkNotNull(folderDao, "folderDao must not be null.");
         this.folderDao = folderDao;
     }
 
