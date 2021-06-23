@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.label.dto.LabFolderDto;
 import cn.zhengcaiyun.idata.label.dto.LabFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.label.enums.FolderTreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.label.service.LabFolderService;
+import cn.zhengcaiyun.idata.label.service.folder.LabFolderManager;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplier;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSuppliers;
 import com.google.common.base.MoreObjects;
@@ -18,7 +19,9 @@ import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,11 +29,8 @@ import java.util.stream.Collectors;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
@@ -43,13 +43,25 @@ public class LabFolderServiceImpl implements LabFolderService {
 
     @Autowired
     private LabFolderDao labFolderDao;
+    @Autowired
+    private LabFolderManager labFolderManager;
+    @Resource
+    private List<LabFolderTreeNodeSupplier> list;
+    @Resource
+    private Map<String, LabFolderTreeNodeSupplier> map;
+
+//    @Autowired
+//    public LabFolderServiceImpl(LabFolderDao labFolderDao) {
+//        checkNotNull(labFolderDao,"labFolderDao must not be null.");
+//        this.labFolderDao = labFolderDao;
+//    }
 
     @Override
     public Long createFolder(LabFolderDto labFolderDto, String operator) {
-        LabFolder existFolder = getFolder(labFolderDto.getName());
+        LabFolder existFolder = labFolderManager.getFolder(labFolderDto.getName());
         checkState(existFolder == null, "文件夹名称已存在");
         Optional.ofNullable(labFolderDto.getParentId())
-                .ifPresent(parentId -> getFolder(parentId, "父文件夹不存在"));
+                .ifPresent(parentId -> labFolderManager.getFolder(parentId, "父文件夹不存在"));
 
         LabFolder labFolder = newCreatedFolder(labFolderDto, operator);
         labFolderDao.insertSelective(labFolder);
@@ -58,13 +70,13 @@ public class LabFolderServiceImpl implements LabFolderService {
 
     @Override
     public Long editFolder(LabFolderDto labFolderDto, String operator) {
-        LabFolder folder = getFolder(labFolderDto.getId(), "文件夹不存在");
-        LabFolder checkNameFolder = getFolder(labFolderDto.getName());
+        LabFolder folder = labFolderManager.getFolder(labFolderDto.getId(), "文件夹不存在");
+        LabFolder checkNameFolder = labFolderManager.getFolder(labFolderDto.getName());
         if (!Objects.isNull(checkNameFolder)) {
             checkState(Objects.equals(folder.getId(), checkNameFolder.getId()), "文件夹名称已存在");
         }
         Optional.ofNullable(labFolderDto.getParentId())
-                .ifPresent(parentId -> getFolder(parentId, "父文件夹不存在"));
+                .ifPresent(parentId -> labFolderManager.getFolder(parentId, "父文件夹不存在"));
 
         LabFolder updateFolder = newEditedFolder(labFolderDto, operator);
         labFolderDao.updateByPrimaryKeySelective(updateFolder);
@@ -73,7 +85,7 @@ public class LabFolderServiceImpl implements LabFolderService {
 
     @Override
     public LabFolderDto getFolder(Long id) {
-        LabFolder folder = getFolder(id, "文件夹不存在");
+        LabFolder folder = labFolderManager.getFolder(id, "文件夹不存在");
         LabFolderDto dto = new LabFolderDto();
         BeanUtils.copyProperties(folder, dto);
         return dto;
@@ -81,7 +93,9 @@ public class LabFolderServiceImpl implements LabFolderService {
 
     @Override
     public Boolean deleteFolder(Long id, String operator) {
-        getFolder(id, "文件夹不存在");
+        LabFolder folder = labFolderManager.getFolder(id, "文件夹不存在");
+        //已删除
+        if (folder.getDel().equals(DEL_YES.val)) return true;
         // 软删除，修改del状态
         labFolderDao.update(dsl -> dsl.set(labFolder.del).equalTo(DEL_YES.val)
                 .set(labFolder.editor).equalTo(operator).where(labFolder.id, isEqualTo(id)));
@@ -92,7 +106,7 @@ public class LabFolderServiceImpl implements LabFolderService {
     public List<LabFolderDto> getFolders(String belong) {
         if (isEmpty(belong)) return Lists.newArrayList();
 
-        List<LabFolder> folders = queryFolders(belong);
+        List<LabFolder> folders = labFolderManager.queryFolders(belong);
         BeanCopier copier = BeanCopier.create(LabFolder.class, LabFolderDto.class, false);
         // todo test
         List<LabFolderDto> folderDtoList = Lists.newArrayList();
@@ -105,7 +119,7 @@ public class LabFolderServiceImpl implements LabFolderService {
     @Override
     public List<LabFolderTreeNodeDto> getFolderTree(String belong) {
         if (isEmpty(belong)) return Lists.newArrayList();
-        List<LabFolder> folders = queryFolders(belong);
+        List<LabFolder> folders = labFolderManager.queryFolders(belong);
         if (CollectionUtils.isEmpty(folders)) return Lists.newArrayList();
 
         List<LabFolderTreeNodeDto> treeNodeDtoList = Lists.newArrayListWithCapacity(256);
@@ -156,28 +170,6 @@ public class LabFolderServiceImpl implements LabFolderService {
         nodeDto.setParentId(folder.getParentId());
         nodeDto.setCid(nodeDto.getType() + "_" + nodeDto.getId());
         return nodeDto;
-    }
-
-    private List<LabFolder> queryFolders(String belong) {
-        return labFolderDao.select(
-                dsl -> dsl.where(labFolder.belong, isEqualTo(belong),
-                        and(labFolder.del, isEqualTo(DEL_NO.val))));
-    }
-
-    private LabFolder getFolder(String folderName) {
-        checkArgument(isNotEmpty(folderName), "文件夹名称不能为空");
-        LabFolder folder = labFolderDao.selectOne(
-                dsl -> dsl.where(labFolder.name, isEqualTo(folderName),
-                        and(labFolder.del, isEqualTo(DEL_NO.val))))
-                .orElse(null);
-        return folder;
-    }
-
-    private LabFolder getFolder(Long folderId, String errorMsg) {
-        checkArgument(folderId != null, "文件夹编号不能为空");
-        Optional<LabFolder> folderOptional = labFolderDao.selectByPrimaryKey(folderId);
-        checkState(folderOptional.isPresent(), errorMsg);
-        return folderOptional.get();
     }
 
     private LabFolder newCreatedFolder(LabFolderDto labFolderDto, String operator) {
