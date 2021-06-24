@@ -82,7 +82,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         newLabel.setVersion(label.getVersion() + 1);
         //标签主体限制修改
         newLabel.setObjectType(label.getObjectType());
-        objectLabelManager.createAndDelLabel(newLabel, label.getId());
+        objectLabelManager.renewLabel(newLabel, label.getId());
         return newLabel.getId();
     }
 

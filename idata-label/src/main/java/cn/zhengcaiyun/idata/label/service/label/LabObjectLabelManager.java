@@ -49,7 +49,7 @@ public class LabObjectLabelManager {
     }
 
     @Transactional
-    public Long createAndDelLabel(LabObjectLabel newLabel, Long oldLabelId) {
+    public Long renewLabel(LabObjectLabel newLabel, Long oldLabelId) {
         // 软删除，修改del状态
         objectLabelDao.update(dsl -> dsl.set(labObjectLabel.del).equalTo(DEL_YES.val)
                 .set(labObjectLabel.editor).equalTo(newLabel.getCreator()).where(labObjectLabel.id, isEqualTo(oldLabelId)));
