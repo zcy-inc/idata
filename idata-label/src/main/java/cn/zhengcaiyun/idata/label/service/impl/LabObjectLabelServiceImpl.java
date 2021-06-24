@@ -3,6 +3,9 @@ package cn.zhengcaiyun.idata.label.service.impl;
 import cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDao;
 import cn.zhengcaiyun.idata.label.dal.model.LabObjectLabel;
 import cn.zhengcaiyun.idata.label.dto.LabObjectLabelDto;
+import cn.zhengcaiyun.idata.label.dto.LabelQueryDataDto;
+import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDefDto;
+import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDto;
 import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleLayerDto;
 import cn.zhengcaiyun.idata.label.service.LabObjectLabelService;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderManager;
@@ -106,6 +109,22 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         return null;
     }
 
+    @Override
+    public LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Integer limit, Integer offset) {
+        LabObjectLabel label = objectLabelManager.getObjectLabel(id, "标签不存在");
+        List<LabelRuleLayerDto> ruleLayerDtoList = ruleLayerFromJson(label.getRules());
+        checkArgument(!CollectionUtils.isEmpty(ruleLayerDtoList), "请创建标签规则");
+
+        LabelRuleLayerDto ruleLayerDto = ruleLayerDtoList.stream()
+                .filter(layerDto -> layerDto.getLayerId().equals(layerId))
+                .findFirst().orElse(null);
+        checkArgument(ruleLayerDto == null, "该标签分层不存在");
+
+        LabelRuleDefDto ruleDefDto = ruleLayerDto.getRuleDef();
+        LabelRuleDto ruleDto = ruleDefDto.getRules().get(0);
+        return null;
+    }
+
     private LabObjectLabel newCreatedObjectLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel label = new LabObjectLabel();
         label.setName(labelDto.getName());
@@ -114,11 +133,29 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         label.setRemark(labelDto.getRemark());
         label.setFolderId(MoreObjects.firstNonNull(labelDto.getFolderId(), 0L));
         label.setVersion(1);
-        label.setRules(ruleLayerToJson(labelDto.getRuleLayers()));
+        label.setRules(ruleLayerToJson(generateId(labelDto.getRuleLayers())));
         label.setDel(DEL_NO.val);
         label.setCreator(operator);
         label.setEditor(operator);
         return label;
+    }
+
+    private List<LabelRuleLayerDto> generateId(List<LabelRuleLayerDto> ruleLayers) {
+        if (CollectionUtils.isEmpty(ruleLayers)) return ruleLayers;
+
+        long layerCounter = 1;
+        for (LabelRuleLayerDto ruleLayerDto : ruleLayers) {
+            ruleLayerDto.setLayerId(layerCounter++);
+            LabelRuleDefDto ruleDefDto = ruleLayerDto.getRuleDef();
+            if (!Objects.isNull(ruleDefDto) && !CollectionUtils.isEmpty(ruleDefDto.getRules())) {
+                List<LabelRuleDto> ruleDtoList = ruleDefDto.getRules();
+                long ruleCounter = 1;
+                for (LabelRuleDto ruleDto : ruleDtoList) {
+                    ruleDto.setRuleId(ruleCounter++);
+                }
+            }
+        }
+        return ruleLayers;
     }
 
     private String ruleLayerToJson(List<LabelRuleLayerDto> ruleLayers) {

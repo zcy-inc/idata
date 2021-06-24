@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.label.service;
 
 import cn.zhengcaiyun.idata.label.dto.LabObjectLabelDto;
+import cn.zhengcaiyun.idata.label.dto.LabelQueryDataDto;
 
 /**
  * @description: 对象标签service
@@ -42,4 +43,13 @@ public interface LabObjectLabelService {
      * @return
      */
     Boolean deleteLabel(Long id, String operator);
+
+    /**
+     * 查询标签计算数据
+     *
+     * @param id
+     * @param layerId
+     * @return
+     */
+    LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Integer limit, Integer offset);
 }
