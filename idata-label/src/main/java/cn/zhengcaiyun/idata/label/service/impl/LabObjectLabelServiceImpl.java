@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.label.service.impl;
 
+import cn.zhengcaiyun.idata.label.compute.LabelDataComputer;
 import cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDao;
 import cn.zhengcaiyun.idata.label.dal.model.LabObjectLabel;
 import cn.zhengcaiyun.idata.label.dto.LabObjectLabelDto;
@@ -42,17 +43,21 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     private final LabObjectLabelDao objectLabelDao;
     private final LabFolderManager folderManager;
     private final LabObjectLabelManager objectLabelManager;
+    private final LabelDataComputer labelDataComputer;
 
     @Autowired
     public LabObjectLabelServiceImpl(LabObjectLabelDao objectLabelDao,
                                      LabFolderManager folderManager,
-                                     LabObjectLabelManager objectLabelManager) {
+                                     LabObjectLabelManager objectLabelManager,
+                                     LabelDataComputer labelDataComputer) {
         checkNotNull(objectLabelDao, "objectLabelDao must not be null.");
         checkNotNull(folderManager, "folderManager must not be null.");
         checkNotNull(objectLabelManager, "objectLabelManager must not be null.");
+        checkNotNull(labelDataComputer, "labelDataComputer must not be null.");
         this.objectLabelDao = objectLabelDao;
         this.folderManager = folderManager;
         this.objectLabelManager = objectLabelManager;
+        this.labelDataComputer = labelDataComputer;
     }
 
     @Override
@@ -117,12 +122,16 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
 
         LabelRuleLayerDto ruleLayerDto = ruleLayerDtoList.stream()
                 .filter(layerDto -> layerDto.getLayerId().equals(layerId))
-                .findFirst().orElse(null);
+                .findFirst()
+                .orElse(null);
         checkArgument(ruleLayerDto == null, "该标签分层不存在");
 
         LabelRuleDefDto ruleDefDto = ruleLayerDto.getRuleDef();
         LabelRuleDto ruleDto = ruleDefDto.getRules().get(0);
-        return null;
+        LabelQueryDataDto queryDataDto = labelDataComputer.compute(ruleDto, label.getObjectType(), limit, offset);
+        queryDataDto.setLabelName(label.getName());
+        queryDataDto.setLayerName(ruleLayerDto.getLayerName());
+        return queryDataDto;
     }
 
     private LabObjectLabel newCreatedObjectLabel(LabObjectLabelDto labelDto, String operator) {
