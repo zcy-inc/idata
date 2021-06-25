@@ -29,6 +29,7 @@ public class SpecialAttributeDto {
     @ApiModelProperty(value = "AGGREGATOR_SUM:ENUM_VALUE | AGGREGATOR_AVG:ENUM_VALUE | AGGREGATOR_MAX:ENUM_VALUE | " +
             "AGGREGATOR_MIN:ENUM_VALUE | AGGREGATOR_CNT:ENUM_VALUE | AGGREGATOR_CNTD:ENUM_VALUE")
     private String aggregatorCode;
+    private Boolean degradeDim;
     private String atomicMetricCode;
     private String atomicMetricName; // TODO 前端确认是否需要
     private String complexMetricFormula; // TODO 命名
@@ -41,6 +42,14 @@ public class SpecialAttributeDto {
 
     public void setAggregatorCode(String aggregatorCode) {
         this.aggregatorCode = aggregatorCode;
+    }
+
+    public Boolean getDegradeDim() {
+        return degradeDim;
+    }
+
+    public void setDegradeDim(Boolean degradeDim) {
+        this.degradeDim = degradeDim;
     }
 
     public String getAtomicMetricCode() {

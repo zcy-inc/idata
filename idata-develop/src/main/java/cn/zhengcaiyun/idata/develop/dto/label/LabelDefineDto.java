@@ -34,6 +34,7 @@ public class LabelDefineDto {
     private String editor;
     private Date editTime;
     private String labelCode;
+    @ApiModelProperty(value = "标签名 | 维度名 | 修饰词名 | 指标名")
     private String labelName;
     @ApiModelProperty(value = "STRING_LABEL | BOOLEAN_LABEL | USER_LABEL | " +
             "ENUM_LABEL | ENUM_VALUE_LABEL | ATTRIBUTE_LABEL | DIMENSION_LABEL | " +
@@ -44,7 +45,7 @@ public class LabelDefineDto {
     @ApiModelProperty(value = "BOOLEAN | WHOLE | STRING | enum_code(动态，约定以:ENUM结尾) | ENUM")
     private String labelParamType;
     private List<EnumValueDto> enumValues;
-    private List<SpecialAttributeDto> specialAttributes;
+    private SpecialAttributeDto specialAttribute;
     private List<AttributeDto> labelAttributes;
     @ApiModelProperty(value = "TABLE | COLUMN")
     private String subjectType;
@@ -142,12 +143,12 @@ public class LabelDefineDto {
         this.enumValues = enumValues;
     }
 
-    public List<SpecialAttributeDto> getSpecialAttributes() {
-        return specialAttributes;
+    public SpecialAttributeDto getSpecialAttribute() {
+        return specialAttribute;
     }
 
-    public void setSpecialAttributes(List<SpecialAttributeDto> specialAttributes) {
-        this.specialAttributes = specialAttributes;
+    public void setSpecialAttribute(SpecialAttributeDto specialAttribute) {
+        this.specialAttribute = specialAttribute;
     }
 
     public List<AttributeDto> getLabelAttributes() {

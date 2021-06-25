@@ -14,26 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.label;
+package cn.zhengcaiyun.idata.develop.service.measure;
 
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-
-import java.util.List;
-import java.util.Map;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 14:44
+ * @date 2021-06-23 09:45
  */
 
-public interface LabelService {
-    LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator);
-    LabelDefineDto findDefine(String labelCode);
-    List<LabelDefineDto> findDefines(String subjectType, String labelTag);
-    boolean deleteDefine(String labelCode, String operator);
-    LabelDto label(LabelDto labelDto, String operator);
-    List<LabelDto> findLabels(Long tableId, String columnName, String labelCode);
-    Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
-    boolean removeLabel(LabelDto labelDto, String operator);
+public interface ModifierService {
+    MeasureDto findModifier(String modifierCode);
+    MeasureDto create(MeasureDto modifier, String operator);
+    MeasureDto edit(MeasureDto modifier, String operator);
+    MeasureDto disable(String modifierCode, String operator);
+    boolean delete(String modifierCode, String operator);
 }

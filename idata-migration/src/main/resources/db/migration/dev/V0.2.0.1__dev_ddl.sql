@@ -44,7 +44,7 @@ create table if not exists idata.dev_label_define (
   label_tag          varchar(30)     comment '标签的标签',
   label_param_type   varchar(30)     comment '标签参数类型',
   label_attributes   varchar(500)    not null default '[]' comment '标签属性',
-  special_attributes varchar(500)    not null default '[]' comment '特定标签属性，根据标签的标签字段变化',
+  special_attribute  varchar(500)    not null default '{}' comment '特定标签属性，根据标签的标签字段变化',
   subject_type       varchar(20)     comment '打标主体类型',
   label_index        integer         comment '标签序号',
   label_required     tinyint         not null default 0 comment '是否必须打标(1:是,0:否)',

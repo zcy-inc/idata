@@ -39,6 +39,7 @@ public class LabelDto {
     private String labelParamValue;
     // 枚举名称或者枚举值字面值
     private String enumNameOrValue;
+    private String tableName;
 
     // GaS
     public Long getId() {
@@ -151,5 +152,13 @@ public class LabelDto {
 
     public void setEnumNameOrValue(String enumNameOrValue) {
         this.enumNameOrValue = enumNameOrValue;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

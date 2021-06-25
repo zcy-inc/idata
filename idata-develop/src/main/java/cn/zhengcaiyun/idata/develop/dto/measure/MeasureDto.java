@@ -14,26 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.label;
+package cn.zhengcaiyun.idata.develop.dto.measure;
 
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 14:44
+ * @date 2021-06-18 17:47
  */
 
-public interface LabelService {
-    LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator);
-    LabelDefineDto findDefine(String labelCode);
-    List<LabelDefineDto> findDefines(String subjectType, String labelTag);
-    boolean deleteDefine(String labelCode, String operator);
-    LabelDto label(LabelDto labelDto, String operator);
-    List<LabelDto> findLabels(Long tableId, String columnName, String labelCode);
-    Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
-    boolean removeLabel(LabelDto labelDto, String operator);
+public class MeasureDto extends LabelDefineDto {
+    private List<LabelDto> measureLabels;
+    private MeasureDto autoMetric;
+    private List<MeasureDto> modifiers;
+
+    // GaS
+    public List<LabelDto> getMeasureLabels() {
+        return measureLabels;
+    }
+
+    public void setMeasureLabels(List<LabelDto> measureLabels) {
+        this.measureLabels = measureLabels;
+    }
 }

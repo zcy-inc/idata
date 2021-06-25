@@ -61,7 +61,7 @@ public class JsonColumnHandler implements TypeHandler {
     enum JsonColumnTypeEnum {
         EnumAttributes("enum_attributes", new TypeReference<List<AttributeDto>>(){}),
         LabelAttributes("label_attributes", new TypeReference<List<AttributeDto>>(){}),
-        SpecialAttributes("special_attributes", new TypeReference<List<SpecialAttributeDto>>(){});
+        SpecialAttribute("special_attribute", new TypeReference<SpecialAttributeDto>(){});
         private String columnName;
         private TypeReference<?> type;
 

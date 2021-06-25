@@ -17,9 +17,10 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
-import cn.zhengcaiyun.idata.develop.dto.target.TargetDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author caizhedong
@@ -30,20 +31,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/p1/dev")
 public class DimensionController {
 
-    @GetMapping("dimension/{dimensionId}")
-    public RestResult<TargetDto> findById(@PathVariable("dimensionId") Long dimensionId) {
+    @GetMapping("dimension")
+    public RestResult<MeasureDto> findById(@RequestParam("dimensionCode") String dimensionCode) {
         return RestResult.success();
     }
 
     @PostMapping("dimension")
-    public RestResult<TargetDto> addOrUpdateDimension(TargetDto targetDto,
-                                                      String operator) {
+    public RestResult<MeasureDto> addOrUpdateDimension(@RequestBody MeasureDto dimension,
+                                                       HttpServletRequest request) {
         return RestResult.success();
     }
 
-    @DeleteMapping("dimension/{dimensionId}")
-    public RestResult deleteDimension(@PathVariable("dimensionId") Long dimensionId,
-                                      String operator) {
+    @PostMapping("dimension/disableDimension")
+    public RestResult disableDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                      HttpServletRequest request) {
+        return RestResult.success();
+    }
+
+    @DeleteMapping("dimension")
+    public RestResult deleteDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                      HttpServletRequest request) {
         return RestResult.success();
     }
 }

@@ -17,8 +17,11 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -29,20 +32,32 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/p1/dev")
 public class MetricController {
 
-    @GetMapping("metric/{metricId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("metricId") Long metricId) {
+    @GetMapping("metric")
+    public RestResult<MeasureDto> findById(@RequestParam("metricCode") String metricCode) {
+        return RestResult.success();
+    }
+
+    @GetMapping("measures")
+    public RestResult<List<MeasureDto>> getMeasures(@RequestParam("labelTag") String labelTag,
+                                                    @RequestParam(value = "labelCode", required = false) String labelCode) {
         return RestResult.success();
     }
 
     @PostMapping("metric")
-    public RestResult<LabelDefineDto> addOrUpdateMetric(LabelDefineDto labelDefineDto,
-                                                           String creator) {
+    public RestResult<MeasureDto> addOrUpdateMetric(@RequestBody MeasureDto dimension,
+                                                    HttpServletRequest request) {
         return RestResult.success();
     }
 
-    @DeleteMapping("dimension/{metricId}")
-    public RestResult deleteMetric(@PathVariable("metricId") Long metricId,
-                                      String editor) {
+    @PostMapping("metric/disableMetric")
+    public RestResult disableMetric(@RequestParam("metricCode") String metricCode,
+                                   HttpServletRequest request) {
+        return RestResult.success();
+    }
+
+    @DeleteMapping("metric")
+    public RestResult deleteMetric(@RequestParam("metricCode") String metricCode,
+                                   HttpServletRequest request) {
         return RestResult.success();
     }
 }

@@ -33,7 +33,7 @@
             <columnOverride column="label_required" javaType="java.lang.Integer"/>
             <columnOverride column="label_attributes" javaType="java.util.List"
                             typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-            <columnOverride column="special_attributes" javaType="java.util.List"
+            <columnOverride column="special_attribute" javaType="cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto"
                             typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
         </table>
         <table tableName="dev_label" mapperName="DevLabelDao">

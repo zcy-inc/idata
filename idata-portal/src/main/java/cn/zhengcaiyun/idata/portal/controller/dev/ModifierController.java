@@ -17,8 +17,10 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author caizhedong
@@ -29,20 +31,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/p1/dev")
 public class ModifierController {
 
-    @GetMapping("modifier/{modifierId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("modifierId") Long modifierId) {
+    @GetMapping("modifier")
+    public RestResult<MeasureDto> findById(@RequestParam("modifierCode") String modifierCode) {
         return RestResult.success();
     }
 
     @PostMapping("modifier")
-    public RestResult<LabelDefineDto> addOrUpdateModifier(LabelDefineDto labelDefineDto,
-                                                           String creator) {
+    public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto dimension,
+                                                      HttpServletRequest request) {
         return RestResult.success();
     }
 
-    @DeleteMapping("modifier/{modifierId}")
-    public RestResult deleteModifier(@PathVariable("modifierId") Long modifierId,
-                                   String editor) {
+    @PostMapping("modifier/disableModifier")
+    public RestResult disableModifier(@RequestParam("modifierCode") Long modifierCode,
+                                     HttpServletRequest request) {
+        return RestResult.success();
+    }
+
+    @DeleteMapping("modifier")
+    public RestResult deleteModifier(@RequestParam("modifierCode") String modifierCode,
+                                     HttpServletRequest request) {
         return RestResult.success();
     }
 }

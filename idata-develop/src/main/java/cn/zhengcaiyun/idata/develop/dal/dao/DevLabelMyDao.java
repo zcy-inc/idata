@@ -16,34 +16,25 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.dao;
 
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 /**
- * @author shiyin
- * @date 2021-06-17 21:11
+ * @author caizhedong
+ * @date 2021-06-28 17:32
  */
 
 @Mapper
-public interface DevLabelDefineMyDao {
-
-    @Select("<script>" +
-            "select * " +
-            "from dev_label_define " +
-            "where dev_label_define.del != 1 " +
-            "and (dev_label_define.label_attributes like concat('%', #{enumCode}, '%') " +
-            "or dev_label_define.label_param_type = #{enumCode})" +
-            "</script>")
-    List<DevLabelDefine> selectLabelDefineByEnumCode(String enumCode);
+public interface DevLabelMyDao {
 
     @Select("<script>" +
             "SELECT * " +
-            "FROM dev_label_define " +
-            "WHERE dev_label_define.del != 1 AND dev_label_define.disable NOT LIKE '%_DISABLE' " +
-                "AND FIND_IN_SET(dev_label_define.label_code, #{labelCodes})" +
+            "FROM dev_label " +
+            "WHERE dev_label.del != 1 " +
+                "AND FIND_IN_SET(dev_label.label_code, #{labelCodes})" +
             "</script>")
-    List<DevLabelDefine> selectLabelDefinesByLabelCodes(String labelCodes);
+    List<DevLabel> selectLabelsByLabelCodes(String labelCodes);
 }
