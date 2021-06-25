@@ -42,7 +42,7 @@ public class GroupByModel implements ModelRender {
             if (count > 0) {
                 builder.append(", ");
             }
-            builder.append(column.renderSqlWithAlias());
+            builder.append(column.renderSql());
         }
         return builder.toString();
     }

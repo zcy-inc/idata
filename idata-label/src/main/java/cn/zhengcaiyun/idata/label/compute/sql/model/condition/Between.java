@@ -7,9 +7,9 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  * @author: yangjianhua
  * @create: 2021-06-24 15:11
  **/
-public class Between extends BaseCondition {
+public class Between<T> extends BaseCondition<T> {
 
-    private Between(BaseColumn column, Long... params) {
+    private Between(BaseColumn column, T... params) {
         super(column, params);
     }
 
@@ -20,10 +20,10 @@ public class Between extends BaseCondition {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " between " + getFirstParam() + " and " + getSecondParam() + connectNextCond();
+        return getColumnName() + " between " + getFirstParam().toString() + " and " + getSecondParam().toString() + connectNextCond();
     }
 
-    public static Between of(BaseColumn column, Long... params) {
+    public static <T> Between<T> of(BaseColumn column, T... params) {
         return new Between(column, params);
     }
 

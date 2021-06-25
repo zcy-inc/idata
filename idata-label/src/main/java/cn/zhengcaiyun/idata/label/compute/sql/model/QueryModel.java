@@ -88,11 +88,6 @@ public class QueryModel implements ModelRender {
             return this;
         }
 
-        public Builder whereModel(WhereModel whereModel) {
-            this.whereModel = whereModel;
-            return this;
-        }
-
         public QueryModel build() {
             return new QueryModel(this);
         }

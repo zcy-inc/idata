@@ -51,5 +51,5 @@ public interface LabObjectLabelService {
      * @param layerId
      * @return
      */
-    LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Integer limit, Integer offset);
+    LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Long limit, Long offset);
 }

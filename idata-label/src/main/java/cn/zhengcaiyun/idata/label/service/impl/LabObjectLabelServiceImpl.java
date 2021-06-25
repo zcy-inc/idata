@@ -110,7 +110,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     }
 
     @Override
-    public LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Integer limit, Integer offset) {
+    public LabelQueryDataDto queryLabelResultData(Long id, Long layerId, Long limit, Long offset) {
         LabObjectLabel label = objectLabelManager.getObjectLabel(id, "标签不存在");
         List<LabelRuleLayerDto> ruleLayerDtoList = ruleLayerFromJson(label.getRules());
         checkArgument(!CollectionUtils.isEmpty(ruleLayerDtoList), "请创建标签规则");

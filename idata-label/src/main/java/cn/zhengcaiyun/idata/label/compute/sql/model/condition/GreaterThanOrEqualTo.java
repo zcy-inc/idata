@@ -7,9 +7,9 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  * @author: yangjianhua
  * @create: 2021-06-24 15:07
  **/
-public class GreaterThanOrEqualTo extends BaseCondition {
+public class GreaterThanOrEqualTo<T> extends BaseCondition<T> {
 
-    private GreaterThanOrEqualTo(BaseColumn column, Long... params) {
+    private GreaterThanOrEqualTo(BaseColumn column, T... params) {
         super(column, params);
     }
 
@@ -20,10 +20,10 @@ public class GreaterThanOrEqualTo extends BaseCondition {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " >= " + getFirstParam() + connectNextCond();
+        return getColumnName() + " >= " + getFirstParam().toString() + connectNextCond();
     }
 
-    public static GreaterThanOrEqualTo of(BaseColumn column, Long... params) {
+    public static <T> GreaterThanOrEqualTo<T> of(BaseColumn column, T... params) {
         return new GreaterThanOrEqualTo(column, params);
     }
 

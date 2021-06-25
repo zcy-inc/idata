@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.label.compute.sql.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -10,6 +13,7 @@ public class TableModel implements ModelRender {
     private final String name;
 
     private TableModel(String name) {
+        checkArgument(isNotEmpty(name), "表名不能为空");
         this.name = name;
     }
 

@@ -2,6 +2,8 @@ package cn.zhengcaiyun.idata.label.compute.sql.model.function;
 
 import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -12,6 +14,7 @@ public abstract class BaseFunction implements BaseColumn {
     protected final String alias;
 
     protected BaseFunction(BaseColumn column, String alias) {
+        checkNotNull(column, "函数列不能为空.");
         this.column = column;
         this.alias = alias;
     }

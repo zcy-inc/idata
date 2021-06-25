@@ -16,15 +16,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author: yangjianhua
  * @create: 2021-06-24 15:29
  **/
-public abstract class BaseCondition implements ModelRender {
+public abstract class BaseCondition<T> implements ModelRender {
     protected final BaseColumn column;
-    protected final List<Long> params;
+    protected final List<T> params;
     protected String connector;
     protected BaseCondition nextCondition;
 
-    protected BaseCondition(BaseColumn column, Long... params) {
-        checkNotNull(column, "column is null.");
-        checkArgument(params != null && params.length > 0, "params is null.");
+    protected BaseCondition(BaseColumn column, T... params) {
+        checkNotNull(column, "where条件列不能为空.");
+        checkArgument(params != null && params.length > 0, "where条件参数不能为空.");
         this.column = column;
         this.params = Lists.newArrayList(params);
     }
@@ -33,11 +33,15 @@ public abstract class BaseCondition implements ModelRender {
         return this.column.renderSql();
     }
 
-    protected Long getFirstParam() {
+    protected T getFirstParam() {
         return this.params.get(0);
     }
 
-    protected Long getSecondParam() {
+    protected List<T> getParams() {
+        return this.params;
+    }
+
+    protected T getSecondParam() {
         return this.params.get(1);
     }
 
@@ -52,6 +56,14 @@ public abstract class BaseCondition implements ModelRender {
             return "";
         }
         return " " + connector + " " + nextCondition.renderSql();
+    }
+
+    public boolean hasNextCondition() {
+        return !Objects.isNull(nextCondition);
+    }
+
+    public BaseCondition nextCondition() {
+        return nextCondition;
     }
 
     protected abstract BaseCondition getThis();

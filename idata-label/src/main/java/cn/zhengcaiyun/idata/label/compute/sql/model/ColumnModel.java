@@ -2,6 +2,8 @@ package cn.zhengcaiyun.idata.label.compute.sql.model;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -13,6 +15,8 @@ public class ColumnModel implements BaseColumn {
     private final String alias;
 
     private ColumnModel(String name, TableModel table, String alias) {
+        checkArgument(name != null, "列不能为空");
+        checkArgument(table != null, "表不能为空");
         this.name = name;
         this.table = table;
         this.alias = alias;

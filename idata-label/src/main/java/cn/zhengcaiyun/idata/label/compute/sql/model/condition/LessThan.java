@@ -7,9 +7,9 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  * @author: yangjianhua
  * @create: 2021-06-24 15:07
  **/
-public class LessThan extends BaseCondition {
+public class LessThan<T> extends BaseCondition<T> {
 
-    private LessThan(BaseColumn column, Long... params) {
+    private LessThan(BaseColumn column, T... params) {
         super(column, params);
     }
 
@@ -20,10 +20,10 @@ public class LessThan extends BaseCondition {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " < " + getFirstParam() + connectNextCond();
+        return getColumnName() + " < " + getFirstParam().toString() + connectNextCond();
     }
 
-    public static LessThan of(BaseColumn column, Long... params) {
+    public static <T> LessThan<T> of(BaseColumn column, T... params) {
         return new LessThan(column, params);
     }
 
