@@ -12,7 +12,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
 import { getDWOwner, getTableLabels } from '@/services/tablemanage';
-import { Table, ForeignKey } from '@/types/tablemanage';
+import { Table, ForeignKey } from '@/types/datapi';
 import { InitialColumn } from './constants';
 
 import IconFont from '@/components/IconFont';

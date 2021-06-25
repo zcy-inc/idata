@@ -19,8 +19,8 @@ import type { FC, ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
-import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/tablemanage';
-import { rules } from '@/constants/tablemanage';
+import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/datapi';
+import { rules } from '@/constants/datapi';
 import { InitialLabel, RadioOps } from '../constants';
 
 import IconFont from '@/components/IconFont';

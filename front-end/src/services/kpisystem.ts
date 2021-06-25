@@ -1,9 +1,8 @@
+import { TreeNodeType } from '@/constants/datapi';
 import { request } from 'umi';
 
 // 树 获取
-export async function getFolderTree(params: {
-  devTreeType: 'DIMENSION_LABEL' | 'MODIFIER_LABEL' | 'METRIC_LABEL';
-}) {
+export async function getFolderTree(params: { devTreeType: TreeNodeType }) {
   return request('/api/p1/dev/devFolderTree', { method: 'GET', params });
 }
 // 树 获取平铺的文件夹目录
@@ -28,7 +27,7 @@ export async function deleteFolder(params: { folderId: string }) {
 export async function getDimension(params: { dimensionId: string }) {
   return request(`/api/p1/dev/dimension/${params.dimensionId}`, { method: 'GET', params });
 }
-// 维度 更新
+// 维度 创建 / 更新
 export async function createDimension(data: { dimensionId?: string }) {
   return request(`/api/p1/dev/dimension`, { method: 'POST', data });
 }
@@ -43,7 +42,7 @@ export async function getModifier(params: { modifierId: string }) {
   return request(`/api/p1/dev/modifier/${params.modifierId}`, { method: 'GET', params });
 }
 // 修饰词 创建 / 更新
-export async function updateModifier(data: { modifierId?: string }) {
+export async function createModifier(data: { modifierId?: string }) {
   return request(`/api/p1/dev/modifier`, { method: 'POST', data });
 }
 // 修饰词 删除
@@ -57,7 +56,7 @@ export async function getMetric(params: { metricId: string }) {
   return request(`/api/p1/dev/metric/${params.metricId}`, { method: 'GET', params });
 }
 // 指标 创建 / 更新
-export async function updateMetric(data: { metricId?: string }) {
+export async function createMetric(data: { metricId?: string }) {
   return request(`/api/p1/dev/metric`, { method: 'POST', data });
 }
 // 指标 删除

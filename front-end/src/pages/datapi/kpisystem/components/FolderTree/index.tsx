@@ -8,7 +8,7 @@ import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
 
 import { deleteFolder } from '@/services/kpisystem';
-import { TreeNodeType } from '@/types/kpisystem';
+import { TreeNodeType } from '@/constants/datapi';
 
 export type Key = string | number;
 export interface FolderTreeProps {}
@@ -45,21 +45,20 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const [visible, setVisible] = useState(false);
 
-  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, addTab } = useModel(
-    'kpisystem',
-    (_) => ({
+  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, viewTab, createTab } =
+    useModel('kpisystem', (_) => ({
       tree: _.tree,
       getTree: _.getTree,
       treeType: _.treeType,
       curNode: _.curNode,
       setCurNode: _.setCurNode,
       setFolderMode: _.setFolderMode,
-      addTab: _.addTab,
-    }),
-  );
+      viewTab: _.viewTab,
+      createTab: _.createTab,
+    }));
 
   useEffect(() => {
-    getTree('DIMENSION_LABEL');
+    getTree(TreeNodeType.DIMENSION_LABEL);
   }, []);
 
   useEffect(() => {
@@ -114,6 +113,15 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         break;
       case 'delete':
         onDeleteFolder();
+        break;
+      case 'dimension':
+        createTab(TreeNodeType.DIMENSION_LABEL);
+        break;
+      case 'modifier':
+        createTab(TreeNodeType.MODIFIER_LABEL);
+        break;
+      case 'metric':
+        createTab(TreeNodeType.METRIC_LABEL);
         break;
       default:
         break;
@@ -241,12 +249,12 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
             const folderId = `${node.folderId}`;
             setCurNode({ ...node, folderId, parentId });
           }}
-          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && addTab(node)}
+          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && viewTab(node)}
         >
           {loop(tree)}
         </Tree>
       </Dropdown>
-      <CreateFolder visible={visible} onCancel={() => setVisible(false)} />
+      {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
     </Fragment>
   );
 };

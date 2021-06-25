@@ -6,7 +6,7 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { createFolder, getFolders, updateFolder } from '@/services/tablemanage';
-import { FlatTreeNode } from '@/types/tablemanage';
+import { FlatTreeNode } from '@/types/datapi';
 
 export interface CreateFolderProps {
   visible: boolean;

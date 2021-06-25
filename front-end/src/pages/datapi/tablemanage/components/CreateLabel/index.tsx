@@ -26,7 +26,7 @@ import {
   getFolders,
   getLabel,
 } from '@/services/tablemanage';
-import { EnumName, EnumValue, FlatTreeNode, LabelAttribute } from '@/types/tablemanage';
+import { EnumName, EnumValue, FlatTreeNode, LabelAttribute } from '@/types/datapi';
 import { isEnumType } from '@/utils/tablemanage';
 
 export interface CreateTagProps {}

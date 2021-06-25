@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions } from 'antd';
 import type { FC } from 'react';
 
@@ -6,17 +6,34 @@ import Title from '../../../components/Title';
 import ViewAtomic from './components/ViewAtomic';
 import ViewDerive from './components/ViewDerive';
 import ViewComplex from './components/ViewComplex';
+import { LabelAttribute, Metric, TableLable } from '@/types/datapi';
 
-export interface ViewModifierProps {}
+export interface ViewModifierProps {
+  data: Metric;
+}
 
 const { Item } = Descriptions;
+const TagMap = {
+  ATOMIC_METRIC_LABEL: '原子指标',
+  DERIVE_METRIC_LABEL: '派生指标',
+  COMPLEX_METRIC_LABEL: '复合指标',
+};
+const ViewMap = {
+  ATOMIC_METRIC_LABEL: <ViewAtomic />,
+  DERIVE_METRIC_LABEL: <ViewDerive />,
+  COMPLEX_METRIC_LABEL: <ViewComplex />,
+};
 
-const ViewModifier: FC<ViewModifierProps> = ({}) => {
-  const ViewMap = {
-    atomic: <ViewAtomic />,
-    derive: <ViewDerive />,
-    complex: <ViewComplex />,
-  };
+const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
+  const [attributes, setAttributes] = useState<LabelAttribute[]>([]);
+  const [DWD, setDWD] = useState<TableLable[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setDWD(data.targetLabels);
+      setAttributes(data.labelAttributes);
+    }
+  }, [data]);
 
   return (
     <Fragment>
@@ -27,21 +44,13 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
         labelStyle={{ color: '#8A8FAE' }}
         style={{ margin: '16px 0' }}
       >
-        <Item label="指标类型">{'-'}</Item>
-        <Item label="指标名称">{'-'}</Item>
-        <Item label="ID">{'-'}</Item>
-        <Item label="英文别名">{'-'}</Item>
-        <Item label="业务过程" span={2}>
-          {'-'}
-        </Item>
-        <Item label="定义" span={3}>
-          {'-'}
-        </Item>
-        <Item label="备注" span={3}>
-          {'-'}
-        </Item>
+        <Item label="指标类型">{TagMap[data?.labelTag]}</Item>
+        <Item label="指标名称">{data?.labelName}</Item>
+        {attributes.map((attribute) => (
+          <Item label={attribute.attributeKey}>{attribute.attributeValue}</Item>
+        ))}
       </Descriptions>
-      {ViewMap['complex']}
+      {ViewMap[data?.labelTag]}
     </Fragment>
   );
 };

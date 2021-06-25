@@ -4,6 +4,9 @@ export enum TreeNodeType {
   TABLE = 'TABLE',
   LABEL = 'LABEL',
   ENUM = 'ENUM',
+  DIMENSION_LABEL = 'DIMENSION_LABEL',
+  MODIFIER_LABEL = 'MODIFIER_LABEL',
+  METRIC_LABEL = 'METRIC_LABEL',
 }
 export enum LabelRequired {
   NOT_REQUIRED = 0,
@@ -16,6 +19,9 @@ export enum LabelTag {
   ENUM_VALUE_LABEL = 'ENUM_VALUE_LABEL',
   ATTRIBUTE_LABEL = 'ATTRIBUTE_LABEL',
   USER_LABEL = 'USER_LABEL',
+  ATOMIC_METRIC_LABEL = 'ATOMIC_METRIC_LABEL',
+  DERIVE_METRIC_LABEL = 'DERIVE_METRIC_LABEL',
+  COMPLEX_METRIC_LABEL = 'COMPLEX_METRIC_LABEL',
 }
 export enum ERType {
   I2I = 'I2I',
@@ -28,3 +34,7 @@ export enum ERType {
 export const rules = {
   require: [{ required: true, message: '必填' }],
 };
+export const BooleanOptions = [
+  { label: '是', value: 'true' },
+  { label: '否', value: 'false' },
+];

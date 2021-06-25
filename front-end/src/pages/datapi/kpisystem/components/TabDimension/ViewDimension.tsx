@@ -4,26 +4,43 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import Title from '../../../components/Title';
-import { LabelAttribute, Modifier, TableLable } from '@/types/datapi';
+import { Dimension, LabelAttribute, TableLable } from '@/types/datapi';
 
-export interface ViewModifierProps {
-  data: Modifier;
+export interface ViewDimensionProps {
+  data: Dimension;
 }
 
 const { Item } = Descriptions;
 const { TabPane } = Tabs;
-const Cols = [
+const ColsDIM = [
+  { title: '表名', dataIndex: '', key: '' },
+  { title: '字段名', dataIndex: '', key: '' },
+  { title: '表名', dataIndex: '', key: '' },
+];
+const ColsDWD = [
   { title: '表名', dataIndex: '', key: '' },
   { title: '关联表字段', dataIndex: '', key: '' },
 ];
 
-const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
+const ViewDimension: FC<ViewDimensionProps> = ({ data }) => {
   const [attributes, setAttributes] = useState<LabelAttribute[]>([]);
+  const [DIM, setDIM] = useState<TableLable[]>([]);
   const [DWD, setDWD] = useState<TableLable[]>([]);
 
   useEffect(() => {
     if (data) {
-      setDWD(data.targetLabels);
+      const list = data.targetLabels;
+      const tmpM: TableLable[] = [];
+      const tmpD: TableLable[] = [];
+      list.map((item) => {
+        if (item.labelParamValue === 'true') {
+          tmpM.push(item);
+        } else {
+          tmpD.push(item);
+        }
+      });
+      setDIM(tmpM);
+      setDWD(tmpD);
       setAttributes(data.labelAttributes);
     }
   }, [data]);
@@ -44,12 +61,15 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
       </Descriptions>
       <Title>关联信息</Title>
       <Tabs className={styles['reset-tabs']}>
-        <TabPane key="main" tab="事实表">
-          <Table columns={Cols} dataSource={DWD} pagination={false} style={{ marginTop: 24 }} />
+        <TabPane key="DIM" tab="主表">
+          <Table columns={ColsDIM} dataSource={DIM} pagination={false} style={{ marginTop: 24 }} />
+        </TabPane>
+        <TabPane key="dim" tab="事实表">
+          <Table columns={ColsDWD} dataSource={DWD} pagination={false} style={{ marginTop: 24 }} />
         </TabPane>
       </Tabs>
     </Fragment>
   );
 };
 
-export default ViewModifier;
+export default ViewDimension;

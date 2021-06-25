@@ -1,3 +1,4 @@
+import { TreeNodeType } from '@/constants/datapi';
 import { request } from 'umi';
 
 // 树 获取
@@ -68,7 +69,7 @@ export async function getTableReferDbs() {
   return request('/api/p1/dev/dbNames', { method: 'GET' });
 }
 // 表 获取参考表
-export async function getTableReferTbs(params: { labelValue: string }) {
+export async function getTableReferTbs(params: { labelValue?: string }) {
   return request('/api/p1/dev/referTables', { method: 'GET', params });
 }
 // 表 获取参考字段

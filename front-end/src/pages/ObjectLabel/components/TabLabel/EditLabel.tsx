@@ -13,10 +13,13 @@ import { getFolders } from '@/services/objectlabel';
 import Title from '../Title';
 import EditRules from './components/EditRules';
 import { rules, ObjectType } from './constants';
+import { ObjectLabel } from '@/types/objectlabel';
 
-export interface ViewDIMProps {}
+export interface EditLableProps {
+  initial?: ObjectLabel;
+}
 
-const ViewDIM: FC<ViewDIMProps> = ({}) => {
+const EditLable: FC<EditLableProps> = ({ initial }) => {
   const [folderOps, setFolderOps] = useState([]);
   const [form] = Form.useForm();
 
@@ -67,9 +70,9 @@ const ViewDIM: FC<ViewDIMProps> = ({}) => {
         />
       </ProForm>
       <Title>标签规则</Title>
-      <EditRules />
+      <EditRules initial={initial} />
     </Fragment>
   );
 };
 
-export default ViewDIM;
+export default EditLable;

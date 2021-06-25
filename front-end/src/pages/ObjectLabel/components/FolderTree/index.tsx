@@ -43,7 +43,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const [visible, setVisible] = useState(false);
 
-  const { tree, getTree, curNode, setCurNode, setFolderMode, addTab } = useModel(
+  const { tree, getTree, curNode, setCurNode, setFolderMode, viewTab, createTab } = useModel(
     'objectlabel',
     (_) => ({
       tree: _.tree,
@@ -51,7 +51,8 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       curNode: _.curNode,
       setCurNode: _.setCurNode,
       setFolderMode: _.setFolderMode,
-      addTab: _.addTab,
+      viewTab: _.viewTab,
+      createTab: _.createTab,
     }),
   );
 
@@ -66,13 +67,13 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const menu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
       <Menu.Item key="folder">新建文件夹</Menu.Item>
-      <Menu.Item key="label">新建数据标签</Menu.Item>
+      <Menu.Item key="objectLabel">新建数据标签</Menu.Item>
     </Menu>
   );
 
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      <Menu.Item key="label">新建数据标签</Menu.Item>
+      <Menu.Item key="objectLabel">新建数据标签</Menu.Item>
       <Menu.Divider />
       <Menu.Item key="folder">新建文件夹</Menu.Item>
       {curNode?.type === 'FOLDER' && (
@@ -84,7 +85,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     </Menu>
   );
 
-  // 新建文件夹/维度/修饰词/指标
+  // 目录的操作
   const onMenuActions = (key: Key) => {
     switch (key) {
       case 'folder':
@@ -98,6 +99,9 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       case 'delete':
         onDeleteFolder();
         break;
+      case 'objectLabel':
+        createTab();
+        break;
       default:
         break;
     }
@@ -107,7 +111,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     confirm({
       title: '您确定要删除该文件夹吗？',
       onOk: () =>
-        deleteFolder({ folderId: curNode?.folderId })
+        deleteFolder({ id: curNode?.folderId })
           .then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
@@ -219,7 +223,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
             const folderId = `${node.folderId}`;
             setCurNode({ ...node, folderId, parentId });
           }}
-          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && addTab(node)}
+          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && viewTab(node)}
         >
           {loop(tree)}
         </Tree>

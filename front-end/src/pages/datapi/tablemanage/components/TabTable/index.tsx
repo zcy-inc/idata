@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { createTable, delTable, getTable } from '@/services/tablemanage';
-import { Table, ForeignKey } from '@/types/tablemanage';
+import { Table, ForeignKey } from '@/types/datapi';
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';
 

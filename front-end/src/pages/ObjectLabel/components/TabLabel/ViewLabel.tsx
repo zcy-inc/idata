@@ -1,51 +1,168 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import ProTable from '@ant-design/pro-table';
-import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { Button, Card, Descriptions, Form, Typography } from 'antd';
+import { Button, Card, Descriptions, Typography } from 'antd';
 import type { FC, Key } from 'react';
-import type { ProColumns } from '@ant-design/pro-table';
 import styles from '../../index.less';
 
 import Title from '../Title';
 import ViewRules from './components/ViewRules';
 
-import { exportObjectLabel, getObjectLabelLayer } from '@/services/objectlabel';
-import { ObjectLabel } from '@/types/objectlabel';
+import { getObjectLabelLayer, exportObjectLabel } from '@/services/objectlabel';
+import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
 
-export interface ViewDIMProps {}
-
+export interface ViewLabelProps {
+  data: ObjectLabel;
+}
+interface Layer extends RuleLayer {
+  key: number;
+  label: string;
+}
 const { Item } = Descriptions;
 const { Link } = Typography;
-const columns: ProColumns[] = [
-  { title: '主体ID', dataIndex: 'test1', key: 'test1', hideInSearch: true },
-  { title: '主体名称', dataIndex: 'test2', key: 'test2', hideInSearch: true },
-  { title: '近一月交易额（万元）', dataIndex: 'test3', key: 'test3', hideInSearch: true },
-  { title: '近一月交易数（笔）', dataIndex: 'test4', key: 'test4', hideInSearch: true },
+const mock: Layer[] = [
+  {
+    key: 1,
+    label: '1',
+    layerId: 1,
+    layerName: 'in_vane s layer',
+    ruleDef: {
+      rules: [
+        {
+          ruleId: 11,
+          ruleName: 'aa',
+          indicatorDefs: [
+            {
+              indicatorCode: '111',
+              condition: 'equal',
+              params: [100, 200],
+            },
+          ],
+          dimensionDefs: [
+            {
+              dimensionCode: '222',
+              params: ['location'],
+            },
+          ],
+        },
+        {
+          ruleId: 11,
+          ruleName: 'aa',
+          indicatorDefs: [
+            {
+              indicatorCode: '111',
+              condition: 'equal',
+              params: [100, 200],
+            },
+          ],
+          dimensionDefs: [
+            {
+              dimensionCode: '222',
+              params: ['location'],
+            },
+          ],
+        },
+        {
+          ruleId: 11,
+          ruleName: 'aa',
+          indicatorDefs: [
+            {
+              indicatorCode: '111',
+              condition: 'equal',
+              params: [100, 200],
+            },
+          ],
+          dimensionDefs: [
+            {
+              dimensionCode: '222',
+              params: ['location'],
+            },
+          ],
+        },
+        {
+          ruleId: 11,
+          ruleName: 'aa',
+          indicatorDefs: [
+            {
+              indicatorCode: '111',
+              condition: 'equal',
+              params: [100, 200],
+            },
+          ],
+          dimensionDefs: [
+            {
+              dimensionCode: '222',
+              params: ['location'],
+            },
+          ],
+        },
+        {
+          ruleId: 11,
+          ruleName: 'aa',
+          indicatorDefs: [
+            {
+              indicatorCode: '111',
+              condition: 'equal',
+              params: [100, 200],
+            },
+          ],
+          dimensionDefs: [
+            {
+              dimensionCode: '222',
+              params: ['location'],
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
-const ViewDIM: FC<ViewDIMProps> = ({}) => {
-  const [data, setData] = useState<ObjectLabel>();
-  const [key, setKey] = useState<Key>('');
-  const [dataSource, setDataSource] = useState([{}]);
-  const [form] = Form.useForm();
-
+const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
+  const [key, setKey] = useState<Key>('');
+  const [layers, setLayers] = useState<Layer[]>(mock);
+  const [columns, setColumns] = useState([]);
+  const [list, setList] = useState([{}]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
-  const getData = () => {
-    getObjectLabelLayer({
-      id: data?.id as number,
-      layerId: key as number,
-    });
+  useEffect(() => {
+    if (data) {
+      const tmpL = data.ruleLayers.map((layer) => ({
+        ...layer,
+        key: layer.layerId,
+        label: layer.layerName,
+      }));
+      setLayers(tmpL);
+    }
+  }, [data]);
+
+  const getList = (layerId?: number) => {
+    getObjectLabelLayer({ id: data.id, layerId: (layerId || key) as number })
+      .then((res) => {})
+      .catch((err) => {});
   };
 
   const onExport = () => {
-    exportObjectLabel({
-      id: data?.id as number,
-      layerId: key as number,
-    });
+    exportObjectLabel({ id: data.id, layerId: key as number })
+      .then((res) => {
+        const link = document.createElement('a');
+        const body = document.querySelector('body');
+
+        link.href = window.URL.createObjectURL(res.data); // 创建对象url param: blob
+        link.download = 'fileName';
+
+        // fix Firefox
+        link.style.display = 'none';
+        body?.appendChild(link);
+
+        link.click();
+        body?.removeChild(link);
+
+        window.URL.revokeObjectURL(link.href); // 通过调用 URL.createObjectURL() 创建的 URL 对象
+      })
+      .catch((err) => {});
   };
 
   return (
@@ -57,59 +174,37 @@ const ViewDIM: FC<ViewDIMProps> = ({}) => {
         labelStyle={{ color: '#8A8FAE' }}
         style={{ margin: '16px 0' }}
       >
-        <Item label="标签名称">{'-'}</Item>
-        <Item label="标签英文名">{'-'}</Item>
-        <Item label="标签主体">{'-'}</Item>
+        <Item label="标签名称">{data?.name}</Item>
+        <Item label="标签英文名">{data?.nameEn}</Item>
+        <Item label="标签主体">{data?.objectType}</Item>
         <Item label="标签规则">
           <Link onClick={showModal}>查看详情</Link>
         </Item>
-        <Item label="更新人">{'-'}</Item>
-        <Item label="最近编辑时间">{'-'}</Item>
+        <Item label="更新人">{data?.editor}</Item>
+        <Item label="最近编辑时间">{data?.editTime}</Item>
         <Item label="备注" span={3}>
-          {'-'}
+          {data?.remark}
         </Item>
       </Descriptions>
       <Title>数据内容</Title>
       <Card className={`${styles.content} ${styles.reset}`}>
-        <ProForm layout="horizontal" submitter={false} form={form}>
-          <ProFormText
-            name="param"
-            label="搜索主体"
-            placeholder="请输入ID或者名称"
-            width="sm"
-            fieldProps={{
-              onBlur: () => {
-                const param = form.getFieldsValue();
-                console.log(param);
-              },
-            }}
-          />
-        </ProForm>
         <ProTable
           columns={columns}
-          dataSource={dataSource}
+          dataSource={list}
           search={false}
           options={false}
           toolbar={{
-            menu: {
-              type: 'tab',
-              items: [
-                { key: 'tab1', label: '分层1' },
-                { key: 'tab2', label: '分层2' },
-                { key: 'tab3', label: '分层3' },
-              ],
-              onChange: (key) => setKey(key as Key),
-            },
+            menu: { type: 'tab', items: layers, onChange: (key) => setKey(key as Key) },
             actions: [
               <Button onClick={onExport}>导出</Button>,
-              <Button onClick={getData}>查询</Button>,
+              <Button onClick={() => getList()}>查询</Button>,
             ],
           }}
         />
       </Card>
-      <ViewRules visible={visible} onCancel={hideModal} />
+      {visible && <ViewRules layers={layers} visible={visible} onCancel={hideModal} />}
     </Fragment>
   );
 };
 
-export default ViewDIM;
+export default ViewLabel;

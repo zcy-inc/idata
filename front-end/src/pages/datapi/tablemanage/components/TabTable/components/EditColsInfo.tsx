@@ -6,7 +6,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
-import { ColumnLabel, Table, TableLable } from '@/types/tablemanage';
+import { ColumnLabel, Table, TableLable } from '@/types/datapi';
 
 export type StructAction = 'del' | 'up' | 'down';
 export interface EditColsInfoProps {

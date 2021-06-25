@@ -1,19 +1,39 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 import { Input } from 'antd';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 
 import Title from '../../../../components/Title';
-export interface EditAtomicProps {}
+import { Metric } from '@/types/datapi';
+
+export interface EditAtomicProps {
+  initial?: Metric;
+}
 
 const { TextArea } = Input;
 
-const EditAtomic: FC<EditAtomicProps> = ({}) => {
+const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
+  const [data, setData] = useState('');
+
+  useEffect(() => {
+    if (initial) {
+    }
+  }, [initial]);
+
+  useImperativeHandle(ref, () => ({
+    complex: data,
+  }));
+
   return (
     <Fragment>
       <Title>生成复合指标</Title>
-      <TextArea placeholder="请输入" style={{ marginTop: 16 }} />
+      <TextArea
+        value={data}
+        onChange={({ target: { value } }) => setData(value)}
+        placeholder="请输入"
+        style={{ marginTop: 16 }}
+      />
     </Fragment>
   );
 };
 
-export default EditAtomic;
+export default forwardRef(EditAtomic);

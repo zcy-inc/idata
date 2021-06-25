@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import {
   Button,
   Card,
@@ -7,195 +7,343 @@ import {
   Dropdown,
   Input,
   Menu,
+  message,
   Select,
   Space,
   Typography,
 } from 'antd';
 import { cloneDeep } from 'lodash';
-import type { FC, Key } from 'react';
+import { useModel } from 'umi';
+import type { FC } from 'react';
 import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
 import { getRandomStr } from '@/utils/tablemanage';
-import { useRef } from 'react';
+import { ObjectLabel } from '@/types/objectlabel';
 
-export interface ViewDIMProps {}
-interface Layer {
-  key: string;
-  title: string;
-  DIM?: { a: string | null; b: string | null }[];
-  Mtr?: { a: string | null; b: string | null; c: string }[];
+export interface EditRulesProps {
+  initial?: ObjectLabel;
 }
-const initialLayer = {
-  key: 'initial',
-  title: '分层1',
-  DIM: [],
-  Mtr: [],
+type ActionKey = 'copy' | 'delete';
+type Condition = 'equal' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'between';
+interface Indicator {
+  indicatorCode: string | null;
+  condition: Condition | null;
+  params: string[] | number[];
+}
+interface Dimension {
+  dimensionCode: string | null;
+  params: string[];
+}
+interface Rule {
+  ruleId: number;
+  ruleName: string;
+  indicator: Indicator[];
+  dimension: Dimension[];
+}
+interface Layer {
+  layerId: number;
+  layerName: string;
+  rules: Rule[];
+}
+const initialLayer: Layer = {
+  layerId: Date.now(),
+  layerName: '分层' + getRandomStr(5),
+  rules: [
+    {
+      ruleId: Date.now(),
+      ruleName: '规则1',
+      indicator: [{ indicatorCode: null, condition: null, params: [] }],
+      dimension: [{ dimensionCode: null, params: [] }],
+    },
+  ],
 };
+const ConditionOptions = [
+  { label: '等于', value: 'equal' },
+  { label: '大于', value: 'greater' },
+  { label: '小于', value: 'less' },
+  { label: '大于等于', value: 'greaterOrEqual' },
+  { label: '小于等于', value: 'lessOrEqual' },
+  { label: '介于两个值之间', value: 'between' },
+];
 const { Panel } = Collapse;
 const { Link } = Typography;
 
-const EditRules: FC<ViewDIMProps> = ({}) => {
-  const [layers, setLayers] = useState(new Map<string, Layer>([['initial', initialLayer]]));
-  const [activeLayer, setActiveLayer] = useState<Layer>(initialLayer);
-  const menuClickedLayer = useRef<Layer>();
+const EditRules: FC<EditRulesProps> = ({ initial }) => {
+  const [layers, setLayers] = useState<Layer[]>([initialLayer]);
+  const [activeKey, setActiveKey] = useState(0); // 取的是数组的index而非layerId
+  const { setEditLayers } = useModel('objectlabel', (_) => ({
+    setEditLayers: _.setEditLayers,
+  }));
 
-  const renderLayers = () => {
-    const tmp = [];
-    for (let value of layers.values()) {
-      tmp.push(value);
+  useEffect(() => {
+    if (initial) {
+      const _layers: Layer[] = initial.ruleLayers.map((layer) => ({
+        layerId: layer.layerId,
+        layerName: layer.layerName,
+        rules: layer.ruleDef.rules.map((rule) => ({
+          ruleId: rule.ruleId,
+          ruleName: rule.ruleName,
+          indicator: rule.indicatorDefs.map((indicator) => ({
+            indicatorCode: indicator.indicatorCode,
+            condition: indicator.condition,
+            params: indicator.params,
+          })),
+          dimension: rule.dimensionDefs.map((dimension) => ({
+            dimensionCode: dimension.dimensionCode,
+            params: dimension.params,
+          })),
+        })),
+      }));
+      setLayers(_layers);
     }
+  }, [initial]);
 
-    return tmp;
-  };
+  useEffect(() => {
+    setEditLayers(layers);
+  }, [layers]);
 
-  const onMenuAction = (key: Key) => {
+  const onMenuAction = (key: ActionKey, i: number) => {
+    if (key === 'delete') {
+      layers.splice(i, 1);
+      setLayers([...layers]);
+      setActiveKey(i >= layers.length ? layers.length - 1 : i);
+    }
     if (key === 'copy') {
-      const copy: Layer = cloneDeep(menuClickedLayer.current);
-      copy.key = Date.now().toString();
-      copy.title = `${copy?.title}_copy`;
-      layers.set(copy.key, copy);
-      setLayers(new Map([...layers]));
-      setActiveLayer(copy);
-    }
-    if (key === 'del') {
-      layers.delete(menuClickedLayer.current?.key || ''); // TODO
-      setLayers(new Map([...layers]));
-      if (layers.size === 0) {
-        setActiveLayer(null);
-      } else {
-        const tmp = renderLayers();
-        const lastIndex = tmp.findIndex((_) => _.key === activeLayer.key) - 1;
-        const curActive = tmp[lastIndex > 0 ? lastIndex : 0];
-        setActiveLayer(curActive);
-      }
+      const copy = cloneDeep(layers[i]);
+      copy.layerId = Date.now();
+      copy.layerName = `${copy.layerName}_cpoy_` + getRandomStr(5);
+      layers.push(copy);
+      setLayers([...layers]);
+      setActiveKey(layers.length - 1);
     }
   };
 
-  const menu = (
-    <Menu onClick={({ key }) => onMenuAction(key)}>
+  const menu = (i: number) => (
+    <Menu onClick={({ key }) => onMenuAction(key as ActionKey, i)}>
       <Menu.Item key="copy">复制</Menu.Item>
-      <Menu.Item key="del">删除</Menu.Item>
+      <Menu.Item key="delete">删除</Menu.Item>
     </Menu>
   );
 
-  const addLayer = () => {
-    const key = Date.now().toString();
-    const _ = { key, title: '分层_' + getRandomStr(5), DIM: [], Mtr: [] };
-    layers.set(key, _);
-    setLayers(layers);
-    setActiveLayer(_);
+  const createLayer = () => {
+    const layerId = Date.now();
+    const newLayer: Layer = {
+      layerId,
+      layerName: '分层' + getRandomStr(5),
+      rules: [
+        {
+          ruleId: Date.now(),
+          ruleName: '规则1',
+          indicator: [{ indicatorCode: null, condition: null, params: [] }],
+          dimension: [{ dimensionCode: null, params: [] }],
+        },
+      ],
+    };
+    layers.push(newLayer);
+    setLayers([...layers]);
+    setActiveKey(layers.length - 1);
   };
 
-  const onAddItem = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, type: 'DIM' | 'Mtr') => {
-    e.stopPropagation();
-    if (type === 'DIM') {
-      activeLayer.DIM.push({ a: null, b: null });
-    }
-    if (type === 'Mtr') {
-      activeLayer.Mtr.push({ a: null, b: null, c: '' });
-    }
-    layers.set(activeLayer?.key, activeLayer);
-    setActiveLayer({ ...activeLayer });
-    setLayers(new Map([...layers]));
+  const changeLayerName = (v: string) => {
+    layers[activeKey].layerName = v;
+    setLayers([...layers]);
   };
 
-  const onDelItem = (i: number, type: 'DIM' | 'Mtr') => {
-    if (type === 'DIM') {
-      activeLayer.DIM.splice(i, 1);
+  const createIndicator = (iR: number) => {
+    if (layers[activeKey].rules[iR].indicator.length > 0) {
+      message.info('同一规则中只能存在一条指标');
+      return;
     }
-    if (type === 'Mtr') {
-      activeLayer.Mtr.splice(i, 1);
-    }
-    layers.set(activeLayer?.key, activeLayer);
-    setActiveLayer({ ...activeLayer });
-    setLayers(new Map([...layers]));
+    layers[activeKey].rules[iR].indicator.push({
+      indicatorCode: null,
+      condition: null,
+      params: [],
+    });
+    setLayers([...layers]);
   };
 
-  const onChangeLayer = (key: string) => {
-    setActiveLayer(layers.get(key) as Layer);
+  const deleteIndicator = (iR: number, iI: number) => {
+    layers[activeKey].rules[iR].indicator.splice(iI, 1);
+    setLayers([...layers]);
   };
 
-  const onChangeVisible = (visible: boolean, layer: Layer) => {
-    if (visible) {
-      menuClickedLayer.current = layer;
+  const createDimension = (iR: number) => {
+    layers[activeKey].rules[iR].indicator.push({
+      indicatorCode: null,
+      condition: null,
+      params: [],
+    });
+    setLayers([...layers]);
+  };
+
+  const deleteDimension = (iR: number, iI: number) => {
+    layers[activeKey].rules[iR].indicator.splice(iI, 1);
+    setLayers([...layers]);
+  };
+
+  const setIndicator = (v: string, iR: number, iI: number, prop: string, iP?: number) => {
+    if (prop === 'params') {
+      layers[activeKey].rules[iR].indicator[iI].params[iP || 0] = v;
+    } else {
+      layers[activeKey].rules[iR].indicator[iI][prop] = v;
     }
+    if (prop === 'indicatorCode') {
+      layers[activeKey].rules[iR].dimension = [];
+    }
+    setLayers([...layers]);
+  };
+
+  const setDimension = (v: string, iR: number, iD: number, prop: string) => {
+    if (prop === 'params') {
+      layers[activeKey].rules[iR].dimension[iD].params[0] = v;
+    } else {
+      layers[activeKey].rules[iR].dimension[iD][prop] = v;
+    }
+    setLayers([...layers]);
   };
 
   return (
     <Card className={styles['edit-content']}>
       <Space wrap>
-        {renderLayers().map((layer) => (
+        {layers.map((layer, i) => (
           <Dropdown.Button
-            key={layer.key}
-            className={activeLayer.key === layer.key && styles['layer-active']}
-            onClick={() => onChangeLayer(layer.key)}
-            onVisibleChange={(v) => onChangeVisible(v, layer)}
-            overlay={menu}
+            key={layer.layerId}
+            className={layers[activeKey]?.layerId === layer.layerId && styles['layer-active']}
+            onClick={() => setActiveKey(i)}
+            onVisibleChange={() => {}}
+            overlay={menu(i)}
             trigger={['click']}
           >
-            {layer.title}
+            {layer.layerName}
           </Dropdown.Button>
         ))}
-        <Button icon={<IconFont type="icon-xinjian" />} type="dashed" onClick={addLayer}>
+        <Button icon={<IconFont type="icon-xinjian" />} type="dashed" onClick={createLayer}>
           添加分层
         </Button>
       </Space>
       <Divider />
-      {activeLayer && (
-        <Fragment>
+      {layers[activeKey]?.rules.map((rule, iR) => (
+        <Fragment key={rule.ruleId}>
           <Input
-            value={activeLayer?.title}
-            onChange={({ target: { value } }) => {
-              const _ = { ...activeLayer, title: value };
-              layers.set(activeLayer?.key, _);
-              setActiveLayer(_ as Layer);
-              setLayers(new Map([...layers]));
-            }}
+            placeholder="请输入"
+            value={layers[activeKey]?.layerName}
+            onChange={({ target: { value } }) => changeLayerName(value)}
           />
           <div className={styles['title-bar']}>
             <span className={styles.title}>规则1</span>
-            {/* <Space>
-              <Link>删除</Link>
-              <Divider type="vertical" />
-              <Link>添加</Link>
-            </Space> */}
           </div>
-          <Collapse style={{ marginTop: 16, background: '#fff' }}>
+          <Collapse
+            style={{ marginTop: 16, background: '#fff' }}
+            defaultActiveKey={['indicator', 'dimension']}
+          >
             <Panel
-              header="维度信息"
-              key="DIM"
-              extra={<Link onClick={(e) => onAddItem(e, 'DIM')}>添加</Link>}
+              header="指标信息"
+              key="indicator"
+              extra={
+                <Link
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createIndicator(iR);
+                  }}
+                >
+                  添加
+                </Link>
+              }
             >
               <Space direction="vertical">
-                {activeLayer?.DIM?.map((_, i) => (
-                  <Space key={i}>
-                    <Select placeholder="请选择维度" style={{ width: 240 }} />
-                    <Select placeholder="请选择" style={{ width: 240 }} />
+                {rule.indicator.map((_, iI) => (
+                  <Space key={iI}>
+                    <Select
+                      placeholder="请选择指标"
+                      style={{ minWidth: 160 }}
+                      options={[]}
+                      value={_.indicatorCode}
+                      onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
+                    />
+                    <Select
+                      placeholder="关系"
+                      style={{ minWidth: 160 }}
+                      options={ConditionOptions}
+                      value={_.condition}
+                      onChange={(v) => setIndicator(v as string, iR, iI, 'condition')}
+                    />
+                    {rule.indicator[iI].condition === 'between' ? (
+                      <Input.Group compact>
+                        <Input
+                          style={{ width: 100, textAlign: 'center' }}
+                          placeholder="最小值"
+                          value={_.params[0]}
+                          onChange={({ target: { value } }) =>
+                            setIndicator(value, iR, iI, 'params')
+                          }
+                        />
+                        <Input
+                          className="site-input-split"
+                          style={{ width: 30, pointerEvents: 'none', background: '#fff' }}
+                          placeholder="~"
+                          disabled
+                        />
+                        <Input
+                          className="site-input-right"
+                          style={{ width: 100, textAlign: 'center' }}
+                          placeholder="最大值"
+                          value={rule.indicator[iI].params[1]}
+                          onChange={({ target: { value } }) =>
+                            setIndicator(value, iR, iI, 'params', 1)
+                          }
+                        />
+                      </Input.Group>
+                    ) : (
+                      <Input
+                        placeholder="请输入"
+                        style={{ minWidth: 160 }}
+                        value={rule.indicator[iI].params[0]}
+                        onChange={({ target: { value } }) => setIndicator(value, iR, iI, 'params')}
+                      />
+                    )}
                     <IconFont
                       type="icon-shanchuchanggui"
                       style={{ cursor: 'pointer' }}
-                      onClick={() => onDelItem(i, 'DIM')}
+                      onClick={() => deleteIndicator(iR, iI)}
                     />
                   </Space>
                 ))}
               </Space>
             </Panel>
             <Panel
-              header="指标信息"
-              key="Mtr"
-              extra={<Link onClick={(e) => onAddItem(e, 'Mtr')}>添加</Link>}
+              header="维度信息"
+              key="dimension"
+              extra={
+                <Link
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createDimension(iR);
+                  }}
+                >
+                  添加
+                </Link>
+              }
             >
               <Space direction="vertical">
-                {activeLayer?.Mtr?.map((_, i) => (
-                  <Space key={i}>
-                    <Select placeholder="请选择指标" style={{ minWidth: 160 }} />
-                    <Select placeholder="关系" style={{ minWidth: 160 }} />
-                    <Input placeholder="请输入" style={{ minWidth: 160 }} />
+                {rule.dimension.map((_, iD) => (
+                  <Space key={iD}>
+                    <Select
+                      placeholder="请选择维度"
+                      style={{ width: 240 }}
+                      value={_.dimensionCode}
+                      onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
+                    />
+                    <Select
+                      placeholder="请选择"
+                      style={{ width: 240 }}
+                      value={_.params[0]}
+                      onChange={(v) => setDimension(v as string, iR, iD, 'params')}
+                    />
                     <IconFont
                       type="icon-shanchuchanggui"
                       style={{ cursor: 'pointer' }}
-                      onClick={() => onDelItem(i, 'Mtr')}
+                      onClick={() => deleteDimension(iR, iD)}
                     />
                   </Space>
                 ))}
@@ -203,7 +351,7 @@ const EditRules: FC<ViewDIMProps> = ({}) => {
             </Panel>
           </Collapse>
         </Fragment>
-      )}
+      ))}
     </Card>
   );
 };

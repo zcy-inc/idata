@@ -4,28 +4,29 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
 
-import ViewModifier from './ViewModifier';
-import EditModifier from './EditModifier';
-import { Modifier } from '@/types/datapi';
-import { createModifier, deleteModifier, getModifier } from '@/services/kpisystem';
+import ViewDIM from './ViewDimension';
+import EditDIM from './EditDimension';
+import { createDimension, deleteDimension, getDimension } from '@/services/kpisystem';
+import { Dimension } from '@/types/datapi';
 import { TreeNodeType } from '@/constants/datapi';
 
-export interface TabEnumProps {
+export interface TabDimensionProps {
   initialMode: 'view' | 'edit';
   fileCode: string;
 }
-interface ModifierExportProps {
+interface DimensionExportProps {
   form: any;
+  DIM: [];
   DWD: [];
 }
 
 const { confirm } = Modal;
 
-const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
+const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [data, setData] = useState<Modifier>();
-  const refM = useRef<ModifierExportProps>();
+  const [data, setData] = useState<Dimension>();
+  const refD = useRef<DimensionExportProps>();
   const { getTree, removeTab } = useModel('kpisystem', (_) => ({
     getTree: _.getTree,
     removeTab: _.removeTab,
@@ -33,11 +34,11 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   useEffect(() => {
     setMode(initialMode);
-    fileCode !== 'newModifier' && getModifierInfo(fileCode);
+    fileCode !== 'newDimension' && getDimensionInfo(fileCode);
   }, []);
 
-  const getModifierInfo = (modifierId: string) => {
-    getModifier({ modifierId })
+  const getDimensionInfo = (dimensionId: string) => {
+    getDimension({ dimensionId })
       .then((res) => {
         setData(res.data);
       })
@@ -46,16 +47,17 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   const onSubmit = () => {
     setLoading(true);
-    const form = refM.current?.form;
-    const DWD = refM.current?.DWD;
-    console.log({ form, DWD });
+    const form = refD.current?.form;
+    const DIM = refD.current?.DIM;
+    const DWD = refD.current?.DWD;
+    console.log({ form, DIM, DWD });
     // TODO
-    createModifier({})
+    createDimension({})
       .then((res) => {
         if (res.success) {
           message.success(fileCode === 'newDimensiob' ? '新建维度成功' : '更新维度成功');
           getTree(TreeNodeType.DIMENSION_LABEL);
-          getModifierInfo(''); // TODO
+          getDimensionInfo(''); // TODO
           setMode('view');
         }
       })
@@ -65,32 +67,32 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   const onDelete = () =>
     confirm({
-      title: '您确定要删除该修饰词吗？',
+      title: '您确定要删除该维度吗？',
       onOk: () =>
-        deleteModifier({ modifierId: fileCode })
+        deleteDimension({ dimensionId: fileCode })
           .then((res) => {
             if (res.success) {
               message.success('删除成功');
               removeTab(''); // TODO
-              getTree(TreeNodeType.MODIFIER_LABEL);
+              getTree(TreeNodeType.DIMENSION_LABEL);
             }
           })
           .catch((err) => {}),
     });
 
   const onCancel = () => {
-    if (fileCode === 'newModifier') {
-      removeTab('newModifier');
+    if (fileCode === 'newDimension') {
+      removeTab('newDimension');
     } else {
       setMode('view');
-      getModifierInfo(fileCode);
+      getDimensionInfo(fileCode);
     }
   };
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewModifier data={data as Modifier} />}
-      {mode === 'edit' && <EditModifier ref={refM} initial={data} />}
+      {mode === 'view' && <ViewDIM data={data as Dimension} />}
+      {mode === 'edit' && <EditDIM ref={refD} initial={data} />}
       <div className={styles.submit}>
         {mode === 'view' && [
           <Button key="edit" type="primary" onClick={() => setMode('edit')}>
@@ -98,7 +100,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
           </Button>,
           <Popconfirm
             key="del"
-            title="您确认要删除该修饰词吗？"
+            title="您确认要删除该维度吗？"
             onConfirm={onDelete}
             okButtonProps={{ loading }}
             okText="确认"
@@ -120,4 +122,4 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   );
 };
 
-export default TabEnum;
+export default TabDimension;
