@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.develop.dal.model;
 
+import cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Generated;
@@ -91,8 +92,8 @@ public class DevLabelDefine {
      * Database Column Remarks:
      *   特定标签属性，根据标签的标签字段变化
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attributes")
-    private List specialAttributes;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attribute")
+    private SpecialAttributeDto specialAttribute;
 
     /**
      * Database Column Remarks:
@@ -239,14 +240,14 @@ public class DevLabelDefine {
         this.labelAttributes = labelAttributes;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attributes")
-    public List getSpecialAttributes() {
-        return specialAttributes;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attribute")
+    public SpecialAttributeDto getSpecialAttribute() {
+        return specialAttribute;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attributes")
-    public void setSpecialAttributes(List specialAttributes) {
-        this.specialAttributes = specialAttributes;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.special_attribute")
+    public void setSpecialAttribute(SpecialAttributeDto specialAttribute) {
+        this.specialAttribute = specialAttribute;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label_define.subject_type")
