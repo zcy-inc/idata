@@ -94,7 +94,7 @@ public class LabFolderServiceImpl implements LabFolderService {
         // 软删除，修改del状态
         labFolderDao.update(dsl -> dsl.set(labFolder.del).equalTo(DEL_YES.val)
                 .set(labFolder.editor).equalTo(operator).where(labFolder.id, isEqualTo(id)));
-        return true;
+        return Boolean.TRUE;
     }
 
     @Override
@@ -138,7 +138,8 @@ public class LabFolderServiceImpl implements LabFolderService {
         if (CollectionUtils.isEmpty(nodeDtoList)) return null;
 
         for (LabFolderTreeNodeDto nodeDto : nodeDtoList) {
-            nodeDto.setChildren(makeTree(nodeDto.getId(), listMultimap));
+            if (FolderTreeNodeTypeEnum.FOLDER.getCode().equals(nodeDto.getType()))
+                nodeDto.setChildren(makeTree(nodeDto.getId(), listMultimap));
         }
         return nodeDtoList;
     }

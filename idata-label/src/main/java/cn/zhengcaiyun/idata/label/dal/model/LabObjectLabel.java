@@ -88,6 +88,13 @@ public class LabObjectLabel {
 
     /**
      * Database Column Remarks:
+     *   起源记录id，修改时指向第一次创建的记录id
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.origin_id")
+    private Long originId;
+
+    /**
+     * Database Column Remarks:
      *   文件夹id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.folder_id")
@@ -208,6 +215,16 @@ public class LabObjectLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.version")
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.origin_id")
+    public Long getOriginId() {
+        return originId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.origin_id")
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.folder_id")

@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface LabObjectLabelDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: lab_object_label")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, nameEn, objectType, remark, version, folderId, rules);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, nameEn, objectType, remark, version, originId, folderId, rules);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: lab_object_label")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -68,6 +68,7 @@ public interface LabObjectLabelDao {
         @Result(column="object_type", property="objectType", jdbcType=JdbcType.VARCHAR),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
         @Result(column="version", property="version", jdbcType=JdbcType.INTEGER),
+        @Result(column="origin_id", property="originId", jdbcType=JdbcType.BIGINT),
         @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT),
         @Result(column="rules", property="rules", jdbcType=JdbcType.LONGVARCHAR)
     })
@@ -107,6 +108,7 @@ public interface LabObjectLabelDao {
             .map(objectType).toProperty("objectType")
             .map(remark).toProperty("remark")
             .map(version).toProperty("version")
+            .map(originId).toProperty("originId")
             .map(folderId).toProperty("folderId")
             .map(rules).toProperty("rules")
         );
@@ -125,6 +127,7 @@ public interface LabObjectLabelDao {
             .map(objectType).toPropertyWhenPresent("objectType", record::getObjectType)
             .map(remark).toPropertyWhenPresent("remark", record::getRemark)
             .map(version).toPropertyWhenPresent("version", record::getVersion)
+            .map(originId).toPropertyWhenPresent("originId", record::getOriginId)
             .map(folderId).toPropertyWhenPresent("folderId", record::getFolderId)
             .map(rules).toPropertyWhenPresent("rules", record::getRules)
         );
@@ -169,6 +172,7 @@ public interface LabObjectLabelDao {
                 .set(objectType).equalTo(record::getObjectType)
                 .set(remark).equalTo(record::getRemark)
                 .set(version).equalTo(record::getVersion)
+                .set(originId).equalTo(record::getOriginId)
                 .set(folderId).equalTo(record::getFolderId)
                 .set(rules).equalTo(record::getRules);
     }
@@ -185,6 +189,7 @@ public interface LabObjectLabelDao {
                 .set(objectType).equalToWhenPresent(record::getObjectType)
                 .set(remark).equalToWhenPresent(record::getRemark)
                 .set(version).equalToWhenPresent(record::getVersion)
+                .set(originId).equalToWhenPresent(record::getOriginId)
                 .set(folderId).equalToWhenPresent(record::getFolderId)
                 .set(rules).equalToWhenPresent(record::getRules);
     }
@@ -202,6 +207,7 @@ public interface LabObjectLabelDao {
             .set(objectType).equalTo(record::getObjectType)
             .set(remark).equalTo(record::getRemark)
             .set(version).equalTo(record::getVersion)
+            .set(originId).equalTo(record::getOriginId)
             .set(folderId).equalTo(record::getFolderId)
             .set(rules).equalTo(record::getRules)
             .where(id, isEqualTo(record::getId))
@@ -221,6 +227,7 @@ public interface LabObjectLabelDao {
             .set(objectType).equalToWhenPresent(record::getObjectType)
             .set(remark).equalToWhenPresent(record::getRemark)
             .set(version).equalToWhenPresent(record::getVersion)
+            .set(originId).equalToWhenPresent(record::getOriginId)
             .set(folderId).equalToWhenPresent(record::getFolderId)
             .set(rules).equalToWhenPresent(record::getRules)
             .where(id, isEqualTo(record::getId))

@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @description: 标签controller
  * @author: yangjianhua
@@ -33,10 +35,16 @@ import java.util.List;
 public class LabObjectLabelController {
     private static final Logger logger = LoggerFactory.getLogger(LabObjectLabelController.class);
 
+    private final TokenService tokenService;
+    private final LabObjectLabelService objectLabelService;
+
     @Autowired
-    private TokenService tokenService;
-    @Autowired
-    private LabObjectLabelService objectLabelService;
+    public LabObjectLabelController(TokenService tokenService, LabObjectLabelService objectLabelService) {
+        checkNotNull(tokenService, "tokenService must not be null.");
+        checkNotNull(objectLabelService, "objectLabelService must not be null.");
+        this.tokenService = tokenService;
+        this.objectLabelService = objectLabelService;
+    }
 
     @PostMapping("/objectLabel")
     public RestResult<Long> createLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {

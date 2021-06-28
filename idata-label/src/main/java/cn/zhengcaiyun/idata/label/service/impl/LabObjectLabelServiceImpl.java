@@ -68,7 +68,6 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
                 .ifPresent(folderId -> folderManager.getFolder(folderId, "文件夹不存在"));
         checkArgument(isNotEmpty(labelDto.getObjectType()), "标签主体不能为空");
 
-
         LabObjectLabel label = newCreatedObjectLabel(labelDto, operator);
         objectLabelDao.insertSelective(label);
         return label.getId();
@@ -77,7 +76,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     @Override
     public Long editLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel label = objectLabelManager.getObjectLabel(labelDto.getId(), "标签不存在");
-        LabObjectLabel checkNameLabel = objectLabelManager.getObjectLabel(label.getName());
+        LabObjectLabel checkNameLabel = objectLabelManager.getObjectLabel(labelDto.getName());
         if (!Objects.isNull(checkNameLabel)) {
             //编辑后，名称不能和其他标签相同
             checkState(Objects.equals(label.getId(), checkNameLabel.getId()), "标签名称已存在");
@@ -88,6 +87,8 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         //标签编辑逻辑：将旧数据状态置为删除，新增一条标签记录，版本号+1
         LabObjectLabel newLabel = newCreatedObjectLabel(labelDto, operator);
         newLabel.setVersion(label.getVersion() + 1);
+        //第一次修改时，originId取被修改记录的id，之后的修改取被修改记录的originId
+        newLabel.setOriginId(Objects.equals(label.getOriginId(), 0L) ? label.getId() : label.getOriginId());
         //标签主体限制修改
         newLabel.setObjectType(label.getObjectType());
         objectLabelManager.renewLabel(newLabel, label.getId());
@@ -111,7 +112,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         // 软删除，修改del状态
         objectLabelDao.update(dsl -> dsl.set(labObjectLabel.del).equalTo(DEL_YES.val)
                 .set(labObjectLabel.editor).equalTo(operator).where(labObjectLabel.id, isEqualTo(id)));
-        return null;
+        return Boolean.TRUE;
     }
 
     @Override

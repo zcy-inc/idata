@@ -89,6 +89,13 @@ public final class LabObjectLabelDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   起源记录id，修改时指向第一次创建的记录id
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.origin_id")
+    public static final SqlColumn<Long> originId = labObjectLabel.originId;
+
+    /**
+     * Database Column Remarks:
      *   文件夹id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: lab_object_label.folder_id")
@@ -124,6 +131,8 @@ public final class LabObjectLabelDynamicSqlSupport {
         public final SqlColumn<String> remark = column("remark", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> version = column("version", JDBCType.INTEGER);
+
+        public final SqlColumn<Long> originId = column("origin_id", JDBCType.BIGINT);
 
         public final SqlColumn<Long> folderId = column("folder_id", JDBCType.BIGINT);
 

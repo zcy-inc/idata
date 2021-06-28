@@ -23,10 +23,11 @@ create table if not exists lab_object_label
     edit_time   datetime            not null default current_timestamp on update current_timestamp comment '修改时间',
     name        varchar(100)        NOT NULL COMMENT '名称',
     name_en     varchar(100)        NOT NULL COMMENT '英文名称',
-    object_type varchar(10)         NOT NULL COMMENT '主体类型',
+    object_type varchar(30)         NOT NULL COMMENT '主体类型',
     remark      varchar(200)        NOT NULL COMMENT '备注',
     rules       mediumtext COMMENT '标签规则，json格式',
     version     int(11) unsigned    NOT NULL COMMENT '版本',
+    origin_id   bigint(20) unsigned not null default 0 comment '起源记录id，修改时指向第一次创建的记录id',
     folder_id   bigint(20) unsigned NOT NULL COMMENT '文件夹id'
 ) engine = innodb
   auto_increment = 1

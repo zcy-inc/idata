@@ -9,16 +9,12 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://172.29.108.185:30106/idata"
+                        connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
         <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.label.dal.model" targetProject="src/main/java"/>
         <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.label.dal.dao" targetProject="src/main/java"/>
 
-        <table tableName="lab_folder" mapperName="LabFolderDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
         <table tableName="lab_object_label" mapperName="LabObjectLabelDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
