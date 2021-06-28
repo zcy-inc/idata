@@ -15,13 +15,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +26,7 @@ import java.util.stream.Collectors;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
@@ -41,20 +39,17 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 @Service
 public class LabFolderServiceImpl implements LabFolderService {
 
-    @Autowired
-    private LabFolderDao labFolderDao;
-    @Autowired
-    private LabFolderManager labFolderManager;
-    @Resource
-    private List<LabFolderTreeNodeSupplier> list;
-    @Resource
-    private Map<String, LabFolderTreeNodeSupplier> map;
+    private final LabFolderDao labFolderDao;
+    private final LabFolderManager labFolderManager;
 
-//    @Autowired
-//    public LabFolderServiceImpl(LabFolderDao labFolderDao) {
-//        checkNotNull(labFolderDao,"labFolderDao must not be null.");
-//        this.labFolderDao = labFolderDao;
-//    }
+    @Autowired
+    public LabFolderServiceImpl(LabFolderDao labFolderDao,
+                                LabFolderManager labFolderManager) {
+        checkNotNull(labFolderDao, "labFolderDao must not be null.");
+        checkNotNull(labFolderManager, "labFolderManager must not be null.");
+        this.labFolderDao = labFolderDao;
+        this.labFolderManager = labFolderManager;
+    }
 
     @Override
     public Long createFolder(LabFolderDto labFolderDto, String operator) {
@@ -107,12 +102,11 @@ public class LabFolderServiceImpl implements LabFolderService {
         if (isEmpty(belong)) return Lists.newArrayList();
 
         List<LabFolder> folders = labFolderManager.queryFolders(belong);
-        BeanCopier copier = BeanCopier.create(LabFolder.class, LabFolderDto.class, false);
-        // todo test
-        List<LabFolderDto> folderDtoList = Lists.newArrayList();
-        List<LabFolderDto> folderDtoList1 = Lists.newArrayList();
-        copier.copy(folders, folderDtoList, null);
-        BeanUtils.copyProperties(folders, folderDtoList1);
+        List<LabFolderDto> folderDtoList = folders.stream().map(folder -> {
+            LabFolderDto folderDto = new LabFolderDto();
+            BeanUtils.copyProperties(folder, folderDto);
+            return folderDto;
+        }).collect(Collectors.toList());
         return folderDtoList;
     }
 

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * lab-folder-api
  * 文件夹接口
@@ -22,10 +24,17 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/p1/lab")
 public class LabFolderController {
+
+    private final TokenService tokenService;
+    private final LabFolderService folderService;
+
     @Autowired
-    private TokenService tokenService;
-    @Autowired
-    private LabFolderService folderService;
+    public LabFolderController(TokenService tokenService, LabFolderService folderService) {
+        checkNotNull(tokenService, "tokenService must not be null.");
+        checkNotNull(folderService, "folderService must not be null.");
+        this.tokenService = tokenService;
+        this.folderService = folderService;
+    }
 
     /**
      * 创建文件夹
