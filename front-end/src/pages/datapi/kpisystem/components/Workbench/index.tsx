@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { IconFont } from '@/components';
-import TabDIM from '../TabDIM';
+import TabDimension from '../TabDimension';
 import TabModifier from '../TabModifier';
 import TabMetric from '../TabMetric';
 
@@ -21,13 +21,14 @@ const Workbench: FC = ({}) => {
 
   const renderTab = (tab: any) => {
     switch (tab.type) {
-      case 'TABLE':
-        return <TabDIM initialMode={tab.mode} fileCode={tab.code} />;
-      case 'LABEL':
+      case 'DIMENSION_LABEL':
+        return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;
+      case 'MODIFIER_LABEL':
         return <TabModifier initialMode={tab.mode} fileCode={tab.code} />;
-      case 'ENUM':
-      default:
+      case 'METRIC_LABEL':
         return <TabMetric initialMode={tab.mode} fileCode={tab.code} />;
+      default:
+        return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;
     }
   };
 

@@ -1,22 +1,37 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useState } from 'react';
 import ProForm, { ProFormSelect } from '@ant-design/pro-form';
 import { Select, Typography } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../../kpisystem/index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../../../../components/Title';
-import { rulesSelect } from '../constants';
+import { rules } from '@/constants/datapi';
+import { Metric, Table } from '@/types/datapi';
 
-export interface EditAtomicProps {}
+export interface EditDeriveProps {
+  initial?: Metric;
+}
+interface TableOptions extends Table {
+  label: string;
+  value: string;
+}
 
 const { Link } = Typography;
+const { require } = rules;
 
-const EditAtomic: FC<EditAtomicProps> = ({}) => {
+const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initial }, ref) => {
   const [DWDData, setDWDData] = useState<any[]>([]);
   const [DWDKeys, setDWDKeys] = useState<React.Key[]>([]);
+
+  useEffect(() => {}, []);
+
+  useEffect(() => {
+    if (initial) {
+    }
+  }, [initial]);
 
   // 添加一行数据
   const addData = () => {
@@ -25,7 +40,7 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
     setDWDData([...DWDData, data]);
     setDWDKeys([...DWDKeys, id]);
   };
-  // 因为是自己维护的data, 所以手动录入数据
+
   const setValue = (schema: any, value: any) => {
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
@@ -83,8 +98,8 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
           label="原子指标"
           width="md"
           placeholder="请选择"
-          rules={rulesSelect}
-          options={[]}
+          rules={require}
+          options={[]} // TODO
         />
       </ProForm>
       <EditableProTable
@@ -110,4 +125,4 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
   );
 };
 
-export default EditAtomic;
+export default forwardRef(EditDerive);

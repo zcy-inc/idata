@@ -7,7 +7,7 @@ import styles from '../../../index.less';
 import IconFont from '@/components/IconFont';
 import { getEnumNames, getEnumValues } from '@/services/tablemanage';
 import { getRandomStr, isEnumType } from '@/utils/tablemanage';
-import { Enum, EnumValue } from '@/types/tablemanage';
+import { Enum, EnumValue } from '@/types/datapi';
 import SelectEnum from '../../SelectEnum';
 
 export interface EnumTableProps {

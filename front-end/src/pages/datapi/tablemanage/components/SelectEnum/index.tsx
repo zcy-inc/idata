@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { SelectValue } from 'antd/es/select';
 
 import { getEnumNames } from '@/services/tablemanage';
-import { EnumName } from '@/types/tablemanage';
+import { EnumName } from '@/types/datapi';
 import { isEnumType } from '@/utils/tablemanage';
 
 interface SelectEnumProps<VT> {

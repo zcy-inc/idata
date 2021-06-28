@@ -1,7 +1,8 @@
+import { TreeNodeType } from '@/constants/datapi';
 import { request } from 'umi';
 
 // 树 获取
-export async function getFolderTree(params: { devTreeType: 'TABLE' | 'LABEL' | 'ENUM' }) {
+export async function getFolderTree(params: { devTreeType: TreeNodeType }) {
   return request('/api/p1/dev/devFolderTree', { method: 'GET', params });
 }
 // 树 获取平铺的文件夹目录
@@ -19,4 +20,46 @@ export async function updateFolder(data: { folderName: string; parentId: string;
 // 文件夹 删除
 export async function deleteFolder(params: { folderId: string }) {
   return request(`/api/p1/dev/devFolder/${params.folderId}`, { method: 'DELETE', params });
+}
+
+/* ========== 维度 ========== */
+// 维度 获取
+export async function getDimension(params: { dimensionId: string }) {
+  return request(`/api/p1/dev/dimension/${params.dimensionId}`, { method: 'GET', params });
+}
+// 维度 创建 / 更新
+export async function createDimension(data: { dimensionId?: string }) {
+  return request(`/api/p1/dev/dimension`, { method: 'POST', data });
+}
+// 维度 删除
+export async function deleteDimension(params: { dimensionId: string }) {
+  return request(`/api/p1/dev/dimension/${params.dimensionId}`, { method: 'DELETE', params });
+}
+
+/* ========== 修饰词 ========== */
+// 修饰词 获取
+export async function getModifier(params: { modifierId: string }) {
+  return request(`/api/p1/dev/modifier/${params.modifierId}`, { method: 'GET', params });
+}
+// 修饰词 创建 / 更新
+export async function createModifier(data: { modifierId?: string }) {
+  return request(`/api/p1/dev/modifier`, { method: 'POST', data });
+}
+// 修饰词 删除
+export async function deleteModifier(params: { modifierId: string }) {
+  return request(`/api/p1/dev/modifier/${params.modifierId}`, { method: 'DELETE', params });
+}
+
+/* ========== 指标 ========== */
+// 指标 获取
+export async function getMetric(params: { metricId: string }) {
+  return request(`/api/p1/dev/metric/${params.metricId}`, { method: 'GET', params });
+}
+// 指标 创建 / 更新
+export async function createMetric(data: { metricId?: string }) {
+  return request(`/api/p1/dev/metric`, { method: 'POST', data });
+}
+// 指标 删除
+export async function deleteMetric(params: { metricId: string }) {
+  return request(`/api/p1/dev/metric/${params.metricId}`, { method: 'DELETE', params });
 }

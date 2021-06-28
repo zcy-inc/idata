@@ -14,7 +14,7 @@ const TableManage: FC = () => {
   }));
 
   return (
-    <PageContainer contentClassName={styles.content}>
+    <PageContainer contentClassName={styles['tabel-manage']}>
       <div className={styles.board}>
         <div className={styles.left}>
           <FolderTree />

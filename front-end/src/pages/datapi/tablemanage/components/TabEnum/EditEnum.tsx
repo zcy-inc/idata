@@ -6,8 +6,8 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { getFolders } from '@/services/tablemanage';
-import { rules } from '@/constants/tablemanage';
-import { Enum, FlatTreeNode } from '@/types/tablemanage';
+import { rules } from '@/constants/datapi';
+import { Enum, FlatTreeNode } from '@/types/datapi';
 import EnumTable from './components/EnumTable';
 
 export interface EditEnumProps {

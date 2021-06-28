@@ -1,21 +1,52 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 import { Select, Tabs, Typography } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../../kpisystem/index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../../../../components/Title';
+import { Metric, Table } from '@/types/datapi';
+import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
 
-export interface EditAtomicProps {}
+export interface EditAtomicProps {
+  initial?: Metric;
+}
+interface TableOptions extends Table {
+  label: string;
+  value: string;
+}
 
 const { Link } = Typography;
 const { TabPane } = Tabs;
 
-const EditAtomic: FC<EditAtomicProps> = ({}) => {
+const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
   const [DWDData, setDWDData] = useState<any[]>([]);
   const [DWDKeys, setDWDKeys] = useState<React.Key[]>([]);
+  const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
+  const [DWDStrings, setDWDStrings] = useState<[][]>([]);
+
+  useImperativeHandle(ref, () => ({
+    DWD: DWDData,
+  }));
+
+  useEffect(() => {
+    getTableReferTbs({ labelValue: 'dwd' })
+      .then((res) => {
+        const t = res.data.map((table: Table) => ({
+          label: table.tableName,
+          value: table.id,
+        }));
+        setDWDTables(t);
+      })
+      .catch((err) => {});
+  }, []);
+
+  useEffect(() => {
+    if (initial) {
+    }
+  }, [initial]);
 
   // 添加一行数据
   const addData = () => {
@@ -24,8 +55,17 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
     setDWDData([...DWDData, data]);
     setDWDKeys([...DWDKeys, id]);
   };
-  // 因为是自己维护的data, 所以手动录入数据
+
   const setValue = (schema: any, value: any) => {
+    if (schema.dataIndex === 'tableName') {
+      getTableReferStr({ tableId: value })
+        .then((res) => {
+          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          DWDStrings[schema.index] = strs;
+          setDWDStrings([...DWDStrings]);
+        })
+        .catch((err) => {});
+    }
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
   };
@@ -41,13 +81,13 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
   const Cols: ProColumns[] = [
     {
       title: '表名',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'tableName',
+      key: 'tableName',
       renderFormItem: (schema) => (
         <Select
           allowClear
           placeholder="请选择"
-          options={[]}
+          options={DWDTables}
           onChange={(value) => setValue(schema, value)}
         />
       ),
@@ -60,7 +100,7 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
         <Select
           allowClear
           placeholder="请选择"
-          options={[]}
+          options={DWDStrings[schema.index as number]}
           onChange={(value) => setValue(schema, value)}
         />
       ),
@@ -101,7 +141,7 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
             }}
           />
           <Link onClick={addData} style={{ display: 'inline-block', marginTop: 16 }}>
-            <IconFont type="icon-tianjia" />
+            <IconFont type="icon-tianjia" style={{ marginRight: 4 }} />
             添加字段
           </Link>
         </TabPane>
@@ -110,4 +150,4 @@ const EditAtomic: FC<EditAtomicProps> = ({}) => {
   );
 };
 
-export default EditAtomic;
+export default forwardRef(EditAtomic);

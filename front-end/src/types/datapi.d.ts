@@ -1,4 +1,4 @@
-import { TreeNodeType, LabelRequired, LabelTag, ERType } from '@/constants/tablemanage';
+import { TreeNodeType, LabelRequired, LabelTag, ERType } from '@/constants/datapi';
 
 export interface FlatTreeNode {
   id: number;
@@ -92,3 +92,16 @@ export interface Table {
   columnInfos: ColumnLabel[];
   foreignKeys: ForeignKey[];
 }
+
+/* ========== kipsystem ========== */
+export interface Dimension {
+  id: numebr;
+  folderId?: numebr;
+  labelName: string;
+  labelTag: LabelTag;
+  labelAttributes: LabelAttribute[];
+  specialAttributes: {};
+  targetLabels: TableLable[];
+}
+export interface Modifier extends Dimension {}
+export interface Metric extends Dimension {}

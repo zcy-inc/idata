@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions, Table } from 'antd';
 import type { FC } from 'react';
 
-import { Enum, EnumValue, LabelAttribute } from '@/types/tablemanage';
+import { Enum, EnumValue, LabelAttribute } from '@/types/datapi';
 import Title from '../../../components/Title';
 
 export interface ViewEnumProps {

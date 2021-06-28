@@ -19,8 +19,8 @@ import type { FC, ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
-import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/tablemanage';
-import { rules } from '@/constants/tablemanage';
+import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/datapi';
+import { rules } from '@/constants/datapi';
 import { InitialLabel, RadioOps } from '../constants';
 
 import IconFont from '@/components/IconFont';
@@ -105,6 +105,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
           if (initial) {
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
+            labelValues.current.set('tableName', initial.tableName);
             tableLabels.forEach((_: TableLable) => {
               const v = _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue;
               labelValues.current.set(_.labelCode, v);

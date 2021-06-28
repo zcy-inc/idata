@@ -8,6 +8,7 @@ import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
 
 import { deleteFolder } from '@/services/kpisystem';
+import { TreeNodeType } from '@/constants/datapi';
 
 export type Key = string | number;
 export interface FolderTreeProps {}
@@ -31,9 +32,9 @@ const { confirm } = Modal;
 const NodeTypeIcon = {
   FOLDER: <IconFont type="icon-wenjianjia" key="folder" />,
   FOLDEROPEN: <IconFont type="icon-wenjianjiazhankai" key="folderopen" />,
-  LABEL: <IconFont type="icon-biaoqian1" key="label" />,
-  ENUM: <IconFont type="icon-meiju" key="enum" />,
-  TABLE: <IconFont type="icon-biao" key="table" />,
+  LABEL: <IconFont type="icon-biaoqian1" key="dimension" />,
+  ENUM: <IconFont type="icon-meiju" key="modifier" />,
+  TABLE: <IconFont type="icon-biao" key="metric" />,
 };
 
 const FolderTree: FC<FolderTreeProps> = ({}) => {
@@ -44,21 +45,20 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const [visible, setVisible] = useState(false);
 
-  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, addTab } = useModel(
-    'kpisystem',
-    (_) => ({
+  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, viewTab, createTab } =
+    useModel('kpisystem', (_) => ({
       tree: _.tree,
       getTree: _.getTree,
       treeType: _.treeType,
       curNode: _.curNode,
       setCurNode: _.setCurNode,
       setFolderMode: _.setFolderMode,
-      addTab: _.addTab,
-    }),
-  );
+      viewTab: _.viewTab,
+      createTab: _.createTab,
+    }));
 
   useEffect(() => {
-    getTree('TABLE');
+    getTree(TreeNodeType.DIMENSION_LABEL);
   }, []);
 
   useEffect(() => {
@@ -68,21 +68,21 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const menu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
       <Menu.Item key="folder">新建文件夹</Menu.Item>
-      <Menu.Item key="label">新建维度</Menu.Item>
-      <Menu.Item key="enum">新建修饰词</Menu.Item>
-      <Menu.Item key="table">新建指标</Menu.Item>
+      <Menu.Item key="dimension">新建维度</Menu.Item>
+      <Menu.Item key="modifier">新建修饰词</Menu.Item>
+      <Menu.Item key="metric">新建指标</Menu.Item>
     </Menu>
   );
 
   const renderTypeMenu = () => {
     switch (treeType) {
-      case 'TABLE':
-        return <Menu.Item key="table">新建维度</Menu.Item>;
-      case 'LABEL':
-        return <Menu.Item key="label">新建修饰词</Menu.Item>;
-      case 'ENUM':
+      case 'DIMENSION_LABEL':
+        return <Menu.Item key="dimension">新建维度</Menu.Item>;
+      case 'MODIFIER_LABEL':
+        return <Menu.Item key="modifier">新建修饰词</Menu.Item>;
+      case 'METRIC_LABEL':
       default:
-        return <Menu.Item key="enum">新建指标</Menu.Item>;
+        return <Menu.Item key="metric">新建指标</Menu.Item>;
     }
   };
 
@@ -113,6 +113,15 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         break;
       case 'delete':
         onDeleteFolder();
+        break;
+      case 'dimension':
+        createTab(TreeNodeType.DIMENSION_LABEL);
+        break;
+      case 'modifier':
+        createTab(TreeNodeType.MODIFIER_LABEL);
+        break;
+      case 'metric':
+        createTab(TreeNodeType.METRIC_LABEL);
         break;
       default:
         break;
@@ -224,10 +233,10 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           />
         </Dropdown>
       </div>
-      <Tabs activeKey={treeType} onChange={(key) => getTree(key)}>
-        <TabPane tab="维度" key="TABLE" />
-        <TabPane tab="修饰词" key="LABEL" />
-        <TabPane tab="指标" key="ENUM" />
+      <Tabs activeKey={treeType} onChange={(key) => getTree(key as TreeNodeType)}>
+        <TabPane tab="维度" key="DIMENSION_LABEL" />
+        <TabPane tab="修饰词" key="MODIFIER_LABEL" />
+        <TabPane tab="指标" key="METRIC_LABEL" />
       </Tabs>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
@@ -240,12 +249,12 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
             const folderId = `${node.folderId}`;
             setCurNode({ ...node, folderId, parentId });
           }}
-          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && addTab(node)}
+          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && viewTab(node)}
         >
           {loop(tree)}
         </Tree>
       </Dropdown>
-      <CreateFolder visible={visible} onCancel={() => setVisible(false)} />
+      {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
     </Fragment>
   );
 };

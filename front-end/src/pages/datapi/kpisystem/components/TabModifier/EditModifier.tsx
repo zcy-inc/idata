@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 import ProForm, {
   ProFormSelect,
   ProFormText,
@@ -8,34 +8,63 @@ import ProForm, {
 import { Form, Popover, Table, Tabs, Select, Typography } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { FC } from 'react';
+import type { ForwardRefRenderFunction, Key } from 'react';
 import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../../../components/Title';
 import { getFolders } from '@/services/kpisystem';
-import { rulesText, rulesSelect } from './constants';
+import { rules } from '@/constants/datapi';
+import { Modifier, Table as ITable } from '@/types/datapi';
+import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
 
-export interface ViewModifierProps {}
+export interface ViewModifierProps {
+  initial?: Modifier;
+}
+interface TableOptions extends ITable {
+  label: string;
+  value: string;
+}
 
 const { TabPane } = Tabs;
 const { Link } = Typography;
+const { require } = rules;
 
-const ViewModifier: FC<ViewModifierProps> = ({}) => {
+const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ initial }, ref) => {
   const [folderOps, setFolderOps] = useState([]);
-  const [formLabel] = Form.useForm();
-
+  const [form] = Form.useForm();
+  // 事实表
   const [DWDData, setDWDData] = useState<any[]>([]);
-  const [DWDKeys, setDWDKeys] = useState<React.Key[]>([]);
+  const [DWDKeys, setDWDKeys] = useState<Key[]>([]);
+  const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
+  const [DWDStrings, setDWDStrings] = useState<[][]>([]);
+
+  useImperativeHandle(ref, () => ({
+    form: form.getFieldsValue(),
+    DWD: DWDData,
+  }));
 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: any) => ({
+          label: _.folderName,
+          value: `${_.id}`,
+        }));
         setFolderOps(fd);
       })
       .catch((err) => {});
+    getTableReferTbs({ labelValue: 'dwd' })
+      .then((res) => {
+        setDWDTables(res.data);
+      })
+      .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    if (initial) {
+    }
+  }, [initial]);
 
   // 添加一行数据
   const addData = () => {
@@ -44,8 +73,17 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
     setDWDData([...DWDData, data]);
     setDWDKeys([...DWDKeys, id]);
   };
-  // 因为是自己维护的data, 所以手动录入数据
+
   const setValue = (schema: any, value: any) => {
+    if (schema.dataIndex === 'tableName') {
+      getTableReferStr({ tableId: value })
+        .then((res) => {
+          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          DWDStrings[schema.index] = strs;
+          setDWDStrings([...DWDStrings]);
+        })
+        .catch((err) => {});
+    }
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
   };
@@ -61,13 +99,13 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
   const Cols: ProColumns[] = [
     {
       title: '表名',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'tableName',
+      key: 'tableName',
       renderFormItem: (schema) => (
         <Select
           allowClear
           placeholder="请选择"
-          options={[]}
+          options={DWDTables}
           onChange={(value) => setValue(schema, value)}
         />
       ),
@@ -80,7 +118,7 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
         <Select
           allowClear
           placeholder="请选择"
-          options={[]}
+          options={DWDStrings[schema.index as number]}
           onChange={(value) => setValue(schema, value)}
         />
       ),
@@ -99,30 +137,30 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
         className={`${styles.reset} ${styles['reset-inline']}`}
         layout="horizontal"
         colon={false}
-        form={formLabel}
+        form={form}
         submitter={false}
       >
         <ProFormGroup>
           <ProFormText
-            name="name"
+            name="labelName"
             label="修饰词名称"
             width="sm"
             placeholder="请输入"
-            rules={rulesText}
+            rules={require}
           />
           <ProFormText
-            name="en"
+            name="英文别名"
             label="英文别名"
             width="sm"
             placeholder="请输入"
-            rules={rulesText}
+            rules={require}
           />
           <ProFormSelect
-            name="id"
+            name="枚举值"
             label="枚举值"
             width="sm"
             placeholder="请输入"
-            rules={rulesSelect}
+            rules={require}
             tooltip="若为空，请在数仓设计-新建枚举类型处新建。"
             options={[]}
           />
@@ -136,8 +174,8 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
             </Popover>
           </ProForm.Item>
         </ProFormGroup>
-        <ProFormText name="define" label="定义" width="md" placeholder="请输入" rules={rulesText} />
-        <ProFormTextArea name="remark" label="备注" width="md" placeholder="请输入" />
+        <ProFormText name="定义" label="定义" width="md" placeholder="请输入" rules={require} />
+        <ProFormTextArea name="备注" label="备注" width="md" placeholder="请输入" />
         <ProFormSelect
           name="folderId"
           label="位置"
@@ -173,4 +211,4 @@ const ViewModifier: FC<ViewModifierProps> = ({}) => {
   );
 };
 
-export default ViewModifier;
+export default forwardRef(ViewModifier);

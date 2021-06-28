@@ -8,8 +8,8 @@ import IconFont from '@/components/IconFont';
 import CreateFolder from '../CreateFolder';
 
 import { deleteFolder } from '@/services/tablemanage';
-import { TreeNode as ITreeNode } from '@/types/tablemanage';
-import { TreeNodeType } from '@/constants/tablemanage';
+import { TreeNode as ITreeNode } from '@/types/datapi';
+import { TreeNodeType } from '@/constants/datapi';
 
 interface SearchTreeNode {
   key: string;

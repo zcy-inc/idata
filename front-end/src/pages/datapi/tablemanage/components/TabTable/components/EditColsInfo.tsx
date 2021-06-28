@@ -6,7 +6,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
-import { ColumnLabel, Table, TableLable } from '@/types/tablemanage';
+import { ColumnLabel, Table, TableLable } from '@/types/datapi';
 
 export type StructAction = 'del' | 'up' | 'down';
 export interface EditColsInfoProps {
@@ -46,6 +46,8 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         _keys.push(_.id);
         return t;
       });
+      console.log(_data);
+
       setData(_data);
       setKeys(_keys);
     }

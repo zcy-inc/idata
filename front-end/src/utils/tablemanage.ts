@@ -5,7 +5,7 @@
  */
 export function getRandomStr(len: number) {
   let str = '';
-  for (let i = 0; i < len - 1; i++) {
+  for (let i = 0; i < len; i++) {
     str += String.fromCharCode(Math.random() * (122 - 97) + 97);
   }
   return str;

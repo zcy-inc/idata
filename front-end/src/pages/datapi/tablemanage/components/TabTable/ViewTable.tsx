@@ -4,8 +4,8 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { getDWOwner } from '@/services/tablemanage';
-import { User } from '@/types/tablemanage';
-import { LabelTag } from '@/constants/tablemanage';
+import { User } from '@/types/datapi';
+import { LabelTag } from '@/constants/datapi';
 import { ViewInitialColumns, TransformBoolean } from './constants';
 
 import Title from '../../../components/Title';
@@ -45,7 +45,6 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         _.columnLabels.forEach((item: any) => (tmp[item.labelCode] = transformLabelValue(item)));
         return tmp;
       });
-      console.log(dt);
 
       setColumns(ViewInitialColumns.concat(exCols));
       setDataSource(dt);
