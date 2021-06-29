@@ -94,7 +94,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 foreignKeyDto.setReferDbName(getDbName(tableId));
                 return foreignKeyDto;
         }).collect(Collectors.toList());
-        List<LabelDto> tableLabelList = labelService.findLabels(tableId, null, null);
+        List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
 
         echoTableInfo.setTableLabels(tableLabelList);
@@ -260,7 +260,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         devTableInfoDao.update(c -> c.set(devTableInfo.del).equalTo(1).set(devTableInfo.editor).equalTo(operator)
                 .where(devTableInfo.id, isEqualTo(tableId)));
         // 删除label表记录
-        List<LabelDto> tableLabelDtoList = labelService.findLabels(tableId, null, null);
+        List<LabelDto> tableLabelDtoList = labelService.findLabels(tableId, null);
         boolean deleteSuccess = tableLabelDtoList.stream().allMatch(tableLabelDto ->
                 labelService.removeLabel(tableLabelDto, operator));
         // 删除columnInfo表记录

@@ -71,7 +71,7 @@ public class DimensionServiceImpl implements DimensionService {
         checkArgument(dimension != null, "维度不存在");
 
         MeasureDto echoDimension = PojoUtil.copyOne(dimension, MeasureDto.class);
-        echoDimension.setMeasureLabels(labelService.findLabels(null, null, dimensionCode));
+        echoDimension.setMeasureLabels(labelService.findLabelsByCode(dimensionCode));
         return echoDimension;
     }
 
@@ -172,7 +172,7 @@ public class DimensionServiceImpl implements DimensionService {
             boolean isDelete = deleteDimensionLabelList.stream().allMatch(deleteDimensionLabel ->
                     labelService.removeLabel(deleteDimensionLabel, operator));
 
-            echoDimension.setMeasureLabels(labelService.findLabels(null, null, dimension.getLabelCode()));
+            echoDimension.setMeasureLabels(labelService.findLabelsByCode(dimension.getLabelCode()));
         }
         return echoDimension;
     }
@@ -188,7 +188,6 @@ public class DimensionServiceImpl implements DimensionService {
                 .orElse(null);
         checkArgument(checkDimension != null, "维度不存在或已停用");
 
-        // TODO 标签系统校验
         devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(LabelTagEnum.DIMENSION_LABEL_DISABLE.name())
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(dimensionCode)),
@@ -205,7 +204,7 @@ public class DimensionServiceImpl implements DimensionService {
                 and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
                 .orElse(null);
         checkArgument(checkDimension != null, "维度不存在");
-        // TODO 标签系统校验
+
         return labelService.deleteDefine(dimensionCode, operator);
     }
 }

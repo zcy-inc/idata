@@ -205,7 +205,6 @@ public class MetricServiceImpl implements MetricService {
                 .orElse(null);
         checkArgument(existMetric != null, "指标不存在或已停用");
 
-        // TODO 标签系统依赖校验
         // 原子指标校验是否被派生指标依赖
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existMetric.getLabelTag())) {
             checkArgument(getRelyDeriveMetricNames(metricCode) == null,
@@ -228,7 +227,6 @@ public class MetricServiceImpl implements MetricService {
                 .orElse(null);
         checkArgument(existModifier != null, "指标不存在或未停用或已删除");
 
-        // TODO 标签系统依赖校验
         // 原子指标校验是否被派生指标依赖
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existModifier.getLabelTag())) {
             checkArgument(getRelyDeriveMetricNames(metricCode) == null,
@@ -297,7 +295,7 @@ public class MetricServiceImpl implements MetricService {
         }
 
         MetricDto echoMetric = PojoUtil.copyOne(metric, MetricDto.class);
-        echoMetric.setMeasureLabels(labelService.findLabels(null, null, metricCode));
+        echoMetric.setMeasureLabels(labelService.findLabelsByCode(metricCode));
         // 反查维度和派生指标
         if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())
                 || metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {

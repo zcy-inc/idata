@@ -33,7 +33,8 @@ public interface LabelService {
     List<LabelDefineDto> findDefines(String subjectType, String labelTag);
     boolean deleteDefine(String labelCode, String operator);
     LabelDto label(LabelDto labelDto, String operator);
-    List<LabelDto> findLabels(Long tableId, String columnName, String labelCode);
+    List<LabelDto> findLabels(Long tableId, String columnName);
+    List<LabelDto> findLabelsByCode(String labelCode);
     Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
     boolean removeLabel(LabelDto labelDto, String operator);
 }
