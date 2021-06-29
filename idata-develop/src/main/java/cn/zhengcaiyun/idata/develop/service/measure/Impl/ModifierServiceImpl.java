@@ -62,14 +62,7 @@ public class ModifierServiceImpl implements ModifierService {
 
     @Override
     public MeasureDto findModifier(String modifierCode) {
-        DevLabelDefine modifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(modifierCode))))
-                .orElse(null);
-        checkArgument(modifier != null, "修饰词不存在");
-
-        MeasureDto echoModifier = PojoUtil.copyOne(modifier, MeasureDto.class);
-        echoModifier.setMeasureLabels(labelService.findLabels(null, null, modifierCode));
-        return echoModifier;
+        return getModifierByCode(modifierCode);
     }
 
     @Override
@@ -151,7 +144,7 @@ public class ModifierServiceImpl implements ModifierService {
                     .collect(Collectors.toList());
             boolean isDelete = deleteModifierLabelList.stream().allMatch(deleteModifierLabel ->
                     labelService.removeLabel(deleteModifierLabel, operator));
-            echoDimension.setMeasureLabels(labelService.findLabels(null, null, modifier.getLabelCode()));
+            echoDimension.setMeasureLabels(labelService.findLabelsByCode(modifier.getLabelCode()));
         }
         return echoDimension;
     }
@@ -175,8 +168,8 @@ public class ModifierServiceImpl implements ModifierService {
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(modifierCode)),
                         and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
-        // TODO 不调用自身接口
-        return modifierService.findModifier(modifierCode);
+
+        return getModifierByCode(modifierCode);
     }
 
     @Override
@@ -194,6 +187,17 @@ public class ModifierServiceImpl implements ModifierService {
         checkArgument(relyDeriveMetricNameList.size() == 0,
                 String.join(",", relyDeriveMetricNameList) + "依赖该修饰词，不能删除");
         return labelService.deleteDefine(modifierCode, operator);
+    }
+
+    private MeasureDto getModifierByCode(String modifierCode) {
+        DevLabelDefine modifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(modifierCode))))
+                .orElse(null);
+        checkArgument(modifier != null, "修饰词不存在");
+
+        MeasureDto echoModifier = PojoUtil.copyOne(modifier, MeasureDto.class);
+        echoModifier.setMeasureLabels(labelService.findLabelsByCode(modifierCode));
+        return echoModifier;
     }
 
     private List<String> getRelyDeriveMetricName(String modifierCode) {

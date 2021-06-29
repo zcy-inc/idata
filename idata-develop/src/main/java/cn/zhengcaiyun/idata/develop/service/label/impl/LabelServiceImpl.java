@@ -20,8 +20,11 @@ import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
@@ -38,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.checkSysLabelCode;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -53,6 +57,10 @@ public class LabelServiceImpl implements LabelService {
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
     private DevLabelDao devLabelDao;
+    @Autowired
+    private DevLabelDefineMyDao devLabelDefineMyDao;
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
     @Autowired
     private EnumService enumService;
 
@@ -192,7 +200,7 @@ public class LabelServiceImpl implements LabelService {
         if (labelTag != null) {
             builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
         }
-        return devLabelDefineDao.selectMany(builder.build()
+        return devLabelDefineDao.selectMany(builder.orderBy(devLabelDefine.labelIndex).build()
                         .render(RenderingStrategies.MYBATIS3))
                 .stream().map(devLabelDefine -> {
                     LabelDefineDto labelDefineDto = PojoUtil.copyOne(devLabelDefine, LabelDefineDto.class);
@@ -226,7 +234,6 @@ public class LabelServiceImpl implements LabelService {
         return true;
     }
 
-    // TODO 增加返回表名称
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public LabelDto label(LabelDto labelDto, String operator) {
@@ -284,17 +291,35 @@ public class LabelServiceImpl implements LabelService {
         }
     }
 
-    // TODO 通过labelCode查询，增加表名返回
     @Override
-    public List<LabelDto> findLabels(Long tableId, String columnName, String labelCode) {
+    public List<LabelDto> findLabels(Long tableId, String columnName) {
         Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
                 c.where(devLabelDefine.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+//        return toLabelDtoList(devLabelDao.select(c ->
+//                c.where(devLabel.tableId, isEqualTo(tableId),
+//                        and(devLabel.columnName, isEqual(columnName)),
+//                        and(devLabel.del, isNotEqualTo(1)))));
         return devLabelDao.select(c ->
                 c.where(devLabel.tableId, isEqualTo(tableId),
                         and(devLabel.columnName, isEqual(columnName)),
                         and(devLabel.del, isNotEqualTo(1))))
                 .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LabelDto> findLabelsByCode(String labelCode) {
+        Map<Long, String> tableInfoMap = devTableInfoDao.selectMany(select(devTableInfo.id, devTableInfo.tableName)
+                .from(devTableInfo).where(devTableInfo.del, isNotEqualTo(1)).build().render(RenderingStrategies.MYBATIS3))
+                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+        return PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))
+                .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
+                .stream().peek(labelDto -> {
+                    checkArgument(tableInfoMap.containsKey(labelDto.getTableId()), "表不存在");
+                    labelDto.setTableName(tableInfoMap.get(labelDto.getTableId()));
+                }).collect(Collectors.toList());
     }
 
     @Override
@@ -327,6 +352,23 @@ public class LabelServiceImpl implements LabelService {
                     && labelDto.getLabelParamValue() != null) {
                 labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
             }
+        }
+        return labelDto;
+    }
+
+    private LabelDto toLabelDtoList(DevLabelDefine labelDefine, Map<String, DevLabel> labelMap) {
+        LabelDto labelDto = PojoUtil.copyOne(labelMap.get(labelDefine.getLabelCode()), LabelDto.class);
+        labelDto.setLabelName(labelDefine.getLabelName());
+        labelDto.setLabelParamType(labelDefine.getLabelParamType());
+        labelDto.setLabelTag(labelDefine.getLabelTag());
+        if (labelDto.getLabelParamType() != null
+                && labelDto.getLabelParamType().endsWith(":ENUM")
+                && labelDto.getLabelParamValue() != null) {
+            labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
+        }
+        if (MetaTypeEnum.ENUM.name().equals(labelDto.getLabelParamType())
+                && labelDto.getLabelParamValue() != null) {
+            labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
         }
         return labelDto;
     }

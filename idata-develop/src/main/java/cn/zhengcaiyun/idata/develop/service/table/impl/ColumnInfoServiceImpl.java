@@ -302,8 +302,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .set(devColumnInfo.editor).equalTo(operator)
                 .where(devColumnInfo.id, isEqualTo(columnId)));
         // 删除label表记录
-        List<LabelDto> columnLabelList = labelService.findLabels(columnInfo.getTableId(), columnInfo.getColumnName(),
-                null);
+        List<LabelDto> columnLabelList = labelService.findLabels(columnInfo.getTableId(), columnInfo.getColumnName());
 
         return columnLabelList.stream().allMatch(columnLabel ->
                 labelService.removeLabel(columnLabel, operator));

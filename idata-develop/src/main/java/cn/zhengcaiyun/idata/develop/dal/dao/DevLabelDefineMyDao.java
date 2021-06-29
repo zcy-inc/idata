@@ -43,7 +43,8 @@ public interface DevLabelDefineMyDao {
             "SELECT * " +
             "FROM dev_label_define " +
             "WHERE dev_label_define.del != 1 AND dev_label_define.label_tag NOT LIKE '%_DISABLE' " +
-                "AND FIND_IN_SET(dev_label_define.label_code, #{labelCodes})" +
+                "AND FIND_IN_SET(dev_label_define.label_code, #{labelCodes}) " +
+            "ORDER BY dev_label_define.label_index" +
             "</script>")
     List<DevLabelDefine> selectLabelDefinesByLabelCodes(String labelCodes);
 }

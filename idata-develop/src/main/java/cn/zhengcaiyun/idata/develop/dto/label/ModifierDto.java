@@ -25,6 +25,8 @@ import java.util.List;
 public class ModifierDto {
     private String modifierCode;
     private String modifierName; // TODO 前端确认是否需要
+    private String tableName;
+    private String columnName;
     private List<String> enumValueCodes;
     private List<String> enumValues; // TODO 前端确认是否需要
 
@@ -43,6 +45,22 @@ public class ModifierDto {
 
     public void setModifierName(String modifierName) {
         this.modifierName = modifierName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     public List<String> getEnumValueCodes() {
