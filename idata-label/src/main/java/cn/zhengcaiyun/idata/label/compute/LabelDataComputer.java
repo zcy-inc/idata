@@ -1,9 +1,12 @@
 package cn.zhengcaiyun.idata.label.compute;
 
 import cn.zhengcaiyun.idata.label.compute.query.Query;
+import cn.zhengcaiyun.idata.label.compute.query.QueryService;
 import cn.zhengcaiyun.idata.label.compute.query.dto.ConnectionDto;
 import cn.zhengcaiyun.idata.label.compute.query.dto.WideTableDataDto;
 import cn.zhengcaiyun.idata.label.compute.query.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.label.compute.sql.transform.DimensionTranslator;
+import cn.zhengcaiyun.idata.label.compute.sql.transform.IndicatorTranslator;
 import cn.zhengcaiyun.idata.label.compute.sql.transform.SqlTranslator;
 import cn.zhengcaiyun.idata.label.dto.LabelQueryDataDto;
 import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDto;
@@ -47,7 +50,7 @@ public class LabelDataComputer {
         ConnectionDto connectionDto = getConnectionInfo();
         checkNotNull(connectionDto != null, "数据源连接信息不正确");
         String sql = sqlTranslator.translate(ruleDto, objectType, limit, offset);
-        WideTableDataDto tableDataDto = null;
+        WideTableDataDto tableDataDto;
         try {
             tableDataDto = query.query(connectionDto, sql);
         } catch (SQLException ex) {
@@ -70,12 +73,42 @@ public class LabelDataComputer {
         if (trinoConfig != null) {
             return JSON.parseObject(trinoConfig.getValueOne(), ConnectionDto.class);
         }
-
-//        ConnectionDto connectionDto = new ConnectionDto();
-//        connectionDto.setHost("172.29.108.184");
-//        connectionDto.setPort(18080);
-//        connectionDto.setDbCatalog("hive");
-//        connectionDto.setUsername("presto");
         return null;
+    }
+
+    private ConnectionDto newConnectionInfo() {
+        ConnectionDto connectionDto = new ConnectionDto();
+        connectionDto.setHost("172.29.108.184");
+        connectionDto.setPort(18080);
+        connectionDto.setDbCatalog("hive");
+        connectionDto.setUsername("presto");
+        return connectionDto;
+    }
+
+    public LabelQueryDataDto testCompute() {
+        ConnectionDto connectionDto = newConnectionInfo();
+
+        String sql = sqlTranslator.mockSQL();
+        WideTableDataDto tableDataDto;
+        try {
+            tableDataDto = query.query(connectionDto, sql);
+        } catch (SQLException ex) {
+            logger.debug("query from trino failed. sql: {}.", sql, Throwables.getStackTraceAsString(ex));
+            throw new ExecuteSqlException("执行错误");
+        }
+
+        if (Objects.isNull(tableDataDto)) {
+            return null;
+        }
+        LabelQueryDataDto dataDto = new LabelQueryDataDto();
+        dataDto.setColumns(tableDataDto.getMeta());
+        dataDto.setData(tableDataDto.getData());
+        return dataDto;
+    }
+
+    public static void main(String[] args) {
+        SqlTranslator sqlTranslator = new SqlTranslator(new DimensionTranslator(), new IndicatorTranslator());
+        LabelDataComputer computer = new LabelDataComputer(new QueryService(), sqlTranslator, null);
+        computer.testCompute();
     }
 }

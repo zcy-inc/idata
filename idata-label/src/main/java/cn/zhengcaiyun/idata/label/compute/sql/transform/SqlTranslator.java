@@ -186,6 +186,11 @@ public class SqlTranslator {
     }
 
     public static void main(String[] args) {
+        SqlTranslator sqlTranslator = new SqlTranslator(new DimensionTranslator(), new IndicatorTranslator());
+        System.out.println(sqlTranslator.mockSQL());
+    }
+
+    public String mockSQL() {
         IndicatorMetadata indicatorDto = new IndicatorMetadata();
         IndicatorMetadata.DecorateWordMetadata decorateWordDto = new IndicatorMetadata.DecorateWordMetadata();
         decorateWordDto.setColumn("trade_status_name");
@@ -226,11 +231,10 @@ public class SqlTranslator {
         Long limit = 1L;
         Long offset = null;
 
-        SqlTranslator sqlTranslator = new SqlTranslator(new DimensionTranslator(), new IndicatorTranslator());
-        QueryModel queryModel = sqlTranslator.translateToModel(objectMetadata,
+        QueryModel queryModel = translateToModel(objectMetadata,
                 indicatorDto, dimensionDtoList, limit, offset);
-        String sql = sqlTranslator.joinObjectInfo(queryModel, objectMetadata, objectTypeEnum);
-        System.out.println(sql);
+        String sql = joinObjectInfo(queryModel, objectMetadata, objectTypeEnum);
+        return sql;
     }
 
 }
