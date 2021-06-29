@@ -5,11 +5,12 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
 import cn.zhengcaiyun.idata.label.compute.sql.model.ColumnModel;
 import cn.zhengcaiyun.idata.label.compute.sql.model.TableModel;
 import cn.zhengcaiyun.idata.label.compute.sql.model.condition.BaseCondition;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -36,14 +37,18 @@ public class IndicatorTranslator {
         return columnOptional.get();
     }
 
-    public Optional<BaseCondition<String>> toDecorateWordCondition(IndicatorMetadata.DecorateWordMetadata metadata, TableModel tableModel) {
-        if (Objects.isNull(metadata)) return Optional.empty();
+    public Optional<List<BaseCondition<String>>> toDecorateWordCondition(List<IndicatorMetadata.DecorateWordMetadata> metadataList, TableModel tableModel) {
+        if (CollectionUtils.isEmpty(metadataList)) return Optional.empty();
 
-        checkArgument(StringUtils.isNotEmpty(metadata.getColumn()), "修饰词不正确");
-        checkArgument(!CollectionUtils.isEmpty(metadata.getParams()), "修饰词不正确");
-        ColumnModel column = ColumnModel.of(metadata.getColumn(), tableModel);
-        BaseCondition<String> inThe = column.inThe(metadata.getParams().toArray(new String[0]));
-        return Optional.of(inThe);
+        List<BaseCondition<String>> conditionList = Lists.newLinkedList();
+        for (IndicatorMetadata.DecorateWordMetadata metadata : metadataList) {
+            checkArgument(StringUtils.isNotEmpty(metadata.getColumn()), "修饰词不正确");
+            checkArgument(!CollectionUtils.isEmpty(metadata.getParams()), "修饰词不正确");
+            ColumnModel column = ColumnModel.of(metadata.getColumn(), tableModel);
+            BaseCondition<String> inThe = column.inThe(metadata.getParams().toArray(new String[0]));
+            conditionList.add(inThe);
+        }
+        return Optional.of(conditionList);
     }
 
     public Optional<BaseCondition<Long>> toIndicatorCondition(IndicatorMetadata metadata, TableModel tableModel) {

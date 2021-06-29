@@ -15,7 +15,7 @@ public class IndicatorMetadata {
     private String table;
     private String column;
     private String function;
-    private DecorateWordMetadata decorateWord;
+    private List<DecorateWordMetadata> decorateWords;
 
     /**
      * 条件:
@@ -106,11 +106,11 @@ public class IndicatorMetadata {
         this.indicatorParams = indicatorParams;
     }
 
-    public DecorateWordMetadata getDecorateWord() {
-        return decorateWord;
+    public List<DecorateWordMetadata> getDecorateWords() {
+        return decorateWords;
     }
 
-    public void setDecorateWord(DecorateWordMetadata decorateWord) {
-        this.decorateWord = decorateWord;
+    public void setDecorateWords(List<DecorateWordMetadata> decorateWords) {
+        this.decorateWords = decorateWords;
     }
 }

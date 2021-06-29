@@ -8,9 +8,6 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.label.compute.metadata.DimensionMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.IndicatorMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.ObjectMetadata;
-import cn.zhengcaiyun.idata.label.dto.label.rule.DimensionDefDto;
-import cn.zhengcaiyun.idata.label.dto.label.rule.IndicatorDefDto;
-import cn.zhengcaiyun.idata.label.enums.ObjectTypeEnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
@@ -22,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @description:
@@ -45,96 +39,105 @@ public class MeasureApiAgent {
         if (StringUtils.isEmpty(indicatorCode)) return Optional.empty();
 
         List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(indicatorCode));
-        if (CollectionUtils.isEmpty(measureDtoList)){
+        if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
-        return Optional.of(convertToIndicatorMetadata( measureDtoList.get(0)));
+        return Optional.of(convertToIndicatorMetadata(measureDtoList.get(0)));
     }
 
-    private IndicatorMetadata convertToIndicatorMetadata(MeasureDto measureDto){
+    private IndicatorMetadata convertToIndicatorMetadata(MeasureDto measureDto) {
         IndicatorMetadata metadata = new IndicatorMetadata();
         metadata.setCode(measureDto.getLabelCode());
         metadata.setName(measureDto.getLabelName());
         List<LabelDto> measureLabels = measureDto.getMeasureLabels();
-        if (CollectionUtils.isEmpty(measureLabels)){
+        if (CollectionUtils.isEmpty(measureLabels)) {
             return null;
         }
         metadata.setTable(measureLabels.get(0).getTableName());
         metadata.setColumn(measureLabels.get(0).getColumnName());
         SpecialAttributeDto specialAttributeDto = measureDto.getSpecialAttribute();
-        if (Objects.isNull(specialAttributeDto)){
+        if (Objects.isNull(specialAttributeDto)) {
             return null;
         }
         metadata.setFunction(specialAttributeDto.getAggregatorCode());
         List<ModifierDto> modifiers = specialAttributeDto.getModifiers();
-        if (!CollectionUtils.isEmpty(modifiers)){
-            ModifierDto modifierDto = modifiers.get(0);
-            IndicatorMetadata.DecorateWordMetadata decorateWord = new IndicatorMetadata.DecorateWordMetadata();
-            //todo finish column
-            decorateWord.setColumn("");
-            decorateWord.setParams(modifierDto.getEnumValues());
-            metadata.setDecorateWord(decorateWord);
+        if (!CollectionUtils.isEmpty(modifiers)) {
+            List<IndicatorMetadata.DecorateWordMetadata> decorateWords = Lists.newArrayList();
+            for (ModifierDto modifierDto : modifiers) {
+                IndicatorMetadata.DecorateWordMetadata decorateWord = new IndicatorMetadata.DecorateWordMetadata();
+                decorateWord.setColumn(modifierDto.getColumnName());
+                decorateWord.setParams(modifierDto.getEnumValues());
+                decorateWords.add(decorateWord);
+            }
+            metadata.setDecorateWords(decorateWords);
         }
         return metadata;
     }
 
-    public Optional<Map<String,DimensionMetadata>> getDimensionMetadata(List<String> dimensionCodes) {
+    public Optional<Map<String, DimensionMetadata>> getDimensionMetadata(List<String> dimensionCodes,
+                                                                         IndicatorMetadata indicatorMetadata) {
         if (CollectionUtils.isEmpty(dimensionCodes)) return Optional.empty();
         List<MeasureDto> measureDtoList = measureApi.getMeasures(dimensionCodes);
-        if (CollectionUtils.isEmpty(measureDtoList)){
+        if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
-        Map<String,DimensionMetadata> metadataMap = Maps.newHashMap();
-        for (MeasureDto measureDto:measureDtoList){
-            DimensionMetadata metadata= convertToDimensionMetadata( measureDto);
-            metadataMap.put(metadata.getCode(),metadata);
+        Map<String, DimensionMetadata> metadataMap = Maps.newHashMap();
+        for (MeasureDto measureDto : measureDtoList) {
+            DimensionMetadata metadata = convertToDimensionMetadata(measureDto, indicatorMetadata);
+            if (!Objects.isNull(metadata))
+                metadataMap.put(metadata.getCode(), metadata);
         }
         return Optional.of(metadataMap);
     }
 
-    private DimensionMetadata convertToDimensionMetadata(MeasureDto measureDto){
+    private DimensionMetadata convertToDimensionMetadata(MeasureDto measureDto,
+                                                         IndicatorMetadata indicatorMetadata) {
         DimensionMetadata metadata = new DimensionMetadata();
         metadata.setCode(measureDto.getLabelCode());
         metadata.setName(measureDto.getLabelName());
         List<LabelDto> measureLabels = measureDto.getMeasureLabels();
-        if (CollectionUtils.isEmpty(measureLabels)){
+        if (CollectionUtils.isEmpty(measureLabels)) {
             return null;
         }
-        metadata.setTable(measureLabels.get(0).getTableName());
-        metadata.setColumn(measureLabels.get(0).getColumnName());
+        for (LabelDto labelDto : measureLabels) {
+            if (labelDto.getTableName().equals(indicatorMetadata.getTable())) {
+                metadata.setTable(measureLabels.get(0).getTableName());
+                metadata.setColumn(measureLabels.get(0).getColumnName());
+                break;
+            }
+        }
+        if (StringUtils.isEmpty(metadata.getColumn())) {
+            return null;
+        }
         return metadata;
     }
 
-    public ObjectMetadata getObjectMetadata(ObjectTypeEnum objectTypeEnum) {
-        checkArgument(objectTypeEnum != null, "未选择标签主体.");
-        // 从指标系统获取维度数据，转换为 ObjectDto
-        return null;
-    }
-
-    public Optional<ObjectMetadata> getObjectMetadata(List<String> objectCodes) {
-        if (CollectionUtils.isEmpty(objectCodes)) return Optional.empty();
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(objectCodes);
-        if (CollectionUtils.isEmpty(measureDtoList)){
+    public Optional<ObjectMetadata> getObjectMetadata(String objectCode) {
+        if (StringUtils.isEmpty(objectCode)) return Optional.empty();
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(objectCode));
+        if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
-        Map<String,ObjectMetadata> metadataMap = Maps.newHashMap();
-        for (MeasureDto measureDto:measureDtoList){
-            DimensionMetadata metadata= convertToDimensionMetadata( measureDto);
-            metadataMap.put(metadata.getCode(),metadata);
-        }
-        return Optional.of(metadataMap);
+        return Optional.ofNullable(convertToObjectMetadata(measureDtoList.get(0)));
     }
 
-    private ObjectMetadata convertToObjectMetadata(MeasureDto measureDto){
+    private ObjectMetadata convertToObjectMetadata(MeasureDto measureDto) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setCode(measureDto.getLabelCode());
         metadata.setName(measureDto.getLabelName());
         List<LabelDto> measureLabels = measureDto.getMeasureLabels();
-        if (CollectionUtils.isEmpty(measureLabels)){
+        if (CollectionUtils.isEmpty(measureLabels)) {
             return null;
         }
-        metadata.setTable(measureLabels.get(0).getTableName());
-        metadata.setColumn(measureLabels.get(0).getColumnName());
+        for (LabelDto labelDto : measureLabels) {
+            if (labelDto.getLabelParamValue().equals("true")) {
+                metadata.setTable(labelDto.getTableName());
+                metadata.setColumn(labelDto.getColumnName());
+                break;
+            }
+        }
+        if (StringUtils.isEmpty(metadata.getColumn()))
+            return null;
         return metadata;
     }
 

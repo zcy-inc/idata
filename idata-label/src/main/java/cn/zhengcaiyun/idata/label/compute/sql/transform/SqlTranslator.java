@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.label.compute.sql.transform;
 
+import cn.zhengcaiyun.idata.label.compute.MeasureApiAgent;
 import cn.zhengcaiyun.idata.label.compute.metadata.DimensionMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.IndicatorMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.ObjectMetadata;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +32,9 @@ import static com.google.common.base.Preconditions.checkState;
 @Component
 public class SqlTranslator {
 
+    @Autowired
+    private MeasureApiAgent measureApiAgent;
+
     private final DimensionTranslator dimensionTranslator;
     private final IndicatorTranslator indicatorTranslator;
 
@@ -43,15 +48,13 @@ public class SqlTranslator {
         checkArgument(ruleDto != null, "标签规则为空.");
         Optional<ObjectTypeEnum> optionalObjectTypeEnum = ObjectTypeEnum.getEnum(objectType);
         checkState(optionalObjectTypeEnum.isPresent(), "标签主体不正确.");
+        checkArgument(!CollectionUtils.isEmpty(ruleDto.getIndicatorDefs()), "未选择指标");
 
-        List<IndicatorMetadata> indicatorMetadataList = getIndicatorMetadata(ruleDto.getIndicatorDefs());
-        checkState(!CollectionUtils.isEmpty(indicatorMetadataList), "未获取到指标数据.");
-        List<DimensionMetadata> dimensionMetadataList = getDimensionMetadata(ruleDto.getDimensionDefs());
-        checkState(!CollectionUtils.isEmpty(dimensionMetadataList), "未获取到维度数据.");
+        IndicatorMetadata indicatorMetadata = getIndicatorMetadata(ruleDto.getIndicatorDefs().get(0));
+        List<DimensionMetadata> dimensionMetadataList = getDimensionMetadata(ruleDto.getDimensionDefs(), indicatorMetadata);
         ObjectMetadata objectMetadata = getObjectMetadata(optionalObjectTypeEnum.get());
-        checkState(!Objects.isNull(objectMetadata), "未获取到标签主体数据.");
 
-        QueryModel queryModel = translateToModel(objectMetadata, indicatorMetadataList.get(0),
+        QueryModel queryModel = translateToModel(objectMetadata, indicatorMetadata,
                 dimensionMetadataList, limit, offset);
         return joinObjectInfo(queryModel, objectMetadata, optionalObjectTypeEnum.get());
     }
@@ -89,7 +92,7 @@ public class SqlTranslator {
         // group by 语句
         GroupModel groupModel = buildGroupModel(objectMetadata, dimensionMetadataList, tableModel);
         //having 语句
-        HavingModel havingModel = buildHavingModel(indicatorMetadata, dimensionMetadataList, tableModel);
+        HavingModel havingModel = buildHavingModel(indicatorMetadata, tableModel);
         //paging
         PagingModel pagingModel = PagingModel.of(limit, offset);
 
@@ -102,7 +105,6 @@ public class SqlTranslator {
     }
 
     private HavingModel buildHavingModel(IndicatorMetadata indicatorMetadata,
-                                         List<DimensionMetadata> dimensionMetadataList,
                                          TableModel tableModel) {
         // 维度描述组合，作为指标列别名前缀
         Optional<BaseCondition<Long>> indCondOptional = indicatorTranslator.toIndicatorCondition(indicatorMetadata, tableModel);
@@ -130,19 +132,20 @@ public class SqlTranslator {
                                                  TableModel tableModel) {
         WhereModel whereModel = null;
         // 修饰词暂时放在where条件下，当多指标（表）时，可以放到select条件中
-        Optional<BaseCondition<String>> dwCondOptional = indicatorTranslator.toDecorateWordCondition(indicatorMetadata.getDecorateWord(), tableModel);
+        List<BaseCondition<String>> conditionList = Lists.newArrayList();
+        Optional<List<BaseCondition<String>>> dwCondOptional = indicatorTranslator.toDecorateWordCondition(indicatorMetadata.getDecorateWords(), tableModel);
         if (dwCondOptional.isPresent()) {
-            whereModel = WhereModel.of(dwCondOptional.get());
+            conditionList.addAll(dwCondOptional.get());
         }
         Optional<List<BaseCondition<String>>> dimCondOptional = dimensionTranslator.toConditions(dimensionMetadataList, tableModel);
         if (dimCondOptional.isPresent()) {
-            List<BaseCondition<String>> dimConditions = dimCondOptional.get();
-            for (BaseCondition<String> dimCond : dimConditions) {
-                if (whereModel == null) {
-                    whereModel = WhereModel.of(dimCond);
-                } else {
-                    whereModel.and(dimCond);
-                }
+            conditionList.addAll(dimCondOptional.get());
+        }
+        for (BaseCondition<String> dimCond : conditionList) {
+            if (whereModel == null) {
+                whereModel = WhereModel.of(dimCond);
+            } else {
+                whereModel.and(dimCond);
             }
         }
         return Optional.ofNullable(whereModel);
@@ -161,28 +164,37 @@ public class SqlTranslator {
         return SelectModel.of().addColumn(objIdColumn, indicatorFuncColumn);
     }
 
-    private List<IndicatorMetadata> getIndicatorMetadata(List<IndicatorDefDto> indicatorDefs) {
-        checkArgument(!CollectionUtils.isEmpty(indicatorDefs), "未选择指标.");
-        List<String> indicatorCodes = indicatorDefs.stream()
-                .map(defDto -> defDto.getIndicatorCode())
-                .collect(Collectors.toList());
+    private IndicatorMetadata getIndicatorMetadata(IndicatorDefDto indicatorDefDto) {
         // 从指标系统获取指标数据，转换为 IndicatorDto
-        return null;
+        Optional<IndicatorMetadata> optional = measureApiAgent.getIndicatorMetadata(indicatorDefDto.getIndicatorCode());
+        checkState(optional.isPresent(), "未获取到可用的指标数据");
+        return optional.get();
     }
 
-    private List<DimensionMetadata> getDimensionMetadata(List<DimensionDefDto> dimensionDefs) {
+    private List<DimensionMetadata> getDimensionMetadata(List<DimensionDefDto> dimensionDefs, IndicatorMetadata indicatorMetadata) {
         checkArgument(!CollectionUtils.isEmpty(dimensionDefs), "未选择维度.");
         List<String> dimensionCodes = dimensionDefs.stream()
                 .map(defDto -> defDto.getDimensionCode())
                 .collect(Collectors.toList());
         // 从指标系统获取维度数据，转换为 DimensionDto
-        return null;
+        Optional<Map<String, DimensionMetadata>> optional = measureApiAgent.getDimensionMetadata(dimensionCodes, indicatorMetadata);
+        checkState(optional.isPresent(), "未获取到可用的维度数据");
+        Map<String, DimensionMetadata> metadataMap = optional.get();
+        List<DimensionMetadata> metadataList = Lists.newArrayList();
+        for (String dimensionCode : dimensionCodes) {
+            DimensionMetadata metadata = metadataMap.get(dimensionCode);
+            checkState(!Objects.isNull(metadata), "未获取到可用的维度数据");
+            metadataList.add(metadata);
+        }
+        return metadataList;
     }
 
     private ObjectMetadata getObjectMetadata(ObjectTypeEnum objectTypeEnum) {
         checkArgument(objectTypeEnum != null, "未选择标签主体.");
         // 从指标系统获取维度数据，转换为 ObjectDto
-        return null;
+        Optional<ObjectMetadata> optional = measureApiAgent.getObjectMetadata(objectTypeEnum.getType());
+        checkState(optional.isPresent(), "未获取到标签主体数据");
+        return optional.get();
     }
 
     public static void main(String[] args) {
@@ -192,15 +204,19 @@ public class SqlTranslator {
 
     public String mockSQL() {
         IndicatorMetadata indicatorDto = new IndicatorMetadata();
-        IndicatorMetadata.DecorateWordMetadata decorateWordDto = new IndicatorMetadata.DecorateWordMetadata();
-        decorateWordDto.setColumn("trade_status_name");
-        decorateWordDto.setParams(Lists.newArrayList("已完成", "无效"));
+        IndicatorMetadata.DecorateWordMetadata decorateWordDto_1 = new IndicatorMetadata.DecorateWordMetadata();
+        decorateWordDto_1.setColumn("trade_status_name");
+        decorateWordDto_1.setParams(Lists.newArrayList("已完成", "无效"));
+        IndicatorMetadata.DecorateWordMetadata decorateWordDto_2 = new IndicatorMetadata.DecorateWordMetadata();
+        decorateWordDto_2.setColumn("order_status_name");
+        decorateWordDto_2.setParams(Lists.newArrayList("已完成", "已备案"));
+
         indicatorDto.setCode("trade_amount_1");
         indicatorDto.setName("交易总额");
         indicatorDto.setTable("dwd.dwd_trade_order_detail");
         indicatorDto.setColumn("item_amount");
         indicatorDto.setFunction("AGGREGATOR_SUM:ENUM_VALUE");
-        indicatorDto.setDecorateWord(decorateWordDto);
+        indicatorDto.setDecorateWords(Lists.newArrayList(decorateWordDto_1, decorateWordDto_2));
         indicatorDto.setIndicatorCondition("greaterOrEqual");
         indicatorDto.setIndicatorParams(new Long[]{30000L});
 
