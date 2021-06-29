@@ -16,7 +16,7 @@ create table if not exists idata.dev_table_info (
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor      varchar(20)     not null default '' comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  table_name  varchar(30)     not null comment '表名称',
+  table_name  varchar(200)     not null comment '表名称',
   folder_id   bigint          comment '文件夹ID,null表示最外层文件夹'
 ) engine=innodb default charset=utf8mb4 comment='表信息表';
 

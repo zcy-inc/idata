@@ -53,7 +53,7 @@ public class MetricController {
 
     @GetMapping("metricsOrDimensions")
     public RestResult<List<MeasureDto>> getMetricsOrDimensions(@RequestParam("labelTag") String labelTag,
-                                                               @RequestParam("labelCode") List<String> labelCodes) {
+                                                               @RequestParam("labelCodes") List<String> labelCodes) {
         return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 

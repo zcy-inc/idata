@@ -71,6 +71,7 @@ public class MetricServiceImpl implements MetricService {
 
     private String[] metricInfos = new String[]{"enName", "metricId", "bizTypeCode", "metricDefine"};
     private final String BIZ_TYPE_CODE = "bizTypeEnum:ENUM";
+    private final String METRIC_LABEL = "METRIC_LABEL";
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -91,13 +92,18 @@ public class MetricServiceImpl implements MetricService {
         List<DevLabel> measureLabelList = devLabelMyDao.selectLabelsByLabelCodes(String.join(",", labelCodes));
         List<DevLabel> devMeasureLabelList = new ArrayList<>();
         for (DevLabel measureLabel : measureLabelList) {
-            List<DevLabel> devMeasureLabels = devLabelDao.selectMany(select(devLabel.allColumns())
+            var builder = select(devLabel.allColumns())
                     .from(devLabel)
                     .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
                     .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(measureLabel.getTableId()),
-                            and(devLabel.columnName, isEqualTo(measureLabel.getColumnName())),
-                            and(devLabelDefine.labelTag, isEqualTo(labelTag))))
-                    .build().render(RenderingStrategies.MYBATIS3));
+                            and(devLabel.columnName, isEqualTo(measureLabel.getColumnName()))));
+            if (METRIC_LABEL.equals(labelTag)) {
+                builder.and(devLabelDefine.labelTag, isLike("%" + METRIC_LABEL));
+            }
+            if (LabelTagEnum.DIMENSION_LABEL.name().equals(labelTag)) {
+                builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
+            }
+            List<DevLabel> devMeasureLabels = devLabelDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
             devMeasureLabelList.addAll(devMeasureLabels);
         }
         Set<String> measureCodeList = devMeasureLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toSet());
