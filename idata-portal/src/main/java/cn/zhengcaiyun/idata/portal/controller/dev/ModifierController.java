@@ -18,6 +18,9 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,26 +34,38 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(path = "/p1/dev")
 public class ModifierController {
 
+    @Autowired
+    private ModifierService modifierService;
+    @Autowired
+    private TokenService tokenService;
+
     @GetMapping("modifier")
-    public RestResult<MeasureDto> findById(@RequestParam("modifierCode") String modifierCode) {
-        return RestResult.success();
+    public RestResult<MeasureDto> findByCode(@RequestParam("modifierCode") String modifierCode) {
+        return RestResult.success(modifierService.findModifier(modifierCode));
     }
 
     @PostMapping("modifier")
-    public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto dimension,
+    public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto modifier,
                                                       HttpServletRequest request) {
-        return RestResult.success();
+        MeasureDto echoModifier;
+        if (modifier.getId() == null) {
+            echoModifier = modifierService.create(modifier, tokenService.getNickname(request));
+        }
+        else {
+            echoModifier = modifierService.edit(modifier, tokenService.getNickname(request));
+        }
+        return RestResult.success(echoModifier);
     }
 
     @PostMapping("modifier/disableModifier")
-    public RestResult disableModifier(@RequestParam("modifierCode") Long modifierCode,
+    public RestResult disableModifier(@RequestParam("modifierCode") String modifierCode,
                                      HttpServletRequest request) {
-        return RestResult.success();
+        return RestResult.success(modifierService.disable(modifierCode, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("modifier")
     public RestResult deleteModifier(@RequestParam("modifierCode") String modifierCode,
                                      HttpServletRequest request) {
-        return RestResult.success();
+        return RestResult.success(modifierService.delete(modifierCode, tokenService.getNickname(request)));
     }
 }
