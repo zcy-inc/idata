@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.label.compute.dto;
+package cn.zhengcaiyun.idata.label.compute.metadata;
 
 /**
  * 维度信息
@@ -7,7 +7,7 @@ package cn.zhengcaiyun.idata.label.compute.dto;
  * @author: yangjianhua
  * @create: 2021-06-25 09:51
  **/
-public class DimensionDto {
+public class DimensionMetadata {
     private String code;
     private String name;
     private String table;

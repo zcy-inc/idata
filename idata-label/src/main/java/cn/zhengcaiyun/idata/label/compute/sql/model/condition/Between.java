@@ -9,8 +9,8 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  **/
 public class Between<T> extends BaseCondition<T> {
 
-    private Between(BaseColumn column, T... params) {
-        super(column, params);
+    private Between(BaseColumn column, T littler, T bigger) {
+        super(column, littler, bigger);
     }
 
     @Override
@@ -20,11 +20,11 @@ public class Between<T> extends BaseCondition<T> {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " between " + getFirstParam().toString() + " and " + getSecondParam().toString() + connectNextCond();
+        return getColumnName() + " between " + getParam() + " and " + getAnotherParam() + connectNextCond();
     }
 
-    public static <T> Between<T> of(BaseColumn column, T... params) {
-        return new Between(column, params);
+    public static <T> Between<T> of(BaseColumn column, T littler, T bigger) {
+        return new Between(column, littler, bigger);
     }
 
 }

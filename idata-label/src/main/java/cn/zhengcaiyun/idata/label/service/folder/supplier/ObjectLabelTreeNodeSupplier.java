@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDynamicSqlSupport.labObjectLabel;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
@@ -66,5 +67,12 @@ public class ObjectLabelTreeNodeSupplier implements LabFolderTreeNodeSupplier {
         nodeDto.setParentId(label.getFolderId());
         nodeDto.setCid(nodeDto.getType() + "_" + nodeDto.getId());
         return nodeDto;
+    }
+
+    @Override
+    public Boolean hasSubTreeNode(Long folderId) {
+        long count = objectLabelDao.count(dsl -> dsl.where(labObjectLabel.folderId, isEqualTo(folderId),
+                and(labObjectLabel.del, isEqualTo(DEL_NO.val))));
+        return count > 0L;
     }
 }

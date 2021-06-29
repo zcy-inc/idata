@@ -11,5 +11,5 @@ import java.util.function.Supplier;
  * @create: 2021-06-22 11:40
  **/
 public interface LabFolderTreeNodeSupplier extends Supplier<List<LabFolderTreeNodeDto>> {
-
+    Boolean hasSubTreeNode(Long folderId);
 }

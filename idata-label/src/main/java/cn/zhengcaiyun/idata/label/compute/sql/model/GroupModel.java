@@ -12,18 +12,18 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author: yangjianhua
  * @create: 2021-06-24 14:49
  **/
-public class GroupByModel implements ModelRender {
+public class GroupModel implements ModelRender {
     private final List<BaseColumn> columnList;
 
-    private GroupByModel() {
+    private GroupModel() {
         columnList = Lists.newArrayList();
     }
 
-    public static GroupByModel of() {
-        return new GroupByModel();
+    public static GroupModel of() {
+        return new GroupModel();
     }
 
-    public GroupByModel addColumn(BaseColumn... columns) {
+    public GroupModel addColumn(BaseColumn... columns) {
         if (columns != null && columns.length > 0) {
             for (BaseColumn column : columns) {
                 columnList.add(column);
@@ -43,6 +43,7 @@ public class GroupByModel implements ModelRender {
                 builder.append(", ");
             }
             builder.append(column.renderSql());
+            count++;
         }
         return builder.toString();
     }

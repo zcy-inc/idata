@@ -12,24 +12,24 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author: yangjianhua
  * @create: 2021-06-24 14:49
  **/
-public class OrderByModel implements ModelRender {
+public class OrderModel implements ModelRender {
 
     private final List<SortableColumn> columnList;
 
-    private OrderByModel() {
+    private OrderModel() {
         columnList = Lists.newArrayList();
     }
 
-    public static OrderByModel of() {
-        return new OrderByModel();
+    public static OrderModel of() {
+        return new OrderModel();
     }
 
-    public OrderByModel addAscColumn(BaseColumn column) {
+    public OrderModel addAscColumn(BaseColumn column) {
         columnList.add(SortableColumn.asc(column));
         return this;
     }
 
-    public OrderByModel addDescColumn(BaseColumn column) {
+    public OrderModel addDescColumn(BaseColumn column) {
         columnList.add(SortableColumn.desc(column));
         return this;
     }
@@ -47,6 +47,7 @@ public class OrderByModel implements ModelRender {
             builder.append(column.getColumn().renderSql());
             builder.append(" ");
             builder.append(column.getSort());
+            count++;
         }
         return builder.toString();
     }

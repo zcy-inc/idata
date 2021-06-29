@@ -25,11 +25,9 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
-import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @description: 文件夹接口实现
@@ -91,9 +89,16 @@ public class LabFolderServiceImpl implements LabFolderService {
         LabFolder folder = labFolderManager.getFolder(id, "文件夹不存在");
         //已删除
         if (folder.getDel().equals(DEL_YES.val)) return true;
+
+        //存在子文件夹或文件，则不能删除
+        List<LabFolder> subFolders = labFolderManager.querySubFolders(id);
+        checkState(!CollectionUtils.isEmpty(subFolders), "不能删除该文件夹");
+        LabFolderTreeNodeSupplier supplier = LabFolderTreeNodeSupplierFactory.getSupplier(folder.getBelong());
+        Optional.ofNullable(supplier)
+                .ifPresent(sup -> checkState(!sup.hasSubTreeNode(id), "不能删除该文件夹"));
+
         // 软删除，修改del状态
-        labFolderDao.update(dsl -> dsl.set(labFolder.del).equalTo(DEL_YES.val)
-                .set(labFolder.editor).equalTo(operator).where(labFolder.id, isEqualTo(id)));
+        labFolderManager.deleteFolder(id, operator);
         return Boolean.TRUE;
     }
 

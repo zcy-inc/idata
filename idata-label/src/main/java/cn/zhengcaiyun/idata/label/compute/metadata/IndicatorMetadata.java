@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.label.compute.dto;
+package cn.zhengcaiyun.idata.label.compute.metadata;
 
 import java.util.List;
 
@@ -9,13 +9,13 @@ import java.util.List;
  * @author: yangjianhua
  * @create: 2021-06-25 09:35
  **/
-public class IndicatorDto {
+public class IndicatorMetadata {
     private String code;
     private String name;
     private String table;
     private String column;
     private String function;
-    private DecorateWordDto decorateWord;
+    private DecorateWordMetadata decorateWord;
 
     /**
      * 条件:
@@ -29,7 +29,7 @@ public class IndicatorDto {
     private String indicatorCondition;
     private Long[] indicatorParams;
 
-    public static class DecorateWordDto {
+    public static class DecorateWordMetadata {
         private String column;
         private List<String> params;
 
@@ -106,11 +106,11 @@ public class IndicatorDto {
         this.indicatorParams = indicatorParams;
     }
 
-    public DecorateWordDto getDecorateWord() {
+    public DecorateWordMetadata getDecorateWord() {
         return decorateWord;
     }
 
-    public void setDecorateWord(DecorateWordDto decorateWord) {
+    public void setDecorateWord(DecorateWordMetadata decorateWord) {
         this.decorateWord = decorateWord;
     }
 }

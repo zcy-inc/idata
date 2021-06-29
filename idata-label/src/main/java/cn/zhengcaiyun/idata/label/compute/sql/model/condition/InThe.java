@@ -22,7 +22,7 @@ public class InThe<T> extends BaseCondition<T> {
     @Override
     public String renderSql() {
         return getColumnName() + " " + getParams().stream()
-                .map(t -> t.toString())
+                .map(t -> withSingleQuote(t))
                 .collect(Collectors.joining(",", "in (", ")")) + connectNextCond();
     }
 

@@ -33,16 +33,16 @@ public abstract class BaseCondition<T> implements ModelRender {
         return this.column.renderSql();
     }
 
-    protected T getFirstParam() {
-        return this.params.get(0);
+    protected String getParam() {
+        return withSingleQuote(this.params.get(0));
     }
 
     protected List<T> getParams() {
         return this.params;
     }
 
-    protected T getSecondParam() {
-        return this.params.get(1);
+    protected String getAnotherParam() {
+        return withSingleQuote(this.params.get(1));
     }
 
     public BaseCondition and(BaseCondition condition) {
@@ -67,4 +67,10 @@ public abstract class BaseCondition<T> implements ModelRender {
     }
 
     protected abstract BaseCondition getThis();
+
+    protected String withSingleQuote(T param) {
+        if (param instanceof String)
+            return "'" + param + "'";
+        return param.toString();
+    }
 }

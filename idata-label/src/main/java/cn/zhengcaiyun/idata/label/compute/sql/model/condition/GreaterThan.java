@@ -9,8 +9,8 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  **/
 public class GreaterThan<T> extends BaseCondition<T> {
 
-    private GreaterThan(BaseColumn column, T... params) {
-        super(column, params);
+    private GreaterThan(BaseColumn column, T param) {
+        super(column, param);
     }
 
     @Override
@@ -20,10 +20,10 @@ public class GreaterThan<T> extends BaseCondition<T> {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " > " + getFirstParam().toString() + connectNextCond();
+        return getColumnName() + " > " + getParam() + connectNextCond();
     }
 
-    public static <T> GreaterThan<T> of(BaseColumn column, T... params) {
-        return new GreaterThan(column, params);
+    public static <T> GreaterThan<T> of(BaseColumn column, T param) {
+        return new GreaterThan(column, param);
     }
 }

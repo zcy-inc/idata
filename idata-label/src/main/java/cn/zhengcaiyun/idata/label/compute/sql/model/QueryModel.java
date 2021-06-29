@@ -11,18 +11,18 @@ public class QueryModel implements ModelRender {
     private final SelectModel selectModel;
     private final TableModel tableModel;
     private final WhereModel whereModel;
-    private final GroupByModel groupByModel;
+    private final GroupModel groupModel;
     private final HavingModel havingModel;
-    private final OrderByModel orderByModel;
+    private final OrderModel orderModel;
     private final PagingModel pagingModel;
 
     private QueryModel(Builder builder) {
         this.selectModel = builder.selectModel;
         this.tableModel = builder.tableModel;
         this.whereModel = builder.whereModel;
-        this.groupByModel = builder.groupByModel;
+        this.groupModel = builder.groupModel;
         this.havingModel = builder.havingModel;
-        this.orderByModel = builder.orderByModel;
+        this.orderModel = builder.orderModel;
         this.pagingModel = builder.pagingModel;
     }
 
@@ -34,14 +34,14 @@ public class QueryModel implements ModelRender {
         if (!Objects.isNull(whereModel)) {
             builder.append(whereModel.renderSql()).append(" ");
         }
-        if (!Objects.isNull(groupByModel)) {
-            builder.append(groupByModel.renderSql()).append(" ");
+        if (!Objects.isNull(groupModel)) {
+            builder.append(groupModel.renderSql()).append(" ");
         }
         if (!Objects.isNull(havingModel)) {
             builder.append(havingModel.renderSql()).append(" ");
         }
-        if (!Objects.isNull(orderByModel)) {
-            builder.append(orderByModel.renderSql()).append(" ");
+        if (!Objects.isNull(orderModel)) {
+            builder.append(orderModel.renderSql()).append(" ");
         }
         if (!Objects.isNull(pagingModel)) {
             builder.append(pagingModel.renderSql()).append(" ");
@@ -53,9 +53,9 @@ public class QueryModel implements ModelRender {
         private final SelectModel selectModel;
         private final TableModel tableModel;
         private WhereModel whereModel;
-        private GroupByModel groupByModel;
+        private GroupModel groupModel;
         private HavingModel havingModel;
-        private OrderByModel orderByModel;
+        private OrderModel orderModel;
         private PagingModel pagingModel;
 
         public Builder(SelectModel selectModel, TableModel tableModel) {
@@ -68,8 +68,8 @@ public class QueryModel implements ModelRender {
             return this;
         }
 
-        public Builder group(GroupByModel groupByModel) {
-            this.groupByModel = groupByModel;
+        public Builder group(GroupModel groupModel) {
+            this.groupModel = groupModel;
             return this;
         }
 
@@ -78,8 +78,8 @@ public class QueryModel implements ModelRender {
             return this;
         }
 
-        public Builder order(OrderByModel orderByModel) {
-            this.orderByModel = orderByModel;
+        public Builder order(OrderModel orderModel) {
+            this.orderModel = orderModel;
             return this;
         }
 

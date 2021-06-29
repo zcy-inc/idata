@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
 import static com.google.common.base.Preconditions.*;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -51,5 +52,16 @@ public class LabFolderManager {
         Optional<LabFolder> folderOptional = folderDao.selectByPrimaryKey(folderId);
         checkState(folderOptional.isPresent(), errorMsg);
         return folderOptional.get();
+    }
+
+    public int deleteFolder(Long folderId, String operator) {
+        return folderDao.update(dsl -> dsl.set(labFolder.del).equalTo(DEL_YES.val)
+                .set(labFolder.editor).equalTo(operator).where(labFolder.id, isEqualTo(folderId)));
+    }
+
+    public List<LabFolder> querySubFolders(Long folderId) {
+        return folderDao.select(
+                dsl -> dsl.where(labFolder.parentId, isEqualTo(folderId),
+                        and(labFolder.del, isEqualTo(DEL_NO.val))));
     }
 }

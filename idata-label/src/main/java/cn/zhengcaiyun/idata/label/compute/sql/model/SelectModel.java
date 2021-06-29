@@ -43,6 +43,7 @@ public class SelectModel implements ModelRender {
                 builder.append(", ");
             }
             builder.append(column.renderSqlWithAlias());
+            count++;
         }
         return builder.toString();
     }

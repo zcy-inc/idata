@@ -9,8 +9,8 @@ import cn.zhengcaiyun.idata.label.compute.sql.model.BaseColumn;
  **/
 public class LessThanOrEqualTo<T> extends BaseCondition<T> {
 
-    private LessThanOrEqualTo(BaseColumn column, T... params) {
-        super(column, params);
+    private LessThanOrEqualTo(BaseColumn column, T param) {
+        super(column, param);
     }
 
     @Override
@@ -20,11 +20,11 @@ public class LessThanOrEqualTo<T> extends BaseCondition<T> {
 
     @Override
     public String renderSql() {
-        return getColumnName() + " <= " + getFirstParam().toString() + connectNextCond();
+        return getColumnName() + " <= " + getParam() + connectNextCond();
     }
 
-    public static <T> LessThanOrEqualTo<T> of(BaseColumn column, T... params) {
-        return new LessThanOrEqualTo(column, params);
+    public static <T> LessThanOrEqualTo<T> of(BaseColumn column, T param) {
+        return new LessThanOrEqualTo(column, param);
     }
 
 }
