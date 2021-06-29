@@ -17,8 +17,14 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -29,20 +35,50 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/p1/dev")
 public class MetricController {
 
-    @GetMapping("metric/{metricId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("metricId") Long metricId) {
-        return RestResult.success();
+    @Autowired
+    private MetricService metricService;
+    @Autowired
+    private TokenService tokenService;
+
+    @GetMapping("metric")
+    public RestResult<MeasureDto> findByCode(@RequestParam("metricCode") String metricCode) {
+        return RestResult.success(metricService.findMetric(metricCode));
+    }
+
+    @GetMapping("metrics")
+    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("labelTag") String labelTag,
+                                                    @RequestParam(value = "labelCode", required = false) String labelCode) {
+        return RestResult.success(metricService.findMetrics(labelTag));
+    }
+
+    @GetMapping("metricsOrDimensions")
+    public RestResult<List<MeasureDto>> getMetricsOrDimensions(@RequestParam("labelTag") String labelTag,
+                                                               @RequestParam("labelCodes") List<String> labelCodes) {
+        return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 
     @PostMapping("metric")
-    public RestResult<LabelDefineDto> addOrUpdateMetric(LabelDefineDto labelDefineDto,
-                                                           String creator) {
-        return RestResult.success();
+    public RestResult<MeasureDto> addOrUpdateMetric(@RequestBody MeasureDto metric,
+                                                    HttpServletRequest request) {
+        MeasureDto echoMetric;
+        if (metric.getId() == null) {
+            echoMetric = metricService.create(metric, tokenService.getNickname(request));
+        }
+        else {
+            echoMetric = metricService.edit(metric, tokenService.getNickname(request));
+        }
+        return RestResult.success(echoMetric);
     }
 
-    @DeleteMapping("dimension/{metricId}")
-    public RestResult deleteMetric(@PathVariable("metricId") Long metricId,
-                                      String editor) {
-        return RestResult.success();
+    @PostMapping("metric/disableMetric")
+    public RestResult disableMetric(@RequestParam("metricCode") String metricCode,
+                                   HttpServletRequest request) {
+        return RestResult.success(metricService.disable(metricCode, tokenService.getNickname(request)));
+    }
+
+    @DeleteMapping("metric")
+    public RestResult deleteMetric(@RequestParam("metricCode") String metricCode,
+                                   HttpServletRequest request) {
+        return RestResult.success(metricService.delete(metricCode, tokenService.getNickname(request)));
     }
 }

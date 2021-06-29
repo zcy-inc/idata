@@ -30,4 +30,5 @@ public interface ColumnInfoService {
     List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
     boolean delete(Long columnId, String operator);
+    boolean checkColumn(String columnName, Long tableId);
 }

@@ -17,8 +17,14 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -29,20 +35,43 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/p1/dev")
 public class DimensionController {
 
-    @GetMapping("dimension/{dimensionId}")
-    public RestResult<LabelDefineDto> findById(@PathVariable("dimensionId") Long dimensionId) {
-        return RestResult.success();
+    @Autowired
+    private DimensionService dimensionService;
+    @Autowired
+    private TokenService tokenService;
+
+    @GetMapping("dimension")
+    public RestResult<MeasureDto> findByCode(@RequestParam("dimensionCode") String dimensionCode) {
+        return RestResult.success(dimensionService.findDimension(dimensionCode));
+    }
+
+    @GetMapping("dimensionValues")
+    public RestResult<List<String>> findValuesByCode(@RequestParam("dimensionCode") String dimensionCode) {
+        return RestResult.success(dimensionService.findDimensionValues(dimensionCode));
     }
 
     @PostMapping("dimension")
-    public RestResult<LabelDefineDto> addOrUpdateDimension(LabelDefineDto labelDefineDto,
-                                                           String creator) {
-        return RestResult.success();
+    public RestResult<MeasureDto> addOrUpdateDimension(@RequestBody MeasureDto dimension,
+                                                       HttpServletRequest request) {
+        MeasureDto echoDimension;
+        if (dimension.getId() == null) {
+            echoDimension = dimensionService.create(dimension, tokenService.getNickname(request));
+        }
+        else {
+            echoDimension = dimensionService.edit(dimension, tokenService.getNickname(request));
+        }
+        return RestResult.success(echoDimension);
     }
 
-    @DeleteMapping("dimension/{dimensionId}")
-    public RestResult deleteDimension(@PathVariable("dimensionId") Long dimensionId,
-                                      String editor) {
-        return RestResult.success();
+    @PostMapping("dimension/disableDimension")
+    public RestResult disableDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                      HttpServletRequest request) {
+        return RestResult.success(dimensionService.disable(dimensionCode, tokenService.getNickname(request)));
+    }
+
+    @DeleteMapping("dimension")
+    public RestResult deleteDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                      HttpServletRequest request) {
+        return RestResult.success(dimensionService.delete(dimensionCode, tokenService.getNickname(request)));
     }
 }

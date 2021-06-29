@@ -16,7 +16,7 @@ create table if not exists idata.dev_table_info (
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor      varchar(20)     not null default '' comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  table_name  varchar(30)     not null comment '表名称',
+  table_name  varchar(200)     not null comment '表名称',
   folder_id   bigint          comment '文件夹ID,null表示最外层文件夹'
 ) engine=innodb default charset=utf8mb4 comment='表信息表';
 
@@ -44,7 +44,7 @@ create table if not exists idata.dev_label_define (
   label_tag          varchar(30)     comment '标签的标签',
   label_param_type   varchar(30)     comment '标签参数类型',
   label_attributes   varchar(500)    not null default '[]' comment '标签属性',
-  special_attributes varchar(500)    not null default '[]' comment '特定标签属性，根据标签的标签字段变化',
+  special_attribute  varchar(500)    not null default '{}' comment '特定标签属性，根据标签的标签字段变化',
   subject_type       varchar(20)     comment '打标主体类型',
   label_index        integer         comment '标签序号',
   label_required     tinyint         not null default 0 comment '是否必须打标(1:是,0:否)',

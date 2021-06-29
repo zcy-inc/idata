@@ -106,7 +106,7 @@ public class LabelServiceImpl implements LabelService {
             labelDefineDto.setCreator(operator);
             devLabelDefineDao.insertSelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
                     "labelCode", "labelName", "labelTag", "labelParamType",
-                    "labelAttributes", "specialAttributes", "subjectType", "labelIndex",
+                    "labelAttributes", "specialAttribute", "subjectType", "labelIndex",
                     "labelRequired", "labelScope", "folderId", "creator"));
         }
         else {
@@ -117,7 +117,7 @@ public class LabelServiceImpl implements LabelService {
             labelDefineDto.setId(labelDefine.getId());
             labelDefineDto.setEditor(operator);
             devLabelDefineDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
-                    "id", "labelName", "labelAttributes", "specialAttributes", "labelIndex",
+                    "id", "labelName", "labelAttributes", "specialAttribute", "labelIndex",
                     "labelRequired", "folderId", "editor"));
         }
         return PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
@@ -173,6 +173,7 @@ public class LabelServiceImpl implements LabelService {
         return labelDefineDto;
     }
 
+    // TODO 根据index排序，支持查询指标系统
     @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
         checkArgument(subjectType != null || labelTag != null,
@@ -225,6 +226,7 @@ public class LabelServiceImpl implements LabelService {
         return true;
     }
 
+    // TODO 增加返回表名称
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public LabelDto label(LabelDto labelDto, String operator) {
@@ -282,8 +284,9 @@ public class LabelServiceImpl implements LabelService {
         }
     }
 
+    // TODO 通过labelCode查询，增加表名返回
     @Override
-    public List<LabelDto> findLabels(Long tableId, String columnName) {
+    public List<LabelDto> findLabels(Long tableId, String columnName, String labelCode) {
         Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
                 c.where(devLabelDefine.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
@@ -307,6 +310,7 @@ public class LabelServiceImpl implements LabelService {
                         Collectors.mapping(devLabel -> toLabelDto(devLabel, labelDefineMap), Collectors.toList())));
     }
 
+    // TODO 根据index排序
     private LabelDto toLabelDto(DevLabel devLabel, Map<String, DevLabelDefine> labelDefineMap) {
         LabelDto labelDto = PojoUtil.copyOne(devLabel, LabelDto.class);
         DevLabelDefine labelDefine = labelDefineMap.get(devLabel.getLabelCode());

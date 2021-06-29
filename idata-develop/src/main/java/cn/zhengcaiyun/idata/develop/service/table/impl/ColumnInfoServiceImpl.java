@@ -273,6 +273,15 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         return deleteColumnInfo(columnId, operator);
     }
 
+    @Override
+    public boolean checkColumn(String columnName, Long tableId) {
+        List<DevColumnInfo> columnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
+                .from(devColumnInfo)
+                .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
+                .build().render(RenderingStrategies.MYBATIS3));
+        return columnInfoList.stream().map(DevColumnInfo::getColumnName).collect(Collectors.toList()).contains(columnName);
+    }
+
     private boolean deleteColumnInfo(Long columnId, String operator) {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(columnId != null, "字段ID不能为空");
@@ -293,7 +302,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .set(devColumnInfo.editor).equalTo(operator)
                 .where(devColumnInfo.id, isEqualTo(columnId)));
         // 删除label表记录
-        List<LabelDto> columnLabelList = labelService.findLabels(columnInfo.getTableId(), columnInfo.getColumnName());
+        List<LabelDto> columnLabelList = labelService.findLabels(columnInfo.getTableId(), columnInfo.getColumnName(),
+                null);
 
         return columnLabelList.stream().allMatch(columnLabel ->
                 labelService.removeLabel(columnLabel, operator));

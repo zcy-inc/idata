@@ -35,7 +35,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevLabelDefineDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label_define")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, labelCode, labelName, labelTag, labelParamType, labelAttributes, specialAttributes, subjectType, labelIndex, labelRequired, labelScope, folderId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, labelCode, labelName, labelTag, labelParamType, labelAttributes, specialAttribute, subjectType, labelIndex, labelRequired, labelScope, folderId);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label_define")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -69,7 +69,7 @@ public interface DevLabelDefineDao {
         @Result(column="label_tag", property="labelTag", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_param_type", property="labelParamType", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_attributes", property="labelAttributes", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
-        @Result(column="special_attributes", property="specialAttributes", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
+        @Result(column="special_attribute", property="specialAttribute", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
         @Result(column="subject_type", property="subjectType", jdbcType=JdbcType.VARCHAR),
         @Result(column="label_index", property="labelIndex", jdbcType=JdbcType.INTEGER),
         @Result(column="label_required", property="labelRequired", jdbcType=JdbcType.TINYINT),
@@ -112,7 +112,7 @@ public interface DevLabelDefineDao {
             .map(labelTag).toProperty("labelTag")
             .map(labelParamType).toProperty("labelParamType")
             .map(labelAttributes).toProperty("labelAttributes")
-            .map(specialAttributes).toProperty("specialAttributes")
+            .map(specialAttribute).toProperty("specialAttribute")
             .map(subjectType).toProperty("subjectType")
             .map(labelIndex).toProperty("labelIndex")
             .map(labelRequired).toProperty("labelRequired")
@@ -134,7 +134,7 @@ public interface DevLabelDefineDao {
             .map(labelTag).toPropertyWhenPresent("labelTag", record::getLabelTag)
             .map(labelParamType).toPropertyWhenPresent("labelParamType", record::getLabelParamType)
             .map(labelAttributes).toPropertyWhenPresent("labelAttributes", record::getLabelAttributes)
-            .map(specialAttributes).toPropertyWhenPresent("specialAttributes", record::getSpecialAttributes)
+            .map(specialAttribute).toPropertyWhenPresent("specialAttribute", record::getSpecialAttribute)
             .map(subjectType).toPropertyWhenPresent("subjectType", record::getSubjectType)
             .map(labelIndex).toPropertyWhenPresent("labelIndex", record::getLabelIndex)
             .map(labelRequired).toPropertyWhenPresent("labelRequired", record::getLabelRequired)
@@ -182,7 +182,7 @@ public interface DevLabelDefineDao {
                 .set(labelTag).equalTo(record::getLabelTag)
                 .set(labelParamType).equalTo(record::getLabelParamType)
                 .set(labelAttributes).equalTo(record::getLabelAttributes)
-                .set(specialAttributes).equalTo(record::getSpecialAttributes)
+                .set(specialAttribute).equalTo(record::getSpecialAttribute)
                 .set(subjectType).equalTo(record::getSubjectType)
                 .set(labelIndex).equalTo(record::getLabelIndex)
                 .set(labelRequired).equalTo(record::getLabelRequired)
@@ -202,7 +202,7 @@ public interface DevLabelDefineDao {
                 .set(labelTag).equalToWhenPresent(record::getLabelTag)
                 .set(labelParamType).equalToWhenPresent(record::getLabelParamType)
                 .set(labelAttributes).equalToWhenPresent(record::getLabelAttributes)
-                .set(specialAttributes).equalToWhenPresent(record::getSpecialAttributes)
+                .set(specialAttribute).equalToWhenPresent(record::getSpecialAttribute)
                 .set(subjectType).equalToWhenPresent(record::getSubjectType)
                 .set(labelIndex).equalToWhenPresent(record::getLabelIndex)
                 .set(labelRequired).equalToWhenPresent(record::getLabelRequired)
@@ -223,7 +223,7 @@ public interface DevLabelDefineDao {
             .set(labelTag).equalTo(record::getLabelTag)
             .set(labelParamType).equalTo(record::getLabelParamType)
             .set(labelAttributes).equalTo(record::getLabelAttributes)
-            .set(specialAttributes).equalTo(record::getSpecialAttributes)
+            .set(specialAttribute).equalTo(record::getSpecialAttribute)
             .set(subjectType).equalTo(record::getSubjectType)
             .set(labelIndex).equalTo(record::getLabelIndex)
             .set(labelRequired).equalTo(record::getLabelRequired)
@@ -246,7 +246,7 @@ public interface DevLabelDefineDao {
             .set(labelTag).equalToWhenPresent(record::getLabelTag)
             .set(labelParamType).equalToWhenPresent(record::getLabelParamType)
             .set(labelAttributes).equalToWhenPresent(record::getLabelAttributes)
-            .set(specialAttributes).equalToWhenPresent(record::getSpecialAttributes)
+            .set(specialAttribute).equalToWhenPresent(record::getSpecialAttribute)
             .set(subjectType).equalToWhenPresent(record::getSubjectType)
             .set(labelIndex).equalToWhenPresent(record::getLabelIndex)
             .set(labelRequired).equalToWhenPresent(record::getLabelRequired)
