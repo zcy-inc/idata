@@ -92,7 +92,7 @@ public class LabFolderServiceImpl implements LabFolderService {
 
         //存在子文件夹或文件，则不能删除
         List<LabFolder> subFolders = labFolderManager.querySubFolders(id);
-        checkState(!CollectionUtils.isEmpty(subFolders), "不能删除该文件夹");
+        checkState(CollectionUtils.isEmpty(subFolders), "不能删除该文件夹");
         LabFolderTreeNodeSupplier supplier = LabFolderTreeNodeSupplierFactory.getSupplier(folder.getBelong());
         Optional.ofNullable(supplier)
                 .ifPresent(sup -> checkState(!sup.hasSubTreeNode(id), "不能删除该文件夹"));
