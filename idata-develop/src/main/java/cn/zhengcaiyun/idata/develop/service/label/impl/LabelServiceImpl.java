@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
+import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.DB_NAME_LABEL;
 import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.checkSysLabelCode;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -61,6 +62,8 @@ public class LabelServiceImpl implements LabelService {
     private DevTableInfoDao devTableInfoDao;
     @Autowired
     private EnumService enumService;
+
+    private final String DB_NAME = "dbName:LABEL";
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -311,13 +314,16 @@ public class LabelServiceImpl implements LabelService {
         Map<Long, String> tableInfoMap = devTableInfoDao.selectMany(select(devTableInfo.id, devTableInfo.tableName)
                 .from(devTableInfo).where(devTableInfo.del, isNotEqualTo(1)).build().render(RenderingStrategies.MYBATIS3))
                 .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+        Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
         return PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                 .from(devLabel)
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
                 .stream().peek(labelDto -> {
                     checkArgument(tableInfoMap.containsKey(labelDto.getTableId()), "表不存在");
-                    labelDto.setTableName(tableInfoMap.get(labelDto.getTableId()));
+                    labelDto.setTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
                 }).collect(Collectors.toList());
     }
 
