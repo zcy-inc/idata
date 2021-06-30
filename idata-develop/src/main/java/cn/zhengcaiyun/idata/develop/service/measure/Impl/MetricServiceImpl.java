@@ -312,7 +312,7 @@ public class MetricServiceImpl implements MetricService {
             }
             else {
                 MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
-                echoMetric.setAtomicMetric(atomicMetric);
+                echoMetric.setMeasureLabels(labelService.findLabelsByCode(atomicMetric.getLabelCode()));
                 Long atomicTableId = labelService.findLabelsByCode(atomicMetric.getLabelCode()).get(0).getTableId();
                 echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicTableId));
             }
