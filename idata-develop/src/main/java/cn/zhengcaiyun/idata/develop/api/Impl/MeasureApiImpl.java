@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.api.MeasureApi;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
@@ -54,11 +56,13 @@ public class MeasureApiImpl implements MeasureApi {
     @Autowired
     private MetricService metricService;
 
+    private final String DB_NAME = "dbName:LABEL";
+
     @Override
     public List<MeasureDto> getMeasures(List<String> labelCodes) {
         List<DevLabelDefine> measureList = devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", labelCodes));
         List<MeasureDto> echoMeasureList = measureList.stream().map(measure -> {
-            MeasureDto echoMeasure = new MeasureDto();
+            MeasureDto echoMeasure;
             if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(measure.getLabelTag())) {
                 echoMeasure = metricService.findMetric(measure.getLabelCode());
             }
@@ -67,9 +71,13 @@ public class MeasureApiImpl implements MeasureApi {
                         .from(devLabel)
                         .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(measure.getLabelCode())))
                         .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class);
+                Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                        and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                        .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
                 measureLabelList.forEach(measureLabel -> {
-                    measureLabel.setTableName(devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
-                            and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
+                    measureLabel.setTableName(dwdTableInfoMap.get(measureLabel.getTableId()) + "." +
+                            devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                                    and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
                 });
                 echoMeasure = PojoUtil.copyOne(measure, MeasureDto.class);
                 echoMeasure.setMeasureLabels(measureLabelList);
