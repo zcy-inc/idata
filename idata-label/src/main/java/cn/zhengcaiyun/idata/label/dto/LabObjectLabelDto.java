@@ -3,7 +3,6 @@ package cn.zhengcaiyun.idata.label.dto;
 import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleLayerDto;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @description: 对象标签dto类
@@ -39,6 +38,11 @@ public class LabObjectLabelDto extends BaseDto {
      * 版本
      */
     private Integer version;
+
+    /**
+     * 起源记录id，修改时指向第一次创建的记录id
+     */
+    private Long originId;
 
     /**
      * 文件夹id
@@ -114,31 +118,11 @@ public class LabObjectLabelDto extends BaseDto {
         this.ruleLayers = ruleLayers;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LabObjectLabelDto that = (LabObjectLabelDto) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(nameEn, that.nameEn) && Objects.equals(objectType, that.objectType) && Objects.equals(remark, that.remark) && Objects.equals(version, that.version) && Objects.equals(folderId, that.folderId) && Objects.equals(ruleLayers, that.ruleLayers);
+    public Long getOriginId() {
+        return originId;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), id, name, nameEn, objectType, remark, version, folderId, ruleLayers);
-    }
-
-    @Override
-    public String toString() {
-        return "LabObjectLabelDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", nameEn='" + nameEn + '\'' +
-                ", objectType='" + objectType + '\'' +
-                ", remark='" + remark + '\'' +
-                ", version=" + version +
-                ", folderId=" + folderId +
-                ", ruleLayers=" + ruleLayers +
-                "} " + super.toString();
+    public void setOriginId(Long originId) {
+        this.originId = originId;
     }
 }

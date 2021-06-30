@@ -30,10 +30,10 @@ public interface LabObjectLabelService {
     /**
      * 获取标签
      *
-     * @param id
+     * @param originId
      * @return
      */
-    LabObjectLabelDto getLabel(Long id);
+    LabObjectLabelDto getLabel(Long originId);
 
     /**
      * 删除标签

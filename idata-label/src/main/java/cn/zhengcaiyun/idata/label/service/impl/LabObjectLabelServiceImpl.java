@@ -73,8 +73,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         checkArgument(isNotEmpty(labelDto.getObjectType()), "标签主体不能为空");
 
         LabObjectLabel label = newCreatedObjectLabel(labelDto, operator);
-        objectLabelDao.insertSelective(label);
-        return label.getId();
+        return objectLabelManager.saveLabel(label);
     }
 
     @Override
@@ -91,8 +90,8 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         //标签编辑逻辑：将旧数据状态置为删除，新增一条标签记录，版本号+1
         LabObjectLabel newLabel = newCreatedObjectLabel(labelDto, operator);
         newLabel.setVersion(label.getVersion() + 1);
-        //第一次修改时，originId取被修改记录的id，之后的修改取被修改记录的originId
-        newLabel.setOriginId(Objects.equals(label.getOriginId(), 0L) ? label.getId() : label.getOriginId());
+        //修改时，新的记录originId和被修改记录originId一致
+        newLabel.setOriginId(label.getOriginId());
         //标签主体限制修改
         newLabel.setObjectType(label.getObjectType());
         objectLabelManager.renewLabel(newLabel, label.getId());
@@ -100,8 +99,8 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     }
 
     @Override
-    public LabObjectLabelDto getLabel(Long id) {
-        LabObjectLabel label = objectLabelManager.getObjectLabel(id, "标签不存在");
+    public LabObjectLabelDto getLabel(Long originId) {
+        LabObjectLabel label = objectLabelManager.getObjectLabelByOriginId(originId, "标签不存在");
         LabObjectLabelDto dto = new LabObjectLabelDto();
         BeanUtils.copyProperties(label, dto);
         dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));

@@ -48,6 +48,24 @@ public class LabObjectLabelManager {
         return optional.get();
     }
 
+    public LabObjectLabel getObjectLabelByOriginId(Long labelOriginId, String errorMsg) {
+        checkArgument(Objects.nonNull(labelOriginId), "标签编号不能为空");
+
+        Optional<LabObjectLabel> optional = objectLabelDao.selectOne(
+                dsl -> dsl.where(labObjectLabel.originId, isEqualTo(labelOriginId),
+                        and(labObjectLabel.del, isEqualTo(DEL_NO.val))));
+        checkState(optional.isPresent(), errorMsg);
+        return optional.get();
+    }
+
+    @Transactional
+    public Long saveLabel(LabObjectLabel label) {
+        objectLabelDao.insertSelective(label);
+        objectLabelDao.update(dsl -> dsl.set(labObjectLabel.originId).equalTo(label.getId())
+                .where(labObjectLabel.id, isEqualTo(label.getId())));
+        return label.getId();
+    }
+
     @Transactional
     public Long renewLabel(LabObjectLabel newLabel, Long oldLabelId) {
         // 软删除，修改del状态

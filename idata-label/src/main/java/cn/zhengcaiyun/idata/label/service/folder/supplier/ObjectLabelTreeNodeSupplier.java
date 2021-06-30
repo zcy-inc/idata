@@ -60,7 +60,7 @@ public class ObjectLabelTreeNodeSupplier implements LabFolderTreeNodeSupplier {
 
     private LabFolderTreeNodeDto convertTreeNode(LabObjectLabel label) {
         LabFolderTreeNodeDto nodeDto = new LabFolderTreeNodeDto();
-        nodeDto.setId(label.getId());
+        nodeDto.setId(label.getOriginId());
         nodeDto.setName(label.getName());
         nodeDto.setType(FolderTreeNodeTypeEnum.LABEL.getCode());
         nodeDto.setBelong(BELONG);
