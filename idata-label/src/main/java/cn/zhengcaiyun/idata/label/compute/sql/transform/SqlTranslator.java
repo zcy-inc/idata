@@ -32,16 +32,15 @@ import static com.google.common.base.Preconditions.checkState;
 @Component
 public class SqlTranslator {
 
-    @Autowired
-    private MeasureApiAgent measureApiAgent;
-
+    private final MeasureApiAgent measureApiAgent;
     private final DimensionTranslator dimensionTranslator;
     private final IndicatorTranslator indicatorTranslator;
 
     @Autowired
-    public SqlTranslator(DimensionTranslator dimensionTranslator, IndicatorTranslator indicatorTranslator) {
+    public SqlTranslator(DimensionTranslator dimensionTranslator, IndicatorTranslator indicatorTranslator, MeasureApiAgent measureApiAgent) {
         this.dimensionTranslator = dimensionTranslator;
         this.indicatorTranslator = indicatorTranslator;
+        this.measureApiAgent = measureApiAgent;
     }
 
     public String translate(LabelRuleDto ruleDto, String objectType, Long limit, Long offset) {
@@ -198,7 +197,7 @@ public class SqlTranslator {
     }
 
     public static void main(String[] args) {
-        SqlTranslator sqlTranslator = new SqlTranslator(new DimensionTranslator(), new IndicatorTranslator());
+        SqlTranslator sqlTranslator = new SqlTranslator(new DimensionTranslator(), new IndicatorTranslator(), null);
         System.out.println(sqlTranslator.mockSQL());
     }
 

@@ -13,6 +13,11 @@ public class DimensionDefDto {
      * 维度code，取自指标系统
      */
     private String dimensionCode;
+
+    /**
+     * 维度名称
+     */
+    private String dimensionName;
     /**
      * 维度值
      */
@@ -32,6 +37,14 @@ public class DimensionDefDto {
 
     public void setParams(String[] params) {
         this.params = params;
+    }
+
+    public String getDimensionName() {
+        return dimensionName;
+    }
+
+    public void setDimensionName(String dimensionName) {
+        this.dimensionName = dimensionName;
     }
 
     @Override

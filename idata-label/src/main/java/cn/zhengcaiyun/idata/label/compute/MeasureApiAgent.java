@@ -35,6 +35,18 @@ public class MeasureApiAgent {
         this.measureApi = measureApi;
     }
 
+    public Optional<Map<String, String>> getNames(List<String> codes) {
+        if (CollectionUtils.isEmpty(codes)) return Optional.empty();
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(codes);
+        if (CollectionUtils.isEmpty(measureDtoList)) return Optional.empty();
+
+        Map<String, String> nameMap = Maps.newHashMap();
+        for (MeasureDto measureDto : measureDtoList) {
+            nameMap.put(measureDto.getLabelCode(), measureDto.getLabelName());
+        }
+        return Optional.of(nameMap);
+    }
+
     public Optional<IndicatorMetadata> getIndicatorMetadata(String indicatorCode) {
         if (StringUtils.isEmpty(indicatorCode)) return Optional.empty();
 

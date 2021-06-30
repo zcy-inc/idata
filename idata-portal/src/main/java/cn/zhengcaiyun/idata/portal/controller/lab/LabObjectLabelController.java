@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -97,7 +98,7 @@ public class LabObjectLabelController {
     private SXSSFWorkbook downloadAsExcel(LabelQueryDataDto queryDataDto) {
         List<ColumnDto> columns = null;
         List<List<String>> data = null;
-        if (queryDataDto != null) {
+        if (!Objects.isNull(queryDataDto)) {
             columns = queryDataDto.getColumns();
             data = queryDataDto.getData();
         }

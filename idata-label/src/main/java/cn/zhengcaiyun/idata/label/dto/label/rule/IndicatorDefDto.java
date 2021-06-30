@@ -13,6 +13,12 @@ public class IndicatorDefDto {
      * 指标code，从指标数据中取
      */
     private String indicatorCode;
+
+    /**
+     * 指标名称
+     */
+    private String indicatorName;
+
     /**
      * 条件:
      * 等于：equal，
@@ -50,6 +56,14 @@ public class IndicatorDefDto {
 
     public void setParams(Long[] params) {
         this.params = params;
+    }
+
+    public String getIndicatorName() {
+        return indicatorName;
+    }
+
+    public void setIndicatorName(String indicatorName) {
+        this.indicatorName = indicatorName;
     }
 
     @Override

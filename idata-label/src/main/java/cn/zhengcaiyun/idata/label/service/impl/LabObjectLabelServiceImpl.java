@@ -1,13 +1,12 @@
 package cn.zhengcaiyun.idata.label.service.impl;
 
 import cn.zhengcaiyun.idata.label.compute.LabelDataComputer;
+import cn.zhengcaiyun.idata.label.compute.MeasureApiAgent;
 import cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDao;
 import cn.zhengcaiyun.idata.label.dal.model.LabObjectLabel;
 import cn.zhengcaiyun.idata.label.dto.LabObjectLabelDto;
 import cn.zhengcaiyun.idata.label.dto.LabelQueryDataDto;
-import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDefDto;
-import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDto;
-import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleLayerDto;
+import cn.zhengcaiyun.idata.label.dto.label.rule.*;
 import cn.zhengcaiyun.idata.label.service.LabObjectLabelService;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderManager;
 import cn.zhengcaiyun.idata.label.service.label.LabObjectLabelManager;
@@ -21,15 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.label.dal.dao.LabObjectLabelDynamicSqlSupport.labObjectLabel;
 import static com.google.common.base.Preconditions.*;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
@@ -44,20 +44,24 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     private final LabFolderManager folderManager;
     private final LabObjectLabelManager objectLabelManager;
     private final LabelDataComputer labelDataComputer;
+    private final MeasureApiAgent measureApiAgent;
 
     @Autowired
     public LabObjectLabelServiceImpl(LabObjectLabelDao objectLabelDao,
                                      LabFolderManager folderManager,
                                      LabObjectLabelManager objectLabelManager,
-                                     LabelDataComputer labelDataComputer) {
+                                     LabelDataComputer labelDataComputer,
+                                     MeasureApiAgent measureApiAgent) {
         checkNotNull(objectLabelDao, "objectLabelDao must not be null.");
         checkNotNull(folderManager, "folderManager must not be null.");
         checkNotNull(objectLabelManager, "objectLabelManager must not be null.");
         checkNotNull(labelDataComputer, "labelDataComputer must not be null.");
+        checkNotNull(measureApiAgent, "measureApiAgent must not be null.");
         this.objectLabelDao = objectLabelDao;
         this.folderManager = folderManager;
         this.objectLabelManager = objectLabelManager;
         this.labelDataComputer = labelDataComputer;
+        this.measureApiAgent = measureApiAgent;
     }
 
     @Override
@@ -100,7 +104,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         LabObjectLabel label = objectLabelManager.getObjectLabel(id, "标签不存在");
         LabObjectLabelDto dto = new LabObjectLabelDto();
         BeanUtils.copyProperties(label, dto);
-        dto.setRuleLayers(ruleLayerFromJson(label.getRules()));
+        dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));
         return dto;
     }
 
@@ -129,18 +133,16 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
 
         LabelRuleDefDto ruleDefDto = ruleLayerDto.getRuleDef();
         LabelRuleDto ruleDto = ruleDefDto.getRules().get(0);
-        LabelQueryDataDto queryDataDto = labelDataComputer.compute(ruleDto, label.getObjectType(), limit, offset);
-        queryDataDto.setLabelName(label.getName());
-        queryDataDto.setLayerName(ruleLayerDto.getLayerName());
-        return queryDataDto;
+        Optional<LabelQueryDataDto> optional = labelDataComputer.compute(ruleDto, label.getObjectType(), limit, offset);
+        return optional.orElse(null);
     }
 
     private LabObjectLabel newCreatedObjectLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel label = new LabObjectLabel();
         label.setName(labelDto.getName());
-        label.setNameEn(labelDto.getNameEn());
+        label.setNameEn(defaultString(labelDto.getNameEn()));
         label.setObjectType(labelDto.getObjectType());
-        label.setRemark(labelDto.getRemark());
+        label.setRemark(defaultString(labelDto.getRemark()));
         label.setFolderId(MoreObjects.firstNonNull(labelDto.getFolderId(), 0L));
         label.setVersion(1);
         label.setRules(ruleLayerToJson(generateId(labelDto.getRuleLayers())));
@@ -177,5 +179,47 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         if (isEmpty(ruleLayerJson)) return Lists.newArrayList();
         return JSON.parseObject(ruleLayerJson, new TypeReference<List<LabelRuleLayerDto>>() {
         });
+    }
+
+    private List<LabelRuleLayerDto> fillNames(List<LabelRuleLayerDto> layerDtoList) {
+        if (CollectionUtils.isEmpty(layerDtoList)) return layerDtoList;
+
+        for (LabelRuleLayerDto layerDto : layerDtoList) {
+            LabelRuleDefDto ruleDefDto = layerDto.getRuleDef();
+            if (Objects.isNull(ruleDefDto)) continue;
+            List<LabelRuleDto> ruleDtoList = ruleDefDto.getRules();
+            if (CollectionUtils.isEmpty(ruleDtoList)) continue;
+
+            for (LabelRuleDto ruleDto : ruleDtoList) {
+                List<IndicatorDefDto> indicatorDefs = ruleDto.getIndicatorDefs();
+                if (!CollectionUtils.isEmpty(indicatorDefs)) {
+                    List<String> indicatorCodes = indicatorDefs.stream()
+                            .map(indicatorDefDto -> indicatorDefDto.getIndicatorCode())
+                            .collect(Collectors.toList());
+                    Optional<Map<String, String>> mapOptional = measureApiAgent.getNames(indicatorCodes);
+                    if (mapOptional.isPresent()) {
+                        Map<String, String> nameMap = mapOptional.get();
+                        indicatorDefs.stream()
+                                .forEach(indicatorDefDto ->
+                                        indicatorDefDto.setIndicatorName(defaultString(nameMap.get(indicatorDefDto.getIndicatorCode()))));
+                    }
+                }
+
+                List<DimensionDefDto> dimensionDefs = ruleDto.getDimensionDefs();
+                if (!CollectionUtils.isEmpty(dimensionDefs)) {
+                    List<String> dimensionCodes = dimensionDefs.stream()
+                            .map(dimensionDefDto -> dimensionDefDto.getDimensionCode())
+                            .collect(Collectors.toList());
+                    Optional<Map<String, String>> mapOptional = measureApiAgent.getNames(dimensionCodes);
+                    if (mapOptional.isPresent()) {
+                        Map<String, String> nameMap = mapOptional.get();
+                        dimensionDefs.stream()
+                                .forEach(dimensionDefDto ->
+                                        dimensionDefDto.setDimensionName(defaultString(nameMap.get(dimensionDefDto.getDimensionCode()))));
+                    }
+                }
+            }
+        }
+        return layerDtoList;
     }
 }

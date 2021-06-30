@@ -57,6 +57,7 @@
         <fastjson.version>1.2.46</fastjson.version>
         <okhttp3.version>4.2.2</okhttp3.version>
         <poi.version>4.1.2</poi.version>
+        <presto-jdbc.version>333</presto-jdbc.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -95,6 +96,12 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.prestosql</groupId>
+                <artifactId>presto-jdbc</artifactId>
+                <version>${presto-jdbc.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project>
