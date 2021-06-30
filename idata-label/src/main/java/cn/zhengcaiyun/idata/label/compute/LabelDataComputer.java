@@ -47,7 +47,8 @@ public class LabelDataComputer {
     public Optional<LabelQueryDataDto> compute(LabelRuleDto ruleDto, String objectType, Long limit, Long offset) {
         ConnectionDto connectionDto = getConnectionInfo();
         checkNotNull(connectionDto != null, "数据源连接信息不正确");
-        String sql = sqlTranslator.translate(ruleDto, objectType, limit, offset);
+//        String sql = sqlTranslator.translate(ruleDto, objectType, limit, offset);
+        String sql = sqlTranslator.mockSQL();
         logger.info("translate to sql: {}.", sql);
         WideTableDataDto tableDataDto;
         try {

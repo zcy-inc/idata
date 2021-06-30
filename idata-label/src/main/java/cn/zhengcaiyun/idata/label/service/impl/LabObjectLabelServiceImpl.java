@@ -129,7 +129,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
                 .filter(layerDto -> layerDto.getLayerId().equals(layerId))
                 .findFirst()
                 .orElse(null);
-        checkArgument(ruleLayerDto == null, "该标签分层不存在");
+        checkArgument(!Objects.isNull(ruleLayerDto), "该标签分层不存在");
 
         LabelRuleDefDto ruleDefDto = ruleLayerDto.getRuleDef();
         LabelRuleDto ruleDto = ruleDefDto.getRules().get(0);
