@@ -73,7 +73,7 @@ public class MetricServiceImpl implements MetricService {
     private ColumnInfoService columnInfoService;
 
     private String[] metricInfos = new String[]{"enName", "metricId", "bizTypeCode", "metricDefine"};
-    private final String BIZ_TYPE_CODE = "bizTypeEnum:ENUM";
+    private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
 
     @Override
@@ -273,7 +273,7 @@ public class MetricServiceImpl implements MetricService {
         List<LabelDefineDto> modifierList = labelService.findDefines(SubjectTypeEnum.COLUMN.name(), LabelTagEnum.MODIFIER_LABEL.name());
         Map<String, List<String>> modifierMap = modifierList.stream().collect(Collectors.toMap(LabelDefineDto::getLabelCode,
                 modifier -> enumService.getEnumValues(modifier.getLabelAttributes().stream()
-                        .filter(labelAttribute -> BIZ_TYPE_CODE.equals(labelAttribute.getAttributeKey())).findFirst()
+                        .filter(labelAttribute -> MODIFIER_ENUM.equals(labelAttribute.getAttributeKey())).findFirst()
                         .get().getEnumValue()).stream().map(EnumValueDto::getValueCode)
                         .collect(Collectors.toList())));
         List<String> errorModifierCodeList = relatedModifierMap.entrySet().stream().filter(relatedModifier ->

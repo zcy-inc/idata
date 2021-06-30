@@ -68,8 +68,7 @@ public class MeasureApiImpl implements MeasureApi {
                         .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(measure.getLabelCode())))
                         .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class);
                 measureLabelList.forEach(measureLabel -> {
-                    measureLabel.setTableName(devTableInfoDao.selectOne(c -> c.where(devTableInfo.del,
-                            isNotEqualTo(1),
+                    measureLabel.setTableName(devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
                             and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
                 });
                 echoMeasure = PojoUtil.copyOne(measure, MeasureDto.class);
