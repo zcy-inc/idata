@@ -142,13 +142,15 @@ public class MeasureApiAgent {
             return null;
         }
         for (LabelDto labelDto : measureLabels) {
-            if (labelDto.getLabelParamValue().equals("true")) {
+            if ("true".equals(labelDto.getLabelParamValue())) {
                 metadata.setTable(labelDto.getTableName());
                 metadata.setColumn(labelDto.getColumnName());
+                metadata.setOriginTable(labelDto.getTableName());
                 break;
             }
         }
-        if (StringUtils.isEmpty(metadata.getColumn()))
+        if (StringUtils.isEmpty(metadata.getColumn())
+                || StringUtils.isEmpty(metadata.getOriginTable()))
             return null;
         return metadata;
     }
