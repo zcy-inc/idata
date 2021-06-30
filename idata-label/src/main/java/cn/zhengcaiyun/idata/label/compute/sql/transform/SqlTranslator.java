@@ -167,7 +167,10 @@ public class SqlTranslator {
         // 从指标系统获取指标数据，转换为 IndicatorDto
         Optional<IndicatorMetadata> optional = measureApiAgent.getIndicatorMetadata(indicatorDefDto.getIndicatorCode());
         checkState(optional.isPresent(), "未获取到可用的指标数据");
-        return optional.get();
+        IndicatorMetadata metadata = optional.get();
+        metadata.setIndicatorCondition(indicatorDefDto.getCondition());
+        metadata.setIndicatorParams(indicatorDefDto.getParams());
+        return metadata;
     }
 
     private List<DimensionMetadata> getDimensionMetadata(List<DimensionDefDto> dimensionDefs, IndicatorMetadata indicatorMetadata) {
@@ -180,9 +183,10 @@ public class SqlTranslator {
         checkState(optional.isPresent(), "未获取到可用的维度数据");
         Map<String, DimensionMetadata> metadataMap = optional.get();
         List<DimensionMetadata> metadataList = Lists.newArrayList();
-        for (String dimensionCode : dimensionCodes) {
-            DimensionMetadata metadata = metadataMap.get(dimensionCode);
+        for (DimensionDefDto dimensionDefDto : dimensionDefs) {
+            DimensionMetadata metadata = metadataMap.get(dimensionDefDto.getDimensionCode());
             checkState(!Objects.isNull(metadata), "未获取到可用的维度数据");
+            metadata.setDimensionParams(dimensionDefDto.getParams());
             metadataList.add(metadata);
         }
         return metadataList;

@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-06-25 10:26
  **/
 public enum ObjectTypeEnum {
-    purchaser("supplier:LABEL", "purchaser_org_id", "purchaser_org_name", "采购单位"),
-    supplier("purchaserOrg:LABEL", "supplier_org_id", "supplier_org_name", "供应商"),
+    purchaser("purchaserOrg:LABEL", "purchaser_org_id", "purchaser_org_name", "采购单位"),
+    supplier("supplier:LABEL", "supplier_org_id", "supplier_org_name", "供应商"),
     ;
 
     private String type;
