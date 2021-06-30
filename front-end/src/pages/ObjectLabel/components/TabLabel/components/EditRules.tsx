@@ -19,44 +19,28 @@ import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
 import { getRandomStr } from '@/utils/tablemanage';
-import { ObjectLabel } from '@/types/objectlabel';
+import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
+import { getDimensionList, getMetricList } from '@/services/objectlabel';
+import { Label } from '@/types/datapi';
 
 export interface EditRulesProps {
   initial?: ObjectLabel;
+  objectType: string;
 }
 type ActionKey = 'copy' | 'delete';
-type Condition = 'equal' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'between';
-interface Indicator {
-  indicatorCode: string | null;
-  condition: Condition | null;
-  params: string[] | number[];
-}
-interface Dimension {
-  dimensionCode: string | null;
-  params: string[];
-}
-interface Rule {
-  ruleId: number;
-  ruleName: string;
-  indicator: Indicator[];
-  dimension: Dimension[];
-}
-interface Layer {
-  layerId: number;
-  layerName: string;
-  rules: Rule[];
-}
-const initialLayer: Layer = {
+const initialLayer: RuleLayer = {
   layerId: Date.now(),
   layerName: '分层' + getRandomStr(5),
-  rules: [
-    {
-      ruleId: Date.now(),
-      ruleName: '规则1',
-      indicator: [{ indicatorCode: null, condition: null, params: [] }],
-      dimension: [{ dimensionCode: null, params: [] }],
-    },
-  ],
+  ruleDef: {
+    rules: [
+      {
+        ruleId: Date.now(),
+        ruleName: '规则1',
+        indicatorDefs: [{ indicatorCode: null, condition: null, params: [] }],
+        dimensionDefs: [{ dimensionCode: null, params: [] }],
+      },
+    ],
+  },
 };
 const ConditionOptions = [
   { label: '等于', value: 'equal' },
@@ -69,39 +53,69 @@ const ConditionOptions = [
 const { Panel } = Collapse;
 const { Link } = Typography;
 
-const EditRules: FC<EditRulesProps> = ({ initial }) => {
-  const [layers, setLayers] = useState<Layer[]>([initialLayer]);
+const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
+  const [layers, setLayers] = useState<RuleLayer[]>([initialLayer]);
   const [activeKey, setActiveKey] = useState(0); // 取的是数组的index而非layerId
+  const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]);
+  const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]);
+  const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]);
   const { setEditLayers } = useModel('objectlabel', (_) => ({
     setEditLayers: _.setEditLayers,
   }));
 
   useEffect(() => {
+    getMetric(objectType);
+  }, [objectType]);
+
+  useEffect(() => {
     if (initial) {
-      const _layers: Layer[] = initial.ruleLayers.map((layer) => ({
-        layerId: layer.layerId,
-        layerName: layer.layerName,
-        rules: layer.ruleDef.rules.map((rule) => ({
-          ruleId: rule.ruleId,
-          ruleName: rule.ruleName,
-          indicator: rule.indicatorDefs.map((indicator) => ({
-            indicatorCode: indicator.indicatorCode,
-            condition: indicator.condition,
-            params: indicator.params,
-          })),
-          dimension: rule.dimensionDefs.map((dimension) => ({
-            dimensionCode: dimension.dimensionCode,
-            params: dimension.params,
-          })),
-        })),
-      }));
-      setLayers(_layers);
+      setLayers(initial.ruleLayers);
+      // 获取指标信息的options
+      getMetric(initial.objectType);
+      // 获取维度信息的一级options
+      const indicatorCode = initial.ruleLayers[0].ruleDef.rules[0].indicatorDefs[0].indicatorCode;
+      getMetricList({
+        labelTag: 'DIMENSION_LABEL',
+        labelCodes: [objectType, indicatorCode as string],
+      })
+        .then((res) => {
+          const tmp = res.data.map((label: Label) => ({
+            label: label.labelName,
+            value: label.labelCode,
+          }));
+          setDimensionCodeOptions(tmp);
+        })
+        .catch((err) => {});
+      // 获取维度信息的二级options
+      const promises: Promise<any>[] = [];
+      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs.forEach((dimension) => {
+        promises.push(getDimensionList({ dimensionCode: dimension.dimensionCode as string }));
+      });
+      Promise.all(promises)
+        .then((results) => {
+          results.forEach((res, i) => {
+            dimensionParamOptions[i] = res.data.map((v: string) => ({ label: v, value: v }));
+          });
+        })
+        .catch((err) => {});
     }
   }, [initial]);
 
   useEffect(() => {
     setEditLayers(layers);
   }, [layers]);
+
+  const getMetric = (objectType: string) => {
+    getMetricList({ labelTag: 'METRIC_LABEL', labelCodes: [objectType] })
+      .then((res) => {
+        const tmp = res.data.map((label: Label) => ({
+          label: label.labelName,
+          value: label.labelCode,
+        }));
+        setIndicatorCodeOptions(tmp);
+      })
+      .catch((err) => {});
+  };
 
   const onMenuAction = (key: ActionKey, i: number) => {
     if (key === 'delete') {
@@ -128,17 +142,19 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
 
   const createLayer = () => {
     const layerId = Date.now();
-    const newLayer: Layer = {
+    const newLayer: RuleLayer = {
       layerId,
       layerName: '分层' + getRandomStr(5),
-      rules: [
-        {
-          ruleId: Date.now(),
-          ruleName: '规则1',
-          indicator: [{ indicatorCode: null, condition: null, params: [] }],
-          dimension: [{ dimensionCode: null, params: [] }],
-        },
-      ],
+      ruleDef: {
+        rules: [
+          {
+            ruleId: Date.now(),
+            ruleName: '规则1',
+            indicatorDefs: [{ indicatorCode: null, condition: null, params: [] }],
+            dimensionDefs: [{ dimensionCode: null, params: [] }],
+          },
+        ],
+      },
     };
     layers.push(newLayer);
     setLayers([...layers]);
@@ -151,11 +167,11 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
   };
 
   const createIndicator = (iR: number) => {
-    if (layers[activeKey].rules[iR].indicator.length > 0) {
+    if (layers[activeKey].ruleDef.rules[iR].indicatorDefs.length > 0) {
       message.info('同一规则中只能存在一条指标');
       return;
     }
-    layers[activeKey].rules[iR].indicator.push({
+    layers[activeKey].ruleDef.rules[iR].indicatorDefs.push({
       indicatorCode: null,
       condition: null,
       params: [],
@@ -164,43 +180,63 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
   };
 
   const deleteIndicator = (iR: number, iI: number) => {
-    layers[activeKey].rules[iR].indicator.splice(iI, 1);
+    layers[activeKey].ruleDef.rules[iR].indicatorDefs.splice(iI, 1);
     setLayers([...layers]);
   };
 
   const createDimension = (iR: number) => {
-    layers[activeKey].rules[iR].indicator.push({
-      indicatorCode: null,
-      condition: null,
+    layers[activeKey].ruleDef.rules[iR].dimensionDefs.push({
+      dimensionCode: null,
       params: [],
     });
     setLayers([...layers]);
   };
 
-  const deleteDimension = (iR: number, iI: number) => {
-    layers[activeKey].rules[iR].indicator.splice(iI, 1);
+  const deleteDimension = (iR: number, iD: number) => {
+    layers[activeKey].ruleDef.rules[iR].dimensionDefs.splice(iD, 1);
+    dimensionParamOptions.splice(iD, 1);
+    setDimensionParamOptions([...dimensionParamOptions]);
     setLayers([...layers]);
   };
 
   const setIndicator = (v: string, iR: number, iI: number, prop: string, iP?: number) => {
     if (prop === 'params') {
-      layers[activeKey].rules[iR].indicator[iI].params[iP || 0] = v;
+      layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI].params[iP || 0] = v;
     } else {
-      layers[activeKey].rules[iR].indicator[iI][prop] = v;
-    }
-    if (prop === 'indicatorCode') {
-      layers[activeKey].rules[iR].dimension = [];
+      layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI][prop] = v;
     }
     setLayers([...layers]);
+
+    if (prop === 'indicatorCode') {
+      getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, v] })
+        .then((res) => {
+          const tmp = res.data.map((label: Label) => ({
+            label: label.labelName,
+            value: label.labelCode,
+          }));
+          setDimensionCodeOptions(tmp);
+          layers[activeKey].ruleDef.rules[iR].dimensionDefs = [{ dimensionCode: null, params: [] }];
+        })
+        .catch((err) => {});
+    }
   };
 
   const setDimension = (v: string, iR: number, iD: number, prop: string) => {
     if (prop === 'params') {
-      layers[activeKey].rules[iR].dimension[iD].params[0] = v;
+      layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].params[0] = v;
+      setLayers([...layers]);
     } else {
-      layers[activeKey].rules[iR].dimension[iD][prop] = v;
+      getDimensionList({ dimensionCode: v })
+        .then((res) => {
+          layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].dimensionCode = v;
+          dimensionParamOptions[iD] = res.data.map((v: string) => ({ label: v, value: v }));
+          setLayers([...layers]);
+          setDimensionParamOptions([...dimensionParamOptions]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-    setLayers([...layers]);
   };
 
   return (
@@ -223,7 +259,7 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
         </Button>
       </Space>
       <Divider />
-      {layers[activeKey]?.rules.map((rule, iR) => (
+      {layers[activeKey]?.ruleDef.rules.map((rule, iR) => (
         <Fragment key={rule.ruleId}>
           <Input
             placeholder="请输入"
@@ -252,26 +288,24 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
               }
             >
               <Space direction="vertical">
-                {rule.indicator.map((_, iI) => (
+                {rule.indicatorDefs.map((_, iI) => (
                   <Space key={iI}>
                     <Select
                       placeholder="请选择指标"
-                      style={{ minWidth: 160 }}
-                      options={[]}
-                      value={_.indicatorCode}
+                      options={indicatorCodeOptions}
+                      value={_.indicatorCode as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
                     />
                     <Select
                       placeholder="关系"
-                      style={{ minWidth: 160 }}
                       options={ConditionOptions}
-                      value={_.condition}
+                      value={_.condition as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'condition')}
                     />
-                    {rule.indicator[iI].condition === 'between' ? (
+                    {rule.indicatorDefs[iI].condition === 'between' ? (
                       <Input.Group compact>
                         <Input
-                          style={{ width: 100, textAlign: 'center' }}
+                          style={{ textAlign: 'center' }}
                           placeholder="最小值"
                           value={_.params[0]}
                           onChange={({ target: { value } }) =>
@@ -286,9 +320,9 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
                         />
                         <Input
                           className="site-input-right"
-                          style={{ width: 100, textAlign: 'center' }}
+                          style={{ textAlign: 'center' }}
                           placeholder="最大值"
-                          value={rule.indicator[iI].params[1]}
+                          value={rule.indicatorDefs[iI].params[1]}
                           onChange={({ target: { value } }) =>
                             setIndicator(value, iR, iI, 'params', 1)
                           }
@@ -297,8 +331,7 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
                     ) : (
                       <Input
                         placeholder="请输入"
-                        style={{ minWidth: 160 }}
-                        value={rule.indicator[iI].params[0]}
+                        value={rule.indicatorDefs[iI].params[0]}
                         onChange={({ target: { value } }) => setIndicator(value, iR, iI, 'params')}
                       />
                     )}
@@ -326,18 +359,18 @@ const EditRules: FC<EditRulesProps> = ({ initial }) => {
               }
             >
               <Space direction="vertical">
-                {rule.dimension.map((_, iD) => (
+                {rule.dimensionDefs.map((_, iD) => (
                   <Space key={iD}>
                     <Select
                       placeholder="请选择维度"
-                      style={{ width: 240 }}
-                      value={_.dimensionCode}
+                      value={_.dimensionCode as string}
+                      options={dimensionCodeOptions}
                       onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
                     />
                     <Select
                       placeholder="请选择"
-                      style={{ width: 240 }}
                       value={_.params[0]}
+                      options={dimensionParamOptions[iD]}
                       onChange={(v) => setDimension(v as string, iR, iD, 'params')}
                     />
                     <IconFont

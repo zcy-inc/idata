@@ -89,7 +89,7 @@ export default () => {
     fileCode && setCurLabel(fileCode);
     setVisibleLabel(true);
   };
-  
+
   const hideLabel = () => {
     setCurLabel('');
     setVisibleLabel(false);

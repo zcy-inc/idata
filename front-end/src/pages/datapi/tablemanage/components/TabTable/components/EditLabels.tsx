@@ -26,9 +26,17 @@ import { InitialLabel, RadioOps } from '../constants';
 import IconFont from '@/components/IconFont';
 import Title from '../../../../components/Title';
 
-export interface EditLabelsProps {
+interface EditLabelsProps {
   form: FormInstance;
   initial?: Table;
+}
+interface FlatTreeNodeOptions extends FlatTreeNode {
+  label: string;
+  value: string;
+}
+interface TableLableOptions extends TableLable {
+  label: string;
+  value: string;
 }
 
 const CheckboxGroup = Checkbox.Group;
@@ -45,18 +53,18 @@ const FormLabel: FC = ({ children }) => {
 
 const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, initial }, ref) => {
   // 平铺的目录树, 用于表单的位置
-  const [folders, setFolders] = useState<any[]>([]);
+  const [folders, setFolders] = useState<FlatTreeNodeOptions[]>([]);
   // checklist
   const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
   const [checkedList, setCheckedList] = useState<string[]>([]); // 齿轮那儿选中的项
   const [allChecked, setAllChecked] = useState(true); // 是否全选
   const [indeterminate, setIndeterminate] = useState(false); // 全选的一个样式开关
   // labels
-  const [labels, setLabels] = useState<any[]>([]); // 用以渲染checklist的完整obj
+  const [labels, setLabels] = useState<TableLableOptions[]>([]); // 用以渲染checklist的完整obj
   const labelsMap = useRef(new Map()); // 方便检索做的map
   const labelValues = useRef(new Map()); // 表单的数据（应要求checklist只做显隐, 数据还是全量）
 
-  const { curFolder } = useModel('tabalmanage', (ret) => ({
+  const { curFolder } = useModel('tablemanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
 
@@ -138,7 +146,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
   }, [initial, curFolder]);
 
   // 单选
-  const onCheck = (list) => {
+  const onCheck = (list: string[]) => {
     setCheckedList(list);
     setAllChecked(list.length === labels.length);
     setIndeterminate(!!list.length && list.length < labels.length);
@@ -240,7 +248,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             <CheckboxGroup
               options={labels}
               value={checkedList}
-              onChange={onCheck}
+              onChange={(v) => onCheck(v as string[])}
               style={{ display: 'flex', flexDirection: 'column' }}
             />
           }

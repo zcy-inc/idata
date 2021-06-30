@@ -5,6 +5,7 @@ import styles from '../../index.less';
 
 import Title from '../../../components/Title';
 import { Dimension, LabelAttribute, TableLable } from '@/types/datapi';
+import { KpiLabelsMap } from '@/constants/datapi';
 
 export interface ViewDimensionProps {
   data: Dimension;
@@ -56,7 +57,7 @@ const ViewDimension: FC<ViewDimensionProps> = ({ data }) => {
       >
         <Item label="维度名称">{data?.labelName}</Item>
         {attributes.map((attribute) => (
-          <Item label={attribute.attributeKey}>{attribute.attributeValue}</Item>
+          <Item label={KpiLabelsMap[attribute.attributeKey]}>{attribute.attributeValue}</Item>
         ))}
       </Descriptions>
       <Title>关联信息</Title>

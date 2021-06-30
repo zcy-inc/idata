@@ -105,18 +105,24 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             placeholder="请输入"
             rules={require}
           />
-          <ProFormText name="Code" label="Code" width="sm" placeholder="请输入" rules={require} />
+          <ProFormText
+            name="metricId"
+            label="Code"
+            width="sm"
+            placeholder="请输入"
+            rules={require}
+          />
         </ProFormGroup>
         <ProFormGroup>
           <ProFormText
-            name="英文别名"
+            name="enName"
             label="英文别名"
             width="sm"
             placeholder="请输入"
             rules={require}
           />
           <ProFormSelect
-            name="业务过程"
+            name="bizTypeCode"
             label="业务过程"
             width="sm"
             placeholder="请选择"
@@ -131,8 +137,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             options={folderOps}
           />
         </ProFormGroup>
-        <ProFormText name="定义" label="定义" width="md" placeholder="请输入" rules={require} />
-        <ProFormTextArea name="备注" label="备注" width="md" placeholder="请输入" />
+        <ProFormText
+          name="metricDefine"
+          label="定义"
+          width="md"
+          placeholder="请输入"
+          rules={require}
+        />
+        <ProFormTextArea name="comment" label="备注" width="md" placeholder="请输入" />
       </ProForm>
       {EditMap[metricType][0]}
     </Fragment>

@@ -12,7 +12,7 @@ import TabTable from '../TabTable';
 const { TabPane } = Tabs;
 
 const Workbench: FC = ({}) => {
-  const { panes, activeKey, onChangeTab, onRemovePane } = useModel('tabalmanage', (ret) => ({
+  const { panes, activeKey, onChangeTab, onRemovePane } = useModel('tablemanage', (ret) => ({
     panes: ret.panes,
     activeKey: ret.activeKey,
     onChangeTab: ret.onChangeTab,

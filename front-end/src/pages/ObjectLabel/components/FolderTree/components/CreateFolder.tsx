@@ -26,7 +26,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: any) => ({ label: _.name, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -35,8 +35,9 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     let folderName = '';
     let parentId = null;
+
     if (folderMode === 'create') {
-      parentId = curNode?.type === 'FOLDER' ? curNode?.folderId : curNode?.parentId;
+      parentId = curNode?.type === 'FOLDER' ? `${curNode?.id}` : curNode?.parentId;
     } else {
       folderName = curNode?.name;
       parentId = curNode?.parentId;
@@ -57,9 +58,13 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       modalProps={{ onCancel, maskClosable: false, destroyOnClose: true }}
       visible={visible}
       onFinish={async (values) => {
-        const params: any = { folderName: values.folderName, parentId: values.parentId };
-        if (curNode) {
-          Object.assign(params, { id: curNode.folderId });
+        const params: any = {
+          name: values.folderName,
+          parentId: values.parentId,
+          belong: 'lab',
+        };
+        if (curNode && folderMode === 'edit') {
+          Object.assign(params, { id: curNode.id });
           updateFolder(params)
             .then((res) => {
               if (res.success) {

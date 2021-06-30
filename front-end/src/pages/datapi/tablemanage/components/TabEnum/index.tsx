@@ -22,7 +22,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   const [data, setData] = useState<Enum>();
 
-  const { getTree, onRemovePane } = useModel('tabalmanage', (ret) => ({
+  const { getTree, onRemovePane } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
     onRemovePane: ret.onRemovePane,
   }));

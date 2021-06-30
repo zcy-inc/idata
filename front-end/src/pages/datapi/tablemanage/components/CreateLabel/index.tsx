@@ -47,7 +47,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
   // edit mode
   const [form] = Form.useForm();
 
-  const { curFolder, getTree, hideLabel, curLabel, visible } = useModel('tabalmanage', (ret) => ({
+  const { curFolder, getTree, hideLabel, curLabel, visible } = useModel('tablemanage', (ret) => ({
     curFolder: ret.curFolder,
     getTree: ret.getTree,
     hideLabel: ret.hideLabel,

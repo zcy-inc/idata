@@ -30,7 +30,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
 
   const refTable = useRef<EditTableExportProps>();
 
-  const { getTree, onRemovePane } = useModel('tabalmanage', (ret) => ({
+  const { getTree, onRemovePane } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
     onRemovePane: ret.onRemovePane,
   }));

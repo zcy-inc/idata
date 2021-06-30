@@ -1,7 +1,9 @@
 import React, { Fragment } from 'react';
 import { Modal, Collapse, Space, Tabs } from 'antd';
 import type { FC } from 'react';
+
 import { RuleLayer } from '@/types/objectlabel';
+import { ConditionMap } from '../constants';
 
 interface ViewRulesProps {
   layers: RuleLayer[];
@@ -30,8 +32,8 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
                     <Space direction="vertical">
                       {rule.indicatorDefs.map((indicator) => (
                         <Space>
-                          <span>{indicator.indicatorCode}</span>
-                          <span>{indicator.condition}</span>
+                          <span>{indicator.indicatorName}</span>
+                          <span>{ConditionMap[indicator.condition]}</span>
                           <span>{indicator.params}</span>
                         </Space>
                       ))}
@@ -41,7 +43,7 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
                     <Space direction="vertical">
                       {rule.dimensionDefs.map((dimension) => (
                         <Space>
-                          <span>{dimension.dimensionCode}</span>
+                          <span>{dimension.dimensionName}</span>
                           <span>{dimension.params}</span>
                         </Space>
                       ))}

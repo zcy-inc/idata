@@ -1,6 +1,5 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import ProTable from '@ant-design/pro-table';
-import { Button, Card, Descriptions, Typography } from 'antd';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Space, Empty } from 'antd';
 import type { FC, Key } from 'react';
 import styles from '../../index.less';
 
@@ -9,160 +8,82 @@ import ViewRules from './components/ViewRules';
 
 import { getObjectLabelLayer, exportObjectLabel } from '@/services/objectlabel';
 import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
+import { ObjectTypeView } from './constants';
 
 export interface ViewLabelProps {
   data: ObjectLabel;
 }
-interface Layer extends RuleLayer {
-  key: number;
-  label: string;
-}
+
 const { Item } = Descriptions;
 const { Link } = Typography;
-const mock: Layer[] = [
-  {
-    key: 1,
-    label: '1',
-    layerId: 1,
-    layerName: 'in_vane s layer',
-    ruleDef: {
-      rules: [
-        {
-          ruleId: 11,
-          ruleName: 'aa',
-          indicatorDefs: [
-            {
-              indicatorCode: '111',
-              condition: 'equal',
-              params: [100, 200],
-            },
-          ],
-          dimensionDefs: [
-            {
-              dimensionCode: '222',
-              params: ['location'],
-            },
-          ],
-        },
-        {
-          ruleId: 11,
-          ruleName: 'aa',
-          indicatorDefs: [
-            {
-              indicatorCode: '111',
-              condition: 'equal',
-              params: [100, 200],
-            },
-          ],
-          dimensionDefs: [
-            {
-              dimensionCode: '222',
-              params: ['location'],
-            },
-          ],
-        },
-        {
-          ruleId: 11,
-          ruleName: 'aa',
-          indicatorDefs: [
-            {
-              indicatorCode: '111',
-              condition: 'equal',
-              params: [100, 200],
-            },
-          ],
-          dimensionDefs: [
-            {
-              dimensionCode: '222',
-              params: ['location'],
-            },
-          ],
-        },
-        {
-          ruleId: 11,
-          ruleName: 'aa',
-          indicatorDefs: [
-            {
-              indicatorCode: '111',
-              condition: 'equal',
-              params: [100, 200],
-            },
-          ],
-          dimensionDefs: [
-            {
-              dimensionCode: '222',
-              params: ['location'],
-            },
-          ],
-        },
-        {
-          ruleId: 11,
-          ruleName: 'aa',
-          indicatorDefs: [
-            {
-              indicatorCode: '111',
-              condition: 'equal',
-              params: [100, 200],
-            },
-          ],
-          dimensionDefs: [
-            {
-              dimensionCode: '222',
-              params: ['location'],
-            },
-          ],
-        },
-      ],
-    },
-  },
-];
 
 const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
-  const [key, setKey] = useState<Key>('');
-  const [layers, setLayers] = useState<Layer[]>(mock);
-  const [columns, setColumns] = useState([]);
-  const [list, setList] = useState([{}]);
+
+  const [layers, setLayers] = useState<RuleLayer[]>([]);
+  const [activeKey, setActiveKey] = useState<string>('');
+
+  const [loading, setLoading] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
+  const [columns, setColumns] = useState<{ title: string; key: Key; dataIndex: Key }[][]>([]);
+  const [list, setList] = useState<{ [key: string]: any }[][]>([]);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
 
   useEffect(() => {
     if (data) {
-      const tmpL = data.ruleLayers.map((layer) => ({
-        ...layer,
-        key: layer.layerId,
-        label: layer.layerName,
-      }));
-      setLayers(tmpL);
+      setLayers(data.ruleLayers);
+      setActiveKey(`${data.ruleLayers[0].layerId}`);
     }
   }, [data]);
 
-  const getList = (layerId?: number) => {
-    getObjectLabelLayer({ id: data.id, layerId: (layerId || key) as number })
-      .then((res) => {})
-      .catch((err) => {});
+  const getActiveIndex = () => layers.findIndex((layer) => `${layer.layerId}` === activeKey);
+
+  const getList = () => {
+    setLoading(true);
+    getObjectLabelLayer({ id: data.id, layerId: activeKey })
+      .then((res) => {
+        const c = res.data.columns.map((column, i) => ({
+          title: column.columnName,
+          key: i,
+          dataIndex: i,
+        }));
+        const d = res.data.data.map((r) => {
+          const tmp = { id: Date.now() };
+          r.forEach((v, i) => (tmp[i] = v));
+          return tmp;
+        });
+        const i = getActiveIndex();
+        columns[i] = c;
+        list[i] = d;
+        setColumns([...columns]);
+        setList([...list]);
+      })
+      .catch((err) => {})
+      .finally(() => setLoading(false));
   };
 
   const onExport = () => {
-    exportObjectLabel({ id: data.id, layerId: key as number })
+    setLoadingExport(true);
+    exportObjectLabel({ id: data.id, layerId: activeKey })
       .then((res) => {
-        const link = document.createElement('a');
         const body = document.querySelector('body');
-
-        link.href = window.URL.createObjectURL(res.data); // 创建对象url param: blob
-        link.download = 'fileName';
-
+        const link = document.createElement('a');
+        const blob = new Blob([res], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        link.href = window.URL.createObjectURL(blob); // 创建URL对象 param: blob
+        link.download = `${data.name}_${activeKey}`;
         // fix Firefox
         link.style.display = 'none';
         body?.appendChild(link);
-
         link.click();
         body?.removeChild(link);
-
-        window.URL.revokeObjectURL(link.href); // 通过调用 URL.createObjectURL() 创建的 URL 对象
+        window.URL.revokeObjectURL(link.href); // 释放创建的URL对象
       })
-      .catch((err) => {});
+      .catch((err) => {})
+      .finally(() => setLoadingExport(false));
   };
 
   return (
@@ -176,7 +97,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
       >
         <Item label="标签名称">{data?.name}</Item>
         <Item label="标签英文名">{data?.nameEn}</Item>
-        <Item label="标签主体">{data?.objectType}</Item>
+        <Item label="标签主体">{ObjectTypeView[data?.objectType]}</Item>
         <Item label="标签规则">
           <Link onClick={showModal}>查看详情</Link>
         </Item>
@@ -188,19 +109,39 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
       </Descriptions>
       <Title>数据内容</Title>
       <Card className={`${styles.content} ${styles.reset}`}>
-        <ProTable
-          columns={columns}
-          dataSource={list}
-          search={false}
-          options={false}
-          toolbar={{
-            menu: { type: 'tab', items: layers, onChange: (key) => setKey(key as Key) },
-            actions: [
-              <Button onClick={onExport}>导出</Button>,
-              <Button onClick={() => getList()}>查询</Button>,
-            ],
+        <Tabs
+          onChange={setActiveKey}
+          tabBarExtraContent={{
+            right: (
+              <Space>
+                <Button onClick={onExport} loading={loadingExport} disabled={loading}>
+                  导出
+                </Button>
+                <Button onClick={getList} disabled={loading || loadingExport}>
+                  查询
+                </Button>
+              </Space>
+            ),
           }}
-        />
+        >
+          {layers.map((layer, i) => (
+            <Tabs.TabPane tab={layer.layerName} key={layer.layerId} style={{ marginTop: 16 }}>
+              <Skeleton loading={loading} active>
+                {columns[i] ? (
+                  <Table
+                    rowKey="id"
+                    columns={columns[i]}
+                    dataSource={list[i]}
+                    pagination={false}
+                    scroll={{ x: 'max-content' }}
+                  />
+                ) : (
+                  <Empty />
+                )}
+              </Skeleton>
+            </Tabs.TabPane>
+          ))}
+        </Tabs>
       </Card>
       {visible && <ViewRules layers={layers} visible={visible} onCancel={hideModal} />}
     </Fragment>

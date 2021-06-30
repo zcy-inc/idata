@@ -9,7 +9,7 @@ import FolderTree from './components/FolderTree';
 import Workbench from './components/Workbench';
 
 const TableManage: FC = () => {
-  const { visibleLabel } = useModel('tabalmanage', (ret) => ({
+  const { visibleLabel } = useModel('tablemanage', (ret) => ({
     visibleLabel: ret.visibleLabel,
   }));
 

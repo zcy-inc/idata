@@ -111,7 +111,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     confirm({
       title: '您确定要删除该文件夹吗？',
       onOk: () =>
-        deleteFolder({ id: curNode?.folderId })
+        deleteFolder({ id: curNode?.id })
           .then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
@@ -219,16 +219,16 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
           onRightClick={({ node }: any) => {
-            const parentId = node.parentId?.split('_')[1] || null;
-            const folderId = `${node.folderId}`;
-            setCurNode({ ...node, folderId, parentId });
+            const parentId =
+              typeof node.parentId === 'string' ? node.parentId?.split('_')[1] : null;
+            setCurNode({ ...node, parentId });
           }}
           onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && viewTab(node)}
         >
           {loop(tree)}
         </Tree>
       </Dropdown>
-      <CreateFolder visible={visible} onCancel={() => setVisible(false)} />
+      {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
     </Fragment>
   );
 };

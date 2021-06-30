@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
-import type { FC, ChangeEvent } from 'react';
+import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -9,18 +9,10 @@ import CreateFolder from './components/CreateFolder';
 
 import { deleteFolder } from '@/services/kpisystem';
 import { TreeNodeType } from '@/constants/datapi';
+import { TreeNode as ITreeNode } from '@/types/datapi';
 
-export type Key = string | number;
 export interface FolderTreeProps {}
-export interface TreeNode {
-  name: string;
-  type: string;
-  folderId: string;
-  parentId: string;
-  children?: TreeNode[];
-  [key: string]: any;
-}
-export interface FlatTreeNode {
+interface SearchTreeNode {
   key: string;
   name: string;
   parentId?: string;
@@ -39,9 +31,9 @@ const NodeTypeIcon = {
 
 const FolderTree: FC<FolderTreeProps> = ({}) => {
   const [searchValue, setSearchValue] = useState('');
-  const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
-  const flatTree = useRef<FlatTreeNode[]>([]);
+  const flatTree = useRef<SearchTreeNode[]>([]);
 
   const [visible, setVisible] = useState(false);
 
@@ -143,13 +135,13 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     });
 
   // 组装数据，并高亮检索结果
-  const loop = (data: any[], parentId?: string): any => {
+  const loop = (data: ITreeNode[], parentId?: string): any => {
     const n = data.length;
     return data.map((_, i) => {
       const { name, type, cid } = _;
       const _i = name.indexOf(searchValue);
       const node = { ..._, key: cid };
-      let _type = type;
+      let _type = type as string;
       let title = (
         <span key="title" className={!parentId && type === 'FOLDER' && styles['folder-root']}>
           {name}
@@ -206,7 +198,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     const keys = flatTree.current
       .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
       .filter((_) => !!_);
-    setExpandedKeys(keys);
+    setExpandedKeys(keys as Key[]);
     setSearchValue(value);
     setAutoExpandParent(true);
   };

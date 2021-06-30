@@ -19,7 +19,7 @@ const { require } = rules;
 
 const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   const [folders, setFolders] = useState([]);
-  const { curFolder } = useModel('tabalmanage', (ret) => ({
+  const { curFolder } = useModel('tablemanage', (ret) => ({
     curFolder: ret.curFolder,
   }));
 

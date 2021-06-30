@@ -38,3 +38,18 @@ export const BooleanOptions = [
   { label: '是', value: 'true' },
   { label: '否', value: 'false' },
 ];
+
+// 维度："enName", "dimensionId", "dimensionDefine"，"comment"
+// 修饰词："enName", "modifierEnum", "modifierDefine"，"comment"
+// 指标："enName", "metricId", "bizTypeCode", "metricDefine"，"comment"
+export const KpiLabelsMap = {
+  enName: '英文别名',
+  comment: '备注',
+  dimensionId: 'Code',
+  dimensionDefine: '定义',
+  modifierEnum: '枚举值',
+  modifierDefine: '定义',
+  metricId: 'Code',
+  bizTypeCode: '业务过程',
+  metricDefine: '定义',
+};
