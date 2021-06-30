@@ -92,7 +92,6 @@ public class MetricServiceImpl implements MetricService {
     // 标签系统查询指标或维度，根据输入的labelCodes缩小范围
     @Override
     public List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag) {
-//        List<DevLabel> measureLabelList = devLabelMyDao.selectLabelsByLabelCodes(String.join(",", labelCodes));
         List<DevLabel> measureLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                 and(devLabel.labelCode, isIn(labelCodes))));
         List<DevLabel> devMeasureLabelList = new ArrayList<>();
@@ -111,8 +110,19 @@ public class MetricServiceImpl implements MetricService {
             List<DevLabel> devMeasureLabels = devLabelDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
             devMeasureLabelList.addAll(devMeasureLabels);
         }
-        Set<String> measureCodeList = devMeasureLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toSet());
-        return PojoUtil.copyList(devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", measureCodeList)),
+        List<LabelDefineDto> deriveMetricList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DERIVE_METRIC_LABEL.name())))),
+                LabelDefineDto.class);
+        List<String> measureCodeList = devMeasureLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toList());
+        deriveMetricList.forEach(deriveMetric -> {
+            if (isNotEmpty(deriveMetric.getSpecialAttribute().getAtomicMetricCode())
+                    && measureCodeList.contains(deriveMetric.getSpecialAttribute().getAtomicMetricCode())) {
+                measureCodeList.add(deriveMetric.getLabelCode());
+            }
+        });
+        Set<String> echoMeasureCodeList = new HashSet<>(measureCodeList);
+        return PojoUtil.copyList(devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", echoMeasureCodeList)),
                 MeasureDto.class);
     }
 
