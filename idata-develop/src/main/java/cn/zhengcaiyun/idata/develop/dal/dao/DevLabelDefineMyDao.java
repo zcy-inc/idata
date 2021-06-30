@@ -16,8 +16,11 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.dao;
 
+import cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -30,6 +33,9 @@ import java.util.List;
 @Mapper
 public interface DevLabelDefineMyDao {
 
+    @Result(column = "label_attributes", property = "labelAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "special_attribute", property = "specialAttribute", javaType = SpecialAttributeDto.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "enum_attributes", property = "enumAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
     @Select("<script>" +
             "select * " +
             "from dev_label_define " +
@@ -39,6 +45,9 @@ public interface DevLabelDefineMyDao {
             "</script>")
     List<DevLabelDefine> selectLabelDefineByEnumCode(String enumCode);
 
+    @Result(column = "label_attributes", property = "labelAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "special_attribute", property = "specialAttribute", javaType = SpecialAttributeDto.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "enum_attributes", property = "enumAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
     @Select("<script>" +
             "SELECT * " +
             "FROM dev_label_define " +
