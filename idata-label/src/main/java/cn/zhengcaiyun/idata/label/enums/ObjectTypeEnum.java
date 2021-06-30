@@ -53,7 +53,8 @@ public enum ObjectTypeEnum {
     }
 
     public static Optional<ObjectTypeEnum> getEnum(String objectType) {
-        if (StringUtils.isNotEmpty(objectType)) return Optional.empty();
+        if (StringUtils.isEmpty(objectType)) return Optional.empty();
+
         return Optional.ofNullable(map.get(objectType));
     }
 }

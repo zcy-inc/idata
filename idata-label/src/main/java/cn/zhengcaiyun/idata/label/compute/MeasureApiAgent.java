@@ -2,9 +2,9 @@ package cn.zhengcaiyun.idata.label.compute;
 
 import cn.zhengcaiyun.idata.develop.api.MeasureApi;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.develop.dto.label.ModifierDto;
 import cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import cn.zhengcaiyun.idata.label.compute.metadata.DimensionMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.IndicatorMetadata;
 import cn.zhengcaiyun.idata.label.compute.metadata.ObjectMetadata;
@@ -54,7 +54,7 @@ public class MeasureApiAgent {
         if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
-        return Optional.of(convertToIndicatorMetadata(measureDtoList.get(0)));
+        return Optional.ofNullable(convertToIndicatorMetadata(measureDtoList.get(0)));
     }
 
     private IndicatorMetadata convertToIndicatorMetadata(MeasureDto measureDto) {
@@ -72,7 +72,7 @@ public class MeasureApiAgent {
             return null;
         }
         metadata.setFunction(specialAttributeDto.getAggregatorCode());
-        List<ModifierDto> modifiers = specialAttributeDto.getModifiers();
+        List<ModifierDto> modifiers = measureDto.getModifiers();
         if (!CollectionUtils.isEmpty(modifiers)) {
             List<IndicatorMetadata.DecorateWordMetadata> decorateWords = Lists.newArrayList();
             for (ModifierDto modifierDto : modifiers) {
