@@ -57,7 +57,7 @@ public class MeasureApiImpl implements MeasureApi {
     @Override
     public List<MeasureDto> getMeasures(List<String> labelCodes) {
         List<DevLabelDefine> measureList = devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", labelCodes));
-        return measureList.stream().map(measure -> {
+        List<MeasureDto> echoMeasureList = measureList.stream().map(measure -> {
             MeasureDto echoMeasure = new MeasureDto();
             if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(measure.getLabelTag())) {
                 echoMeasure = metricService.findMetric(measure.getLabelCode());
@@ -72,9 +72,11 @@ public class MeasureApiImpl implements MeasureApi {
                             isNotEqualTo(1),
                             and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
                 });
-                echoMeasure = PojoUtil.copyOne(echoMeasure, MeasureDto.class);
+                echoMeasure = PojoUtil.copyOne(measure, MeasureDto.class);
+                echoMeasure.setMeasureLabels(measureLabelList);
             }
             return echoMeasure;
         }).collect(Collectors.toList());
+        return echoMeasureList;
     }
 }

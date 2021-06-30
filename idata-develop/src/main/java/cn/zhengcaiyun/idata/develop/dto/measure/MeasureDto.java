@@ -28,8 +28,8 @@ import java.util.List;
 
 public class MeasureDto extends LabelDefineDto {
     private List<LabelDto> measureLabels;
-    private MeasureDto autoMetric;
-    private List<MeasureDto> modifiers;
+    private MeasureDto atomicMetric;
+    private List<ModifierDto> modifiers;
 
     // GaS
     public List<LabelDto> getMeasureLabels() {
@@ -38,5 +38,21 @@ public class MeasureDto extends LabelDefineDto {
 
     public void setMeasureLabels(List<LabelDto> measureLabels) {
         this.measureLabels = measureLabels;
+    }
+
+    public MeasureDto getAtomicMetric() {
+        return atomicMetric;
+    }
+
+    public void setAtomicMetric(MeasureDto atomicMetric) {
+        this.atomicMetric = atomicMetric;
+    }
+
+    public List<ModifierDto> getModifiers() {
+        return modifiers;
+    }
+
+    public void setModifiers(List<ModifierDto> modifiers) {
+        this.modifiers = modifiers;
     }
 }

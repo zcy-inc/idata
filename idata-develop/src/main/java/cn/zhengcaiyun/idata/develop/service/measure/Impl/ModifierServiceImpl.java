@@ -19,9 +19,13 @@ package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
+import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -52,17 +57,54 @@ public class ModifierServiceImpl implements ModifierService {
     @Autowired
     private DevLabelDao devLabelDao;
     @Autowired
+    private DevTableInfoDao devTableInfoDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
-    private ModifierService modifierService;
-    @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private EnumService enumService;
 
     private String[] modifierInfos = new String[]{"enName", "modifierEnum", "modifierDefine"};
 
     @Override
     public MeasureDto findModifier(String modifierCode) {
         return getModifierByCode(modifierCode);
+    }
+
+    // 依靠派生指标code查询修饰词
+    @Override
+    public List<ModifierDto> findModifiers(String metricCode, Long atomicTableId) {
+        DevLabelDefine metric = devLabelDefineDao.selectOne(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElse(null);
+        checkArgument(metric != null, "指标不存在");
+        Map<String, List<String>> metricModifierMap = metric.getSpecialAttribute().getModifiers().stream()
+                .collect(Collectors.toMap(ModifierDto::getModifierCode, ModifierDto::getEnumValueCodes));
+        List<String> modifierCodeList = PojoUtil.copyOne(metric, MeasureDto.class).getSpecialAttribute().getModifiers()
+                .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+        List<MeasureDto> modifierList = PojoUtil.copyList(devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isIn(modifierCodeList)))), MeasureDto.class);
+        List<ModifierDto> echoModifierList = modifierList.stream().map(modifier -> {
+            ModifierDto echoModifier = new ModifierDto();
+            echoModifier.setModifierName(modifier.getLabelName());
+            List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()));
+            echoModifier.setEnumValues(modifierEnumValueList);
+            if (atomicTableId != null) {
+                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
+                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->
+                        modifierLabel.getTableId().equals(atomicTableId)).findAny()
+                        .orElse(null);
+                if (echoModifierLabel != null) {
+                    echoModifier.setTableName(tableMap.get(atomicTableId));
+                    echoModifier.setColumnName(echoModifierLabel.getColumnName());
+                }
+            }
+            return echoModifier;
+        }).collect(Collectors.toList());
+        return echoModifierList;
     }
 
     @Override

@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.label;
 
+import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;

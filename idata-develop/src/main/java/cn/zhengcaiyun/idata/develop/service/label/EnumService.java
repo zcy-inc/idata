@@ -33,5 +33,6 @@ public interface EnumService {
     List<EnumValueDto> getEnumValues(String enumCode);
     String getEnumName(String enumCode);
     String getEnumValue(String valueCode);
+    List<String> getEnumValues(List<String> valueCodes);
     boolean delete(String enumCode, String operator);
 }

@@ -18,10 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.label.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
@@ -34,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -58,7 +56,7 @@ public class LabelServiceImpl implements LabelService {
     @Autowired
     private DevLabelDao devLabelDao;
     @Autowired
-    private DevLabelDefineMyDao devLabelDefineMyDao;
+    private DevLabelMyDao devLabelMyDao;
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
@@ -293,18 +291,19 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
-        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
-//        return toLabelDtoList(devLabelDao.select(c ->
+        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
+//        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+//                c.where(devLabelDefine.del, isNotEqualTo(1)))
+//                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+////        return toLabelDtoList(devLabelDao.select(c ->
+////                c.where(devLabel.tableId, isEqualTo(tableId),
+////                        and(devLabel.columnName, isEqual(columnName)),
+////                        and(devLabel.del, isNotEqualTo(1)))));
+//        return devLabelDao.select(c ->
 //                c.where(devLabel.tableId, isEqualTo(tableId),
 //                        and(devLabel.columnName, isEqual(columnName)),
-//                        and(devLabel.del, isNotEqualTo(1)))));
-        return devLabelDao.select(c ->
-                c.where(devLabel.tableId, isEqualTo(tableId),
-                        and(devLabel.columnName, isEqual(columnName)),
-                        and(devLabel.del, isNotEqualTo(1))))
-                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
+//                        and(devLabel.del, isNotEqualTo(1))))
+//                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }
 
     @Override

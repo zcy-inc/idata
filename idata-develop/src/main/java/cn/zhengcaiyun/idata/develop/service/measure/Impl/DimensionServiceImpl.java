@@ -19,7 +19,10 @@ package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -38,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -54,6 +58,8 @@ public class DimensionServiceImpl implements DimensionService {
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
     private DevLabelDao devLabelDao;
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
     @Autowired
     private LabelService labelService;
     @Autowired
@@ -75,8 +81,22 @@ public class DimensionServiceImpl implements DimensionService {
         return echoDimension;
     }
 
+    // 利用指标code反查维度
     @Override
     public List<MeasureDto> findDimensionsByLabelCode(String labelCode) {
+        DevLabelDefine dimensionLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelTag, isNotLike("%_DISABLE")), and(devLabelDefine.labelCode, isEqualTo(labelCode))))
+                .orElse(null);
+        checkArgument(dimensionLabelDefine != null, "维度不存在或已停用");
+        List<LabelDto> dimensionLabelList = PojoUtil.copyList(devLabelDao.select(c -> c.where(devLabel.del,
+                isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))), LabelDto.class);
+        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+        dimensionLabelList.forEach(dimensionLabel -> {
+            if (tableMap.containsKey(dimensionLabel.getTableId())) {
+                dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId()));
+            }
+        });
         return null;
     }
 

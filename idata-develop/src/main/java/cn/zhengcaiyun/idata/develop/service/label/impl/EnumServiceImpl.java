@@ -185,6 +185,13 @@ public class EnumServiceImpl implements EnumService {
     }
 
     @Override
+    public List<String> getEnumValues(List<String> valueCodes) {
+        return devEnumValueDao.select(c ->
+                c.where(devEnumValue.valueCode, isIn(valueCodes), and(devEnumValue.del, isNotEqualTo(1))))
+                .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional(rollbackFor = Throwable.class)
     public boolean delete(String enumCode, String operator) {
         checkArgument(enumCode != null, "enumCode不能为空");

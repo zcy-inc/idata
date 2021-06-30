@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.dao;
 
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -31,10 +31,17 @@ import java.util.List;
 public interface DevLabelMyDao {
 
     @Select("<script>" +
-            "SELECT * " +
+            "SELECT dev_label.id, dev_label.label_code, dev_label.table_id, dev_label.column_name, " +
+                "dev_label.label_param_value, dev_label_define.label_name, dev_label_define.label_tag, " +
+                "dev_label_define.label_param_type " +
             "FROM dev_label " +
-            "WHERE dev_label.del != 1 " +
-                "AND FIND_IN_SET(dev_label.label_code, #{labelCodes})" +
+            "LEFT JOIN dev_label_define " +
+            "ON dev_label.label_code = dev_label_define.label_code " +
+            "WHERE dev_label.del != 1 AND dev_label_define.del != 1 AND dev_label.table_id = #{tableId} " +
+                "<if test = 'columnNames != null'>" +
+                    "AND FIND_IN_SET(dev_label.column_name, #{columnNames}) " +
+                "</if>" +
+            "ORDER BY dev_label_define.label_index, dev_label_define.id" +
             "</script>")
-    List<DevLabel> selectLabelsByLabelCodes(String labelCodes);
+    List<LabelDto> selectLabelsBySubject(Long tableId, String columnNames);
 }

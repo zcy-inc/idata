@@ -17,6 +17,9 @@
 package cn.zhengcaiyun.idata.develop.service.measure;
 
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
+
+import java.util.List;
 
 /**
  * @author caizhedong
@@ -25,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 
 public interface ModifierService {
     MeasureDto findModifier(String modifierCode);
+    List<ModifierDto> findModifiers(String metricCode, Long atomicTableId);
     MeasureDto create(MeasureDto modifier, String operator);
     MeasureDto edit(MeasureDto modifier, String operator);
     MeasureDto disable(String modifierCode, String operator);

@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure;
 
-import cn.zhengcaiyun.idata.develop.dto.label.MetricDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 
 import java.util.List;

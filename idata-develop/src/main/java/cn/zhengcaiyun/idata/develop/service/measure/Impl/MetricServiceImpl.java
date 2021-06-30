@@ -25,10 +25,13 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
+import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,7 @@ public class MetricServiceImpl implements MetricService {
     @Autowired
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
-    private DevLabelMyDao devLabelMyDao;
+    private ModifierService modifierService;
     @Autowired
     private DevLabelDefineMyDao devLabelDefineMyDao;
     @Autowired
@@ -89,7 +92,9 @@ public class MetricServiceImpl implements MetricService {
     // 标签系统查询指标或维度，根据输入的labelCodes缩小范围
     @Override
     public List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag) {
-        List<DevLabel> measureLabelList = devLabelMyDao.selectLabelsByLabelCodes(String.join(",", labelCodes));
+//        List<DevLabel> measureLabelList = devLabelMyDao.selectLabelsByLabelCodes(String.join(",", labelCodes));
+        List<DevLabel> measureLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isIn(labelCodes))));
         List<DevLabel> devMeasureLabelList = new ArrayList<>();
         for (DevLabel measureLabel : measureLabelList) {
             var builder = select(devLabel.allColumns())
@@ -304,6 +309,12 @@ public class MetricServiceImpl implements MetricService {
             if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
                 List<MeasureDto> deriveMetricList = getMetricByAtomic(metricCode);
                 echoMetric.setDeriveMetrics(deriveMetricList);
+            }
+            else {
+                MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
+                echoMetric.setAtomicMetric(atomicMetric);
+                Long atomicTableId = labelService.findLabelsByCode(atomicMetric.getLabelCode()).get(0).getTableId();
+                echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicTableId));
             }
         }
         return echoMetric;
