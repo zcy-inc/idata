@@ -294,19 +294,19 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
-        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
-//        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
-//                c.where(devLabelDefine.del, isNotEqualTo(1)))
-//                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+//        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
 ////        return toLabelDtoList(devLabelDao.select(c ->
 ////                c.where(devLabel.tableId, isEqualTo(tableId),
 ////                        and(devLabel.columnName, isEqual(columnName)),
 ////                        and(devLabel.del, isNotEqualTo(1)))));
-//        return devLabelDao.select(c ->
-//                c.where(devLabel.tableId, isEqualTo(tableId),
-//                        and(devLabel.columnName, isEqual(columnName)),
-//                        and(devLabel.del, isNotEqualTo(1))))
-//                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
+        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+        return devLabelDao.select(c ->
+                c.where(devLabel.tableId, isEqualTo(tableId),
+                        and(devLabel.columnName, isEqual(columnName)),
+                        and(devLabel.del, isNotEqualTo(1))))
+                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }
 
     @Override
