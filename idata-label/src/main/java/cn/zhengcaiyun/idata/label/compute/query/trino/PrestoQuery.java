@@ -117,16 +117,4 @@ public class PrestoQuery implements Query {
         return queryResult;
     }
 
-    public static void main(String[] args) throws SQLException {
-        ConnectionDto connectionDto = new ConnectionDto();
-        connectionDto.setHost("172.29.108.184");
-        connectionDto.setPort(18080);
-        connectionDto.setDbCatalog("hive");
-        connectionDto.setUsername("presto");
-//        new PrestoQuery().getConnection(connectionDto);
-//        System.out.println(new PrestoQuery().getSchemas(connectionDto));
-//        System.out.println(new PrestoQuery().getTables(connectionDto, "tmp"));
-//        System.out.println(new PrestoQuery().getColumns(connectionDto, "tmp", "tmp_charge_bill_order_goods"));
-        System.out.println(new PrestoQuery().query(connectionDto, "select loan_time from dwd.dwd_loan_repayment_detail where loan_time > date('2019-01-01') limit 1"));
-    }
 }

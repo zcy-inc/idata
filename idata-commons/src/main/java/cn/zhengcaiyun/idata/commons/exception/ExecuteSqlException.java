@@ -1,9 +1,9 @@
-package cn.zhengcaiyun.idata.label.compute.query.exception;
+package cn.zhengcaiyun.idata.commons.exception;
 
 /**
- * @description:
+ * @description: sql执行异常
  * @author: yangjianhua
- * @create: 2021-06-25 16:22
+ * @create: 2021-07-01 09:57
  **/
 public class ExecuteSqlException extends RuntimeException {
 

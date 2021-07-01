@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.config;
 
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -41,10 +42,16 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public RestResult exceptionHandler(Exception error, HttpServletRequest req) {
-        log.error("uri: {}, method: {}, stack: {}", req.getRequestURI(), req.getMethod(),
+        log.warn("uri: {}, method: {}, stack: {}", req.getRequestURI(), req.getMethod(),
                 ExceptionUtils.getStackTrace(error));
         if (error instanceof IllegalArgumentException) {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof IllegalStateException) {
+            return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof ExecuteSqlException) {
+            return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
         }
         if (error instanceof HttpMessageNotReadableException
                 || error instanceof HttpRequestMethodNotSupportedException
