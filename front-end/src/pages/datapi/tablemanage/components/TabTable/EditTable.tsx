@@ -12,7 +12,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
 import { getDWOwner, getTableLabels } from '@/services/tablemanage';
-import { Table, ForeignKey } from '@/types/datapi';
+import { Table, ForeignKey, TableLable } from '@/types/datapi';
 import { InitialColumn } from './constants';
 
 import IconFont from '@/components/IconFont';
@@ -20,18 +20,22 @@ import EditLabels from './components/EditLabels';
 import EditColsInfo from './components/EditColsInfo';
 import EditForeign from './components/EditForeign';
 
-export interface EditTableProps {
+interface EditTableProps {
   refs: { [key: string]: FormInstance };
   initial?: Table;
 }
-export interface LabelsExportProps {
+interface LabelsExportProps {
   labels: Map<string, any>;
 }
-export interface ColumnsExportProps {
+interface ColumnsExportProps {
   data: { [key: string]: any }[];
 }
-export interface ForeignExportProps {
+interface ForeignExportProps {
   data: ForeignKey[];
+}
+interface TableLableOption extends TableLable {
+  label: string;
+  value: string;
 }
 
 const CheckboxGroup = Checkbox.Group;
@@ -40,14 +44,14 @@ const { TabPane } = Tabs;
 const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, initial }, ref) => {
   // 表结构可选列设置
   const [checkedList, setCheckedList] = useState<string[]>([]);
-  const [allChecked, setAllChecked] = useState<boolean>(true);
-  const [indeterminate, setIndeterminate] = useState<boolean>(false);
+  const [allChecked, setAllChecked] = useState(true);
+  const [indeterminate, setIndeterminate] = useState(false);
   const [iconType, setIconType] = useState<'icon-shezhi' | 'icon-shezhijihuo'>('icon-shezhi');
   // 表结构的列与检索表
-  const [columns, setColumns] = useState<any[]>([]);
+  const [columns, setColumns] = useState<TableLableOption[]>([]);
   const columnsMap = useRef(new Map()); // 检索用的
   // 外键
-  const [strOps, setStrOps] = useState<any[]>([]);
+  const [strOps, setStrOps] = useState<TableLableOption[]>([]);
 
   const refLabel = useRef<LabelsExportProps>();
   const refColumns = useRef<ColumnsExportProps>();
@@ -127,7 +131,11 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
             // 切换到外键的时候，保存表结构字段，生成Select的ops
             const dataIndex = columns[0].labelCode;
             const stData = refColumns.current?.data || [];
-            const ops = stData.map((_: any) => ({ label: _[dataIndex], value: _[dataIndex] }));
+            const ops = stData.map((_: any) => ({
+              ..._,
+              label: _[dataIndex],
+              value: _[dataIndex],
+            }));
             setStrOps(ops);
           }
         }}
@@ -167,7 +175,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
           <EditColsInfo
             ref={refColumns}
             initial={initial}
-            _props={{
+            colProps={{
               checkedList,
               columns,
               columnsMap: columnsMap.current,

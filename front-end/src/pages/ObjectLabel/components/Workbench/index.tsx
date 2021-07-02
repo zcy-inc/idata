@@ -1,7 +1,7 @@
 import React from 'react';
 import { useModel } from 'umi';
 import { Empty, Tabs } from 'antd';
-import type { FC } from 'react';
+import type { FC, Key } from 'react';
 import styles from '../../index.less';
 
 import { IconFont } from '@/components';
@@ -22,19 +22,20 @@ const Workbench: FC = ({}) => {
       type="editable-card"
       onChange={(key) => setActiveTab(key)}
       activeKey={activeTab}
-      onEdit={(key, action) => action === 'remove' && removeTab(key)}
       tabBarGutter={0}
+      onEdit={(key, action) => action === 'remove' && removeTab(key as Key)}
       tabBarStyle={{ background: '#F1F3F9' }}
       hideAdd
     >
       {tabs.map((tab) => (
         <TabPane
+          tabKey={`${tab.key}`}
           className={styles['tab-pane']}
           tab={tab.title}
           key={tab.key}
           closeIcon={<IconFont type="icon-guanbichanggui" />}
         >
-          <TabLabel initialMode={tab.mode} fileCode={tab.code} />
+          <TabLabel initialMode={tab.mode} originId={tab.originId} />
         </TabPane>
       ))}
     </Tabs>

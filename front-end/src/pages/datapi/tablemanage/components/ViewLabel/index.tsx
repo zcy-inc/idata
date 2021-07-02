@@ -29,7 +29,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
   const [dataSource, setDateSource] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const { getTree, showLabel, onRemovePane } = useModel('tabalmanage', (ret) => ({
+  const { getTree, showLabel, onRemovePane } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
     showLabel: ret.showLabel,
     onRemovePane: ret.onRemovePane,

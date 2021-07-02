@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
+import { Dropdown, Input, Menu, message, Tabs, Tree, Modal, Typography } from 'antd';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
@@ -20,6 +20,7 @@ type TreeNodeIcon = 'FOLDER' | 'FOLDEROPEN' | 'LABEL' | 'ENUM' | 'TABLE';
 
 const { TreeNode } = Tree;
 const { TabPane } = Tabs;
+const { Text } = Typography;
 const { confirm } = Modal;
 const NodeTypeIcon = {
   FOLDER: <IconFont type="icon-wenjianjia" key="folder" />,
@@ -49,7 +50,7 @@ const FolderTree: FC = () => {
     onCreateTable,
     onViewTree,
     showLabel,
-  } = useModel('tabalmanage', (ret) => ({
+  } = useModel('tablemanage', (ret) => ({
     setFolderMode: ret.setFolderMode,
     curFolder: ret.curFolder,
     setCurFolder: ret.setCurFolder,
@@ -163,8 +164,8 @@ const FolderTree: FC = () => {
       if (_i > -1) {
         const pre = name.substring(0, _i);
         const suf = name.substring(_i + search?.length);
-        const className =
-          (!parentId && type === TreeNodeType.FOLDER && styles['folder-root']) || '';
+        const className = !parentId && type === TreeNodeType.FOLDER && styles['folder-root'];
+
         title = (
           <span key="title" className={className}>
             {pre}
@@ -210,7 +211,7 @@ const FolderTree: FC = () => {
       .filter((_) => _.name.indexOf(value) > -1 && _.parentId)
       .map((_) => _.parentId);
 
-    setExpandedKeys(keys);
+    setExpandedKeys(keys as Key[]);
     setSearch(value);
     setAutoExpand(true);
   };

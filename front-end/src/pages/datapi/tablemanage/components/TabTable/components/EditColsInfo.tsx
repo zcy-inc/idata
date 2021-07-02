@@ -11,7 +11,7 @@ import { ColumnLabel, Table, TableLable } from '@/types/datapi';
 export type StructAction = 'del' | 'up' | 'down';
 export interface EditColsInfoProps {
   initial?: Table;
-  _props: {
+  colProps: {
     checkedList: string[];
     columns: any[];
     columnsMap: Map<string, any>;
@@ -21,7 +21,7 @@ export interface EditColsInfoProps {
 const { Link } = Typography;
 
 const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
-  { initial, _props: { checkedList, columns, columnsMap } },
+  { initial, colProps: { checkedList, columns, columnsMap } },
   ref,
 ) => {
   // 表结构的列与数据

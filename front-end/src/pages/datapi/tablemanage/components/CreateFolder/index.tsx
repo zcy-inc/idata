@@ -18,7 +18,7 @@ const rules = [{ required: true, message: '必填' }];
 const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   const [folders, setFolders] = useState([]);
   const [form] = Form.useForm();
-  const { folderMode, curFolder, curTreeType, getTree } = useModel('tabalmanage', (ret) => ({
+  const { folderMode, curFolder, curTreeType, getTree } = useModel('tablemanage', (ret) => ({
     folderMode: ret.folderMode,
     curFolder: ret.curFolder,
     curTreeType: ret.curTreeType,

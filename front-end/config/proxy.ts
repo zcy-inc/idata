@@ -9,7 +9,8 @@ export default {
   dev: {
     '/api/**/*': {
       target: 'http://idata-staging.cai-inc.com/',
-      // target: 'http://10.201.74.37:9527',
+      // target: 'http://10.201.63.219:9527', // shiguang
+      // target: 'http://10.201.34.135:9527', // yiran
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

@@ -7,6 +7,7 @@ import ViewAtomic from './components/ViewAtomic';
 import ViewDerive from './components/ViewDerive';
 import ViewComplex from './components/ViewComplex';
 import { LabelAttribute, Metric, TableLable } from '@/types/datapi';
+import { KpiLabelsMap } from '@/constants/datapi';
 
 export interface ViewModifierProps {
   data: Metric;
@@ -47,7 +48,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
         <Item label="指标类型">{TagMap[data?.labelTag]}</Item>
         <Item label="指标名称">{data?.labelName}</Item>
         {attributes.map((attribute) => (
-          <Item label={attribute.attributeKey}>{attribute.attributeValue}</Item>
+          <Item label={KpiLabelsMap[attribute.attributeKey]}>{attribute.attributeValue}</Item>
         ))}
       </Descriptions>
       {ViewMap[data?.labelTag]}

@@ -209,7 +209,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             ...labelStyle,
             text: cfg.label || '',
             fill: '#000',
-            textAlign: 'start',
+            textAlign: 'left',
             lineWidth: 1,
           },
         });
@@ -222,7 +222,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         const width = 260;
         const height = 316;
         const itemCount = 10;
-        const boxStyle: any = { stroke: '#3F88FE' }; // 控制node的主色
+        const boxStyle: any = { stroke: '#3F88FE', fill: '#fff' }; // 控制node的主色
 
         const { attrs = [], startIndex = 0, selectedIndex, collapsed } = cfg;
         const list = attrs; // data传入的完整list
@@ -234,6 +234,10 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         );
 
         const offsetY = (0.5 - (startIndex % 1)) * itemHeight + 30;
+        const keyshape = group.addShape('rect', {
+          attrs: { x: 0, y: 0, width, height: collapsed ? 45 : height, ...boxStyle },
+          draggable: true,
+        });
         // 绘制标题的行
         group.addShape('rect', {
           attrs: { fill: boxStyle.stroke, height: 30, width },
@@ -242,7 +246,10 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
 
         let fontLeft = 12;
         // 绘制标题的文本
-        group.addShape('text', { attrs: { y: 22, x: fontLeft, fill: '#fff', text: cfg.label } });
+        group.addShape('text', {
+          attrs: { y: 22, x: fontLeft, fill: '#fff', text: cfg.label },
+          draggable: true,
+        });
         // 绘制收起展开的行
         group.addShape('rect', {
           attrs: {
@@ -272,10 +279,6 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
           name: collapsed ? 'expand' : 'collapse',
         });
         // 绘制收起展开行的 边框 ？
-        const keyshape = group.addShape('rect', {
-          attrs: { x: 0, y: 0, width, height: collapsed ? 45 : height, ...boxStyle },
-          draggable: true,
-        });
         // 如果是收起状态的，到这里就返回，不绘制下面的 container
         if (collapsed) return keyshape;
 
@@ -309,6 +312,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
               height: height - 30,
               ...barStyle.boxStyle,
             },
+            draggable: true,
           });
           // 计算 scrollbar-thumb 的 y坐标
           const indexHeight =
@@ -322,6 +326,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
               height: Math.min(height, indexHeight),
               ...barStyle.innerStyle,
             },
+            draggable: true,
           });
         }
         if (afterList) {
@@ -356,6 +361,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
                   lineWidth: 1,
                   cursor: 'pointer',
                 },
+                draggable: true,
               });
               listContainer.addShape('circle', {
                 attrs: {
@@ -368,6 +374,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
                   lineWidth: 1,
                   cursor: 'pointer',
                 },
+                draggable: true,
               });
             }
             const textAttrs = {
@@ -433,26 +440,18 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
 
     const width = container.scrollWidth;
     const height = (container.scrollHeight || 800) - 20;
-    const toolbar = new G6.ToolBar({
-      className: styles.toolbar,
-    });
+    const toolbar = new G6.ToolBar({ className: styles.toolbar });
     const graph = new G6.Graph({
       container,
       width,
       height,
       plugins: [toolbar],
-      defaultNode: {
-        size: [300, 400],
-        type: 'dice-er-box',
-        color: '#5B8FF9',
-        style: { fill: '#9EC9FF', lineWidth: 3 },
-        labelCfg: { style: { fill: 'black', fontSize: 20 } },
-      },
+      defaultNode: { size: [300, 400], type: 'dice-er-box' },
       defaultEdge: {
         type: 'dice-er-edge',
         style: { stroke: '#e2e2e2', lineWidth: 4, endArrow: true },
       },
-      modes: { default: ['dice-er-scroll', 'drag-node', 'drag-canvas'] },
+      modes: { default: ['drag-node', 'dice-er-scroll', 'drag-canvas'] },
       layout: {
         type: 'dagre',
         rankdir: 'LR',
@@ -463,7 +462,6 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
       },
       animate: true,
     });
-
     getTableRelations({ tableId: id }).then((res) => {
       const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
       const edges = Array.isArray(res.data.edges) ? res.data.edges : [];

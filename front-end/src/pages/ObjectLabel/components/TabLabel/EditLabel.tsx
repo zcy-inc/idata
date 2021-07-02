@@ -1,12 +1,12 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 import ProForm, {
   ProFormSelect,
   ProFormText,
   ProFormTextArea,
   ProFormGroup,
 } from '@ant-design/pro-form';
-import { Form } from 'antd';
-import type { FC } from 'react';
+import type { FormInstance } from 'antd';
+import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
 import { getFolders } from '@/services/objectlabel';
@@ -14,23 +14,52 @@ import Title from '../Title';
 import EditRules from './components/EditRules';
 import { rules, ObjectType } from './constants';
 import { ObjectLabel } from '@/types/objectlabel';
+import { useModel } from '@/.umi/plugin-model/useModel';
 
 export interface EditLableProps {
   initial?: ObjectLabel;
+  form: FormInstance;
 }
 
-const EditLable: FC<EditLableProps> = ({ initial }) => {
+const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial, form }, ref) => {
   const [folderOps, setFolderOps] = useState([]);
-  const [form] = Form.useForm();
+  const [objectType, setObjectType] = useState('supplier:LABEL');
+  const { curNode } = useModel('objectlabel', (_) => ({
+    curNode: _.curNode,
+  }));
+
+  useImperativeHandle(ref, () => ({ form }));
 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: any) => ({ label: _.name, value: _.id }));
         setFolderOps(fd);
       })
       .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    if (initial) {
+      form.setFieldsValue({
+        name: initial.name,
+        nameEn: initial.nameEn,
+        objectType: initial.objectType,
+        remark: initial.remark,
+        folderId: initial.folderId === 0 ? null : initial.folderId,
+      });
+    }
+  }, [initial]);
+
+  useEffect(() => {
+    let folderId = null;
+    if (initial) {
+      folderId = initial.folderId?.toString();
+    } else if (curNode) {
+      folderId = curNode.type === 'FOLDER' ? curNode.id : curNode.parentId;
+    }
+    form.setFieldsValue({ folderId });
+  }, [initial, curNode]);
 
   return (
     <Fragment>
@@ -58,6 +87,8 @@ const EditLable: FC<EditLableProps> = ({ initial }) => {
             placeholder="请输入"
             rules={rules}
             options={ObjectType}
+            initialValue="supplier:LABEL"
+            fieldProps={{ onChange: setObjectType }}
           />
         </ProFormGroup>
         <ProFormTextArea name="remark" label="备注" width="md" placeholder="请输入" />
@@ -70,9 +101,9 @@ const EditLable: FC<EditLableProps> = ({ initial }) => {
         />
       </ProForm>
       <Title>标签规则</Title>
-      <EditRules initial={initial} />
+      <EditRules initial={initial} objectType={objectType} />
     </Fragment>
   );
 };
 
-export default EditLable;
+export default forwardRef(EditLable);

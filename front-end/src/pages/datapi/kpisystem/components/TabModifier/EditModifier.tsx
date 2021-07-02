@@ -149,14 +149,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             rules={require}
           />
           <ProFormText
-            name="英文别名"
+            name="enName"
             label="英文别名"
             width="sm"
             placeholder="请输入"
             rules={require}
           />
           <ProFormSelect
-            name="枚举值"
+            name="modifierEnum"
             label="枚举值"
             width="sm"
             placeholder="请输入"
@@ -174,8 +174,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             </Popover>
           </ProForm.Item>
         </ProFormGroup>
-        <ProFormText name="定义" label="定义" width="md" placeholder="请输入" rules={require} />
-        <ProFormTextArea name="备注" label="备注" width="md" placeholder="请输入" />
+        <ProFormText
+          name="modifierDefine"
+          label="定义"
+          width="md"
+          placeholder="请输入"
+          rules={require}
+        />
+        <ProFormTextArea name="comment" label="备注" width="md" placeholder="请输入" />
         <ProFormSelect
           name="folderId"
           label="位置"

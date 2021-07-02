@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, Key } from 'react';
 
 import { getFolderTree } from '@/services/objectlabel';
 import { TreeNode } from '@/types/objectlabel';
 
 interface ITab {
-  key: string;
+  key: Key;
   title: string | ReactNode;
+  originId: number;
   [key: string]: any;
 }
 const newObjectLabel = {
   title: '新建数据标签',
   key: 'newObjectLabel',
-  code: 'newObjectLabel',
+  originId: -1,
   mode: 'edit',
 };
 
@@ -37,12 +38,13 @@ export default () => {
 
   // 点击文件查看的时候增加一个tab
   const viewTab = (node: TreeNode) => {
-    const { cid, name, fileCode, type } = node;
-    if (!tabs.some((_) => _.key === cid)) {
-      setTabs([...tabs, { key: cid, title: name, code: fileCode, type, mode: 'view' }]);
+    const { name, id, type } = node;
+    if (!tabs.some((_) => _.key === `${id}`)) {
+      setTabs([...tabs, { key: `${id}`, originId: id as number, title: name, type, mode: 'view' }]);
     }
-    setActiveTab(cid);
+    setActiveTab(`${id}`);
   };
+
   // 增加一个tab
   const createTab = () => {
     if (!tabs.some((_) => _.key === 'newObjectLabel')) {
@@ -52,13 +54,13 @@ export default () => {
   };
 
   // 关闭一个tab
-  const removeTab = (key: any) => {
+  const removeTab = (key: Key) => {
     const curPanes = tabs.filter((_) => _.key !== key);
     let curActiveKey = activeTab;
     let lastIndex = tabs.findIndex((_) => _.key === key) - 1;
 
     if (curPanes.length && curActiveKey === key) {
-      curActiveKey = curPanes[lastIndex > 0 ? lastIndex : 0].key;
+      curActiveKey = curPanes[lastIndex > 0 ? lastIndex : 0].key as string;
     }
     setTabs(curPanes);
     setActiveTab(curActiveKey);
