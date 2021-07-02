@@ -193,24 +193,27 @@ public class ModifierServiceImpl implements ModifierService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public MeasureDto disable(String modifierCode, String operator) {
+    public MeasureDto disableOrAble(String modifierCode, String labelTag, String operator) {
         checkArgument(isNotEmpty(operator), "修改者不能为空");
         checkArgument(isNotEmpty(modifierCode), "修饰词Code不能为空");
+        String existLabelTag = LabelTagEnum.MODIFIER_LABEL_DISABLE.name().equals(labelTag) ?
+                LabelTagEnum.MODIFIER_LABEL.name() : LabelTagEnum.MODIFIER_LABEL_DISABLE.name();
         DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(modifierCode)), and(devLabelDefine.labelTag,
-                        isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))))
+                        isEqualTo(existLabelTag))))
                 .orElse(null);
-        checkArgument(checkModifier != null, "修饰词不存在或已停用");
+        checkArgument(checkModifier != null, "修饰词不存");
 
         // 派生指标依赖校验
-        List<String> relyDeriveMetricNameList = getRelyDeriveMetricName(modifierCode);
-        checkArgument(relyDeriveMetricNameList.size() == 0,
-                String.join(",", relyDeriveMetricNameList) + "依赖该修饰词，不能停用");
-        devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(LabelTagEnum.MODIFIER_LABEL_DISABLE.name())
+        if (LabelTagEnum.MODIFIER_LABEL_DISABLE.name().equals(labelTag)) {
+            List<String> relyDeriveMetricNameList = getRelyDeriveMetricName(modifierCode);
+            checkArgument(relyDeriveMetricNameList.size() == 0,
+                    String.join(",", relyDeriveMetricNameList) + "依赖该修饰词，不能停用");
+        }
+        devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(labelTag)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(modifierCode)),
-                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
-
+                        and(devLabelDefine.labelTag, isEqualTo(existLabelTag))));
         return getModifierByCode(modifierCode);
     }
 

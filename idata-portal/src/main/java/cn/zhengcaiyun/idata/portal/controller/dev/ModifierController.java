@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,10 +58,11 @@ public class ModifierController {
         return RestResult.success(echoModifier);
     }
 
-    @PostMapping("modifier/disableModifier")
-    public RestResult disableModifier(@RequestParam("modifierCode") String modifierCode,
-                                     HttpServletRequest request) {
-        return RestResult.success(modifierService.disable(modifierCode, tokenService.getNickname(request)));
+    @PostMapping("modifier/disableOrAbleModifier")
+    public RestResult disableOrAbleModifier(@RequestParam("modifierCode") String modifierCode,
+                                            @RequestParam("labelTag") String labelTag,
+                                            HttpServletRequest request) {
+        return RestResult.success(modifierService.disableOrAble(modifierCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("modifier")

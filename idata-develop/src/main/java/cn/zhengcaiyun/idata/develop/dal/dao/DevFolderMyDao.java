@@ -47,14 +47,35 @@ public interface DevFolderMyDao {
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
-                        "WHERE del = 0" +
+                        "WHERE del = 0 " +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"ENUM\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
                             "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
                         "FROM dev_enum " +
-                        "WHERE del = 0" +
+                        "WHERE del = 0 " +
+                "</if>" +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"DIMENSION\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'DIMENSION_LABEL') AS type, " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                        "FROM dev_label_define " +
+                        "WHERE del = 0 AND label_tag = 'DIMENSION_LABEL' " +
+                "</if>" +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"MODIFIER\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'MODIFIER_LABEL') AS type, " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                        "FROM dev_label_define " +
+                        "WHERE del = 0 AND label_tag = 'MODIFIER_LABEL' " +
+                "</if>" +
+                "<if test = 'devTreeType != null and devTreeType.indexOf(\"METRIC\") != -1'>" +
+                    "UNION ALL " +
+                        "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'METRIC_LABEL') AS type, " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                        "FROM dev_label_define " +
+                        "WHERE del = 0 AND label_tag LIKE '%_METRIC_LABEL' " +
                 "</if>" +
                 "<if test = 'devTreeType == null or \"\" == devTreeType'>" +
                     "UNION ALL " +

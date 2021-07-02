@@ -182,7 +182,6 @@ public class LabelServiceImpl implements LabelService {
         return labelDefineDto;
     }
 
-    // TODO 根据index排序，支持查询指标系统
     @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
         checkArgument(subjectType != null || labelTag != null,
@@ -199,7 +198,12 @@ public class LabelServiceImpl implements LabelService {
             builder.and(devLabelDefine.subjectType, isEqualTo(subjectType));
         }
         if (labelTag != null) {
-            builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
+            if ("METRIC_LABEL".equals(labelTag)) {
+                builder.and(devLabelDefine.labelTag, isLike("%_METRIC_LABEL"));
+            }
+            else {
+                builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
+            }
         }
         return devLabelDefineDao.selectMany(builder.orderBy(devLabelDefine.labelIndex).build()
                         .render(RenderingStrategies.MYBATIS3))
@@ -250,7 +254,8 @@ public class LabelServiceImpl implements LabelService {
                 || LabelTagEnum.BOOLEAN_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.USER_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.ENUM_LABEL.name().equals(labelDefine.getLabelTag())
-                || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())) {
+                || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.DIMENSION_LABEL.name().equals(labelDefine.getLabelTag())) {
                 checkArgument(labelDto.getLabelParamValue() != null, "labelParamValue不能为空");
         }
         else {
@@ -292,21 +297,18 @@ public class LabelServiceImpl implements LabelService {
         }
     }
 
+    // TODO
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
-//        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
-////        return toLabelDtoList(devLabelDao.select(c ->
-////                c.where(devLabel.tableId, isEqualTo(tableId),
-////                        and(devLabel.columnName, isEqual(columnName)),
-////                        and(devLabel.del, isNotEqualTo(1)))));
-        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
-        return devLabelDao.select(c ->
-                c.where(devLabel.tableId, isEqualTo(tableId),
-                        and(devLabel.columnName, isEqual(columnName)),
-                        and(devLabel.del, isNotEqualTo(1))))
-                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
+        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
+//        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+//                c.where(devLabelDefine.del, isNotEqualTo(1)))
+//                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+//        return devLabelDao.select(c ->
+//                c.where(devLabel.tableId, isEqualTo(tableId),
+//                        and(devLabel.columnName, isEqual(columnName)),
+//                        and(devLabel.del, isNotEqualTo(1))))
+//                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }
 
     @Override
@@ -317,66 +319,66 @@ public class LabelServiceImpl implements LabelService {
         Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                 and(devLabel.labelCode, isEqualTo(DB_NAME))))
                 .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+//        List<LabelDto> echoLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+//                .from(devLabel)
+//                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))
+//                .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class);
+//        echoLabelList.forEach(labelDto -> {
+//            checkArgument(tableInfoMap.containsKey(labelDto.getTableId()), "表不存在");
+//            labelDto.setTableName(tableInfoMap.get(labelDto.getTableId());
+//            labelDto.setDbTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
+//        });
         return PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                 .from(devLabel)
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
                 .stream().peek(labelDto -> {
                     checkArgument(tableInfoMap.containsKey(labelDto.getTableId()), "表不存在");
-                    labelDto.setTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
+                    labelDto.setTableName(tableInfoMap.get(labelDto.getTableId()));
+                    labelDto.setDbTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
                 }).collect(Collectors.toList());
     }
 
     @Override
     public Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames) {
         checkArgument(columnNames != null && columnNames.size() > 0, "columnNames不能为空");
-        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
-        return devLabelDao.select(c -> c.where(devLabel.tableId, isEqualTo(tableId),
-                and(devLabel.columnName, isIn(columnNames)),
-                and(devLabel.del, isNotEqualTo(1))))
-                .stream().collect(Collectors.groupingBy(DevLabel::getColumnName,
-                        Collectors.mapping(devLabel -> toLabelDto(devLabel, labelDefineMap), Collectors.toList())));
+        return devLabelMyDao.selectLabelsBySubject(tableId, String.join(",", columnNames))
+                .stream().collect(Collectors.groupingBy(LabelDto::getColumnName));
+//        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
+//                c.where(devLabelDefine.del, isNotEqualTo(1)))
+//                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));
+//        return devLabelDao.selectMany(select(devLabel.allColumns()).from(devLabel)
+//                .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+//                .where(devLabel.tableId, isEqualTo(tableId), and(devLabel.columnName, isIn(columnNames)),
+//                        and(devLabel.del, isNotEqualTo(1)), and(devLabelDefine.del, isNotEqualTo(1)),
+//                        and(devLabelDefine.labelTag, isNotLike("%METRIC_LABEL")),
+//                        and(devLabelDefine.labelTag, isNotEqualTo("MODIFIER_LABEL")),
+//                        and(devLabelDefine.labelTag, isNotEqualTo("DIMENSION_LABEL")))
+//                .build().render(RenderingStrategies.MYBATIS3))
+//                .stream().collect(Collectors.groupingBy(DevLabel::getColumnName,
+//                        Collectors.mapping(devLabel -> toLabelDto(devLabel, labelDefineMap), Collectors.toList())));
     }
 
-    // TODO 根据index排序
-    private LabelDto toLabelDto(DevLabel devLabel, Map<String, DevLabelDefine> labelDefineMap) {
-        LabelDto labelDto = PojoUtil.copyOne(devLabel, LabelDto.class);
-        DevLabelDefine labelDefine = labelDefineMap.get(devLabel.getLabelCode());
-        if (labelDefine != null) {
-            labelDto.setLabelName(labelDefine.getLabelName());
-            labelDto.setLabelParamType(labelDefine.getLabelParamType());
-            labelDto.setLabelTag(labelDefine.getLabelTag());
-            if (labelDto.getLabelParamType() != null
-                    && labelDto.getLabelParamType().endsWith(":ENUM")
-                    && labelDto.getLabelParamValue() != null) {
-                labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
-            }
-            if (MetaTypeEnum.ENUM.name().equals(labelDto.getLabelParamType())
-                    && labelDto.getLabelParamValue() != null) {
-                labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
-            }
-        }
-        return labelDto;
-    }
-
-    private LabelDto toLabelDtoList(DevLabelDefine labelDefine, Map<String, DevLabel> labelMap) {
-        LabelDto labelDto = PojoUtil.copyOne(labelMap.get(labelDefine.getLabelCode()), LabelDto.class);
-        labelDto.setLabelName(labelDefine.getLabelName());
-        labelDto.setLabelParamType(labelDefine.getLabelParamType());
-        labelDto.setLabelTag(labelDefine.getLabelTag());
-        if (labelDto.getLabelParamType() != null
-                && labelDto.getLabelParamType().endsWith(":ENUM")
-                && labelDto.getLabelParamValue() != null) {
-            labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
-        }
-        if (MetaTypeEnum.ENUM.name().equals(labelDto.getLabelParamType())
-                && labelDto.getLabelParamValue() != null) {
-            labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
-        }
-        return labelDto;
-    }
+    // 已新增根据index排序方法替换，暂注释待删除
+//    private LabelDto toLabelDto(DevLabel devLabel, Map<String, DevLabelDefine> labelDefineMap) {
+//        LabelDto labelDto = PojoUtil.copyOne(devLabel, LabelDto.class);
+//        DevLabelDefine labelDefine = labelDefineMap.get(devLabel.getLabelCode());
+//        if (labelDefine != null) {
+//            labelDto.setLabelName(labelDefine.getLabelName());
+//            labelDto.setLabelParamType(labelDefine.getLabelParamType());
+//            labelDto.setLabelTag(labelDefine.getLabelTag());
+//            if (labelDto.getLabelParamType() != null
+//                    && labelDto.getLabelParamType().endsWith(":ENUM")
+//                    && labelDto.getLabelParamValue() != null) {
+//                labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
+//            }
+//            if (MetaTypeEnum.ENUM.name().equals(labelDto.getLabelParamType())
+//                    && labelDto.getLabelParamValue() != null) {
+//                labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
+//            }
+//        }
+//        return labelDto;
+//    }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)

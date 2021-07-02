@@ -14,12 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.impl;
+package cn.zhengcaiyun.idata.develop.service.folder.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
-import cn.zhengcaiyun.idata.develop.service.DevFolderService;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
@@ -31,7 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -47,7 +53,13 @@ public class DevFolderServiceImpl implements DevFolderService {
     @Autowired
     private DevFolderDao devFolderDao;
     @Autowired
+    private DevLabelDefineDao devLabelDefineDao;
+    @Autowired
     private DevFolderMyDao devFolderMyDao;
+    @Autowired
+    private DevEnumDao devEnumDao;
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
 
     @Override
     public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType) {
@@ -107,6 +119,7 @@ public class DevFolderServiceImpl implements DevFolderService {
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isEqualTo(developFolderDto.getId()))))
                 .orElse(null);
         checkArgument(checkFolder != null, "文件夹不存在");
+        checkArgument(!checkFolder.getId().equals(developFolderDto.getParentId()), "父文件夹ID有误");
 
         developFolderDto.setEditor(operator);
         DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class);
@@ -123,6 +136,18 @@ public class DevFolderServiceImpl implements DevFolderService {
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isEqualTo(devFolderId))))
                 .orElse(null);
         checkArgument(checkFolder != null, "文件夹不存在");
+        List<DevFolder> childrenFolderList = devFolderDao.select(c ->
+                c.where(devFolder.del, isNotEqualTo(1), and(devFolder.parentId, isEqualTo(devFolderId))));
+        checkArgument(childrenFolderList == null || childrenFolderList.size() == 0, "文件夹下存在文件夹，不能删除");
+        List<DevLabelDefine> childrenLabelList = devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.folderId, isEqualTo(devFolderId))));
+        List<DevEnum> childrenEnumList = devEnumDao.select(c ->
+                c.where(devEnum.del, isNotEqualTo(1), and(devEnum.folderId, isEqualTo(devFolderId))));
+        List<DevTableInfo> childrenTableList = devTableInfoDao.select(c ->
+                c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.folderId, isEqualTo(devFolderId))));
+        checkArgument((childrenLabelList == null || childrenLabelList.size() == 0)
+                && (childrenEnumList == null || childrenEnumList.size() == 0)
+                && (childrenTableList == null || childrenTableList.size() == 0), "文件夹下存在文件，不能删除");
 
         devFolderDao.update(c -> c.set(devFolder.del).equalTo(1)
                 .set(devFolder.editor).equalTo(operator)

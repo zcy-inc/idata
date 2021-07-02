@@ -86,7 +86,7 @@ public class MetricServiceImpl implements MetricService {
     @Override
     public List<MeasureDto> findMetrics(String labelTag) {
         LabelTagEnum.valueOf(labelTag);
-        return PojoUtil.copyList(labelService.findDefines(null, labelTag), MeasureDto.class);
+        return PojoUtil.copyList(labelService.findDefines(SubjectTypeEnum.COLUMN.name(), labelTag), MeasureDto.class);
     }
 
     // 标签系统查询指标或维度，根据输入的labelCodes缩小范围
@@ -211,24 +211,26 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public MeasureDto disable(String metricCode, String operator) {
+    public MeasureDto disableOrAble(String metricCode, String labelTag, String operator) {
         checkArgument(isNotEmpty(operator), "修改者不能为空");
         checkArgument(isNotEmpty(metricCode), "指标Code不能为空");
+        String existLabelTag = labelTag.endsWith("_METRIC_LABEL_DISABLE") ?
+                labelTag.substring(0, labelTag.length() - 8) : labelTag + "_DISABLE";
         DevLabelDefine existMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(metricCode)), and(devLabelDefine.labelTag,
-                        isLike("%_METRIC_%")), and(devLabelDefine.labelTag, isNotLike("%DISABLE"))))
+                and(devLabelDefine.labelCode, isEqualTo(metricCode)),
+                and(devLabelDefine.labelTag, isEqualTo(existLabelTag))))
                 .orElse(null);
-        checkArgument(existMetric != null, "指标不存在或已停用");
+        checkArgument(existMetric != null, "指标不存");
 
         // 原子指标校验是否被派生指标依赖
-        if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existMetric.getLabelTag())) {
+        if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existMetric.getLabelTag())
+                && labelTag.endsWith("_METRIC_LABEL_DISABLE")) {
             checkArgument(getRelyDeriveMetricNames(metricCode) == null,
                     getRelyDeriveMetricNames(metricCode) + "依赖该原子指标，不能停用");
         }
-        String labelTag = existMetric.getLabelTag() + "_DISABLE";
         devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(labelTag).set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(metricCode)),
-                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
+                        and(devLabelDefine.labelTag, isEqualTo(existLabelTag))));
         return getMetricByCode(metricCode);
     }
 
@@ -314,7 +316,7 @@ public class MetricServiceImpl implements MetricService {
         // 反查维度和派生指标
         if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())
                 || metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
-            List<MeasureDto> dimensionList = dimensionService.findDimensionsByLabelCode(metricCode);
+            List<MeasureDto> dimensionList = dimensionService.findDimensionsByMetricCode(metricCode);
             echoMetric.setDimensions(dimensionList);
             if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
                 List<MeasureDto> deriveMetricList = getMetricByAtomic(metricCode);

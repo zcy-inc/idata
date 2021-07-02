@@ -27,10 +27,10 @@ import java.util.List;
 
 public interface DimensionService {
     MeasureDto findDimension(String dimensionCode);
-    List<MeasureDto> findDimensionsByLabelCode(String labelCode);
+    List<MeasureDto> findDimensionsByMetricCode(String metricCode);
     List<String> findDimensionValues(String dimensionCode);
     MeasureDto create(MeasureDto dimension, String operator);
     MeasureDto edit(MeasureDto dimension, String operator);
-    MeasureDto disable(String dimensionCode, String operator);
+    MeasureDto disableOrAble(String dimensionCode, String labelTag, String operator);
     boolean delete(String dimensionCode, String operator);
 }

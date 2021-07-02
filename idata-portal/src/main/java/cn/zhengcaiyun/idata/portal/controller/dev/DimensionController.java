@@ -63,10 +63,11 @@ public class DimensionController {
         return RestResult.success(echoDimension);
     }
 
-    @PostMapping("dimension/disableDimension")
-    public RestResult disableDimension(@RequestParam("dimensionCode") String dimensionCode,
-                                      HttpServletRequest request) {
-        return RestResult.success(dimensionService.disable(dimensionCode, tokenService.getNickname(request)));
+    @PostMapping("dimension/disableOrAbleDimension")
+    public RestResult disableOrAbleDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                             @RequestParam("labelTag") String labelTag,
+                                             HttpServletRequest request) {
+        return RestResult.success(dimensionService.disableOrAble(dimensionCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("dimension")

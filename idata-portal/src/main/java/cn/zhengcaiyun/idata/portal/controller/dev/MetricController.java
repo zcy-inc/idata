@@ -70,10 +70,11 @@ public class MetricController {
         return RestResult.success(echoMetric);
     }
 
-    @PostMapping("metric/disableMetric")
-    public RestResult disableMetric(@RequestParam("metricCode") String metricCode,
-                                   HttpServletRequest request) {
-        return RestResult.success(metricService.disable(metricCode, tokenService.getNickname(request)));
+    @PostMapping("metric/disableOrAbleMetric")
+    public RestResult disableOrAbleMetric(@RequestParam("metricCode") String metricCode,
+                                          @RequestParam("labelTag") String labelTag,
+                                          HttpServletRequest request) {
+        return RestResult.success(metricService.disableOrAble(metricCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("metric")

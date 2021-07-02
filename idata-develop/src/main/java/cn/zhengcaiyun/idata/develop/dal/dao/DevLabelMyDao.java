@@ -37,10 +37,17 @@ public interface DevLabelMyDao {
             "FROM dev_label " +
             "LEFT JOIN dev_label_define " +
             "ON dev_label.label_code = dev_label_define.label_code " +
-            "WHERE dev_label.del != 1 AND dev_label_define.del != 1 AND dev_label.table_id = #{tableId} " +
-                "<if test = 'columnNames != null'>" +
-                    "AND FIND_IN_SET(dev_label.column_name, #{columnNames}) " +
-                "</if>" +
+            "WHERE dev_label.del != 1 AND dev_label_define.del != 1 AND dev_label_define.label_tag not like '%_METRIC_LABEL' " +
+                "AND dev_label_define.label_tag != 'MODIFIER_LABEL' AND dev_label_define.label_tag != 'DIMENSION_LABEL '" +
+                "AND dev_label.table_id = #{tableId} " +
+                "<choose>" +
+                    "<when test = 'columnNames != null'>" +
+                        "AND FIND_IN_SET(dev_label.column_name, #{columnNames}) " +
+                    "</when>" +
+                    "<otherwise>" +
+                        "AND dev_label.column_name IS null " +
+                    "</otherwise>" +
+                "</choose>" +
             "ORDER BY dev_label_define.label_index, dev_label_define.id" +
             "</script>")
     List<LabelDto> selectLabelsBySubject(Long tableId, String columnNames);

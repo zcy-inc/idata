@@ -31,6 +31,6 @@ public interface ModifierService {
     List<ModifierDto> findModifiers(String metricCode, Long atomicTableId);
     MeasureDto create(MeasureDto modifier, String operator);
     MeasureDto edit(MeasureDto modifier, String operator);
-    MeasureDto disable(String modifierCode, String operator);
+    MeasureDto disableOrAble(String modifierCode, String labelTag, String operator);
     boolean delete(String modifierCode, String operator);
 }
