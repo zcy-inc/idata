@@ -1,0 +1,74 @@
+{
+  // Place your zcy-idata-pro-front workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+  // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+  // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+  // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+  // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+  // Placeholders with the same ids are connected.
+  // Example:
+  "list page template": {
+    "scope": "typescriptreact",
+    "prefix": "create-list-page",
+    "body": [
+      "import React, { useState } from  'react'",
+      "import { Card, Input, Button } from 'antd';",
+      "import { SearchPanel, TiledTable, Operation } from '@/components';",
+      "import { operationTypeEnum } from '@/components/Operation';",
+      "import { usePaginated } from '@/hooks';",
+      "import type { ColumnsType } from 'antd/es/table';",
+      "import { ${1:service}, ${2:deleteService} } from '@/services/${3:fileName}';",
+      "import type { ${4:type} } from '@/interfaces/${3:fileName}';",
+      "import { getDeleteFn } from '@/utils/utils';",
+      "\nconst List: React.FC = () => {",
+      "\tconst [extraParams, setExtraParams] = useState<Record<string, unknown> | undefined>({});",
+      "\tconst { tableProps, refresh } = usePaginated((params) => ${1:service}({ ...params, ...extraParams }), {",
+      "\t\trefreshDeps: [extraParams] ",
+      "\t});",
+      "\n\tconst onReset = () => setExtraParams({});",
+      "\tconst onDelete = getDeleteFn(${2:deleteService}, refresh);",
+      "\tconst columns: ColumnsType<${4:type}> = [",
+      "\t\t{",
+      "\t\t\ttitle: 'name',",
+      "\t\t\tdataIndex: 'name',",
+      "\t\t},",
+      "\t\t{",
+      "\t\t\ttitle: '操作',",
+      "\t\t\trender: (_, row) => (",
+      "\t\t\t\t<Operation.Group>",
+      "\t\t\t\t\t<Operation label=\"删除\" type={operationTypeEnum.DANGER}  onClick={() => onDelete(row.id)} />",
+      "\t\t\t\t</Operation.Group>",
+      "\t\t\t)",
+      "\t\t}",
+      "\t]",
+      "\treturn (",
+      "\t\t<Card bordered={false}>",
+      "\t\t\t<SearchPanel options={[{ label: '名称', name: 'name', component: <Input />}]} templateColumns=\"280px\" onSearch={setExtraParams} onReset={onReset}/>",
+      "\t\t\t<TiledTable rowKey=\"id\" leftBtns={<Button>添加</Button>} columns={columns} {...tableProps} />",
+      "\t\t</Card>",
+      "\t)",
+      "}",
+      "\nexport default List;"
+	],
+  },
+  "profile page template": {
+    "scope": "typescriptreact",
+    "prefix": "create-profile-page",
+    "body": [
+      "import React from 'react';",
+      "import { Card, Descriptions } from 'antd';",
+      "import { useProfile } from '@/hooks';",
+      "import { ${1:service} } from '@/services/${2:fileName}';",
+      "\nconst Profile = () => {",
+      "\tconst { data: record } = useProfile(${1:service});",
+      "\treturn (",
+      "\t\t<Card bordered={false}>",
+      "\t\t\t<Descriptions title=\"基本信息\">",
+      "\t\t\t\t<Descriptions.Item label=\"${3:名字}\">{record?.${4:filed}}</Descriptions.Item>",
+      "\t\t\t</Descriptions>",
+      "\t\t</Card>",
+      "\t);",
+	  "};",
+	  "\nexport default Profile;"
+    ]
+  }
+}

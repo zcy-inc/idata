@@ -1,0 +1,48 @@
+.wrapper {
+  position: relative;
+}
+
+:global {
+  .custom__tag {
+    padding: 5px 12px;
+    font-size: 14px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    line-height: 14px;
+    vertical-align: middle;
+    border-radius: 16px;
+    &::before {
+      position: relative;
+      top: -2px;
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 8px;
+      border-radius: 50%;
+      content: '';
+    }
+  }
+  .custom__tag__normal {
+    color: #278cdd;
+    background: #b3daf9;
+    border-color: #b3daf9;
+    &::before {
+      background: #278cdd;
+    }
+  }
+  .custom__tag__warn {
+    color: #ff9931;
+    background: #fbead8;
+    border-color: #f8cea6;
+    &::before {
+      background: #ff9931;
+    }
+  }
+  .custom__tag__danger {
+    color: #e8315e;
+    background: #fce5eb;
+    border-color: #f2c6d1;
+    &::before {
+      background: #e8315e;
+    }
+  }
+}

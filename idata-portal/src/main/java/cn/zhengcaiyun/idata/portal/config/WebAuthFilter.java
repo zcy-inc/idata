@@ -1,0 +1,121 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package cn.zhengcaiyun.idata.portal.config;
+
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import com.alibaba.fastjson.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
+
+import javax.servlet.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
+
+/**
+ * @author shiyin
+ * @date 2021-03-14 21:55
+ */
+@Component
+public class WebAuthFilter implements Filter {
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+        String token;
+        MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest((HttpServletRequest) servletRequest);
+        if (mutableRequest.getHeader("Authorization") != null) {
+            token = mutableRequest.getHeader("Authorization");
+        }
+        else {
+            Cookie tokenCookie = WebUtils.getCookie((HttpServletRequest) servletRequest, "Authorization");
+            token = (tokenCookie != null ? tokenCookie.getValue() : null);
+            if (token != null) {
+                mutableRequest.putHeader("Authorization", token);
+            }
+        }
+        String path = ((HttpServletRequest) servletRequest).getRequestURI();
+        if (path.contains("/v2/api-docs")
+                || path.contains("/p0/")) {
+            filterChain.doFilter(mutableRequest, servletResponse);
+            return;
+        }
+        if (token == null || !tokenService.checkToken(token)) {
+            ((HttpServletResponse) servletResponse).setStatus(HttpServletResponse.SC_OK);
+            servletResponse.setContentType("application/json; charset=UTF-8");
+            servletResponse.getWriter().write(JSON.toJSONString(
+                    RestResult.error(RestResult.UNAUTHORIZED_ERROR_CODE, "未登录", null)));
+            servletResponse.getWriter().flush();
+            return;
+        }
+        filterChain.doFilter(mutableRequest, servletResponse);
+    }
+
+    static class MutableHttpServletRequest extends HttpServletRequestWrapper {
+        private final Map<String, String> customHeaders;
+
+        MutableHttpServletRequest(HttpServletRequest request){
+            super(request);
+            this.customHeaders = new HashMap<>();
+        }
+
+        void putHeader(String name, String value){
+            this.customHeaders.put(name, value);
+        }
+
+        public String getHeader(String name) {
+            String headerValue = customHeaders.get(name);
+
+            if (headerValue != null){
+                return headerValue;
+            }
+            return ((HttpServletRequest) getRequest()).getHeader(name);
+        }
+
+        public Enumeration<String> getHeaderNames() {
+            Set<String> set = new HashSet<>(customHeaders.keySet());
+
+            Enumeration<String> e = ((HttpServletRequest) getRequest()).getHeaderNames();
+            while (e.hasMoreElements()) {
+                String n = e.nextElement();
+                set.add(n);
+            }
+            return Collections.enumeration(set);
+        }
+
+        public Enumeration<String> getHeaders(String name) {
+            Set<String> headerValues = new HashSet<>();
+            if (this.customHeaders.get(name) != null) {
+                headerValues.add(this.customHeaders.get(name));
+            }
+
+            Enumeration<String> underlyingHeaderValues = ((HttpServletRequest) getRequest()).getHeaders(name);
+            while (underlyingHeaderValues.hasMoreElements()) {
+                headerValues.add(underlyingHeaderValues.nextElement());
+            }
+            return Collections.enumeration(headerValues);
+        }
+    }
+}

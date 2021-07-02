@@ -2,16 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <modules>
-        <module>idata-commons</module>
-    </modules>
-    <groupId>cn.zhengcaiyun.bigdata.idata</groupId>
+    <groupId>cn.zhengcaiyun.idata</groupId>
     <artifactId>idata-parent</artifactId>
-    <version>${revision}</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
-
     <name>${project.artifactId}</name>
-    <description>The parent project of idata</description>
+    <description>The parent project of IData</description>
     <url>https://github.com/zcy-inc/idata</url>
     <scm>
         <url>https://github.com/zcy-inc/idata</url>
@@ -32,46 +28,80 @@
     </issueManagement>
     <organization>
         <name>政采云有限公司</name>
-        <url>https://zcygov.cn</url>
+        <url>https://zhengcaiyun.cn</url>
     </organization>
+
+    <modules>
+        <module>idata-commons</module>
+        <module>idata-portal</module>
+        <module>idata-migration</module>
+        <module>idata-system</module>
+        <module>idata-user</module>
+        <module>idata-develop</module>
+        <module>idata-label</module>
+    </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>2.3.8.RELEASE</version>
+        <relativePath/>
     </parent>
-
     <properties>
+<!--        <revision>1.0.0</revision>-->
         <java.version>11</java.version>
-        <revision>1.0.0-SNAPSHOT</revision>
+        <mybatis-dynamic-sql.version>1.2.1</mybatis-dynamic-sql.version>
+        <mybatis-generator-plugin.version>1.4.0</mybatis-generator-plugin.version>
+        <mybatis-spring-boot.version>2.1.2</mybatis-spring-boot.version>
+        <swagger.version>2.9.2</swagger.version>
+        <fastjson.version>1.2.46</fastjson.version>
+        <okhttp3.version>4.2.2</okhttp3.version>
+        <poi.version>4.1.2</poi.version>
+        <presto-jdbc.version>333</presto-jdbc.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
+                <groupId>org.mybatis.dynamic-sql</groupId>
+                <artifactId>mybatis-dynamic-sql</artifactId>
+                <version>${mybatis-dynamic-sql.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-core</artifactId>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prestosql</groupId>
+                <artifactId>presto-jdbc</artifactId>
+                <version>${presto-jdbc.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

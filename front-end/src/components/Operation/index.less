@@ -1,0 +1,46 @@
+@import '~antd/es/style/themes/default.less';
+
+.group {
+  :global {
+    .operation {
+      &:not(:last-child) {
+        &::after {
+          position: relative;
+          top: -0.06em;
+          display: inline-block;
+          height: 0.9em;
+          margin: 0 8px;
+          vertical-align: middle;
+          border-top: 0;
+          border-left: 1px solid rgba(85, 48, 48, 0.1);
+          content: '';
+        }
+      }
+    }
+  }
+}
+
+.base {
+  cursor: pointer;
+}
+
+.default {
+  color: @primary-color;
+}
+
+.warn {
+  color: @warning-color;
+}
+
+.danger {
+  color: @error-color;
+}
+
+.safe {
+  color: #04b577;
+}
+
+.disable {
+  color: #888a8d;
+  cursor: not-allowed;
+}

@@ -1,0 +1,309 @@
+body {
+  // Button 按钮
+  .ant-btn {
+    height: 40px;
+    padding: 8px 23px;
+  }
+  .ant-btn.ant-btn-primary {
+    color: #fff;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .ant-btn-primary:focus,
+  .ant-btn-primary:hover {
+    color: #fff;
+    background: #5f8ffb;
+    border-color: #5f8ffb;
+  }
+
+  .ant-btn-primary:active {
+    color: #fff;
+    background: #2768f6;
+    border-color: #2768f6;
+  }
+
+  .ant-btn-primary[disabled],
+  .ant-btn-primary[disabled]:active,
+  .ant-btn-primary[disabled]:focus,
+  .ant-btn-primary[disabled]:hover {
+    color: #999;
+    background: #e8e8e8;
+    border-color: #dcdfe6;
+  }
+
+  .ant-btn {
+    color: #15172f;
+    border: 1px solid var(--border-color-base);
+    border-radius: 4px;
+  }
+  .ant-btn-text {
+    color: #5f6266;
+    border-color: transparent;
+  }
+
+  .ant-btn:focus,
+  .ant-btn:hover {
+    color: var(--primary-color);
+    background: #ecf2ff;
+    border: 1px solid var(--primary-color);
+  }
+
+  .ant-btn:active {
+    color: #096dd9;
+    background: #fff;
+    border-color: #096dd9;
+  }
+
+  .ant-btn[disabled],
+  .ant-btn[disabled]:active,
+  .ant-btn[disabled]:focus,
+  .ant-btn[disabled]:hover {
+    color: #737b96;
+    background: #e8e8e8;
+  }
+  .ant-btn > .anticon + span,
+  .ant-btn > span + .anticon {
+    margin-left: 6px;
+  }
+
+  // Switch
+  .ant-switch {
+    background-color: #cfd3e1;
+  }
+  .ant-switch-small {
+    min-width: 38px;
+    height: 18px;
+    line-height: 18px;
+  }
+  .ant-switch-small .ant-switch-handle {
+    width: 14px;
+    height: 14px;
+  }
+  .ant-switch-small.ant-switch-checked .ant-switch-handle {
+    left: calc(100% - 14px - 2px);
+  }
+  .ant-switch-checked {
+    background: var(--success-color);
+  }
+
+  // Modal 对话框
+  .ant-modal-content {
+    border-radius: 4px;
+  }
+  .ant-modal-header {
+    border-bottom: 1px solid #e9e9e9;
+  }
+  .ant-modal-body {
+    padding: 32px;
+  }
+  .ant-modal-title {
+    color: #737b96;
+    font-size: 14px;
+  }
+  .ant-modal-close {
+    color: #bfc4d5;
+  }
+  .ant-modal-footer {
+    padding: 10px 16px 8px;
+    background: #f7f9fa;
+    border-top: none;
+
+    // .ant-btn:first-child:not(:hover) {
+    //   color: #5f6266;
+    //   background: transparent;
+    //   border-color: transparent;
+    //   box-shadow: none;
+    // }
+    // .ant-btn.ant-btn-primary {
+    //   margin-left: 16px;
+    // }
+  }
+
+  // Input
+  .ant-input {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  // Input - TextArea 输入框 - 文本域
+  .ant-input-textarea-show-count {
+    position: relative;
+    .ant-input {
+      padding-bottom: 26px;
+    }
+    &::after {
+      position: absolute;
+      right: 13px;
+      bottom: 2px;
+    }
+  }
+
+  // Input - Search 输入框 - 搜索框
+  .ant-input-affix-wrapper {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color: #adbbc4;
+    &::after {
+      border-color: var(--primary-color);
+      border-radius: 4px;
+    }
+    &:focus {
+      border-color: var(--primary-color);
+      border-radius: 4px;
+    }
+  }
+
+  // Select
+  .ant-select-multiple .ant-select-selector {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background-color: #eff5ff;
+  }
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #eff5ff;
+  }
+  .ant-select-multiple .ant-select-selection-item {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: #737b96;
+    border: none;
+    border-radius: 2px;
+  }
+
+  // Checkbox
+  .ant-checkbox-wrapper {
+    color: #737b96;
+  }
+  .ant-checkbox-inner {
+    width: 14px;
+    height: 14px;
+    border-color: #a6aab8;
+    border-radius: 2px;
+  }
+  .ant-checkbox-inner::after {
+    top: 45%;
+    left: 20%;
+  }
+
+  // Pagination
+  .ant-pagination-next .ant-pagination-item-link,
+  .ant-pagination-prev .ant-pagination-item-link {
+    border: none;
+  }
+
+  .ant-pagination-item {
+    border: none;
+    a {
+      margin: 1px 4px;
+      padding: 0;
+      color: #c0c4cc;
+      border-radius: 4px;
+      &:hover {
+        color: var(--primary-color);
+        background: #eff5ff;
+      }
+    }
+  }
+  .ant-pagination-item-active a {
+    color: #141736;
+  }
+  .ant-pagination-total-text {
+    color: #bfc4d5;
+  }
+
+  // Table - 表格
+  .ant-table .ant-table-thead > tr > th {
+    padding: 12px 24px;
+    color: #737b96;
+    border-radius: 4px 4px 0 0;
+  }
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #ecf1f3;
+  }
+  .ant-table-tbody > tr.ant-table-row:hover > td {
+    background: #f7fbfd;
+  }
+  .ant-table-tbody > tr > td,
+  .ant-table-thead > tr > th,
+  .ant-table tfoot > tr > td,
+  .ant-table tfoot > tr > th {
+    padding: 24px;
+  }
+
+  // Tabs - 标签页
+  .ant-tabs-card {
+    .ant-tabs-nav {
+      margin: 0;
+    }
+    .ant-tabs-content-holder {
+      background: #fff;
+    }
+    .ant-tabs-nav::before {
+      display: none;
+    }
+    .ant-tabs-nav .ant-tabs-tab {
+      margin-right: 0 !important;
+      color: #223345;
+      background: #fff;
+      border-bottom: none;
+    }
+    .ant-tabs-nav .ant-tabs-tab-active {
+      color: #fff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    .ant-tabs-nav .ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: #fff;
+    }
+    .ant-tabs-nav .ant-tabs-content {
+      margin-top: -16px;
+    }
+    .ant-tabs-nav .ant-tabs-content > .ant-tabs-tabpane {
+      padding: 24px;
+      background: #fff;
+    }
+  }
+
+  // Form.Item
+  .ant-form-item-label > label {
+    height: 40px;
+  }
+
+  .ant-form-item-label
+    > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+    margin-right: 2px;
+    font-weight: 500;
+  }
+
+  .ant-form-item-explain {
+    padding-top: 1px;
+    font-size: 12px;
+  }
+
+  // Descriotions
+  .ant-descriptions-header {
+    margin-bottom: 16px;
+  }
+
+  .ant-descriptions-title {
+    color: #223345;
+    font-size: 14px;
+  }
+
+  // pro-layout
+  .ant-pro-global-header-layout-mix {
+    padding-left: 30px;
+    background: #141736;
+  }
+  .ant-pro-basicLayout-content {
+    margin: 0;
+    background: #F7F8FC;
+
+    .ant-pro-page-container {
+      margin: 0;
+    }
+  }
+}
