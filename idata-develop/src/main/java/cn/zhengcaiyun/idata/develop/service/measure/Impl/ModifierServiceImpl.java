@@ -20,6 +20,8 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
@@ -66,6 +68,7 @@ public class ModifierServiceImpl implements ModifierService {
     private EnumService enumService;
 
     private String[] modifierInfos = new String[]{"enName", "modifierEnum", "modifierDefine"};
+    private final String MODIFIER_ENUM = "modifierEnum";
 
     @Override
     public MeasureDto findModifier(String modifierCode) {
@@ -89,22 +92,55 @@ public class ModifierServiceImpl implements ModifierService {
                 and(devLabelDefine.labelCode, isIn(modifierCodeList)))), MeasureDto.class);
         List<ModifierDto> echoModifierList = modifierList.stream().map(modifier -> {
             ModifierDto echoModifier = new ModifierDto();
+            echoModifier.setModifierCode(modifier.getLabelCode());
             echoModifier.setModifierName(modifier.getLabelName());
+            AttributeDto modifierAttribute = modifier.getLabelAttributes()
+                    .stream().filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
+                    .findAny().get();
+            echoModifier.setModifierAttribute(modifierAttribute);
             List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()));
             echoModifier.setEnumValues(modifierEnumValueList);
-            if (atomicTableId != null) {
-                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
-                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->
-                        modifierLabel.getTableId().equals(atomicTableId)).findAny()
-                        .orElse(null);
-                if (echoModifierLabel != null) {
-                    echoModifier.setTableName(tableMap.get(atomicTableId));
-                    echoModifier.setColumnName(echoModifierLabel.getColumnName());
-                }
-            }
+            echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
+//            if (atomicTableId != null) {
+//                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
+//                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->
+//                        modifierLabel.getTableId().equals(atomicTableId)).findAny()
+//                        .orElse(null);
+//                if (echoModifierLabel != null) {
+//                    echoModifier.setTableName(tableMap.get(atomicTableId));
+//                    echoModifier.setColumnName(echoModifierLabel.getColumnName());
+//                }
+//            }
             return echoModifier;
         }).collect(Collectors.toList());
         return echoModifierList;
+    }
+
+    @Override
+    public List<MeasureDto> findModifiersByAtomicCode(String atomicMetricCode) {
+        DevLabel atomicLabel = devLabelDao.selectOne(select(devLabel.allColumns())
+                .from(devLabel)
+                .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                .where(devLabel.labelCode, isEqualTo(atomicMetricCode), and(devLabel.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelCode, isEqualTo(atomicMetricCode)), and(devLabelDefine.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isNotEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL_DISABLE.name())))
+                .build().render(RenderingStrategies.MYBATIS3))
+                .orElse(null);
+        if (atomicLabel == null) { return null; }
+//        List<MeasureDto> echoModifierList = PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
+//                        .from(devLabelDefine)
+//                        .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
+//                        .where(devLabelDefine.del, isNotEqualTo(1), and(devLabel.del, isNotEqualTo(1)),
+//                                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
+//                                and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
+//                        .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
+        return PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
+                .from(devLabelDefine)
+                .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
+                .where(devLabelDefine.del, isNotEqualTo(1), and(devLabel.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
+                        and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
+                .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
     }
 
     @Override
@@ -241,6 +277,12 @@ public class ModifierServiceImpl implements ModifierService {
         checkArgument(modifier != null, "修饰词不存在");
 
         MeasureDto echoModifier = PojoUtil.copyOne(modifier, MeasureDto.class);
+        echoModifier.getLabelAttributes().stream()
+                .peek(labelAttribute -> {
+                    if (MODIFIER_ENUM.equals(labelAttribute.getAttributeKey())) {
+                        labelAttribute.setEnumName(enumService.getEnumName(labelAttribute.getAttributeValue()));
+                    }
+                }).collect(Collectors.toList());
         echoModifier.setMeasureLabels(labelService.findLabelsByCode(modifierCode));
         return echoModifier;
     }

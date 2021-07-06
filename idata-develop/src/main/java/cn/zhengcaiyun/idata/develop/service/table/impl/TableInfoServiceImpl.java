@@ -104,7 +104,6 @@ public class TableInfoServiceImpl implements TableInfoService {
         return echoTableInfo;
     }
 
-    // TODO 改造成通用获取表信息接口，允许不传labelValue
     @Override
     public List<TableInfoDto> getTables(String labelValue) {
         List<DevTableInfo> tableInfoList = devTableInfoDao.selectMany(select(devTableInfo.allColumns())

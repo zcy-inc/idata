@@ -16,6 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.measure;
 
+import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
+
 import java.util.List;
 
 /**
@@ -24,11 +26,12 @@ import java.util.List;
  */
 public class ModifierDto {
     private String modifierCode;
-    private String modifierName; // TODO 前端确认是否需要
+    private String modifierName;
     private String tableName;
     private String columnName;
     private List<String> enumValueCodes;
-    private List<String> enumValues; // TODO 前端确认是否需要
+    private List<String> enumValues;
+    private AttributeDto modifierAttribute;
 
     // GaS
     public String getModifierCode() {
@@ -77,5 +80,13 @@ public class ModifierDto {
 
     public void setEnumValues(List<String> enumValues) {
         this.enumValues = enumValues;
+    }
+
+    public AttributeDto getModifierAttribute() {
+        return modifierAttribute;
+    }
+
+    public void setModifierAttribute(AttributeDto modifierAttribute) {
+        this.modifierAttribute = modifierAttribute;
     }
 }

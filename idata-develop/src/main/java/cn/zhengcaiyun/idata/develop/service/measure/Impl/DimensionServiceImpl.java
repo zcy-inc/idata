@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
@@ -31,7 +32,10 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import com.alibaba.fastjson.JSON;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +47,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSuppo
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -68,7 +73,8 @@ public class DimensionServiceImpl implements DimensionService {
     private ColumnInfoService columnInfoService;
 
     private final String[] dimensionInfos = new String[]{"enName", "dimensionId", "dimensionDefine"};
-    private final String DIMENSION_LABEL_TAG = "DIMENSION_LABEL";
+    private final String DB_NAME = "dbName:LABEL";
+    private final String EN_NAME = "enName";
 
     @Override
     public MeasureDto findDimension(String dimensionCode) {
@@ -92,11 +98,27 @@ public class DimensionServiceImpl implements DimensionService {
         return echoDimensionList;
     }
 
-    // TODO mock数据用于联调，待修改
     @Override
     public List<String> findDimensionValues(String dimensionCode) {
-        String[] mockDimensionValues = new String[]{"339900", "330899", "330802"};
-        return Arrays.asList(mockDimensionValues);
+        DevLabelDefine dimensionDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())),
+                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
+                .orElseThrow(() -> new IllegalArgumentException("维度不存在"));
+        DevLabel dimensionLabel = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(dimensionCode)), and(devLabel.labelParamValue, isEqualTo("true"))))
+                .orElse(null);
+        if (dimensionLabel == null) { return null; }
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.id, isEqualTo(dimensionLabel.getTableId())))).get();
+        String dbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isEqualTo(1),
+                and(devLabel.tableId, isEqualTo(dimensionLabel.getTableId())), and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .get().getLabelParamValue();
+        String selectSql = String.format("SELECT DISTINCT %s FROM %s.%s", dimensionLabel.getColumnName(), dbName,
+                tableInfo.getTableName());
+        List<String> echoDimensionValues = new ArrayList<>();
+        // TODO mock数据用于联调，sql已完成，待调用查询方法
+        echoDimensionValues = Arrays.asList("339900", "330899", "330802");
+        return echoDimensionValues;
     }
 
     @Override
@@ -243,19 +265,26 @@ public class DimensionServiceImpl implements DimensionService {
                 .from(devLabel)
                 .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isIn(metricLabelTableIdList)),
-                        and(devLabelDefine.del, isNotEqualTo(1)), and(devLabelDefine.labelTag, isEqualTo(DIMENSION_LABEL_TAG)))
+                        and(devLabelDefine.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())))
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
                 .stream().peek(dimensionLabel -> dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId())))
                 .collect(Collectors.toList());
         Map<String, List<LabelDto>> dimensionLabelMap = dimensionLabelList.stream().collect(Collectors.groupingBy(LabelDto::getLabelCode));
         Set<String> dimensionLabelCodeList = dimensionLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toSet());
-        List<DevLabelDefine> dimensionLabelDefineList = devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isEqualTo(DIMENSION_LABEL_TAG)),
-                        and(devLabelDefine.labelCode, isIn(dimensionLabelCodeList))));
+        List<LabelDefineDto> dimensionLabelDefineList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())),
+                        and(devLabelDefine.labelCode, isIn(dimensionLabelCodeList)))), LabelDefineDto.class);
         return dimensionLabelDefineList.stream().map(dimension -> {
             MeasureDto echoDimension = new MeasureDto();
             echoDimension.setLabelCode(dimension.getLabelCode());
             echoDimension.setLabelName(dimension.getLabelName());
+            String enName = dimension.getLabelAttributes()
+                    .stream().filter(labelAttribute -> labelAttribute.getAttributeKey().equals(EN_NAME))
+                    .findAny()
+                    .get().getAttributeValue();
+            echoDimension.setEnName(enName);
             echoDimension.setMeasureLabels(dimensionLabelMap.get(dimension.getLabelCode()));
             return echoDimension;
         }).collect(Collectors.toList());

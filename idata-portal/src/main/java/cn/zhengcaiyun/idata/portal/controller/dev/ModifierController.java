@@ -20,11 +20,14 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author caizhedong
@@ -45,11 +48,16 @@ public class ModifierController {
         return RestResult.success(modifierService.findModifier(modifierCode));
     }
 
+    @GetMapping("modifiersByAtomic")
+    public RestResult<List<MeasureDto>> findByAtomicMetricCode(@RequestParam("atomicMetricCode") String atomicMetricCode) {
+        return RestResult.success(modifierService.findModifiersByAtomicCode(atomicMetricCode));
+    }
+
     @PostMapping("modifier")
     public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto modifier,
                                                       HttpServletRequest request) {
         MeasureDto echoModifier;
-        if (modifier.getId() == null) {
+        if (isEmpty(modifier.getLabelCode())) {
             echoModifier = modifierService.create(modifier, tokenService.getNickname(request));
         }
         else {

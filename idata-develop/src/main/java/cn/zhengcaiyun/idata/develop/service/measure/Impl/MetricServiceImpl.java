@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelAttributes;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -75,6 +76,7 @@ public class MetricServiceImpl implements MetricService {
     private String[] metricInfos = new String[]{"enName", "metricId", "bizTypeCode", "metricDefine"};
     private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
+    private final String METRIC_BIZ_TYPE = "bizTypeCode";
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -180,7 +182,7 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(metric.getLabelCode()), "指标Code不能为空");
         DevLabelDefine existMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metric.getLabelCode())), and(devLabelDefine.labelTag,
-                        isLike("%_METRIC_DISABLE"))))
+                        isLike("%_METRIC_LABEL"))))
                 .orElse(null);
         checkArgument(existMetric != null, "指标不存在或未停用");
 
@@ -220,7 +222,7 @@ public class MetricServiceImpl implements MetricService {
                 and(devLabelDefine.labelCode, isEqualTo(metricCode)),
                 and(devLabelDefine.labelTag, isEqualTo(existLabelTag))))
                 .orElse(null);
-        checkArgument(existMetric != null, "指标不存");
+        checkArgument(existMetric != null, "指标不存在");
 
         // 原子指标校验是否被派生指标依赖
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existMetric.getLabelTag())
@@ -240,7 +242,7 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(operator), "修改者不能为空");
         checkArgument(isNotEmpty(metricCode), "指标Code不能为空");
         DevLabelDefine existModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(metricCode)), and(devLabelDefine.labelTag, isLike("%_METRIC_DISABLE"))))
+                and(devLabelDefine.labelCode, isEqualTo(metricCode)), and(devLabelDefine.labelTag, isLike("%_METRIC_LABEL_DISABLE"))))
                 .orElse(null);
         checkArgument(existModifier != null, "指标不存在或未停用或已删除");
 
@@ -261,6 +263,12 @@ public class MetricServiceImpl implements MetricService {
                         .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag,
                                 isEqualTo(LabelTagEnum.DERIVE_METRIC_LABEL.name())))
                         .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
+        deriveMetricList.stream().peek(deriveMetric -> {
+            AttributeDto metricLabelAttribute = deriveMetric.getLabelAttributes().stream()
+                    .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(METRIC_BIZ_TYPE))
+                    .findAny().get();
+            deriveMetric.setBizTypeValue(enumService.getEnumValue(metricLabelAttribute.getAttributeValue()));
+        }).collect(Collectors.toList());
         Map<String, List<MeasureDto>> relyDriveAndAtomicMap = new HashMap<>();
         deriveMetricList.forEach(metricLabel -> {
             List<MeasureDto> metricLabelList;
@@ -303,6 +311,7 @@ public class MetricServiceImpl implements MetricService {
                 getMetricByAtomic(autoMetricCode).stream().map(MeasureDto::getLabelName).collect(Collectors.joining(",")) : null;
     }
 
+    // 查询指标
     private MetricDto getMetricByCode(String metricCode) {
         DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metricCode))))
@@ -312,6 +321,12 @@ public class MetricServiceImpl implements MetricService {
         }
 
         MetricDto echoMetric = PojoUtil.copyOne(metric, MetricDto.class);
+        echoMetric.getLabelAttributes().stream()
+                .peek(labelAttribute -> {
+                    if (METRIC_BIZ_TYPE.equals(labelAttribute.getAttributeKey())) {
+                        labelAttribute.setEnumValue(enumService.getEnumValue(labelAttribute.getAttributeValue()));
+                    }
+                }).collect(Collectors.toList());
         echoMetric.setMeasureLabels(labelService.findLabelsByCode(metricCode));
         // 反查维度和派生指标
         if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())
@@ -325,7 +340,10 @@ public class MetricServiceImpl implements MetricService {
             else {
                 MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
                 echoMetric.setMeasureLabels(labelService.findLabelsByCode(atomicMetric.getLabelCode()));
-                echoMetric.setSpecialAttribute(atomicMetric.getSpecialAttribute());
+                SpecialAttributeDto echoSpecialAttribute = atomicMetric.getSpecialAttribute();
+                echoSpecialAttribute.setAtomicMetricCode(atomicMetric.getLabelCode());
+                echoSpecialAttribute.setAtomicMetricName(atomicMetric.getLabelName());
+                echoMetric.setSpecialAttribute(echoSpecialAttribute);
                 Long atomicTableId = labelService.findLabelsByCode(atomicMetric.getLabelCode()).get(0).getTableId();
                 echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicTableId));
             }

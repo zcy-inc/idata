@@ -297,7 +297,7 @@ public class LabelServiceImpl implements LabelService {
         }
     }
 
-    // TODO
+    // TODO 待上线前删除注释
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
         return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
@@ -311,6 +311,7 @@ public class LabelServiceImpl implements LabelService {
 //                .stream().map(devLabel -> toLabelDto(devLabel, labelDefineMap)).collect(Collectors.toList());
     }
 
+    // TODO 待上线前删除注释
     @Override
     public List<LabelDto> findLabelsByCode(String labelCode) {
         Map<Long, String> tableInfoMap = devTableInfoDao.selectMany(select(devTableInfo.id, devTableInfo.tableName)
@@ -339,6 +340,7 @@ public class LabelServiceImpl implements LabelService {
                 }).collect(Collectors.toList());
     }
 
+    // TODO 待上线前删除注释
     @Override
     public Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames) {
         checkArgument(columnNames != null && columnNames.size() > 0, "columnNames不能为空");
@@ -359,7 +361,7 @@ public class LabelServiceImpl implements LabelService {
 //                        Collectors.mapping(devLabel -> toLabelDto(devLabel, labelDefineMap), Collectors.toList())));
     }
 
-    // 已新增根据index排序方法替换，暂注释待删除
+    // TODO 已新增根据index排序方法替换，暂注释待上线前删除
 //    private LabelDto toLabelDto(DevLabel devLabel, Map<String, DevLabelDefine> labelDefineMap) {
 //        LabelDto labelDto = PojoUtil.copyOne(devLabel, LabelDto.class);
 //        DevLabelDefine labelDefine = labelDefineMap.get(devLabel.getLabelCode());

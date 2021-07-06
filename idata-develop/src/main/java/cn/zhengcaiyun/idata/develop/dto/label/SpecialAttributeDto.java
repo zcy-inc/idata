@@ -32,8 +32,8 @@ public class SpecialAttributeDto {
     private String aggregatorCode;
     private Boolean degradeDim;
     private String atomicMetricCode;
-    private String atomicMetricName; // TODO 前端确认是否需要
-    private String complexMetricFormula; // TODO 命名
+    private String atomicMetricName;
+    private String complexMetricFormula;
     private List<ModifierDto> modifiers;
 
     // GaS
