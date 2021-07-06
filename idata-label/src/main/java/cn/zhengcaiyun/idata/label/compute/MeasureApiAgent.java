@@ -81,7 +81,7 @@ public class MeasureApiAgent {
         if (CollectionUtils.isEmpty(measureLabels)) {
             return null;
         }
-        metadata.setTable(measureLabels.get(0).getTableName());
+        metadata.setTable(measureLabels.get(0).getDbTableName());
         metadata.setColumn(measureLabels.get(0).getColumnName());
         SpecialAttributeDto specialAttributeDto = measureDto.getSpecialAttribute();
         if (Objects.isNull(specialAttributeDto)) {
@@ -128,8 +128,8 @@ public class MeasureApiAgent {
             return null;
         }
         for (LabelDto labelDto : measureLabels) {
-            if (labelDto.getTableName().equals(indicatorMetadata.getTable())) {
-                metadata.setTable(measureLabels.get(0).getTableName());
+            if (labelDto.getDbTableName().equals(indicatorMetadata.getTable())) {
+                metadata.setTable(measureLabels.get(0).getDbTableName());
                 metadata.setColumn(measureLabels.get(0).getColumnName());
                 break;
             }
@@ -159,9 +159,9 @@ public class MeasureApiAgent {
         }
         for (LabelDto labelDto : measureLabels) {
             if ("true".equals(labelDto.getLabelParamValue())) {
-                metadata.setTable(labelDto.getTableName());
+                metadata.setTable(labelDto.getDbTableName());
                 metadata.setColumn(labelDto.getColumnName());
-                metadata.setOriginTable(labelDto.getTableName());
+                metadata.setOriginTable(labelDto.getDbTableName());
                 break;
             }
         }
