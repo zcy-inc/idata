@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { getFolderTree } from '@/services/kpisystem';
+import { getFolderTree } from '@/services/measure';
 import { TreeNodeType } from '@/constants/datapi';
 import { TreeNode } from '@/types/datapi';
 
@@ -55,10 +55,20 @@ export default () => {
   const viewTab = (node: TreeNode) => {
     const { cid, name, fileCode, type } = node;
     if (!tabs.some((_) => _.key === cid)) {
-      setTabs([...tabs, { key: cid, title: name, code: fileCode, type, mode: 'view' }]);
+      setTabs([
+        ...tabs,
+        {
+          key: cid,
+          title: name,
+          code: fileCode,
+          type: type.split('_')[0],
+          mode: 'view',
+        },
+      ]);
     }
     setActiveTab(cid);
   };
+
   // 新建维度 / 修饰词 / 指标
   const createTab = (type: TreeNodeType) => {
     if (type === TreeNodeType.DIMENSION_LABEL) {
@@ -88,6 +98,21 @@ export default () => {
     setActiveTab(curActiveKey);
   };
 
+  const replaceTab = (oldKey: string, newKey: string, title: string) => {
+    let targetI = tabs.findIndex((_) => _.key === oldKey);
+    let newTab: ITab = {
+      key: newKey,
+      code: newKey.split('_')[1],
+      title: title,
+      mode: 'view',
+      type: tabs[targetI].type,
+    };
+    tabs[targetI] = newTab;
+
+    setActiveTab(newKey);
+    setTabs([...tabs]);
+  };
+
   return {
     // tree
     tree,
@@ -105,5 +130,6 @@ export default () => {
     viewTab,
     createTab,
     removeTab,
+    replaceTab,
   };
 };

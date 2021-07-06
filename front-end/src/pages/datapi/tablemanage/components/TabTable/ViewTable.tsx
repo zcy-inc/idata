@@ -39,6 +39,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         title: _.labelName,
         dataIndex: _.labelCode,
         key: _.labelCode,
+        render: (_: any) => _ || '-',
       }));
       const dt = dts.map((_: any) => {
         const tmp = { columnName: _.columnName };

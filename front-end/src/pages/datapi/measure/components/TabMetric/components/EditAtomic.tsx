@@ -1,73 +1,81 @@
 import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
-import ProForm, {
-  ProFormSelect,
-  ProFormText,
-  ProFormTextArea,
-  ProFormGroup,
-} from '@ant-design/pro-form';
-import { Form, Popover, Table, Tabs, Select, Typography } from 'antd';
+import { message, Select, Tabs, Typography } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { ForwardRefRenderFunction, Key } from 'react';
-import styles from '../../index.less';
+import styles from '../../../../measure/index.less';
 
 import IconFont from '@/components/IconFont';
-import Title from '../../../components/Title';
-import { getFolders } from '@/services/kpisystem';
-import { rules } from '@/constants/datapi';
-import { Modifier, Table as ITable } from '@/types/datapi';
+import Title from '../../../../components/Title';
+import { Metric, Table } from '@/types/datapi';
 import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
+import { AggregatorCodeOptions } from '@/constants/datapi';
 
-export interface ViewModifierProps {
-  initial?: Modifier;
+export interface EditAtomicProps {
+  initial?: Metric;
 }
-interface TableOptions extends ITable {
+interface TableOptions {
   label: string;
-  value: string;
+  value: number;
 }
 
-const { TabPane } = Tabs;
 const { Link } = Typography;
-const { require } = rules;
+const { TabPane } = Tabs;
 
-const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ initial }, ref) => {
-  const [folderOps, setFolderOps] = useState([]);
-  const [form] = Form.useForm();
-  // 事实表
+const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
   const [DWDData, setDWDData] = useState<any[]>([]);
   const [DWDKeys, setDWDKeys] = useState<Key[]>([]);
   const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
   const [DWDStrings, setDWDStrings] = useState<[][]>([]);
 
   useImperativeHandle(ref, () => ({
-    form: form.getFieldsValue(),
-    DWD: DWDData,
+    data: DWDData,
   }));
 
   useEffect(() => {
-    getFolders()
-      .then((res) => {
-        const fd = res.data.map((_: any) => ({
-          label: _.folderName,
-          value: `${_.id}`,
-        }));
-        setFolderOps(fd);
-      })
-      .catch((err) => {});
     getTableReferTbs({ labelValue: 'dwd' })
       .then((res) => {
-        setDWDTables(res.data);
+        const t = res.data.map((table: Table) => ({
+          label: table.tableName,
+          value: table.id,
+        }));
+        setDWDTables(t);
       })
       .catch((err) => {});
   }, []);
 
   useEffect(() => {
     if (initial) {
+      let tableId = '';
+      const tmpK: Key[] = [];
+      const tmp = initial.measureLabels.map((label) => {
+        tmpK.push(label.id);
+        tableId = `${label.tableId}`;
+        return {
+          id: label.id,
+          tableId: label.tableId,
+          columnName: label.columnName,
+          aggregatorCode: initial.specialAttribute.aggregatorCode,
+        };
+      });
+      getTableReferStr({ tableId })
+        .then((res) => {
+          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          DWDStrings[0] = strs;
+          setDWDStrings([...DWDStrings]);
+        })
+        .catch((err) => {});
+      setDWDData(tmp);
+      setDWDKeys(tmpK);
     }
   }, [initial]);
 
   // 添加一行数据
   const addData = () => {
+    if (DWDData.length > 0) {
+      message.info('原子指标的事实表只能存在一张');
+      return;
+    }
     const id = Date.now();
     const data = { id };
     setDWDData([...DWDData, data]);
@@ -75,7 +83,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   };
 
   const setValue = (schema: any, value: any) => {
-    if (schema.dataIndex === 'tableName') {
+    if (schema.dataIndex === 'tableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
           const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
@@ -99,8 +107,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   const Cols: ProColumns[] = [
     {
       title: '表名',
-      dataIndex: 'tableName',
-      key: 'tableName',
+      dataIndex: 'tableId',
+      key: 'tableId',
       renderFormItem: (schema) => (
         <Select
           allowClear
@@ -112,8 +120,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     },
     {
       title: '关联表字段',
-      dataIndex: 'stringName',
-      key: 'stringName',
+      dataIndex: 'columnName',
+      key: 'columnName',
       renderFormItem: (schema) => (
         <Select
           allowClear
@@ -123,73 +131,24 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         />
       ),
     },
+    {
+      title: '聚合方式',
+      dataIndex: 'aggregatorCode',
+      key: 'aggregatorCode',
+      renderFormItem: (schema) => (
+        <Select
+          allowClear
+          placeholder="请选择"
+          options={AggregatorCodeOptions}
+          onChange={(value) => setValue(schema, value)}
+        />
+      ),
+    },
     { title: '操作', valueType: 'option', fixed: 'right', width: 50 },
-  ];
-  const ColsPreview = [
-    { title: '枚举值', dataIndex: 'enumValue', key: 'enumValue' },
-    { title: '父级枚举值', dataIndex: 'parentValue', key: 'parentValue' },
   ];
 
   return (
     <Fragment>
-      <Title>基本信息</Title>
-      <ProForm
-        className={`${styles.reset} ${styles['reset-inline']}`}
-        layout="horizontal"
-        colon={false}
-        form={form}
-        submitter={false}
-      >
-        <ProFormGroup>
-          <ProFormText
-            name="labelName"
-            label="修饰词名称"
-            width="sm"
-            placeholder="请输入"
-            rules={require}
-          />
-          <ProFormText
-            name="enName"
-            label="英文别名"
-            width="sm"
-            placeholder="请输入"
-            rules={require}
-          />
-          <ProFormSelect
-            name="modifierEnum"
-            label="枚举值"
-            width="sm"
-            placeholder="请输入"
-            rules={require}
-            tooltip="若为空，请在数仓设计-新建枚举类型处新建。"
-            options={[]}
-          />
-          <ProForm.Item>
-            <Popover
-              content={
-                <Table columns={ColsPreview} dataSource={[]} pagination={false} size="small" />
-              }
-            >
-              <Link>预览</Link>
-            </Popover>
-          </ProForm.Item>
-        </ProFormGroup>
-        <ProFormText
-          name="modifierDefine"
-          label="定义"
-          width="md"
-          placeholder="请输入"
-          rules={require}
-        />
-        <ProFormTextArea name="comment" label="备注" width="md" placeholder="请输入" />
-        <ProFormSelect
-          name="folderId"
-          label="位置"
-          width="md"
-          placeholder="根目录"
-          options={folderOps}
-        />
-      </ProForm>
       <Title>关联信息</Title>
       <Tabs className={styles['reset-tabs']}>
         <TabPane key="main" tab="事实表">
@@ -208,7 +167,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             }}
           />
           <Link onClick={addData} style={{ display: 'inline-block', marginTop: 16 }}>
-            <IconFont type="icon-tianjia" />
+            <IconFont type="icon-tianjia" style={{ marginRight: 4 }} />
             添加字段
           </Link>
         </TabPane>
@@ -217,4 +176,4 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   );
 };
 
-export default forwardRef(ViewModifier);
+export default forwardRef(EditAtomic);

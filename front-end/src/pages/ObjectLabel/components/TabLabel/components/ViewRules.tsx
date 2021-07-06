@@ -22,7 +22,7 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
           <TabPane key={layer.layerId} tab={layer.layerName}>
             {/* 规则 */}
             {layer.ruleDef.rules.map((rule) => (
-              <Fragment>
+              <Fragment key={rule.ruleId}>
                 <p style={{ marginBottom: 8, fontSize: 16, fontWeight: 'bold' }}>{rule.ruleName}</p>
                 <Collapse
                   style={{ background: '#fff', marginBottom: 16 }}
@@ -31,7 +31,7 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
                   <Panel header="指标信息" key="indicator">
                     <Space direction="vertical">
                       {rule.indicatorDefs.map((indicator) => (
-                        <Space>
+                        <Space key={indicator.indicatorCode}>
                           <span>{indicator.indicatorName}</span>
                           <span>{ConditionMap[indicator.condition]}</span>
                           <span>{indicator.params}</span>
@@ -42,7 +42,7 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
                   <Panel header="维度信息" key="dimension">
                     <Space direction="vertical">
                       {rule.dimensionDefs.map((dimension) => (
-                        <Space>
+                        <Space key={dimension.dimensionCode}>
                           <span>{dimension.dimensionName}</span>
                           <span>{dimension.params}</span>
                         </Space>

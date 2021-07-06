@@ -7,7 +7,7 @@ import styles from '../../index.less';
 import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
 
-import { deleteFolder } from '@/services/kpisystem';
+import { deleteFolder } from '@/services/measure';
 import { TreeNodeType } from '@/constants/datapi';
 import { TreeNode as ITreeNode } from '@/types/datapi';
 
@@ -38,7 +38,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const [visible, setVisible] = useState(false);
 
   const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, viewTab, createTab } =
-    useModel('kpisystem', (_) => ({
+    useModel('measure', (_) => ({
       tree: _.tree,
       getTree: _.getTree,
       treeType: _.treeType,
@@ -68,11 +68,11 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const renderTypeMenu = () => {
     switch (treeType) {
-      case 'DIMENSION_LABEL':
+      case TreeNodeType.DIMENSION_LABEL:
         return <Menu.Item key="dimension">新建维度</Menu.Item>;
-      case 'MODIFIER_LABEL':
+      case TreeNodeType.MODIFIER_LABEL:
         return <Menu.Item key="modifier">新建修饰词</Menu.Item>;
-      case 'METRIC_LABEL':
+      case TreeNodeType.METRIC_LABEL:
       default:
         return <Menu.Item key="metric">新建指标</Menu.Item>;
     }
@@ -226,9 +226,9 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         </Dropdown>
       </div>
       <Tabs activeKey={treeType} onChange={(key) => getTree(key as TreeNodeType)}>
-        <TabPane tab="维度" key="DIMENSION_LABEL" />
-        <TabPane tab="修饰词" key="MODIFIER_LABEL" />
-        <TabPane tab="指标" key="METRIC_LABEL" />
+        <TabPane tab="维度" key={TreeNodeType.DIMENSION_LABEL} />
+        <TabPane tab="修饰词" key={TreeNodeType.MODIFIER_LABEL} />
+        <TabPane tab="指标" key={TreeNodeType.METRIC_LABEL} />
       </Tabs>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree

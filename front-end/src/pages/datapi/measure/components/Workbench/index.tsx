@@ -8,11 +8,12 @@ import { IconFont } from '@/components';
 import TabDimension from '../TabDimension';
 import TabModifier from '../TabModifier';
 import TabMetric from '../TabMetric';
+import { TreeNodeType } from '@/constants/datapi';
 
 const { TabPane } = Tabs;
 
 const Workbench: FC = ({}) => {
-  const { tabs, activeTab, setActiveTab, removeTab } = useModel('kpisystem', (_) => ({
+  const { tabs, activeTab, setActiveTab, removeTab } = useModel('measure', (_) => ({
     tabs: _.tabs,
     activeTab: _.activeTab,
     setActiveTab: _.setActiveTab,
@@ -21,11 +22,11 @@ const Workbench: FC = ({}) => {
 
   const renderTab = (tab: any) => {
     switch (tab.type) {
-      case 'DIMENSION_LABEL':
+      case TreeNodeType.DIMENSION_LABEL:
         return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;
-      case 'MODIFIER_LABEL':
+      case TreeNodeType.MODIFIER_LABEL:
         return <TabModifier initialMode={tab.mode} fileCode={tab.code} />;
-      case 'METRIC_LABEL':
+      case TreeNodeType.METRIC_LABEL:
         return <TabMetric initialMode={tab.mode} fileCode={tab.code} />;
       default:
         return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;

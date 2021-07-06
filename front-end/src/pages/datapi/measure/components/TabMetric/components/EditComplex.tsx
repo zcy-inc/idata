@@ -14,14 +14,13 @@ const { TextArea } = Input;
 const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
   const [data, setData] = useState('');
 
+  useImperativeHandle(ref, () => ({ data }));
+
   useEffect(() => {
     if (initial) {
+      setData(initial.specialAttribute.complexMetricFormula);
     }
   }, [initial]);
-
-  useImperativeHandle(ref, () => ({
-    complex: data,
-  }));
 
   return (
     <Fragment>

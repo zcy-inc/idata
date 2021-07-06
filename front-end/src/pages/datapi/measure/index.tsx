@@ -6,7 +6,7 @@ import styles from './index.less';
 import FolderTree from './components/FolderTree';
 import Workbench from './components/Workbench';
 
-const KpiSystem: FC = () => {
+const measure: FC = () => {
   return (
     <PageContainer contentClassName={styles['kpi-system']}>
       <div className={styles.board}>
@@ -22,4 +22,4 @@ const KpiSystem: FC = () => {
   );
 };
 
-export default KpiSystem;
+export default measure;

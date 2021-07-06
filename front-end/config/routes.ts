@@ -12,7 +12,7 @@
     routes: [
       { path: '/datapi', redirect: '/datapi/tablemanage' },
       { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/tablemanage' },
-      { path: '/datapi/kpisystem', name: '指标库', component: './datapi/kpisystem' },
+      { path: '/datapi/measure', name: '指标库', component: './datapi/measure' },
     ],
   },
   {

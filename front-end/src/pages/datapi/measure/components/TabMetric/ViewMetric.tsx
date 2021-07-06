@@ -6,7 +6,7 @@ import Title from '../../../components/Title';
 import ViewAtomic from './components/ViewAtomic';
 import ViewDerive from './components/ViewDerive';
 import ViewComplex from './components/ViewComplex';
-import { LabelAttribute, Metric, TableLable } from '@/types/datapi';
+import { LabelAttribute, Metric } from '@/types/datapi';
 import { KpiLabelsMap } from '@/constants/datapi';
 
 export interface ViewModifierProps {
@@ -19,19 +19,18 @@ const TagMap = {
   DERIVE_METRIC_LABEL: '派生指标',
   COMPLEX_METRIC_LABEL: '复合指标',
 };
-const ViewMap = {
-  ATOMIC_METRIC_LABEL: <ViewAtomic />,
-  DERIVE_METRIC_LABEL: <ViewDerive />,
-  COMPLEX_METRIC_LABEL: <ViewComplex />,
-};
 
 const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
   const [attributes, setAttributes] = useState<LabelAttribute[]>([]);
-  const [DWD, setDWD] = useState<TableLable[]>([]);
+
+  const ViewMap = {
+    ATOMIC_METRIC_LABEL: <ViewAtomic data={data} />,
+    DERIVE_METRIC_LABEL: <ViewDerive data={data} />,
+    COMPLEX_METRIC_LABEL: <ViewComplex data={data} />,
+  };
 
   useEffect(() => {
     if (data) {
-      setDWD(data.targetLabels);
       setAttributes(data.labelAttributes);
     }
   }, [data]);
@@ -48,7 +47,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
         <Item label="指标类型">{TagMap[data?.labelTag]}</Item>
         <Item label="指标名称">{data?.labelName}</Item>
         {attributes.map((attribute) => (
-          <Item label={KpiLabelsMap[attribute.attributeKey]}>{attribute.attributeValue}</Item>
+          <Item label={KpiLabelsMap[attribute.attributeKey]}>
+            {attribute.enumValue || attribute.attributeValue || '-'}
+          </Item>
         ))}
       </Descriptions>
       {ViewMap[data?.labelTag]}

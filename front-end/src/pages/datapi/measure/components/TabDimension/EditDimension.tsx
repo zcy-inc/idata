@@ -13,17 +13,28 @@ import styles from '../../index.less';
 
 import IconFont from '@/components/IconFont';
 import Title from '../../../components/Title';
-import { getFolders } from '@/services/kpisystem';
+import { getFolders } from '@/services/measure';
 import { rules, BooleanOptions } from '@/constants/datapi';
-import { Dimension, Table } from '@/types/datapi';
+import { Dimension } from '@/types/datapi';
 import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
 
-export interface EditDimensionProps {
+interface EditDimensionProps {
   initial?: Dimension;
 }
-interface TableOptions extends Table {
+interface TableOptions {
   label: string;
-  value: string;
+  value: string | number;
+}
+interface DIMDataList {
+  id: number;
+  tableId?: number;
+  columnName?: string;
+  degradeDim?: boolean;
+}
+interface DWDDataList {
+  id: number;
+  tableId?: number;
+  columnName?: string;
 }
 
 const { TabPane } = Tabs;
@@ -34,18 +45,18 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
   const [folderOps, setFolderOps] = useState([]);
   const [form] = Form.useForm();
   // 主表
-  const [DIMData, setDIMData] = useState<any[]>([]);
+  const [DIMData, setDIMData] = useState<DIMDataList[]>([]);
   const [DIMKeys, setDIMKeys] = useState<Key[]>([]);
   const [DIMTables, setDIMTables] = useState<TableOptions[]>([]);
   const [DIMStrings, setDIMStrings] = useState([]);
   // 事实表
-  const [DWDData, setDWDData] = useState<any[]>([]);
+  const [DWDData, setDWDData] = useState<DWDDataList[]>([]);
   const [DWDKeys, setDWDKeys] = useState<Key[]>([]);
   const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
   const [DWDStrings, setDWDStrings] = useState<[][]>([]);
 
   useImperativeHandle(ref, () => ({
-    form: form.getFieldsValue(),
+    form: form,
     DIM: DIMData,
     DWD: DWDData,
   }));
@@ -59,18 +70,52 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       .catch((err) => {});
     getTableReferTbs({ labelValue: 'dim' })
       .then((res) => {
-        setDIMTables(res.data);
+        const tableOptions = res.data.map((table) => ({ label: table.tableName, value: table.id }));
+        setDIMTables(tableOptions);
       })
       .catch((err) => {});
     getTableReferTbs({ labelValue: 'dwd' })
       .then((res) => {
-        setDWDTables(res.data);
+        const tableOptions = res.data.map((table) => ({ label: table.tableName, value: table.id }));
+        setDWDTables(tableOptions);
       })
       .catch((err) => {});
   }, []);
 
   useEffect(() => {
     if (initial) {
+      // form initial
+      const values = {
+        labelName: initial.labelName,
+        folderId: initial.folderId,
+      };
+      initial.labelAttributes.forEach((labelAttribute) => {
+        values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
+      });
+      form.setFieldsValue(values);
+      // DIM && DWD initial
+      initial.measureLabels.forEach((measureLabel) => {
+        if (measureLabel.labelParamValue === 'true') {
+          DIMKeys.push(measureLabel.id);
+          DIMData.push({
+            id: measureLabel.id,
+            tableId: measureLabel.tableId,
+            columnName: measureLabel.columnName,
+            degradeDim: initial.specialAttribute.degradeDim,
+          });
+        } else {
+          DWDKeys.push(measureLabel.id);
+          DWDData.push({
+            id: measureLabel.id,
+            tableId: measureLabel.tableId,
+            columnName: measureLabel.columnName,
+          });
+        }
+      });
+      setDIMData([...DIMData]);
+      setDIMKeys([...DIMKeys]);
+      setDWDData([...DWDData]);
+      setDWDKeys([...DWDKeys]);
     }
   }, [initial]);
 
@@ -96,7 +141,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
 
   const setValue = (schema: any, value: any, type: 'DIM' | 'DWD') => {
     if (type === 'DIM') {
-      if (schema.dataIndex === 'tableName') {
+      if (schema.dataIndex === 'tableId') {
         getTableReferStr({ tableId: value })
           .then((res) => {
             const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
@@ -108,7 +153,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       setDIMData([...DIMData]);
     }
     if (type === 'DWD') {
-      if (schema.dataIndex === 'tableName') {
+      if (schema.dataIndex === 'tableId') {
         getTableReferStr({ tableId: value })
           .then((res) => {
             const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
@@ -142,8 +187,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
   const ColsDIM: ProColumns[] = [
     {
       title: '表名',
-      dataIndex: 'tableName',
-      key: 'tableName',
+      dataIndex: 'tableId',
+      key: 'tableId',
       renderFormItem: (schema) => (
         <Select
           allowClear
@@ -155,8 +200,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
     },
     {
       title: '字段名',
-      dataIndex: 'stringName',
-      key: 'stringName',
+      dataIndex: 'columnName',
+      key: 'columnName',
       renderFormItem: (schema) => (
         <Select
           allowClear
@@ -168,12 +213,12 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
     },
     {
       title: '退化维',
-      dataIndex: 'test',
-      key: 'test',
+      dataIndex: 'degradeDim',
+      key: 'degradeDim',
       renderFormItem: (schema) => (
         <Radio.Group
           options={BooleanOptions}
-          onChange={(value) => setValue(schema, value, 'DIM')}
+          onChange={({ target: { checked } }) => setValue(schema, checked, 'DIM')}
         />
       ),
     },
@@ -182,27 +227,27 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
   const ColsDWD: ProColumns[] = [
     {
       title: '表名',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'tableId',
+      key: 'tableName',
       renderFormItem: (schema) => (
         <Select
           allowClear
           placeholder="请选择"
           options={DWDTables}
-          onChange={(value) => setValue(schema, value, 'DIM')}
+          onChange={(value) => setValue(schema, value, 'DWD')}
         />
       ),
     },
     {
       title: '关联表字段',
-      dataIndex: 'stringName',
-      key: 'stringName',
+      dataIndex: 'columnName',
+      key: 'columnName',
       renderFormItem: (schema) => (
         <Select
           allowClear
           placeholder="请选择"
           options={DWDStrings[schema.index as number]}
-          onChange={(value) => setValue(schema, value, 'DIM')}
+          onChange={(value) => setValue(schema, value, 'DWD')}
         />
       ),
     },
@@ -236,7 +281,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           />
           <ProFormText
             name="dimensionId"
-            label="Code"
+            label="维度ID"
             width="sm"
             placeholder="请输入"
             rules={require}
@@ -260,7 +305,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       </ProForm>
       <Title>关联信息</Title>
       <Tabs className={styles['reset-tabs']}>
-        <TabPane key="main" tab="主表">
+        <TabPane key="DIM" tab="主表">
           <EditableProTable
             rowKey="id"
             columns={ColsDIM}
@@ -280,11 +325,11 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
             }}
           />
           <Link onClick={() => addData('DIM')} style={{ display: 'inline-block', marginTop: 16 }}>
-            <IconFont type="icon-tianjia" />
+            <IconFont type="icon-tianjia" style={{ marginRight: 4 }} />
             添加主表
           </Link>
         </TabPane>
-        <TabPane key="dim" tab="事实表">
+        <TabPane key="DWD" tab="事实表">
           <EditableProTable
             rowKey="id"
             columns={ColsDWD}
@@ -300,7 +345,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
             }}
           />
           <Link onClick={() => addData('DWD')} style={{ display: 'inline-block', marginTop: 16 }}>
-            <IconFont type="icon-tianjia" />
+            <IconFont type="icon-tianjia" style={{ marginRight: 4 }} />
             添加事实表
           </Link>
         </TabPane>

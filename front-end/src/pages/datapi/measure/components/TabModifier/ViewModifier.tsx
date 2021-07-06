@@ -4,27 +4,40 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import Title from '../../../components/Title';
-import { LabelAttribute, Modifier, TableLable } from '@/types/datapi';
+import { LabelAttribute, Modifier } from '@/types/datapi';
 import { KpiLabelsMap } from '@/constants/datapi';
 
-export interface ViewModifierProps {
+interface ViewModifierProps {
   data: Modifier;
+}
+interface DWDList {
+  tableName: string;
+  columnName: string;
 }
 
 const { Item } = Descriptions;
 const { TabPane } = Tabs;
 const Cols = [
-  { title: '表名', dataIndex: '', key: '' },
-  { title: '关联表字段', dataIndex: '', key: '' },
+  { title: '表名', dataIndex: 'tableName', key: 'tableName' },
+  { title: '关联表字段', dataIndex: 'columnName', key: 'columnName' },
 ];
 
 const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
   const [attributes, setAttributes] = useState<LabelAttribute[]>([]);
-  const [DWD, setDWD] = useState<TableLable[]>([]);
+  const [DWD, setDWD] = useState<DWDList[]>([]);
 
   useEffect(() => {
     if (data) {
-      setDWD(data.targetLabels);
+      const list = data.measureLabels;
+      const tmpD: DWDList[] = [];
+      list.forEach((item) => {
+        tmpD.push({
+          tableName: item.tableName,
+          columnName: item.columnName,
+        });
+      });
+
+      setDWD(tmpD);
       setAttributes(data.labelAttributes);
     }
   }, [data]);
@@ -40,7 +53,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
       >
         <Item label="维度名称">{data?.labelName}</Item>
         {attributes.map((attribute) => (
-          <Item label={KpiLabelsMap[attribute.attributeKey]}>{attribute.attributeValue}</Item>
+          <Item label={KpiLabelsMap[attribute.attributeKey]}>
+            {attribute.enumName || attribute.attributeValue || '-'}
+          </Item>
         ))}
       </Descriptions>
       <Title>关联信息</Title>

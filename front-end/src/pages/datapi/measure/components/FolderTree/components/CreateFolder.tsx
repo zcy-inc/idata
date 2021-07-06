@@ -5,7 +5,7 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../../index.less';
 
-import { createFolder, getFolders, updateFolder } from '@/services/kpisystem';
+import { createFolder, getFolders, updateFolder } from '@/services/measure';
 import { FlatTreeNode } from '@/types/datapi';
 
 export interface CreateFolderProps {
@@ -23,7 +23,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   const [folders, setFolders] = useState<FlatTreeNodeOption[]>([]);
   const [form] = Form.useForm();
 
-  const { folderMode, curNode, treeType, getTree } = useModel('kpisystem', (ret) => ({
+  const { folderMode, curNode, treeType, getTree } = useModel('measure', (ret) => ({
     folderMode: ret.folderMode,
     curNode: ret.curNode,
     treeType: ret.treeType,

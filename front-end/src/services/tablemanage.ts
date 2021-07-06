@@ -1,4 +1,4 @@
-import { TreeNodeType } from '@/constants/datapi';
+import { Table } from '@/types/datapi';
 import { request } from 'umi';
 
 // 树 获取
@@ -70,7 +70,10 @@ export async function getTableReferDbs() {
 }
 // 表 获取参考表
 export async function getTableReferTbs(params: { labelValue?: string }) {
-  return request('/api/p1/dev/referTables', { method: 'GET', params });
+  return request<{ data: Table[] }>('/api/p1/dev/referTables', {
+    method: 'GET',
+    params,
+  });
 }
 // 表 获取参考字段
 export async function getTableReferStr(params: { tableId: string }) {
@@ -82,7 +85,7 @@ export async function getDWOwner() {
 }
 // 表 查看
 export async function getTable(params: { tableId: any }) {
-  return request(`/api/p1/dev/tableInfo/${params.tableId}`, { method: 'GET', params });
+  return request(`/api/p1/dev/tableInfo/${params.tableId}`, { method: 'GET' });
 }
 // 表 获取关系预览图
 export async function getTableRelations(params: { tableId: string }) {

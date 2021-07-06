@@ -20,9 +20,10 @@ import Title from '../../../components/Title';
 import EditAtomic from './components/EditAtomic';
 import EditDerive from './components/EditDerive';
 import EditComplex from './components/EditComplex';
-import { getFolders } from '@/services/kpisystem';
+import { getFolders } from '@/services/measure';
 import { rules } from '@/constants/datapi';
-import { Metric } from '@/types/datapi';
+import { EnumValue, Metric } from '@/types/datapi';
+import { getEnumValues } from '@/services/tablemanage';
 
 export interface ViewModifierProps {
   initial?: Metric;
@@ -31,10 +32,8 @@ interface AtomicExportProps {
   data: [];
 }
 interface DeriveExportProps {
-  data: {
-    atomic: string;
-    test: [];
-  };
+  atomicMetricCode: string;
+  modifiers: [];
 }
 interface ComplexExportProps {
   data: string;
@@ -50,19 +49,42 @@ const MetricTypeOps = [
 const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ initial }, ref) => {
   const [folderOps, setFolderOps] = useState([]);
   const [form] = Form.useForm();
-  const [metricType, setMetricType] = useState('ATOMIC_METRIC_LABEL');
+  const [bizTypeEnum, setBizTypeEnum] = useState([]);
+  const [metricType, setMetricType] = useState('DERIVE_METRIC_LABEL');
   const refAtomic = useRef<AtomicExportProps>();
   const refDerive = useRef<DeriveExportProps>();
   const refComplex = useRef<ComplexExportProps>();
-  const EditMap = {
-    ATOMIC_METRIC_LABEL: [<EditAtomic ref={refAtomic} />, refAtomic.current?.data],
-    DERIVE_METRIC_LABEL: [<EditDerive ref={refDerive} />, refDerive.current?.data],
-    COMPLEX_METRIC_LABEL: [<EditComplex ref={refComplex} />, refComplex.current?.data],
+  const EditRefMap = {
+    ATOMIC_METRIC_LABEL: <EditAtomic ref={refAtomic} initial={initial} />,
+    DERIVE_METRIC_LABEL: <EditDerive ref={refDerive} initial={initial} />,
+    COMPLEX_METRIC_LABEL: <EditComplex ref={refComplex} initial={initial} />,
   };
 
   useImperativeHandle(ref, () => ({
-    form: form.getFieldsValue(),
-    data: EditMap[metricType][1],
+    form: form,
+    data: () => {
+      switch (metricType) {
+        case 'ATOMIC_METRIC_LABEL':
+          return {
+            type: 'ATOMIC',
+            data: refAtomic.current?.data,
+          };
+        case 'DERIVE_METRIC_LABEL':
+          return {
+            type: 'DERIVE',
+            data: {
+              atomicMetricCode: refDerive.current?.atomicMetricCode,
+              modifiers: refDerive.current?.modifiers,
+            },
+          };
+        case 'COMPLEX_METRIC_LABEL':
+        default:
+          return {
+            type: 'COMPLEX',
+            data: refComplex.current?.data,
+          };
+      }
+    },
   }));
 
   useEffect(() => {
@@ -75,7 +97,32 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         setFolderOps(fd);
       })
       .catch((err) => {});
+    getEnumValues({ enumCode: 'bizTypeEnum:ENUM' })
+      .then((res) => {
+        const options = res.data.map((enumValue: EnumValue) => ({
+          label: enumValue.enumValue,
+          value: enumValue.valueCode,
+        }));
+        setBizTypeEnum(options);
+      })
+      .catch((err) => {});
   }, []);
+
+  useEffect(() => {
+    if (initial) {
+      // form initial
+      const values = {
+        labelName: initial.labelName,
+        folderId: initial.folderId,
+        labelTag: initial.labelTag,
+      };
+      initial.labelAttributes.forEach((labelAttribute) => {
+        values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
+      });
+      form.setFieldsValue(values);
+      setMetricType(initial.labelTag);
+    }
+  }, [initial]);
 
   return (
     <Fragment>
@@ -95,7 +142,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             placeholder="请选择"
             rules={require}
             options={MetricTypeOps}
-            initialValue="ATOMIC_METRIC_LABEL"
+            initialValue="DERIVE_METRIC_LABEL"
             fieldProps={{ onChange: setMetricType }}
           />
           <ProFormText
@@ -107,7 +154,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
           />
           <ProFormText
             name="metricId"
-            label="Code"
+            label="指标ID"
             width="sm"
             placeholder="请输入"
             rules={require}
@@ -127,7 +174,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             width="sm"
             placeholder="请选择"
             rules={require}
-            options={folderOps}
+            options={bizTypeEnum}
           />
           <ProFormSelect
             name="folderId"
@@ -146,7 +193,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         />
         <ProFormTextArea name="comment" label="备注" width="md" placeholder="请输入" />
       </ProForm>
-      {EditMap[metricType][0]}
+      {EditRefMap[metricType]}
     </Fragment>
   );
 };

@@ -40,6 +40,12 @@ export default () => {
   const viewTab = (node: TreeNode) => {
     const { name, id, type } = node;
     if (!tabs.some((_) => _.key === `${id}`)) {
+      // 关于tabs的key
+      // 数据标签中存在【标签历史版本】这一概念, 其存在属性originId和id
+      // originId为该标签的唯一标识符, 所有该标签的历史版本共享一个, 编辑操作不改变originId
+      // id为该标签某一个历史版本的唯一标识符, 编辑操作后修改id
+      // tabs使用originId作为key, get接口也使用originId
+      // 更新、删除使用id
       setTabs([...tabs, { key: `${id}`, originId: id as number, title: name, type, mode: 'view' }]);
     }
     setActiveTab(`${id}`);
