@@ -51,7 +51,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
         labelStyle={{ color: '#8A8FAE' }}
         style={{ margin: '16px 0' }}
       >
-        <Item label="维度名称">{data?.labelName}</Item>
+        <Item label="修饰词名称">{data?.labelName}</Item>
         {attributes.map((attribute) => (
           <Item label={KpiLabelsMap[attribute.attributeKey]}>
             {attribute.enumName || attribute.attributeValue || '-'}

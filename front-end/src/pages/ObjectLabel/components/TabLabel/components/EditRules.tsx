@@ -88,8 +88,10 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         .catch((err) => {});
       // 获取维度信息的二级options
       const promises: Promise<any>[] = [];
-      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs.forEach((dimension) => {
-        promises.push(getDimensionList({ dimensionCode: dimension.dimensionCode as string }));
+      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs.forEach((dimension, i) => {
+        if (dimension.dimensionCode) {
+          promises[i] = getDimensionList({ dimensionCode: dimension.dimensionCode as string });
+        }
       });
       Promise.all(promises)
         .then((results) => {

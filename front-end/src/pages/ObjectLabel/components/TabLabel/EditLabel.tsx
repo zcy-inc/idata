@@ -54,7 +54,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
   useEffect(() => {
     let folderId = null;
     if (initial) {
-      folderId = initial.folderId?.toString();
+      folderId = initial.folderId === 0 ? null : initial.folderId;
     } else if (curNode) {
       folderId = curNode.type === 'FOLDER' ? curNode.id : curNode.parentId;
     }

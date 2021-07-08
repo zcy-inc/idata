@@ -22,9 +22,10 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
 
   const [data, setData] = useState<Enum>();
 
-  const { getTree, onRemovePane } = useModel('tablemanage', (ret) => ({
+  const { getTree, onRemovePane, replaceTab } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
     onRemovePane: ret.onRemovePane,
+    replaceTab: ret.replaceTab,
   }));
 
   useEffect(() => {
@@ -62,13 +63,24 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
       createEnum(data)
         .then((res) => {
           if (res.success) {
-            message.success(fileCode === 'newEnum' ? '新建枚举成功' : '更新枚举成功');
-            getTree('ENUM');
-            getEnumInfo(res.data.enumCode);
-            setMode('view');
+            if (fileCode === 'newEnum') {
+              message.success('新建枚举成功');
+              replaceTab('newEnum', `E_${res.data.enumCode}`, res.data.enumName, 'ENUM');
+            } else {
+              message.success('更新枚举成功');
+              replaceTab(
+                `E_${res.data.enumCode}`,
+                `E_${res.data.enumCode}`,
+                res.data.enumName,
+                'ENUM',
+              );
+              getTree('ENUM');
+              getEnumInfo(res.data.enumCode);
+              setMode('view');
+            }
           }
         })
-        .catch((err) => [])
+        .catch((err) => {})
         .finally(() => setLoading(false));
     });
   };

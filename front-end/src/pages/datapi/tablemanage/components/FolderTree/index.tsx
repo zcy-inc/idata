@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Dropdown, Input, Menu, message, Tabs, Tree, Modal, Typography } from 'antd';
+import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
@@ -20,7 +20,6 @@ type TreeNodeIcon = 'FOLDER' | 'FOLDEROPEN' | 'LABEL' | 'ENUM' | 'TABLE';
 
 const { TreeNode } = Tree;
 const { TabPane } = Tabs;
-const { Text } = Typography;
 const { confirm } = Modal;
 const NodeTypeIcon = {
   FOLDER: <IconFont type="icon-wenjianjia" key="folder" />,
@@ -74,9 +73,9 @@ const FolderTree: FC = () => {
   const menu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
       <Menu.Item key="folder">新建文件夹</Menu.Item>
+      <Menu.Item key="table">新建表</Menu.Item>
       <Menu.Item key="label">新建标签</Menu.Item>
       <Menu.Item key="enum">新建枚举</Menu.Item>
-      <Menu.Item key="table">新建表</Menu.Item>
     </Menu>
   );
   const renderPrimaryMenu = () => {
@@ -149,10 +148,12 @@ const FolderTree: FC = () => {
     return data.map((_, i) => {
       const { name, type, cid } = _;
       const _i = name.indexOf(search);
-      const bold = !parentId && type === TreeNodeType.FOLDER && styles['folder-root'];
-      let iconType: TreeNodeIcon = type;
+      let iconType: TreeNodeIcon = type as TreeNodeIcon;
       let title = (
-        <span key="title" className={bold}>
+        <span
+          key="title"
+          className={!parentId && type === TreeNodeType.FOLDER && styles['folder-root']}
+        >
           {name}
         </span>
       );
@@ -177,7 +178,12 @@ const FolderTree: FC = () => {
 
       const node: any = { ..._, key: cid };
       node.className = (type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin'];
-      node.title = [NodeTypeIcon[iconType], title];
+      node.title = (
+        <Fragment>
+          {NodeTypeIcon[iconType]}
+          {title}
+        </Fragment>
+      );
       parentId && (node.parentId = parentId);
 
       return _.children ? (

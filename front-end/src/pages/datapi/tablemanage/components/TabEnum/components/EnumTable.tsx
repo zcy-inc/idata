@@ -37,17 +37,15 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
 
   useEffect(() => {
     if (initial) {
-      const enumValues = Array.isArray(initial.enumValues) ? initial.enumValues : []; // 传入的datsSource
-      const attrs = Array.isArray(enumValues[0]?.enumAttributes)
-        ? enumValues[0]?.enumAttributes
-        : []; // datsSource第一项的enumAttributes, 用以生成自定义参数的列
-      const pOps: { label: string; value: string }[] = []; // 存储父级枚举值
+      const enumValues = initial.enumValues; // 传入的datsSource
+      const enumAttributes = enumValues?.[0]?.enumAttributes || []; // datsSource第一项的enumAttributes, 用以生成自定义参数的列
+      const parentOps: { label: string; value: string }[] = []; // 存储父级枚举值
       const promises: Promise<any>[] = []; // 对参数类型是枚举的列, 需要使用getEnumNames获取列表
       // 生成自定义参数的列
-      const exCols: EnumColumn[] = attrs.map((_: any, i: number) => {
+      const exCols: EnumColumn[] = enumAttributes.map((_: any, i: number) => {
         let type = _.attributeType;
         if (isEnumType(_.attributeType)) {
-          type = _.attributeType.split(':')[0]; // TODO 这里的值若只是10位字符串, 就去掉split
+          type = _.attributeType;
           promises[i] = getEnumNames();
         }
         return { id: i, title: _.attributeKey, type };
@@ -59,8 +57,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
           parentCode: _.parentCode,
         };
         _.enumAttributes.forEach((attr: any) => (tmp[attr.attributeKey] = attr.attributeValue));
-        pOps[i] = { label: _.enumValue, value: _.valueCode };
-
+        parentOps[i] = { label: _.enumValue, value: _.valueCode };
         return tmp;
       });
       Promise.all(promises).then((res) => {
@@ -72,9 +69,10 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
               value: _enum.valueCode,
             }))),
         );
+
         setColumns(exCols);
         setEnums(dt);
-        setParentOps(pOps);
+        setParentOps(parentOps);
         onChange?.({ columns: exCols, enums: dt });
       });
     }

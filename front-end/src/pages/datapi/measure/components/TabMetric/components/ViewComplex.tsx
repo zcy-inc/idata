@@ -6,7 +6,7 @@ import Title from '../../../../components/Title';
 import { Metric } from '@/types/datapi';
 
 export interface EditComplexProps {
-  data: Metric;
+  data?: Metric;
 }
 
 const { Paragraph } = Typography;
@@ -16,7 +16,7 @@ const EditComplex: FC<EditComplexProps> = ({ data }) => {
     <Fragment>
       <Title>生成复合指标</Title>
       <Paragraph style={{ marginTop: 16 }}>
-        {data.specialAttribute.complexMetricFormula || '-'}
+        {data?.specialAttribute.complexMetricFormula || '-'}
       </Paragraph>
     </Fragment>
   );

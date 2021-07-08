@@ -50,7 +50,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   const [folderOps, setFolderOps] = useState([]);
   const [form] = Form.useForm();
   const [bizTypeEnum, setBizTypeEnum] = useState([]);
-  const [metricType, setMetricType] = useState('DERIVE_METRIC_LABEL');
+  const [metricType, setMetricType] = useState('');
   const refAtomic = useRef<AtomicExportProps>();
   const refDerive = useRef<DeriveExportProps>();
   const refComplex = useRef<ComplexExportProps>();
@@ -92,7 +92,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       .then((res) => {
         const fd = res.data.map((_: any) => ({
           label: _.folderName,
-          value: `${_.id}`,
+          value: _.id,
         }));
         setFolderOps(fd);
       })
@@ -142,7 +142,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             placeholder="请选择"
             rules={require}
             options={MetricTypeOps}
-            initialValue="DERIVE_METRIC_LABEL"
             fieldProps={{ onChange: setMetricType }}
           />
           <ProFormText

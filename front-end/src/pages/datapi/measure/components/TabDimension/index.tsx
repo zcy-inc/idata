@@ -91,10 +91,20 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode })
         if (res.success) {
           if (fileCode === 'newDimension') {
             message.success('新建维度成功');
-            replaceTab('newDimension', `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              'newDimension',
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.DIMENSION_LABEL,
+            );
           } else {
             message.success('更新维度成功');
-            replaceTab(`L_${res.data.labelCode}`, `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              `L_${res.data.labelCode}`,
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.DIMENSION_LABEL,
+            );
             getTree(TreeNodeType.DIMENSION_LABEL);
             getDimensionInfo(res.data.labelCode);
             setMode('view');
@@ -136,7 +146,7 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode })
       .then((res) => {
         if (res.success) {
           message.success('操作成功');
-          setData(res.data);
+          getDimensionInfo(fileCode);
         }
       })
       .catch((err) => {});

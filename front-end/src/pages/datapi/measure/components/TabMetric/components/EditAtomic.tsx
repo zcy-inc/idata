@@ -35,7 +35,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
   useEffect(() => {
     getTableReferTbs({ labelValue: 'dwd' })
       .then((res) => {
-        const t = res.data.map((table: Table) => ({
+        const t = res.data?.map((table: Table) => ({
           label: table.tableName,
           value: table.id,
         }));
@@ -48,7 +48,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
     if (initial) {
       let tableId = '';
       const tmpK: Key[] = [];
-      const tmp = initial.measureLabels.map((label) => {
+      const tmp = initial.measureLabels?.map((label) => {
         tmpK.push(label.id);
         tableId = `${label.tableId}`;
         return {
@@ -60,7 +60,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
       });
       getTableReferStr({ tableId })
         .then((res) => {
-          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
           DWDStrings[0] = strs;
           setDWDStrings([...DWDStrings]);
         })
@@ -86,7 +86,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
     if (schema.dataIndex === 'tableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
-          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
           DWDStrings[schema.index] = strs;
           setDWDStrings([...DWDStrings]);
         })

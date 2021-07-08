@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState, useImperativeHandle, forwardRef }
 import { Typography, Select, Input, Switch, Divider } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import type { ForwardRefRenderFunction } from 'react';
+import type { ForwardRefRenderFunction, Key } from 'react';
 import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
@@ -26,30 +26,31 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
 ) => {
   // 表结构的列与数据
   const [data, setData] = useState<any[]>([]);
-  const [keys, setKeys] = useState<React.Key[]>([]);
+  const [keys, setKeys] = useState<Key[]>([]);
 
-  // 暴露表结构的数据给父组件
-  // 这儿还有一种做法是用表单的formRef来获取, 但是这样拿不到index, 所以用useImperativeHandle
   useImperativeHandle(ref, () => ({ data }));
 
   useEffect(() => {
     if (initial) {
-      const columnsInfo = initial.columnInfos;
-      const _keys: React.Key[] = [];
-      const _data = columnsInfo.map((_: ColumnLabel) => {
-        const t = { key: _.id, id: _.id, columnName: _.columnName };
-        _.columnLabels.forEach((l: TableLable) => {
-          let v: string | boolean = l.labelParamValue;
-          l.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
-          t[l.labelCode] = v;
+      const tmpKeys: Key[] = [];
+      const tmpData = initial.columnInfos?.map((column: ColumnLabel) => {
+        const tmp = {
+          key: column.id,
+          id: column.id,
+          columnName: column.columnName,
+        };
+        column.columnLabels.forEach((label: TableLable) => {
+          let v: string | boolean = label.labelParamValue;
+          label.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
+          tmp[label.labelCode] = v;
         });
-        _keys.push(_.id);
-        return t;
+        tmpKeys.push(column.id);
+        return tmp;
       });
-      console.log(_data);
+      console.log(tmpData);
 
-      setData(_data);
-      setKeys(_keys);
+      setData(tmpData);
+      setKeys(tmpKeys);
     }
   }, [initial]);
 
@@ -77,10 +78,9 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         const _ = columnsMap?.get(labelCode);
         const column: ProColumns = {
           title: _.labelName,
-          dataIndex: _.labelCode,
           key: _.labelCode,
+          dataIndex: _.labelCode,
           width: 200,
-          // labelRequired,
         };
         switch (_.labelTag) {
           case 'STRING_LABEL':
