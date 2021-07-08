@@ -81,7 +81,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     }
 
     @Override
-    public Long createLabel(LabObjectLabelDto labelDto, String operator) {
+    public LabObjectLabelDto createLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel existRecord = objectLabelManager.getObjectLabel(labelDto.getName());
         checkState(Objects.isNull(existRecord), "标签名称已存在");
         Optional.ofNullable(labelDto.getFolderId())
@@ -89,7 +89,12 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         checkArgument(isNotEmpty(labelDto.getObjectType()), "标签主体不能为空");
 
         LabObjectLabel label = newCreatedObjectLabel(labelDto, operator);
-        return objectLabelManager.saveLabel(label);
+        Long labelId = objectLabelManager.saveLabel(label);
+        LabObjectLabel newLabel = objectLabelManager.getObjectLabel(labelId, "标签不存在");
+        LabObjectLabelDto dto = new LabObjectLabelDto();
+        BeanUtils.copyProperties(newLabel, dto);
+        dto.setRuleLayers(fillNames(ruleLayerFromJson(newLabel.getRules())));
+        return dto;
     }
 
     @Override

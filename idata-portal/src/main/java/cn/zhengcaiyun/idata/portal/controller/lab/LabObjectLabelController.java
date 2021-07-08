@@ -64,7 +64,7 @@ public class LabObjectLabelController {
     }
 
     @PostMapping("/objectLabel")
-    public RestResult<Long> createLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
+    public RestResult<LabObjectLabelDto> createLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
         return RestResult.success(objectLabelService.createLabel(labelDto, tokenService.getNickname(request)));
     }
 

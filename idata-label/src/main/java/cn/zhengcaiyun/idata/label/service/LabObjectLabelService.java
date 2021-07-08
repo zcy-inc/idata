@@ -32,7 +32,7 @@ public interface LabObjectLabelService {
      * @param operator
      * @return
      */
-    Long createLabel(LabObjectLabelDto labelDto, String operator);
+    LabObjectLabelDto createLabel(LabObjectLabelDto labelDto, String operator);
 
     /**
      * 编辑标签
