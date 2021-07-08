@@ -68,6 +68,17 @@ public class LabelServiceImpl implements LabelService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator) {
+        if (labelDefineDto.getLabelIndex() != null) {
+            if (labelDefineDto.getLabelIndex() < 0) {
+                labelDefineDto.setLabelIndex(null);
+            }
+            DevLabelDefine checkLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.subjectType, isEqualTo(labelDefineDto.getSubjectType())),
+                    and(devLabelDefine.labelIndex, isEqualTo(labelDefineDto.getLabelIndex()))))
+                    .orElse(null);
+            checkArgument(checkLabelDefine == null, "相同主体的排序编号已存在");
+        }
+
         if (labelDefineDto.getLabelCode() == null) {
             labelDefineDto.setLabelCode(RandomUtil.randomStr(10) + ":LABEL");
             checkArgument(labelDefineDto.getLabelName() != null, "labelName不能为空");
@@ -101,9 +112,6 @@ public class LabelServiceImpl implements LabelService {
             SubjectTypeEnum.valueOf(labelDefineDto.getSubjectType());
             // 标签作用域暂时不做，都是全局的
             labelDefineDto.setLabelScope(null);
-            if (labelDefineDto.getLabelIndex() != null && labelDefineDto.getLabelIndex() < 0) {
-                labelDefineDto.setLabelIndex(null);
-            }
             if (labelDefineDto.getLabelRequired() != null) {
                 if (labelDefineDto.getLabelRequired() < 0) {
                     labelDefineDto.setLabelRequired(null);
@@ -300,7 +308,16 @@ public class LabelServiceImpl implements LabelService {
     // TODO 待上线前删除注释
     @Override
     public List<LabelDto> findLabels(Long tableId, String columnName) {
-        return devLabelMyDao.selectLabelsBySubject(tableId, columnName);
+        List<LabelDto> echoLabelList = devLabelMyDao.selectLabelsBySubject(tableId, columnName);
+        echoLabelList.forEach(labelDto -> {
+            if ("ENUM".equals(labelDto.getLabelParamType())) {
+                labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
+            }
+            else if (labelDto.getLabelParamType().endsWith(":ENUM")) {
+                labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
+            }
+        });
+        return echoLabelList;
 //        Map<String, DevLabelDefine> labelDefineMap = devLabelDefineDao.select(c ->
 //                c.where(devLabelDefine.del, isNotEqualTo(1)))
 //                .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, Function.identity()));

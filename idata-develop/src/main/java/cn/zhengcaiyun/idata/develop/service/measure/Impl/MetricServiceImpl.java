@@ -135,7 +135,8 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(metric.getLabelName()), "指标名称不能为空");
         checkArgument(isNotEmpty(metric.getLabelTag()), "类型不能为空");
         DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelName, isEqualTo(metric.getLabelName()))))
+                and(devLabelDefine.labelName, isEqualTo(metric.getLabelName())),
+                and(devLabelDefine.labelTag, isLike("%METRIC_LABEL"))))
                 .orElse(null);
         checkArgument(checkModifier == null, "指标已存在");
         checkArgument(metric.getLabelAttributes() != null && metric.getLabelAttributes().size() > 0, "基本信息不能为空");

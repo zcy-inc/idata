@@ -96,8 +96,10 @@ public class ModifierServiceImpl implements ModifierService {
             echoModifier.setModifierName(modifier.getLabelName());
             AttributeDto modifierAttribute = modifier.getLabelAttributes()
                     .stream().filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
-                    .findAny().get();
-            echoModifier.setModifierAttribute(modifierAttribute);
+                    .findAny().orElse(null);
+            if (modifierAttribute != null) {
+                echoModifier.setModifierAttribute(modifierAttribute);
+            }
             List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()));
             echoModifier.setEnumValues(modifierEnumValueList);
             echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
@@ -209,6 +211,9 @@ public class ModifierServiceImpl implements ModifierService {
                     .collect(Collectors.toSet());
             Set<String> addModifierStr = new HashSet<>(modifierStr);
             addModifierStr.removeAll(existModifierStr);
+            modifierLabelList.forEach(modifierLabeL -> {
+                modifierLabeL.setLabelCode(modifier.getLabelCode());
+            });
             List<LabelDto> addModifierLabelList = modifierLabelList.stream().filter(modifierLabel ->
                     addModifierStr.contains(modifierLabel.getTableId() + "_" + modifierLabel.getColumnName())
             ).collect(Collectors.toList());
@@ -262,7 +267,7 @@ public class ModifierServiceImpl implements ModifierService {
                 and(devLabelDefine.labelCode, isEqualTo(modifierCode)), and(devLabelDefine.labelTag,
                         isEqualTo(LabelTagEnum.MODIFIER_LABEL_DISABLE.name()))))
                 .orElse(null);
-        checkArgument(existDimension != null, "修饰词不存在");
+        checkArgument(existDimension != null, "修饰词未停用或不存在");
         // 派生指标依赖校验
         List<String> relyDeriveMetricNameList = getRelyDeriveMetricName(modifierCode);
         checkArgument(relyDeriveMetricNameList.size() == 0,

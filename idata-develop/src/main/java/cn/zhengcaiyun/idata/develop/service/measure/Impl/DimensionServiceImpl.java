@@ -270,6 +270,9 @@ public class DimensionServiceImpl implements DimensionService {
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
                 .stream().peek(dimensionLabel -> dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId())))
                 .collect(Collectors.toList());
+        if (dimensionLabelList == null || dimensionLabelList.size() == 0) {
+            return null;
+        }
         Map<String, List<LabelDto>> dimensionLabelMap = dimensionLabelList.stream().collect(Collectors.groupingBy(LabelDto::getLabelCode));
         Set<String> dimensionLabelCodeList = dimensionLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toSet());
         List<LabelDefineDto> dimensionLabelDefineList = PojoUtil.copyList(devLabelDefineDao.select(c ->
@@ -285,6 +288,7 @@ public class DimensionServiceImpl implements DimensionService {
                     .findAny()
                     .get().getAttributeValue();
             echoDimension.setEnName(enName);
+            List<LabelDto> testLabels = dimensionLabelMap.get(dimension.getLabelCode());
             echoDimension.setMeasureLabels(dimensionLabelMap.get(dimension.getLabelCode()));
             return echoDimension;
         }).collect(Collectors.toList());
