@@ -87,7 +87,7 @@ public class DimensionServiceImpl implements DimensionService {
         DevLabelDefine metricLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelTag, isLike("%_METRIC_LABEL%")), and(devLabelDefine.labelCode, isEqualTo(metricCode))))
                 .orElse(null);
-        checkArgument(metricLabelDefine != null, "指标不存在或已停用");
+        checkArgument(metricLabelDefine != null, "指标不存在");
         List<MeasureDto> echoDimensionList = new ArrayList<>();
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metricLabelDefine.getLabelTag())) {
             echoDimensionList = getDimensionsByAtomicMetricCode(metricCode);
@@ -270,7 +270,7 @@ public class DimensionServiceImpl implements DimensionService {
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
                 .stream().peek(dimensionLabel -> dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId())))
                 .collect(Collectors.toList());
-        if (dimensionLabelList == null || dimensionLabelList.size() == 0) {
+        if (dimensionLabelList.size() == 0) {
             return null;
         }
         Map<String, List<LabelDto>> dimensionLabelMap = dimensionLabelList.stream().collect(Collectors.groupingBy(LabelDto::getLabelCode));

@@ -39,6 +39,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSuppo
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -73,7 +74,7 @@ public class EnumServiceImpl implements EnumService {
             if (enumDto.getEnumValues() != null) {
                 enumDto.getEnumValues().forEach(enumValueDto -> {
                     enumValueDto.setEnumCode(enumDto.getEnumCode());
-                    createEnumValue(enumValueDto, operator);
+                    createOrEditEnumValue(enumValueDto, operator);
                 });
             }
         }
@@ -87,12 +88,8 @@ public class EnumServiceImpl implements EnumService {
                     "id", "editor", "enumName", "folderId"));
             if (enumDto.getEnumValues() != null) {
                 enumDto.getEnumValues().forEach(enumValueDto -> {
-                    if (enumValueDto.getValueCode() == null) {
-                        createEnumValue(enumValueDto, operator);
-                    }
-                    else {
-                        editEnumValue(enumValueDto, operator);
-                    }
+                    enumValueDto.setEnumCode(enumDto.getEnumCode());
+                    createOrEditEnumValue(enumValueDto, operator);
                 });
             }
         }
@@ -105,8 +102,7 @@ public class EnumServiceImpl implements EnumService {
         checkArgument(enumValueDto.getEnumValue() != null, "enumValue不能为空");
         checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
         devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
-                "creator", "enumCode", "valueCode", "enumValue",
-                "enumAttributes", "parentCode"));
+                "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
     }
 
     private void editEnumValue(EnumValueDto enumValueDto, String operator) {
@@ -118,6 +114,26 @@ public class EnumServiceImpl implements EnumService {
         enumValueDto.setEditor(operator);
         devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
                 "id", "editor", "enumValue", "enumAttributes", "parentCode"));
+    }
+
+    private void createOrEditEnumValue(EnumValueDto enumValueDto, String operator) {
+        checkArgument(isNotEmpty(enumValueDto.getEnumValue()), "enumValue不能为空");
+        checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
+        DevEnumValue exitEnumValue = devEnumValueDao.selectOne(c ->
+                c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
+                        and(devEnumValue.del, isNotEqualTo(1))))
+                .orElse(null);
+        if (exitEnumValue == null) {
+            enumValueDto.setCreator(operator);
+            devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+                    "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
+        }
+        else {
+            enumValueDto.setId(exitEnumValue.getId());
+            enumValueDto.setEditor(operator);
+            devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+                    "id", "editor", "enumValue", "enumAttributes", "parentCode"));
+        }
     }
 
     @Override
