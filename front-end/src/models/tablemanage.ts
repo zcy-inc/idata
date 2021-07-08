@@ -66,9 +66,6 @@ export default () => {
     [panes],
   );
 
-  // edit模式切换到view模式时, 检索key以替换pane的title
-  const replacePaneKey = (key: string, title: string) => {};
-
   // 关闭Tab
   const onRemovePane = useCallback(
     (key) => {
@@ -85,14 +82,31 @@ export default () => {
     [panes],
   );
 
+  // 显示编辑标签的Modal
   const showLabel = (fileCode?: string) => {
     fileCode && setCurLabel(fileCode);
     setVisibleLabel(true);
   };
-
+  // 关闭编辑标签的Modal
   const hideLabel = () => {
     setCurLabel('');
     setVisibleLabel(false);
+  };
+
+  // 新建完成后替换该Tab的key
+  const replaceTab = (oldKey: string, newKey: string, title: string, treeType: string) => {
+    let targetI = panes.findIndex((_) => _.key === oldKey);
+    let newTab: IPane = {
+      key: newKey,
+      code: newKey.split('_')[1],
+      title: title,
+      mode: 'view',
+      type: panes[targetI].type,
+    };
+    panes[targetI] = newTab;
+    getTree(treeType);
+    setActiveKey(newKey);
+    setPanes([...panes]);
   };
 
   return {
@@ -109,12 +123,12 @@ export default () => {
     onCreateEnum,
     onCreateTable,
     onViewTree,
-    replacePaneKey,
     onRemovePane,
     visibleLabel,
     showLabel,
     hideLabel,
     curLabel,
     setCurLabel,
+    replaceTab,
   };
 };

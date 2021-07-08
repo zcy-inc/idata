@@ -30,9 +30,10 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
 
   const refTable = useRef<EditTableExportProps>();
 
-  const { getTree, onRemovePane } = useModel('tablemanage', (ret) => ({
+  const { getTree, onRemovePane, replaceTab } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
     onRemovePane: ret.onRemovePane,
+    replaceTab: ret.replaceTab,
   }));
 
   useEffect(() => {
@@ -135,11 +136,16 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
         createTable(params)
           .then((res) => {
             if (res.success) {
-              const msg = fileCode === 'newTable' ? '创建表成功' : '修改表成功';
-              message.success(msg);
-              setMode('view');
-              getTableInfo(res.data.id);
-              getTree('TABLE');
+              if (fileCode === 'newTable') {
+                message.success('创建表成功');
+                replaceTab('newTable', `T_${res.data.id}`, res.data.tableName, 'TABLE');
+              } else {
+                message.success('修改表成功');
+                replaceTab(`T_${res.data.id}`, `T_${res.data.id}`, res.data.tableName, 'TABLE');
+                getTree('TABLE');
+                getTableInfo(res.data.id);
+                setMode('view');
+              }
             }
           })
           .catch((err) => {})
@@ -181,7 +187,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           <Popconfirm
             key="del"
             title="您确认要删除该枚举吗？"
-            onConfirm={() => onDelete()}
+            onConfirm={onDelete}
             okButtonProps={{ loading }}
             okText="确认"
             cancelText="取消"

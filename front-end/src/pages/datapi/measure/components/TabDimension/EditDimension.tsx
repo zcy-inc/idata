@@ -64,7 +64,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data.map((_: any) => ({ label: _.folderName, value: _.id }));
         setFolderOps(fd);
       })
       .catch((err) => {});

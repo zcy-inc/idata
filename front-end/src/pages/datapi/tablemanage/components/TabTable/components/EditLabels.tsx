@@ -20,7 +20,7 @@ import styles from '../../../index.less';
 
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/datapi';
-import { rules } from '@/constants/datapi';
+import { LabelTag, rules } from '@/constants/datapi';
 import { InitialLabel, RadioOps } from '../constants';
 
 import IconFont from '@/components/IconFont';
@@ -43,7 +43,7 @@ const CheckboxGroup = Checkbox.Group;
 const { Text } = Typography;
 const { require } = rules;
 
-const FormLabel: FC = ({ children }) => {
+const FormLable: FC = ({ children }) => {
   return (
     <Tooltip title={children}>
       <Text ellipsis>{children}</Text>
@@ -92,7 +92,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
               if (_.labelTag === 'USER_LABEL') {
                 enums = owners.data.content.map((_: User) => ({
                   label: _.nickname,
-                  value: _.id,
+                  value: `${_.id}`,
                 }));
               }
               // 处理枚举类型的ops
@@ -172,7 +172,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             <ProFormText
               key={_.value}
               name={_.labelCode}
-              label={<FormLabel>{_.labelName}</FormLabel>}
+              label={<FormLable>{_.labelName}</FormLable>}
               width="sm"
               rules={!!_.labelRequired ? require : []}
               placeholder="请输入"
@@ -186,7 +186,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             <ProFormRadio.Group
               key={_.value}
               name={_.labelCode}
-              label={<FormLabel>{_.labelName}</FormLabel>}
+              label={<FormLable>{_.labelName}</FormLable>}
               width="sm"
               rules={!!_.labelRequired ? require : []}
               options={RadioOps}
@@ -201,7 +201,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             <ProFormSelect
               key={_.value}
               name={_.labelCode}
-              label={<FormLabel>{_.labelName}</FormLabel>}
+              label={<FormLable>{_.labelName}</FormLable>}
               width="sm"
               rules={!!_.labelRequired ? require : []}
               options={_.enums}
@@ -214,7 +214,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             <ProFormCheckbox.Group
               key={_.value}
               name={_.labelCode}
-              label={<FormLabel>{_.labelName}</FormLabel>}
+              label={<FormLable>{_.labelName}</FormLable>}
               width="sm"
               rules={!!_.labelRequired ? require : []}
               options={[{ label: null, value: _.labelCode }]}
@@ -270,6 +270,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
           width="md"
           placeholder="根目录"
           options={folders}
+          fieldProps={{ onChange: (v) => labelValues.current.set('folderId', v) }}
         />
       </ProForm>
     </Fragment>

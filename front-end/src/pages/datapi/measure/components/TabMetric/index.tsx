@@ -67,6 +67,11 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
     };
     switch (typeData.type) {
       case 'ATOMIC':
+        if (typeData.data.length === 0) {
+          message.error('事实表为必填项');
+          setLoading(false);
+          return;
+        }
         const measureLabels = typeData.data.map((_: { tableId: number; columnName: string }) => ({
           tableId: _.tableId,
           columnName: _.columnName,
@@ -107,10 +112,20 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
         if (res.success) {
           if (fileCode === 'newMetric') {
             message.success('新建指标成功');
-            replaceTab('newMetric', `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              'newMetric',
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.METRIC_LABEL,
+            );
           } else {
             message.success('更新指标成功');
-            replaceTab(`L_${res.data.labelCode}`, `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              `L_${res.data.labelCode}`,
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.METRIC_LABEL,
+            );
             getTree(TreeNodeType.METRIC_LABEL);
             getMetricInfo(res.data.labelCode);
             setMode('view');
@@ -178,6 +193,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
       .then((res) => {
         if (res.success) {
           message.success('操作成功');
+          getMetricInfo(fileCode);
         }
       })
       .catch((err) => {});

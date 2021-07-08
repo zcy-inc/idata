@@ -78,10 +78,20 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
         if (res.success) {
           if (fileCode === 'newModifier') {
             message.success('新建修饰词成功');
-            replaceTab('newModifier', `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              'newModifier',
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.MODIFIER_LABEL,
+            );
           } else {
             message.success('更新修饰词成功');
-            replaceTab(`L_${res.data.labelCode}`, `L_${res.data.labelCode}`, res.data.labelName);
+            replaceTab(
+              `L_${res.data.labelCode}`,
+              `L_${res.data.labelCode}`,
+              res.data.labelName,
+              TreeNodeType.MODIFIER_LABEL,
+            );
             getTree(TreeNodeType.MODIFIER_LABEL);
             getModifierInfo(res.data.labelCode);
             setMode('view');
@@ -97,7 +107,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
       .then((res) => {
         if (res.success) {
           message.success('删除成功');
-          removeTab(`L_${res.data.labelCode}`);
+          removeTab(`L_${data!.labelCode}`);
           getTree(TreeNodeType.MODIFIER_LABEL);
         }
       })
@@ -116,13 +126,14 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
     switchModifier({
       modifierCode: fileCode,
       labelTag:
-        data?.labelTag === LabelTag.DIMENSION_LABEL
-          ? LabelTag.DIMENSION_LABEL_DISABLE
-          : LabelTag.DIMENSION_LABEL,
+        data?.labelTag === LabelTag.MODIFIER_LABEL
+          ? LabelTag.MODIFIER_LABEL_DISABLE
+          : LabelTag.MODIFIER_LABEL,
     })
       .then((res) => {
         if (res.success) {
           message.success('操作成功');
+          getModifierInfo(fileCode);
         }
       })
       .catch((err) => {});
@@ -139,7 +150,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
               编辑
             </Button>
             <Button key="labelTag" onClick={switchStatus}>
-              {data?.labelTag === LabelTag.DIMENSION_LABEL ? '停用' : '启用'}
+              {data?.labelTag === LabelTag.MODIFIER_LABEL ? '停用' : '启用'}
             </Button>
             <Popconfirm
               key="del"

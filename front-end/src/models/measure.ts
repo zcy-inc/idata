@@ -98,7 +98,8 @@ export default () => {
     setActiveTab(curActiveKey);
   };
 
-  const replaceTab = (oldKey: string, newKey: string, title: string) => {
+  // 新建完成后替换该Tab的key
+  const replaceTab = (oldKey: string, newKey: string, title: string, treeType: TreeNodeType) => {
     let targetI = tabs.findIndex((_) => _.key === oldKey);
     let newTab: ITab = {
       key: newKey,
@@ -108,7 +109,7 @@ export default () => {
       type: tabs[targetI].type,
     };
     tabs[targetI] = newTab;
-
+    getTree(treeType);
     setActiveTab(newKey);
     setTabs([...tabs]);
   };

@@ -62,7 +62,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       .then((res) => {
         const fd = res.data.map((_: FlatTreeNode) => ({
           label: _.folderName,
-          value: `${_.id}`,
+          value: _.id,
         }));
         setFolderOps(fd);
       })
@@ -93,6 +93,9 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       };
       initial.labelAttributes.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
+        if (labelAttribute.attributeKey === 'modifierEnum') {
+          onEnumChange(labelAttribute.attributeValue);
+        }
       });
       form.setFieldsValue(values);
       // DWD initial
@@ -118,29 +121,23 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     getEnumValues({ enumCode })
       .then((res) => {
         const enumValues = res.data;
-        const attrs = enumValues[0].enumAttributes;
+        const enumAttributes = enumValues[0].enumAttributes;
         // 格式化枚举参数生成的列
-        const exCols = attrs.map((_: LabelAttribute) => ({
-          title: _.attributeKey,
-          dataIndex: _.attributeType.endsWith('ENUM')
-            ? [_.attributeKey, 'value']
-            : [_.attributeKey, 'code'],
-          key: _.attributeKey,
-          type: _.attributeType.endsWith('ENUM') ? _.attributeType.split(':')[0] : _.attributeType,
+        const exCols = enumAttributes.map((enumAttribute: LabelAttribute) => ({
+          key: enumAttribute.attributeKey,
+          dataIndex: enumAttribute.attributeKey,
+          title: enumAttribute.attributeKey,
         }));
         // 格式化dataSource
-        const dt = enumValues.map((_: EnumValue) => {
+        const dt = enumValues.map((enumValue: EnumValue) => {
           const tmp = {
-            id: _.id,
-            parentValue: _.parentValue || '-',
-            enumValue: { value: _.enumValue, code: _.valueCode },
+            id: enumValue.id,
+            parentValue: enumValue.parentValue || '-',
+            enumValue: { value: enumValue.enumValue, code: enumValue.valueCode },
           };
-          _.enumAttributes.forEach(
-            (_enum: LabelAttribute) =>
-              (tmp[_enum.attributeKey] = {
-                value: _enum.enumValue || '-',
-                code: _enum.attributeValue,
-              }),
+          enumValue.enumAttributes.forEach(
+            (enumAttribute: LabelAttribute) =>
+              (tmp[enumAttribute.attributeKey] = transformValue(enumAttribute)),
           );
           return tmp;
         });
@@ -149,6 +146,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         setEnumVals(dt);
       })
       .catch((err) => {});
+  };
+
+  const transformValue = (enumAttribute: LabelAttribute) => {
+    let value = enumAttribute.enumValue || enumAttribute.attributeValue || '-';
+    if (enumAttribute.attributeType === 'BOOLEAN') {
+      value = value === 'true' ? '是' : '否';
+    }
+    return value;
   };
 
   // 添加一行数据
@@ -172,6 +177,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
   };
+
   // 操作栏行为
   const onAction = (row: any, _: any) => {
     const i = DWDData.findIndex((_) => _.id === row.id);
@@ -256,6 +262,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
                   pagination={false}
                   size="small"
                   scroll={{ x: 'max-content' }}
+                  style={{ minWidth: 120 }}
                 />
               )}
             >

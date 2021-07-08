@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { getDWOwner } from '@/services/tablemanage';
-import { User } from '@/types/datapi';
+import { ColumnLabel, TableLable, User } from '@/types/datapi';
 import { LabelTag } from '@/constants/datapi';
 import { ViewInitialColumns, TransformBoolean } from './constants';
 
@@ -33,17 +33,21 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      const dts = Array.isArray(data.columnInfos) ? data.columnInfos : [];
-      const colLabels = Array.isArray(dts[0]?.columnLabels) ? dts[0].columnLabels : [];
-      const exCols = colLabels.map((_: any) => ({
+      const columnInfos = Array.isArray(data.columnInfos) ? data.columnInfos : [];
+      const columnLabels = Array.isArray(columnInfos[0]?.columnLabels)
+        ? columnInfos[0].columnLabels
+        : [];
+      const exCols = columnLabels.map((_: ColumnLabel) => ({
         title: _.labelName,
         dataIndex: _.labelCode,
         key: _.labelCode,
         render: (_: any) => _ || '-',
       }));
-      const dt = dts.map((_: any) => {
-        const tmp = { columnName: _.columnName };
-        _.columnLabels.forEach((item: any) => (tmp[item.labelCode] = transformLabelValue(item)));
+      const dt = columnInfos.map((columnInfo: ColumnLabel) => {
+        const tmp = { columnName: columnInfo.columnName };
+        columnInfo.columnLabels.forEach(
+          (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
+        );
         return tmp;
       });
 
@@ -73,7 +77,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         labelStyle={{ color: '#8A8FAE', textAlign: 'right' }}
       >
         <Item label="表名称">{data?.tableName}</Item>
-        {data?.tableLabels?.map((_: any) => (
+        {data?.tableLabels?.map((_: TableLable) => (
           <Item key={_.id} label={_.labelName}>
             {transformLabelValue(_)}
           </Item>

@@ -19,13 +19,17 @@ interface EnumListItem {
 }
 
 const { Item } = Descriptions;
-const ViewInitialColumns = [
-  { title: '枚举值', dataIndex: ['enumValue', 'value'], key: 'enumValue', type: 'STRING' },
+const ViewInitialColumns: {
+  title: string;
+  dataIndex: string | string[];
+  key: string;
+  render?: (_: any) => any;
+}[] = [
+  { title: '枚举值', dataIndex: ['enumValue', 'value'], key: 'enumValue' },
   {
     title: '父级枚举值',
     dataIndex: 'parentValue',
     key: 'parentValue',
-    type: 'STRING',
     render: (_: any) => _ || '-',
   },
 ];
@@ -35,38 +39,40 @@ const ViewEnum: FC<ViewEnumProps> = ({ data }) => {
   const [dataSource, setDateSource] = useState<EnumListItem[]>();
 
   useEffect(() => {
-    const enumValues = Array.isArray(data?.enumValues) ? data?.enumValues : [];
-    const attrs = Array.isArray(enumValues[0]?.enumAttributes) ? enumValues[0]?.enumAttributes : [];
-    // 格式化枚举参数生成的列
-    const exCols = attrs.map((_: LabelAttribute) => ({
-      title: _.attributeKey,
-      dataIndex: _.attributeType.endsWith('ENUM')
-        ? [_.attributeKey, 'value']
-        : [_.attributeKey, 'code'],
-      key: _.attributeKey,
-      type: _.attributeType.endsWith('ENUM') ? _.attributeType.split(':')[0] : _.attributeType,
-    }));
-    // 格式化dataSource
-    const dt = enumValues.map((_: EnumValue) => {
-      const tmp: EnumListItem = {
-        parentValue: _.parentValue || '-',
-        enumValue: {
-          value: _.enumValue,
-          code: _.valueCode,
-        },
-      };
-      _.enumAttributes.forEach(
-        (_enum: LabelAttribute) =>
-          (tmp[_enum.attributeKey] = {
-            value: _enum.enumValue || '-',
-            code: _enum.attributeValue,
-          }),
-      );
-      return tmp;
-    });
-    setColumns(ViewInitialColumns.concat(exCols));
-    setDateSource(dt);
+    if (data) {
+      const enumValues = data.enumValues;
+      const enumAttributes = enumValues?.[0]?.enumAttributes || [];
+      // 格式化枚举参数生成的列
+      const exCols = enumAttributes.map((enumAttribute: LabelAttribute) => ({
+        key: enumAttribute.attributeKey,
+        dataIndex: enumAttribute.attributeKey,
+        title: enumAttribute.attributeKey,
+      }));
+      // 格式化dataSource
+      const dt = enumValues.map((enumValue: EnumValue) => {
+        const tmp: EnumListItem = {
+          parentValue: enumValue.parentValue || '-',
+          enumValue: { value: enumValue.enumValue, code: enumValue.valueCode },
+        };
+        enumValue.enumAttributes.forEach(
+          (enumAttribute: LabelAttribute) =>
+            (tmp[enumAttribute.attributeKey] = transformValue(enumAttribute)),
+        );
+        return tmp;
+      });
+
+      setColumns(ViewInitialColumns.concat(exCols));
+      setDateSource(dt);
+    }
   }, [data]);
+
+  const transformValue = (enumAttribute: LabelAttribute) => {
+    let value = enumAttribute.enumValue || enumAttribute.attributeValue || '-';
+    if (enumAttribute.attributeType === 'BOOLEAN') {
+      value = value === 'true' ? '是' : '否';
+    }
+    return value;
+  };
 
   return (
     <Fragment>

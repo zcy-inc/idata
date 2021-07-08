@@ -39,8 +39,8 @@ const ColsDIM = [
   { title: '关联表字段', dataIndex: 'columnName', key: 'columnName' },
 ];
 const ColsDerive = [
-  { title: '指标名称', dataIndex: 'name', key: 'name' },
-  { title: '业务过程', dataIndex: 'test', key: 'test' },
+  { title: '指标名称', dataIndex: 'labelName', key: 'labelName' },
+  { title: '业务过程', dataIndex: 'bizTypeValue', key: 'bizTypeValue' },
 ];
 
 const EditAtomic: FC<EditAtomicProps> = ({ data }) => {
@@ -50,16 +50,16 @@ const EditAtomic: FC<EditAtomicProps> = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      const dwd: DWDList[] = data.measureLabels.map((item) => ({
+      const dwd: DWDList[] = data.measureLabels?.map((item) => ({
         tableName: item.tableName,
         columnName: item.columnName,
         aggregatorCode: AggregatorCodeTransform[data.specialAttribute.aggregatorCode],
       }));
-      const dim = data.dimensions.map((dimension) => ({
+      const dim = data.dimensions?.map((dimension) => ({
         labelName: dimension.labelName,
         enName: dimension.enName as string,
-        tableName: dimension.measureLabels[0].tableName,
-        columnName: dimension.measureLabels[0].columnName,
+        tableName: dimension.measureLabels?.[0]?.tableName,
+        columnName: dimension.measureLabels?.[0]?.columnName,
       }));
       const dir = data.deriveMetrics?.map((metric) => ({
         labelName: metric.labelName,

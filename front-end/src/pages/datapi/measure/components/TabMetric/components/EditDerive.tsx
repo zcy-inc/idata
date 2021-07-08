@@ -61,7 +61,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
       const tmp: DWD[] = [];
       const tmpK: Key[] = [];
       const promises: Promise<any>[] = [];
-      initial.modifiers.forEach((modifier, i) => {
+      initial.modifiers?.forEach((modifier, i) => {
         tmpK.push(i);
         tmp.push({
           id: i,
