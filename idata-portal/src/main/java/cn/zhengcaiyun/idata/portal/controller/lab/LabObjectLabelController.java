@@ -69,7 +69,7 @@ public class LabObjectLabelController {
     }
 
     @PutMapping("/objectLabel")
-    public RestResult<Long> editLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
+    public RestResult<LabObjectLabelDto> editLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
         return RestResult.success(objectLabelService.editLabel(labelDto, tokenService.getNickname(request)));
     }
 

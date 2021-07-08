@@ -90,15 +90,11 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
 
         LabObjectLabel label = newCreatedObjectLabel(labelDto, operator);
         Long labelId = objectLabelManager.saveLabel(label);
-        LabObjectLabel newLabel = objectLabelManager.getObjectLabel(labelId, "标签不存在");
-        LabObjectLabelDto dto = new LabObjectLabelDto();
-        BeanUtils.copyProperties(newLabel, dto);
-        dto.setRuleLayers(fillNames(ruleLayerFromJson(newLabel.getRules())));
-        return dto;
+        return toDto(objectLabelManager.getObjectLabel(labelId, "标签不存在"));
     }
 
     @Override
-    public Long editLabel(LabObjectLabelDto labelDto, String operator) {
+    public LabObjectLabelDto editLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel label = objectLabelManager.getObjectLabel(labelDto.getId(), "标签不存在");
         LabObjectLabel checkNameLabel = objectLabelManager.getObjectLabel(labelDto.getName());
         if (!Objects.isNull(checkNameLabel)) {
@@ -116,16 +112,13 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         //标签主体限制修改
         newLabel.setObjectType(label.getObjectType());
         objectLabelManager.renewLabel(newLabel, label.getId());
-        return newLabel.getId();
+        return toDto(objectLabelManager.getObjectLabel(newLabel.getId(), "标签不存在"));
     }
 
     @Override
     public LabObjectLabelDto getLabel(Long originId) {
         LabObjectLabel label = objectLabelManager.getObjectLabelByOriginId(originId, "标签不存在");
-        LabObjectLabelDto dto = new LabObjectLabelDto();
-        BeanUtils.copyProperties(label, dto);
-        dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));
-        return dto;
+        return toDto(label);
     }
 
     @Override
@@ -188,6 +181,13 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
             }
         }
         return ruleLayers;
+    }
+
+    private LabObjectLabelDto toDto(LabObjectLabel label) {
+        LabObjectLabelDto dto = new LabObjectLabelDto();
+        BeanUtils.copyProperties(label, dto);
+        dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));
+        return dto;
     }
 
     private String ruleLayerToJson(List<LabelRuleLayerDto> ruleLayers) {

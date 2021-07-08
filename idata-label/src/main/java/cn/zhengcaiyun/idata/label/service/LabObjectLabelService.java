@@ -41,7 +41,7 @@ public interface LabObjectLabelService {
      * @param operator
      * @return
      */
-    Long editLabel(LabObjectLabelDto labelDto, String operator);
+    LabObjectLabelDto editLabel(LabObjectLabelDto labelDto, String operator);
 
     /**
      * 获取标签
