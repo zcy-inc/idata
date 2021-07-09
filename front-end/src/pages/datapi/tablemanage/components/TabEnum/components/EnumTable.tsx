@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Input, Radio, Select, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
@@ -34,6 +34,9 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   const [parentOps, setParentOps] = useState<any[]>([]);
   const [isShadowL, setIsShadowL] = useState(false);
   const [isShadowR, setIsShadowR] = useState(false);
+
+  const [scrollWidth, setScrollWidth] = useState(700);
+  const refTable = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (initial) {
@@ -78,26 +81,35 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
     }
   }, [initial]);
 
+  useEffect(() => {
+    refTable.current!.scrollTo(scrollWidth, 0);
+  }, [scrollWidth]);
+
   // 触发作为表单组件onChange事件
   const triggerChange = () => {
     onChange?.({ columns, enums });
   };
+
   // 添加一列
   const addColumn = () => {
     setColumns([...columns, { id: Date.now(), title: '', type: 'STRING' }]);
+    setScrollWidth((pre) => pre + 200);
     triggerChange();
   };
+
   // 删除一列
   const delColunm = (i: number) => {
     columns.splice(i, 1);
     setColumns([...columns]);
     triggerChange();
   };
+
   // 添加一行
   const addEnum = () => {
     setEnums([...enums, { id: Date.now(), enumValue: {} }]);
     triggerChange();
   };
+
   // 删除一行
   const delEnum = (i: number) => {
     enums.splice(i, 1);
@@ -106,6 +118,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
     setParentOps([...parentOps]);
     triggerChange();
   };
+
   // 修改行数据的枚举值列, 新增下需要生成10位code
   const onChangeEnumValue = (v: any, i: number) => {
     if (!enums[i].enumValue.code) {
@@ -119,27 +132,32 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
     setParentOps([...parentOps]);
     triggerChange();
   };
+
   // 修改父类枚举值
   const onChangeParentCode = (v: any, i: number) => {
     enums[i].parentCode = v;
     setEnums([...enums]);
     triggerChange();
   };
+
   // 修改额外参数列的值
   const onChangeEnumParam = (v: any, i: number, colI: number) => {
     enums[i][columns[colI].title] = v;
     setEnums([...enums]);
     triggerChange();
   };
+
   // 生成父级枚举值的ops
   // 找出 parentOps 中与第 i 项枚举值的code相等的项, disable之
   const renderParentOps = (i: number) =>
     parentOps.map((_) => ({ ..._, disabled: _.value === enums[i].enumValue.code }));
+
   // 置空父级枚举值
   const onClearParentCode = (i: number) => {
     enums[i].parentCode = null;
     setEnums([...enums]);
   };
+
   // shadow
   const setShadow = (t: any) => {
     // 左侧的阴影
@@ -160,6 +178,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
     <Fragment>
       <div className={styles['enum-table-shadowbox']}>
         <div
+          ref={refTable}
           className={`${styles['enum-table']} ${isShadowL && styles['enum-table-left-shadow']} ${
             isShadowR && styles['enum-table-right-shadow']
           }`}

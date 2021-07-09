@@ -74,6 +74,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
           // check.group 用的ops
           const ops = [InitialColumn, ...res.data]
             .filter((_: any) => _.labelTag !== 'ATTRIBUTE_LABEL')
+            .sort((a, b) => b.labelRequired - a.labelRequired) // 排序, 必填项在前
             .map((_: any) => {
               const tmp = {
                 ..._,
@@ -110,6 +111,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
     setAllChecked(list.length === columns.length);
     setIndeterminate(!!list.length && list.length < columns.length);
   };
+
   // 全选
   const onAllCheck = (checked: boolean) => {
     const list = checked
@@ -168,7 +170,10 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
                 />
               }
             >
-              <IconFont type={iconType} style={{ cursor: 'pointer', marginLeft: 8 }} />
+              <IconFont
+                type={iconType}
+                style={{ cursor: 'pointer', marginLeft: 8, fontSize: 16 }}
+              />
             </Popover>,
           ]}
         >

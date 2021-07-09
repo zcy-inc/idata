@@ -20,9 +20,12 @@
         .ant-tree-switcher {
           color: #c0c4da;
         }
-        .ant-tree-title .anticon {
-          margin-right: 4px;
-          font-size: 15px;
+        .ant-tree-title {
+          word-break: break-all;
+          .anticon {
+            margin-right: 4px;
+            font-size: 15px;
+          }
         }
       }
       .search {
@@ -166,7 +169,6 @@
       .enum-table-shadowbox {
         position: relative;
         .enum-table {
-          max-height: 560px;
           overflow: auto;
           .columns {
             display: flex;
@@ -261,7 +263,8 @@
           }
         }
         .enum-table-right-shadow {
-          .cell-ops {
+          .cell-ops,
+          .enum-cell-ops {
             &::after {
               position: absolute;
               top: 0;
@@ -447,6 +450,9 @@
           margin-bottom: 0;
         }
       }
+    }
+    .ant-popover-content > .ant-popover-arrow {
+      right: 4px;
     }
   }
 }

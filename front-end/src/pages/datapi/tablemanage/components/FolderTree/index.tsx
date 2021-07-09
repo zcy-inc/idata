@@ -148,12 +148,13 @@ const FolderTree: FC = () => {
     return data.map((_, i) => {
       const { name, type, cid } = _;
       const _i = name.indexOf(search);
+      const clsFolderRoot =
+        (!parentId && type === TreeNodeType.FOLDER && styles['folder-root']) || '';
+      const clsFolderMargin =
+        ((type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin']) || '';
       let iconType: TreeNodeIcon = type as TreeNodeIcon;
       let title = (
-        <span
-          key="title"
-          className={!parentId && type === TreeNodeType.FOLDER && styles['folder-root']}
-        >
+        <span key="title" className={clsFolderRoot}>
           {name}
         </span>
       );
@@ -165,10 +166,8 @@ const FolderTree: FC = () => {
       if (_i > -1) {
         const pre = name.substring(0, _i);
         const suf = name.substring(_i + search?.length);
-        const className = !parentId && type === TreeNodeType.FOLDER && styles['folder-root'];
-
         title = (
-          <span key="title" className={className}>
+          <span key="title" className={clsFolderRoot}>
             {pre}
             <span className={styles['search-match']}>{search}</span>
             {suf}
@@ -177,13 +176,8 @@ const FolderTree: FC = () => {
       }
 
       const node: any = { ..._, key: cid };
-      node.className = (type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin'];
-      node.title = (
-        <Fragment>
-          {NodeTypeIcon[iconType]}
-          {title}
-        </Fragment>
-      );
+      node.className = clsFolderMargin;
+      node.title = [NodeTypeIcon[iconType], title];
       parentId && (node.parentId = parentId);
 
       return _.children ? (

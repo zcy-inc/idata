@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import {
   Button,
   Card,
@@ -18,7 +18,6 @@ import type { FC } from 'react';
 import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
-import { getRandomStr } from '@/utils/tablemanage';
 import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
 import { getDimensionList, getMetricList } from '@/services/objectlabel';
 import { Label } from '@/types/datapi';
@@ -30,7 +29,7 @@ export interface EditRulesProps {
 type ActionKey = 'copy' | 'delete';
 const initialLayer: RuleLayer = {
   layerId: Date.now(),
-  layerName: '分层' + getRandomStr(5),
+  layerName: '分层1',
   ruleDef: {
     rules: [
       {
@@ -59,6 +58,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]);
   const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]);
   const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]);
+  const layerCount = useRef(1);
   const { setEditLayers } = useModel('objectlabel', (_) => ({
     setEditLayers: _.setEditLayers,
   }));
@@ -70,6 +70,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   useEffect(() => {
     if (initial) {
       setLayers(initial.ruleLayers);
+      layerCount.current = initial.ruleLayers.length;
       // 获取指标信息的options
       getMetric(initial.objectType);
       // 获取维度信息的一级options
@@ -128,7 +129,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     if (key === 'copy') {
       const copy = cloneDeep(layers[i]);
       copy.layerId = Date.now();
-      copy.layerName = `${copy.layerName}_cpoy_` + getRandomStr(5);
+      copy.layerName = `${copy.layerName}_cpoy`;
       layers.push(copy);
       setLayers([...layers]);
       setActiveKey(layers.length - 1);
@@ -144,9 +145,10 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
 
   const createLayer = () => {
     const layerId = Date.now();
+    layerCount.current++;
     const newLayer: RuleLayer = {
       layerId,
-      layerName: '分层' + getRandomStr(5),
+      layerName: `分层${layerCount.current}`,
       ruleDef: {
         rules: [
           {

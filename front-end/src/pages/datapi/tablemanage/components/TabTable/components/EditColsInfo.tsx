@@ -77,7 +77,10 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
       .map((labelCode) => {
         const _ = columnsMap?.get(labelCode);
         const column: ProColumns = {
-          title: _.labelName,
+          title: [
+            _.labelRequired === 1 && <span style={{ color: '#f50', marginRight: 2 }}>*</span>,
+            _.labelName,
+          ],
           key: _.labelCode,
           dataIndex: _.labelCode,
           width: 200,

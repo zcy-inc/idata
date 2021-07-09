@@ -20,7 +20,7 @@ import styles from '../../../index.less';
 
 import { getTableLabels, getDWOwner, getFolders } from '@/services/tablemanage';
 import { EnumValue, FlatTreeNode, Table, TableLable, User } from '@/types/datapi';
-import { LabelTag, rules } from '@/constants/datapi';
+import { rules } from '@/constants/datapi';
 import { InitialLabel, RadioOps } from '../constants';
 
 import IconFont from '@/components/IconFont';
@@ -78,36 +78,38 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
         .then((owners) => {
           const list: string[] = []; // 选中的checkedlist, labelCode[]
           // ops, 用以渲染checklist.group
-          const ops = [InitialLabel, ...res.data].map((_: TableLable) => {
-            const tmp = {
-              ..._,
-              label: _.labelName,
-              value: _.labelCode,
-              disabled: _.labelRequired,
-            };
-            // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
-            if (_.labelTag !== 'ATTRIBUTE_LABEL') {
-              let enums = [];
-              // 处理数仓管理人的ops
-              if (_.labelTag === 'USER_LABEL') {
-                enums = owners.data.content.map((_: User) => ({
-                  label: _.nickname,
-                  value: `${_.id}`,
-                }));
+          const ops = [InitialLabel, ...res.data]
+            .sort((a, b) => b.labelRequired - a.labelRequired) // 排序, 必填项在前
+            .map((_: TableLable) => {
+              const tmp = {
+                ..._,
+                label: _.labelName,
+                value: _.labelCode,
+                disabled: _.labelRequired,
+              };
+              // 只有当 labelTag === "ATTRIBUTE_LABEL" 时不存在 labelParamType
+              if (_.labelTag !== 'ATTRIBUTE_LABEL') {
+                let enums = [];
+                // 处理数仓管理人的ops
+                if (_.labelTag === 'USER_LABEL') {
+                  enums = owners.data.content.map((_: User) => ({
+                    label: _.nickname,
+                    value: `${_.id}`,
+                  }));
+                }
+                // 处理枚举类型的ops
+                if (_.labelParamType?.endsWith('ENUM')) {
+                  enums = _.enumValues.map((item: EnumValue) => ({
+                    label: item.enumValue,
+                    value: item.valueCode,
+                  }));
+                }
+                Object.assign(tmp, { enums });
               }
-              // 处理枚举类型的ops
-              if (_.labelParamType?.endsWith('ENUM')) {
-                enums = _.enumValues.map((item: EnumValue) => ({
-                  label: item.enumValue,
-                  value: item.valueCode,
-                }));
-              }
-              Object.assign(tmp, { enums });
-            }
-            labelsMap.current.set(_.labelCode, tmp);
-            list.push(_.labelCode);
-            return tmp;
-          });
+              labelsMap.current.set(_.labelCode, tmp);
+              list.push(_.labelCode);
+              return tmp;
+            });
 
           // 如果有初始值, 就进行赋值操作
           if (initial) {
