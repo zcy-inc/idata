@@ -47,7 +47,8 @@ public interface DevFolderMyDao {
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
-                        "WHERE del = 0 " +
+                        "WHERE del = 0 AND label_tag NOT LIKE 'DIMENSION%' AND label_tag NOT LIKE 'MODIFIER%' " +
+                            "AND label_tag NOT LIKE '%METRIC%' " +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"ENUM\") != -1'>" +
                     "UNION ALL " +

@@ -44,6 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelTag;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -200,8 +201,9 @@ public class DimensionServiceImpl implements DimensionService {
             List<LabelDto> deleteDimensionLabelList = existDimensionLabelList.stream().filter(dimensionLabel ->
                     deleteDimensionStr.contains(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName())
             ).collect(Collectors.toList());
-            List<LabelDto> addEchoDimensionLabelList = addDimensionLabelList.stream().map(dimensionLabel ->
-                    labelService.label(dimensionLabel, operator))
+            List<LabelDto> addEchoDimensionLabelList = addDimensionLabelList.stream().map(dimensionLabel -> {
+                    dimensionLabel.setLabelCode(dimension.getLabelCode());
+                    return labelService.label(dimensionLabel, operator);})
                     .collect(Collectors.toList());
             boolean isDelete = deleteDimensionLabelList.stream().allMatch(deleteDimensionLabel ->
                     labelService.removeLabel(deleteDimensionLabel, operator));
@@ -237,9 +239,10 @@ public class DimensionServiceImpl implements DimensionService {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(isNotEmpty(dimensionCode), "维度Code不能为空");
         DevLabelDefine checkDimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
+                and(devLabelDefine.labelCode, isEqualTo(dimensionCode)),
+                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL_DISABLE.name()))))
                 .orElse(null);
-        checkArgument(checkDimension != null, "维度不存在");
+        checkArgument(checkDimension != null, "维度不存在或未停用或已删除");
 
         return labelService.deleteDefine(dimensionCode, operator);
     }

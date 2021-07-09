@@ -28,9 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
@@ -87,9 +86,32 @@ public class EnumServiceImpl implements EnumService {
             devEnumDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumDto, DevEnum.class,
                     "id", "editor", "enumName", "folderId"));
             if (enumDto.getEnumValues() != null) {
-                enumDto.getEnumValues().forEach(enumValueDto -> {
-                    enumValueDto.setEnumCode(enumDto.getEnumCode());
-                    createOrEditEnumValue(enumValueDto, operator);
+                List<EnumValueDto> enumValueList = enumDto.getEnumValues();
+//                Map<String, EnumValueDto> enumValueMap = enumValueList.stream()
+//                        .collect(Collectors.toMap(EnumValueDto::getValueCode, Function.identity()));
+                List<EnumValueDto> existEnumValueList = getEnumValues(enumDto.getEnumCode());
+//                Map<String, EnumValueDto> existEnumValueMap = existEnumValueList.stream()
+//                        .collect(Collectors.toMap(EnumValueDto::getValueCode, Function.identity()));
+                Set<String> enumValues = enumValueList.stream().map(EnumValueDto::getValueCode).collect(Collectors.toSet());
+                Set<String> existEnumValues = existEnumValueList.stream().map(EnumValueDto::getValueCode).collect(Collectors.toSet());
+                Set<String> addEnumValues = new HashSet<>(enumValues);
+                addEnumValues.removeAll(existEnumValues);
+                Set<String> deleteEnumValues = new HashSet<>(existEnumValues);
+                deleteEnumValues.removeAll(enumValues);
+                enumValueList.forEach(enumValueDto -> {
+                    if (addEnumValues.contains(enumValueDto.getValueCode())) {
+                        enumValueDto.setEnumCode(enumDto.getEnumCode());
+                        createOrEditEnumValue(enumValueDto, operator);
+                    }
+                });
+                existEnumValueList.forEach(enumValueDto -> {
+                    if (deleteEnumValues.contains(enumValueDto.getValueCode())) {
+                        devEnumValueDao.update(c -> c.set(devEnumValue.del).equalTo(1)
+                                .set(devEnumValue.editor).equalTo(operator)
+                                .where(devEnumValue.del, isNotEqualTo(1),
+                                        and(devEnumValue.enumCode, isEqualTo(enumDto.getEnumCode())),
+                                        and(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()))));
+                    }
                 });
             }
         }
@@ -201,10 +223,9 @@ public class EnumServiceImpl implements EnumService {
     }
 
     @Override
-    public List<String> getEnumValues(List<String> valueCodes) {
+    public List<DevEnumValue> getEnumValues(List<String> valueCodes) {
         return devEnumValueDao.select(c ->
-                c.where(devEnumValue.valueCode, isIn(valueCodes), and(devEnumValue.del, isNotEqualTo(1))))
-                .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+                c.where(devEnumValue.valueCode, isIn(valueCodes), and(devEnumValue.del, isNotEqualTo(1))));
     }
 
     @Override

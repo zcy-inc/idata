@@ -153,6 +153,8 @@ public class MetricServiceImpl implements MetricService {
             checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
             if (metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
                 List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
+                Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
+                checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
                 checkArgument(findErrorModifierNames(relatedModifierList) == null,
                         findErrorModifierNames(relatedModifierList) + "修饰词有误");
             }
@@ -192,6 +194,8 @@ public class MetricServiceImpl implements MetricService {
         if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())
                 && metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
             List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
+            Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
+            checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
             checkArgument(findErrorModifierNames(relatedModifierList) == null,
                     findErrorModifierNames(relatedModifierList) + "修饰词有误");
         }
