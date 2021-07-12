@@ -71,18 +71,17 @@ export default () => {
 
   // 新建维度 / 修饰词 / 指标
   const createTab = (type: TreeNodeType) => {
+    const key = Date.now().toString();
     if (type === TreeNodeType.DIMENSION_LABEL) {
-      !tabs.some((_) => _.key === 'newDimension') && setTabs([...tabs, newDimension]);
-      setActiveTab('newDimension');
+      setTabs([...tabs, { ...newDimension, key }]);
     }
     if (type === TreeNodeType.MODIFIER_LABEL) {
-      !tabs.some((_) => _.key === 'newModifier') && setTabs([...tabs, newModifier]);
-      setActiveTab('newModifier');
+      setTabs([...tabs, { ...newModifier, key }]);
     }
     if (type === TreeNodeType.METRIC_LABEL) {
-      !tabs.some((_) => _.key === 'newMetric') && setTabs([...tabs, newMetric]);
-      setActiveTab('newMetric');
+      setTabs([...tabs, { ...newMetric, key }]);
     }
+    setActiveTab(key);
   };
 
   // 关闭一个tab

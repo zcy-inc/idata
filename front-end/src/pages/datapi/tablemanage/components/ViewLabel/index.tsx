@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Descriptions, message, Popconfirm, Table } from 'antd';
+import { Button, Descriptions, message, Modal, Space, Table } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
@@ -22,12 +22,12 @@ export interface ViewLabelProps {
 }
 
 const { Item } = Descriptions;
+const { confirm } = Modal;
 
 const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
   const [data, setData] = useState<any>({});
   const [columns, setColumns] = useState<any[]>(InitialColumns);
   const [dataSource, setDateSource] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const { getTree, showLabel, onRemovePane } = useModel('tablemanage', (ret) => ({
     getTree: ret.getTree,
@@ -91,17 +91,19 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
     setDateSource(attrs);
   };
 
-  const onDelete = (labelCode: string) => {
-    setLoading(true);
-    delLabel({ labelCode })
-      .then((res) => {
-        if (res.success) message.success('删除成功');
-        onRemovePane(`L_${labelCode}`);
-        getTree('LABEL');
-      })
-      .catch((err) => {})
-      .finally(() => setLoading(false));
-  };
+  const onDelete = (labelCode: string) =>
+    confirm({
+      title: '删除标签',
+      content: '您确认要删除该标签吗？',
+      onOk: () =>
+        delLabel({ labelCode })
+          .then((res) => {
+            if (res.success) message.success('删除成功');
+            onRemovePane(`L_${labelCode}`);
+            getTree('LABEL');
+          })
+          .catch((err) => {}),
+    });
 
   return (
     <Fragment>
@@ -127,18 +129,14 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
         </Descriptions>
       )}
       <div className={styles.submit}>
-        <Button type="primary" onClick={() => showLabel(fileCode)}>
-          编辑
-        </Button>
-        <Popconfirm
-          title="您确认要删除该标签吗？"
-          onConfirm={() => onDelete(fileCode)}
-          okButtonProps={{ loading }}
-          okText="确认"
-          cancelText="取消"
-        >
-          <Button>删除</Button>
-        </Popconfirm>
+        <Space>
+          <Button type="primary" onClick={() => showLabel(fileCode)}>
+            编辑
+          </Button>
+          <Button key="del" onClick={() => onDelete(fileCode)}>
+            删除
+          </Button>
+        </Space>
       </div>
     </Fragment>
   );

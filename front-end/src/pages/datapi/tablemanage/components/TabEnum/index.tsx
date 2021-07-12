@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Form, message, Popconfirm } from 'antd';
+import { Button, Form, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
@@ -14,6 +14,8 @@ export interface TabEnumProps {
   initialMode: 'view' | 'edit';
   fileCode: string;
 }
+
+const { confirm } = Modal;
 
 const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>();
@@ -85,56 +87,55 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
     });
   };
 
-  const onDelete = () => {
-    setLoading(true);
-    delEnum({ enumCode: fileCode })
-      .then((res) => {
-        if (res.success) message.success('删除成功');
-        onRemovePane(`E_${fileCode}`);
-        getTree('ENUM');
-      })
-      .catch((err) => {})
-      .finally(() => setLoading(false));
-  };
+  const onDelete = () =>
+    confirm({
+      title: '删除枚举',
+      content: '您确认要删除该枚举吗？',
+      onOk: () =>
+        delEnum({ enumCode: fileCode })
+          .then((res) => {
+            if (res.success) message.success('删除成功');
+            onRemovePane(`E_${fileCode}`);
+            getTree('ENUM');
+          })
+          .catch((err) => {}),
+    });
 
   return (
     <Fragment>
       {mode === 'view' && <ViewEnum data={data} />}
       {mode === 'edit' && <EditEnum form={form} data={fileCode === 'newEnum' ? undefined : data} />}
       <div className={styles.submit}>
-        {mode === 'view' && [
-          <Button key="edit" type="primary" onClick={() => setMode('edit')}>
-            编辑
-          </Button>,
-          <Popconfirm
-            key="del"
-            title="您确认要删除该枚举吗？"
-            onConfirm={() => onDelete()}
-            okButtonProps={{ loading }}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button>删除</Button>
-          </Popconfirm>,
-        ]}
-        {mode === 'edit' && [
-          <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
-            保存
-          </Button>,
-          <Button
-            key="cancel"
-            onClick={() => {
-              if (fileCode === 'newEnum') {
-                onRemovePane('newEnum');
-              } else {
-                setMode('view');
-                getEnumInfo(fileCode);
-              }
-            }}
-          >
-            取消
-          </Button>,
-        ]}
+        {mode === 'view' && (
+          <Space>
+            <Button key="edit" type="primary" onClick={() => setMode('edit')}>
+              编辑
+            </Button>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
+          </Space>
+        )}
+        {mode === 'edit' && (
+          <Space>
+            <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
+              保存
+            </Button>
+            <Button
+              key="cancel"
+              onClick={() => {
+                if (fileCode === 'newEnum') {
+                  onRemovePane('newEnum');
+                } else {
+                  setMode('view');
+                  getEnumInfo(fileCode);
+                }
+              }}
+            >
+              取消
+            </Button>
+          </Space>
+        )}
       </div>
     </Fragment>
   );

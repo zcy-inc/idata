@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Form, message, Modal, Popconfirm } from 'antd';
+import { Button, Form, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
@@ -17,12 +17,13 @@ import { NewObjectLabelOriginId } from './constants';
 
 export interface TabObjectLabelProps {
   initialMode: 'view' | 'edit';
+  tabKey: string;
   originId: number;
 }
 
 const { confirm } = Modal;
 
-const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originId }) => {
+const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', tabKey, originId }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<ObjectLabel>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -62,7 +63,7 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
               .then((res) => {
                 if (res.success) {
                   message.success('创建数据标签成功');
-                  replaceTab('newObjectLabel', res.data.originId, res.data.name);
+                  replaceTab(tabKey, res.data.originId, res.data.name);
                 }
               })
               .catch((err) => {})
@@ -84,23 +85,24 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
   };
 
   const onDelete = () =>
-    deleteObjectLabel({ id: data!.id })
-      .then((res) => {
-        if (res.success) {
-          message.success('删除数据标签成功');
-          getTree();
-          if (originId === NewObjectLabelOriginId) {
-            removeTab('newObjectLabel');
-          } else {
-            removeTab(`${data!.originId}`);
-          }
-        }
-      })
-      .catch((err) => {});
+    confirm({
+      title: '删除数据标签',
+      content: '您确定要删除该数据标签吗？',
+      onOk: () =>
+        deleteObjectLabel({ id: data!.id })
+          .then((res) => {
+            if (res.success) {
+              message.success('删除数据标签成功');
+              getTree();
+              removeTab(`${data!.originId}`);
+            }
+          })
+          .catch((err) => {}),
+    });
 
   const onCancel = () => {
     if (originId === NewObjectLabelOriginId) {
-      removeTab('newObjectLabel');
+      removeTab(tabKey);
     } else {
       setMode('view');
       getLabel(originId);
@@ -112,29 +114,26 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
       {mode === 'view' && <ViewLabel data={data as ObjectLabel} />}
       {mode === 'edit' && <EditLabel initial={data} form={form} />}
       <div className={styles.submit}>
-        {mode === 'view' && [
-          <Button key="edit" type="primary" onClick={() => setMode('edit')}>
-            编辑
-          </Button>,
-          <Popconfirm
-            key="del"
-            title="您确定要删除该数据标签吗？"
-            onConfirm={onDelete}
-            okButtonProps={{ loading }}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button>删除</Button>
-          </Popconfirm>,
-        ]}
-        {mode === 'edit' && [
-          <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
-            保存
-          </Button>,
-          <Button key="cancel" onClick={onCancel}>
-            取消
-          </Button>,
-        ]}
+        {mode === 'view' && (
+          <Space>
+            <Button key="edit" type="primary" onClick={() => setMode('edit')}>
+              编辑
+            </Button>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
+          </Space>
+        )}
+        {mode === 'edit' && (
+          <Space>
+            <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
+              保存
+            </Button>
+            <Button key="cancel" onClick={onCancel}>
+              取消
+            </Button>
+          </Space>
+        )}
       </div>
     </Fragment>
   );

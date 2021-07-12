@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
-import { Modal, Collapse, Space, Tabs } from 'antd';
+import { Modal, Collapse, Space, Tabs, Button } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
 
 import { RuleLayer } from '@/types/objectlabel';
@@ -16,7 +17,17 @@ const { Panel } = Collapse;
 
 const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
   return (
-    <Modal title="查看规则" visible={visible} onCancel={onCancel} bodyStyle={{ padding: 16 }}>
+    <Modal
+      title="查看规则"
+      visible={visible}
+      onCancel={onCancel}
+      bodyStyle={{ padding: 16 }}
+      footer={[
+        <Button type="primary" onClick={onCancel}>
+          确定
+        </Button>,
+      ]}
+    >
       <Tabs>
         {layers.map((layer) => (
           <TabPane key={layer.layerId} tab={layer.layerName}>
@@ -27,6 +38,7 @@ const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
                 <Collapse
                   style={{ background: '#fff', marginBottom: 16 }}
                   defaultActiveKey={['indicator', 'dimension']}
+                  expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
                 >
                   <Panel header="指标信息" key="indicator">
                     <Space direction="vertical">

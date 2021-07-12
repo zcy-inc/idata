@@ -1,11 +1,11 @@
 import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
-import { message, Select, Tabs, Typography } from 'antd';
+import { Select, Tabs } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { ForwardRefRenderFunction, Key } from 'react';
 import styles from '../../../../measure/index.less';
 
-import IconFont from '@/components/IconFont';
+// import IconFont from '@/components/IconFont';
 import Title from '../../../../components/Title';
 import { Metric, Table } from '@/types/datapi';
 import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
@@ -14,17 +14,27 @@ import { AggregatorCodeOptions } from '@/constants/datapi';
 export interface EditAtomicProps {
   initial?: Metric;
 }
+interface DWD {
+  id: number;
+  tableId?: number;
+  columnName?: string;
+  aggregatorCode?: string;
+}
 interface TableOptions {
   label: string;
   value: number;
 }
 
-const { Link } = Typography;
+// const { Link } = Typography;
 const { TabPane } = Tabs;
+const initialKey = Date.now();
+const initialDWD: DWD = {
+  id: initialKey,
+};
 
 const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
-  const [DWDData, setDWDData] = useState<any[]>([]);
-  const [DWDKeys, setDWDKeys] = useState<Key[]>([]);
+  const [DWDData, setDWDData] = useState<DWD[]>([initialDWD]);
+  const [DWDKeys, setDWDKeys] = useState<Key[]>([initialKey]);
   const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
   const [DWDStrings, setDWDStrings] = useState<[][]>([]);
 
@@ -71,16 +81,16 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
   }, [initial]);
 
   // 添加一行数据
-  const addData = () => {
-    if (DWDData.length > 0) {
-      message.info('原子指标的事实表只能存在一张');
-      return;
-    }
-    const id = Date.now();
-    const data = { id };
-    setDWDData([...DWDData, data]);
-    setDWDKeys([...DWDKeys, id]);
-  };
+  // const addData = () => {
+  //   if (DWDData.length > 0) {
+  //     message.info('原子指标的事实表只能存在一张');
+  //     return;
+  //   }
+  //   const id = Date.now();
+  //   const data = { id };
+  //   setDWDData([...DWDData, data]);
+  //   setDWDKeys([...DWDKeys, id]);
+  // };
 
   const setValue = (schema: any, value: any) => {
     if (schema.dataIndex === 'tableId') {
@@ -96,13 +106,13 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
     setDWDData([...DWDData]);
   };
   // 操作栏行为
-  const onAction = (row: any, _: any) => {
-    const i = DWDData.findIndex((_) => _.id === row.id);
-    DWDData.splice(i, 1);
-    DWDKeys.splice(i, 1);
-    setDWDData([...DWDData]);
-    setDWDKeys([...DWDKeys]);
-  };
+  // const onAction = (row: any, _: any) => {
+  //   const i = DWDData.findIndex((_) => _.id === row.id);
+  //   DWDData.splice(i, 1);
+  //   DWDKeys.splice(i, 1);
+  //   setDWDData([...DWDData]);
+  //   setDWDKeys([...DWDKeys]);
+  // };
 
   const Cols: ProColumns[] = [
     {
@@ -144,7 +154,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
         />
       ),
     },
-    { title: '操作', valueType: 'option', fixed: 'right', width: 50 },
+    // { title: '操作', valueType: 'option', fixed: 'right', width: 50 },
   ];
 
   return (
@@ -163,13 +173,13 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
               type: 'multiple',
               editableKeys: DWDKeys,
               onChange: setDWDKeys,
-              actionRender: (row, _) => [<Link onClick={() => onAction(row, _)}>删除</Link>],
+              // actionRender: (row, _) => [<Link onClick={() => onAction(row, _)}>删除</Link>],
             }}
           />
-          <Link onClick={addData} style={{ display: 'inline-block', marginTop: 16 }}>
+          {/* <Link onClick={addData} style={{ display: 'inline-block', marginTop: 16 }}>
             <IconFont type="icon-tianjia" style={{ marginRight: 4 }} />
             添加字段
-          </Link>
+          </Link> */}
         </TabPane>
       </Tabs>
     </Fragment>

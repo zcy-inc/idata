@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Button, message, Popconfirm, Space } from 'antd';
+import { Button, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
@@ -13,14 +13,16 @@ import { LabelTag, TreeNodeType } from '@/constants/datapi';
 
 export interface TabModifierProps {
   initialMode: 'view' | 'edit';
+  tabKey: string;
   fileCode: string;
 }
 interface ModifierExportProps {
   form: FormInstance;
   DWD: [];
 }
+const { confirm } = Modal;
 
-const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) => {
+const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', tabKey, fileCode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<Modifier>();
@@ -79,7 +81,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
           if (fileCode === 'newModifier') {
             message.success('新建修饰词成功');
             replaceTab(
-              'newModifier',
+              tabKey,
               `L_${res.data.labelCode}`,
               res.data.labelName,
               TreeNodeType.MODIFIER_LABEL,
@@ -103,19 +105,23 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
   };
 
   const onDelete = () =>
-    deleteModifier({ modifierCode: fileCode })
-      .then((res) => {
-        if (res.success) {
-          message.success('删除成功');
-          removeTab(`L_${data!.labelCode}`);
-          getTree(TreeNodeType.MODIFIER_LABEL);
-        }
-      })
-      .catch((err) => {});
-
+    confirm({
+      title: '删除修饰词',
+      content: '您确认要删除该修饰词吗？',
+      onOk: () =>
+        deleteModifier({ modifierCode: fileCode })
+          .then((res) => {
+            if (res.success) {
+              message.success('删除成功');
+              removeTab(`L_${data!.labelCode}`);
+              getTree(TreeNodeType.MODIFIER_LABEL);
+            }
+          })
+          .catch((err) => {}),
+    });
   const onCancel = () => {
     if (fileCode === 'newModifier') {
-      removeTab('newModifier');
+      removeTab(tabKey);
     } else {
       setMode('view');
       getModifierInfo(fileCode);
@@ -152,16 +158,9 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', fileCode }) =
             <Button key="labelTag" onClick={switchStatus}>
               {data?.labelTag === LabelTag.MODIFIER_LABEL ? '停用' : '启用'}
             </Button>
-            <Popconfirm
-              key="del"
-              title="您确认要删除该修饰词吗？"
-              onConfirm={onDelete}
-              okButtonProps={{ loading }}
-              okText="确认"
-              cancelText="取消"
-            >
-              <Button>删除</Button>
-            </Popconfirm>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
           </Space>
         )}
         {mode === 'edit' && (

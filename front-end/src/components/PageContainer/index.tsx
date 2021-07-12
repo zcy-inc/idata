@@ -28,7 +28,19 @@ const PageContainer: React.FC<PageContainerProps> = ({
     <div className={wrapCls}>
       <dl>
         <dt>
-          <Breadcrumb {...value.breadcrumb} separator="/" />
+          {value.breadcrumb?.routes ? (
+            <Breadcrumb {...value.breadcrumb} separator="/" />
+          ) : (
+            <Breadcrumb
+              routes={[
+                {
+                  breadcrumbName: value.currentMenu?.name as string,
+                  path: value.currentMenu?.path as string,
+                },
+              ]}
+              separator="/"
+            />
+          )}
           <h1 className={styles.title}>{value.title}</h1>
         </dt>
         <dd>{extra}</dd>

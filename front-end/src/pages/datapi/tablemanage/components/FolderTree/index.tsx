@@ -91,15 +91,15 @@ const FolderTree: FC = () => {
   };
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      {renderPrimaryMenu()}
-      <Menu.Divider />
-      <Menu.Item key="folder">新建文件夹</Menu.Item>
-      {curFolder?.type === 'FOLDER' && (
+      {curFolder?.type === 'FOLDER' ? (
         <Fragment>
+          {renderPrimaryMenu()}
+          <Menu.Divider />
+          <Menu.Item key="folder">新建文件夹</Menu.Item>
           <Menu.Item key="edit">编辑文件夹</Menu.Item>
           <Menu.Item key="delete">删除文件夹</Menu.Item>
         </Fragment>
-      )}
+      ) : null}
     </Menu>
   );
 

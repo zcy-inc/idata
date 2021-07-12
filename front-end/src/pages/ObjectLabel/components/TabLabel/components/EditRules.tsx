@@ -7,11 +7,11 @@ import {
   Dropdown,
   Input,
   Menu,
-  message,
   Select,
   Space,
   Typography,
 } from 'antd';
+import { CaretRightOutlined } from '@ant-design/icons';
 import { cloneDeep } from 'lodash';
 import { useModel } from 'umi';
 import type { FC } from 'react';
@@ -50,11 +50,12 @@ const ConditionOptions = [
   { label: '介于两个值之间', value: 'between' },
 ];
 const { Panel } = Collapse;
-const { Link } = Typography;
+const { Link, Text } = Typography;
 
 const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   const [layers, setLayers] = useState<RuleLayer[]>([initialLayer]);
   const [activeKey, setActiveKey] = useState(0); // 取的是数组的index而非layerId
+  const [expandKeys, setExpandKeys] = useState<string[][]>([['indicator', 'dimension']]); // 折叠面板的展开key
   const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]);
   const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]);
   const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]);
@@ -69,6 +70,11 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
 
   useEffect(() => {
     if (initial) {
+      const tmpExpandKeys = [];
+      for (let i = 0; i < initial.ruleLayers.length; i++) {
+        tmpExpandKeys.push(['indicator', 'dimension']);
+      }
+      setExpandKeys(tmpExpandKeys);
       setLayers(initial.ruleLayers);
       layerCount.current = initial.ruleLayers.length;
       // 获取指标信息的options
@@ -170,23 +176,23 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     setLayers([...layers]);
   };
 
-  const createIndicator = (iR: number) => {
-    if (layers[activeKey].ruleDef.rules[iR].indicatorDefs.length > 0) {
-      message.info('同一规则中只能存在一条指标');
-      return;
-    }
-    layers[activeKey].ruleDef.rules[iR].indicatorDefs.push({
-      indicatorCode: null,
-      condition: null,
-      params: [],
-    });
-    setLayers([...layers]);
-  };
+  // const createIndicator = (iR: number) => {
+  //   if (layers[activeKey].ruleDef.rules[iR].indicatorDefs.length > 0) {
+  //     message.info('同一规则中只能存在一条指标');
+  //     return;
+  //   }
+  //   layers[activeKey].ruleDef.rules[iR].indicatorDefs.push({
+  //     indicatorCode: null,
+  //     condition: null,
+  //     params: [],
+  //   });
+  //   setLayers([...layers]);
+  // };
 
-  const deleteIndicator = (iR: number, iI: number) => {
-    layers[activeKey].ruleDef.rules[iR].indicatorDefs.splice(iI, 1);
-    setLayers([...layers]);
-  };
+  // const deleteIndicator = (iR: number, iI: number) => {
+  //   layers[activeKey].ruleDef.rules[iR].indicatorDefs.splice(iI, 1);
+  //   setLayers([...layers]);
+  // };
 
   const createDimension = (iR: number) => {
     layers[activeKey].ruleDef.rules[iR].dimensionDefs.push({
@@ -255,7 +261,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
             overlay={menu(i)}
             trigger={['click']}
           >
-            {layer.layerName}
+            <Text ellipsis style={{ maxWidth: 88 }}>
+              {layer.layerName}
+            </Text>
           </Dropdown.Button>
         ))}
         <Button icon={<IconFont type="icon-xinjian" />} type="dashed" onClick={createLayer}>
@@ -275,21 +283,26 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
           </div>
           <Collapse
             style={{ marginTop: 16, background: '#fff' }}
-            defaultActiveKey={['indicator', 'dimension']}
+            activeKey={expandKeys[iR]}
+            onChange={(key) => {
+              expandKeys[iR] = key as string[];
+              setExpandKeys([...expandKeys]);
+            }}
+            expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
           >
             <Panel
               header="指标信息"
               key="indicator"
-              extra={
-                <Link
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createIndicator(iR);
-                  }}
-                >
-                  添加
-                </Link>
-              }
+              // extra={
+              //   <Link
+              //     onClick={(e) => {
+              //       e.stopPropagation();
+              //       createIndicator(iR);
+              //     }}
+              //   >
+              //     添加
+              //   </Link>
+              // }
             >
               <Space direction="vertical">
                 {rule.indicatorDefs.map((_, iI) => (
@@ -339,11 +352,11 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                         onChange={({ target: { value } }) => setIndicator(value, iR, iI, 'params')}
                       />
                     )}
-                    <IconFont
+                    {/* <IconFont
                       type="icon-shanchuchanggui"
                       style={{ cursor: 'pointer' }}
                       onClick={() => deleteIndicator(iR, iI)}
-                    />
+                    /> */}
                   </Space>
                 ))}
               </Space>
@@ -356,6 +369,10 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     createDimension(iR);
+                    if (!expandKeys[iR].includes('dimension')) {
+                      expandKeys[iR].push('dimension');
+                      setExpandKeys([...expandKeys]);
+                    }
                   }}
                 >
                   添加
