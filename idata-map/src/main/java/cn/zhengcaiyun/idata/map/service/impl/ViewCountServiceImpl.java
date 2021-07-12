@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.map.service.impl;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.map.dal.dao.ViewCountDao;
 import cn.zhengcaiyun.idata.map.dal.model.ViewCount;
 import cn.zhengcaiyun.idata.map.dto.ViewCountDto;
@@ -76,10 +77,9 @@ public class ViewCountServiceImpl implements ViewCountService {
     }
 
     @Override
-    public List<ViewCountDto> getTopCountEntityForUser(Long userId, String entitySource, Long limit, Long offset) {
-        checkArgument(isNotEmpty(userId), "用户编号不能为空");
+    public List<ViewCountDto> getTopCountEntityForUser(String entitySource, Long limit, Long offset, Operator operator) {
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
-        List<ViewCount> viewCountList = queryTopByViewCount(userId, entitySource, firstNonNull(limit, 10L), firstNonNull(offset, 0L));
+        List<ViewCount> viewCountList = queryTopByViewCount(operator.getId(), entitySource, firstNonNull(limit, 10L), firstNonNull(offset, 0L));
         return toDto(viewCountList);
     }
 
@@ -90,6 +90,8 @@ public class ViewCountServiceImpl implements ViewCountService {
     private ViewCountDto toDto(ViewCount viewCount) {
         ViewCountDto dto = new ViewCountDto();
         BeanUtils.copyProperties(viewCount, dto);
+
+        //todo 补充 entityName
         return dto;
     }
 

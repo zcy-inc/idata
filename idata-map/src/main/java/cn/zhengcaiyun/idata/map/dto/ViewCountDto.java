@@ -36,6 +36,11 @@ public class ViewCountDto extends BaseDto {
     private String entityCode;
 
     /**
+     * 实体记录唯一标识
+     */
+    private String entityName;
+
+    /**
      * 实体记录数据源：数仓表（table） or 数据指标（indicator）
      */
     private String entitySource;

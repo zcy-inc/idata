@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.map.service;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.map.dto.ViewCountDto;
 
 import java.util.List;
@@ -52,11 +53,11 @@ public interface ViewCountService {
     /**
      * 查询指定用户浏览次数前N名的业务记录
      *
-     * @param userId       用户编号
      * @param entitySource 实体记录数据源：数仓表（table） or 数据指标（indicator）
      * @param limit        查询记录数
      * @param offset       默认为0
+     * @param operator     当前操作人
      * @return 浏览次数对象
      */
-    List<ViewCountDto> getTopCountEntityForUser(Long userId, String entitySource, Long limit, Long offset);
+    List<ViewCountDto> getTopCountEntityForUser(String entitySource, Long limit, Long offset, Operator operator);
 }
