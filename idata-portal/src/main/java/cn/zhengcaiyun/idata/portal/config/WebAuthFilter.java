@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.config;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import com.alibaba.fastjson.JSON;
@@ -70,7 +71,22 @@ public class WebAuthFilter implements Filter {
             servletResponse.getWriter().flush();
             return;
         }
-        filterChain.doFilter(mutableRequest, servletResponse);
+
+        try {
+            setCurrentOperator(token);
+            filterChain.doFilter(mutableRequest, servletResponse);
+        }finally {
+            // 清理操作人数据
+            clearCurrentOperator();
+        }
+    }
+
+    private void setCurrentOperator(String token){
+        OperatorContext.setCurrentOperator(OperatorContext.from(token));
+    }
+
+    private void clearCurrentOperator(){
+        OperatorContext.clearCurrentOperator();
     }
 
     static class MutableHttpServletRequest extends HttpServletRequestWrapper {
