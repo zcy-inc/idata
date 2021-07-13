@@ -70,16 +70,17 @@ public class ViewCountServiceImpl implements ViewCountService {
     }
 
     @Override
-    public List<ViewCountDto> getTopCountEntity(String entitySource, Long limit, Long offset) {
+    public List<ViewCountDto> getTopCountEntity(String entitySource, Integer topNum) {
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
-        List<ViewCount> viewCountList = queryTopByViewCount(0L, entitySource, firstNonNull(limit, 10L), firstNonNull(offset, 0L));
+        // 查询数据源下全局排行，userId传0L
+        List<ViewCount> viewCountList = queryTopByViewCount(0L, entitySource, firstNonNull(topNum, 10));
         return toDto(viewCountList);
     }
 
     @Override
-    public List<ViewCountDto> getTopCountEntityForUser(String entitySource, Long limit, Long offset, Operator operator) {
+    public List<ViewCountDto> getTopCountEntityForUser(String entitySource, Integer topNum, Operator operator) {
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
-        List<ViewCount> viewCountList = queryTopByViewCount(operator.getId(), entitySource, firstNonNull(limit, 10L), firstNonNull(offset, 0L));
+        List<ViewCount> viewCountList = queryTopByViewCount(operator.getId(), entitySource, firstNonNull(topNum, 10));
         return toDto(viewCountList);
     }
 
@@ -95,12 +96,12 @@ public class ViewCountServiceImpl implements ViewCountService {
         return dto;
     }
 
-    private List<ViewCount> queryTopByViewCount(Long userId, String entitySource, Long limit, Long offset) {
+    private List<ViewCount> queryTopByViewCount(Long userId, String entitySource, Integer topNum) {
         return countDao.select(dsl -> dsl.where(VIEW_COUNT.userId, isEqualTo(userId),
                 and(VIEW_COUNT.entitySource, isEqualTo(entitySource)),
                 and(VIEW_COUNT.del, isEqualTo(DEL_NO.val)))
                 .orderBy(VIEW_COUNT.viewCount.descending())
-                .limit(limit).offset(offset));
+                .limit(topNum).offset(0L));
     }
 
     private int increaseViewCount(Long id, long increasedCount) {

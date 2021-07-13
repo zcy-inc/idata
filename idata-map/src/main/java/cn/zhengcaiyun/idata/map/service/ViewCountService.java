@@ -44,20 +44,18 @@ public interface ViewCountService {
      * 查询浏览次数前N名的业务记录
      *
      * @param entitySource 实体记录数据源：数仓表（table） or 数据指标（indicator）
-     * @param limit        查询记录数
-     * @param offset       默认为0
+     * @param topNum       查询记录数
      * @return 浏览次数对象
      */
-    List<ViewCountDto> getTopCountEntity(String entitySource, Long limit, Long offset);
+    List<ViewCountDto> getTopCountEntity(String entitySource, Integer topNum);
 
     /**
      * 查询指定用户浏览次数前N名的业务记录
      *
      * @param entitySource 实体记录数据源：数仓表（table） or 数据指标（indicator）
-     * @param limit        查询记录数
-     * @param offset       默认为0
+     * @param topNum       查询记录数
      * @param operator     当前操作人
      * @return 浏览次数对象
      */
-    List<ViewCountDto> getTopCountEntityForUser(String entitySource, Long limit, Long offset, Operator operator);
+    List<ViewCountDto> getTopCountEntityForUser(String entitySource, Integer topNum, Operator operator);
 }

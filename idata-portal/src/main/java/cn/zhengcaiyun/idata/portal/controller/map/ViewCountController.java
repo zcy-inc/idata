@@ -51,25 +51,25 @@ public class ViewCountController {
      * 全局热门排行
      *
      * @param entitySource 数据源：数仓表（table） or 数据指标（indicator）
-     * @param limit        查询排行记录数
+     * @param topNum       查询排行记录数
      * @return 热门排行数据
      */
     @GetMapping("/pop")
     public RestResult<List<ViewCountDto>> popRanking(@RequestParam(value = "entitySource") String entitySource,
-                                                     @RequestParam(value = "limit") Long limit) {
-        return RestResult.success(viewCountService.getTopCountEntity(entitySource, limit, null));
+                                                     @RequestParam(value = "topNum") Integer topNum) {
+        return RestResult.success(viewCountService.getTopCountEntity(entitySource, topNum));
     }
 
     /**
      * 当前用户热门排行
      *
      * @param entitySource 数据源：数仓表（table） or 数据指标（indicator）
-     * @param limit        查询排行记录数
+     * @param topNum       查询排行记录数
      * @return 热门排行数据
      */
     @GetMapping("/user/pop")
     public RestResult<List<ViewCountDto>> popRankingOfUser(@RequestParam(value = "entitySource") String entitySource,
-                                                           @RequestParam(value = "limit") Long limit) {
-        return RestResult.success(viewCountService.getTopCountEntityForUser(entitySource, limit, null, OperatorContext.getCurrentOperator()));
+                                                           @RequestParam(value = "topNum") Integer topNum) {
+        return RestResult.success(viewCountService.getTopCountEntityForUser(entitySource, topNum, OperatorContext.getCurrentOperator()));
     }
 }
