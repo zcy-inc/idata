@@ -91,6 +91,7 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
     confirm({
       title: '删除枚举',
       content: '您确认要删除该枚举吗？',
+      autoFocusButton: null,
       onOk: () =>
         delEnum({ enumCode: fileCode })
           .then((res) => {

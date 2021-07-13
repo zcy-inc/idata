@@ -88,6 +88,7 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', tabKey,
     confirm({
       title: '删除数据标签',
       content: '您确定要删除该数据标签吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteObjectLabel({ id: data!.id })
           .then((res) => {

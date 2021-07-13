@@ -123,6 +123,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const onDeleteFolder = () =>
     confirm({
       title: '您确定要删除该文件夹吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteFolder({ folderId: curNode?.folderId })
           .then((res) => {

@@ -142,6 +142,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
     confirm({
       title: '删除指标',
       content: '您确认要删除该指标吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteMetric({ metricCode: fileCode })
           .then((res) => {

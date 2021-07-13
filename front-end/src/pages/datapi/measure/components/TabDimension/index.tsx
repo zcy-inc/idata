@@ -121,6 +121,7 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', tabKey, fil
     confirm({
       title: '删除维度',
       content: '您确认要删除该维度吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteDimension({ dimensionCode: fileCode })
           .then((res) => {

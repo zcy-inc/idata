@@ -108,6 +108,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', tabKey, fileC
     confirm({
       title: '删除修饰词',
       content: '您确认要删除该修饰词吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteModifier({ modifierCode: fileCode })
           .then((res) => {

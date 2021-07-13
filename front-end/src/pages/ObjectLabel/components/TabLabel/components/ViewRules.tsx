@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { Modal, Collapse, Space, Tabs, Button } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
+import styles from '../../../index.less';
 
 import { RuleLayer } from '@/types/objectlabel';
 import { ConditionMap } from '../constants';
@@ -18,6 +19,7 @@ const { Panel } = Collapse;
 const ViewRules: FC<ViewRulesProps> = ({ layers, visible, onCancel }) => {
   return (
     <Modal
+      className={styles['reset-modal']}
       title="查看规则"
       visible={visible}
       onCancel={onCancel}

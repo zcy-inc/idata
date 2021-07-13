@@ -126,6 +126,14 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       .catch((err) => {});
   };
 
+  const getCopyName = (name: string, i: number): string => {
+    if (layers.findIndex((layer) => layer.layerName === `${name}${i}`) > -1) {
+      return getCopyName(name, i + 1);
+    } else {
+      return `${name}${i}`;
+    }
+  };
+
   const onMenuAction = (key: ActionKey, i: number) => {
     if (key === 'delete') {
       layers.splice(i, 1);
@@ -135,7 +143,11 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     if (key === 'copy') {
       const copy = cloneDeep(layers[i]);
       copy.layerId = Date.now();
-      copy.layerName = `${copy.layerName}_cpoy`;
+      if (layers.findIndex((layer) => layer.layerName === `${copy.layerName}_cpoy`) > -1) {
+        copy.layerName = getCopyName(`${copy.layerName}_cpoy`, 2);
+      } else {
+        copy.layerName = `${copy.layerName}_cpoy`;
+      }
       layers.push(copy);
       setLayers([...layers]);
       setActiveKey(layers.length - 1);

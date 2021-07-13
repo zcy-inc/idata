@@ -95,6 +95,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
     confirm({
       title: '删除标签',
       content: '您确认要删除该标签吗？',
+      autoFocusButton: null,
       onOk: () =>
         delLabel({ labelCode })
           .then((res) => {
