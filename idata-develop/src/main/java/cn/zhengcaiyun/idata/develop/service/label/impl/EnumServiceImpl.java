@@ -141,17 +141,17 @@ public class EnumServiceImpl implements EnumService {
     private void createOrEditEnumValue(EnumValueDto enumValueDto, String operator) {
         checkArgument(isNotEmpty(enumValueDto.getEnumValue()), "enumValue不能为空");
         checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
-        DevEnumValue exitEnumValue = devEnumValueDao.selectOne(c ->
+        DevEnumValue existEnumValue = devEnumValueDao.selectOne(c ->
                 c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
                         and(devEnumValue.del, isNotEqualTo(1))))
                 .orElse(null);
-        if (exitEnumValue == null) {
+        if (existEnumValue == null) {
             enumValueDto.setCreator(operator);
             devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
                     "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
         }
         else {
-            enumValueDto.setId(exitEnumValue.getId());
+            enumValueDto.setId(existEnumValue.getId());
             enumValueDto.setEditor(operator);
             devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
                     "id", "editor", "enumValue", "enumAttributes", "parentCode"));

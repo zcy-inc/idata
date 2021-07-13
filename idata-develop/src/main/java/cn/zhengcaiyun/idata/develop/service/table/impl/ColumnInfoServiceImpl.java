@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.tableId;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -294,8 +295,22 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 columnInfo.getColumnName())
                 .orElse(null);
         if (checkForeignKey != null) {
-            throw new IllegalArgumentException("字段被表" + checkForeignKey.getTableId() + "外键字段依赖，不能删除");
+            throw new IllegalArgumentException(columnInfo.getColumnName() + "字段被表" + checkForeignKey.getTableId() + "外键字段依赖，不能删除");
         }
+        // 校验指标系统依赖
+        Map<String, List<DevLabel>> measureColumnMap = devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(columnInfo.getTableId())),
+                        and(devLabelDefine.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name()),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
+                .build().render(RenderingStrategies.MYBATIS3))
+                .stream().collect(Collectors.groupingBy(DevLabel::getColumnName));
+        checkArgument(!measureColumnMap.containsKey(columnInfo.getColumnName()),
+                labelService.findDefine(measureColumnMap.get(columnInfo.getColumnName()).get(0).getLabelCode())
+                        .getLabelName() + "依赖" + columnInfo.getColumnName() + "字段，不能删除");
 
         // 删除字段表记录
         devColumnInfoDao.update(c -> c.set(devColumnInfo.del).equalTo(1)

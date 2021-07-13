@@ -35,12 +35,18 @@ public interface DevFolderMyDao {
                     "(@fileCode := null) AS fileCode, parent_id AS parentId, (@cid := concat('F_', id)) AS cid " +
                 "FROM dev_folder " +
                 "WHERE del = 0 " +
+                "<if test = 'treeNodeName != null'>" +
+                    "AND dev_folder.folder_name like '%${treeNodeName}%' " +
+                "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"TABLE\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +
                             "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_table_info.table_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"LABEL\") != -1'>" +
                     "UNION ALL " +
@@ -49,6 +55,9 @@ public interface DevFolderMyDao {
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag NOT LIKE 'DIMENSION%' AND label_tag NOT LIKE 'MODIFIER%' " +
                             "AND label_tag NOT LIKE '%METRIC%' " +
+                            "<if test = 'treeNodeName != null'>" +
+                                "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                            "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"ENUM\") != -1'>" +
                     "UNION ALL " +
@@ -56,6 +65,9 @@ public interface DevFolderMyDao {
                             "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
                         "FROM dev_enum " +
                         "WHERE del = 0 " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_enum.enum_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"DIMENSION\") != -1'>" +
                     "UNION ALL " +
@@ -63,6 +75,9 @@ public interface DevFolderMyDao {
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE 'DIMENSION_LABEL%' " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"MODIFIER\") != -1'>" +
                     "UNION ALL " +
@@ -70,6 +85,9 @@ public interface DevFolderMyDao {
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE 'MODIFIER_LABEL%' " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"METRIC\") != -1'>" +
                     "UNION ALL " +
@@ -77,6 +95,9 @@ public interface DevFolderMyDao {
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE '%_METRIC_LABEL%' " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType == null or \"\" == devTreeType'>" +
                     "UNION ALL " +
@@ -84,17 +105,26 @@ public interface DevFolderMyDao {
                             "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_table_info.table_name like '%${treeNodeName}%' " +
+                        "</if>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
                             "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 " +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                        "</if>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
                             "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
                         "FROM dev_enum " +
                         "WHERE del = 0" +
+                        "<if test = 'treeNodeName != null'>" +
+                            "AND dev_enum.enum_name like '%${treeNodeName}%' " +
+                        "</if>" +
                 "</if>" +
             "</script>")
-    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType);
+    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType, String treeNodeName);
 }

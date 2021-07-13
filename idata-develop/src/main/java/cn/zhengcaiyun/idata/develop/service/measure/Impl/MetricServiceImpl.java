@@ -349,8 +349,10 @@ public class MetricServiceImpl implements MetricService {
                 echoSpecialAttribute.setAtomicMetricCode(atomicMetric.getLabelCode());
                 echoSpecialAttribute.setAtomicMetricName(atomicMetric.getLabelName());
                 echoMetric.setSpecialAttribute(echoSpecialAttribute);
-                Long atomicTableId = labelService.findLabelsByCode(atomicMetric.getLabelCode()).get(0).getTableId();
-                echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicTableId));
+                List<LabelDto> atomicLabelList = labelService.findLabelsByCode(atomicMetric.getLabelCode());
+                if (atomicLabelList.size() > 0) {
+                    echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId()));
+                }
             }
         }
         return echoMetric;

@@ -19,10 +19,11 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
-import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
@@ -38,9 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -239,6 +243,10 @@ public class TableInfoServiceImpl implements TableInfoService {
                         tableInfo.getId(), columnNameList, operator);
                 echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
             }
+            else {
+                List<ForeignKeyDto> existForeignKeyList = foreignKeyService.getForeignKeys(tableInfoDto.getId());
+                existForeignKeyList.forEach(existForeignKey -> foreignKeyService.delete(existForeignKey.getId(), operator));
+            }
         }
 
         return echoTableInfoDto;
@@ -255,13 +263,21 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .orElse(null);
         checkArgument(tableInfo != null, "表不存在");
 
-        // 删除tableInfo表记录
-        devTableInfoDao.update(c -> c.set(devTableInfo.del).equalTo(1).set(devTableInfo.editor).equalTo(operator)
-                .where(devTableInfo.id, isEqualTo(tableId)));
+        // 校验指标系统依赖
+        List<DevLabel> measureList = devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)),
+                        and(devLabelDefine.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name()),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
+                .build().render(RenderingStrategies.MYBATIS3));
+        checkArgument(measureList.size() == 0,
+                labelService.findDefine(measureList.get(0).getLabelCode()).getLabelName() + "依赖该表，不能删除");
         // 删除label表记录
         List<LabelDto> tableLabelDtoList = labelService.findLabels(tableId, null);
-        boolean deleteSuccess = tableLabelDtoList.stream().allMatch(tableLabelDto ->
-                labelService.removeLabel(tableLabelDto, operator));
+        boolean deleteSuccess = tableLabelDtoList.stream().allMatch(tableLabelDto -> labelService.removeLabel(tableLabelDto, operator));
         // 删除columnInfo表记录
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
         deleteSuccess = deleteSuccess && columnInfoDtoList.stream().allMatch(columnInfoDto ->
@@ -270,6 +286,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ForeignKeyDto> foreignKeyDtoList = foreignKeyService.getForeignKeys(tableId);
         deleteSuccess = deleteSuccess && foreignKeyDtoList.stream().allMatch(foreignKeyDto ->
                 foreignKeyService.delete(foreignKeyDto.getId(), operator));
+        // 删除tableInfo表记录
+        devTableInfoDao.update(c -> c.set(devTableInfo.del).equalTo(1).set(devTableInfo.editor).equalTo(operator)
+                .where(devTableInfo.id, isEqualTo(tableId)));
 
         return deleteSuccess;
     }

@@ -27,7 +27,7 @@ import java.util.List;
  */
 
 public interface DevFolderService {
-    List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devFolderType);
+    List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devFolderType, String treeNodeName);
     List<DevelopFolderDto> getDevelopFolders(String folderName);
     DevelopFolderDto create(DevelopFolderDto developFolderDto, String operator);
     DevelopFolderDto edit(DevelopFolderDto developFolderDto, String operator);

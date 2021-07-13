@@ -46,6 +46,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport
 import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.DB_NAME_LABEL;
 import static cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum.checkSysLabelCode;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -321,6 +322,9 @@ public class LabelServiceImpl implements LabelService {
     public List<LabelDto> findLabels(Long tableId, String columnName) {
         List<LabelDto> echoLabelList = devLabelMyDao.selectLabelsBySubject(tableId, columnName);
         echoLabelList.forEach(labelDto -> {
+            if (isEmpty(labelDto.getLabelParamType())) {
+                return;
+            }
             if ("ENUM".equals(labelDto.getLabelParamType())) {
                 labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
             }

@@ -42,8 +42,9 @@ public class DevelopFolderController {
     private DevFolderService devFolderService;
 
     @GetMapping("devFolderTree")
-    public RestResult<List<DevelopFolderTreeNodeDto>> getDevFolderTree(@RequestParam(value = "devTreeType", required = false) String devTreeType) {
-        return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType));
+    public RestResult<List<DevelopFolderTreeNodeDto>> getDevFolderTree(@RequestParam(value = "devTreeType", required = false) String devTreeType,
+                                                                       @RequestParam(value = "treeNodeName", required = false) String treeNodeName) {
+        return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType, treeNodeName));
     }
 
     @GetMapping("devFolders")
