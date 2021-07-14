@@ -1,8 +1,9 @@
+import { TreeNodeType } from '@/constants/datapi';
 import { Table } from '@/types/datapi';
 import { request } from 'umi';
 
 // 树 获取
-export async function getFolderTree(params: { devTreeType: 'TABLE' | 'LABEL' | 'ENUM' }) {
+export async function getFolderTree(params: { devTreeType: TreeNodeType; treeNodeName?: string }) {
   return request('/api/p1/dev/devFolderTree', { method: 'GET', params });
 }
 // 树 获取平铺的文件夹目录

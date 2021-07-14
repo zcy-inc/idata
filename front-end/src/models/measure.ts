@@ -44,9 +44,9 @@ export default () => {
   const [activeTab, setActiveTab] = useState('');
 
   // 获取树
-  const getTree = (devTreeType: TreeNodeType) => {
+  const getTree = (devTreeType: TreeNodeType, treeNodeName?: string) => {
     setTreeType(devTreeType);
-    getFolderTree({ devTreeType }).then((res) => {
+    getFolderTree({ devTreeType, treeNodeName }).then((res) => {
       setTree(res.data);
     });
   };

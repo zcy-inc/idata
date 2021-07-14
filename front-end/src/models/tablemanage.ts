@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getFolderTree } from '@/services/tablemanage';
+import { TreeNodeType } from '@/constants/datapi';
 
 export interface IPane {
   key: string;
@@ -22,7 +23,7 @@ const newTable = {
 };
 
 export default () => {
-  const [curTreeType, setCurTreeType] = useState<string>('TABLE'); // 当前树的类型
+  const [curTreeType, setCurTreeType] = useState<TreeNodeType>(TreeNodeType.TABLE); // 当前树的类型
   const [curFolder, setCurFolder] = useState<any>(); // 存储文件夹数据, 编辑的时候赋值
   const [folderMode, setFolderMode] = useState<'create' | 'edit'>('create');
   const [tree, setTree] = useState([]); // 当前树的数据
@@ -32,9 +33,9 @@ export default () => {
   const [curLabel, setCurLabel] = useState(''); // 用来判断新建和编辑
 
   // 获取树
-  const getTree = (devTreeType: any) => {
+  const getTree = (devTreeType: TreeNodeType, treeNodeName?: string) => {
     setCurTreeType(devTreeType);
-    getFolderTree({ devTreeType }).then((res) => {
+    getFolderTree({ devTreeType, treeNodeName }).then((res) => {
       setTree(res.data);
     });
   };
@@ -94,7 +95,7 @@ export default () => {
   };
 
   // 新建完成后替换该Tab的key
-  const replaceTab = (oldKey: string, newKey: string, title: string, treeType: string) => {
+  const replaceTab = (oldKey: string, newKey: string, title: string, treeType: TreeNodeType) => {
     let targetI = panes.findIndex((_) => _.key === oldKey);
     let newTab: IPane = {
       key: newKey,

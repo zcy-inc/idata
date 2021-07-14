@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
+import { debounce } from 'lodash';
 import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
 
@@ -30,7 +31,7 @@ const NodeTypeIcon = {
 };
 
 const FolderTree: FC<FolderTreeProps> = ({}) => {
-  const [searchValue, setSearchValue] = useState('');
+  // const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const flatTree = useRef<SearchTreeNode[]>([]);
@@ -140,7 +141,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     const n = data.length;
     return data.map((_, i) => {
       const { name, type, cid } = _;
-      const _i = name.indexOf(searchValue);
+      // const _i = name.indexOf(searchValue);
       const node: any = { ..._, key: cid };
       const clsFolderRoot = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
       const clsFolderMargin = ((type === 'FOLDER' || i === n - 1) && styles['folder-margin']) || '';
@@ -155,17 +156,17 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         _type = 'FOLDEROPEN';
       }
       // 给检索命中的title加高亮
-      if (_i > -1) {
-        const beforeStr = name.substring(0, _i);
-        const afterStr = name.substring(_i + searchValue?.length);
-        title = (
-          <span key="title" className={clsFolderRoot}>
-            {beforeStr}
-            <span className={styles['search-match']}>{searchValue}</span>
-            {afterStr}
-          </span>
-        );
-      }
+      // if (_i > -1) {
+      //   const beforeStr = name.substring(0, _i);
+      //   const afterStr = name.substring(_i + searchValue?.length);
+      //   title = (
+      //     <span key="title" className={clsFolderRoot}>
+      //       {beforeStr}
+      //       <span className={styles['search-match']}>{searchValue}</span>
+      //       {afterStr}
+      //     </span>
+      //   );
+      // }
       node.className = clsFolderMargin;
       node.title = [NodeTypeIcon[_type], title];
       parentId && (node.parentId = parentId);
@@ -192,18 +193,21 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   // 检索树
   const onFilterTree = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-    if (!value) {
-      setExpandedKeys([]);
-      setSearchValue('');
-      return;
-    }
-    const keys = flatTree.current
-      .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
-      .filter((_) => !!_);
-    setExpandedKeys(keys as Key[]);
-    setSearchValue(value);
-    setAutoExpandParent(true);
+    getTree(treeType, value);
+    // if (!value) {
+    //   setExpandedKeys([]);
+    //   setSearchValue('');
+    //   return;
+    // }
+    // const keys = flatTree.current
+    //   .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
+    //   .filter((_) => !!_);
+    // setExpandedKeys(keys as Key[]);
+    // setSearchValue(value);
+    // setAutoExpandParent(true);
   };
+
+  const deFilterTree = debounce(onFilterTree, 500);
 
   const onExpand = (keys: Key[] = []) => {
     setExpandedKeys(keys);
@@ -217,7 +221,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           className={styles['search-input']}
           placeholder="请输入关键字进行搜索"
           prefix={<IconFont type="icon-sousuo" />}
-          onChange={onFilterTree}
+          onChange={deFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
           <IconFont
