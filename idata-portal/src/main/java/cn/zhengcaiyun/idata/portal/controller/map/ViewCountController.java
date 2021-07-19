@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.map;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.map.dto.ViewCountDto;
+import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
 import cn.zhengcaiyun.idata.map.service.ViewCountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,6 +70,6 @@ public class ViewCountController {
     @GetMapping("/user/pop")
     public RestResult<List<ViewCountDto>> popRankingOfUser(@RequestParam(value = "entitySource") String entitySource,
                                                            @RequestParam(value = "topNum") Integer topNum) {
-        return RestResult.success(viewCountService.getTopCountEntityForUser(entitySource, topNum, OperatorContext.getCurrentOperator()));
+        return RestResult.success(viewCountService.getUserTopCountEntity(entitySource, topNum, OperatorContext.getCurrentOperator()));
     }
 }

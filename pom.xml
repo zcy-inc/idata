@@ -60,7 +60,9 @@
         <fastjson.version>1.2.46</fastjson.version>
         <okhttp3.version>4.2.2</okhttp3.version>
         <poi.version>4.1.2</poi.version>
-        <presto-jdbc.version>333</presto-jdbc.version>
+        <presto-jdbc.version>346</presto-jdbc.version>
+        <hive-jdbc.version>2.1.1</hive-jdbc.version>
+        <antlr.version>4.7.2</antlr.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -103,6 +105,22 @@
                 <groupId>io.prestosql</groupId>
                 <artifactId>presto-jdbc</artifactId>
                 <version>${presto-jdbc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hive</groupId>
+                <artifactId>hive-jdbc</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-slf4j-impl</artifactId>
+                    </exclusion>
+                </exclusions>
+                <version>${hive-jdbc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr.version}</version>
             </dependency>
 
         </dependencies>

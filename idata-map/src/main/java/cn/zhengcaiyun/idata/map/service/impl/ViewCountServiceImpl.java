@@ -18,25 +18,30 @@
 package cn.zhengcaiyun.idata.map.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.map.dal.dao.ViewCountDao;
+import cn.zhengcaiyun.idata.map.bean.condition.ViewCountCond;
+import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
+import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
+import cn.zhengcaiyun.idata.map.constant.Constants;
 import cn.zhengcaiyun.idata.map.dal.model.ViewCount;
-import cn.zhengcaiyun.idata.map.dto.ViewCountDto;
+import cn.zhengcaiyun.idata.map.dal.repo.ViewCountRepo;
+import cn.zhengcaiyun.idata.map.manager.DataEntityManager;
 import cn.zhengcaiyun.idata.map.service.ViewCountService;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
-import static cn.zhengcaiyun.idata.map.dal.dao.ViewCountDynamicSqlSupport.VIEW_COUNT;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @description: 用户浏览次数统计
@@ -46,25 +51,28 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 @Service
 public class ViewCountServiceImpl implements ViewCountService {
 
+    private final ViewCountRepo viewCountRepo;
+    private final DataEntityManager dataEntityManager;
+
     @Autowired
-    private ViewCountDao countDao;
+    public ViewCountServiceImpl(ViewCountRepo viewCountRepo, DataEntityManager dataEntityManager) {
+        this.viewCountRepo = viewCountRepo;
+        this.dataEntityManager = dataEntityManager;
+    }
 
     @Override
     public Long increase(Long userId, String entitySource, String entityCode, String operator) {
         checkArgument(isNotEmpty(userId), "用户编号不能为空");
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
         checkArgument(isNotEmpty(entityCode), "请求参数不能为空");
-        List<ViewCount> viewCounts = countDao.select(dsl -> dsl.where(VIEW_COUNT.userId, isEqualTo(userId),
-                and(VIEW_COUNT.entitySource, isEqualTo(entitySource)),
-                and(VIEW_COUNT.entityCode, isEqualTo(entityCode)),
-                and(VIEW_COUNT.del, isEqualTo(DEL_NO.val)))
-                .orderBy(VIEW_COUNT.id.descending()).limit(1));
+        Optional<ViewCount> viewCountOptional = viewCountRepo.queryUserViewCount(userId, entitySource, entityCode);
         ViewCount viewCount;
-        if (isEmpty(viewCounts)) {
-            viewCount = createViewCount(userId, entitySource, entityCode, operator);
+        if (viewCountOptional.isPresent()) {
+            viewCount = viewCountOptional.get();
+            viewCountRepo.updateViewCount(viewCount.getId(), viewCount.getViewCount() + 1);
         } else {
-            viewCount = viewCounts.get(0);
-            increaseViewCount(viewCount.getId(), viewCount.getViewCount());
+            viewCount = assembleViewCount(userId, entitySource, entityCode, operator);
+            viewCountRepo.createViewCount(viewCount);
         }
         return viewCount.getId();
     }
@@ -73,52 +81,63 @@ public class ViewCountServiceImpl implements ViewCountService {
     public List<ViewCountDto> getTopCountEntity(String entitySource, Integer topNum) {
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
         // 查询数据源下全局排行，userId传0L
-        List<ViewCount> viewCountList = queryTopByViewCount(0L, entitySource, firstNonNull(topNum, 10));
-        return toDto(viewCountList);
+        List<ViewCount> viewCountList = viewCountRepo.queryEntityWithOrderedCount(0L, entitySource, firstNonNull(topNum, 10));
+        if (isEmpty(viewCountList)) return Lists.newArrayList();
+
+        List<String> entityCodes = viewCountList.stream()
+                .map(ViewCount::getEntityCode).collect(Collectors.toList());
+        Map<String, DataEntityDto> entityNameMap = dataEntityManager.getDataEntityMap(entitySource, entityCodes);
+        return assembleEntityName(copyToDto(viewCountList), entityNameMap);
     }
 
     @Override
-    public List<ViewCountDto> getTopCountEntityForUser(String entitySource, Integer topNum, Operator operator) {
+    public List<ViewCountDto> getUserTopCountEntity(String entitySource, Integer topNum, Operator operator) {
         checkArgument(isNotEmpty(entitySource), "请求参数不能为空");
-        List<ViewCount> viewCountList = queryTopByViewCount(operator.getId(), entitySource, firstNonNull(topNum, 10));
-        return toDto(viewCountList);
+        List<ViewCount> viewCountList = viewCountRepo.queryEntityWithOrderedCount(operator.getId(), entitySource, firstNonNull(topNum, 10));
+        if (isEmpty(viewCountList)) return Lists.newArrayList();
+
+        List<String> entityCodes = viewCountList.stream()
+                .map(ViewCount::getEntityCode).collect(Collectors.toList());
+        Map<String, DataEntityDto> entityNameMap = dataEntityManager.getDataEntityMap(entitySource, entityCodes);
+        return assembleEntityName(copyToDto(viewCountList), entityNameMap);
     }
 
-    private List<ViewCountDto> toDto(List<ViewCount> viewCountList) {
-        return viewCountList.stream().map(this::toDto).collect(Collectors.toList());
+    @Override
+    public List<ViewCountDto> queryViewCount(ViewCountCond cond) {
+        List<ViewCount> viewCountList = viewCountRepo.queryViewCount(cond);
+        if (ObjectUtils.isEmpty(viewCountList))
+            return Lists.newLinkedList();
+        return copyToDto(viewCountList);
     }
 
-    private ViewCountDto toDto(ViewCount viewCount) {
+    private List<ViewCountDto> copyToDto(List<ViewCount> viewCountList) {
+        return viewCountList.stream().map(this::copyToDto).collect(Collectors.toList());
+    }
+
+    private ViewCountDto copyToDto(ViewCount viewCount) {
         ViewCountDto dto = new ViewCountDto();
         BeanUtils.copyProperties(viewCount, dto);
-
-        //todo 补充 entityName
         return dto;
     }
 
-    private List<ViewCount> queryTopByViewCount(Long userId, String entitySource, Integer topNum) {
-        return countDao.select(dsl -> dsl.where(VIEW_COUNT.userId, isEqualTo(userId),
-                and(VIEW_COUNT.entitySource, isEqualTo(entitySource)),
-                and(VIEW_COUNT.del, isEqualTo(DEL_NO.val)))
-                .orderBy(VIEW_COUNT.viewCount.descending())
-                .limit(topNum).offset(0L));
+    public List<ViewCountDto> assembleEntityName(List<ViewCountDto> countDtoList, Map<String, DataEntityDto> entityNameMap) {
+        return countDtoList.stream().map(countDto -> {
+            DataEntityDto entityDto = entityNameMap.get(countDto.getEntityCode());
+            String entityName = isNotEmpty(entityDto) ? entityDto.getEntityName() : null;
+            countDto.setEntityName(firstNonNull(entityName, ""));
+            return countDto;
+        }).collect(Collectors.toList());
     }
 
-    private int increaseViewCount(Long id, long increasedCount) {
-        return countDao.update(dsl -> dsl.set(VIEW_COUNT.viewCount).equalTo(increasedCount)
-                .where(VIEW_COUNT.id, isEqualTo(id)));
-    }
-
-    private ViewCount createViewCount(Long userId, String entitySource, String entityCode, String operator) {
+    private ViewCount assembleViewCount(Long userId, String entitySource, String entityCode, String operator) {
         ViewCount viewCount = new ViewCount();
         viewCount.setEntitySource(entitySource);
         viewCount.setEntityCode(entityCode);
         viewCount.setUserId(userId);
-        viewCount.setViewCount(1L);
+        viewCount.setViewCount(Constants.VIEW_COUNT_START);
         viewCount.setCreator(operator);
         viewCount.setDel(DEL_NO.val);
         viewCount.setEditor(operator);
-        countDao.insert(viewCount);
         return viewCount;
     }
 

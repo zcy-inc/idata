@@ -15,43 +15,20 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.map.dto;
+package cn.zhengcaiyun.idata.map.spi.entity;
 
-import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
+import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
+
+import java.util.List;
 
 /**
- * @description: 浏览记录次数dto
+ * @description:
  * @author: yangjianhua
- * @create: 2021-07-09 14:22
+ * @create: 2021-07-14 15:40
  **/
-public class ViewCountDto extends BaseDto {
-    /**
-     * 主键
-     */
-    private Long id;
+public interface DataEntitySupplier<T extends DataSearchCond, R extends DataEntityDto> {
+    List<R> supply(T t);
 
-    /**
-     * 实体记录唯一标识
-     */
-    private String entityCode;
-
-    /**
-     * 实体记录唯一标识
-     */
-    private String entityName;
-
-    /**
-     * 实体记录数据源：数仓表（table） or 数据指标（indicator）
-     */
-    private String entitySource;
-
-    /**
-     * 用户编号，0表示全局所有用户的统计数据
-     */
-    private Long userId;
-
-    /**
-     * 浏览次数
-     */
-    private Long viewCount;
+    List<R> supply(List<String> entityCodes);
 }

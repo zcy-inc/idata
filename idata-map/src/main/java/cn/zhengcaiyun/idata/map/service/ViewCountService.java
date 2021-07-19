@@ -18,7 +18,8 @@
 package cn.zhengcaiyun.idata.map.service;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.map.dto.ViewCountDto;
+import cn.zhengcaiyun.idata.map.bean.condition.ViewCountCond;
+import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
 
 import java.util.List;
 
@@ -57,5 +58,13 @@ public interface ViewCountService {
      * @param operator     当前操作人
      * @return 浏览次数对象
      */
-    List<ViewCountDto> getTopCountEntityForUser(String entitySource, Integer topNum, Operator operator);
+    List<ViewCountDto> getUserTopCountEntity(String entitySource, Integer topNum, Operator operator);
+
+    /**
+     * 查询浏览次数
+     *
+     * @param cond
+     * @return
+     */
+    List<ViewCountDto> queryViewCount(ViewCountCond cond);
 }
