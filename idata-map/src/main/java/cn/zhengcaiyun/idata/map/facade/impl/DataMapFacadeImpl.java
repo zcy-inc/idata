@@ -32,6 +32,7 @@ import cn.zhengcaiyun.idata.map.facade.DataMapFacade;
 import cn.zhengcaiyun.idata.map.manager.CategoryManager;
 import cn.zhengcaiyun.idata.map.manager.DataEntityManager;
 import cn.zhengcaiyun.idata.map.service.ViewCountService;
+import cn.zhengcaiyun.idata.map.util.DataEntityUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
@@ -41,7 +42,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
@@ -77,11 +77,13 @@ public class DataMapFacadeImpl implements DataMapFacade {
         // 数据量小于1000时，查询浏览次数带上实体code，减少查询量；大于1000时，直接查询全量浏览次数统计数据
         List<String> entityCodes = null;
         if (entityDtoList.size() <= 1000) {
-            entityCodes = getEntityCode(entityDtoList);
+            entityCodes = DataEntityUtil.getEntityCode(entityDtoList);
         }
         Map<String, Long> seqMap = getEntitySeq(condition.getSource(), entityCodes, viewCountService::queryViewCount);
-        List<DataEntityDto> seqEntityList = sequencedEntity(entityDtoList, seqMap);
-        return PaginationInMemory.of(seqEntityList).paging(pageParam);
+        List<DataEntityDto> seqEntityList = assembleSequence(entityDtoList, seqMap);
+        Page<DataEntityDto> entityPage = PaginationInMemory.of(seqEntityList).paging(pageParam);
+        entityPage.setContent(dataEntityManager.getEntityExtraInfo(condition.getSource(), entityPage.getContent()));
+        return entityPage;
     }
 
     @Override
@@ -90,8 +92,8 @@ public class DataMapFacadeImpl implements DataMapFacade {
         return TreeNodeHelper.withExpandedNodes(treeNodeDtoList).makeTree(() -> "");
     }
 
-    public List<DataEntityDto> sequencedEntity(List<DataEntityDto> entityDtoList,
-                                               Map<String, Long> seqMap) {
+    private List<DataEntityDto> assembleSequence(List<DataEntityDto> entityDtoList,
+                                                 Map<String, Long> seqMap) {
         entityDtoList.stream()
                 .forEach(entityDto -> entityDto.setViewCount(seqMap.get(entityDto.getEntityCode())));
         return entityDtoList;
@@ -107,12 +109,6 @@ public class DataMapFacadeImpl implements DataMapFacade {
             viewCounts.stream()
                     .forEach(viewCount -> seqMap.put(viewCount.getEntityCode(), viewCount.getViewCount()));
         return seqMap;
-    }
-
-    private List<String> getEntityCode(List<DataEntityDto> entityDtoList) {
-        return entityDtoList.stream()
-                .map(entityDto -> entityDto.getEntityCode())
-                .collect(Collectors.toList());
     }
 
 }

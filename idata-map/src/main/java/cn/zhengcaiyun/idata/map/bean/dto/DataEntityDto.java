@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.map.bean.dto;
 
+import com.google.common.collect.Maps;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -58,7 +59,7 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
     /**
      * 更多属性
      */
-    private Map<String, Object> moreAttrs;
+    private final Map<String, Object> moreAttrs = Maps.newHashMap();
 
     public String getEntityCode() {
         return entityCode;
@@ -120,8 +121,9 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
         return moreAttrs;
     }
 
-    public void setMoreAttrs(Map<String, Object> moreAttrs) {
-        this.moreAttrs = moreAttrs;
+    public DataEntityDto putMoreAttr(String attrKey, Object attrVal) {
+        this.moreAttrs.put(attrKey, attrVal);
+        return this;
     }
 
     @Override

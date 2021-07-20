@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.map.bean.condition;
 
+import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+
 import java.util.List;
 
 /**
@@ -110,5 +112,13 @@ public class DataSearchCond {
 
     public void setKeyWords(List<String> keyWords) {
         this.keyWords = keyWords;
+    }
+
+    public boolean searchFromTable() {
+        return EntitySourceEnum.TABLE.getCode().equals(this.source);
+    }
+
+    public boolean searchFromIndicator() {
+        return EntitySourceEnum.INDICATOR.getCode().equals(this.source);
     }
 }

@@ -17,15 +17,13 @@
 
 package cn.zhengcaiyun.idata.portal.controller.map;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
 import cn.zhengcaiyun.idata.map.service.ViewCountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -47,6 +45,15 @@ public class ViewCountController {
         this.viewCountService = viewCountService;
     }
 
+    @PostMapping("/log")
+    public RestResult<String> logUserView(@RequestParam(value = "entitySource") String entitySource,
+                                          @RequestParam(value = "entityCode") String entityCode) {
+        Operator operator = OperatorContext.getCurrentOperator();
+        viewCountService.increase(0L, entitySource, entityCode, operator.getNickname());
+        viewCountService.increase(operator.getId(), entitySource, entityCode, operator.getNickname());
+        return RestResult.success();
+    }
+
     /**
      * 全局热门排行
      *
@@ -54,8 +61,8 @@ public class ViewCountController {
      * @param topNum       查询排行记录数
      * @return 热门排行数据
      */
-    @GetMapping("/pop")
-    public RestResult<List<ViewCountDto>> popRanking(@RequestParam(value = "entitySource") String entitySource,
+    @GetMapping("/hot")
+    public RestResult<List<ViewCountDto>> hotRanking(@RequestParam(value = "entitySource") String entitySource,
                                                      @RequestParam(value = "topNum") Integer topNum) {
         return RestResult.success(viewCountService.getTopCountEntity(entitySource, topNum));
     }
@@ -67,8 +74,8 @@ public class ViewCountController {
      * @param topNum       查询排行记录数
      * @return 热门排行数据
      */
-    @GetMapping("/user/pop")
-    public RestResult<List<ViewCountDto>> popRankingOfUser(@RequestParam(value = "entitySource") String entitySource,
+    @GetMapping("/user/hot")
+    public RestResult<List<ViewCountDto>> hotRankingOfUser(@RequestParam(value = "entitySource") String entitySource,
                                                            @RequestParam(value = "topNum") Integer topNum) {
         return RestResult.success(viewCountService.getUserTopCountEntity(entitySource, topNum, OperatorContext.getCurrentOperator()));
     }

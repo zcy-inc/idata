@@ -15,42 +15,24 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.map.spi.entity;
+package cn.zhengcaiyun.idata.map.manager;
 
-import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
-import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
-import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 
 /**
- * @description: 获取表实体数据
+ * @description:
  * @author: yangjianhua
- * @create: 2021-07-14 15:56
+ * @create: 2021-07-20 15:07
  **/
 @Component
-public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCond, DataEntityDto> {
+public class TableManager {
 
-    @PostConstruct
-    public void register() {
-        DataEntitySupplierFactory.register(EntitySourceEnum.INDICATOR.getCode(), this);
-    }
-
-    @Override
-    public List<DataEntityDto> supply(DataSearchCond condition) {
+    public Map<String, List<ColumnAttrDto>> getTableColumnInfo(List<String> tableIds) {
+        // todo
         return null;
-    }
-
-    @Override
-    public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
-        return null;
-    }
-
-    @Override
-    public List<DataEntityDto> getExtraInfo(List<DataEntityDto> entities) {
-        // 无额外信息添加，透传entities
-        return entities;
     }
 }

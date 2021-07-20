@@ -15,22 +15,23 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.map.spi.entity;
+package cn.zhengcaiyun.idata.map.util;
 
-import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-14 15:40
+ * @create: 2021-07-20 15:50
  **/
-public interface DataEntitySupplier<T extends DataSearchCond, R extends DataEntityDto> {
-    List<R> supply(T t);
+public class DataEntityUtil {
 
-    List<R> getDataEntity(List<String> entityCodes);
-
-    List<R> getExtraInfo(List<DataEntityDto> entities);
+    public static List<String> getEntityCode(List<DataEntityDto> entityDtoList) {
+        return entityDtoList.stream()
+                .map(entityDto -> entityDto.getEntityCode())
+                .collect(Collectors.toList());
+    }
 }

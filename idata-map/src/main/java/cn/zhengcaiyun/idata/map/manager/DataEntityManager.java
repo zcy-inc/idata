@@ -51,9 +51,8 @@ public class DataEntityManager {
 
     public List<DataEntityDto> getDataEntity(String entitySource, List<String> entityCodes) {
         checkArgument(isNotEmpty(entitySource), "业务源标识不能为空");
-        checkArgument(isNotEmpty(entityCodes), "业务标识不能为空");
         DataEntitySupplier supplier = dataEntitySupplierFactory.getSupplier(entitySource);
-        return supplier.supply(entityCodes);
+        return supplier.getDataEntity(entityCodes);
     }
 
     public List<DataEntityDto> getDataEntity(String entitySource, DataSearchCond condition) {
@@ -70,5 +69,11 @@ public class DataEntityManager {
         }
         return entityDtoList.stream()
                 .collect(Collectors.toMap(DataEntityDto::getEntityCode, Function.identity()));
+    }
+
+    public List<DataEntityDto> getEntityExtraInfo(String entitySource, List<DataEntityDto> entities) {
+        checkArgument(isNotEmpty(entitySource), "业务源标识不能为空");
+        DataEntitySupplier supplier = dataEntitySupplierFactory.getSupplier(entitySource);
+        return supplier.getExtraInfo(entities);
     }
 }
