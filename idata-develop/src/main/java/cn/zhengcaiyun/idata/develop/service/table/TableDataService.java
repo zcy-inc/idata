@@ -14,31 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
 
 /**
- * @author caizhedong
- * @date 2021-05-25 16:07
- */
-
-public interface TableInfoService {
-    TableInfoDto getTableInfo(Long tableId);
-    List<TableInfoDto> getTables(String database);
-    List<LabelDto> getDbNames();
-    TableInfoDto create(TableInfoDto tableInfoDto, String creator);
-    TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
-    boolean delete(Long tableId, String editor);
-
-    /**
-     * 获取表技术相关信息
-     * @param tableId
-     * @return
-     */
-    TableTechInfoDto getTableTechInfo(Long tableId);
+ * @description: 查询表数据
+ * @author: yangjianhua
+ * @create: 2021-07-20 13:59
+ **/
+public interface TableDataService {
+    TableDataDto getTableData(Long tableId);
 }

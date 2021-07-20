@@ -17,6 +17,8 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.api.MetadataFetchApi;
+import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
@@ -67,6 +69,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private DevLabelDao devLabelDao;
     @Autowired
     private ForeignKeyService foreignKeyService;
+    @Autowired
+    private MetadataFetchApi metadataFetchApi;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -272,6 +276,14 @@ public class TableInfoServiceImpl implements TableInfoService {
                 foreignKeyService.delete(foreignKeyDto.getId(), operator));
 
         return deleteSuccess;
+    }
+
+    @Override
+    public TableTechInfoDto getTableTechInfo(Long tableId) {
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
+                and(devTableInfo.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("表不存在"));
+        return metadataFetchApi.getTableTechInfo(getDbName(tableId), tableInfo.getTableName());
     }
 
     private String getDbName(Long tableId) {

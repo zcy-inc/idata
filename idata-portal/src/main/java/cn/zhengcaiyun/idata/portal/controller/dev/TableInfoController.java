@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -82,5 +83,10 @@ public class TableInfoController {
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
                                   HttpServletRequest request) {
         return RestResult.success(tableInfoService.delete(tableId, tokenService.getNickname(request)));
+    }
+
+    @GetMapping("table/techInfo/{tableId}")
+    public RestResult<TableTechInfoDto> getTableTechInfo(@PathVariable("tableId") Long tableId){
+        return RestResult.success(tableInfoService.getTableTechInfo(tableId));
     }
 }
