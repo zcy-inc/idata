@@ -1,0 +1,55 @@
+package cn.zhengcaiyun.idata.connector.spi.presto;
+
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import org.springframework.stereotype.Service;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author shiyin(沐泽)
+ * @date 2020/11/20 23:04
+ */
+@Service
+public class PrestoService {
+
+    public TableDataDto previewTable(String jdbcUrl, String dbName, String tblName) {
+        TableDataDto tableDataDto = new TableDataDto();
+        List<ColumnInfoDto> meta = new ArrayList<>();
+        List<List<String>> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "presto", null);
+             Statement stmt = conn.createStatement();
+             ResultSet res = stmt.executeQuery("select * from \"" + dbName + "\".\""
+                     + tblName + "\"" + "limit 10")) {
+            int columnCount = res.getMetaData().getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                ColumnInfoDto columnDto = new ColumnInfoDto();
+                String colName = res.getMetaData().getColumnName(i);
+                columnDto.setColumnName(colName);
+                columnDto.setColumnType(res.getMetaData().getColumnTypeName(i));
+                meta.add(columnDto);
+            }
+            while (res.next()) {
+                List<String> record = new ArrayList<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    record.add(res.getString(i));
+                }
+                data.add(record);
+            }
+        } catch (SQLException e) {
+            throw new ExecuteSqlException("查询失败", e);
+        }
+        tableDataDto.setMeta(meta);
+        tableDataDto.setData(data);
+        return tableDataDto;
+    }
+
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+//        System.out.println(new PrestoService().previewTable("dwd", "dwd_browse_click_item_log_di"));
+        System.out.println(System.currentTimeMillis() - start);
+    }
+}
