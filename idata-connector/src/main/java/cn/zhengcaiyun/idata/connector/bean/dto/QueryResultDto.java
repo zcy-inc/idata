@@ -14,25 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package cn.zhengcaiyun.idata.connector.bean.dto;
 
-/**
- * @description:
- * @author: yangjianhua
- * @create: 2021-07-20 11:32
- **/
-public class TableTechInfoDto {
-    /**
-     * 表存储大小
-     */
-    private String tableSize;
 
-    public String getTableSize() {
-        return tableSize;
+import java.util.List;
+
+/**
+ * 查询数据结果dto
+ */
+public class QueryResultDto {
+    /**
+     * 查询结果字段信息
+     */
+    private List<ColumnInfoDto> meta;
+    /**
+     * 查询结果数据
+     */
+    private List<List<String>> data;
+    /**
+     * 总数
+     */
+    private Long total;
+
+    public List<ColumnInfoDto> getMeta() {
+        return meta;
     }
 
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
+    public void setMeta(List<ColumnInfoDto> meta) {
+        this.meta = meta;
+    }
+
+    public List<List<String>> getData() {
+        return data;
+    }
+
+    public void setData(List<List<String>> data) {
+        this.data = data;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
     }
 }

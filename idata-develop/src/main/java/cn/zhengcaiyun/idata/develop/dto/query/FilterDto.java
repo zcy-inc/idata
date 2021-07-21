@@ -15,24 +15,38 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.dto.query;
+
+import cn.zhengcaiyun.idata.connector.constant.enums.WideDataTypeEnum;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 17:00
  **/
-public class TableTechInfoDto {
+public class FilterDto extends ContinuousFilterDto {
     /**
-     * 表存储大小
+     * 字段名称
      */
-    private String tableSize;
+    private String columnName;
+    /**
+     * 数据类型
+     */
+    private WideDataTypeEnum dataType;
 
-    public String getTableSize() {
-        return tableSize;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public WideDataTypeEnum getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(WideDataTypeEnum dataType) {
+        this.dataType = dataType;
     }
 }

@@ -14,31 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.connector.bean.dto;
 
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.constant.enums;
 
 /**
- * 表查询数据
- */
-public class TableDataDto {
-    private List<ColumnInfoDto> meta;
-    private List<List<String>> data;
-
-    public List<ColumnInfoDto> getMeta() {
-        return meta;
-    }
-
-    public void setMeta(List<ColumnInfoDto> meta) {
-        this.meta = meta;
-    }
-
-    public List<List<String>> getData() {
-        return data;
-    }
-
-    public void setData(List<List<String>> data) {
-        this.data = data;
-    }
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-07-21 16:58
+ **/
+public enum StringMatchTypeEnum {
+    contains,
+    without,
+    startWith,
+    endWith,
+    isJust,
+    isNot;
 }

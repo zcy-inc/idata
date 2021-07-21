@@ -15,31 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.portal.controller.dev;
+package cn.zhengcaiyun.idata.develop.service.measure;
 
-import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
-import cn.zhengcaiyun.idata.develop.service.table.TableDataService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import cn.zhengcaiyun.idata.develop.dto.query.MeasureDataQueryDto;
 
 /**
- * @description:
+ * @description: 查询指标数据
  * @author: yangjianhua
- * @create: 2021-07-20 14:49
+ * @create: 2021-07-21 15:33
  **/
-@RestController
-@RequestMapping(path = "/p1/dev/table")
-public class TableDataController {
-
-    @Autowired
-    private TableDataService tableDataService;
-
-    @GetMapping("/data/{tableId}")
-    RestResult<QueryResultDto> getTableData(@PathVariable("tableId") Long tableId){
-        return RestResult.success(tableDataService.getTableData(tableId));
-    }
+public interface MeasureDataService {
+    /**
+     * 查询指标数据
+     *
+     * @param measureDataQueryDto
+     * @return
+     */
+    QueryResultDto queryMeasureData(MeasureDataQueryDto measureDataQueryDto);
 }

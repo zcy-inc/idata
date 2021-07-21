@@ -15,24 +15,36 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.dto.query;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 15:53
  **/
-public class TableTechInfoDto {
+public class OrderByDto {
     /**
-     * 表存储大小
+     * 排序字段名
      */
-    private String tableSize;
+    private String columnName;
+    /**
+     * 是否倒排序
+     */
+    private Boolean desc;
 
-    public String getTableSize() {
-        return tableSize;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public Boolean getDesc() {
+        return desc;
+    }
+
+    public void setDesc(Boolean desc) {
+        this.desc = desc;
     }
 }

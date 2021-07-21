@@ -17,8 +17,8 @@
 
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
-import cn.zhengcaiyun.idata.connector.api.DataFetchApi;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.api.DataQueryApi;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
@@ -39,7 +39,7 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class TableDataServiceImpl implements TableDataService {
 
     @Autowired
-    private DataFetchApi dataFetchApi;
+    private DataQueryApi dataQueryApi;
     @Autowired
     private DevLabelDao devLabelDao;
     @Autowired
@@ -48,11 +48,11 @@ public class TableDataServiceImpl implements TableDataService {
     private final String DB_NAME_LABEL = "dbName:LABEL";
 
     @Override
-    public TableDataDto getTableData(Long tableId) {
+    public QueryResultDto getTableData(Long tableId) {
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
                 and(devTableInfo.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("表不存在"));
-        return dataFetchApi.getTableData(getDbName(tableId), tableInfo.getTableName(), 10, 0);
+        return dataQueryApi.queryData(getDbName(tableId), tableInfo.getTableName(), 10, 0);
     }
 
     private String getDbName(Long tableId) {

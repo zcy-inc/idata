@@ -14,19 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.connector.bean.dto;
 
-package cn.zhengcaiyun.idata.connector.api;
 
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import java.util.List;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-07-20 11:43
- **/
-public interface DataFetchApi {
+ * 查询数据结果dto
+ */
+public class SingleColumnResultDto {
+    /**
+     * 查询结果字段信息
+     */
+    private ColumnInfoDto meta;
+    /**
+     * 查询结果数据
+     */
+    private List<String> data;
+    /**
+     * 总数
+     */
+    private Long total;
 
-    TableDataDto getTableData(String db, String table, long limit, long offset);
+    public ColumnInfoDto getMeta() {
+        return meta;
+    }
 
-    TableDataDto getTableData(String db, String table, String[] columns, long limit, long offset);
+    public void setMeta(ColumnInfoDto meta) {
+        this.meta = meta;
+    }
+
+    public List<String> getData() {
+        return data;
+    }
+
+    public void setData(List<String> data) {
+        this.data = data;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
+    }
 }

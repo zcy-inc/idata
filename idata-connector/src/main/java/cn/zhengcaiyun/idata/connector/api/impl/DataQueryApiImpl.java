@@ -17,30 +17,32 @@
 
 package cn.zhengcaiyun.idata.connector.api.impl;
 
-import cn.zhengcaiyun.idata.connector.api.MetadataFetchApi;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
-import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
+import cn.zhengcaiyun.idata.connector.api.DataQueryApi;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
+import cn.zhengcaiyun.idata.connector.spi.presto.PrestoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:50
+ * @create: 2021-07-20 11:49
  **/
 @Service
-public class MetadataFetchApiImpl implements MetadataFetchApi {
+public class DataQueryApiImpl implements DataQueryApi {
 
     @Autowired
-    private HiveService hiveService;
+    private PrestoService prestoService;
 
     @Override
-    public TableTechInfoDto getTableTechInfo(String db, String table) {
+    public QueryResultDto queryData(String db, String table, long limit, long offset) {
         String jdbcUrl = getConnectionCfg();
-        String tableSize = hiveService.getTableSize(jdbcUrl, db, table);
-        TableTechInfoDto techInfoDto = new TableTechInfoDto();
-        techInfoDto.setTableSize(tableSize);
-        return techInfoDto;
+        return prestoService.previewTable(jdbcUrl, db, table);
+    }
+
+    @Override
+    public QueryResultDto queryData(String db, String table, String[] columns, long limit, long offset) {
+        return null;
     }
 
     private String getConnectionCfg() {

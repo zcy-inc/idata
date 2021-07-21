@@ -14,30 +14,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.connector.bean.dto;
+
+package cn.zhengcaiyun.idata.develop.dto.query;
 
 import cn.zhengcaiyun.idata.connector.constant.enums.WideDataTypeEnum;
 
 /**
- * 字段信息
- */
-public class ColumnInfoDto {
+ * @description: 维度列
+ * @author: yangjianhua
+ * @create: 2021-07-21 16:29
+ **/
+public class DimColumnDto {
     /**
-     * 字段名称
+     * 表名
+     */
+    private String tableName;
+    /**
+     * 表别名
+     */
+    private String tableAlias;
+    /**
+     * 字段名
      */
     private String columnName;
     /**
-     * 字段类型（数据库具体类型）
+     * 字段别名
      */
-    private String columnType;
-    /**
-     * 字段描述
-     */
-    private String columnComment;
+    private String columnAlias;
     /**
      * 数据类型
      */
     private WideDataTypeEnum dataType;
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getTableAlias() {
+        return tableAlias;
+    }
+
+    public void setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+    }
 
     public String getColumnName() {
         return columnName;
@@ -47,20 +70,12 @@ public class ColumnInfoDto {
         this.columnName = columnName;
     }
 
-    public String getColumnType() {
-        return columnType;
+    public String getColumnAlias() {
+        return columnAlias;
     }
 
-    public void setColumnType(String columnType) {
-        this.columnType = columnType;
-    }
-
-    public String getColumnComment() {
-        return columnComment;
-    }
-
-    public void setColumnComment(String columnComment) {
-        this.columnComment = columnComment;
+    public void setColumnAlias(String columnAlias) {
+        this.columnAlias = columnAlias;
     }
 
     public WideDataTypeEnum getDataType() {

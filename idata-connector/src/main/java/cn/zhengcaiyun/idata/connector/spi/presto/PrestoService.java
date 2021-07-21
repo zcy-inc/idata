@@ -2,22 +2,18 @@ package cn.zhengcaiyun.idata.connector.spi.presto;
 
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author shiyin(沐泽)
- * @date 2020/11/20 23:04
- */
 @Service
 public class PrestoService {
 
-    public TableDataDto previewTable(String jdbcUrl, String dbName, String tblName) {
-        TableDataDto tableDataDto = new TableDataDto();
+    public QueryResultDto previewTable(String jdbcUrl, String dbName, String tblName) {
+        QueryResultDto queryResultDto = new QueryResultDto();
         List<ColumnInfoDto> meta = new ArrayList<>();
         List<List<String>> data = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, "presto", null);
@@ -42,9 +38,9 @@ public class PrestoService {
         } catch (SQLException e) {
             throw new ExecuteSqlException("查询失败", e);
         }
-        tableDataDto.setMeta(meta);
-        tableDataDto.setData(data);
-        return tableDataDto;
+        queryResultDto.setMeta(meta);
+        queryResultDto.setData(data);
+        return queryResultDto;
     }
 
     public static void main(String[] args) {

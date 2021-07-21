@@ -15,24 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.dto.query;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 16:41
  **/
-public class TableTechInfoDto {
-    /**
-     * 表存储大小
-     */
-    private String tableSize;
-
-    public String getTableSize() {
-        return tableSize;
-    }
-
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
-    }
+public class PillDto extends MeasureColumnDto{
 }

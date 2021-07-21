@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.connector.service;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
 import cn.zhengcaiyun.idata.connector.constant.enums.DataSourceEnum;
 import cn.zhengcaiyun.idata.connector.spi.presto.PrestoQuery;
@@ -57,7 +57,7 @@ public class QueryService implements Query {
     }
 
     @Override
-    public TableDataDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException {
+    public QueryResultDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException {
         return queryFactory.getQuery(connectionCfg.getDataSourceEnum())
                 .query(connectionCfg, selectSql);
     }

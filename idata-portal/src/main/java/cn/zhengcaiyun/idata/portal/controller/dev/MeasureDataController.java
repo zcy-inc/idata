@@ -19,27 +19,27 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
-import cn.zhengcaiyun.idata.develop.service.table.TableDataService;
+import cn.zhengcaiyun.idata.develop.dto.query.MeasureDataQueryDto;
+import cn.zhengcaiyun.idata.develop.service.measure.MeasureDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 14:49
+ * @create: 2021-07-21 18:57
  **/
 @RestController
-@RequestMapping(path = "/p1/dev/table")
-public class TableDataController {
-
+@RequestMapping(path = "/p1/dev/measure")
+public class MeasureDataController {
     @Autowired
-    private TableDataService tableDataService;
+    private MeasureDataService measureDataService;
 
-    @GetMapping("/data/{tableId}")
-    RestResult<QueryResultDto> getTableData(@PathVariable("tableId") Long tableId){
-        return RestResult.success(tableDataService.getTableData(tableId));
+    @PostMapping("/dataQuery")
+    RestResult<QueryResultDto> queryMeasureData(@RequestBody MeasureDataQueryDto measureDataQueryDto) {
+        return RestResult.success(measureDataService.queryMeasureData(measureDataQueryDto));
     }
 }

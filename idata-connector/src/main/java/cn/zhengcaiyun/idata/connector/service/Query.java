@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.connector.service;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
 
 import java.sql.Connection;
@@ -39,5 +39,5 @@ public interface Query {
 
     List<ColumnInfoDto> getColumns(ConnectionCfg connectionCfg, String schemaName, String tableName) throws SQLException;
 
-    TableDataDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException;
+    QueryResultDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException;
 }

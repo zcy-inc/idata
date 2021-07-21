@@ -15,24 +15,50 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.dto.query;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 16:56
  **/
-public class TableTechInfoDto {
+public class DiscreteFilterDto {
     /**
-     * 表存储大小
+     *
      */
-    private String tableSize;
+    private List<String> select;
+    /**
+     *
+     */
+    private List<String> unselect;
+    /**
+     * 字符串匹配条件
+     */
+    private List<StringMatchDto> match;
 
-    public String getTableSize() {
-        return tableSize;
+    public List<String> getSelect() {
+        return select;
     }
 
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
+    public void setSelect(List<String> select) {
+        this.select = select;
+    }
+
+    public List<String> getUnselect() {
+        return unselect;
+    }
+
+    public void setUnselect(List<String> unselect) {
+        this.unselect = unselect;
+    }
+
+    public List<StringMatchDto> getMatch() {
+        return match;
+    }
+
+    public void setMatch(List<StringMatchDto> match) {
+        this.match = match;
     }
 }

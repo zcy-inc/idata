@@ -17,7 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.service.table;
 
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 
 /**
  * @description: 查询表数据
@@ -25,5 +25,5 @@ import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
  * @create: 2021-07-20 13:59
  **/
 public interface TableDataService {
-    TableDataDto getTableData(Long tableId);
+    QueryResultDto getTableData(Long tableId);
 }

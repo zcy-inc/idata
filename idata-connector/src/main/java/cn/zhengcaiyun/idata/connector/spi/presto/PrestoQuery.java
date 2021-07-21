@@ -17,7 +17,7 @@
 package cn.zhengcaiyun.idata.connector.spi.presto;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
-import cn.zhengcaiyun.idata.connector.bean.dto.TableDataDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
 import cn.zhengcaiyun.idata.connector.constant.enums.PrestoDataTypeEnum;
 import cn.zhengcaiyun.idata.connector.constant.enums.SqlDataTypeEnum;
@@ -90,8 +90,8 @@ public class PrestoQuery implements Query {
     }
 
     @Override
-    public TableDataDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException {
-        TableDataDto queryResult = new TableDataDto();
+    public QueryResultDto query(ConnectionCfg connectionCfg, String selectSql) throws SQLException {
+        QueryResultDto queryResult = new QueryResultDto();
         List<ColumnInfoDto> meta = new ArrayList<>();
         List<List<String>> data = new ArrayList<>();
         try (Connection connection = getConnection(connectionCfg);

@@ -17,14 +17,16 @@
 
 package cn.zhengcaiyun.idata.connector.api;
 
-import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-07-20 11:43
  **/
-public interface MetadataFetchApi {
+public interface DataQueryApi {
 
-    TableTechInfoDto getTableTechInfo(String db, String table);
+    QueryResultDto queryData(String db, String table, long limit, long offset);
+
+    QueryResultDto queryData(String db, String table, String[] columns, long limit, long offset);
 }

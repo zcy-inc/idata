@@ -15,24 +15,18 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.constant.enums;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 16:40
  **/
-public class TableTechInfoDto {
-    /**
-     * 表存储大小
-     */
-    private String tableSize;
-
-    public String getTableSize() {
-        return tableSize;
-    }
-
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
-    }
+public enum AggregatorEnum {
+    SUM,
+    AVG,
+    MAX,
+    MIN,
+    CNT,
+    CNTD;
 }

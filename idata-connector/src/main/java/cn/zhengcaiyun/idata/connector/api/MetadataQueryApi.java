@@ -15,24 +15,16 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.connector.api;
+
+import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-20 11:43
  **/
-public class TableTechInfoDto {
-    /**
-     * 表存储大小
-     */
-    private String tableSize;
+public interface MetadataQueryApi {
 
-    public String getTableSize() {
-        return tableSize;
-    }
-
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
-    }
+    TableTechInfoDto getTableTechInfo(String db, String table);
 }

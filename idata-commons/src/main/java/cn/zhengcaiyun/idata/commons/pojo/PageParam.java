@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.commons.pojo;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -32,6 +34,12 @@ public class PageParam {
     private PageParam(Long limit, Long offset) {
         this.limit = limit;
         this.offset = offset;
+    }
+
+    public static PageParam of(Integer pageNo, Integer pageSize) {
+        long limit = checkLimit(firstNonNull(pageSize, 0).longValue());
+        long offset = (firstNonNull(pageNo, 1) - 1) * limit;
+        return new PageParam(checkLimit(limit), checkOffset(offset));
     }
 
     public static PageParam of(Long limit, Long offset) {

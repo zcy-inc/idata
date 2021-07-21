@@ -15,24 +15,26 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.bean.dto;
+package cn.zhengcaiyun.idata.develop.dto.query;
+
+import cn.zhengcaiyun.idata.develop.constant.enums.AggregatorEnum;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-07-20 11:32
+ * @create: 2021-07-21 16:37
  **/
-public class TableTechInfoDto {
+public class MeasureColumnDto extends DimColumnDto {
     /**
-     * 表存储大小
+     * 聚合方式
      */
-    private String tableSize;
+    private AggregatorEnum aggregator;
 
-    public String getTableSize() {
-        return tableSize;
+    public AggregatorEnum getAggregator() {
+        return aggregator;
     }
 
-    public void setTableSize(String tableSize) {
-        this.tableSize = tableSize;
+    public void setAggregator(AggregatorEnum aggregator) {
+        this.aggregator = aggregator;
     }
 }
