@@ -1,4 +1,3 @@
-// Generated from /Users/shiyin/Work/git/bigdata/server/idata-server/src/main/resources/SparkSql.g4 by ANTLR 4.7.2
 package cn.zhengcaiyun.idata.connector.parser.spark;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

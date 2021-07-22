@@ -1,4 +1,3 @@
-// Generated from /Users/shiyin/Work/git/bigdata/server/idata-server/src/main/java/cn/gov/zcy/idata/parser/hive/Hplsql.g4 by ANTLR 4.7.2
 package cn.zhengcaiyun.idata.connector.parser.hive;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 

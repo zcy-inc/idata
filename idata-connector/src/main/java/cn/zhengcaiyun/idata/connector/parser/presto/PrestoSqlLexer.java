@@ -1,4 +1,3 @@
-// Generated from /Users/shiyin/Work/git/bigdata/server/idata-server/src/main/resources/PrestoSql.g4 by ANTLR 4.7.2
 package cn.zhengcaiyun.idata.connector.parser.presto;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

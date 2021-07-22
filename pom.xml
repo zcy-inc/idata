@@ -61,7 +61,7 @@
         <okhttp3.version>4.2.2</okhttp3.version>
         <poi.version>4.1.2</poi.version>
         <presto-jdbc.version>346</presto-jdbc.version>
-        <hive-jdbc.version>2.1.1</hive-jdbc.version>
+        <hive-jdbc.version>2.3.9</hive-jdbc.version>
         <antlr.version>4.7.2</antlr.version>
     </properties>
     <dependencyManagement>
@@ -113,6 +113,10 @@
                     <exclusion>
                         <groupId>org.apache.logging.log4j</groupId>
                         <artifactId>log4j-slf4j-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>jdk.tools</groupId>
+                        <artifactId>jdk.tools</artifactId>
                     </exclusion>
                 </exclusions>
                 <version>${hive-jdbc.version}</version>
