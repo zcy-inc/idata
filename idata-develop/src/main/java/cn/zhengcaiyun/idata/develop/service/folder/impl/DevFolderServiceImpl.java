@@ -22,10 +22,10 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
-import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,8 +62,24 @@ public class DevFolderServiceImpl implements DevFolderService {
     private DevTableInfoDao devTableInfoDao;
 
     @Override
-    public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType) {
-        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType);
+    public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType, String treeNodeName) {
+        treeNodeName = isNotEmpty(treeNodeName) ? treeNodeName : null;
+        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType, treeNodeName);
+        List<Long> folderIdList = folderTreeList
+                .stream().filter(folderTree -> "FOLDER".equals(folderTree.getType())).collect(Collectors.toList())
+                .stream().map(DevelopFolderTreeNodeDto::getFolderId).collect(Collectors.toList());
+        List<DevFolder> folderList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)));
+        folderList.forEach(folder -> {
+            if (!folderIdList.contains(folder.getId())) {
+                DevelopFolderTreeNodeDto folderTreeNode = new DevelopFolderTreeNodeDto();
+                folderTreeNode.setName(folder.getFolderName());
+                folderTreeNode.setParentId(folder.getParentId());
+                folderTreeNode.setFolderId(folder.getId());
+                folderTreeNode.setType("FOLDER");
+                folderTreeNode.setCid("F_" + folder.getId());
+                folderTreeList.add(folderTreeNode);
+            }
+        });
         return getFolderTreeNodeList(null, true, folderTreeList);
     }
 
@@ -78,7 +94,10 @@ public class DevFolderServiceImpl implements DevFolderService {
                         echoFolderTreeNode.setChildren(getFolderTreeNodeList(folderTreeNode.getFolderId(), true, folderTreeNodeList));
                     }
                     return echoFolderTreeNode;
-                }).collect(Collectors.toList());
+                }).collect(Collectors.toList())
+                .stream().filter(developFolderTreeNode ->
+                        developFolderTreeNode.getChildren() == null || developFolderTreeNode.getChildren().size() > 0)
+                .collect(Collectors.toList());;
         return echo;
     }
 

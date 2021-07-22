@@ -19,7 +19,12 @@ interface EditDeriveProps {
 interface AtomicOption {
   label: string;
   value: string;
+}
+interface ModifierOption {
+  label: string;
+  value: string;
   enumCode: string;
+  disabled?: boolean;
 }
 interface DWD {
   id: Key;
@@ -34,6 +39,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
   const [DWDData, setDWDData] = useState<DWD[]>([]);
   const [DWDKeys, setDWDKeys] = useState<Key[]>([]);
   const [atomicOptions, setAtomicOptions] = useState<AtomicOption[]>([]);
+  const [modifierOptions, setModifierOptions] = useState<ModifierOption[]>([]);
   const [enumOptions, setEnumOptions] = useState<[][]>([]);
   const [form] = Form.useForm();
 
@@ -99,13 +105,14 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
             (labelAttribute) => labelAttribute.attributeKey === 'modifierEnum',
           )?.attributeValue,
         }));
-        setAtomicOptions(ops);
+        setModifierOptions(ops);
       })
       .catch((err) => {});
   };
 
   const getEnums = (labelCode: string, index: number) => {
-    const enumCode = atomicOptions.find((atomic) => (atomic.value = labelCode))?.enumCode as string;
+    const enumCode = modifierOptions.find((modifier) => (modifier.value = labelCode))
+      ?.enumCode as string;
     getEnumValues({ enumCode })
       .then((res) => {
         const ops = res.data.map((enumValue: EnumValue) => ({
@@ -128,11 +135,22 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
 
   const setValue = (schema: any, value: string) => {
     if (schema.dataIndex === 'modifierCode') {
-      getEnums(value, schema.index);
+      if (value) {
+        getEnums(value, schema.index);
+        // const i = modifierOptions.findIndex((item) => item.value === value);
+        // modifierOptions[i].disabled = true;
+      } else {
+        // const i = modifierOptions.findIndex(
+        //   (item) => item.value === DWDData[schema.index].modifierCode,
+        // );
+        // modifierOptions[i].disabled = false;
+      }
     }
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
+    // setModifierOptions([...modifierOptions]);
   };
+
   // 操作栏行为
   const onAction = (row: any, _: any) => {
     const i = DWDData.findIndex((_) => _.id === row.id);
@@ -151,7 +169,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
         <Select
           allowClear
           placeholder="请选择"
-          options={atomicOptions}
+          options={modifierOptions}
           onChange={(value) => setValue(schema, value as string)}
         />
       ),
@@ -194,6 +212,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
         />
       </ProForm>
       <EditableProTable
+        className={styles.reset}
         rowKey="id"
         columns={Cols}
         value={DWDData}

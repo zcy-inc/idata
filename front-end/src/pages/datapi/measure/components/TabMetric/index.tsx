@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Button, message, Popconfirm, Space } from 'antd';
+import { Button, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
@@ -13,14 +13,16 @@ import { LabelTag, TreeNodeType } from '@/constants/datapi';
 
 export interface TabMetricProps {
   initialMode: 'view' | 'edit';
+  tabKey: string;
   fileCode: string;
 }
 interface MetricExportProps {
   form: FormInstance;
   data: () => any;
 }
+const { confirm } = Modal;
 
-const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
+const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<Metric>();
@@ -113,7 +115,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
           if (fileCode === 'newMetric') {
             message.success('新建指标成功');
             replaceTab(
-              'newMetric',
+              tabKey,
               `L_${res.data.labelCode}`,
               res.data.labelName,
               TreeNodeType.METRIC_LABEL,
@@ -137,19 +139,25 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
   };
 
   const onDelete = () =>
-    deleteMetric({ metricCode: fileCode })
-      .then((res) => {
-        if (res.success) {
-          message.success('删除成功');
-          removeTab(`L_${data!.labelCode}`);
-          getTree(TreeNodeType.METRIC_LABEL);
-        }
-      })
-      .catch((err) => {});
+    confirm({
+      title: '删除指标',
+      content: '您确认要删除该指标吗？',
+      autoFocusButton: null,
+      onOk: () =>
+        deleteMetric({ metricCode: fileCode })
+          .then((res) => {
+            if (res.success) {
+              message.success('删除成功');
+              removeTab(`L_${data!.labelCode}`);
+              getTree(TreeNodeType.METRIC_LABEL);
+            }
+          })
+          .catch((err) => {}),
+    });
 
   const onCancel = () => {
     if (fileCode === 'newMetric') {
-      removeTab('newMetric');
+      removeTab(tabKey);
     } else {
       setMode('view');
       getMetricInfo(fileCode);
@@ -212,16 +220,9 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', fileCode }) => {
             <Button key="labelTag" onClick={switchStatus}>
               {transformLabelTagText(data?.labelTag as LabelTag)}
             </Button>
-            <Popconfirm
-              key="del"
-              title="您确认要删除该指标吗？"
-              onConfirm={onDelete}
-              okButtonProps={{ loading }}
-              okText="确认"
-              cancelText="取消"
-            >
-              <Button>删除</Button>
-            </Popconfirm>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
           </Space>
         )}
         {mode === 'edit' && (

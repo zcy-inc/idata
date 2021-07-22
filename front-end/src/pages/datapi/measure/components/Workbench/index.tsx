@@ -5,10 +5,10 @@ import type { FC } from 'react';
 import styles from '../../index.less';
 
 import { IconFont } from '@/components';
+import { TreeNodeType } from '@/constants/datapi';
 import TabDimension from '../TabDimension';
 import TabModifier from '../TabModifier';
 import TabMetric from '../TabMetric';
-import { TreeNodeType } from '@/constants/datapi';
 
 const { TabPane } = Tabs;
 
@@ -23,13 +23,12 @@ const Workbench: FC = ({}) => {
   const renderTab = (tab: any) => {
     switch (tab.type) {
       case TreeNodeType.DIMENSION_LABEL:
-        return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;
+        return <TabDimension initialMode={tab.mode} tabKey={tab.key} fileCode={tab.code} />;
       case TreeNodeType.MODIFIER_LABEL:
-        return <TabModifier initialMode={tab.mode} fileCode={tab.code} />;
+        return <TabModifier initialMode={tab.mode} tabKey={tab.key} fileCode={tab.code} />;
       case TreeNodeType.METRIC_LABEL:
-        return <TabMetric initialMode={tab.mode} fileCode={tab.code} />;
       default:
-        return <TabDimension initialMode={tab.mode} fileCode={tab.code} />;
+        return <TabMetric initialMode={tab.mode} tabKey={tab.key} fileCode={tab.code} />;
     }
   };
 

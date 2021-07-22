@@ -15,7 +15,7 @@ export interface ViewLabelProps {
 }
 
 const { Item } = Descriptions;
-const { Link } = Typography;
+const { Link, Text } = Typography;
 
 const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
@@ -125,7 +125,15 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
           }}
         >
           {layers.map((layer, i) => (
-            <Tabs.TabPane tab={layer.layerName} key={layer.layerId} style={{ marginTop: 16 }}>
+            <Tabs.TabPane
+              tab={
+                <Text ellipsis style={{ maxWidth: 88 }}>
+                  {layer.layerName}
+                </Text>
+              }
+              key={layer.layerId}
+              style={{ marginTop: 16 }}
+            >
               <Skeleton loading={loading} active>
                 {columns[i] ? (
                   <Table

@@ -28,12 +28,13 @@ import {
 } from '@/services/tablemanage';
 import { EnumName, EnumValue, FlatTreeNode, LabelAttribute } from '@/types/datapi';
 import { isEnumType } from '@/utils/tablemanage';
+import { LabelTag } from '@/constants/datapi';
 
 export interface CreateTagProps {}
 
 const CreateTag: FC<CreateTagProps> = ({}) => {
   // 标签类型
-  const [tagType, setTagType] = useState('');
+  const [tagType, setTagType] = useState<LabelTag>();
   const [folders, setFolders] = useState([]);
   // 标签类型为枚举标签时
   const [enumTypeOps, setEnumTypeOps] = useState([]);
@@ -207,48 +208,57 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
       .catch((err) => {});
   };
 
+  const renderWidth = () => {
+    return tagType !== LabelTag.ENUM_VALUE_LABEL && tagType !== LabelTag.ATTRIBUTE_LABEL;
+  };
+
   return (
     <ModalForm
       className={styles.reset}
-      title="新建标签"
+      title={curLabel ? '编辑标签' : '新建标签'}
       layout="horizontal"
       colon={false}
       labelAlign="left"
       form={form}
-      width={1200}
+      width={renderWidth() ? 560 : 1200}
       visible={visible}
       modalProps={{ onCancel: hideLabel, maskClosable: false, destroyOnClose: true }}
       submitter={{ submitButtonProps: { loading } }}
       onFinish={async (values) => {
         setLoading(true);
         const params = {
-          ...values,
           labelParamType: TagToParamMap[values.labelTag],
         };
+        for (let [key, value] of Object.entries(values)) {
+          if (`${value}`) {
+            params[key] = value;
+          }
+        }
+        // 当类型为枚举的时候, labelParamType为选择的enumCode
         if (values.enumCode) {
           params.labelParamType = values.enumCode;
         }
         if (curLabel) {
-          params.labelCode = curLabel;
+          Object.assign(params, { labelCode: curLabel });
         }
         createTag(params)
           .then((res) => {
             if (res.success) {
-              message.success(curLabel ? '修改标签成功' : '新建标签成功');
+              message.success(curLabel ? '编辑标签成功' : '新建标签成功');
               hideLabel();
               getTree('LABEL');
               getLabelInfo(res.data.labelCode);
             }
           })
-          .catch((err) => message.error('新建标签失败'))
+          .catch((err) => message.error(curLabel ? '编辑标签失败' : '新建标签失败'))
           .finally(() => setLoading(false));
       }}
     >
       <Row gutter={24}>
-        <Col span={8}>
+        <Col span={renderWidth() ? 24 : 8}>
           <ProFormText name="labelName" label="标签名称" rules={rules} placeholder="请输入名称" />
         </Col>
-        <Col span={8}>
+        <Col span={renderWidth() ? 24 : 8}>
           <ProFormSelect
             name="labelTag"
             label="标签类型"
@@ -258,7 +268,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
             valueEnum={LabelTagOps}
           />
         </Col>
-        <Col span={8}>
+        <Col span={renderWidth() ? 24 : 8}>
           <ProFormRadio.Group
             name="subjectType"
             label="标签主体"
@@ -331,7 +341,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         options={IsReqOps}
       />
       <Row gutter={24}>
-        <Col span={8}>
+        <Col span={renderWidth() ? 24 : 8}>
           <ProFormText
             name="labelIndex"
             label="排序编号"
@@ -339,7 +349,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
             tooltip="编号数值小则优先级高"
           />
         </Col>
-        <Col span={8}>
+        <Col span={renderWidth() ? 24 : 8}>
           <ProFormSelect name="folderId" label="位置" placeholder="根目录" options={folders} />
         </Col>
       </Row>

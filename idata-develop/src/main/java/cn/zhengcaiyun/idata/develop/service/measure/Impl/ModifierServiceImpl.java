@@ -20,10 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
-import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
@@ -100,7 +97,8 @@ public class ModifierServiceImpl implements ModifierService {
             if (modifierAttribute != null) {
                 echoModifier.setModifierAttribute(modifierAttribute);
             }
-            List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()));
+            List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()))
+                    .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
             echoModifier.setEnumValues(modifierEnumValueList);
             echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
 //            if (atomicTableId != null) {

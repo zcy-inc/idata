@@ -20,9 +20,12 @@
         .ant-tree-switcher {
           color: #c0c4da;
         }
-        .ant-tree-title .anticon {
-          margin-right: 4px;
-          font-size: 15px;
+        .ant-tree-title {
+          word-break: break-all;
+          .anticon {
+            margin-right: 4px;
+            font-size: 15px;
+          }
         }
       }
       .search {
@@ -95,11 +98,6 @@
         padding: 12px 48px;
         background: #fff;
         box-shadow: 0 -5px 4px -3px #f0f2f5;
-        :global {
-          .ant-btn-primary {
-            margin-right: 16px;
-          }
-        }
       }
       .tab-pane {
         height: 100%;
@@ -166,7 +164,6 @@
       .enum-table-shadowbox {
         position: relative;
         .enum-table {
-          max-height: 560px;
           overflow: auto;
           .columns {
             display: flex;
@@ -261,7 +258,8 @@
           }
         }
         .enum-table-right-shadow {
-          .cell-ops {
+          .cell-ops,
+          .enum-cell-ops {
             &::after {
               position: absolute;
               top: 0;
@@ -447,6 +445,9 @@
           margin-bottom: 0;
         }
       }
+    }
+    .ant-popover-content > .ant-popover-arrow {
+      right: 4px;
     }
   }
 }

@@ -35,7 +35,7 @@ const Workbench: FC = ({}) => {
           key={tab.key}
           closeIcon={<IconFont type="icon-guanbichanggui" />}
         >
-          <TabLabel initialMode={tab.mode} originId={tab.originId} />
+          <TabLabel initialMode={tab.mode} tabKey={`${tab.key}`} originId={tab.originId} />
         </TabPane>
       ))}
     </Tabs>

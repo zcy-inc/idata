@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 
@@ -33,6 +34,6 @@ public interface EnumService {
     List<EnumValueDto> getEnumValues(String enumCode);
     String getEnumName(String enumCode);
     String getEnumValue(String valueCode);
-    List<String> getEnumValues(List<String> valueCodes);
+    List<DevEnumValue> getEnumValues(List<String> valueCodes);
     boolean delete(String enumCode, String operator);
 }

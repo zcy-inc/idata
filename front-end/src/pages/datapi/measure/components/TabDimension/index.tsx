@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Button, message, Popconfirm, Space } from 'antd';
+import { Button, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
@@ -18,6 +18,7 @@ import { LabelTag, TreeNodeType } from '@/constants/datapi';
 
 export interface TabDimensionProps {
   initialMode: 'view' | 'edit';
+  tabKey: string;
   fileCode: string;
 }
 interface DimensionExportProps {
@@ -25,8 +26,9 @@ interface DimensionExportProps {
   DIM: [];
   DWD: [];
 }
+const { confirm } = Modal;
 
-const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode }) => {
+const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', tabKey, fileCode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<Dimension>();
@@ -92,7 +94,7 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode })
           if (fileCode === 'newDimension') {
             message.success('新建维度成功');
             replaceTab(
-              'newDimension',
+              tabKey,
               `L_${res.data.labelCode}`,
               res.data.labelName,
               TreeNodeType.DIMENSION_LABEL,
@@ -116,19 +118,25 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode })
   };
 
   const onDelete = () =>
-    deleteDimension({ dimensionCode: fileCode })
-      .then((res) => {
-        if (res.success) {
-          message.success('删除成功');
-          removeTab(`L_${data!.labelCode}`);
-          getTree(TreeNodeType.DIMENSION_LABEL);
-        }
-      })
-      .catch((err) => {});
+    confirm({
+      title: '删除维度',
+      content: '您确认要删除该维度吗？',
+      autoFocusButton: null,
+      onOk: () =>
+        deleteDimension({ dimensionCode: fileCode })
+          .then((res) => {
+            if (res.success) {
+              message.success('删除成功');
+              removeTab(`L_${data!.labelCode}`);
+              getTree(TreeNodeType.DIMENSION_LABEL);
+            }
+          })
+          .catch((err) => {}),
+    });
 
   const onCancel = () => {
     if (fileCode === 'newDimension') {
-      removeTab('newDimension');
+      removeTab(tabKey);
     } else {
       setMode('view');
       getDimensionInfo(fileCode);
@@ -165,16 +173,9 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', fileCode })
             <Button key="labelTag" onClick={switchStatus}>
               {data?.labelTag === LabelTag.DIMENSION_LABEL ? '停用' : '启用'}
             </Button>
-            <Popconfirm
-              key="del"
-              title="您确认要删除该维度吗？"
-              onConfirm={onDelete}
-              okButtonProps={{ loading }}
-              okText="确认"
-              cancelText="取消"
-            >
-              <Button>删除</Button>
-            </Popconfirm>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
           </Space>
         )}
         {mode === 'edit' && (

@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
+import { debounce } from 'lodash';
 import type { FC, ChangeEvent, Key } from 'react';
 import styles from '../../index.less';
 
@@ -30,7 +31,7 @@ const NodeTypeIcon = {
 };
 
 const FolderTree: FC = () => {
-  const [search, setSearch] = useState('');
+  // const [search, setSearch] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
   const [autoExpand, setAutoExpand] = useState(true);
 
@@ -63,7 +64,7 @@ const FolderTree: FC = () => {
   }));
 
   useEffect(() => {
-    getTree('TABLE');
+    getTree(TreeNodeType.TABLE);
   }, []);
 
   useEffect(() => {
@@ -91,15 +92,15 @@ const FolderTree: FC = () => {
   };
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      {renderPrimaryMenu()}
-      <Menu.Divider />
-      <Menu.Item key="folder">新建文件夹</Menu.Item>
-      {curFolder?.type === 'FOLDER' && (
+      {curFolder?.type === 'FOLDER' ? (
         <Fragment>
+          {renderPrimaryMenu()}
+          <Menu.Divider />
+          <Menu.Item key="folder">新建文件夹</Menu.Item>
           <Menu.Item key="edit">编辑文件夹</Menu.Item>
           <Menu.Item key="delete">删除文件夹</Menu.Item>
         </Fragment>
-      )}
+      ) : null}
     </Menu>
   );
 
@@ -126,6 +127,7 @@ const FolderTree: FC = () => {
       case 'delete':
         confirm({
           title: '您确定要删除该文件夹吗？',
+          autoFocusButton: null,
           onOk: () =>
             deleteFolder({ folderId: curFolder.folderId })
               .then((res) => {
@@ -147,13 +149,14 @@ const FolderTree: FC = () => {
     const n = data.length;
     return data.map((_, i) => {
       const { name, type, cid } = _;
-      const _i = name.indexOf(search);
+      // const _i = name.indexOf(search);
+      const clsFolderRoot =
+        (!parentId && type === TreeNodeType.FOLDER && styles['folder-root']) || '';
+      const clsFolderMargin =
+        ((type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin']) || '';
       let iconType: TreeNodeIcon = type as TreeNodeIcon;
       let title = (
-        <span
-          key="title"
-          className={!parentId && type === TreeNodeType.FOLDER && styles['folder-root']}
-        >
+        <span key="title" className={clsFolderRoot}>
           {name}
         </span>
       );
@@ -162,28 +165,21 @@ const FolderTree: FC = () => {
         iconType = 'FOLDEROPEN';
       }
       // 给检索命中的title加高亮
-      if (_i > -1) {
-        const pre = name.substring(0, _i);
-        const suf = name.substring(_i + search?.length);
-        const className = !parentId && type === TreeNodeType.FOLDER && styles['folder-root'];
-
-        title = (
-          <span key="title" className={className}>
-            {pre}
-            <span className={styles['search-match']}>{search}</span>
-            {suf}
-          </span>
-        );
-      }
+      // if (_i > -1) {
+      //   const pre = name.substring(0, _i);
+      //   const suf = name.substring(_i + search?.length);
+      //   title = (
+      //     <span key="title" className={clsFolderRoot}>
+      //       {pre}
+      //       <span className={styles['search-match']}>{search}</span>
+      //       {suf}
+      //     </span>
+      //   );
+      // }
 
       const node: any = { ..._, key: cid };
-      node.className = (type === TreeNodeType.FOLDER || i === n - 1) && styles['folder-margin'];
-      node.title = (
-        <Fragment>
-          {NodeTypeIcon[iconType]}
-          {title}
-        </Fragment>
-      );
+      node.className = clsFolderMargin;
+      node.title = [NodeTypeIcon[iconType], title];
       parentId && (node.parentId = parentId);
 
       return _.children ? (
@@ -208,19 +204,22 @@ const FolderTree: FC = () => {
 
   // 检索树
   const onFilterTree = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-    if (!value) {
-      setExpandedKeys([]);
-      setSearch('');
-      return;
-    }
-    const keys = flatTree.current
-      .filter((_) => _.name.indexOf(value) > -1 && _.parentId)
-      .map((_) => _.parentId);
+    getTree(curTreeType, value);
+    // if (!value) {
+    //   setExpandedKeys([]);
+    //   setSearch('');
+    //   return;
+    // }
+    // const keys = flatTree.current
+    //   .filter((_) => _.name.indexOf(value) > -1 && _.parentId)
+    //   .map((_) => _.parentId);
 
-    setExpandedKeys(keys as Key[]);
-    setSearch(value);
-    setAutoExpand(true);
+    // setExpandedKeys(keys as Key[]);
+    // setSearch(value);
+    // setAutoExpand(true);
   };
+
+  const deFilterTree = debounce(onFilterTree, 500);
 
   const onExpand = (keys: Key[]) => {
     setExpandedKeys(keys);
@@ -234,7 +233,7 @@ const FolderTree: FC = () => {
           className={styles['search-input']}
           placeholder="请输入关键字进行搜索"
           prefix={<IconFont type="icon-sousuo" />}
-          onChange={onFilterTree}
+          onChange={deFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
           <IconFont
@@ -244,10 +243,10 @@ const FolderTree: FC = () => {
           />
         </Dropdown>
       </div>
-      <Tabs activeKey={curTreeType} onChange={(key) => getTree(key)}>
-        <TabPane tab="表" key="TABLE" />
-        <TabPane tab="标签" key="LABEL" />
-        <TabPane tab="枚举" key="ENUM" />
+      <Tabs activeKey={curTreeType} onChange={(key) => getTree(key as TreeNodeType)}>
+        <TabPane tab="表" key={TreeNodeType.TABLE} />
+        <TabPane tab="标签" key={TreeNodeType.LABEL} />
+        <TabPane tab="枚举" key={TreeNodeType.ENUM} />
       </Tabs>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree

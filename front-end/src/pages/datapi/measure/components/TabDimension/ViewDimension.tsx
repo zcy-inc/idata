@@ -43,7 +43,7 @@ const ViewDimension: FC<ViewDimensionProps> = ({ data }) => {
       const tmpM: DIMList[] = [];
       const tmpD: DWDList[] = [];
       list.forEach((item) => {
-        if (item.labelParamValue) {
+        if (item.labelParamValue === 'true') {
           tmpM.push({
             tableName: item.tableName,
             columnName: item.columnName,

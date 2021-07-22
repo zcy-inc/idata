@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Button, Form, message, Popconfirm } from 'antd';
+import { Button, Form, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../index.less';
@@ -19,6 +19,7 @@ interface EditTableExportProps {
   fkData: ForeignKey[];
   columnsMap: Map<string, any>;
 }
+const { confirm } = Modal;
 
 const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -154,17 +155,20 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
       .finally(() => setLoading(false));
   };
 
-  const onDelete = () => {
-    setLoading(true);
-    delTable({ tableId: fileCode })
-      .then((res) => {
-        if (res.success) message.success('删除成功');
-        onRemovePane(`T_${fileCode}`);
-        getTree('TABLE');
-      })
-      .catch((err) => {})
-      .finally(() => setLoading(false));
-  };
+  const onDelete = () =>
+    confirm({
+      title: '删除枚举',
+      content: '您确认要删除该枚举吗？',
+      autoFocusButton: null,
+      onOk: () =>
+        delTable({ tableId: fileCode })
+          .then((res) => {
+            if (res.success) message.success('删除成功');
+            onRemovePane(`T_${fileCode}`);
+            getTree('TABLE');
+          })
+          .catch((err) => {}),
+    });
 
   const onCancel = () => {
     if (fileCode === 'newTable') {
@@ -180,29 +184,26 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
       {mode === 'view' && <ViewTable data={data} />}
       {mode === 'edit' && <EditTable ref={refTable} refs={refs} initial={data} />}
       <div className={styles.submit}>
-        {mode === 'view' && [
-          <Button key="edit" type="primary" onClick={() => setMode('edit')}>
-            编辑
-          </Button>,
-          <Popconfirm
-            key="del"
-            title="您确认要删除该枚举吗？"
-            onConfirm={onDelete}
-            okButtonProps={{ loading }}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button>删除</Button>
-          </Popconfirm>,
-        ]}
-        {mode === 'edit' && [
-          <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
-            保存
-          </Button>,
-          <Button key="cancel" onClick={onCancel}>
-            取消
-          </Button>,
-        ]}
+        {mode === 'view' && (
+          <Space>
+            <Button key="edit" type="primary" onClick={() => setMode('edit')}>
+              编辑
+            </Button>
+            <Button key="del" onClick={onDelete}>
+              删除
+            </Button>
+          </Space>
+        )}
+        {mode === 'edit' && (
+          <Space>
+            <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
+              保存
+            </Button>
+            <Button key="cancel" onClick={onCancel}>
+              取消
+            </Button>
+          </Space>
+        )}
       </div>
     </Fragment>
   );

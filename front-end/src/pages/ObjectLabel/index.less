@@ -15,9 +15,12 @@
         .ant-tree-switcher {
           color: #c0c4da;
         }
-        .ant-tree-title .anticon {
-          margin-right: 4px;
-          font-size: 15px;
+        .ant-tree-title {
+          word-break: break-all;
+          .anticon {
+            margin-right: 4px;
+            font-size: 15px;
+          }
         }
       }
       .search {
@@ -162,11 +165,6 @@
         padding: 12px 48px;
         background: #fff;
         box-shadow: 0 -5px 4px -3px #f0f2f5;
-        :global {
-          .ant-btn-primary {
-            margin-right: 16px;
-          }
-        }
       }
     }
   }
@@ -203,12 +201,21 @@
     }
   }
 }
+
 .reset-inline {
   margin-top: 12px;
   :global {
     .ant-form-item-label > label {
       justify-content: flex-end;
       width: 90px;
+    }
+  }
+}
+
+.reset-modal {
+  :global {
+    .ant-modal-footer {
+      background: transparent;
     }
   }
 }
