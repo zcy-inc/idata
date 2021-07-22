@@ -56,6 +56,7 @@ public class TableDataServiceImpl implements TableDataService {
     }
 
     private String getDbName(Long tableId) {
+        // todo 公用方法，可以抽出来
         return devLabelDao.selectOne(c -> c
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.tableId, isEqualTo(tableId))))

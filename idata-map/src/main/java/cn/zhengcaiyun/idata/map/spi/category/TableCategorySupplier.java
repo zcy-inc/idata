@@ -38,8 +38,15 @@ public class TableCategorySupplier implements CategorySupplier<CategoryCond, Cat
         CategorySupplierFactory.register(CategoryTypeEnum.PROPERTY_DIR.getType(), this);
     }
 
+    /**
+     * 查询资产目录集合
+     *
+     * @param categoryCond 查询条件
+     * @return 资产目录集合
+     */
     @Override
     public List<CategoryTreeNodeDto> supply(CategoryCond categoryCond) {
+        // todo 从数仓设计模块查询资产目录数据，封装为CategoryTreeNodeDto对象集合
         return null;
     }
 }

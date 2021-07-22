@@ -52,16 +52,36 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
         DataEntitySupplierFactory.register(EntitySourceEnum.TABLE.getCode(), this);
     }
 
+    /**
+     * 根据条件查询数仓表
+     *
+     * @param condition
+     * @return
+     */
     @Override
     public List<DataEntityDto> supply(DataSearchCond condition) {
+        // todo 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
         return null;
     }
 
+    /**
+     * 根据表唯一标识集合查询数仓表设计数据
+     *
+     * @param entityCodes
+     * @return
+     */
     @Override
     public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
+        // todo 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
         return null;
     }
 
+    /**
+     * 获取表设计额外信息，如表字段信息
+     *
+     * @param entities
+     * @return
+     */
     @Override
     public List<DataEntityDto> getExtraInfo(List<DataEntityDto> entities) {
         if (isEmpty(entities)) return entities;

@@ -38,8 +38,15 @@ public class IndicatorCategorySupplier implements CategorySupplier<CategoryCond,
         CategorySupplierFactory.register(CategoryTypeEnum.BIZ_PROCESS.getType(), this);
     }
 
+    /**
+     * 根据条件查询业务过程
+     *
+     * @param categoryCond 查询条件
+     * @return 业务过程list
+     */
     @Override
     public List<CategoryTreeNodeDto> supply(CategoryCond categoryCond) {
+        // todo 从指标库查询业务过程数据，封装为CategoryTreeNodeDto对象集合
         return null;
     }
 }

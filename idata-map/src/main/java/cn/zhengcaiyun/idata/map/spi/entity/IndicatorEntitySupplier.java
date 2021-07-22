@@ -38,13 +38,27 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
         DataEntitySupplierFactory.register(EntitySourceEnum.INDICATOR.getCode(), this);
     }
 
+    /**
+     * 根据条件查询指标数据
+     *
+     * @param condition
+     * @return
+     */
     @Override
     public List<DataEntityDto> supply(DataSearchCond condition) {
+        //todo 从指标库查询指标数据
         return null;
     }
 
+    /**
+     * 根据指标唯一标识获取指标数据
+     *
+     * @param entityCodes
+     * @return
+     */
     @Override
     public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
+        //todo 从指标库查询指标数据
         return null;
     }
 
