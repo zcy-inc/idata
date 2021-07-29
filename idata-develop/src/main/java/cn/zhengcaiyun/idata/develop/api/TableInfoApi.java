@@ -16,15 +16,16 @@
  */
 package cn.zhengcaiyun.idata.develop.api;
 
-import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 
 import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-06-22 11:33
+ * @date 2021-07-23 16:36
  */
 
-public interface MeasureApi {
-    List<MeasureDto> getMeasures(List<String> labelCodes, List<String> metricInfos, String bizType);
+public interface TableInfoApi {
+    List<Long> getTableIds(List<String> searchTexts, String assetCatalogueCode, String dwLayerCode, String searchType);
+    List<TableDetailDto> getTablesByIds(List<Long> tableIds);
 }

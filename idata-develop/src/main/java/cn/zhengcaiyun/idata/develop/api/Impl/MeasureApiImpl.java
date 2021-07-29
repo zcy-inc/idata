@@ -59,7 +59,7 @@ public class MeasureApiImpl implements MeasureApi {
     private final String DB_NAME = "dbName:LABEL";
 
     @Override
-    public List<MeasureDto> getMeasures(List<String> labelCodes) {
+    public List<MeasureDto> getMeasures(List<String> labelCodes, List<String> metricInfos, String bizType) {
         List<DevLabelDefine> measureList = devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", labelCodes));
         List<MeasureDto> echoMeasureList = measureList.stream().map(measure -> {
             MeasureDto echoMeasure;

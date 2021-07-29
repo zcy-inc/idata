@@ -53,7 +53,7 @@ public class TableInfoController {
 
     @GetMapping("referTables")
     public RestResult<List<TableInfoDto>> getReferTables(@RequestParam("labelValue") String labelValue) {
-        return RestResult.success(tableInfoService.getTables(labelValue));
+        return RestResult.success(tableInfoService.getTables(null, labelValue));
     }
 
     @GetMapping("dbNames")

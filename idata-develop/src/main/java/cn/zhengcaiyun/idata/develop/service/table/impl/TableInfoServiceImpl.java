@@ -113,7 +113,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public List<TableInfoDto> getTables(String labelValue) {
+    public List<TableInfoDto> getTablesByDataBase(String labelValue) {
         List<DevTableInfo> tableInfoList = devTableInfoDao.selectMany(select(devTableInfo.allColumns())
                 .from(devTableInfo)
                 .leftJoin(devLabel).on(devTableInfo.id, equalTo(devLabel.tableId))
@@ -121,6 +121,11 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devLabel.labelParamValue, isEqualTo(labelValue)))
                 .build().render(RenderingStrategies.MYBATIS3));
         return PojoUtil.copyList(tableInfoList, TableInfoDto.class);
+    }
+
+    @Override
+    public List<TableInfoDto> getTables(List<String> searchTableTexts, String enumValue) {
+        return null;
     }
 
     @Override

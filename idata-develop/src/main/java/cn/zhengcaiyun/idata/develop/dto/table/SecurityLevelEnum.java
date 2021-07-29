@@ -14,17 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.api;
-
-import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.table;
 
 /**
  * @author caizhedong
- * @date 2021-06-22 11:33
+ * @date 2021-07-28 19:32
  */
 
-public interface MeasureApi {
-    List<MeasureDto> getMeasures(List<String> labelCodes, List<String> metricInfos, String bizType);
+public enum SecurityLevelEnum {
+    HIGH,
+    MEDIUM,
+    LOW;
 }

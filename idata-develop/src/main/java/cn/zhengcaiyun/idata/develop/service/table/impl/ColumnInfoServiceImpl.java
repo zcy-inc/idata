@@ -95,46 +95,6 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Transactional(rollbackFor = Throwable.class)
     public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList,
                                             String operator) {
-//        checkArgument(isNotEmpty(operator), "创建者不能为空");
-//        checkArgument(columnInfoDto.getTableId() != null, "字段所属表ID不能为空");
-//        checkArgument(isNotEmpty(columnInfoDto.getColumnName()), "字段名不能为空");
-//        DevColumnInfo checkDevColumn = devColumnInfoDao.selectOne(c ->
-//                c.where(devColumnInfo.del, isNotEqualTo(1),
-//                        and(devColumnInfo.tableId, isEqualTo(columnInfoDto.getTableId())),
-//                        and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
-//                .orElse(null);
-//        //checkArgument(checkDevColumn == null, "该表中已存在该字段");
-//        List<LabelDefineDto> columnLabelDefineDtoList = labelService.findDefines(COLUMN_SUBJECT, null)
-//                .stream()
-//                .filter(labelDefineDto -> labelDefineDto.getLabelRequired().equals(1))
-//                .filter(labelDefineDto -> Arrays.asList(columnLabelTags).contains(labelDefineDto.getLabelTag()))
-//                .collect(Collectors.toList());
-//        Map<String, String> columnLabelDefineMap = columnLabelDefineDtoList
-//                .stream()
-//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode, LabelDefineDto::getLabelName));
-//        checkArgument(columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0,
-//                "缺少字段必要信息");
-//        List<LabelDto> columnLabelList = columnInfoDto.getColumnLabels();
-//        List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
-//        for (Map.Entry<String, String> entry : columnLabelDefineMap.entrySet()) {
-//            checkArgument(columnLabelCodeList.contains(entry.getKey()), entry.getValue() + "不能为空");
-//        }
-//
-//        // 插入字段表
-//        columnInfoDto.setCreator(operator);
-//        DevColumnInfo columnInfo = PojoUtil.copyOne(columnInfoDto, DevColumnInfo.class,
-//                "tableId", "columnName", "columnIndex", "creator");
-//        devColumnInfoDao.insertSelective(columnInfo);
-//        ColumnInfoDto echoColumnInfoDto = PojoUtil.copyOne(devColumnInfoDao.selectByPrimaryKey(columnInfo.getId()).get(),
-//                ColumnInfoDto.class);
-//        // 插入label表
-//        List<LabelDto> echoColumnLabelList = columnLabelList.stream()
-//                .map(columnLabel ->  {
-//                    columnLabel.setTableId(columnInfoDto.getTableId());
-//                    return labelService.label(columnLabel, operator);})
-//                .collect(Collectors.toList());
-//        echoColumnInfoDto.setColumnLabels(echoColumnLabelList);
-//        return echoColumnInfoDto;
         checkArgument(isNotEmpty(operator), "操作者不能为空");
         checkArgument(tableId != null, "字段所属表ID不能为空");
         List<LabelDefineDto> columnLabelDefineDtoList = labelService.findDefines(COLUMN_SUBJECT, null)

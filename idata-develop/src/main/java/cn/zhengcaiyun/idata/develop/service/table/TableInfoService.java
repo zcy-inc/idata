@@ -29,7 +29,9 @@ import java.util.List;
 
 public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
-    List<TableInfoDto> getTables(String database);
+    List<TableInfoDto> getTablesByDataBase(String database);
+//    List<TableInfoDto> getTablesByEnumValue(String enumValue);
+    List<TableInfoDto> getTables(List<String> searchTableTexts, String enumValue);
     List<LabelDto> getDbNames();
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
     TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
