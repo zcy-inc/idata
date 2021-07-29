@@ -57,7 +57,7 @@ public class QueryStatementDsl {
     }
 
     public QueryStatementDsl where(ConditionDslProvider provider){
-        this.fromClause = FromClause.of(table);
+//        this.fromClause = FromClause.of(table);
         return this;
     }
 

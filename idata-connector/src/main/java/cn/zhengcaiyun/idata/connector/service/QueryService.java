@@ -27,7 +27,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-@Service
+@Service(value = "connectQueryService")
 public class QueryService implements Query {
 
     private final QueryFactory queryFactory = new QueryFactory();
