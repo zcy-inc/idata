@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.service.measure.DimensionDataService;
 import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author: yangjianhua
  * @create: 2021-07-21 18:36
  **/
+@Service
 public class DimensionDataServiceImpl implements DimensionDataService {
 
     @Autowired

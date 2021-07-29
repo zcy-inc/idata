@@ -43,26 +43,26 @@
                     <artifactId>slf4j-log4j12</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
-<!--                <exclusion>-->
-<!--                    <groupId>org.eclipse.jetty.aggregate</groupId>-->
-<!--                    <artifactId>jetty-all</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>hadoop-client</artifactId>-->
-<!--                    <groupId>org.apache.hadoop</groupId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>hbase-server</artifactId>-->
-<!--                    <groupId>org.apache.hbase</groupId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>hbase-client</artifactId>-->
-<!--                    <groupId>org.apache.hbase</groupId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>hadoop-yarn-registry</artifactId>-->
-<!--                    <groupId>org.apache.hadoop</groupId>-->
-<!--                </exclusion>-->
+                <exclusion>
+                    <groupId>org.eclipse.jetty.aggregate</groupId>
+                    <artifactId>jetty-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-client</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hbase-server</artifactId>
+                    <groupId>org.apache.hbase</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hbase-client</artifactId>
+                    <groupId>org.apache.hbase</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-yarn-registry</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
