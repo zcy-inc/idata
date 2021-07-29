@@ -40,7 +40,6 @@
         <module>idata-develop</module>
         <module>idata-label</module>
         <module>idata-map</module>
-        <module>idata-sql</module>
         <module>idata-connector</module>
     </modules>
 
