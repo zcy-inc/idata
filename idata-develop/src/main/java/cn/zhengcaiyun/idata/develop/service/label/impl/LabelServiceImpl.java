@@ -202,6 +202,7 @@ public class LabelServiceImpl implements LabelService {
         return labelDefineDto;
     }
 
+    // TODO 新增字段时查询有误
     @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
         checkArgument(subjectType != null || labelTag != null,

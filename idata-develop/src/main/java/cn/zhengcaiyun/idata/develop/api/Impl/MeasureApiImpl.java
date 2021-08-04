@@ -18,25 +18,32 @@ package cn.zhengcaiyun.idata.develop.api.Impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.api.MeasureApi;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
+import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
+import kotlin.jvm.internal.PackageReference;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.valueCode;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelAttributes;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -54,13 +61,23 @@ public class MeasureApiImpl implements MeasureApi {
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
+    private DevLabelDefineDao devLabelDefineDao;
+    @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private MetricService metricService;
 
     private final String DB_NAME = "dbName:LABEL";
+    private final String BIZ_TYPE_ENUM = "bizTypeEnum:ENUM";
+    private final String METRIC_DEFINE = "metricDefine";
+    private final String BIZ_TYPE_CODE = "bizTypeCode";
+    private final String METRIC_ID = "metricId";
+    private final String EN_NAME = "enName";
 
     @Override
-    public List<MeasureDto> getMeasures(List<String> labelCodes, List<String> metricInfos, String bizType) {
+    public List<MeasureDto> getMeasures(List<String> labelCodes) {
         List<DevLabelDefine> measureList = devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", labelCodes));
+        List<AttributeDto> measureAttributeList = new ArrayList<>();
         List<MeasureDto> echoMeasureList = measureList.stream().map(measure -> {
             MeasureDto echoMeasure;
             if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(measure.getLabelTag())) {
@@ -82,8 +99,114 @@ public class MeasureApiImpl implements MeasureApi {
                 echoMeasure = PojoUtil.copyOne(measure, MeasureDto.class);
                 echoMeasure.setMeasureLabels(measureLabelList);
             }
+            measureAttributeList.addAll(echoMeasure.getLabelAttributes());
             return echoMeasure;
         }).collect(Collectors.toList());
+        Map<String, String> bizTypeMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(BIZ_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+        Map<String, String> enNameMap = echoMeasureList.stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                        measure -> {
+                            AttributeDto attribute = measure.getLabelAttributes().stream()
+                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+                                            && labelAttribute.getAttributeKey().equals(EN_NAME)).findAny().get();
+                            return attribute.getAttributeValue();
+                        }));
+        Map<String, String> metricIdMap = echoMeasureList.stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                        measure -> {
+                            AttributeDto attribute = measure.getLabelAttributes().stream()
+                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+                                            && labelAttribute.getAttributeKey().equals(METRIC_ID)).findAny().get();
+                            return attribute.getAttributeValue();
+                        }));
+        Map<String, String> metricDefineMap = echoMeasureList.stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                        measure -> {
+                            AttributeDto attribute = measure.getLabelAttributes().stream()
+                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+                                            && labelAttribute.getAttributeKey().equals(METRIC_DEFINE)).findAny().get();
+                            return attribute.getAttributeValue();
+                        }));
+        Map<String, String> metricBizTypeCodeMap = echoMeasureList.stream()
+                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                        measure -> {
+                            AttributeDto attribute = measure.getLabelAttributes().stream()
+                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+                                            && labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().get();
+                            return attribute.getAttributeValue();
+                        }));
+        echoMeasureList.forEach(measure -> {
+            if (measure.getLabelTag().endsWith("METRIC_LABEL")) {
+                measure.setEnName(enNameMap.get(measure.getLabelCode()));
+                measure.setMeasureId(metricIdMap.get(measure.getLabelCode()));
+                measure.setMeasureDefine(metricDefineMap.get(measure.getLabelCode()));
+                measure.setBizTypeValue(bizTypeMap.get(metricBizTypeCodeMap.get(measure.getLabelCode())));
+            }
+        });
         return echoMeasureList;
+    }
+
+    @Override
+    public List<String> getMetricCodes(List<String> metricTexts, String bizTypeCode) {
+        List<LabelDefineDto> metricList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del,
+                isNotEqualTo(1), and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DERIVE_METRIC_LABEL.name())),
+                                or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.COMPLEX_METRIC_LABEL.name()))))),
+                LabelDefineDto.class);
+        Set<String> metricCodes = metricList.stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toSet());
+        if (metricTexts != null && metricTexts.size() > 0) {
+            Map<String, String> enNameMetricMap = metricList.stream()
+                    .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                            metric -> {
+                        AttributeDto attribute = metric.getLabelAttributes().stream()
+                                .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(EN_NAME)).findAny().get();
+                        return attribute.getAttributeValue();
+                    }));
+            Map<String, String> metricIdMap = metricList.stream()
+                    .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                            metric -> {
+                                AttributeDto attribute = metric.getLabelAttributes().stream()
+                                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(METRIC_ID)).findAny().get();
+                                return attribute.getAttributeValue();
+                            }));
+            List<MeasureDto> measureList = metricList.stream().map(metric -> {
+                MeasureDto measure = PojoUtil.copyOne(metric, MeasureDto.class,
+                        "id", "labelName", "labelCode", "labelTag");
+                measure.setEnName(enNameMetricMap.get(metric.getLabelCode()));
+                measure.setMeasureId(metricIdMap.get(metric.getLabelCode()));
+                return measure;
+            }).collect(Collectors.toList());
+            List<String> removeSearchMetricCodeList = new ArrayList<>();
+            metricTexts.forEach(text -> {
+                List<String> removeSearchCodeList = measureList.stream()
+                        .filter(measure -> !measure.getLabelName().contains(text)
+                                && !measure.getEnName().contains(text) && !measure.getMeasureId().contains(text))
+                        .collect(Collectors.toList())
+                        .stream().map(MeasureDto::getLabelCode).collect(Collectors.toList());
+                removeSearchMetricCodeList.addAll(removeSearchCodeList);
+            });
+            Set<String> removeSearchMetricCodes = new HashSet<>(removeSearchMetricCodeList);
+            metricCodes.removeAll(removeSearchMetricCodes);
+        }
+        if (isNotEmpty(bizTypeCode)) {
+            Map<String, String> bizTypeMetricMap = metricList.stream()
+                    .collect(Collectors.toMap(metric -> {
+                        AttributeDto attribute = metric.getLabelAttributes().stream()
+                                .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().get();
+                        return attribute.getAttributeValue();
+                    }, LabelDefineDto::getLabelCode));
+            List<String> bizTypeCodeList = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1))
+                    .and(devEnumValue.valueCode, isEqualTo(bizTypeCode), or(devEnumValue.parentCode, isEqualTo(bizTypeCode))))
+                    .stream().map(DevEnumValue::getEnumCode).collect(Collectors.toList());
+            Set<String> removeBizTypeMetricCodes = bizTypeMetricMap.entrySet().stream()
+                    .filter(metric -> !bizTypeCodeList.contains(metric.getKey()))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toSet());
+            metricCodes.removeAll(removeBizTypeMetricCodes);
+        }
+        return new ArrayList<>(metricCodes);
     }
 }

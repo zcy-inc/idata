@@ -36,27 +36,51 @@ public interface DevTableInfoMyDao {
                 "<if test = 'searchType != null and searchType.indexOf(\"COLUMN\") != -1'>" +
                     "LEFT JOIN dev_column_info " +
                     "ON dev_label.column_name = dev_column_info.column_name " +
-                    "WHERE dev_label.del != 1 AND dev_column_info.del != 1 " +
-                        "AND (dev_column_info.column_name REGEX #{searchTexts} " +
-                            "OR dev_label.label_param_value REGEX #{searchTexts}) " +
+                    "WHERE dev_label.del != 1 AND dev_column_info.del != 1 AND (" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_column_info.column_name LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                        "OR " +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                    ") " +
                 "</if>" +
                 "<if test = 'searchType != null and searchType.indexOf(\"TABLE\") != -1'>" +
                     "LEFT JOIN dev_table_info " +
                     "ON dev_label.table_id = dev_table_info.id " +
-                    "WHERE dev_label.del != 1 AND dev_table_info.del != 1 " +
-                        "AND (dev_table_info.table_name REGEX #{searchTexts} " +
-                            "OR dev_label.label_param_value REGEX #{searchTexts}) " +
+                    "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND (" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                        "OR " +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                    ") " +
                 "</if>" +
                 "<if test = 'searchType == null'>" +
                     "LEFT JOIN dev_table_info " +
                     "ON dev_label.table_id = dev_table_info.id " +
                     "LEFT JOIN dev_column_info " +
                     "ON dev_label.column_name = dev_column_info.column_name " +
-                    "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND dev_column_info.del != 1 " +
-                    "AND (dev_column_info.column_name REGEX #{searchTexts} " +
-                        "OR dev_table_info.table_name REGEX #{searchTexts} " +
-                        "OR dev_label.label_param_value REGEX #{searchTexts}) " +
+                    "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND dev_column_info.del != 1 AND (" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                        "OR " +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_column_info.column_name LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                        "OR " +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                            "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
+                        "</foreach>" +
+                    ") " +
+                    "AND (dev_column_info.column_name REGEXP #{searchTexts} " +
+                        "OR dev_table_info.table_name REGEXP #{searchTexts} " +
+                        "OR dev_label.label_param_value REGEXP #{searchTexts}) " +
                 "</if>" +
             "</script>")
-    List<Long> getSearchTableIds(String searchType, String searchTexts);
+    List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
 }

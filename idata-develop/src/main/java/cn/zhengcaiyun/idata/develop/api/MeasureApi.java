@@ -26,5 +26,6 @@ import java.util.List;
  */
 
 public interface MeasureApi {
-    List<MeasureDto> getMeasures(List<String> labelCodes, List<String> metricInfos, String bizType);
+    List<MeasureDto> getMeasures(List<String> labelCodes);
+    List<String> getMetricCodes(List<String> metricTexts, String bizTypeCode);
 }

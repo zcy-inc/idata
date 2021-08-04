@@ -53,7 +53,7 @@ public class MeasureApiAgent {
 
     public Optional<Map<String, String>> getNames(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) return Optional.empty();
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(codes, null, null);
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(codes);
         if (CollectionUtils.isEmpty(measureDtoList)) return Optional.empty();
 
         Map<String, String> nameMap = Maps.newHashMap();
@@ -66,7 +66,7 @@ public class MeasureApiAgent {
     public Optional<IndicatorMetadata> getIndicatorMetadata(String indicatorCode) {
         if (StringUtils.isEmpty(indicatorCode)) return Optional.empty();
 
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(indicatorCode), null, null);
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(indicatorCode));
         if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
@@ -105,7 +105,7 @@ public class MeasureApiAgent {
     public Optional<Map<String, DimensionMetadata>> getDimensionMetadata(List<String> dimensionCodes,
                                                                          IndicatorMetadata indicatorMetadata) {
         if (CollectionUtils.isEmpty(dimensionCodes)) return Optional.empty();
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(dimensionCodes, null, null);
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(dimensionCodes);
         if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }
@@ -142,7 +142,7 @@ public class MeasureApiAgent {
 
     public Optional<ObjectMetadata> getObjectMetadata(String objectCode) {
         if (StringUtils.isEmpty(objectCode)) return Optional.empty();
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(objectCode), null, null);
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(Lists.newArrayList(objectCode));
         if (CollectionUtils.isEmpty(measureDtoList)) {
             return Optional.empty();
         }

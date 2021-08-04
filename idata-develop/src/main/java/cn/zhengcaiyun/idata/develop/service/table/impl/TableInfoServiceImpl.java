@@ -19,10 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
@@ -39,12 +36,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
@@ -316,4 +315,22 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devLabel.tableId, isEqualTo(tableId))))
                 .get().getLabelParamValue();
     }
+//
+//    private List<String> getAssetCatalogues(String assetCatalogueCode) {
+//        List<DevEnumValue> assetCatalogueList = devEnumValueDao.select(c ->
+//                c.where(devEnumValue.del, isNotEqualTo(1)).and(devEnumValue.enumCode, isEqualTo(ASSET_CATALOGUE_ENUM)));
+//        Map<String, DevEnumValue> assetCatalogueMap = assetCatalogueList.stream()
+//                .collect(Collectors.toMap(DevEnumValue::getValueCode, Function.identity()));
+//        List<DevEnumValue> echo = new ArrayList<>();
+//        echo.add(assetCatalogueMap.get(assetCatalogueCode));
+//        return getTree(echo, assetCatalogueMap).stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+//    }
+//
+//    private List<DevEnumValue> getTree(List<DevEnumValue> assetCatalogues, Map<String, DevEnumValue> assetCatalogueMap) {
+//        if (isNotEmpty(assetCatalogues.get(0).getParentCode())) {
+//            assetCatalogues.add(0, assetCatalogueMap.get(assetCatalogues.get(0).getParentCode()));
+//            getTree(assetCatalogues, assetCatalogueMap);
+//        }
+//        return assetCatalogues;
+//    }
 }

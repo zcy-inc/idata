@@ -33,6 +33,7 @@ import com.sun.xml.bind.v2.util.CollisionCheckStack;
 import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Function;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.valueCode;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -50,6 +52,8 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
  * @author caizhedong
  * @date 2021-07-23 16:36
  */
+
+@Service
 public class TableInfoApiImpl implements TableInfoApi {
 
     @Autowired
@@ -61,21 +65,18 @@ public class TableInfoApiImpl implements TableInfoApi {
     @Autowired
     private DevTableInfoMyDao devTableInfoMyDao;
     @Autowired
-    private ColumnInfoService columnInfoService;
-    @Autowired
     private DevColumnInfoDao devColumnInfoDao;
 
     private final String ASSET_CATALOGUE_LABEL = "assetCatalogue:LABEL";
     private final String ASSET_CATALOGUE_ENUM = "assetCatalogueEnum:ENUM";
     private final String DW_LAYER_LABEL = "dwLayer:LABEL";
     private final String METABASE_URL_LABEL = "metabaseUrl:LABEL";
-    private final String TABLE_COMMENT_LABEL = "tableComment:LABEL";
+    private final String TABLE_COMMENT_LABEL = "tblComment:LABEL";
     private final String SECURITY_LEVEL_LABEL = "securityLevel:LABEL";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
     private final String[] tableDetails = {TABLE_COMMENT_LABEL, ASSET_CATALOGUE_LABEL, SECURITY_LEVEL_LABEL,
             METABASE_URL_LABEL, COLUMN_COMMENT_LABEL};
 
-    // TODO 数据资产是给表打标
     @Override
     public List<Long> getTableIds(List<String> searchTexts, String assetCatalogueCode, String dwLayerCode,
                                         String searchType) {
@@ -88,31 +89,39 @@ public class TableInfoApiImpl implements TableInfoApi {
                     .stream().map(TableInfoDto::getId).collect(Collectors.toList());
         }
         else {
-            tableInfoIdList = devTableInfoMyDao.getSearchTableIds(searchType, String.join("|", searchTexts));
+            tableInfoIdList = devTableInfoMyDao.getSearchTableIds(searchType, searchTexts);
         }
         Set<Long> tableIds = new HashSet<>(tableInfoIdList);
+        // 资产目录查询(本级及可能的下级)
         if (isNotEmpty(assetCatalogueCode)) {
-            Set<Long> assetCatalogueTableIds = devLabelDao.select(c ->
-                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isEqualTo(assetCatalogueCode))
+            List<String> assetCatalogueCodeList = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1))
+                    .and(devEnumValue.valueCode, isEqualTo(assetCatalogueCode), or(devEnumValue.parentCode, isEqualTo(assetCatalogueCode))))
+                    .stream().map(DevEnumValue::getValueCode).collect(Collectors.toList());
+            Set<Long> removeAssetCatalogueTableIds = devLabelDao.select(c ->
+                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isNotIn(assetCatalogueCodeList))
                             .and(devLabel.labelCode, isEqualTo(ASSET_CATALOGUE_LABEL)))
                     .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            tableIds.removeAll(assetCatalogueTableIds);
+            tableIds.removeAll(removeAssetCatalogueTableIds);
         }
+        // 数仓分层查询
         if (isNotEmpty(dwLayerCode)) {
-            Set<Long> dwLayerTableIds = devLabelDao.select(c ->
-                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isEqualTo(dwLayerCode))
+            Set<Long> removeDwLayerTableIds = devLabelDao.select(c ->
+                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isNotEqualTo(dwLayerCode))
                             .and(devLabel.labelCode, isEqualTo(DW_LAYER_LABEL)))
                     .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            tableIds.removeAll(dwLayerTableIds);
+            tableIds.removeAll(removeDwLayerTableIds);
         }
         return new ArrayList<>(tableIds);
     }
 
     @Override
     public List<TableDetailDto> getTablesByIds(List<Long> tableIds) {
+        if (tableIds.size() == 0) {
+            return new ArrayList<>();
+        }
         List<TableDetailDto> tableInfoList = PojoUtil.copyList(devTableInfoDao.select(c ->
                 c.where(devTableInfo.id, isIn(tableIds)).and(devTableInfo.del, isNotEqualTo(1))),
-                TableDetailDto.class, "id", "name");
+                TableDetailDto.class, "id", "tableName");
         Map<Long, List<LabelDto>> tableInfoMap = PojoUtil.copyList(devLabelDao.select(c ->
                 c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.tableId, isIn(tableIds))
                         .and(devLabel.labelCode, isIn(Arrays.asList(tableDetails)))), LabelDto.class)
@@ -124,9 +133,9 @@ public class TableInfoApiImpl implements TableInfoApi {
             List<LabelDto> columnLabelList = tableInfoMap.get(columnInfo.getTableId());
 //            String columnComment = columnLabelList.stream().filter(columnLabel ->
 //                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findFirst().get().getLabelParamValue();
-            columnInfo.setColumnComment(columnLabelList.stream().filter(columnLabel ->
-                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL) && columnLabel.getColumnName().equals(columnInfo.getColumnName()))
-                    .findFirst().get().getLabelParamValue());
+            columnLabelList.stream().filter(columnLabel ->
+                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findFirst().ifPresent(commentLabel ->
+                    columnInfo.setColumnComment(commentLabel.getLabelParamValue()));
         });
         Map<Long, List<ColumnInfoDto>> columnInfoMap = columnInfoList.stream().collect(Collectors.groupingBy(ColumnInfoDto::getTableId));
         tableInfoList.forEach(tableDetail -> {
@@ -142,24 +151,25 @@ public class TableInfoApiImpl implements TableInfoApi {
 //                        tableLabel.getLabelCode().equals(METABASE_URL_LABEL)).findFirst().get().getLabelParamValue();
                 tableDetail.setTableComment(tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(TABLE_COMMENT_LABEL)).findFirst().get().getLabelParamValue());
-                tableDetail.setSecurityLevel(convertSecurityLevel(tableLabelList.stream().filter(tableLabel ->
-                        tableLabel.getLabelCode().equals(SECURITY_LEVEL_LABEL)).findFirst().get().getLabelParamValue()));
-//                tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue()));
-                tableDetail.setMetabaseUrl(tableLabelList.stream().filter(tableLabel ->
-                        tableLabel.getLabelCode().equals(METABASE_URL_LABEL)).findFirst().get().getLabelParamValue());
+                tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
+                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue()));
+                tableLabelList.stream().filter(tableLabel ->
+                        tableLabel.getLabelCode().equals(SECURITY_LEVEL_LABEL)).findFirst().ifPresent(securityLabel ->
+                        tableDetail.setSecurityLevel(convertSecurityLevel(securityLabel.getLabelParamValue())));
+                tableLabelList.stream().filter(tableLabel ->
+                        tableLabel.getLabelCode().equals(METABASE_URL_LABEL)).findFirst().ifPresent(metabaseLabel ->
+                        tableDetail.setMetabaseUrl(metabaseLabel.getLabelParamValue()));
                 tableDetail.setColumnInfos(columnInfoMap.get(tableDetail.getId()));
             }
         });
         return tableInfoList;
     }
 
-    // TODO
     private List<String> getAssetCatalogues(String assetCatalogueCode) {
         List<DevEnumValue> assetCatalogueList = devEnumValueDao.select(c ->
                 c.where(devEnumValue.del, isNotEqualTo(1)).and(devEnumValue.enumCode, isEqualTo(ASSET_CATALOGUE_ENUM)));
         Map<String, DevEnumValue> assetCatalogueMap = assetCatalogueList.stream()
-                .collect(Collectors.toMap(DevEnumValue::getEnumCode, Function.identity()));
+                .collect(Collectors.toMap(DevEnumValue::getValueCode, Function.identity()));
         List<DevEnumValue> echo = new ArrayList<>();
         echo.add(assetCatalogueMap.get(assetCatalogueCode));
         return getTree(echo, assetCatalogueMap).stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());

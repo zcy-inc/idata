@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.develop.api.TableInfoApi;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -45,6 +47,8 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private TableInfoApi tableInfoApi;
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
@@ -88,5 +92,14 @@ public class TableInfoController {
     @GetMapping("table/techInfo/{tableId}")
     public RestResult<TableTechInfoDto> getTableTechInfo(@PathVariable("tableId") Long tableId){
         return RestResult.success(tableInfoService.getTableTechInfo(tableId));
+    }
+
+    @GetMapping("testTable")
+    public RestResult<List<TableDetailDto>> testTables(@RequestParam(value = "searchTexts", required = false) List<String> searchTexts,
+                                                       @RequestParam(value = "assetCatalogueCode", required = false) String assetCatalogueCode,
+                                                       @RequestParam(value = "dwLayerCode", required = false) String dwLayerCode,
+                                                       @RequestParam(value = "searchType", required = false) String searchType) {
+        List<Long> tableId = tableInfoApi.getTableIds(searchTexts, assetCatalogueCode, dwLayerCode, searchType);
+        return RestResult.success(tableInfoApi.getTablesByIds(tableId));
     }
 }
