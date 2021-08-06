@@ -32,6 +32,14 @@ public class ColumnAttrDto {
      */
     private String nameEn;
 
+    public ColumnAttrDto() {
+    }
+
+    public ColumnAttrDto(String name, String nameEn) {
+        this.name = name;
+        this.nameEn = nameEn;
+    }
+
     public String getName() {
         return name;
     }

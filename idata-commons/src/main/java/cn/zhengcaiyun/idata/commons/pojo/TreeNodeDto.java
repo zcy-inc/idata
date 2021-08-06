@@ -17,7 +17,7 @@
 
 package cn.zhengcaiyun.idata.commons.pojo;
 
-import cn.zhengcaiyun.idata.commons.util.TreeNodeHelper;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * 泛型 N 表示节点类型
  * @author: yangjianhua
  * @create: 2021-07-15 17:08
- * @see TreeNodeHelper
+ * @see TreeNodeGenerator
  **/
 public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
     /**

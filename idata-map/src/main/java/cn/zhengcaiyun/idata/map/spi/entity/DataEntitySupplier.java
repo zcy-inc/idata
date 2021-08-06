@@ -28,9 +28,8 @@ import java.util.List;
  * @create: 2021-07-14 15:40
  **/
 public interface DataEntitySupplier<T extends DataSearchCond, R extends DataEntityDto> {
-    List<R> supply(T t);
+    List<R> queryDataEntity(T t);
 
     List<R> getDataEntity(List<String> entityCodes);
 
-    List<R> getExtraInfo(List<DataEntityDto> entities);
 }

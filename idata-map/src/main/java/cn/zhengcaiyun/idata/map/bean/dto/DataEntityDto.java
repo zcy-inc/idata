@@ -20,7 +20,9 @@ package cn.zhengcaiyun.idata.map.bean.dto;
 import com.google.common.collect.Maps;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @description: 数据实体dto
@@ -28,6 +30,15 @@ import java.util.Map;
  * @create: 2021-07-14 13:55
  **/
 public class DataEntityDto implements Comparable<DataEntityDto> {
+
+    public static final String more_table_column = "columns";
+    public static final String more_table_match_column = "matchColumns";
+    public static final String more_table_security_level = "securityLevelCode";
+
+    public static final String more_indicator_type = "indicatorType";
+    public static final String more_indicator_id = "indicatorId";
+    public static final String more_indicator_comment = "indicatorDefComment";
+
     /**
      * 数据实体code，唯一编号
      */
@@ -49,6 +60,10 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
      */
     private String categoryName;
     /**
+     * 数据实体所属类别全路径名称（包含所有父级）
+     */
+    private List<String> categoryPathNames;
+    /**
      * 数据实体 metabase url
      */
     private String metabaseUrl;
@@ -57,9 +72,13 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
      */
     private Long viewCount = 0L;
     /**
-     * 更多属性
+     * 更多属性，*** 勿用于并发处理 ***
      */
-    private final Map<String, Object> moreAttrs = Maps.newHashMap();
+    private Map<String, Object> moreAttrs = null;
+
+    public DataEntityDto(String entityCode) {
+        this.entityCode = entityCode;
+    }
 
     public String getEntityCode() {
         return entityCode;
@@ -121,7 +140,21 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
         return moreAttrs;
     }
 
+    public List<String> getCategoryPathNames() {
+        return categoryPathNames;
+    }
+
+    public void setCategoryPathNames(List<String> categoryPathNames) {
+        this.categoryPathNames = categoryPathNames;
+    }
+
+    public Object getMoreAttrs(String attrKey) {
+        if (Objects.isNull(attrKey)) return null;
+        return this.moreAttrs.get(attrKey);
+    }
+
     public DataEntityDto putMoreAttr(String attrKey, Object attrVal) {
+        if (Objects.isNull(this.moreAttrs)) this.moreAttrs = Maps.newHashMap();
         this.moreAttrs.put(attrKey, attrVal);
         return this;
     }
@@ -129,8 +162,6 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
     @Override
     public int compareTo(@NotNull DataEntityDto other) {
         int result = Long.compare(this.getViewCount(), other.getViewCount());
-        if (result == 0)
-            result = this.getEntityName().compareTo(other.getEntityName());
         if (result == 0)
             result = this.getEntityCode().compareTo(other.getEntityCode());
         return result;

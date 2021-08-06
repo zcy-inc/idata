@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.map.util;
 
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 public class DataEntityUtil {
 
     public static List<String> getEntityCode(List<DataEntityDto> entityDtoList) {
+        if (ObjectUtils.isEmpty(entityDtoList)) return Lists.newArrayList();
         return entityDtoList.stream()
                 .map(entityDto -> entityDto.getEntityCode())
                 .collect(Collectors.toList());

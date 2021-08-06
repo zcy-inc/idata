@@ -24,19 +24,20 @@ import com.google.common.collect.MultimapBuilder;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
  * @description: 工具类，创建TreeNodeDto树
- * example: TreeNodeHelper.withExpandedNodes(treeNodeDtoList).makeTree(() -> "0");
+ * example: TreeNodeGenerator.withExpandedNodes(treeNodeDtoList).makeTree(() -> "0");
  * @author: yangjianhua
  * @create: 2021-07-15 17:18
  * @see TreeNodeDto
  **/
-public class TreeNodeHelper<N extends TreeNodeDto> {
+public class TreeNodeGenerator<N extends TreeNodeDto> {
     private final List<N> expandedNodes;
 
-    private TreeNodeHelper(List<N> expandedNodes) {
+    private TreeNodeGenerator(List<N> expandedNodes) {
         this.expandedNodes = expandedNodes;
     }
 
@@ -46,8 +47,8 @@ public class TreeNodeHelper<N extends TreeNodeDto> {
      * @param expandedNodes
      * @return
      */
-    public static <N extends TreeNodeDto> TreeNodeHelper withExpandedNodes(List<N> expandedNodes) {
-        return new TreeNodeHelper(expandedNodes);
+    public static <N extends TreeNodeDto> TreeNodeGenerator withExpandedNodes(List<N> expandedNodes) {
+        return new TreeNodeGenerator(expandedNodes);
     }
 
     /**
@@ -57,22 +58,35 @@ public class TreeNodeHelper<N extends TreeNodeDto> {
      * @return
      */
     public List<N> makeTree(Supplier<String> parentIdProvider) {
+        return makeTree(parentIdProvider, null);
+    }
+
+    /**
+     * 传入父节点id Supplier
+     *
+     * @param parentIdProvider
+     * @return
+     */
+    public List<N> makeTree(Supplier<String> parentIdProvider, final Integer maxLevel) {
         if (CollectionUtils.isEmpty(expandedNodes)) return Lists.newArrayList();
 
         ListMultimap<String, N> treeListMultimap = MultimapBuilder.hashKeys().arrayListValues().build();
         expandedNodes.stream().forEach(nodeDto -> treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto));
 
-        // 最上层文件夹parent id 为0
-        List<N> treeList = makeTree(parentIdProvider.get(), treeListMultimap);
+        int curLevel = 1;
+        List<N> treeList = makeTree(parentIdProvider.get(), treeListMultimap, curLevel, maxLevel);
         return treeList == null ? Lists.newArrayList() : treeList;
     }
 
-    private List<N> makeTree(String parentId, ListMultimap<String, N> listMultimap) {
+    private List<N> makeTree(String parentId, ListMultimap<String, N> listMultimap, int curLevel, final Integer maxLevel) {
+        if (Objects.nonNull(maxLevel) && curLevel > maxLevel) {
+            return null;
+        }
         List<N> nodeDtoList = listMultimap.get(parentId);
         if (CollectionUtils.isEmpty(nodeDtoList)) return null;
 
         for (N nodeDto : nodeDtoList) {
-            nodeDto.setChildren(makeTree(nodeDto.getId().toString(), listMultimap));
+            nodeDto.setChildren(makeTree(nodeDto.getId().toString(), listMultimap, curLevel + 1, maxLevel));
         }
         return nodeDtoList;
     }

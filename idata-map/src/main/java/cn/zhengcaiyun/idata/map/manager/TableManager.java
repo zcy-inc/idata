@@ -17,11 +17,7 @@
 
 package cn.zhengcaiyun.idata.map.manager;
 
-import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @description:
@@ -31,14 +27,4 @@ import java.util.Map;
 @Component
 public class TableManager {
 
-    /**
-     * 根据表唯一标识获取表字段信息
-     *
-     * @param tableIds
-     * @return
-     */
-    public Map<String, List<ColumnAttrDto>> getTableColumnInfo(List<String> tableIds) {
-        // todo 从数仓设计模块查询表数据
-        return null;
-    }
 }

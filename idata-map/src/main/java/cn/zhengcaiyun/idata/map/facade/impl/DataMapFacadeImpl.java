@@ -21,11 +21,12 @@ import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.KeywordUtil;
 import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
-import cn.zhengcaiyun.idata.commons.util.TreeNodeHelper;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
 import cn.zhengcaiyun.idata.map.bean.condition.CategoryCond;
 import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.condition.ViewCountCond;
 import cn.zhengcaiyun.idata.map.bean.dto.CategoryTreeNodeDto;
+import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
 import cn.zhengcaiyun.idata.map.facade.DataMapFacade;
@@ -36,6 +37,7 @@ import cn.zhengcaiyun.idata.map.util.DataEntityUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +73,7 @@ public class DataMapFacadeImpl implements DataMapFacade {
         condition.setKeyWords(KeywordUtil.parseKeyword(keyword));
         condition.setKeyWord(null);
 
-        List<DataEntityDto> entityDtoList = dataEntityManager.getDataEntity(condition.getSource(), condition);
+        List<DataEntityDto> entityDtoList = dataEntityManager.queryDataEntity(condition.getSource(), condition);
         if (isEmpty(entityDtoList)) return Page.newOne(Lists.newLinkedList(), 0);
 
         // 数据量小于1000时，查询浏览次数带上实体code，减少查询量；大于1000时，直接查询全量浏览次数统计数据
@@ -82,14 +84,18 @@ public class DataMapFacadeImpl implements DataMapFacade {
         Map<String, Long> seqMap = getEntitySeq(condition.getSource(), entityCodes, viewCountService::queryViewCount);
         List<DataEntityDto> seqEntityList = assembleSequence(entityDtoList, seqMap);
         Page<DataEntityDto> entityPage = PaginationInMemory.of(seqEntityList).paging(pageParam);
-        entityPage.setContent(dataEntityManager.getEntityExtraInfo(condition.getSource(), entityPage.getContent()));
+        List<DataEntityDto> entityWholeInfoList = dataEntityManager.getEntityWholeInfo(condition.getSource(), entityPage.getContent());
+        if (condition.searchFromTable()) {
+            entityWholeInfoList = pickEntityMatchColumn(entityWholeInfoList, condition.getKeyWords());
+        }
+        entityPage.setContent(entityWholeInfoList);
         return entityPage;
     }
 
     @Override
     public List<CategoryTreeNodeDto> getCategory(CategoryCond condition) {
         List<CategoryTreeNodeDto> treeNodeDtoList = categoryManager.getCategoryTreeNode(condition.getCategoryType(), condition);
-        return TreeNodeHelper.withExpandedNodes(treeNodeDtoList).makeTree(() -> "");
+        return TreeNodeGenerator.withExpandedNodes(treeNodeDtoList).makeTree(() -> "", condition.getLevel());
     }
 
     private List<DataEntityDto> assembleSequence(List<DataEntityDto> entityDtoList,
@@ -109,6 +115,32 @@ public class DataMapFacadeImpl implements DataMapFacade {
             viewCounts.stream()
                     .forEach(viewCount -> seqMap.put(viewCount.getEntityCode(), viewCount.getViewCount()));
         return seqMap;
+    }
+
+    private List<DataEntityDto> pickEntityMatchColumn(List<DataEntityDto> entityWholeInfoList, List<String> keyWords) {
+        if (ObjectUtils.isEmpty(entityWholeInfoList) || ObjectUtils.isEmpty(keyWords)) return entityWholeInfoList;
+
+        for (DataEntityDto entityDto : entityWholeInfoList) {
+            entityDto.putMoreAttr(DataEntityDto.more_table_match_column, pickMatchColumn((List<ColumnAttrDto>) entityDto.getMoreAttrs(DataEntityDto.more_table_column), keyWords));
+        }
+        return entityWholeInfoList;
+    }
+
+    private List<ColumnAttrDto> pickMatchColumn(List<ColumnAttrDto> dtoList, List<String> keyWords) {
+        if (ObjectUtils.isEmpty(keyWords) || ObjectUtils.isEmpty(dtoList)) return Lists.newArrayList();
+
+        List<ColumnAttrDto> pickList = Lists.newArrayList();
+        for (ColumnAttrDto dto : dtoList) {
+            for (String keyWord : keyWords) {
+                if (StringUtils.isEmpty(keyWord))
+                    continue;
+                if ((StringUtils.isNotEmpty(dto.getName()) && dto.getName().indexOf(keyWord) >= 0)
+                        || (StringUtils.isNotEmpty(dto.getNameEn()) && dto.getNameEn().indexOf(keyWord) >= 0)) {
+                    pickList.add(dto);
+                }
+            }
+        }
+        return pickList;
     }
 
 }

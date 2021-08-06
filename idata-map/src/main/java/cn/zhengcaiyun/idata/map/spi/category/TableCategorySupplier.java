@@ -17,13 +17,20 @@
 
 package cn.zhengcaiyun.idata.map.spi.category;
 
+import cn.zhengcaiyun.idata.develop.api.EnumApi;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.map.bean.condition.CategoryCond;
 import cn.zhengcaiyun.idata.map.bean.dto.CategoryTreeNodeDto;
 import cn.zhengcaiyun.idata.map.constant.enums.CategoryTypeEnum;
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description: 获取表实体数据
@@ -32,6 +39,13 @@ import java.util.List;
  **/
 @Component
 public class TableCategorySupplier implements CategorySupplier<CategoryCond, CategoryTreeNodeDto> {
+
+    private final EnumApi enumApi;
+
+    @Autowired
+    public TableCategorySupplier(EnumApi enumApi) {
+        this.enumApi = enumApi;
+    }
 
     @PostConstruct
     public void register() {
@@ -46,7 +60,19 @@ public class TableCategorySupplier implements CategorySupplier<CategoryCond, Cat
      */
     @Override
     public List<CategoryTreeNodeDto> supply(CategoryCond categoryCond) {
-        // todo 从数仓设计模块查询资产目录数据，封装为CategoryTreeNodeDto对象集合
-        return null;
+        // 从数仓设计模块查询资产目录数据，封装为CategoryTreeNodeDto对象集合
+        List<EnumValueDto> dtoList = enumApi.getEnumValues("assetCatalogueEnum:ENUM");
+        if (ObjectUtils.isNotEmpty(dtoList)) return Lists.newArrayList();
+
+        return dtoList.stream().map(this::toTreeNode).collect(Collectors.toList());
+    }
+
+    private CategoryTreeNodeDto toTreeNode(EnumValueDto dto) {
+        CategoryTreeNodeDto nodeDto = new CategoryTreeNodeDto();
+        nodeDto.setId(dto.getValueCode());
+        nodeDto.setName(dto.getEnumValue());
+        nodeDto.setParentId(MoreObjects.firstNonNull(dto.getParentCode(), ""));
+        nodeDto.setType("assetCatalogueEnum:ENUM");
+        return nodeDto;
     }
 }

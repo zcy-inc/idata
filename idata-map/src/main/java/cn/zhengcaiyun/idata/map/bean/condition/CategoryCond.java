@@ -29,7 +29,7 @@ public class CategoryCond {
      */
     private String categoryType;
     /**
-     * 查询树层级，0表示查询所有，n（>0）表示查询前n级
+     * 查询树层级，n（>0）表示查询前n级，查询所有时不传
      */
     private Integer level;
 

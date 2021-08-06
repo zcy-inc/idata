@@ -17,20 +17,22 @@
 
 package cn.zhengcaiyun.idata.map.spi.entity;
 
+import cn.zhengcaiyun.idata.develop.api.TableInfoApi;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
-import cn.zhengcaiyun.idata.map.manager.TableManager;
-import cn.zhengcaiyun.idata.map.util.DataEntityUtil;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @description: 获取表实体数据
@@ -40,11 +42,11 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 @Component
 public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, DataEntityDto> {
 
-    private final TableManager tableManager;
+    private final TableInfoApi tableInfoApi;
 
     @Autowired
-    public TableEntitySupplier(TableManager tableManager) {
-        this.tableManager = tableManager;
+    public TableEntitySupplier(TableInfoApi tableInfoApi) {
+        this.tableInfoApi = tableInfoApi;
     }
 
     @PostConstruct
@@ -59,9 +61,13 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
      * @return
      */
     @Override
-    public List<DataEntityDto> supply(DataSearchCond condition) {
-        // todo 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
-        return null;
+    public List<DataEntityDto> queryDataEntity(DataSearchCond condition) {
+        // 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
+        List<Long> tableIds = tableInfoApi.getTableIds(condition.getKeyWords(), condition.getCategoryId(), condition.getTableLayer(),
+                "all".equals(condition.getTableSearchRange()) ? null : condition.getTableSearchRange().toUpperCase());
+        if (ObjectUtils.isEmpty(tableIds)) return Lists.newArrayList();
+
+        return tableIds.stream().map(id -> new DataEntityDto(id.toString())).collect(Collectors.toList());
     }
 
     /**
@@ -72,28 +78,31 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
      */
     @Override
     public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
-        // todo 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
-        return null;
+        List<Long> tableIds = entityCodes.stream().map(Long::parseLong).collect(Collectors.toList());
+        // 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
+        List<TableDetailDto> dtoList = tableInfoApi.getTablesByIds(tableIds);
+        if (ObjectUtils.isEmpty(dtoList)) return Lists.newArrayList();
+
+        return dtoList.stream().map(this::toDataEntity).collect(Collectors.toList());
     }
 
-    /**
-     * 获取表设计额外信息，如表字段信息
-     *
-     * @param entities
-     * @return
-     */
-    @Override
-    public List<DataEntityDto> getExtraInfo(List<DataEntityDto> entities) {
-        if (isEmpty(entities)) return entities;
-
-        // 单独查询表字段信息
-        List<String> codes = DataEntityUtil.getEntityCode(entities);
-        Map<String, List<ColumnAttrDto>> tableColumnMap = tableManager.getTableColumnInfo(codes);
-        if (isEmpty(tableColumnMap)) return entities;
-
-        entities.stream()
-                .forEach(dataEntityDto ->
-                        dataEntityDto.putMoreAttr("columns", tableColumnMap.get(dataEntityDto.getEntityCode())));
-        return entities;
+    private DataEntityDto toDataEntity(TableDetailDto detailDto) {
+        DataEntityDto entityDto = new DataEntityDto(detailDto.getId().toString());
+        entityDto.setEntityName(detailDto.getTableComment());
+        entityDto.setEntityNameEn(detailDto.getTableName());
+        entityDto.setMetabaseUrl(detailDto.getMetabaseUrl());
+        entityDto.setCategoryPathNames(detailDto.getAssetCatalogues());
+        if (Objects.nonNull(detailDto.getSecurityLevel())) {
+            entityDto.putMoreAttr(DataEntityDto.more_table_security_level, detailDto.getSecurityLevel().name());
+        }
+        List<ColumnInfoDto> columnInfoDtoList = detailDto.getColumnInfos();
+        if (ObjectUtils.isNotEmpty(columnInfoDtoList)) {
+            List<ColumnAttrDto> columnAttrDtoList = columnInfoDtoList.stream()
+                    .map(colInfo -> new ColumnAttrDto(colInfo.getColumnComment(), colInfo.getColumnName()))
+                    .collect(Collectors.toList());
+            entityDto.putMoreAttr(DataEntityDto.more_table_column, columnAttrDtoList);
+        }
+        return entityDto;
     }
+
 }

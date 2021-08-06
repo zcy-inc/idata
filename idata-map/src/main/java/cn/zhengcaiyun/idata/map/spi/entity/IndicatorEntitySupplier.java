@@ -17,13 +17,20 @@
 
 package cn.zhengcaiyun.idata.map.spi.entity;
 
+import cn.zhengcaiyun.idata.develop.api.MeasureApi;
+import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description: 获取表实体数据
@@ -32,6 +39,14 @@ import java.util.List;
  **/
 @Component
 public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCond, DataEntityDto> {
+
+    private final MeasureApi measureApi;
+
+    @Autowired
+    public IndicatorEntitySupplier(MeasureApi measureApi) {
+        this.measureApi = measureApi;
+    }
+
 
     @PostConstruct
     public void register() {
@@ -45,9 +60,12 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
      * @return
      */
     @Override
-    public List<DataEntityDto> supply(DataSearchCond condition) {
-        //todo 从指标库查询指标数据
-        return null;
+    public List<DataEntityDto> queryDataEntity(DataSearchCond condition) {
+        // 从指标库查询指标数据
+        List<String> metricCodes = measureApi.getMetricCodes(condition.getKeyWords(), condition.getCategoryId());
+        if (ObjectUtils.isEmpty(metricCodes)) return Lists.newArrayList();
+
+        return metricCodes.stream().map(code -> new DataEntityDto(code)).collect(Collectors.toList());
     }
 
     /**
@@ -58,13 +76,28 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
      */
     @Override
     public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
-        //todo 从指标库查询指标数据
-        return null;
+        // 从指标库查询指标数据
+        List<MeasureDto> measureDtoList = measureApi.getMeasures(entityCodes);
+        if (ObjectUtils.isEmpty(measureDtoList)) return Lists.newArrayList();
+
+        return measureDtoList.stream().map(this::toDataEntity).collect(Collectors.toList());
     }
 
-    @Override
-    public List<DataEntityDto> getExtraInfo(List<DataEntityDto> entities) {
-        // 无额外信息添加，透传entities
-        return entities;
+    private DataEntityDto toDataEntity(MeasureDto measureDto) {
+        DataEntityDto entityDto = new DataEntityDto(measureDto.getLabelCode());
+        entityDto.setEntityName(measureDto.getLabelName());
+        entityDto.setEntityNameEn(measureDto.getEnName());
+        entityDto.setCategoryName(measureDto.getBizTypeValue());
+        if (StringUtils.isNotEmpty(measureDto.getLabelTag())) {
+            entityDto.putMoreAttr(DataEntityDto.more_indicator_type, measureDto.getLabelTag());
+        }
+        if (StringUtils.isNotEmpty(measureDto.getMeasureId())) {
+            entityDto.putMoreAttr(DataEntityDto.more_indicator_id, measureDto.getMeasureId());
+        }
+        if (StringUtils.isNotEmpty(measureDto.getMeasureDefine())) {
+            entityDto.putMoreAttr(DataEntityDto.more_indicator_comment, measureDto.getMeasureDefine());
+        }
+        return entityDto;
     }
+
 }

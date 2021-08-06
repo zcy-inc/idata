@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.spi.entity.DataEntitySupplier;
 import cn.zhengcaiyun.idata.map.spi.entity.DataEntitySupplierFactory;
+import cn.zhengcaiyun.idata.map.util.DataEntityUtil;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,11 +56,11 @@ public class DataEntityManager {
         return supplier.getDataEntity(entityCodes);
     }
 
-    public List<DataEntityDto> getDataEntity(String entitySource, DataSearchCond condition) {
+    public List<DataEntityDto> queryDataEntity(String entitySource, DataSearchCond condition) {
         checkArgument(isNotEmpty(entitySource), "业务源标识不能为空");
         checkArgument(isNotEmpty(condition), "查询条件不能为空");
         DataEntitySupplier supplier = dataEntitySupplierFactory.getSupplier(entitySource);
-        return supplier.supply(condition);
+        return supplier.queryDataEntity(condition);
     }
 
     public Map<String, DataEntityDto> getDataEntityMap(String entitySource, List<String> entityCodes) {
@@ -71,9 +72,9 @@ public class DataEntityManager {
                 .collect(Collectors.toMap(DataEntityDto::getEntityCode, Function.identity()));
     }
 
-    public List<DataEntityDto> getEntityExtraInfo(String entitySource, List<DataEntityDto> entities) {
+    public List<DataEntityDto> getEntityWholeInfo(String entitySource, List<DataEntityDto> entities) {
         checkArgument(isNotEmpty(entitySource), "业务源标识不能为空");
         DataEntitySupplier supplier = dataEntitySupplierFactory.getSupplier(entitySource);
-        return supplier.getExtraInfo(entities);
+        return supplier.getDataEntity(DataEntityUtil.getEntityCode(entities));
     }
 }
