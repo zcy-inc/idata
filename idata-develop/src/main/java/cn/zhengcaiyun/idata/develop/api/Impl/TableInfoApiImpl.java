@@ -131,8 +131,6 @@ public class TableInfoApiImpl implements TableInfoApi {
                 ColumnInfoDto.class, "id", "columnName", "tableId");
         columnInfoList.forEach(columnInfo -> {
             List<LabelDto> columnLabelList = tableInfoMap.get(columnInfo.getTableId());
-//            String columnComment = columnLabelList.stream().filter(columnLabel ->
-//                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findFirst().get().getLabelParamValue();
             columnLabelList.stream().filter(columnLabel ->
                     columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findFirst().ifPresent(commentLabel ->
                     columnInfo.setColumnComment(commentLabel.getLabelParamValue()));
@@ -141,14 +139,6 @@ public class TableInfoApiImpl implements TableInfoApi {
         tableInfoList.forEach(tableDetail -> {
             if (tableInfoMap.containsKey(tableDetail.getId())) {
                 List<LabelDto> tableLabelList = tableInfoMap.get(tableDetail.getId());
-//                String tableComment = tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(TABLE_COMMENT_LABEL)).findFirst().get().getLabelParamValue();
-//                String securityLevel = tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(SECURITY_LEVEL_LABEL)).findFirst().get().getLabelParamValue();
-//                String assetCatalogueCode = tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue();
-//                String metabaseUrl = tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(METABASE_URL_LABEL)).findFirst().get().getLabelParamValue();
                 tableDetail.setTableComment(tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(TABLE_COMMENT_LABEL)).findFirst().get().getLabelParamValue());
                 tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
