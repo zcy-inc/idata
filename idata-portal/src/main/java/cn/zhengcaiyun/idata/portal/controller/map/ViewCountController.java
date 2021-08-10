@@ -45,6 +45,13 @@ public class ViewCountController {
         this.viewCountService = viewCountService;
     }
 
+    /**
+     * 记录用户浏览日志
+     *
+     * @param entitySource 数据源：数仓表（table） or 数据指标（indicator）
+     * @param entityCode   数据实体（表或指标）的唯一标识
+     * @return
+     */
     @PostMapping("/log")
     public RestResult<String> logUserView(@RequestParam(value = "entitySource") String entitySource,
                                           @RequestParam(value = "entityCode") String entityCode) {

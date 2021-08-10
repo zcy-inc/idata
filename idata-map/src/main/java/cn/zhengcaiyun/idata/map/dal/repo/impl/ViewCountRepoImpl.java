@@ -86,7 +86,7 @@ public class ViewCountRepoImpl implements ViewCountRepo {
 
     @Override
     public int createViewCount(ViewCount viewCount) {
-        return countDao.insert(viewCount);
+        return countDao.insertSelective(viewCount);
     }
 
     @Override

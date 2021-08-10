@@ -85,7 +85,7 @@ public class DataMapFacadeImpl implements DataMapFacade {
         }
         Map<String, Long> seqMap = getEntitySeq(condition.getSource(), entityCodes, viewCountService::queryViewCount);
         List<DataEntityDto> seqEntityList = assembleSequence(entityDtoList, seqMap);
-        Page<DataEntityDto> entityPage = PaginationInMemory.of(seqEntityList).paging(pageParam);
+        Page<DataEntityDto> entityPage = PaginationInMemory.of(seqEntityList).sort().paging(pageParam);
         List<DataEntityDto> entityWholeInfoList = dataEntityManager.getEntityWholeInfo(condition.getSource(), entityPage.getContent());
         if (condition.searchFromTable()) {
             entityWholeInfoList = pickEntityMatchColumn(entityWholeInfoList, condition.getKeyWords());

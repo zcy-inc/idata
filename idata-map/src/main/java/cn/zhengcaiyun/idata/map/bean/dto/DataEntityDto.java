@@ -159,9 +159,15 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
         return this;
     }
 
+    /**
+     * 根据热门浏览次数倒序排，浏览次数相同时，根据 entityCode 自然排序
+     *
+     * @param other
+     * @return
+     */
     @Override
     public int compareTo(@NotNull DataEntityDto other) {
-        int result = Long.compare(this.getViewCount(), other.getViewCount());
+        int result = Long.compare(other.getViewCount(), this.getViewCount());
         if (result == 0)
             result = this.getEntityCode().compareTo(other.getEntityCode());
         return result;

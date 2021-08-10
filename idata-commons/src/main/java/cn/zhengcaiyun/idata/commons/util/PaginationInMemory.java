@@ -54,8 +54,8 @@ public class PaginationInMemory<T extends Comparable<T>> {
     public Page<T> paging(final PageParam pageParam) {
         checkArgument(nonNull(pageParam), "分页参数为空");
         List<T> pagingList = dataList.stream()
-                .limit(pageParam.getLimit())
                 .skip(firstNonNull(pageParam.getOffset(), 0L))
+                .limit(pageParam.getLimit())
                 .collect(Collectors.toList());
         return Page.newOne(pagingList, dataList.size());
     }

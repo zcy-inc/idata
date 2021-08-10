@@ -63,8 +63,12 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
     @Override
     public List<DataEntityDto> queryDataEntity(DataSearchCond condition) {
         // 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
+        String tableSearchRange = condition.getTableSearchRange();
+        if (tableSearchRange != null && "all".equals(condition.getTableSearchRange()))
+            tableSearchRange = null;
+
         List<Long> tableIds = tableInfoApi.getTableIds(condition.getKeyWords(), condition.getCategoryId(), condition.getTableLayer(),
-                "all".equals(condition.getTableSearchRange()) ? null : condition.getTableSearchRange().toUpperCase());
+                tableSearchRange == null ? null : tableSearchRange.toUpperCase());
         if (ObjectUtils.isEmpty(tableIds)) return Lists.newArrayList();
 
         return tableIds.stream().map(id -> new DataEntityDto(id.toString())).collect(Collectors.toList());

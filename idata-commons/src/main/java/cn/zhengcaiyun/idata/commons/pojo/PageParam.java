@@ -59,7 +59,7 @@ public class PageParam {
     }
 
     public static Long checkOffset(Long offset) {
-        if (offset != null || offset < 0)
+        if (offset != null && offset < 0)
             return null;
         return offset;
     }
