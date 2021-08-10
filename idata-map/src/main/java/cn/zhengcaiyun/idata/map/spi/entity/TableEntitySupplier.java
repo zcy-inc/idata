@@ -24,6 +24,7 @@ import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,12 +64,12 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
     @Override
     public List<DataEntityDto> queryDataEntity(DataSearchCond condition) {
         // 从数仓设计模块查询表数据，封装为DataEntityDto对象集合
-        String tableSearchRange = condition.getTableSearchRange();
+        String tableSearchRange = Strings.emptyToNull(condition.getTableSearchRange());
         if (tableSearchRange != null && "all".equals(condition.getTableSearchRange()))
             tableSearchRange = null;
 
-        List<Long> tableIds = tableInfoApi.getTableIds(condition.getKeyWords(), condition.getCategoryId(), condition.getTableLayer(),
-                tableSearchRange == null ? null : tableSearchRange.toUpperCase());
+        List<Long> tableIds = tableInfoApi.getTableIds(condition.getKeyWords(), Strings.emptyToNull(condition.getCategoryId()),
+                Strings.emptyToNull(condition.getTableLayer()), tableSearchRange == null ? null : tableSearchRange.toUpperCase());
         if (ObjectUtils.isEmpty(tableIds)) return Lists.newArrayList();
 
         return tableIds.stream().map(id -> new DataEntityDto(id.toString())).collect(Collectors.toList());

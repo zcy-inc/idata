@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,7 +63,7 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
     @Override
     public List<DataEntityDto> queryDataEntity(DataSearchCond condition) {
         // 从指标库查询指标数据
-        List<String> metricCodes = measureApi.getMetricCodes(condition.getKeyWords(), condition.getCategoryId());
+        List<String> metricCodes = measureApi.getMetricCodes(condition.getKeyWords(), Strings.emptyToNull(condition.getCategoryId()));
         if (ObjectUtils.isEmpty(metricCodes)) return Lists.newArrayList();
 
         return metricCodes.stream().map(code -> new DataEntityDto(code)).collect(Collectors.toList());

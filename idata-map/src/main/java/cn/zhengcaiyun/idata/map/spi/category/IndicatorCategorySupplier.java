@@ -62,7 +62,7 @@ public class IndicatorCategorySupplier implements CategorySupplier<CategoryCond,
     public List<CategoryTreeNodeDto> supply(CategoryCond categoryCond) {
         // 从指标库查询业务过程数据，封装为CategoryTreeNodeDto对象集合
         List<EnumValueDto> dtoList = enumApi.getEnumValues("bizTypeEnum:ENUM");
-        if (ObjectUtils.isNotEmpty(dtoList)) return Lists.newArrayList();
+        if (ObjectUtils.isEmpty(dtoList)) return Lists.newArrayList();
 
         return dtoList.stream().map(this::toTreeNode).collect(Collectors.toList());
     }

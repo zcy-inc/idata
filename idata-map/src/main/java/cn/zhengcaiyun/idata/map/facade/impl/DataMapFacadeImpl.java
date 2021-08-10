@@ -44,6 +44,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -75,22 +76,28 @@ public class DataMapFacadeImpl implements DataMapFacade {
         condition.setKeyWords(KeywordUtil.parseKeyword(keyword));
         condition.setKeyWord(null);
 
+        // 查询数据实体，当前只包含数据实体code（唯一标识），排序分页后再查询实体其他数据
         List<DataEntityDto> entityDtoList = dataEntityManager.queryDataEntity(condition.getSource(), condition);
         if (isEmpty(entityDtoList)) return Page.newOne(Lists.newLinkedList(), 0);
 
-        // 数据量小于1000时，查询浏览次数带上实体code，减少查询量；大于1000时，直接查询全量浏览次数统计数据
+        // 搜索结果数据量小于1000时，查询浏览次数带上实体code，减少查询量；大于1000时，直接查询全量浏览次数统计数据
         List<String> entityCodes = null;
         if (entityDtoList.size() <= 1000) {
             entityCodes = DataEntityUtil.getEntityCode(entityDtoList);
         }
         Map<String, Long> seqMap = getEntitySeq(condition.getSource(), entityCodes, viewCountService::queryViewCount);
+        // 浏览次数添加到数据实体中
         List<DataEntityDto> seqEntityList = assembleSequence(entityDtoList, seqMap);
+        // 排序后分页
         Page<DataEntityDto> entityPage = PaginationInMemory.of(seqEntityList).sort().paging(pageParam);
+        // 根据分页结果查询数据实体全部数据
         List<DataEntityDto> entityWholeInfoList = dataEntityManager.getEntityWholeInfo(condition.getSource(), entityPage.getContent());
         if (condition.searchFromTable()) {
             entityWholeInfoList = pickEntityMatchColumn(entityWholeInfoList, condition.getKeyWords());
         }
-        entityPage.setContent(entityWholeInfoList);
+        // entityWholeInfoList 中为分页后重新查询的数据对象，需要再次加上浏览次数排序（只排当页数据）
+        List<DataEntityDto> seqEntityWholeInfoList = assembleSequence(entityWholeInfoList, seqMap);
+        entityPage.setContent(seqEntityWholeInfoList.stream().sorted().collect(Collectors.toList()));
         return entityPage;
     }
 
