@@ -29,7 +29,6 @@ import java.util.List;
 @Mapper
 public interface DevTableInfoMyDao {
 
-    // TODO 待测试
     @Select("<script>" +
                 "SELECT dev_label.table_id " +
                 "FROM dev_label " +
@@ -37,11 +36,11 @@ public interface DevTableInfoMyDao {
                     "LEFT JOIN dev_column_info " +
                     "ON dev_label.column_name = dev_column_info.column_name " +
                     "WHERE dev_label.del != 1 AND dev_column_info.del != 1 AND (" +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_column_info.column_name LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                         "OR " +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                     ") " +
@@ -50,11 +49,11 @@ public interface DevTableInfoMyDao {
                     "LEFT JOIN dev_table_info " +
                     "ON dev_label.table_id = dev_table_info.id " +
                     "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND (" +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                         "OR " +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                     ") " +
@@ -65,15 +64,15 @@ public interface DevTableInfoMyDao {
                     "LEFT JOIN dev_column_info " +
                     "ON dev_label.column_name = dev_column_info.column_name " +
                     "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND dev_column_info.del != 1 AND (" +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                         "OR " +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_column_info.column_name LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                         "OR " +
-                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'OR' close = ')'>" +
+                        "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                             "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                     ") " +
