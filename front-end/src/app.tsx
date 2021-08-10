@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageLoading } from '@ant-design/pro-layout';
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
-import { history } from 'umi';
+import { history, Link } from 'umi';
 import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
 import type { CurrentUser } from '@/interfaces/user';
 import type { Context } from 'umi-request';
@@ -20,6 +20,10 @@ const fetchCurrentUser = async () => {
   }
   return undefined;
 };
+
+const renderIcon = (src: string) => (
+  <img src={src} alt="icon" style={{ marginRight: 10, height: 14 }} />
+);
 
 /**
  * 获取用户信息比较慢的时候会展示一个 loading
@@ -61,6 +65,21 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
+    subMenuItemRender: (subMenu, defaultDom) => {
+      let icon = location.hash.includes(subMenu.path as string)
+        ? renderIcon(subMenu.iconActive)
+        : renderIcon(subMenu.iconDefault);
+      return [icon, defaultDom];
+    },
+    menuItemRender: (item, defaultDom) => {
+      let icon = null;
+      if (item.path === '/objectLabel') {
+        icon = location.hash.includes(item.path)
+          ? renderIcon(item.iconActive)
+          : renderIcon(item.iconDefault);
+      }
+      return [icon, <Link to={item.path as string}>{defaultDom}</Link>];
+    },
     ...initialState?.settings,
   };
 };
