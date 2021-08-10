@@ -76,9 +76,6 @@ public interface DevTableInfoMyDao {
                             "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
                         "</foreach>" +
                     ") " +
-                    "AND (dev_column_info.column_name REGEXP #{searchTexts} " +
-                        "OR dev_table_info.table_name REGEXP #{searchTexts} " +
-                        "OR dev_label.label_param_value REGEXP #{searchTexts}) " +
                 "</if>" +
             "</script>")
     List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
