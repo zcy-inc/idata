@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * develop-data-query-controller
  * @description:
  * @author: yangjianhua
  * @create: 2021-07-21 18:57
@@ -38,6 +39,12 @@ public class MeasureDataController {
     @Autowired
     private MeasureDataService measureDataService;
 
+    /**
+     * 查询指标数据
+     *
+     * @param measureDataQueryDto
+     * @return
+     */
     @PostMapping("/dataQuery")
     RestResult<QueryResultDto> queryMeasureData(@RequestBody MeasureDataQueryDto measureDataQueryDto) {
         return RestResult.success(measureDataService.queryMeasureData(measureDataQueryDto));

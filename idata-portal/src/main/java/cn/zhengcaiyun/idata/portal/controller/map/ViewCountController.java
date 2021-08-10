@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * data-map-api
+ * data-map-controller
  *
  * @description: 浏览热度rest接口
  * @author: yangjianhua

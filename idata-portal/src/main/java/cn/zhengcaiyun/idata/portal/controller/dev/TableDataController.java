@@ -38,8 +38,15 @@ public class TableDataController {
     @Autowired
     private TableDataService tableDataService;
 
+    /**
+     * 查询表数据
+     * 默认最大查询10条
+     *
+     * @param tableId 表id
+     * @return
+     */
     @GetMapping("/data/{tableId}")
-    RestResult<QueryResultDto> getTableData(@PathVariable("tableId") Long tableId){
+    RestResult<QueryResultDto> getTableData(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableDataService.getTableData(tableId));
     }
 }
