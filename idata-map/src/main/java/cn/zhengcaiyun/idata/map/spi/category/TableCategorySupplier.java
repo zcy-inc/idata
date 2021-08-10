@@ -62,7 +62,7 @@ public class TableCategorySupplier implements CategorySupplier<CategoryCond, Cat
     public List<CategoryTreeNodeDto> supply(CategoryCond categoryCond) {
         // 从数仓设计模块查询资产目录数据，封装为CategoryTreeNodeDto对象集合
         List<EnumValueDto> dtoList = enumApi.getEnumValues("assetCatalogueEnum:ENUM");
-        if (ObjectUtils.isNotEmpty(dtoList)) return Lists.newArrayList();
+        if (ObjectUtils.isEmpty(dtoList)) return Lists.newArrayList();
 
         return dtoList.stream().map(this::toTreeNode).collect(Collectors.toList());
     }

@@ -26,10 +26,7 @@ import cn.zhengcaiyun.idata.map.bean.dto.CategoryTreeNodeDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.facade.DataMapFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -59,9 +56,10 @@ public class DataMapController {
      * @param offset    查询起始记录位置
      * @return
      */
-    @GetMapping("/search")
-    public RestResult<Page<DataEntityDto>> search(@RequestParam DataSearchCond condition,
-                                                  @RequestParam Long limit, @RequestParam Long offset) {
+    @PostMapping("/search")
+    public RestResult<Page<DataEntityDto>> search(@RequestBody DataSearchCond condition,
+                                                  @RequestParam(value = "limit") Long limit,
+                                                  @RequestParam(value = "offset") Long offset) {
         return RestResult.success(dataMapFacade.searchEntity(condition, PageParam.of(limit, offset)));
     }
 
@@ -72,7 +70,7 @@ public class DataMapController {
      * @return
      */
     @GetMapping("/category")
-    public RestResult<List<CategoryTreeNodeDto>> getCategory(@RequestParam CategoryCond condition) {
+    public RestResult<List<CategoryTreeNodeDto>> getCategory(CategoryCond condition) {
         return RestResult.success(dataMapFacade.getCategory(condition));
     }
 }
