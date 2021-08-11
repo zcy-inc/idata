@@ -193,17 +193,18 @@ public class MeasureApiImpl implements MeasureApi {
         }
         if (isNotEmpty(bizTypeCode)) {
             Map<String, String> bizTypeMetricMap = metricList.stream()
-                    .collect(Collectors.toMap(metric -> {
+                    .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+                            metric -> {
                         AttributeDto attribute = metric.getLabelAttributes().stream()
                                 .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().get();
                         return attribute.getAttributeValue();
-                    }, LabelDefineDto::getLabelCode));
+                    }));
             List<String> bizTypeCodeList = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1))
                     .and(devEnumValue.valueCode, isEqualTo(bizTypeCode), or(devEnumValue.parentCode, isEqualTo(bizTypeCode))))
-                    .stream().map(DevEnumValue::getEnumCode).collect(Collectors.toList());
+                    .stream().map(DevEnumValue::getValueCode).collect(Collectors.toList());
             Set<String> removeBizTypeMetricCodes = bizTypeMetricMap.entrySet().stream()
-                    .filter(metric -> !bizTypeCodeList.contains(metric.getKey()))
-                    .map(Map.Entry::getValue)
+                    .filter(metric -> !bizTypeCodeList.contains(metric.getValue()))
+                    .map(Map.Entry::getKey)
                     .collect(Collectors.toSet());
             metricCodes.removeAll(removeBizTypeMetricCodes);
         }
