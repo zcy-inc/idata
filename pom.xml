@@ -62,6 +62,7 @@
         <presto-jdbc.version>346</presto-jdbc.version>
         <hive-jdbc.version>2.1.1</hive-jdbc.version>
         <antlr.version>4.7.2</antlr.version>
+        <postgresql.version>42.2.5</postgresql.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -124,6 +125,11 @@
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
                 <version>${antlr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
             </dependency>
 
         </dependencies>

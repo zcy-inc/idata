@@ -73,7 +73,7 @@ public class MetricServiceImpl implements MetricService {
     @Autowired
     private ColumnInfoService columnInfoService;
 
-    private String[] metricInfos = new String[]{"enName", "metricId", "bizTypeCode", "metricDefine"};
+    private String[] metricInfos = new String[]{"enName", "metricId", "bizProcessCode", "metricDefine"};
     private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
     private final String METRIC_BIZ_TYPE = "bizTypeCode";
@@ -161,19 +161,34 @@ public class MetricServiceImpl implements MetricService {
         }
         MeasureDto echoMetric = PojoUtil.copyOne(labelService.defineLabel(metric, operator), MeasureDto.class);
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metric.getLabelTag())) {
-            checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "关联信息不能为空");
-            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "聚合方式不能为空");
-            List<LabelDto> metricLabelList = metric.getMeasureLabels();
-            // 校验关联信息
-            metricLabelList.forEach(metricLabel ->
-                    checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
-                    String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
+            // 正常逻辑
+//            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "聚合方式不能为空");
+//            checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "关联信息不能为空");
+//            List<LabelDto> metricLabelList = metric.getMeasureLabels();
+//            // 校验关联信息
+//            metricLabelList.forEach(metricLabel ->
+//                    checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
+//                            String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
+//
+//            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
+//                metricLabel.setLabelCode(echoMetric.getLabelCode());
+//                return labelService.label(metricLabel, operator);
+//            }).collect(Collectors.toList());
+//            echoMetric.setMeasureLabels(echoMetricLabelList);
+            // 数据迁移相关代码
+            if (metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0) {
+                List<LabelDto> metricLabelList = metric.getMeasureLabels();
+                // 校验关联信息
+                metricLabelList.forEach(metricLabel ->
+                        checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
+                                String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
 
-            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-                metricLabel.setLabelCode(echoMetric.getLabelCode());
-                return labelService.label(metricLabel, operator);
-            }).collect(Collectors.toList());
-            echoMetric.setMeasureLabels(echoMetricLabelList);
+                List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
+                    metricLabel.setLabelCode(echoMetric.getLabelCode());
+                    return labelService.label(metricLabel, operator);
+                }).collect(Collectors.toList());
+                echoMetric.setMeasureLabels(echoMetricLabelList);
+            }
         }
         return echoMetric;
     }

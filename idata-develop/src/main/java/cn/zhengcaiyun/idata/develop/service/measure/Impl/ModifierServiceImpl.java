@@ -161,7 +161,8 @@ public class ModifierServiceImpl implements ModifierService {
             modifierInfoList.removeAll(modifierAttributeKeyList);
             throw new IllegalArgumentException(String.join(",", modifierInfoList) + "不能为空");
         }
-        checkArgument(modifier.getMeasureLabels() != null && modifier.getMeasureLabels().size() > 0, "关联信息不能为空");
+        // 数据迁移相关，暂注释
+//        checkArgument(modifier.getMeasureLabels() != null && modifier.getMeasureLabels().size() > 0, "关联信息不能为空");
 
         List<LabelDto> modifierLabelList = modifier.getMeasureLabels();
         // 校验关联信息

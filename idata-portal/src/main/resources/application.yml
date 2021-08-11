@@ -36,3 +36,9 @@ zcy:
 auth:
   jwt:
     security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
+
+pg:
+  datasource:
+    jdbcUrl: jdbc:postgresql://pgm-9dpnl7hlk20gh0hp1o.pg.rds.aliyuncs.com:3433/db_idata?currentSchema=idata
+    username: zcy_idata
+    password: MUhSwEHb1Yx0
