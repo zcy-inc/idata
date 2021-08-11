@@ -26,6 +26,7 @@ import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,10 +81,10 @@ public class DevFolderServiceImpl implements DevFolderService {
                 folderTreeList.add(folderTreeNode);
             }
         });
-        return getFolderTreeNodeList(null, true, folderTreeList);
+        return getFolderTreeNodeList(null, true, treeNodeName, folderTreeList);
     }
 
-    private List<DevelopFolderTreeNodeDto> getFolderTreeNodeList(Long parentId, boolean isRecursive,
+    private List<DevelopFolderTreeNodeDto> getFolderTreeNodeList(Long parentId, boolean isRecursive, String treeNodeName,
                                                                  List<DevelopFolderTreeNodeDto> folderTreeNodeList) {
         List<DevelopFolderTreeNodeDto> echo = folderTreeNodeList.stream()
                 .filter(folderTreeNode -> parentId == folderTreeNode.getParentId())
@@ -91,14 +92,19 @@ public class DevFolderServiceImpl implements DevFolderService {
                     DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class,
                             "type", "name", "cid", "fileCode", "folderId");
                     if (isRecursive && DevelopTreeTypeEnum.FOLDER.name().equals(folderTreeNode.getType())) {
-                        echoFolderTreeNode.setChildren(getFolderTreeNodeList(folderTreeNode.getFolderId(), true, folderTreeNodeList));
+                        echoFolderTreeNode.setChildren(getFolderTreeNodeList(folderTreeNode.getFolderId(), true,
+                                treeNodeName, folderTreeNodeList));
                     }
                     return echoFolderTreeNode;
-                }).collect(Collectors.toList())
-                .stream().filter(developFolderTreeNode ->
-                        developFolderTreeNode.getChildren() == null || developFolderTreeNode.getChildren().size() > 0)
-                .collect(Collectors.toList());;
-        return echo;
+                }).collect(Collectors.toList());
+        if (StringUtils.isEmpty(treeNodeName)) {
+            return echo;
+        }
+        else {
+            return echo.stream().filter(developFolderTreeNode ->
+                    developFolderTreeNode.getChildren() == null || developFolderTreeNode.getChildren().size() > 0)
+                    .collect(Collectors.toList());
+        }
     }
 
     @Override
