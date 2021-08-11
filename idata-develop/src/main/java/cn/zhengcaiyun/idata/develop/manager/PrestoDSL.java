@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.AggregatorEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.LogicOperatorEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.StringMatchTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.query.*;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -100,10 +101,15 @@ public class PrestoDSL {
     }
 
     private void measure(MeasureColumnDto measure, Boolean aggregate) {
-        if (aggregate != null && aggregate) {
-            String aggregateStr = "sum(";
-            if (measure.getAggregator() != null && AggregatorEnum.AVG.equals(measure.getAggregator())) {
-                aggregateStr = "avg(";
+        if (BooleanUtils.isTrue(aggregate) && Objects.nonNull(measure.getAggregator())) {
+            AggregatorEnum aggregator = measure.getAggregator();
+            String aggregateStr;
+            if (AggregatorEnum.CNT.equals(measure.getAggregator())) {
+                aggregateStr = "count(";
+            } else if (AggregatorEnum.CNTD.equals(measure.getAggregator())) {
+                aggregateStr = "count(distinct ";
+            } else {
+                aggregateStr = aggregator.name().toLowerCase() + "(";
             }
             sb.append(aggregateStr).append(columnQuote(measure.getColumnName())).append(") ").append(columnQuote(measure.getColumnName()));
         } else {

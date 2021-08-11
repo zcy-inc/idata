@@ -30,8 +30,6 @@ import java.util.List;
 
 /**
  * 从itable copy过来，暂时先这样，后续需要做一个独立模块时再调整
- * @author shiyin(沐泽)
- * @date 2020/6/21 20:24
  */
 
 public class PrestoQuery implements Query {

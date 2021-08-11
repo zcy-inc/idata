@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.develop.service.table.TableDataService;
@@ -27,7 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @description:
+ * develop-data-query-controller
+ *
+ * @description: 查询表数据
  * @author: yangjianhua
  * @create: 2021-07-20 14:49
  **/
@@ -40,13 +43,12 @@ public class TableDataController {
 
     /**
      * 查询表数据
-     * 默认最大查询10条
      *
      * @param tableId 表id
      * @return
      */
     @GetMapping("/data/{tableId}")
     RestResult<QueryResultDto> getTableData(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(tableDataService.getTableData(tableId));
+        return RestResult.success(tableDataService.getTableData(tableId, PageParam.of(10L, 0L)));
     }
 }

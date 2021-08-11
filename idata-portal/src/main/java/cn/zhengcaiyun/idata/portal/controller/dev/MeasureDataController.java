@@ -29,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * develop-data-query-controller
- * @description:
+ *
+ * @description: 查询指标数据
  * @author: yangjianhua
  * @create: 2021-07-21 18:57
  **/

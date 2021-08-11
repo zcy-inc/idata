@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.manager;
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
+import cn.zhengcaiyun.idata.connector.constant.enums.DataSourceEnum;
 import cn.zhengcaiyun.idata.connector.service.Query;
 import cn.zhengcaiyun.idata.develop.dto.query.TableDataQueryDto;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
@@ -36,6 +37,7 @@ import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sys
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
@@ -55,7 +57,7 @@ public class TableQueryManager {
     public QueryResultDto queryData(TableDataQueryDto dataQueryDto) {
         ConnectionCfg connectionDto = getConnectionInfo();
         checkState(connectionDto != null, "数据源连接信息不正确");
-        checkArgument(isEmpty(dataQueryDto.getDimensions()) && isEmpty(dataQueryDto.getMeasures()), "维度和度量不能同时为空");
+        checkArgument(isNotEmpty(dataQueryDto.getDimensions()) || isNotEmpty(dataQueryDto.getMeasures()), "维度和度量不能同时为空");
 
         QueryResultDto resultDto;
         try {
@@ -80,7 +82,7 @@ public class TableQueryManager {
     public Long count(TableDataQueryDto dataQueryDto) {
         ConnectionCfg connectionDto = getConnectionInfo();
         checkState(connectionDto != null, "数据源连接信息不正确");
-        checkArgument(isEmpty(dataQueryDto.getDimensions()) && isEmpty(dataQueryDto.getMeasures()), "维度和度量不能同时为空");
+        checkArgument(isNotEmpty(dataQueryDto.getDimensions()) || isNotEmpty(dataQueryDto.getMeasures()), "维度和度量不能同时为空");
         QueryResultDto resultDto;
 
         String selectStr = (dataQueryDto.getAggregate() != null && dataQueryDto.getAggregate()) ?
@@ -106,9 +108,11 @@ public class TableQueryManager {
     private ConnectionCfg getConnectionInfo() {
         SysConfig trinoConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("trino-info")))
                 .orElse(null);
+        ConnectionCfg cfg = null;
         if (trinoConfig != null) {
-            return JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+            cfg = JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+            cfg.setDataSourceEnum(DataSourceEnum.PRESTO);
         }
-        return null;
+        return cfg;
     }
 }

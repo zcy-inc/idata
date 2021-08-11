@@ -20,8 +20,16 @@ package cn.zhengcaiyun.idata.connector.api.impl;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
+import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
+import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
+import static com.google.common.base.Preconditions.checkState;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @description:
@@ -33,6 +41,8 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Autowired
     private HiveService hiveService;
+    @Autowired
+    private SysConfigDao sysConfigDao;
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
@@ -44,7 +54,9 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     }
 
     private String getConnectionCfg() {
-        // todo
-        return "";
+        SysConfig hiveConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("hive-info")))
+                .orElse(null);
+        checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
+        return hiveConfig.getValueOne();
     }
 }
