@@ -202,7 +202,6 @@ public class LabelServiceImpl implements LabelService {
         return labelDefineDto;
     }
 
-    // TODO 新增字段时查询有误
     @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
         checkArgument(subjectType != null || labelTag != null,
@@ -225,6 +224,11 @@ public class LabelServiceImpl implements LabelService {
             else {
                 builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
             }
+        }
+        else {
+            builder.and(devLabelDefine.labelTag, isNotLike("%_METRIC_LABEL%"))
+                    .and(devLabelDefine.labelTag, isNotLike(LabelTagEnum.DIMENSION_LABEL.name() + "%"))
+                    .and(devLabelDefine.labelTag, isNotLike(LabelTagEnum.MODIFIER_LABEL.name() + "%"));
         }
         return devLabelDefineDao.selectMany(builder.orderBy(devLabelDefine.labelIndex).build()
                         .render(RenderingStrategies.MYBATIS3))

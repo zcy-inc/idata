@@ -123,11 +123,6 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public List<TableInfoDto> getTables(List<String> searchTableTexts, String enumValue) {
-        return null;
-    }
-
-    @Override
     public List<LabelDto> getDbNames() {
         List<LabelDto> dbLabelDtoList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.labelCode, devLabel.labelParamValue)
                         .from(devLabel)
@@ -281,8 +276,9 @@ public class TableInfoServiceImpl implements TableInfoService {
                                 or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
                                 or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
                 .build().render(RenderingStrategies.MYBATIS3));
-        checkArgument(measureList.size() == 0,
-                labelService.findDefine(measureList.get(0).getLabelCode()).getLabelName() + "依赖该表，不能删除");
+        if (measureList.size() != 0) {
+            throw new IllegalArgumentException(labelService.findDefine(measureList.get(0).getLabelCode()).getLabelName() + "依赖该表，不能删除");
+        }
         // 删除label表记录
         List<LabelDto> tableLabelDtoList = labelService.findLabels(tableId, null);
         boolean deleteSuccess = tableLabelDtoList.stream().allMatch(tableLabelDto -> labelService.removeLabel(tableLabelDto, operator));
