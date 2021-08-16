@@ -4,7 +4,7 @@
     layout: false,
     component: './Login',
   },
-  { path: '/', redirect: '/authority' },
+  { path: '/', redirect: '/datapi' },
   {
     path: '/datapi',
     name: '数据研发',

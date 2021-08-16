@@ -168,7 +168,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             rules={require}
           />
           <ProFormSelect
-            name="bizTypeCode"
+            name="bizProcessCode"
             label="业务过程"
             width="sm"
             placeholder="请选择"
