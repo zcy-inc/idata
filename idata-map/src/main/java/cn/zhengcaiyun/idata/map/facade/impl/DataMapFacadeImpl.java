@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,7 @@ public class DataMapFacadeImpl implements DataMapFacade {
     public Page<DataEntityDto> searchEntity(DataSearchCond condition, PageParam pageParam) {
         checkArgument(StringUtils.isNotBlank(condition.getSource()), "需指定搜索数据类型");
         String keyword = condition.getKeyWord();
-        if (isEmpty(keyword) || keyword.length() > 1000) return Page.newOne(Lists.newLinkedList(), 0);
+        if (Objects.nonNull(keyword) && keyword.length() > 1000) return Page.newOne(Lists.newArrayList(), 0);
         condition.setKeyWords(KeywordUtil.parseKeyword(keyword));
         condition.setKeyWord(null);
 

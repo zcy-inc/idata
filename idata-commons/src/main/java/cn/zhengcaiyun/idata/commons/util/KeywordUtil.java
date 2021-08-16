@@ -18,10 +18,9 @@
 package cn.zhengcaiyun.idata.commons.util;
 
 import com.google.common.base.Splitter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
-
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 /**
  * @description:
@@ -31,7 +30,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 public class KeywordUtil {
 
     public static List<String> parseKeyword(String keyword) {
-        if (isEmpty(keyword)) return null;
+        if (StringUtils.isBlank(keyword)) return null;
         return Splitter.on(" ").omitEmptyStrings().trimResults().splitToList(keyword);
     }
 
