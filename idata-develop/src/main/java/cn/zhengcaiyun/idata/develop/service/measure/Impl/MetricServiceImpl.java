@@ -136,7 +136,7 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(metric.getLabelTag()), "类型不能为空");
         DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelName, isEqualTo(metric.getLabelName())),
-                and(devLabelDefine.labelTag, isLike("%METRIC_LABEL"))))
+                and(devLabelDefine.labelTag, isEqualTo(metric.getLabelTag()))))
                 .orElse(null);
         checkArgument(checkModifier == null, "指标已存在");
         checkArgument(metric.getLabelAttributes() != null && metric.getLabelAttributes().size() > 0, "基本信息不能为空");
@@ -150,7 +150,8 @@ public class MetricServiceImpl implements MetricService {
 
         // 校验修饰词枚举值是否属于修饰词
         if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
-            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
+            // 数据迁移暂注释
+            // checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
             if (metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
                 List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
                 Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());

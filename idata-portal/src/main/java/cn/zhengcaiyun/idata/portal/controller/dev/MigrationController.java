@@ -41,10 +41,8 @@ public class MigrationController {
 
     @PostMapping("syncTable")
     @Transactional(rollbackFor = Throwable.class)
-    public RestResult<List<TableInfoDto>> syncTable(@RequestParam("syncForeignKey") Boolean syncForeignKey,
-                                                    @RequestParam("beginId") Long beginId,
-                                                    @RequestParam("endId") Long endId){
-        return RestResult.success(migrationService.syncTableData(syncForeignKey, beginId, endId));
+    public RestResult<List<TableInfoDto>> syncTable(@RequestParam("syncForeignKey") Boolean syncForeignKey){
+        return RestResult.success(migrationService.syncTableData(syncForeignKey));
     }
 
     @PostMapping("syncBizProcess")

@@ -48,6 +48,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -85,12 +86,11 @@ public class MigrationService {
     private DevLabelDefineDao devLabelDefineDao;
     @Autowired
     private MetricService metricService;
+    @Autowired
+    private DevColumnInfoDao devColumnInfoDao;
 
-//    private final Map<String, Long> devFolderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
-//            .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
-
-    public List<TableInfoDto> syncTableData(boolean syncForeignKey, Long beginId, Long endId){
-        List<Map<String, Object>> tableList = dwMetaService.getSomeTables(beginId, endId);
+    public List<TableInfoDto> syncTableData(boolean syncForeignKey){
+        List<Map<String, Object>> tableList = dwMetaService.getTables();
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
         Map<String, String> domainMap = dwMetaService.getDomains();
@@ -152,19 +152,19 @@ public class MigrationService {
             for (Map.Entry<String, Object> entry : tableRecord.entrySet()) {
                 LabelDto tableLabel = new LabelDto();
                 String colKey = entry.getKey();
-                if ("db_name".equals(colKey)) {
+                if ("db_name".equals(colKey) && tableRecord.get("db_name") != null) {
                     tableLabel.setLabelCode("dbName:LABEL");
                     tableLabel.setLabelParamValue((String) tableRecord.get("db_name"));
                 }
-                else if ("tbl_comment".equals(colKey)) {
+                else if ("tbl_comment".equals(colKey) && tableRecord.get("tbl_comment") != null) {
                     tableLabel.setLabelCode("tblComment:LABEL");
                     tableLabel.setLabelParamValue((String) tableRecord.get("tbl_comment"));
                 }
-                else if ("pw_owner_name".equals(colKey)) {
+                else if ("pw_owner_name".equals(colKey) && tableRecord.get("pw_owner_name") != null) {
                     tableLabel.setLabelCode("pwOwnerId:LABEL");
                     tableLabel.setLabelParamValue((String) tableRecord.get("pw_owner_name"));
                 }
-                else if ("dw_owner_id".equals(colKey)) {
+                else if ("dw_owner_id".equals(colKey) && tableRecord.get("dw_owner_id") != null) {
                     tableLabel.setLabelCode("dwOwnerId:LABEL");
                     if (userMap.containsKey(tableRecord.get("dw_owner_id").toString())
                             && idataUserMap.containsKey(userMap.get(tableRecord.get("dw_owner_id").toString()))) {
@@ -174,15 +174,15 @@ public class MigrationService {
                         tableLabel.setLabelParamValue(idataUserMap.get("大时").toString());
                     }
                 }
-                else if ("domain_id".equals(colKey)) {
+                else if ("domain_id".equals(colKey) && tableRecord.get("domain_id") != null) {
                     tableLabel.setLabelCode("domainId:LABEL");
                     tableLabel.setLabelParamValue(idataDomainMap.get(domainMap.get(tableRecord.get("domain_id").toString())));
                 }
-                else if ("description".equals(colKey)) {
+                else if ("description".equals(colKey) && tableRecord.get("description") != null) {
                     tableLabel.setLabelCode("tblDescription:LABEL");
                     tableLabel.setLabelParamValue((String) tableRecord.get("description"));
                 }
-                else if ("partitioned".equals(colKey)) {
+                else if ("partitioned".equals(colKey) && tableRecord.get("partitioned") != null) {
                     String partitioned = tableRecord.get("partitioned").toString();
                     tableLabel.setLabelCode("partitionedTbl:LABEL");
                     if ("false".equals(partitioned)) {
@@ -192,7 +192,7 @@ public class MigrationService {
                         tableLabel.setLabelParamValue("true");
                     }
                 }
-                else if ("layer".equals(colKey)) {
+                else if ("layer".equals(colKey) && tableRecord.get("layer") != null) {
                     tableLabel.setLabelCode("dwLayer:LABEL");
                     tableLabel.setLabelParamValue(idataLayerMap.get((String) tableRecord.get("layer")));
                 }
@@ -267,7 +267,8 @@ public class MigrationService {
         });
 
         for (TableInfoDto tableInfoDto : addList) {
-            echoTable = tableInfoService.create(tableInfoDto, "时光test");
+            echoTable = tableInfoService.create(tableInfoDto, "系统管理员");
+            System.out.println("Table Sync Success : tableName " + tableInfoDto.getTableName());
             echoList.add(echoTable);
         }
         return echoList;
@@ -291,7 +292,7 @@ public class MigrationService {
                 }).collect(Collectors.toList());
         enumDto.setEnumValues(enumValueList);
         enumDto.setFolderId(folderMap.get("EnumSystemFolder"));
-        return enumService.createOrEdit(enumDto, "时光test");
+        return enumService.createOrEdit(enumDto, "系统管理员");
     }
 
     public List<MeasureDto> syncDimensions() {
@@ -305,7 +306,6 @@ public class MigrationService {
         Map<String, Long> folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
         List<MeasureDto> echo = dimensionList.stream().map(dimensionMap -> {
-            // TODO folderId
             MeasureDto dimension = new MeasureDto();
             dimension.setLabelTag(LabelTagEnum.DIMENSION_LABEL.name());
             dimension.setSubjectType(SubjectTypeEnum.COLUMN.name());
@@ -357,7 +357,7 @@ public class MigrationService {
             }
             dimension.setMeasureLabels(dimensionLabelList);
             dimension.setFolderId(folderMap.get("DimensionFolder"));
-            return dimensionService.create(dimension, "时光test");
+            return dimensionService.create(dimension, "系统管理员");
         }).collect(Collectors.toList());
         return echo;
     }
@@ -374,7 +374,6 @@ public class MigrationService {
         List<EnumDto> echo = new ArrayList<>();
         modifierTypeMap.forEach((key, value) -> {
             if (modifierMap.containsKey(key)) {
-                // TODO folderId
                 EnumDto enumDto = new EnumDto();
                 String enumName = (String) value.entrySet().stream().filter(map -> "modifier_type".equals(map.getKey()))
                         .findFirst().get().getValue();
@@ -392,7 +391,7 @@ public class MigrationService {
                 }).collect(Collectors.toList());
                 enumDto.setEnumValues(echoEnumValueList);
                 enumDto.setFolderId(folderMap.get("EnumSystemFolder"));
-                echo.add(enumService.createOrEdit(enumDto, "时光test"));
+                echo.add(enumService.createOrEdit(enumDto, "系统管理员"));
             }
         });
         return echo;
@@ -407,10 +406,22 @@ public class MigrationService {
                 .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
+        Map<String, List<String>> idataColumnMap = new HashMap<>();
+        devColumnInfoDao.select(c -> c.where(devColumnInfo.del,
+                isNotEqualTo(1))).forEach(record -> {
+                    List<String> columnNameList;
+                    if (idataColumnMap.containsKey(record.getTableId().toString())) {
+                        columnNameList = idataColumnMap.get(record.getTableId().toString());
+                    }
+                    else {
+                        columnNameList = new ArrayList<>();
+                    }
+                    columnNameList.add(record.getColumnName());
+                    idataColumnMap.put(record.getTableId().toString(), columnNameList);
+        });
         Map<String, Long> folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
         List<MeasureDto> echo = modifierTypeList.stream().map(modifierTypeMap -> {
-            // TODO folderId
             MeasureDto modifier = new MeasureDto();
             modifier.setLabelTag(LabelTagEnum.MODIFIER_LABEL.name());
             modifier.setSubjectType(SubjectTypeEnum.COLUMN.name());
@@ -427,7 +438,7 @@ public class MigrationService {
             AttributeDto enumAttribute = new AttributeDto();
             enumAttribute.setAttributeKey("modifierEnum");
             enumAttribute.setAttributeType("STRING");
-            enumAttribute.setAttributeValue(modifierEnumMap.get((String) modifierTypeMap.get("modifier_type")));
+            enumAttribute.setAttributeValue(modifierEnumMap.getOrDefault((String) modifierTypeMap.get("modifier_type"), ""));
             measureAttributeList.add(enumAttribute);
             AttributeDto defineAttribute = new AttributeDto();
             defineAttribute.setAttributeKey("modifierDefine");
@@ -451,12 +462,15 @@ public class MigrationService {
                     LabelDto roleLabel = new LabelDto();
                     roleLabel.setTableId(idataTableMap.get(tableMap.get(roleRecord.get("table_id").toString())));
                     roleLabel.setColumnName((String) roleRecord.get("column_name"));
-                    modifierLabelList.add(roleLabel);
+                    if (idataColumnMap.containsKey(roleRecord.get("table_id").toString())
+                            && idataColumnMap.get(roleRecord.get("table_id").toString()).contains((String) roleRecord.get("column_name"))) {
+                        modifierLabelList.add(roleLabel);
+                    }
                 });
             }
             modifier.setMeasureLabels(modifierLabelList);
             modifier.setFolderId(folderMap.get("ModifierFolder"));
-            return modifierService.create(modifier, "时光test");
+            return modifierService.create(modifier, "系统管理员");
         }).collect(Collectors.toList());
         return echo;
     }
@@ -478,7 +492,6 @@ public class MigrationService {
         aggregatorMap.put("CNT", "AGGREGATOR_CNT:ENUM_VALUE");
         aggregatorMap.put("CNTD", "AGGREGATOR_CNTD:ENUM_VALUE");
         List<MeasureDto> echo = metricList.stream().map(record -> {
-            // TODO folderId
             MeasureDto metric = new MeasureDto();
             //metric.setLabelCode(RandomUtil.randomStr(10) + ":LABEL");
             metric.setLabelName((String) record.get("cn_name"));
@@ -530,17 +543,18 @@ public class MigrationService {
                     atomicLabelDto.setColumnName((String) roleList.get(0).get("column_name"));
                     atomicLabelList.add(atomicLabelDto);
                     metric.setMeasureLabels(atomicLabelList);
+                    metric.setFolderId(folderMap.get("AtomicMetricFolder"));
                 }
             }
             else if ("derive".equals((String) record.get("metric_type"))) {
                 Map<String, DevLabelDefine> measureMap = devLabelDefineDao.select(c ->
-                        c.where(devLabelDefine.del, isNotEqualTo(1)))
+                        c.where(devLabelDefine.del, isNotEqualTo(1),
+                                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()),
+                                        or(devLabelDefine.labelTag, isEqualTo("")))))
                         .stream().collect(Collectors.toMap(DevLabelDefine::getLabelName, Function.identity()));
                 Map<String, String> atomicMetricMap = metricList.stream().collect(Collectors.toMap(
                         metricRecord -> metricRecord.get("id").toString(), metricRecord -> (String) metricRecord.get("cn_name")));
                 Map<String, String> modifierEnumMap = devEnumDao.select(c -> c.where(devEnum.del, isNotEqualTo(1)))
-                        .stream().collect(Collectors.toMap(DevEnum::getEnumName, DevEnum::getEnumCode));
-                Map<String, String> modifierEnumValueMap = devEnumDao.select(c -> c.where(devEnum.del, isNotEqualTo(1)))
                         .stream().collect(Collectors.toMap(DevEnum::getEnumName, DevEnum::getEnumCode));
                 Map<String, String> modifierTypeMap = dwMetaService.getModifierTypes().stream()
                         .collect(Collectors.toMap(modifierType -> modifierType.get("id").toString(),
@@ -562,7 +576,9 @@ public class MigrationService {
                 List<ModifierDto> modifierList = new ArrayList<>();
                 modifierTypeAndModifierMap.forEach((key, value) -> {
                     ModifierDto echoModifier = new ModifierDto();
-                    echoModifier.setModifierCode(measureMap.get(modifierTypeMap.get(key)).getLabelCode());
+                    if (measureMap.containsKey(modifierTypeMap.get(key))) {
+                        echoModifier.setModifierCode(measureMap.get(modifierTypeMap.get(key)).getLabelCode());
+                    }
                     List<String> modifierEnumValueCodeList =
                             enumService.getEnumValues(modifierEnumMap.get(modifierTypeMap.get(key)))
                             .stream().map(EnumValueDto::getValueCode).collect(Collectors.toList());
@@ -570,6 +586,7 @@ public class MigrationService {
                     modifierList.add(echoModifier);
                 });
                 metric.setModifiers(modifierList);
+                metric.setFolderId(folderMap.get("DeriveMetricFolder"));
             }
             else if ("complex".equals((String) record.get("metric_type"))) {
                 metric.setLabelTag(LabelTagEnum.COMPLEX_METRIC_LABEL.name());
@@ -577,13 +594,13 @@ public class MigrationService {
                 String complexMetricFormula = record.get("formula") != null ? (String) record.get("formula") : "";
                 specialAttributeDto.setComplexMetricFormula(complexMetricFormula);
                 metric.setSpecialAttribute(specialAttributeDto);
+                metric.setFolderId(folderMap.get("ComplexMetricFolder"));
             }
             else {
                 return null;
             }
             metric.setLabelAttributes(attributeList);
-            metric.setFolderId(folderMap.get("MetricFolder"));
-            return metricService.create(metric, "时光test");
+            return metricService.create(metric, "系统管理员");
         }).collect(Collectors.toList());
 
         return echo;
@@ -628,7 +645,7 @@ public class MigrationService {
                     columnLabel.setLabelCode("columnDescription:LABEL");
                     columnLabel.setLabelParamValue((String) columnMap.get("description"));
                 }
-                else if ("partitioned".equals(colKey)) {
+                else if ("partitioned".equals(colKey) && columnMap.get("partitioned") != null) {
                     columnLabel.setColumnName(columnName);
                     String partitioned = columnMap.get("partitioned").toString();
                     columnLabel.setLabelCode("partitionedCol:LABEL");
@@ -639,7 +656,7 @@ public class MigrationService {
                         columnLabel.setLabelParamValue("true");
                     }
                 }
-                else if ("pk".equals(colKey)) {
+                else if ("pk".equals(colKey) && columnMap.get("pk") != null) {
                     columnLabel.setColumnName(columnName);
                     String pk = columnMap.get("pk").toString();
                     columnLabel.setLabelCode("pk:LABEL");
@@ -650,7 +667,7 @@ public class MigrationService {
                         columnLabel.setLabelParamValue("true");
                     }
                 }
-                else if ("security_level".equals(colKey)) {
+                else if ("security_level".equals(colKey) && columnMap.get("security_level") != null) {
                     columnLabel.setColumnName(columnName);
                     columnLabel.setLabelCode("tblSecurityLevel:LABEL");
                     columnLabel.setLabelParamValue(syncSecurityLevel((String) columnMap.get("security_level")));
