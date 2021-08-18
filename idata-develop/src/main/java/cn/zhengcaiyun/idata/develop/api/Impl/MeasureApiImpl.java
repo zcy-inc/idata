@@ -68,9 +68,9 @@ public class MeasureApiImpl implements MeasureApi {
     private MetricService metricService;
 
     private final String DB_NAME = "dbName:LABEL";
-    private final String BIZ_TYPE_ENUM = "bizTypeEnum:ENUM";
+    private final String BIZ_TYPE_ENUM = "bizProcessEnum:ENUM";
     private final String METRIC_DEFINE = "metricDefine";
-    private final String BIZ_TYPE_CODE = "bizTypeCode";
+    private final String BIZ_TYPE_CODE = "bizProcessCode";
     private final String METRIC_ID = "metricId";
     private final String EN_NAME = "enName";
 

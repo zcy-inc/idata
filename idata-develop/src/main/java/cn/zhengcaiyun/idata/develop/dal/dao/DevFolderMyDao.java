@@ -38,6 +38,9 @@ public interface DevFolderMyDao {
                 "<if test = 'treeNodeName != null'>" +
                     "AND dev_folder.folder_name like '%${treeNodeName}%' " +
                 "</if>" +
+                "<if test = 'devTreeType != null'>" +
+                    "AND dev_folder.folder_type = #{devTreeType} " +
+                "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"TABLE\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +

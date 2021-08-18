@@ -76,7 +76,7 @@ public class MetricServiceImpl implements MetricService {
     private String[] metricInfos = new String[]{"enName", "metricId", "bizProcessCode", "metricDefine"};
     private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
-    private final String METRIC_BIZ_TYPE = "bizTypeCode";
+    private final String METRIC_BIZ_TYPE = "bizProcessCode";
 
     @Override
     public MetricDto findMetric(String metricCode) {

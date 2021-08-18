@@ -525,6 +525,7 @@ public class MigrationService {
                 Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                         .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
                 metric.setLabelTag(LabelTagEnum.ATOMIC_METRIC_LABEL.name());
+                metric.setFolderId(folderMap.get("AtomicMetricFolder"));
                 List<Map<String, Object>> roleList = atomicColumnRoleMap.get(record.get("id").toString());
                 if (roleList != null && roleList.size() > 0) {
                     String aggregator = aggregatorMap.get((String) roleList.get(0).get("aggregator"));
@@ -537,7 +538,6 @@ public class MigrationService {
                     atomicLabelDto.setColumnName((String) roleList.get(0).get("column_name"));
                     atomicLabelList.add(atomicLabelDto);
                     metric.setMeasureLabels(atomicLabelList);
-                    metric.setFolderId(folderMap.get("AtomicMetricFolder"));
                 }
             }
             else if ("derive".equals((String) record.get("metric_type"))) {
