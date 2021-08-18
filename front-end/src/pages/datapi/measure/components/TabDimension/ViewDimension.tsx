@@ -42,7 +42,7 @@ const ViewDimension: FC<ViewDimensionProps> = ({ data }) => {
       const list = data.measureLabels;
       const tmpM: DIMList[] = [];
       const tmpD: DWDList[] = [];
-      list.forEach((item) => {
+      list?.forEach((item) => {
         if (item.labelParamValue === 'true') {
           tmpM.push({
             tableName: item.tableName,
@@ -73,7 +73,7 @@ const ViewDimension: FC<ViewDimensionProps> = ({ data }) => {
         style={{ margin: '16px 0' }}
       >
         <Item label="维度名称">{data?.labelName}</Item>
-        {attributes.map((attribute) => (
+        {attributes?.map((attribute) => (
           <Item label={KpiLabelsMap[attribute.attributeKey]}>
             {attribute.attributeValue || '-'}
           </Item>

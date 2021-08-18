@@ -90,7 +90,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({
+        const fd = res.data?.map((_: any) => ({
           label: _.folderName,
           value: _.id,
         }));
@@ -99,7 +99,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       .catch((err) => {});
     getEnumValues({ enumCode: 'bizTypeEnum:ENUM' })
       .then((res) => {
-        const options = res.data.map((enumValue: EnumValue) => ({
+        const options = res.data?.map((enumValue: EnumValue) => ({
           label: enumValue.enumValue,
           value: enumValue.valueCode,
         }));
@@ -116,7 +116,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         folderId: initial.folderId,
         labelTag: initial.labelTag,
       };
-      initial.labelAttributes.forEach((labelAttribute) => {
+      initial.labelAttributes?.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
       });
       form.setFieldsValue(values);

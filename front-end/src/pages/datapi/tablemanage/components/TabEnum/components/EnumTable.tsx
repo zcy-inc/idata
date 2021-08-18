@@ -54,12 +54,12 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
         return { id: i, title: _.attributeKey, type };
       });
       // 格式化datsSource
-      const dt = enumValues.map((_: any, i: number) => {
+      const dt = enumValues?.map((_: any, i: number) => {
         const tmp = {
           enumValue: { code: _.valueCode, value: _.enumValue },
           parentCode: _.parentCode,
         };
-        _.enumAttributes.forEach((attr: any) => (tmp[attr.attributeKey] = attr.attributeValue));
+        _.enumAttributes?.forEach((attr: any) => (tmp[attr.attributeKey] = attr.attributeValue));
         parentOps[i] = { label: _.enumValue, value: _.valueCode };
         return tmp;
       });
@@ -67,7 +67,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
         res.forEach(
           (_: any, i: number) =>
             _ &&
-            (exCols[i].enumValues = _.data.map((_enum: EnumValue) => ({
+            (exCols[i].enumValues = _.data?.map((_enum: EnumValue) => ({
               label: _enum.enumValue,
               value: _enum.valueCode,
             }))),
@@ -150,7 +150,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
   // 生成父级枚举值的ops
   // 找出 parentOps 中与第 i 项枚举值的code相等的项, disable之
   const renderParentOps = (i: number) =>
-    parentOps.map((_) => ({ ..._, disabled: _.value === enums[i].enumValue.code }));
+    parentOps?.map((_) => ({ ..._, disabled: _.value === enums[i].enumValue.code }));
 
   // 置空父级枚举值
   const onClearParentCode = (i: number) => {
@@ -226,7 +226,7 @@ const EnumTable: FC<EnumTableProps> = ({ initial, onChange }) => {
                       if (isEnumType(type)) {
                         getEnumValues({ enumCode: type })
                           .then((res) => {
-                            columns[i].enumValues = res.data.map((_: any) => ({
+                            columns[i].enumValues = res.data?.map((_: any) => ({
                               label: _.enumValue,
                               value: _.valueCode,
                             }));

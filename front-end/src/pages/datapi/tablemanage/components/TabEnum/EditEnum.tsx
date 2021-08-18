@@ -26,7 +26,7 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FlatTreeNode) => ({
+        const fd = res.dat?.map((_: FlatTreeNode) => ({
           label: _.folderName,
           value: `${_.id}`,
         }));

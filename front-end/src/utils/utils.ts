@@ -108,7 +108,7 @@ export const cutTreeData = <T extends TreeNode>(roots: T[], level: number) => {
   const holder = cloneDeep(roots);
   const stack: T[] = [];
   const loop = (nodes: T[]) => {
-    nodes.forEach((node) => {
+    nodes?.forEach((node) => {
       stack.push(node);
       if (stack.length >= level) {
         delete node.children;

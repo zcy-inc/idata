@@ -33,7 +33,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({
+        const fd = res.data?.map((_: any) => ({
           label: _.folderName,
           value: `${_.id}`,
         }));

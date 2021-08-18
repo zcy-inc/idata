@@ -92,14 +92,14 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
                 let enums = [];
                 // 处理数仓管理人的ops
                 if (_.labelTag === 'USER_LABEL') {
-                  enums = owners.data.content.map((_: User) => ({
+                  enums = owners.data.content?.map((_: User) => ({
                     label: _.nickname,
                     value: `${_.id}`,
                   }));
                 }
                 // 处理枚举类型的ops
                 if (_.labelParamType?.endsWith('ENUM')) {
-                  enums = _.enumValues.map((item: EnumValue) => ({
+                  enums = _.enumValues?.map((item: EnumValue) => ({
                     label: item.enumValue,
                     value: item.valueCode,
                   }));
@@ -116,7 +116,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             const tableLabels = initial.tableLabels;
             const initialValue = { tableName: initial.tableName };
             labelValues.current.set('tableName', initial.tableName);
-            tableLabels.forEach((_: TableLable) => {
+            tableLabels?.forEach((_: TableLable) => {
               const v = _.labelTag === 'ATTRIBUTE_LABEL' ? [_.labelCode] : _.labelParamValue;
               labelValues.current.set(_.labelCode, v);
               initialValue[_.labelCode] = v;
@@ -131,7 +131,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
     // 获取平铺的目录树
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FlatTreeNode) => ({ label: _.folderName, value: `${_.id}` }));
+        const fd = res.data?.map((_: FlatTreeNode) => ({ label: _.folderName, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -157,8 +157,8 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
   // 全选
   const onAllCheck = (checked: boolean) => {
     const list = checked
-      ? labels.map((_) => _.value)
-      : labels.filter((_) => _.labelRequired).map((_) => _.value);
+      ? labels?.map((_) => _.value)
+      : labels?.filter((_) => _.labelRequired).map((_) => _.value);
     setCheckedList(list);
     setAllChecked(checked);
     setIndeterminate(!checked);

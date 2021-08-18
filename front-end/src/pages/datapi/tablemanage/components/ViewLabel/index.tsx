@@ -59,7 +59,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ fileCode }) => {
         }));
         const data = values.map((_: any) => {
           const tmp = { id: _.id, enumValue: _.enumValue, parentValue: _.parentValue };
-          _.enumAttributes.forEach((_enum: any) => {
+          _.enumAttributes?.forEach((_enum: any) => {
             tmp[_enum.attributeKey] = _enum.attributeValue;
           });
           return tmp;

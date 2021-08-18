@@ -64,19 +64,19 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data?.map((_: any) => ({ label: _.folderName, value: _.id }));
         setFolderOps(fd);
       })
       .catch((err) => {});
     getTableReferTbs({ labelValue: 'dim' })
       .then((res) => {
-        const tableOptions = res.data.map((table) => ({ label: table.tableName, value: table.id }));
+        const tableOptions = res.data?.map((table) => ({ label: table.tableName, value: table.id }));
         setDIMTables(tableOptions);
       })
       .catch((err) => {});
     getTableReferTbs({ labelValue: 'dwd' })
       .then((res) => {
-        const tableOptions = res.data.map((table) => ({ label: table.tableName, value: table.id }));
+        const tableOptions = res.data?.map((table) => ({ label: table.tableName, value: table.id }));
         setDWDTables(tableOptions);
       })
       .catch((err) => {});
@@ -89,12 +89,12 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
         labelName: initial.labelName,
         folderId: initial.folderId,
       };
-      initial.labelAttributes.forEach((labelAttribute) => {
+      initial.labelAttributes?.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
       });
       form.setFieldsValue(values);
       // DIM && DWD initial
-      initial.measureLabels.forEach((measureLabel) => {
+      initial.measureLabels?.forEach((measureLabel) => {
         if (measureLabel.labelParamValue === 'true') {
           DIMKeys.push(measureLabel.id);
           DIMData.push({
@@ -144,7 +144,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       if (schema.dataIndex === 'tableId') {
         getTableReferStr({ tableId: value })
           .then((res) => {
-            const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+            const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
             setDIMStrings(strs);
           })
           .catch((err) => {});
@@ -156,7 +156,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       if (schema.dataIndex === 'tableId') {
         getTableReferStr({ tableId: value })
           .then((res) => {
-            const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+            const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
             DWDStrings[schema.index] = strs;
             setDWDStrings([...DWDStrings]);
           })

@@ -39,7 +39,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
           id: column.id,
           columnName: column.columnName,
         };
-        column.columnLabels.forEach((label: TableLable) => {
+        column.columnLabels?.forEach((label: TableLable) => {
           let v: string | boolean = label.labelParamValue;
           label.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
           tmp[label.labelCode] = v;
@@ -58,7 +58,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
   const addData = () => {
     const key = Date.now();
     const item = { key };
-    columns.forEach(
+    columns?.forEach(
       (_: any) => (item[_.labelCode] = _.labelTag === 'BOOLEAN_LABEL' ? false : null),
     );
     setData([...data, item]);

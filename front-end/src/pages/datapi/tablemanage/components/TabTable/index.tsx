@@ -117,7 +117,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           columnInfos[i] = item;
         }
         // 处理foreignKeys的入参格式
-        foreignKeys = foreignKeys.map((_: any) => {
+        foreignKeys = foreignKeys?.map((_: any) => {
           return {
             ..._,
             columnNames: _.columnNames.join(','),

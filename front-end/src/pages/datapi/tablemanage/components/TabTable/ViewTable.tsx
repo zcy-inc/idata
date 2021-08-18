@@ -45,7 +45,7 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
       }));
       const dt = columnInfos.map((columnInfo: ColumnLabel) => {
         const tmp = { columnName: columnInfo.columnName };
-        columnInfo.columnLabels.forEach(
+        columnInfo.columnLabels?.forEach(
           (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
         );
         return tmp;

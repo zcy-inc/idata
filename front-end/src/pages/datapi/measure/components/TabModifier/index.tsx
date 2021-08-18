@@ -49,7 +49,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', tabKey, fileC
   const onSubmit = () => {
     setLoading(true);
     const form = refM.current!.form.getFieldsValue();
-    const DWD = refM.current!.DWD.map((_: { tableId: number; columnName: string }) => ({
+    const DWD = refM.current!.DWD?.map((_: { tableId: number; columnName: string }) => ({
       tableId: _.tableId,
       columnName: _.columnName,
       labelParamValue: 'false',

@@ -60,7 +60,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FlatTreeNode) => ({
+        const fd = res.data?.map((_: FlatTreeNode) => ({
           label: _.folderName,
           value: _.id,
         }));
@@ -69,7 +69,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       .catch((err) => {});
     getEnumNames()
       .then((res) => {
-        const ops = res.data.map((e: EnumName) => ({
+        const ops = res.data?.map((e: EnumName) => ({
           label: e.enumName,
           value: e.enumCode,
         }));
@@ -78,7 +78,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       .catch((err) => {});
     getTableReferTbs({ labelValue: 'dwd' })
       .then((res) => {
-        const tableOptions = res.data.map((table) => ({ label: table.tableName, value: table.id }));
+        const tableOptions = res.data?.map((table) => ({ label: table.tableName, value: table.id }));
         setDWDTables(tableOptions);
       })
       .catch((err) => {});
@@ -91,7 +91,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         labelName: initial.labelName,
         folderId: initial.folderId,
       };
-      initial.labelAttributes.forEach((labelAttribute) => {
+      initial.labelAttributes?.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;
         if (labelAttribute.attributeKey === 'modifierEnum') {
           onEnumChange(labelAttribute.attributeValue);
@@ -99,7 +99,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       });
       form.setFieldsValue(values);
       // DWD initial
-      initial.measureLabels.forEach((measureLabel) => {
+      initial.measureLabels?.forEach((measureLabel) => {
         DWDKeys.push(measureLabel.id);
         DWDData.push({
           id: measureLabel.id,
@@ -123,19 +123,19 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         const enumValues = res.data;
         const enumAttributes = enumValues[0].enumAttributes;
         // 格式化枚举参数生成的列
-        const exCols = enumAttributes.map((enumAttribute: LabelAttribute) => ({
+        const exCols = enumAttributes?.map((enumAttribute: LabelAttribute) => ({
           key: enumAttribute.attributeKey,
           dataIndex: enumAttribute.attributeKey,
           title: enumAttribute.attributeKey,
         }));
         // 格式化dataSource
-        const dt = enumValues.map((enumValue: EnumValue) => {
+        const dt = enumValues?.map((enumValue: EnumValue) => {
           const tmp = {
             id: enumValue.id,
             parentValue: enumValue.parentValue || '-',
             enumValue: { value: enumValue.enumValue, code: enumValue.valueCode },
           };
-          enumValue.enumAttributes.forEach(
+          enumValue.enumAttributes?.forEach(
             (enumAttribute: LabelAttribute) =>
               (tmp[enumAttribute.attributeKey] = transformValue(enumAttribute)),
           );
@@ -168,7 +168,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     if (schema.dataIndex === 'tableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
-          const strs = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
           DWDStrings[schema.index] = strs;
           setDWDStrings([...DWDStrings]);
         })

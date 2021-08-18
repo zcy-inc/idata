@@ -185,7 +185,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       return;
     }
     const keys = flatTree.current
-      .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
+      ?.map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
       .filter((_) => !!_);
     setExpandedKeys(keys);
     setSearchValue(value);

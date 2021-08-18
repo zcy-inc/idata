@@ -43,18 +43,18 @@ const ViewEnum: FC<ViewEnumProps> = ({ data }) => {
       const enumValues = data.enumValues;
       const enumAttributes = enumValues?.[0]?.enumAttributes || [];
       // 格式化枚举参数生成的列
-      const exCols = enumAttributes.map((enumAttribute: LabelAttribute) => ({
+      const exCols = enumAttributes?.map((enumAttribute: LabelAttribute) => ({
         key: enumAttribute.attributeKey,
         dataIndex: enumAttribute.attributeKey,
         title: enumAttribute.attributeKey,
       }));
       // 格式化dataSource
-      const dt = enumValues.map((enumValue: EnumValue) => {
+      const dt = enumValues?.map((enumValue: EnumValue) => {
         const tmp: EnumListItem = {
           parentValue: enumValue.parentValue || '-',
           enumValue: { value: enumValue.enumValue, code: enumValue.valueCode },
         };
-        enumValue.enumAttributes.forEach(
+        enumValue.enumAttributes?.forEach(
           (enumAttribute: LabelAttribute) =>
             (tmp[enumAttribute.attributeKey] = transformValue(enumAttribute)),
         );

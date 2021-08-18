@@ -54,12 +54,12 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', tabKey, fil
 
   const onSubmit = () => {
     const form = refD.current!.form.getFieldsValue();
-    const DIM = refD.current!.DIM.map((_: { tableId: number; columnName: string }) => ({
+    const DIM = refD.current!.DIM?.map((_: { tableId: number; columnName: string }) => ({
       tableId: _.tableId,
       columnName: _.columnName,
       labelParamValue: 'true',
     }));
-    const DWD = refD.current!.DWD.map((_: { tableId: number; columnName: string }) => ({
+    const DWD = refD.current!.DWD?.map((_: { tableId: number; columnName: string }) => ({
       tableId: _.tableId,
       columnName: _.columnName,
       labelParamValue: 'false',

@@ -33,7 +33,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.name, value: _.id }));
+        const fd = res.data?.map((_: any) => ({ label: _.name, value: _.id }));
         setFolderOps(fd);
       })
       .catch((err) => {});

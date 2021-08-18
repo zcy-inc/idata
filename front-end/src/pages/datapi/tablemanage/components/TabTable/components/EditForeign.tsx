@@ -34,7 +34,7 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
   useEffect(() => {
     getTableReferDbs()
       .then((res) => {
-        const dbs = res.data.map((_: any) => ({
+        const dbs = res.data?.map((_: any) => ({
           label: _.labelParamValue,
           value: _.labelParamValue,
         }));
@@ -49,7 +49,7 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
       const promisesT: Promise<any>[] = [];
       const promisesC: Promise<any>[] = [];
       const _keys: React.Key[] = [];
-      const _data = foreignKeys.map((_: any, i: number) => {
+      const _data = foreignKeys?.map((_: any, i: number) => {
         _keys.push(_.id);
         promisesT[i] = getTableReferTbs({ labelValue: _.referDbName });
         promisesC[i] = getTableReferStr({ tableId: _.referTableId });
@@ -66,10 +66,10 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
       Promise.all(promisesT).then((resT) => {
         Promise.all(promisesC).then((resC) => {
           resT.forEach((_T: any, i: number) => {
-            tbs[i] = _T.data.map((_: any) => ({ label: _.tableName, value: _.id }));
+            tbs[i] = _T.data?.map((_: any) => ({ label: _.tableName, value: _.id }));
           });
           resC.forEach((_C: any, i: number) => {
-            str[i] = _C.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+            str[i] = _C.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
           });
           setTbs([...tbs]);
           setStr([...str]);
@@ -93,7 +93,7 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
     if (schema.dataIndex === 'referDbName') {
       getTableReferTbs({ labelValue: value })
         .then((res) => {
-          const tmp = res.data.map((_: any) => ({ label: _.tableName, value: _.id }));
+          const tmp = res.data?.map((_: any) => ({ label: _.tableName, value: _.id }));
           tbs[schema.index] = tmp;
           setTbs([...tbs]);
         })
@@ -102,7 +102,7 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
     if (schema.dataIndex === 'referTableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
-          const tmp = res.data.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+          const tmp = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
           str[schema.index] = tmp;
           setStr([...str]);
         })

@@ -51,7 +51,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
   useEffect(() => {
     getTableLabels({ labelTag: LabelTag.ATOMIC_METRIC_LABEL, subjectType: 'COLUMN' })
       .then((res) => {
-        const tmp = res.data.map((atomic: Label) => ({
+        const tmp = res.data?.map((atomic: Label) => ({
           label: atomic.labelName,
           value: atomic.labelCode,
         }));
@@ -78,8 +78,8 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
       });
       Promise.all(promises)
         .then((results) => {
-          results.forEach((res, i) => {
-            const ops = res.data.map((enumValue: EnumValue) => ({
+          results?.forEach((res, i) => {
+            const ops = res.data?.map((enumValue: EnumValue) => ({
               label: enumValue.enumValue,
               value: enumValue.valueCode,
             }));
@@ -98,7 +98,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
   const getModifiers = (atomicMetricCode: string) => {
     getAtomicMetrics({ atomicMetricCode })
       .then((res) => {
-        const ops = res.data.map((modifier: Modifier) => ({
+        const ops = res.data?.map((modifier: Modifier) => ({
           label: modifier.labelName,
           value: modifier.labelCode,
           enumCode: modifier.labelAttributes.find(
@@ -115,7 +115,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
       ?.enumCode as string;
     getEnumValues({ enumCode })
       .then((res) => {
-        const ops = res.data.map((enumValue: EnumValue) => ({
+        const ops = res.data?.map((enumValue: EnumValue) => ({
           label: enumValue.enumValue,
           value: enumValue.valueCode,
         }));

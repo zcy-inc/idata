@@ -30,7 +30,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
     if (data) {
       const list = data.measureLabels;
       const tmpD: DWDList[] = [];
-      list.forEach((item) => {
+      list?.forEach((item) => {
         tmpD.push({
           tableName: item.tableName,
           columnName: item.columnName,
@@ -52,7 +52,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
         style={{ margin: '16px 0' }}
       >
         <Item label="修饰词名称">{data?.labelName}</Item>
-        {attributes.map((attribute) => (
+        {attributes?.map((attribute) => (
           <Item label={KpiLabelsMap[attribute.attributeKey]}>
             {attribute.enumName || attribute.attributeValue || '-'}
           </Item>

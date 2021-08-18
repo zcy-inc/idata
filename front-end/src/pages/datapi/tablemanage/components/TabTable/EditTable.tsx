@@ -83,13 +83,13 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
                 disabled: _.labelRequired,
               };
               if (_.labelTag === 'USER_LABEL') {
-                tmp.enums = owners.data.content.map((_: any) => ({
+                tmp.enums = owners.data.content?.map((_: any) => ({
                   label: _.nickname,
                   value: _.id,
                 }));
               }
               if (_.labelTag === 'ENUM_VALUE_LABEL') {
-                tmp.enums = _.enumValues.map((item: any) => ({
+                tmp.enums = _.enumValues?.map((item: any) => ({
                   label: item.enumValue,
                   value: item.valueCode,
                 }));

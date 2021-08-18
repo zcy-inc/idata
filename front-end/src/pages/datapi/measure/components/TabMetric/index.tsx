@@ -74,7 +74,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
           setLoading(false);
           return;
         }
-        const measureLabels = typeData.data.map((_: { tableId: number; columnName: string }) => ({
+        const measureLabels = typeData?.data?.map((_: { tableId: number; columnName: string }) => ({
           tableId: _.tableId,
           columnName: _.columnName,
           labelParamValue: 'false',
@@ -87,7 +87,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
         break;
       case 'DERIVE':
         const atomicMetricCode = typeData.data.atomicMetricCode;
-        const modifiers = typeData.data.modifiers.map(
+        const modifiers = typeData?.data?.modifiers?.map(
           (modifier: { modifierCode: string; enumValueCodes: string[] }) => ({
             modifierCode: modifier.modifierCode,
             enumValueCodes: modifier.enumValueCodes,

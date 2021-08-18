@@ -86,7 +86,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         labelCodes: [objectType, indicatorCode as string],
       })
         .then((res) => {
-          const tmp = res.data.map((label: Label) => ({
+          const tmp = res.data?.map((label: Label) => ({
             label: label.labelName,
             value: label.labelCode,
           }));
@@ -95,15 +95,15 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         .catch((err) => {});
       // 获取维度信息的二级options
       const promises: Promise<any>[] = [];
-      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs.forEach((dimension, i) => {
+      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs?.forEach((dimension, i) => {
         if (dimension.dimensionCode) {
           promises[i] = getDimensionList({ dimensionCode: dimension.dimensionCode as string });
         }
       });
       Promise.all(promises)
         .then((results) => {
-          results.forEach((res, i) => {
-            dimensionParamOptions[i] = res.data.map((v: string) => ({ label: v, value: v }));
+          results?.forEach((res, i) => {
+            dimensionParamOptions[i] = res.data?.map((v: string) => ({ label: v, value: v }));
           });
         })
         .catch((err) => {});
@@ -117,7 +117,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   const getMetric = (objectType: string) => {
     getMetricList({ labelTag: 'METRIC_LABEL', labelCodes: [objectType] })
       .then((res) => {
-        const tmp = res.data.map((label: Label) => ({
+        const tmp = res.data?.map((label: Label) => ({
           label: label.labelName,
           value: label.labelCode,
         }));
@@ -232,7 +232,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     if (prop === 'indicatorCode') {
       getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, v] })
         .then((res) => {
-          const tmp = res.data.map((label: Label) => ({
+          const tmp = res.data?.map((label: Label) => ({
             label: label.labelName,
             value: label.labelCode,
           }));
@@ -251,7 +251,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       getDimensionList({ dimensionCode: v })
         .then((res) => {
           layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].dimensionCode = v;
-          dimensionParamOptions[iD] = res.data.map((v: string) => ({ label: v, value: v }));
+          dimensionParamOptions[iD] = res.data?.map((v: string) => ({ label: v, value: v }));
           setLayers([...layers]);
           setDimensionParamOptions([...dimensionParamOptions]);
         })
@@ -283,7 +283,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         </Button>
       </Space>
       <Divider />
-      {layers[activeKey]?.ruleDef.rules.map((rule, iR) => (
+      {layers[activeKey]?.ruleDef?.rules?.map((rule, iR) => (
         <Fragment key={rule.ruleId}>
           <Input
             placeholder="请输入"
@@ -317,7 +317,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
               // }
             >
               <Space direction="vertical">
-                {rule.indicatorDefs.map((_, iI) => (
+                {rule?.indicatorDefs?.map((_, iI) => (
                   <Space key={iI}>
                     <Select
                       placeholder="请选择指标"
@@ -392,7 +392,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
               }
             >
               <Space direction="vertical">
-                {rule.dimensionDefs.map((_, iD) => (
+                {rule?.dimensionDefs?.map((_, iD) => (
                   <Space key={iD}>
                     <Select
                       placeholder="请选择维度"

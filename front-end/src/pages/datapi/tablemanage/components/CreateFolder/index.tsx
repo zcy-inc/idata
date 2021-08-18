@@ -28,7 +28,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const folderOps = res.data.map((_: FlatTreeNode) => ({
+        const folderOps = res.data?.map((_: FlatTreeNode) => ({
           label: _.folderName,
           value: `${_.id}`,
         }));

@@ -44,14 +44,14 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
     setLoading(true);
     getObjectLabelLayer({ id: data.id, layerId: activeKey })
       .then((res) => {
-        const c = res.data.columns.map((column, i) => ({
+        const c = res.data?.columns?.map((column, i) => ({
           title: column.columnName,
           key: i,
           dataIndex: i,
         }));
-        const d = res.data.data.map((r) => {
+        const d = res.data?.data?.map((r) => {
           const tmp = { id: Date.now() };
-          r.forEach((v, i) => (tmp[i] = v));
+          r?.forEach((v, i) => (tmp[i] = v));
           return tmp;
         });
         const i = getActiveIndex();
@@ -124,7 +124,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
             ),
           }}
         >
-          {layers.map((layer, i) => (
+          {layers?.map((layer, i) => (
             <Tabs.TabPane
               tab={
                 <Text ellipsis style={{ maxWidth: 88 }}>

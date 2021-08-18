@@ -70,7 +70,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
               getEnumValues({ enumCode: value })
                 .then((res) => {
                   const data = Array.isArray(res.data) ? res.data : [];
-                  const ops = data.map((_: EnumValue) => ({
+                  const ops = data?.map((_: EnumValue) => ({
                     label: _.enumValue,
                     value: _.valueCode,
                   }));
@@ -102,7 +102,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: FlatTreeNode) => ({ label: _.folderName, value: _.id }));
+        const fd = res.data?.map((_: FlatTreeNode) => ({ label: _.folderName, value: _.id }));
         setFolders(fd);
       })
       .catch((err) => {});
@@ -143,7 +143,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
           onChangeEnumTypeOps(enumCode);
         }
         if (_.labelTag === 'ATTRIBUTE_LABEL') {
-          const labelAttributes = _.labelAttributes.map((item: LabelAttribute, i: number) => ({
+          const labelAttributes = _.labelAttributes?.map((item: LabelAttribute, i: number) => ({
             ...item,
             id: i,
             attributeType: isEnumType(item.attributeType)
@@ -153,7 +153,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
 
           Object.assign(values, { labelAttributes });
           setEditableRowKeys(
-            labelAttributes.map((item: LabelAttribute & { id: number }) => item.id),
+            labelAttributes?.map((item: LabelAttribute & { id: number }) => item.id),
           );
           onChangeLableTag('ATTRIBUTE_LABEL');
         }
@@ -196,7 +196,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         });
         setEnumTypeCols(cols);
         // 处理数据
-        const dt = data.map((_: EnumValue) => {
+        const dt = data?.map((_: EnumValue) => {
           const d = { key: _.id, enumValue: _.enumValue, parentValue: _.parentValue };
           const _exCols = Array.isArray(_.enumAttributes) ? _.enumAttributes : [];
           _exCols.forEach((col: LabelAttribute) => (d[col.attributeKey] = col.attributeValue));

@@ -15,14 +15,14 @@ const itemHeight = 30;
 const fontFamily =
   'Avenir,-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol';
 const handleDataTransform = (tables: any[], tedges: any[]) => {
-  const nodes = tables.map((node) => ({
+  const nodes = tables?.map((node) => ({
     ...node,
     id: `${node.key}`,
     key: `${node.key}`,
-    attrs: node.columnInfos.map((_: any) => ({ ..._, key: _.columnName })),
+    attrs: node.columnInfos?.map((_: any) => ({ ..._, key: _.columnName })),
     label: `${node.key}.${node.tableComment}`,
   }));
-  const edges = tedges.map((edge) => ({
+  const edges = tedges?.map((edge) => ({
     ...edge,
     source: edge.from,
     sourceKey: edge.fromPort,

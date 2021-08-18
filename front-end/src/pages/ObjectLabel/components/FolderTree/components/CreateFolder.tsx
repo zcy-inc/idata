@@ -26,7 +26,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.name, value: `${_.id}` }));
+        const fd = res.data?.map((_: any) => ({ label: _.name, value: `${_.id}` }));
         setFolders(fd);
       })
       .catch((err) => {});

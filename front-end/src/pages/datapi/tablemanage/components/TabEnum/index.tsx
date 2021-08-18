@@ -50,11 +50,11 @@ const TabEnum: FC<TabEnumProps> = ({ initialMode = 'view', fileCode }) => {
       const data = {
         enumName: values.enumName,
         folderId: values.folderId,
-        enumValues: values.enumValues.enums.map((_: any) => ({
+        enumValues: values.enumValues.enums?.map((_: any) => ({
           enumValue: _.enumValue.value,
           valueCode: _.enumValue.code,
           parentCode: _.parentCode,
-          enumAttributes: values.enumValues.columns.map((col: any) => ({
+          enumAttributes: values.enumValues.columns?.map((col: any) => ({
             attributeKey: col.title,
             attributeType: col.type,
             attributeValue: _[col.title],
