@@ -79,24 +79,10 @@ public class DwMetaService implements InitializingBean, DisposableBean {
         this.dwMetaJdbcTemplate = new JdbcTemplate(dwMetaDatasource);
     }
 
-    public List<Map<String, Object>> getSomeTables() {
-        String tableSql = "select idata.table_info.* from idata.table_info " +
-                "where idata.table_info.del = false";
-        return dwMetaJdbcTemplate.queryForList(tableSql);
-    }
-
     public List<Map<String, Object>> getTables() {
         String tableSql = "select idata.table_info.* from idata.table_info " +
                 "where idata.table_info.del = false order by id";
         return dwMetaJdbcTemplate.queryForList(tableSql);
-    }
-
-    public List<String> getTableNames(List<Long> tableIds) {
-        Map<String, String> tableMap = new HashMap<>();
-        String tableSql = "select idata.table_info.tbl_name from idata.table_info " +
-                "where idata.table_info.del = false and idata.table_info.id in " + tableIds + " order by id";
-        return dwMetaJdbcTemplate.queryForList(tableSql)
-                .stream().map(record -> (String) record.get("tbl_name")).collect(Collectors.toList());
     }
 
     public List<Map<String, Object>> getColumns() {

@@ -39,16 +39,22 @@ public class MigrationController {
     @Autowired
     private MigrationService migrationService;
 
-    @PostMapping("syncTable")
-    @Transactional(rollbackFor = Throwable.class)
-    public RestResult<List<TableInfoDto>> syncTable(@RequestParam("syncForeignKey") Boolean syncForeignKey){
-        return RestResult.success(migrationService.syncTableData(syncForeignKey));
-    }
-
     @PostMapping("syncBizProcess")
     @Transactional(rollbackFor = Throwable.class)
     public RestResult<EnumDto> syncBizProcess(){
         return RestResult.success(migrationService.syncBizProcess());
+    }
+
+    @PostMapping("syncTable")
+    @Transactional(rollbackFor = Throwable.class)
+    public RestResult<List<TableInfoDto>> syncTable(){
+        return RestResult.success(migrationService.syncTableData());
+    }
+
+    @PostMapping("syncForeignKey")
+    @Transactional(rollbackFor = Throwable.class)
+    public RestResult<Boolean> syncForeignKey(){
+        return RestResult.success(migrationService.syncForeignKeys());
     }
 
     @PostMapping("syncDimensions")

@@ -18,10 +18,7 @@ package cn.zhengcaiyun.idata.portal.config;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
-import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
@@ -37,6 +34,7 @@ import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
+import com.google.gson.internal.$Gson$Preconditions;
 import com.google.inject.internal.cglib.reflect.$FastMember;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.record.DimensionsRecord;
@@ -88,8 +86,10 @@ public class MigrationService {
     private MetricService metricService;
     @Autowired
     private DevColumnInfoDao devColumnInfoDao;
+    @Autowired
+    private DevForeignKeyDao devForeignKeyDao;
 
-    public List<TableInfoDto> syncTableData(boolean syncForeignKey){
+    public List<TableInfoDto> syncTableData(){
         List<Map<String, Object>> tableList = dwMetaService.getTables();
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
@@ -227,42 +227,6 @@ public class MigrationService {
             if (syncColumnList != null && syncColumnList.size() > 0) {
                 tableInfoDto.setColumnInfos(syncColumns(syncColumnList, idataColTypeMap));
             }
-            // 外键信息
-            if (syncForeignKey) {
-                List<Map<String, Object>> foreignKeyList = dwMetaService.getForeignKeys();
-                List<ForeignKeyDto> echoForeignKeys = new ArrayList<>();
-                tableInfoDto.setId(idataTableMap.get(tableInfoDto.getTableName()));
-                foreignKeyList.forEach(foreignKeyMap -> {
-                    ForeignKeyDto echoForeignKey = new ForeignKeyDto();
-                    echoForeignKey.setTableId(idataTableMap.get(tableInfoDto.getTableName()));
-                    for (Map.Entry<String, Object> entry : foreignKeyMap.entrySet()) {
-                        String colKey = entry.getKey();
-                        if ("col_ids".equals(colKey) && foreignKeyMap.get("col_ids") != null) {
-                            List<Long> colIdList = Arrays.stream(((String) foreignKeyMap.get("col_ids")).split("[{,}]"))
-                                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList())
-                                    .stream().map(Long::valueOf).collect(Collectors.toList());
-                            List<String> columnNameList = dwMetaService.getColumnName(colIdList);
-                            echoForeignKey.setColumnNames(String.join(",", columnNameList));
-                        }
-                        if ("refer_tbl_id".equals(colKey) && foreignKeyMap.get("refer_tbl_id") != null) {
-                            String referTableId = (String) foreignKeyMap.get("refer_tbl_id");
-                            echoForeignKey.setReferTableId(idataTableMap.get(tableMap.get(referTableId).get("id").toString()));
-                        }
-                        if ("refer_col_ids".equals(colKey) && foreignKeyMap.get("refer_col_ids") != null) {
-                            List<Long> referColIdList = Arrays.stream(((String) foreignKeyMap.get("refer_col_ids")).split("[{,}]"))
-                                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList())
-                                    .stream().map(Long::valueOf).collect(Collectors.toList());
-                            List<String> columnNameList = dwMetaService.getColumnName(referColIdList);
-                            echoForeignKey.setColumnNames(String.join(",", columnNameList));
-                        }
-                        if ("er_type".equals(colKey) && foreignKeyMap.get("er_type") != null) {
-                            echoForeignKey.setErType((String) foreignKeyMap.get("er_type"));
-                        }
-                    }
-                    echoForeignKeys.add(echoForeignKey);
-                });
-                tableInfoDto.setForeignKeys(echoForeignKeys);
-            }
             addList.add(tableInfoDto);
         });
 
@@ -272,6 +236,36 @@ public class MigrationService {
             echoList.add(echoTable);
         }
         return echoList;
+    }
+
+    public boolean syncForeignKeys() {
+        List<Map<String, Object>> foreignKeyList = dwMetaService.getForeignKeys();
+        List<Map<String, Object>> columnList = dwMetaService.getColumns();
+        Map<String, String> columnMap = columnList.stream().collect(Collectors.toMap(
+                record -> record.get("id").toString(), record -> (String) record.get("col_name")));
+        Map<String, String> tableMap = dwMetaService.getTables().stream()
+                .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
+        Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
+        List<Integer> echoList = foreignKeyList.stream().map(foreignKeyMap -> {
+            DevForeignKey echo = new DevForeignKey();
+            echo.setCreator("系统管理员");
+            echo.setTableId(idataTableMap.get(tableMap.get(foreignKeyMap.get("table_id").toString())));
+            String colIdStr = foreignKeyMap.get("col_ids").toString();
+            String[] colIdStrs = colIdStr.split("[{,}]");
+            List<String> colIdList = Arrays.stream((foreignKeyMap.get("col_ids")).toString().split("[{,}]"))
+                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            List<String> columnNameList = colIdList.stream().map(columnMap::get).collect(Collectors.toList());
+            echo.setColumnNames(String.join(",", columnNameList));
+            echo.setReferTableId(idataTableMap.get(tableMap.get(foreignKeyMap.get("refer_tbl_id").toString())));
+            List<String> referColIdList = Arrays.stream((foreignKeyMap.get("col_ids")).toString().split("[{,}]"))
+                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            List<String> referColumnNameList = referColIdList.stream().map(columnMap::get).collect(Collectors.toList());
+            echo.setReferColumnNames(String.join(",", referColumnNameList));
+            echo.setErType((String) foreignKeyMap.get("er_type"));
+            return devForeignKeyDao.insertSelective(echo);
+        }).collect(Collectors.toList());
+        return true;
     }
 
     public EnumDto syncBizProcess() {
