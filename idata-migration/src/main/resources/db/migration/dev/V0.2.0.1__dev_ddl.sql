@@ -6,7 +6,8 @@ create table if not exists idata.dev_folder (
   editor      varchar(20)     not null default '' comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   folder_name varchar(30)     not null comment '文件夹名称',
-  parent_id   bigint          comment '上级文件夹ID,null表示最外层文件夹'
+  parent_id   bigint          comment '上级文件夹ID,null表示最外层文件夹',
+  folder_type varchar(20)     not null comment '文件夹所属模块类型'
 ) engine=innodb auto_increment=21 default charset=utf8mb4 comment='文件夹表';
 
 create table if not exists idata.dev_table_info (
@@ -16,7 +17,7 @@ create table if not exists idata.dev_table_info (
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor      varchar(20)     not null default '' comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  table_name  varchar(200)     not null comment '表名称',
+  table_name  varchar(200)    not null comment '表名称',
   folder_id   bigint          comment '文件夹ID,null表示最外层文件夹'
 ) engine=innodb default charset=utf8mb4 comment='表信息表';
 
@@ -27,7 +28,7 @@ create table if not exists idata.dev_column_info (
   create_time   datetime(3)     not null default current_timestamp(3) comment '创建时间',
   editor        varchar(20)     not null default '' comment '修改者',
   edit_time     datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
-  column_name   varchar(30)     not null comment '字段名称',
+  column_name   varchar(200)    not null comment '字段名称',
   table_id      bigint          not null comment '所属表ID',
   column_index  integer         comment '字段顺序(从0开始)'
 ) engine=innodb default charset=utf8mb4 comment='字段信息表';
@@ -43,7 +44,7 @@ create table if not exists idata.dev_label_define (
   label_name         varchar(30)     not null comment '标签名称',
   label_tag          varchar(30)     comment '标签的标签',
   label_param_type   varchar(30)     comment '标签参数类型',
-  label_attributes   varchar(500)    not null default '[]' comment '标签属性',
+  label_attributes   varchar(1000)   not null default '[]' comment '标签属性',
   special_attribute  varchar(500)    not null default '{}' comment '特定标签属性，根据标签的标签字段变化',
   subject_type       varchar(20)     comment '打标主体类型',
   label_index        integer         comment '标签序号',
@@ -61,8 +62,8 @@ create table if not exists idata.dev_label (
   edit_time         datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   label_code        varchar(50)     not null comment '标签唯一标识',
   table_id          bigint          comment '打标主体表ID',
-  column_name       varchar(30)     comment '打标主体字段名', unique uk_labelCode_tableId_columnName(label_code, table_id, column_name),
-  label_param_value varchar(200)    comment '标签参数值'
+  column_name       varchar(200)    comment '打标主体字段名', unique uk_labelCode_tableId_columnName(label_code, table_id, column_name),
+  label_param_value varchar(500)    comment '标签参数值'
 ) engine=innodb default charset=utf8mb4 comment='标签表';
 
 create table if not exists idata.dev_enum (
