@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageContainer } from '@/components';
+import SplitPane from 'react-split-pane';
 import type { FC } from 'react';
 import styles from './index.less';
 
@@ -9,15 +10,14 @@ import Workbench from './components/Workbench';
 const ObjectLabel: FC = () => {
   return (
     <PageContainer contentClassName={styles['object-label']}>
-      <div className={styles.board}>
+      <SplitPane className={styles.board} defaultSize={300} style={{ position: 'relative' }}>
         <div className={styles.left}>
           <FolderTree />
         </div>
-        <div className={styles.divider} />
         <div className={styles.right}>
           <Workbench />
         </div>
-      </div>
+      </SplitPane>
     </PageContainer>
   );
 };

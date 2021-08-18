@@ -1,16 +1,14 @@
 .object-label {
   padding: 0 !important;
   .board {
-    display: flex;
     height: 100%;
-    .divider {
-      border-right: solid 1px #f0f2f5;
-    }
     .left {
-      width: 300px;
+      height: 100%;
       :global {
         .ant-tree {
+          height: calc(100% - 94px);
           padding: 16px;
+          overflow-y: scroll;
         }
         .ant-tree-switcher {
           color: #c0c4da;
@@ -51,33 +49,39 @@
     }
     .right {
       position: relative;
-      width: calc(100% - 301px);
+      height: 100%;
       padding-bottom: 64px;
       :global {
-        .ant-tabs-card .ant-tabs-nav {
-          .ant-tabs-tab.ant-tabs-tab-with-remove {
-            display: flex;
-            justify-content: space-between;
-            width: 160px;
-            background: #f1f3f9;
-            border-color: #f1f3f9;
-            .ant-tabs-tab-btn {
-              max-width: 100px;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
+        .ant-tabs-card {
+          height: 100%;
+          .ant-tabs-nav {
+            .ant-tabs-tab.ant-tabs-tab-with-remove {
+              display: flex;
+              justify-content: space-between;
+              width: 160px;
+              background: #f1f3f9;
+              border-color: #f1f3f9;
+              .ant-tabs-tab-btn {
+                max-width: 100px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
+            }
+            .ant-tabs-tab-active.ant-tabs-tab-with-remove {
+              background: #fff;
+              border-color: #fff;
+              .ant-tabs-tab-btn {
+                max-width: 100px;
+                overflow: hidden;
+                color: #304ffe;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
             }
           }
-          .ant-tabs-tab-active.ant-tabs-tab-with-remove {
-            background: #fff;
-            border-color: #fff;
-            .ant-tabs-tab-btn {
-              max-width: 100px;
-              overflow: hidden;
-              color: #304ffe;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
+          .ant-tabs-content-holder {
+            overflow-y: scroll;
           }
         }
         .ant-empty {

@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Descriptions, Table, Tabs } from 'antd';
-import type { FC } from 'react';
+import { Descriptions, Table, Tabs, Tooltip } from 'antd';
+import type { FC, CSSProperties } from 'react';
 import styles from '../../index.less';
 
 import { getDWOwner } from '@/services/tablemanage';
@@ -17,6 +17,12 @@ export interface ViewTableProps {
 
 const { Item } = Descriptions;
 const { TabPane } = Tabs;
+const ellipsis: CSSProperties = {
+  display: 'inline-block',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const ViewTable: FC<ViewTableProps> = ({ data }) => {
   const [columns, setColumns] = useState<any[]>([]);
@@ -59,13 +65,13 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
   const transformLabelValue = (_: any) => {
     switch (_.labelTag) {
       case LabelTag.ENUM_VALUE_LABEL:
-        return _.enumNameOrValue;
+        return _.enumNameOrValue || '-';
       case LabelTag.BOOLEAN_LABEL:
-        return TransformBoolean[_.labelParamValue];
+        return TransformBoolean[_.labelParamValue] || '-';
       case LabelTag.USER_LABEL:
         return users?.find((user) => `${user.id}` === _.labelParamValue)?.nickname || '-';
       default:
-        return _.labelParamValue;
+        return _.labelParamValue || '-';
     }
   };
 
@@ -76,10 +82,16 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         colon={false}
         labelStyle={{ color: '#8A8FAE', textAlign: 'right' }}
       >
-        <Item label="表名称">{data?.tableName}</Item>
+        <Item label="表名称" contentStyle={ellipsis}>
+          <Tooltip placement="topLeft" title={data?.tableName}>
+            {data?.tableName}
+          </Tooltip>
+        </Item>
         {data?.tableLabels?.map((_: TableLable) => (
-          <Item key={_.id} label={_.labelName}>
-            {transformLabelValue(_)}
+          <Item key={_.id} label={_.labelName} contentStyle={ellipsis}>
+            <Tooltip placement="topLeft" title={transformLabelValue(_)}>
+              {transformLabelValue(_)}
+            </Tooltip>
           </Item>
         ))}
       </Descriptions>

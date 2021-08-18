@@ -84,6 +84,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
             })
             .catch((err) => {});
         } else {
+          Object.assign(params, { folderType: treeType });
           createFolder(params)
             .then((res) => {
               if (res.success) {

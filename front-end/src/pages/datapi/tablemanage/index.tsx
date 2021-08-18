@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageContainer } from '@/components';
 import { useModel } from 'umi';
+import SplitPane from 'react-split-pane';
 import type { FC } from 'react';
 import styles from './index.less';
 
@@ -15,15 +16,14 @@ const TableManage: FC = () => {
 
   return (
     <PageContainer contentClassName={styles['tabel-manage']}>
-      <div className={styles.board}>
+      <SplitPane className={styles.board} defaultSize={300} style={{position:'relative'}}>
         <div className={styles.left}>
           <FolderTree />
         </div>
-        <div className={styles.divider} />
         <div className={styles.right}>
           <Workbench />
         </div>
-      </div>
+      </SplitPane>
       {visibleLabel && <CreateLabel />}
     </PageContainer>
   );

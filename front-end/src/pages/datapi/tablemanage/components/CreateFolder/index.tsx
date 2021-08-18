@@ -80,6 +80,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
           createFolder({
             folderName: values.folderName,
             parentId: values.parentId,
+            folderType: curTreeType,
           })
             .then((res) => {
               if (res.success) {
