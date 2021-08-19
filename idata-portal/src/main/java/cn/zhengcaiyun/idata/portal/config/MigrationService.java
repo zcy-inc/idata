@@ -456,8 +456,9 @@ public class MigrationService {
                     LabelDto roleLabel = new LabelDto();
                     roleLabel.setTableId(idataTableMap.get(tableMap.get(roleRecord.get("table_id").toString())));
                     roleLabel.setColumnName((String) roleRecord.get("column_name"));
-                    if (idataColumnMap.containsKey(roleRecord.get("table_id").toString())
-                            && idataColumnMap.get(roleRecord.get("table_id").toString()).contains((String) roleRecord.get("column_name"))) {
+                    if (idataColumnMap.containsKey(idataTableMap.get(tableMap.get(roleRecord.get("table_id").toString())).toString())
+                            && idataColumnMap.get(idataTableMap.get(tableMap.get(roleRecord.get("table_id").toString())).toString())
+                            .contains((String) roleRecord.get("column_name"))) {
                         modifierLabelList.add(roleLabel);
                     }
                 });
@@ -544,9 +545,9 @@ public class MigrationService {
                 Map<String, DevLabelDefine> measureMap = devLabelDefineDao.select(c ->
                         c.where(devLabelDefine.del, isNotEqualTo(1),
                                 and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()),
-                                        or(devLabelDefine.labelTag, isEqualTo("")))))
+                                        or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())))))
                         .stream().collect(Collectors.toMap(DevLabelDefine::getLabelName, Function.identity()));
-                Map<String, String> atomicMetricMap = metricList.stream().collect(Collectors.toMap(
+                Map<String, String> atomicMetricMap = dwMetaService.getMetrics("atomic").stream().collect(Collectors.toMap(
                         metricRecord -> metricRecord.get("id").toString(), metricRecord -> (String) metricRecord.get("cn_name")));
                 Map<String, String> modifierEnumMap = devEnumDao.select(c -> c.where(devEnum.del, isNotEqualTo(1)))
                         .stream().collect(Collectors.toMap(DevEnum::getEnumName, DevEnum::getEnumCode));
@@ -563,7 +564,6 @@ public class MigrationService {
                     specialAttributeDto.setAtomicMetricCode(measureMap.get(atomicMetricMap
                             .get(record.get("atomic_id").toString())).getLabelCode());
                 }
-                metric.setSpecialAttribute(specialAttributeDto);
                 List<String> modifierIdList = Arrays.stream((record.get("modifier_ids").toString()).split("[{,}]"))
                         .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
                 Map<String, List<String>> modifierTypeAndModifierMap = getModifiers(modifierIdList, modifierMap, modifierTypeIdMap);
@@ -577,9 +577,12 @@ public class MigrationService {
                             enumService.getEnumValues(modifierEnumMap.get(modifierTypeMap.get(key)))
                             .stream().map(EnumValueDto::getValueCode).collect(Collectors.toList());
                     echoModifier.setEnumValueCodes(modifierEnumValueCodeList);
-                    modifierList.add(echoModifier);
+                    if (!modifierList.contains(echoModifier)) {
+                        modifierList.add(echoModifier);
+                    }
                 });
-                metric.setModifiers(modifierList);
+                specialAttributeDto.setModifiers(modifierList);
+                metric.setSpecialAttribute(specialAttributeDto);
                 metric.setFolderId(folderMap.get("DeriveMetricFolder"));
             }
             else if ("complex".equals((String) record.get("metric_type"))) {

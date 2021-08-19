@@ -92,26 +92,29 @@ public class TableInfoApiImpl implements TableInfoApi {
             tableInfoIdList = devTableInfoMyDao.getSearchTableIds(searchType, searchTexts);
         }
         Set<Long> tableIds = new HashSet<>(tableInfoIdList);
+        List<Long> assetTableIdList = new ArrayList<>(tableIds);
         // 资产目录查询(本级及可能的下级)
         if (isNotEmpty(assetCatalogueCode)) {
             List<String> assetCatalogueCodeList = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1))
                     .and(devEnumValue.valueCode, isEqualTo(assetCatalogueCode), or(devEnumValue.parentCode, isEqualTo(assetCatalogueCode))))
                     .stream().map(DevEnumValue::getValueCode).collect(Collectors.toList());
-            Set<Long> removeAssetCatalogueTableIds = devLabelDao.select(c ->
-                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isNotIn(assetCatalogueCodeList))
+            Set<Long> assetCatalogueTableIds = devLabelDao.select(c ->
+                    c.where(devLabel.del, isNotEqualTo(1)).
+                            and(devLabel.labelParamValue, isIn(assetCatalogueCodeList))
                             .and(devLabel.labelCode, isEqualTo(ASSET_CATALOGUE_LABEL)))
                     .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            tableIds.removeAll(removeAssetCatalogueTableIds);
+            assetTableIdList = assetCatalogueTableIds.stream().filter(tableIds::contains).collect(Collectors.toList());
         }
         // 数仓分层查询
+        List<Long> echoTableIdList = new ArrayList<>(assetTableIdList);
         if (isNotEmpty(dwLayerCode)) {
-            Set<Long> removeDwLayerTableIds = devLabelDao.select(c ->
-                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isNotEqualTo(dwLayerCode))
+            Set<Long> dwLayerTableIds = devLabelDao.select(c ->
+                    c.where(devLabel.del, isNotEqualTo(1)).and(devLabel.labelParamValue, isEqualTo(dwLayerCode))
                             .and(devLabel.labelCode, isEqualTo(DW_LAYER_LABEL)))
                     .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            tableIds.removeAll(removeDwLayerTableIds);
+            echoTableIdList = dwLayerTableIds.stream().filter(assetTableIdList::contains).collect(Collectors.toList());
         }
-        return new ArrayList<>(tableIds);
+        return echoTableIdList;
     }
 
     @Override
@@ -141,11 +144,14 @@ public class TableInfoApiImpl implements TableInfoApi {
                 List<LabelDto> tableLabelList = tableInfoMap.get(tableDetail.getId());
                 tableDetail.setTableComment(tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(TABLE_COMMENT_LABEL)).findFirst().get().getLabelParamValue());
-                tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
-                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue()));
+//                tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
+//                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue()));
                 tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(SECURITY_LEVEL_LABEL)).findFirst().ifPresent(securityLabel ->
                         tableDetail.setSecurityLevel(convertSecurityLevel(securityLabel.getLabelParamValue())));
+                tableLabelList.stream().filter(tableLabel ->
+                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().ifPresent(assetCatalogueLabel ->
+                        tableDetail.setAssetCatalogues(getAssetCatalogues(assetCatalogueLabel.getLabelParamValue())));
                 tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(METABASE_URL_LABEL)).findFirst().ifPresent(metabaseLabel ->
                         tableDetail.setMetabaseUrl(metabaseLabel.getLabelParamValue()));

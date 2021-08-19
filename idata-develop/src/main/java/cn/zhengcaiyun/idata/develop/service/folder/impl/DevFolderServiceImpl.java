@@ -78,10 +78,17 @@ public class DevFolderServiceImpl implements DevFolderService {
                 folderTreeNode.setFolderId(folder.getId());
                 folderTreeNode.setType("FOLDER");
                 folderTreeNode.setCid("F_" + folder.getId());
+                folderTreeNode.setFolderType(folder.getFolderType());
                 folderTreeList.add(folderTreeNode);
             }
         });
-        return getFolderTreeNodeList(null, true, treeNodeName, folderTreeList);
+
+        List<DevelopFolderTreeNodeDto> echoList = getFolderTreeNodeList(null, true, treeNodeName, folderTreeList).stream()
+                .filter(record -> record.getFolderType() == null || record.getFolderType().equals(devTreeType))
+                .collect(Collectors.toList());
+        return getFolderTreeNodeList(null, true, treeNodeName, folderTreeList).stream()
+                .filter(record -> record.getFolderType() == null || record.getFolderType().equals(devTreeType))
+                .collect(Collectors.toList());
     }
 
     private List<DevelopFolderTreeNodeDto> getFolderTreeNodeList(Long parentId, boolean isRecursive, String treeNodeName,
@@ -90,7 +97,7 @@ public class DevFolderServiceImpl implements DevFolderService {
                 .filter(folderTreeNode -> parentId == folderTreeNode.getParentId())
                 .map(folderTreeNode -> {
                     DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class,
-                            "type", "name", "cid", "fileCode", "folderId");
+                            "type", "name", "cid", "fileCode", "folderId", "folderType");
                     if (isRecursive && DevelopTreeTypeEnum.FOLDER.name().equals(folderTreeNode.getType())) {
                         echoFolderTreeNode.setChildren(getFolderTreeNodeList(folderTreeNode.getFolderId(), true,
                                 treeNodeName, folderTreeNodeList));

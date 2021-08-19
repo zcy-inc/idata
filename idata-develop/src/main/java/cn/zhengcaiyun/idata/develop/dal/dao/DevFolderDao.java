@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevFolderDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_folder")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, folderName, parentId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, folderName, parentId, folderType);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_folder")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -64,7 +64,8 @@ public interface DevFolderDao {
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="folder_name", property="folderName", jdbcType=JdbcType.VARCHAR),
-        @Result(column="parent_id", property="parentId", jdbcType=JdbcType.BIGINT)
+        @Result(column="parent_id", property="parentId", jdbcType=JdbcType.BIGINT),
+        @Result(column="folder_type", property="folderType", jdbcType=JdbcType.VARCHAR)
     })
     List<DevFolder> selectMany(SelectStatementProvider selectStatement);
 
@@ -99,6 +100,7 @@ public interface DevFolderDao {
             .map(editTime).toProperty("editTime")
             .map(folderName).toProperty("folderName")
             .map(parentId).toProperty("parentId")
+            .map(folderType).toProperty("folderType")
         );
     }
 
@@ -112,6 +114,7 @@ public interface DevFolderDao {
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(folderName).toPropertyWhenPresent("folderName", record::getFolderName)
             .map(parentId).toPropertyWhenPresent("parentId", record::getParentId)
+            .map(folderType).toPropertyWhenPresent("folderType", record::getFolderType)
         );
     }
 
@@ -150,7 +153,8 @@ public interface DevFolderDao {
                 .set(editor).equalTo(record::getEditor)
                 .set(editTime).equalTo(record::getEditTime)
                 .set(folderName).equalTo(record::getFolderName)
-                .set(parentId).equalTo(record::getParentId);
+                .set(parentId).equalTo(record::getParentId)
+                .set(folderType).equalTo(record::getFolderType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_folder")
@@ -161,7 +165,8 @@ public interface DevFolderDao {
                 .set(editor).equalToWhenPresent(record::getEditor)
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(folderName).equalToWhenPresent(record::getFolderName)
-                .set(parentId).equalToWhenPresent(record::getParentId);
+                .set(parentId).equalToWhenPresent(record::getParentId)
+                .set(folderType).equalToWhenPresent(record::getFolderType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_folder")
@@ -174,6 +179,7 @@ public interface DevFolderDao {
             .set(editTime).equalTo(record::getEditTime)
             .set(folderName).equalTo(record::getFolderName)
             .set(parentId).equalTo(record::getParentId)
+            .set(folderType).equalTo(record::getFolderType)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -188,6 +194,7 @@ public interface DevFolderDao {
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(folderName).equalToWhenPresent(record::getFolderName)
             .set(parentId).equalToWhenPresent(record::getParentId)
+            .set(folderType).equalToWhenPresent(record::getFolderType)
             .where(id, isEqualTo(record::getId))
         );
     }

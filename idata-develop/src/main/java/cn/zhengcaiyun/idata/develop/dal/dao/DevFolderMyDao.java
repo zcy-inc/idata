@@ -32,7 +32,8 @@ public interface DevFolderMyDao {
 
     @Select("<script>" +
                 "SELECT id AS folderId, folder_name AS name, (@type := 'FOLDER') AS type, " +
-                    "(@fileCode := null) AS fileCode, parent_id AS parentId, (@cid := concat('F_', id)) AS cid " +
+                    "(@fileCode := null) AS fileCode, parent_id AS parentId, (@cid := concat('F_', id)) AS cid, " +
+                    "folder_type AS folderType " +
                 "FROM dev_folder " +
                 "WHERE del = 0 " +
                 "<if test = 'treeNodeName != null'>" +
@@ -44,7 +45,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"TABLE\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +
-                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
+                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
                         "<if test = 'treeNodeName != null'>" +
@@ -54,7 +56,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"LABEL\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
-                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag NOT LIKE 'DIMENSION%' AND label_tag NOT LIKE 'MODIFIER%' " +
                             "AND label_tag NOT LIKE '%METRIC%' " +
@@ -65,7 +68,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"ENUM\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
-                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
+                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_enum " +
                         "WHERE del = 0 " +
                         "<if test = 'treeNodeName != null'>" +
@@ -75,7 +79,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"DIMENSION\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'DIMENSION_LABEL') AS type, " +
-                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE 'DIMENSION_LABEL%' " +
                         "<if test = 'treeNodeName != null'>" +
@@ -85,7 +90,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"MODIFIER\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'MODIFIER_LABEL') AS type, " +
-                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE 'MODIFIER_LABEL%' " +
                         "<if test = 'treeNodeName != null'>" +
@@ -95,7 +101,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"METRIC\") != -1'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'METRIC_LABEL') AS type, " +
-                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 AND label_tag LIKE '%_METRIC_LABEL%' " +
                         "<if test = 'treeNodeName != null'>" +
@@ -105,7 +112,8 @@ public interface DevFolderMyDao {
                 "<if test = 'devTreeType == null or \"\" == devTreeType'>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, table_name AS name, (@type := 'TABLE') AS type, " +
-                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid " +
+                            "id AS fileCode, folder_id AS parentId, (@cid := concat('T_', id)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_table_info " +
                         "WHERE del = 0 " +
                         "<if test = 'treeNodeName != null'>" +
@@ -113,7 +121,8 @@ public interface DevFolderMyDao {
                         "</if>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, label_name AS name, (@type := 'LABEL') AS type, " +
-                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid " +
+                            "label_code AS fileCode, folder_id AS parentId, (@cid := concat('L_', label_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_label_define " +
                         "WHERE del = 0 " +
                         "<if test = 'treeNodeName != null'>" +
@@ -121,7 +130,8 @@ public interface DevFolderMyDao {
                         "</if>" +
                     "UNION ALL " +
                         "SELECT (@folderId := null) AS folderId, enum_name AS name, (@type := 'ENUM') AS type, " +
-                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid " +
+                            "enum_code AS fileCode,  folder_id AS parentId, (@cid := concat('E_', enum_code)) AS cid, " +
+                            "(@folderType := null) AS folderType " +
                         "FROM dev_enum " +
                         "WHERE del = 0" +
                         "<if test = 'treeNodeName != null'>" +

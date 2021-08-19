@@ -151,7 +151,7 @@ public class MetricServiceImpl implements MetricService {
         // 校验修饰词枚举值是否属于修饰词
         if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
             // 数据迁移暂注释
-            // checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
+            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
             if (metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
                 List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
                 Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
