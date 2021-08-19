@@ -49,7 +49,7 @@ const MetricTypeOps = [
 const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ initial }, ref) => {
   const [folderOps, setFolderOps] = useState([]);
   const [form] = Form.useForm();
-  const [bizTypeEnum, setBizTypeEnum] = useState([]);
+  const [bizProcessEnum, setBizProcessEnum] = useState([]);
   const [metricType, setMetricType] = useState('');
   const refAtomic = useRef<AtomicExportProps>();
   const refDerive = useRef<DeriveExportProps>();
@@ -97,13 +97,13 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         setFolderOps(fd);
       })
       .catch((err) => {});
-    getEnumValues({ enumCode: 'bizTypeEnum:ENUM' })
+    getEnumValues({ enumCode: 'bizProcessEnum:ENUM' })
       .then((res) => {
         const options = res.data?.map((enumValue: EnumValue) => ({
           label: enumValue.enumValue,
           value: enumValue.valueCode,
         }));
-        setBizTypeEnum(options);
+        setBizProcessEnum(options);
       })
       .catch((err) => {});
   }, []);
@@ -173,7 +173,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             width="sm"
             placeholder="请选择"
             rules={require}
-            options={bizTypeEnum}
+            options={bizProcessEnum}
           />
           <ProFormSelect
             name="folderId"

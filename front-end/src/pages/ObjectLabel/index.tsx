@@ -10,7 +10,12 @@ import Workbench from './components/Workbench';
 const ObjectLabel: FC = () => {
   return (
     <PageContainer contentClassName={styles['object-label']}>
-      <SplitPane className={styles.board} defaultSize={300} style={{ position: 'relative' }}>
+      <SplitPane
+        className={styles.board}
+        defaultSize={300}
+        style={{ position: 'relative' }}
+        pane2Style={{ width: 0 }}
+      >
         <div className={styles.left}>
           <FolderTree />
         </div>

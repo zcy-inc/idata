@@ -10,7 +10,12 @@ import Workbench from './components/Workbench';
 const measure: FC = () => {
   return (
     <PageContainer contentClassName={styles['kpi-system']}>
-      <SplitPane className={styles.board} defaultSize={300} style={{ position: 'relative' }}>
+      <SplitPane
+        className={styles.board}
+        defaultSize={300}
+        style={{ position: 'relative' }}
+        pane2Style={{ width: 0 }}
+      >
         <div className={styles.left}>
           <FolderTree />
         </div>

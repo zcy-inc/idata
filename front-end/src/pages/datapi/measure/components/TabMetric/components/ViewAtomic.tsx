@@ -23,7 +23,7 @@ interface DIMList {
 }
 interface DIRList {
   labelName: string;
-  bizTypeValue: string;
+  bizProcessValue: string;
 }
 
 const { TabPane } = Tabs;
@@ -40,7 +40,7 @@ const ColsDIM = [
 ];
 const ColsDerive = [
   { title: '指标名称', dataIndex: 'labelName', key: 'labelName' },
-  { title: '业务过程', dataIndex: 'bizTypeValue', key: 'bizTypeValue' },
+  { title: '业务过程', dataIndex: 'bizProcessValue', key: 'bizProcessValue' },
 ];
 
 const EditAtomic: FC<EditAtomicProps> = ({ data }) => {
@@ -63,7 +63,7 @@ const EditAtomic: FC<EditAtomicProps> = ({ data }) => {
       }));
       const dir = data.deriveMetrics?.map((metric) => ({
         labelName: metric.labelName,
-        bizTypeValue: metric.bizTypeValue,
+        bizProcessValue: metric.bizProcessValue,
       }));
 
       setDWD(dwd);

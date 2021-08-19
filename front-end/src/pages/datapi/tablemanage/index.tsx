@@ -16,7 +16,12 @@ const TableManage: FC = () => {
 
   return (
     <PageContainer contentClassName={styles['tabel-manage']}>
-      <SplitPane className={styles.board} defaultSize={300} style={{position:'relative'}}>
+      <SplitPane
+        className={styles.board}
+        defaultSize={300}
+        style={{ position: 'relative' }}
+        pane2Style={{ width: 0 }}
+      >
         <div className={styles.left}>
           <FolderTree />
         </div>
