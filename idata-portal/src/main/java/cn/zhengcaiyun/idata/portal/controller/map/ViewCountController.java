@@ -53,11 +53,10 @@ public class ViewCountController {
      * @return
      */
     @PostMapping("/log")
-    public RestResult<String> logUserView(@RequestParam(value = "entitySource") String entitySource,
-                                          @RequestParam(value = "entityCode") String entityCode) {
+    public RestResult<String> logUserView(@RequestBody ViewCountDto countDto) {
         Operator operator = OperatorContext.getCurrentOperator();
-        viewCountService.increase(0L, entitySource, entityCode, operator.getNickname());
-        viewCountService.increase(operator.getId(), entitySource, entityCode, operator.getNickname());
+        viewCountService.increase(0L, countDto.getEntitySource(), countDto.getEntityCode(), operator.getNickname());
+        viewCountService.increase(operator.getId(), countDto.getEntitySource(), countDto.getEntityCode(), operator.getNickname());
         return RestResult.success();
     }
 
