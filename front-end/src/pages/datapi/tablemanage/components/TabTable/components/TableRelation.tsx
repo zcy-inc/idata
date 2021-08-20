@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import G6 from '@antv/g6';
+import { Spin } from 'antd';
 import { findDOMNode } from 'react-dom';
 import type { FC } from 'react';
 import styles from '../../../index.less';
@@ -34,9 +35,11 @@ const handleDataTransform = (tables: any[], tedges: any[]) => {
 };
 
 const TableRelation: FC<TableRelationProps> = ({ id }) => {
+  const [loading, setLoading] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
+    setLoading(true);
     const isInBBox = (point: any, bbox: any) => {
       const { x, y } = point;
       const { minX, minY, maxX, maxY } = bbox;
@@ -462,15 +465,23 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
       },
       animate: true,
     });
-    getTableRelations({ tableId: id }).then((res) => {
-      const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
-      const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
-      graph.data(handleDataTransform(tables, edges));
-      graph.render();
-    });
+    getTableRelations({ tableId: id })
+      .then((res) => {
+        const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
+        const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
+        graph.data(handleDataTransform(tables, edges));
+        graph.render();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  return <div className={styles.g6} ref={ref} />;
+  return (
+    <Spin spinning={loading}>
+      <div className={styles.g6} ref={ref} />
+    </Spin>
+  );
 };
 
 export default TableRelation;

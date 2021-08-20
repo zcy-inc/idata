@@ -89,9 +89,13 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         </Item>
         {data?.tableLabels?.map((_: TableLable) => (
           <Item key={_.id} label={_.labelName} contentStyle={ellipsis}>
-            <Tooltip placement="topLeft" title={transformLabelValue(_)}>
-              {transformLabelValue(_)}
-            </Tooltip>
+            {_.labelCode === 'metabaseUrl:LABEL' ? (
+              <a target='_blank' href={transformLabelValue(_)}>查看</a>
+            ) : (
+              <Tooltip placement="topLeft" title={transformLabelValue(_)}>
+                {transformLabelValue(_)}
+              </Tooltip>
+            )}
           </Item>
         ))}
       </Descriptions>

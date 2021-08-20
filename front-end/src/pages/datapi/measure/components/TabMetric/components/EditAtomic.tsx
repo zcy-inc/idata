@@ -68,13 +68,15 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
           aggregatorCode: initial.specialAttribute.aggregatorCode,
         };
       });
-      getTableReferStr({ tableId })
-        .then((res) => {
-          const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
-          DWDStrings[0] = strs;
-          setDWDStrings([...DWDStrings]);
-        })
-        .catch((err) => {});
+      if (tableId) {
+        getTableReferStr({ tableId })
+          .then((res) => {
+            const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+            DWDStrings[0] = strs;
+            setDWDStrings([...DWDStrings]);
+          })
+          .catch((err) => {});
+      }
       setDWDData(tmp);
       setDWDKeys(tmpK);
     }
