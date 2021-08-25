@@ -99,10 +99,12 @@ public class EnumServiceImpl implements EnumService {
                 Set<String> deleteEnumValues = new HashSet<>(existEnumValues);
                 deleteEnumValues.removeAll(enumValues);
                 enumValueList.forEach(enumValueDto -> {
-                    if (addEnumValues.contains(enumValueDto.getValueCode())) {
-                        enumValueDto.setEnumCode(enumDto.getEnumCode());
-                        createOrEditEnumValue(enumValueDto, operator);
-                    }
+                    enumValueDto.setEnumCode(enumDto.getEnumCode());
+                    createOrEditEnumValue(enumValueDto, operator);
+//                    if (addEnumValues.contains(enumValueDto.getValueCode())) {
+//                        enumValueDto.setEnumCode(enumDto.getEnumCode());
+//                        createOrEditEnumValue(enumValueDto, operator);
+//                    }
                 });
                 existEnumValueList.forEach(enumValueDto -> {
                     if (deleteEnumValues.contains(enumValueDto.getValueCode())) {
