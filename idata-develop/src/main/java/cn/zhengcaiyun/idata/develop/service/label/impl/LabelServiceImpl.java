@@ -334,7 +334,10 @@ public class LabelServiceImpl implements LabelService {
                 labelDto.setEnumNameOrValue(enumService.getEnumName(labelDto.getLabelParamValue()));
             }
             else if (labelDto.getLabelParamType().endsWith(":ENUM")) {
-                labelDto.setEnumNameOrValue(enumService.getEnumValue(labelDto.getLabelParamValue()));
+                List<String> enumValueCodeList = Arrays.asList(labelDto.getLabelParamValue().split(","));
+                List<String> enumValueList = enumService.getEnumValues(enumValueCodeList)
+                        .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+                labelDto.setEnumNameOrValue(String.join(",", enumValueList));
             }
         });
         return echoLabelList;
