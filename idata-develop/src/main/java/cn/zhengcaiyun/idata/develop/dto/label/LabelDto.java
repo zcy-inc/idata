@@ -16,6 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.label;
 
+import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
+
 import java.util.Date;
 
 /**
@@ -35,12 +37,17 @@ public class LabelDto {
     private String labelName;
     private Long tableId;
     private String columnName;
+    private String columnComment;
     private String labelParamType;
     private String labelParamValue;
     // 枚举名称或者枚举值字面值
     private String enumNameOrValue;
     private String tableName;
+    private String tableComment;
     private String dbTableName;
+    private String dbName;
+    private DataTypeEnum columnDataType;
+    private String metabaseUrl;
 
     // GaS
     public Long getId() {
@@ -169,5 +176,45 @@ public class LabelDto {
 
     public void setDbTableName(String dbTableName) {
         this.dbTableName = dbTableName;
+    }
+
+    public String getColumnComment() {
+        return columnComment;
+    }
+
+    public void setColumnComment(String columnComment) {
+        this.columnComment = columnComment;
+    }
+
+    public String getTableComment() {
+        return tableComment;
+    }
+
+    public void setTableComment(String tableComment) {
+        this.tableComment = tableComment;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public DataTypeEnum getColumnDataType() {
+        return columnDataType;
+    }
+
+    public void setColumnDataType(DataTypeEnum columnDataType) {
+        this.columnDataType = columnDataType;
+    }
+
+    public String getMetabaseUrl() {
+        return metabaseUrl;
+    }
+
+    public void setMetabaseUrl(String metabaseUrl) {
+        this.metabaseUrl = metabaseUrl;
     }
 }

@@ -18,9 +18,11 @@ package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
@@ -29,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -43,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelTag;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
@@ -67,6 +71,8 @@ public class DimensionServiceImpl implements DimensionService {
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private DimensionService dimensionService;
@@ -76,6 +82,10 @@ public class DimensionServiceImpl implements DimensionService {
     private final String[] dimensionInfos = new String[]{"enName", "dimensionId", "dimensionDefine"};
     private final String DB_NAME = "dbName:LABEL";
     private final String EN_NAME = "enName";
+    private final String COL_COMMENT = "columnComment:LABEL";
+    private final String TBL_COMMENT = "tblComment:LABEL";
+    private final String COLUMN_TYPE = "columnType:LABEL";
+    private final String COL_TYPE_ENUM = "hiveColTypeEnum:ENUM";
 
     @Override
     public MeasureDto findDimension(String dimensionCode) {
@@ -111,7 +121,7 @@ public class DimensionServiceImpl implements DimensionService {
         if (dimensionLabel == null) { return null; }
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
                 and(devTableInfo.id, isEqualTo(dimensionLabel.getTableId())))).get();
-        String dbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isEqualTo(1),
+        String dbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
                 and(devLabel.tableId, isEqualTo(dimensionLabel.getTableId())), and(devLabel.labelCode, isEqualTo(DB_NAME))))
                 .get().getLabelParamValue();
         String selectSql = String.format("SELECT DISTINCT %s FROM %s.%s", dimensionLabel.getColumnName(), dbName,
@@ -259,6 +269,22 @@ public class DimensionServiceImpl implements DimensionService {
     }
 
     private List<MeasureDto> getDimensionsByAtomicMetricCode(String atomicMetricCode) {
+        Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COL_COMMENT))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<Long, String> tableCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(TBL_COMMENT))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COLUMN_TYPE))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(COL_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+
         List<LabelDto> metricLabelList = PojoUtil.copyList(devLabelDao.select(c -> c.where(devLabel.del,
                 isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(atomicMetricCode)))), LabelDto.class);
         List<Long> metricLabelTableIdList = metricLabelList.stream().map(LabelDto::getTableId).collect(Collectors.toList());
@@ -271,8 +297,16 @@ public class DimensionServiceImpl implements DimensionService {
                         and(devLabelDefine.del, isNotEqualTo(1)),
                         and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())))
                 .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
-                .stream().peek(dimensionLabel -> dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId())))
-                .collect(Collectors.toList());
+                .stream().peek(dimensionLabel -> {
+                    dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId()));
+                    dimensionLabel.setTableComment(tableCommentMap.get(dimensionLabel.getTableId()));
+                    dimensionLabel.setDbName(dwdTableInfoMap.get(dimensionLabel.getTableId()));
+                    String columnComment = columnCommentMap.containsKey(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName())
+                            ? columnCommentMap.get(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName()) : dimensionLabel.getColumnName();
+                    dimensionLabel.setColumnComment(columnComment);
+                    dimensionLabel.setColumnDataType(ColumnTypeEnum.toDataType(columnTypeEnumMap
+                            .get(columnTypeMap.get(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName()))));
+                }).collect(Collectors.toList());
         if (dimensionLabelList.size() == 0) {
             return null;
         }
@@ -291,7 +325,6 @@ public class DimensionServiceImpl implements DimensionService {
                     .findAny()
                     .get().getAttributeValue();
             echoDimension.setEnName(enName);
-            List<LabelDto> testLabels = dimensionLabelMap.get(dimension.getLabelCode());
             echoDimension.setMeasureLabels(dimensionLabelMap.get(dimension.getLabelCode()));
             return echoDimension;
         }).collect(Collectors.toList());

@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.dto.measure;
 
 import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
+import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
 
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class ModifierDto {
     private String modifierName;
     private String tableName;
     private String columnName;
+    private String columnComment;
+    private DataTypeEnum columnDataType;
     private List<String> enumValueCodes;
     private List<String> enumValues;
     private AttributeDto modifierAttribute;
@@ -88,5 +91,21 @@ public class ModifierDto {
 
     public void setModifierAttribute(AttributeDto modifierAttribute) {
         this.modifierAttribute = modifierAttribute;
+    }
+
+    public String getColumnComment() {
+        return columnComment;
+    }
+
+    public void setColumnComment(String columnComment) {
+        this.columnComment = columnComment;
+    }
+
+    public DataTypeEnum getColumnDataType() {
+        return columnDataType;
+    }
+
+    public void setColumnDataType(DataTypeEnum columnDataType) {
+        this.columnDataType = columnDataType;
     }
 }

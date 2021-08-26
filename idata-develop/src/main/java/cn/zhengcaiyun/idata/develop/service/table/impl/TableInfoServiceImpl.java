@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Autowired
     private DevLabelDao devLabelDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private ForeignKeyService foreignKeyService;
     @Autowired
     private MetadataQueryApi metadataQueryApi;
@@ -81,6 +84,11 @@ public class TableInfoServiceImpl implements TableInfoService {
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String DB_NAME_LABEL = "dbName:LABEL";
     private final String TABLE_SUBJECT = "TABLE";
+    private final String TABLE_COMMENT_LABEL = "tblComment:LABEL";
+    private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
+    private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
+    private final String COLUMN_TYPE_LABEL = "columnType:LABEL";
+    private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -107,6 +115,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         echoTableInfo.setTableLabels(tableLabelList);
         echoTableInfo.setColumnInfos(columnInfoDtoList);
         echoTableInfo.setForeignKeys(foreignKeyDtoList);
+        echoTableInfo.setDbName(tableLabelList
+                .stream().filter(tableLabel -> DB_NAME_LABEL.equals(tableLabel.getLabelCode()))
+                .findAny().get().getLabelParamValue());
 
         return echoTableInfo;
     }
@@ -131,6 +142,69 @@ public class TableInfoServiceImpl implements TableInfoService {
                         .build().render(RenderingStrategies.MYBATIS3)),
                 LabelDto.class, "labelCode", "labelParamValue");
         return dbLabelDtoList;
+    }
+
+    @Override
+    public String getTableDDL(Long tableId) {
+        StringBuilder ddl = new StringBuilder("");
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.id, isEqualTo(tableId)))).orElse(null);
+        if (tableInfo == null) { return ddl.toString(); }
+        String tableComment = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.tableId, isEqualTo(tableId)), and(devLabel.labelCode, isEqualTo(TABLE_COMMENT_LABEL))))
+                .get().getLabelParamValue();
+        String tableDbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.tableId, isEqualTo(tableId)), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL))))
+                .get().getLabelParamValue();
+        Map<String, String> columnTypeEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(COLUMN_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+        List<ColumnInfoDto> columnInfoList = columnInfoService.getColumns(tableId);
+        if (columnInfoList.size() == 0) { return ddl.toString(); }
+        columnInfoList.forEach(columnInfoDto -> columnInfoDto.getColumnLabels().forEach(columnLabel -> {
+            if (COLUMN_COMMENT_LABEL.equals(columnLabel.getLabelCode())) {
+                columnInfoDto.setColumnComment(columnLabel.getLabelParamValue());
+            }
+            else if (COLUMN_TYPE_LABEL.equals(columnLabel.getLabelCode())) {
+                columnInfoDto.setColumnType(columnTypeEnumMap.get(columnLabel.getLabelParamValue()));
+            }
+            else if (COLUMN_PT_LABEL.equals(columnLabel.getLabelCode())) {
+                columnInfoDto.setPartitionedColumn(columnLabel.getLabelParamValue());
+            }
+        }));
+        List<ColumnInfoDto> columnInfoDtoList = columnInfoList.stream()
+                .filter(columnInfoDto -> "false".equals(columnInfoDto.getPartitionedColumn()))
+                .collect(Collectors.toList());
+        List<ColumnInfoDto> columnInfoPtList = columnInfoList.stream()
+                .filter(columnInfoDto -> "true".equals(columnInfoDto.getPartitionedColumn()))
+                .collect(Collectors.toList());
+
+        ddl.append("create external table ").append("`").append(tableDbName).append("`.`").append(tableInfo.getTableName()).append("`(\n");
+        for (int i = 0; i < columnInfoDtoList.size(); i++) {
+            if ("false".equals(columnInfoDtoList.get(i).getPartitionedColumn())) {
+                ddl.append("  `").append(columnInfoDtoList.get(i).getColumnName()).append("` ").append(columnInfoDtoList.get(i).getColumnType());
+                if (StringUtils.isNotEmpty(columnInfoDtoList.get(i).getColumnComment())) {
+                    ddl.append(" ").append("comment").append(" ").append("'").append(columnInfoDtoList.get(i).getColumnComment()).append("'");
+                }
+                if (i < columnInfoDtoList.size() - 1) ddl.append(",\n");
+                if (i == columnInfoDtoList.size() - 1) ddl.append(") \n");
+            }
+        }
+        ddl.append("comment '").append(tableComment).append("' \n");
+        if (columnInfoPtList.size() > 0) {
+            ddl.append("partitioned by (\n");
+            for (int i = 0; i < columnInfoPtList.size(); i++) {
+                ddl.append("  `").append(columnInfoPtList.get(i).getColumnName()).append("` ").append(columnInfoPtList.get(i).getColumnType());
+                if (StringUtils.isNotEmpty(columnInfoPtList.get(i).getColumnComment())) {
+                    ddl.append(" ").append("comment").append(" ").append("'").append(columnInfoPtList.get(i).getColumnComment()).append("'");
+                }
+                if (i < columnInfoPtList.size() - 1) ddl.append(",\n");
+                if (i == columnInfoPtList.size() - 1) ddl.append(") \n");
+            }
+        }
+        ddl.append("stored as orc \n");
+        ddl.append(String.format("location 'hdfs://nameservice1/hive/%s.db/%s' \n", tableDbName, tableInfo.getTableName()));
+        return ddl.toString();
     }
 
     @Override

@@ -32,6 +32,7 @@ public interface TableInfoService {
     List<TableInfoDto> getTablesByDataBase(String database);
 //    List<TableInfoDto> getTablesByEnumValue(String enumValue);
     List<LabelDto> getDbNames();
+    String getTableDDL(Long tableId);
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
     TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
     boolean delete(Long tableId, String editor);

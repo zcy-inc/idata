@@ -40,6 +40,7 @@ public class ColumnInfoDto {
     private Boolean pk;
     private String columnComment;
     private String columnType;
+    private String partitionedColumn;
 
     // GaS
     public Long getId() {
@@ -144,5 +145,13 @@ public class ColumnInfoDto {
 
     public void setColumnType(String columnType) {
         this.columnType = columnType;
+    }
+
+    public String getPartitionedColumn() {
+        return partitionedColumn;
+    }
+
+    public void setPartitionedColumn(String partitionedColumn) {
+        this.partitionedColumn = partitionedColumn;
     }
 }

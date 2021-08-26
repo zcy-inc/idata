@@ -73,6 +73,8 @@ public class MeasureApiImpl implements MeasureApi {
     private final String BIZ_TYPE_CODE = "bizProcessCode";
     private final String METRIC_ID = "metricId";
     private final String EN_NAME = "enName";
+    private final String DIMENSION_DEFINE = "dimensionDefine";
+    private final String DIMENSION_ID = "dimensionId";
 
     @Override
     public List<MeasureDto> getMeasures(List<String> labelCodes) {
@@ -109,39 +111,115 @@ public class MeasureApiImpl implements MeasureApi {
                 .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
                         measure -> {
                             AttributeDto attribute = measure.getLabelAttributes().stream()
-                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
-                                            && labelAttribute.getAttributeKey().equals(EN_NAME)).findAny().get();
-                            return attribute.getAttributeValue();
+                                    .filter(labelAttribute -> (measure.getLabelTag().endsWith("_METRIC_LABEL")
+                                            || measure.getLabelTag().equals("DIMENSION_LABEL"))
+                                            && labelAttribute.getAttributeKey().equals(EN_NAME)).findAny().orElse(null);
+                            if (attribute != null) {
+                                return attribute.getAttributeValue();
+                            }
+                            return null;
                         }));
-        Map<String, String> metricIdMap = echoMeasureList.stream()
-                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
-                        measure -> {
-                            AttributeDto attribute = measure.getLabelAttributes().stream()
-                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
-                                            && labelAttribute.getAttributeKey().equals(METRIC_ID)).findAny().get();
-                            return attribute.getAttributeValue();
-                        }));
-        Map<String, String> metricDefineMap = echoMeasureList.stream()
-                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
-                        measure -> {
-                            AttributeDto attribute = measure.getLabelAttributes().stream()
-                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
-                                            && labelAttribute.getAttributeKey().equals(METRIC_DEFINE)).findAny().get();
-                            return attribute.getAttributeValue();
-                        }));
-        Map<String, String> metricBizTypeCodeMap = echoMeasureList.stream()
-                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
-                        measure -> {
-                            AttributeDto attribute = measure.getLabelAttributes().stream()
-                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
-                                            && labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().get();
-                            return attribute.getAttributeValue();
-                        }));
+        Map<String, String> measureIdMap = new HashMap<>();
+        for (MeasureDto measure : echoMeasureList) {
+            AttributeDto attribute = null;
+            if (measure.getLabelTag().endsWith("_METRIC_LABEL")) {
+                attribute = measure.getLabelAttributes().stream()
+                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(METRIC_ID)).findAny().orElse(null);
+            }
+            else if (measure.getLabelTag().equals("DIMENSION_LABEL")) {
+                attribute = measure.getLabelAttributes().stream()
+                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(DIMENSION_ID)).findAny().orElse(null);
+            }
+            if (attribute != null) {
+                measureIdMap.put(measure.getLabelCode(), attribute.getAttributeValue());
+            }
+        }
+//                echoMeasureList.stream()
+//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+//                        measure -> {
+//                            AttributeDto attribute = measure.getLabelAttributes().stream()
+//                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+//                                            && labelAttribute.getAttributeKey().equals(METRIC_ID)).findAny().orElse(null);
+//                            if (attribute != null) {
+//                                return attribute.getAttributeValue();
+//                            }
+//                            return null;
+//                        }));
+//        Map<String, String> dimensionIdMap = echoMeasureList.stream()
+//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+//                        measure -> {
+//                            AttributeDto attribute = measure.getLabelAttributes().stream()
+//                                    .filter(labelAttribute -> measure.getLabelTag().equals("DIMENSION_LABEL")
+//                                            && labelAttribute.getAttributeKey().equals(DIMENSION_ID)).findAny().orElse(null);
+//                            if (attribute != null) {
+//                                return attribute.getAttributeValue();
+//                            }
+//                            return null;
+//                        }));
+        Map<String, String> measureDefineMap = new HashMap<>();
+        for (MeasureDto measure : echoMeasureList) {
+            AttributeDto attribute = null;
+            if (measure.getLabelTag().endsWith("_METRIC_LABEL")) {
+                attribute = measure.getLabelAttributes().stream()
+                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(METRIC_DEFINE)).findAny().orElse(null);
+            }
+            else if (measure.getLabelTag().equals("DIMENSION_LABEL")) {
+                attribute = measure.getLabelAttributes().stream()
+                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(DIMENSION_DEFINE)).findAny().orElse(null);
+            }
+            if (attribute != null) {
+                measureDefineMap.put(measure.getLabelCode(), attribute.getAttributeValue());
+            }
+        }
+//        Map<String, String> metricDefineMap = echoMeasureList.stream()
+//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+//                        measure -> {
+//                            AttributeDto attribute = measure.getLabelAttributes().stream()
+//                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+//                                            && labelAttribute.getAttributeKey().equals(METRIC_DEFINE)).findAny().orElse(null);
+//                            if (attribute != null) {
+//                                return attribute.getAttributeValue();
+//                            }
+//                            return null;
+//                        }));
+//        Map<String, String> dimensionDefineMap = echoMeasureList.stream()
+//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+//                        measure -> {
+//                            AttributeDto attribute = measure.getLabelAttributes().stream()
+//                                    .filter(labelAttribute -> measure.getLabelTag().equals("DIMENSION_LABEL")
+//                                            && labelAttribute.getAttributeKey().equals(DIMENSION_DEFINE)).findAny().orElse(null);
+//                            if (attribute != null) {
+//                                return attribute.getAttributeValue();
+//                            }
+//                            return null;
+//                        }));
+        Map<String, String> metricBizTypeCodeMap = new HashMap<>();
+        for (MeasureDto measure : echoMeasureList) {
+            AttributeDto attribute = null;
+            if (measure.getLabelTag().endsWith("_METRIC_LABEL")) {
+                attribute = measure.getLabelAttributes().stream()
+                        .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().orElse(null);
+            }
+            if (attribute != null) {
+                metricBizTypeCodeMap.put(measure.getLabelCode(), attribute.getAttributeValue());
+            }
+        }
+//        Map<String, String> metricBizTypeCodeMap = echoMeasureList.stream()
+//                .collect(Collectors.toMap(LabelDefineDto::getLabelCode,
+//                        measure -> {
+//                            AttributeDto attribute = measure.getLabelAttributes().stream()
+//                                    .filter(labelAttribute -> measure.getLabelTag().endsWith("_METRIC_LABEL")
+//                                            && labelAttribute.getAttributeKey().equals(BIZ_TYPE_CODE)).findAny().orElse(null);
+//                            if (attribute != null) {
+//                                return attribute.getAttributeValue();
+//                            }
+//                            return null;
+//                        }));
         echoMeasureList.forEach(measure -> {
+            measure.setEnName(enNameMap.get(measure.getLabelCode()));
+            measure.setMeasureId(measureIdMap.get(measure.getLabelCode()));
+            measure.setMeasureDefine(measureDefineMap.get(measure.getLabelCode()));
             if (measure.getLabelTag().endsWith("METRIC_LABEL")) {
-                measure.setEnName(enNameMap.get(measure.getLabelCode()));
-                measure.setMeasureId(metricIdMap.get(measure.getLabelCode()));
-                measure.setMeasureDefine(metricDefineMap.get(measure.getLabelCode()));
                 measure.setBizTypeValue(bizTypeMap.get(metricBizTypeCodeMap.get(measure.getLabelCode())));
             }
         });

@@ -77,18 +77,6 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
-    @Autowired
-    private DwMetaService dwMetaService;
-    @Autowired
-    private UacUserDao uacUserDao;
-    @Autowired
-    private EnumService enumService;
-    @Autowired
-    private DevFolderDao devFolderDao;
-    @Autowired
-    private DevTableInfoDao devTableInfoDao;
-    @Autowired
-    private DevColumnInfoDao devColumnInfoDao;
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
@@ -108,6 +96,11 @@ public class TableInfoController {
     @GetMapping("columnInfos/{tableId}")
     public RestResult<List<ColumnInfoDto>> getColumns(@PathVariable("tableId") Long tableId) {
         return RestResult.success(columnInfoService.getColumns(tableId));
+    }
+
+    @GetMapping("tableDdl/{tableId}")
+    public RestResult<String> getTableDDL(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(tableInfoService.getTableDDL(tableId));
     }
 
     @PostMapping("tableInfo")

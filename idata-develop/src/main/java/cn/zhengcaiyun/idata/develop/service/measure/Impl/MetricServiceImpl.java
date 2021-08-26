@@ -360,6 +360,7 @@ public class MetricServiceImpl implements MetricService {
             }
             else {
                 MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
+                // 派生指标表名和字段名
                 echoMetric.setMeasureLabels(labelService.findLabelsByCode(atomicMetric.getLabelCode()));
                 SpecialAttributeDto echoSpecialAttribute = atomicMetric.getSpecialAttribute();
                 echoSpecialAttribute.setAtomicMetricCode(atomicMetric.getLabelCode());

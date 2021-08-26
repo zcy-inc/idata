@@ -83,8 +83,6 @@ public class ModifierServiceImpl implements ModifierService {
                 .collect(Collectors.toMap(ModifierDto::getModifierCode, ModifierDto::getEnumValueCodes));
         List<String> modifierCodeList = PojoUtil.copyOne(metric, MeasureDto.class).getSpecialAttribute().getModifiers()
                 .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
-        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
         List<MeasureDto> modifierList = PojoUtil.copyList(devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isIn(modifierCodeList)))), MeasureDto.class);
         List<ModifierDto> echoModifierList = modifierList.stream().map(modifier -> {
@@ -101,6 +99,10 @@ public class ModifierServiceImpl implements ModifierService {
                     .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
             echoModifier.setEnumValues(modifierEnumValueList);
             echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
+            List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
+            echoModifier.setColumnName(modifierLabelList.get(0).getColumnName());
+            echoModifier.setColumnComment(modifierLabelList.get(0).getColumnComment());
+            echoModifier.setColumnDataType(modifierLabelList.get(0).getColumnDataType());
 //            if (atomicTableId != null) {
 //                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
 //                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->

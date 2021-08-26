@@ -23,6 +23,8 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
@@ -39,6 +41,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelRequired;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
@@ -66,8 +69,15 @@ public class LabelServiceImpl implements LabelService {
     private DevTableInfoDao devTableInfoDao;
     @Autowired
     private EnumService enumService;
+    @Autowired
+    private DevEnumValueDao devEnumValueDao;
 
     private final String DB_NAME = "dbName:LABEL";
+    private final String COL_COMMENT = "columnComment:LABEL";
+    private final String TBL_COMMENT = "tblComment:LABEL";
+    private final String METABASE_URL = "metabaseUrl:LABEL";
+    private final String COLUMN_TYPE = "columnType:LABEL";
+    private final String COL_TYPE_ENUM = "hiveColTypeEnum:ENUM";
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -141,7 +151,8 @@ public class LabelServiceImpl implements LabelService {
             else if (labelDefineDto.getLabelIndex() < 0) {
                 labelDefineDto.setLabelIndex(labelDefine.getLabelIndex());
             }
-            PojoUtil.copyTo(labelDefineDto, labelDefine, "labelName", "labelIndex");
+            PojoUtil.copyTo(labelDefineDto, labelDefine, "labelName", "specialAttribute",
+                    "folderId", "labelAttributes", "labelIndex");
             if (labelDefineDto.getLabelRequired() != null) {
                 labelDefine.setLabelRequired(labelDefineDto.getLabelRequired());
             }
@@ -360,6 +371,21 @@ public class LabelServiceImpl implements LabelService {
         Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                 and(devLabel.labelCode, isEqualTo(DB_NAME))))
                 .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COL_COMMENT))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<Long, String> tableCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(TBL_COMMENT))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<Long, String> tableMetabaseUrlMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(METABASE_URL))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COLUMN_TYPE))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(COL_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
 //        List<LabelDto> echoLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
 //                .from(devLabel)
 //                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))
@@ -376,7 +402,14 @@ public class LabelServiceImpl implements LabelService {
                 .stream().peek(labelDto -> {
                     checkArgument(tableInfoMap.containsKey(labelDto.getTableId()), "表不存在");
                     labelDto.setTableName(tableInfoMap.get(labelDto.getTableId()));
-                    labelDto.setDbTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
+                    labelDto.setTableComment(tableCommentMap.get(labelDto.getTableId()));
+                    labelDto.setDbName(dwdTableInfoMap.get(labelDto.getTableId()));
+                    String columnComment = columnCommentMap.containsKey(labelDto.getTableId() + "_" + labelDto.getColumnName())
+                            ? columnCommentMap.get(labelDto.getTableId() + "_" + labelDto.getColumnName()) : labelDto.getColumnName();
+                    labelDto.setColumnComment(columnComment);
+                    labelDto.setColumnDataType(ColumnTypeEnum.toDataType(columnTypeEnumMap
+                            .get(columnTypeMap.get(labelDto.getTableId() + "_" + labelDto.getColumnName()))));
+                    labelDto.setMetabaseUrl(tableMetabaseUrlMap.getOrDefault(labelDto.getTableId(), null));
                 }).collect(Collectors.toList());
     }
 

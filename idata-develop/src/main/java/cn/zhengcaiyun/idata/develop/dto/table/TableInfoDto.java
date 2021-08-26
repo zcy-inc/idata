@@ -38,6 +38,7 @@ public class TableInfoDto {
     private List<LabelDto> tableLabels;
     private List<ColumnInfoDto> columnInfos;
     private List<ForeignKeyDto> foreignKeys;
+    private String dbName;
 
     // GaS
     public Long getId() {
@@ -126,5 +127,13 @@ public class TableInfoDto {
 
     public void setForeignKeys(List<ForeignKeyDto> foreignKeys) {
         this.foreignKeys = foreignKeys;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
     }
 }

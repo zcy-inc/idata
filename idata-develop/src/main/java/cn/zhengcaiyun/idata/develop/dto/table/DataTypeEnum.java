@@ -14,35 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.dto.measure;
-
-import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
-import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.table;
 
 /**
  * @author caizhedong
- * @date 2021-06-22 10:49
+ * @date 2021-08-26 下午3:02
  */
-public class MetricDto extends MeasureDto {
-    private List<MeasureDto> dimensions;
-    private List<MeasureDto> deriveMetrics;
 
-    // GaS
-    public List<MeasureDto> getDimensions() {
-        return dimensions;
-    }
-
-    public void setDimensions(List<MeasureDto> dimensions) {
-        this.dimensions = dimensions;
-    }
-
-    public List<MeasureDto> getDeriveMetrics() {
-        return deriveMetrics;
-    }
-
-    public void setDeriveMetrics(List<MeasureDto> deriveMetrics) {
-        this.deriveMetrics = deriveMetrics;
-    }
+public enum DataTypeEnum {
+    Whole,
+    Decimal,
+    DateTime,
+    Date,
+    String,
+    Ignore; // 仅在模块内部使用
 }
