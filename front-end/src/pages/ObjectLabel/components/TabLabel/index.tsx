@@ -23,8 +23,8 @@ export interface TabObjectLabelProps {
 
 const { confirm } = Modal;
 
-const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', tabKey, originId }) => {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode, tabKey, originId }) => {
+  const [mode, setMode] = useState<'view' | 'edit'>();
   const [data, setData] = useState<ObjectLabel>();
   const [loading, setLoading] = useState<boolean>(false);
   const [form] = Form.useForm();

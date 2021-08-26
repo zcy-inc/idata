@@ -6,8 +6,11 @@ import styles from '../../index.less';
 
 import { createTable, delTable, getTable } from '@/services/tablemanage';
 import { Table, ForeignKey } from '@/types/datapi';
+import { TreeNodeType } from '@/constants/datapi';
+
 import ViewTable from './ViewTable';
 import EditTable from './EditTable';
+import DDLModal from './components/DDLModal';
 
 export interface TabTableProps {
   initialMode: 'view' | 'edit';
@@ -25,6 +28,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<Table>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [visible, setVisible] = useState(false);
 
   const [label] = Form.useForm();
   const refs = { label };
@@ -139,11 +143,16 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
             if (res.success) {
               if (fileCode === 'newTable') {
                 message.success('创建表成功');
-                replaceTab('newTable', `T_${res.data.id}`, res.data.tableName, 'TABLE');
+                replaceTab('newTable', `T_${res.data.id}`, res.data.tableName, TreeNodeType.TABLE);
               } else {
                 message.success('修改表成功');
-                replaceTab(`T_${res.data.id}`, `T_${res.data.id}`, res.data.tableName, 'TABLE');
-                getTree('TABLE');
+                replaceTab(
+                  `T_${res.data.id}`,
+                  `T_${res.data.id}`,
+                  res.data.tableName,
+                  TreeNodeType.TABLE,
+                );
+                getTree(TreeNodeType.TABLE);
                 getTableInfo(res.data.id);
                 setMode('view');
               }
@@ -165,7 +174,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           .then((res) => {
             if (res.success) message.success('删除成功');
             onRemovePane(`T_${fileCode}`);
-            getTree('TABLE');
+            getTree(TreeNodeType.TABLE);
           })
           .catch((err) => {}),
     });
@@ -189,6 +198,9 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
             <Button key="edit" type="primary" onClick={() => setMode('edit')}>
               编辑
             </Button>
+            <Button key="edit" onClick={() => setVisible(true)}>
+              DDL模式
+            </Button>
             <Button key="del" onClick={onDelete}>
               删除
             </Button>
@@ -205,6 +217,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           </Space>
         )}
       </div>
+      {visible && <DDLModal visible={visible} onCancel={() => setVisible(false)} />}
     </Fragment>
   );
 };

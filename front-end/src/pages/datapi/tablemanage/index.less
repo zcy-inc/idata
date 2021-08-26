@@ -4,7 +4,7 @@
     height: 100%;
     .left {
       height: 100%;
-      padding: 16px;
+      padding: 16px 18px 16px 16px;
       :global {
         .ant-tabs-tab {
           margin-left: 0;
@@ -15,9 +15,10 @@
         }
         .ant-tree {
           height: calc(100% - 94px);
-          overflow-y: scroll;
+          overflow-y: auto;
         }
         .ant-tree-switcher {
+          width: 15px;
           color: #c0c4da;
         }
         .ant-tree-title {
@@ -37,7 +38,7 @@
           padding-bottom: 4px;
         }
         .icon-plus {
-          margin-left: 16px;
+          margin-left: 8px;
           color: #304ffe;
           font-size: 18px;
         }
@@ -86,7 +87,7 @@
             }
           }
           .ant-tabs-content-holder {
-            overflow-y: scroll;
+            overflow-y: auto;
           }
         }
         .ant-empty {

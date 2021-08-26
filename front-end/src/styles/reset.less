@@ -108,16 +108,6 @@ body {
     padding: 10px 16px 8px;
     background: #f7f9fa;
     border-top: none;
-
-    // .ant-btn:first-child:not(:hover) {
-    //   color: #5f6266;
-    //   background: transparent;
-    //   border-color: transparent;
-    //   box-shadow: none;
-    // }
-    // .ant-btn.ant-btn-primary {
-    //   margin-left: 16px;
-    // }
   }
 
   // Input
@@ -232,6 +222,17 @@ body {
   .ant-table tfoot > tr > th {
     padding: 24px;
   }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #e1e2e2;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   // Tabs - 标签页
   .ant-tabs-card {
@@ -300,10 +301,32 @@ body {
   }
   .ant-pro-basicLayout-content {
     margin: 0;
-    background: #F7F8FC;
+    background: #f7f8fc;
 
     .ant-pro-page-container {
       margin: 0;
     }
   }
+}
+
+// Ant Design Pro SideBar
+.ant-menu-inline-collapsed {
+  .ant-pro-menu-item {
+    opacity: 0;
+  }
+}
+.ant-menu-item-selected {
+  &::after {
+    display: none;
+  }
+}
+
+// BreadCrumb
+.ant-breadcrumb a {
+  color: #7c8296;
+  font-weight: normal;
+}
+.ant-breadcrumb > span:last-child a {
+  color: #191c3d;
+  font-weight: normal;
 }

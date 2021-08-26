@@ -16,7 +16,7 @@ export default defineConfig({
     hmr: true,
   },
   layout: {
-    siderWidth: 220,
+    siderWidth: 288,
     ...defaultSettings,
   },
   locale: {

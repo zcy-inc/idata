@@ -22,7 +22,7 @@ const fetchCurrentUser = async () => {
 };
 
 const renderIcon = (src: string) => (
-  <img src={src} alt="icon" style={{ marginRight: 10, height: 14 }} />
+  <img src={src} alt="icon" style={{ marginRight: 6, height: 14 }} />
 );
 
 /**

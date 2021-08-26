@@ -4,7 +4,7 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  headerHeight: 52,
+  headerHeight: 58,
   navTheme: 'light',
   primaryColor: '#304FFE',
   layout: 'mix',
