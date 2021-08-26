@@ -5,6 +5,7 @@ import ProForm, {
   ProFormTextArea,
   ProFormGroup,
 } from '@ant-design/pro-form';
+import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
@@ -14,7 +15,6 @@ import Title from '../Title';
 import EditRules from './components/EditRules';
 import { rules, ObjectType } from './constants';
 import { ObjectLabel } from '@/types/objectlabel';
-import { useModel } from '@/.umi/plugin-model/useModel';
 
 export interface EditLableProps {
   initial?: ObjectLabel;
