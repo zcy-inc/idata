@@ -4,6 +4,8 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
 const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
@@ -58,5 +60,10 @@ export default defineConfig({
   },
   resolve: {
     includes: ['src/components'],
+  },
+  chainWebpack(memo, { env, webpack, createCSSRule }) {
+    // 设置 alias
+    memo.resolve.alias.set('foo', '/tmp/a/b/foo');
+    memo.plugin('monaco-editor').use(MonacoWebpackPlugin, [{ languages: ['sql'] }]);
   },
 });

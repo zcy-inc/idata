@@ -100,3 +100,7 @@ export async function getTableRelations(params: { tableId: string }) {
 export async function delTable(data: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${data.tableId}`, { method: 'DELETE', data });
 }
+// DDL模式
+export async function getDDL(params: { tableId: any }) {
+  return request(`/api/p1/dev/tableDdl/${params.tableId}`, { method: 'GET', params });
+}

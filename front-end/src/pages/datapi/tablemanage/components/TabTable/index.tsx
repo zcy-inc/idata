@@ -217,7 +217,7 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
           </Space>
         )}
       </div>
-      {visible && <DDLModal visible={visible} onCancel={() => setVisible(false)} />}
+      {visible && <DDLModal visible={visible} onCancel={() => setVisible(false)} data={data} />}
     </Fragment>
   );
 };
