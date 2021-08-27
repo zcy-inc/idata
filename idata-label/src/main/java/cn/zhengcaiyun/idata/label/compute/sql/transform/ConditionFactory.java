@@ -37,7 +37,7 @@ public class ConditionFactory<T> {
 
         BaseCondition<T> baseCondition = null;
         if ("between".equals(condition)) {
-            checkArgument(params.length < 2, "params are invalid.");
+            checkArgument(params.length >= 2, "params are invalid.");
             baseCondition = column.between(params[0], params[1]);
         } else if ("equal".equals(condition)) {
             baseCondition = column.equalTo(params[0]);
