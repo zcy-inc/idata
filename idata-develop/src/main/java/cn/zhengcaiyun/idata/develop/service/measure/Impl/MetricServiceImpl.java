@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -94,38 +95,55 @@ public class MetricServiceImpl implements MetricService {
     // 标签系统查询指标或维度，根据输入的labelCodes缩小范围
     @Override
     public List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag) {
-        List<DevLabel> measureLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
-                and(devLabel.labelCode, isIn(labelCodes))));
-        List<DevLabel> devMeasureLabelList = new ArrayList<>();
-        for (DevLabel measureLabel : measureLabelList) {
-            var builder = select(devLabel.allColumns())
-                    .from(devLabel)
-                    .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
-                    .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(measureLabel.getTableId()),
-                            and(devLabel.columnName, isEqualTo(measureLabel.getColumnName()))));
-            if (METRIC_LABEL.equals(labelTag)) {
-                builder.and(devLabelDefine.labelTag, isLike("%" + METRIC_LABEL));
+        List<MeasureDto> echoMeasureList = new ArrayList<>();
+        List<DevLabelDefine> labelCodeList = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isIn(labelCodes))));
+        List<String> metricCodeList = labelCodeList.stream().filter(measure -> measure.getLabelTag().endsWith(METRIC_LABEL))
+                .collect(Collectors.toList()).stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
+        List<String> dimensionCodeList = labelCodeList.stream().filter(measure -> LabelTagEnum.DIMENSION_LABEL.name().equals(measure.getLabelTag()))
+                .collect(Collectors.toList()).stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
+        if (METRIC_LABEL.equals(labelTag)) {
+            List<DevLabel> measureLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isIn(dimensionCodeList))));
+            List<DevLabel> devMeasureLabelList = new ArrayList<>();
+            for (DevLabel measureLabel : measureLabelList) {
+                var builder = select(devLabel.allColumns())
+                        .from(devLabel)
+                        .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(measureLabel.getTableId())),
+                                and(devLabelDefine.labelTag, isLike("%" + METRIC_LABEL)));
+                List<DevLabel> devMeasureLabels = devLabelDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
+                devMeasureLabelList.addAll(devMeasureLabels);
             }
-            if (LabelTagEnum.DIMENSION_LABEL.name().equals(labelTag)) {
-                builder.and(devLabelDefine.labelTag, isEqualTo(labelTag));
-            }
-            List<DevLabel> devMeasureLabels = devLabelDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
-            devMeasureLabelList.addAll(devMeasureLabels);
+            List<LabelDefineDto> deriveMetricList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                            c.where(devLabelDefine.del, isNotEqualTo(1),
+                                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DERIVE_METRIC_LABEL.name())))),
+                    LabelDefineDto.class);
+            List<String> measureCodeList = devMeasureLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toList());
+            deriveMetricList.forEach(deriveMetric -> {
+                if (isNotEmpty(deriveMetric.getSpecialAttribute().getAtomicMetricCode())
+                        && measureCodeList.contains(deriveMetric.getSpecialAttribute().getAtomicMetricCode())) {
+                    measureCodeList.add(deriveMetric.getLabelCode());
+                }
+            });
+            Set<String> echoMeasureCodeList = new HashSet<>(measureCodeList);
+            echoMeasureList = PojoUtil.copyList(devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",",
+                    echoMeasureCodeList)), MeasureDto.class);
         }
-        List<LabelDefineDto> deriveMetricList = PojoUtil.copyList(devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1),
-                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DERIVE_METRIC_LABEL.name())))),
-                LabelDefineDto.class);
-        List<String> measureCodeList = devMeasureLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toList());
-        deriveMetricList.forEach(deriveMetric -> {
-            if (isNotEmpty(deriveMetric.getSpecialAttribute().getAtomicMetricCode())
-                    && measureCodeList.contains(deriveMetric.getSpecialAttribute().getAtomicMetricCode())) {
-                measureCodeList.add(deriveMetric.getLabelCode());
+        else if (labelTag.equals(LabelTagEnum.DIMENSION_LABEL.name())) {
+            List<DevLabel> dimensionLabel = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isIn(dimensionCodeList))));
+            Set<Long> dimensionTblIdList = dimensionLabel.stream().map(DevLabel::getTableId).collect(Collectors.toSet());
+            List<MeasureDto> metricList = new ArrayList<>();
+            for (String labelCode : metricCodeList) {
+                metricList.addAll(dimensionService.findDimensionsByMetricCode(labelCode));
             }
-        });
-        Set<String> echoMeasureCodeList = new HashSet<>(measureCodeList);
-        return PojoUtil.copyList(devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", echoMeasureCodeList)),
-                MeasureDto.class);
+            Set<String> metricCodes = metricList.stream().map(MeasureDto::getLabelCode).collect(Collectors.toSet());
+            Map<String, MeasureDto> metricMap = metricList.stream().collect(Collectors.toMap(
+                    MeasureDto::getLabelCode, Function.identity(), (value1, value2) -> value1));
+            echoMeasureList = metricCodes.stream().map(metricMap::get).collect(Collectors.toList());
+        }
+        return echoMeasureList;
     }
 
     @Override
@@ -163,33 +181,33 @@ public class MetricServiceImpl implements MetricService {
         MeasureDto echoMetric = PojoUtil.copyOne(labelService.defineLabel(metric, operator), MeasureDto.class);
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metric.getLabelTag())) {
             // 正常逻辑
-//            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "聚合方式不能为空");
-//            checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "关联信息不能为空");
-//            List<LabelDto> metricLabelList = metric.getMeasureLabels();
-//            // 校验关联信息
-//            metricLabelList.forEach(metricLabel ->
-//                    checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
-//                            String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
-//
-//            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-//                metricLabel.setLabelCode(echoMetric.getLabelCode());
-//                return labelService.label(metricLabel, operator);
-//            }).collect(Collectors.toList());
-//            echoMetric.setMeasureLabels(echoMetricLabelList);
-            // 数据迁移相关代码
-            if (metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0) {
-                List<LabelDto> metricLabelList = metric.getMeasureLabels();
-                // 校验关联信息
-                metricLabelList.forEach(metricLabel ->
-                        checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
-                                String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
+            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "聚合方式不能为空");
+            checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "关联信息不能为空");
+            List<LabelDto> metricLabelList = metric.getMeasureLabels();
+            // 校验关联信息
+            metricLabelList.forEach(metricLabel ->
+                    checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
+                            String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
 
-                List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-                    metricLabel.setLabelCode(echoMetric.getLabelCode());
-                    return labelService.label(metricLabel, operator);
-                }).collect(Collectors.toList());
-                echoMetric.setMeasureLabels(echoMetricLabelList);
-            }
+            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
+                metricLabel.setLabelCode(echoMetric.getLabelCode());
+                return labelService.label(metricLabel, operator);
+            }).collect(Collectors.toList());
+            echoMetric.setMeasureLabels(echoMetricLabelList);
+            // 数据迁移相关代码
+//            if (metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0) {
+//                List<LabelDto> metricLabelList = metric.getMeasureLabels();
+//                // 校验关联信息
+//                metricLabelList.forEach(metricLabel ->
+//                        checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
+//                                String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
+//
+//                List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
+//                    metricLabel.setLabelCode(echoMetric.getLabelCode());
+//                    return labelService.label(metricLabel, operator);
+//                }).collect(Collectors.toList());
+//                echoMetric.setMeasureLabels(echoMetricLabelList);
+//            }
         }
         return echoMetric;
     }
