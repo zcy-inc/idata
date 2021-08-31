@@ -17,15 +17,14 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -40,6 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
@@ -64,11 +64,20 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Autowired
     private DevForeignKeyMyDao devForeignKeyMyDaoDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private LabelService labelService;
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
     private final String COLUMN_SUBJECT = "COLUMN";
+    private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
+    private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
+    private final String COLUMN_TYPE_LABEL = "columnType:LABEL";
+    private final String COLUMN_PK_LABEL = "pk:LABEL";
+    private final String COLUMN_SECURITY_LABEL = "colSecurityLevel:LABEL";
+    private final String COLUMN_SECURITY_ENUM = "securityLevelEnum:ENUM";
+    private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String[] columnLabelTags = {LabelTagEnum.STRING_LABEL.name(), LabelTagEnum.BOOLEAN_LABEL.name(),
     LabelTagEnum.USER_LABEL.name(), LabelTagEnum.ENUM_LABEL.name(), LabelTagEnum.ENUM_VALUE_LABEL.name()};
 
@@ -86,6 +95,52 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             echoList = echoList.stream().peek(columnInfoDto ->
                     columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
             ).collect(Collectors.toList());
+        }
+
+        return echoList;
+    }
+
+    @Override
+    public List<ColumnDetailsDto> getColumnDetails(Long tableId) {
+        List<ColumnDetailsDto> echoList = new ArrayList<>();
+        List<DevColumnInfo> devColumnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
+                .from(devColumnInfo)
+                .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
+                .build().render(RenderingStrategies.MYBATIS3));
+        if (devColumnInfoList.size() > 0) {
+            Map<String, String> columnTypeEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                    and(devEnumValue.enumCode, isEqualTo(COLUMN_TYPE_ENUM))))
+                    .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+            Map<String, String> columnSecurityEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                    and(devEnumValue.enumCode, isEqualTo(COLUMN_SECURITY_ENUM))))
+                    .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+            List<ColumnInfoDto> columnInfoList = PojoUtil.copyList(devColumnInfoList, ColumnInfoDto.class, columnInfoFields);
+            List<String> columnNameList = columnInfoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
+            Map<String, List<LabelDto>> columnInfoMap = labelService.findColumnLabelMap(tableId, columnNameList);
+            columnInfoList = columnInfoList.stream().peek(columnInfoDto ->
+                    columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
+            ).collect(Collectors.toList());
+            echoList = columnInfoList.stream().map(columnInfo -> {
+                ColumnDetailsDto echo = PojoUtil.copyOne(columnInfo, ColumnDetailsDto.class);
+                columnInfo.getColumnLabels().forEach(columnLabel -> {
+                    if (columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)) {
+                        echo.setColumnComment(columnLabel.getLabelParamValue());
+                    }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_TYPE_LABEL)) {
+                        echo.setColumnType(columnTypeEnumMap.get(columnLabel.getLabelParamValue()));
+                    }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_PK_LABEL)) {
+                        echo.setPk(Boolean.valueOf(columnLabel.getLabelParamValue()));
+                    }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_SECURITY_LABEL)) {
+                        echo.setSecurityLevel(columnSecurityEnumMap.get(columnLabel.getLabelParamValue()));
+                    }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_DESCRIPTION_LABEL)) {
+                        echo.setColumnDescription(columnLabel.getLabelParamValue());
+                    }
+                });
+                return echo;
+            }).collect(Collectors.toList());
         }
 
         return echoList;

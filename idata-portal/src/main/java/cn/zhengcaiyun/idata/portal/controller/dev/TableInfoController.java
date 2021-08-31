@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -94,8 +95,8 @@ public class TableInfoController {
     }
 
     @GetMapping("columnInfos/{tableId}")
-    public RestResult<List<ColumnInfoDto>> getColumns(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(columnInfoService.getColumns(tableId));
+    public RestResult<List<ColumnDetailsDto>> getColumns(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(columnInfoService.getColumnDetails(tableId));
     }
 
     @GetMapping("tableDdl/{tableId}")

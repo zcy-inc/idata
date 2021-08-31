@@ -14,23 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.table;
-
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.table;
 
 /**
  * @author caizhedong
- * @date 2021-05-25 16:10
+ * @date 2021-08-31 下午1:47
  */
 
-public interface ColumnInfoService {
-    List<ColumnInfoDto> getColumns(Long tableId);
-    List<ColumnDetailsDto> getColumnDetails(Long tableId);
-    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
-//    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
-    boolean delete(Long columnId, String operator);
-    boolean checkColumn(String columnName, Long tableId);
+public class ColumnDetailsDto extends ColumnInfoDto {
+    private String securityLevel;
+    private String columnDescription;
+
+    // GaS
+    public String getSecurityLevel() {
+        return securityLevel;
+    }
+
+    public void setSecurityLevel(String securityLevel) {
+        this.securityLevel = securityLevel;
+    }
+
+    public String getColumnDescription() {
+        return columnDescription;
+    }
+
+    public void setColumnDescription(String columnDescription) {
+        this.columnDescription = columnDescription;
+    }
 }
