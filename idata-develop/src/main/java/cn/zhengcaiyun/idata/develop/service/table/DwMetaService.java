@@ -79,9 +79,16 @@ public class DwMetaService implements InitializingBean, DisposableBean {
         this.dwMetaJdbcTemplate = new JdbcTemplate(dwMetaDatasource);
     }
 
-    public List<Map<String, Object>> getTables() {
-        String tableSql = "select idata.table_info.* from idata.table_info " +
-                "where idata.table_info.del = false order by id";
+    public List<Map<String, Object>> getTables(Long tableId) {
+        String tableSql;
+        if (tableId != null) {
+            tableSql = "select idata.table_info.* from idata.table_info " +
+                    "where idata.table_info.del = false and id = " + tableId;
+        }
+        else {
+            tableSql = "select idata.table_info.* from idata.table_info " +
+                    "where idata.table_info.del = false order by id";
+        }
         return dwMetaJdbcTemplate.queryForList(tableSql);
     }
 
@@ -92,10 +99,18 @@ public class DwMetaService implements InitializingBean, DisposableBean {
         return dwMetaJdbcTemplate.queryForList(columnSql);
     }
 
-    public List<Map<String, Object>> getForeignKeys() {
-        String foreignKeySql = "select idata.foreign_key.* " +
-                "from idata.foreign_key " +
-                "where idata.foreign_key.del = false order by id";
+    public List<Map<String, Object>> getForeignKeys(Long tableId) {
+        String foreignKeySql;
+        if (tableId != null) {
+            foreignKeySql = "select idata.foreign_key.* " +
+                    "from idata.foreign_key " +
+                    "where idata.foreign_key.del = false and table_id = " + tableId;
+        }
+        else {
+            foreignKeySql = "select idata.foreign_key.* " +
+                    "from idata.foreign_key " +
+                    "where idata.foreign_key.del = false order by id";
+        }
         return dwMetaJdbcTemplate.queryForList(foreignKeySql);
     }
 

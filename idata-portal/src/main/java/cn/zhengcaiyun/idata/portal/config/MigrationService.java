@@ -89,8 +89,8 @@ public class MigrationService {
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
 
-    public List<TableInfoDto> syncTableData(){
-        List<Map<String, Object>> tableList = dwMetaService.getTables();
+    public List<TableInfoDto> syncTableData(Long tableId){
+        List<Map<String, Object>> tableList = dwMetaService.getTables(tableId);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
         Map<String, String> domainMap = dwMetaService.getDomains();
@@ -238,12 +238,12 @@ public class MigrationService {
         return echoList;
     }
 
-    public boolean syncForeignKeys() {
-        List<Map<String, Object>> foreignKeyList = dwMetaService.getForeignKeys();
+    public boolean syncForeignKeys(Long tableId) {
+        List<Map<String, Object>> foreignKeyList = dwMetaService.getForeignKeys(tableId);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> columnMap = columnList.stream().collect(Collectors.toMap(
                 record -> record.get("id").toString(), record -> (String) record.get("col_name")));
-        Map<String, String> tableMap = dwMetaService.getTables().stream()
+        Map<String, String> tableMap = dwMetaService.getTables(null).stream()
                 .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
@@ -292,7 +292,7 @@ public class MigrationService {
     public List<MeasureDto> syncDimensions() {
         List<Map<String, Object>> dimensionList = dwMetaService.getDimensions();
         Map<String, List<Map<String, Object>>> columnRoleMap = dwMetaService.getColumnRoles("dimension");
-        List<Map<String, Object>> tableList = dwMetaService.getTables();
+        List<Map<String, Object>> tableList = dwMetaService.getTables(null);
         Map<String, String> tableMap = tableList.stream()
                 .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
@@ -396,7 +396,7 @@ public class MigrationService {
                 .stream().collect(Collectors.toMap(DevEnum::getEnumName, DevEnum::getEnumCode));
         List<Map<String, Object>> modifierTypeList = dwMetaService.getModifierTypes();
         Map<String, List<Map<String, Object>>> columnRoleMap = dwMetaService.getColumnRoles("modifier");
-        Map<String, String> tableMap = dwMetaService.getTables().stream()
+        Map<String, String> tableMap = dwMetaService.getTables(null).stream()
                 .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
@@ -521,7 +521,7 @@ public class MigrationService {
             bizAttribute.setAttributeValue(idataBizProcessMap.get(bizProcessMap.get(record.get("process_id").toString())));
             attributeList.add(bizAttribute);
             if ("atomic".equals((String) record.get("metric_type"))) {
-                Map<String, String> tableMap =  dwMetaService.getTables().stream()
+                Map<String, String> tableMap =  dwMetaService.getTables(null).stream()
                         .collect(Collectors.toMap(table -> table.get("id").toString(), table -> (String) table.get("tbl_name")));
                 Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                         .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));

@@ -47,14 +47,14 @@ public class MigrationController {
 
     @PostMapping("syncTable")
     @Transactional(rollbackFor = Throwable.class)
-    public RestResult<List<TableInfoDto>> syncTable(){
-        return RestResult.success(migrationService.syncTableData());
+    public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId){
+        return RestResult.success(migrationService.syncTableData(tableId));
     }
 
     @PostMapping("syncForeignKey")
     @Transactional(rollbackFor = Throwable.class)
-    public RestResult<Boolean> syncForeignKey(){
-        return RestResult.success(migrationService.syncForeignKeys());
+    public RestResult<Boolean> syncForeignKey(@RequestParam(value = "tableId", required = false) Long tableId){
+        return RestResult.success(migrationService.syncForeignKeys(tableId));
     }
 
     @PostMapping("syncDimensions")

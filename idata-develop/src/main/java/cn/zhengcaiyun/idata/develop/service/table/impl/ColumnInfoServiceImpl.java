@@ -268,9 +268,11 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                                 or(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
                 .build().render(RenderingStrategies.MYBATIS3))
                 .stream().collect(Collectors.groupingBy(DevLabel::getColumnName));
-        checkArgument(!measureColumnMap.containsKey(columnInfo.getColumnName()),
-                labelService.findDefine(measureColumnMap.get(columnInfo.getColumnName()).get(0).getLabelCode())
-                        .getLabelName() + "依赖" + columnInfo.getColumnName() + "字段，不能删除");
+        if (measureColumnMap.size() > 0) {
+            checkArgument(!measureColumnMap.containsKey(columnInfo.getColumnName()),
+                    labelService.findDefine(measureColumnMap.get(columnInfo.getColumnName()).get(0).getLabelCode())
+                            .getLabelName() + "依赖" + columnInfo.getColumnName() + "字段，不能删除");
+        }
 
         // 删除字段表记录
         devColumnInfoDao.update(c -> c.set(devColumnInfo.del).equalTo(1)
