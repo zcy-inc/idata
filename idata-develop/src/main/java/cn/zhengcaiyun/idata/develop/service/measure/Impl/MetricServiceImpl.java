@@ -134,14 +134,20 @@ public class MetricServiceImpl implements MetricService {
             List<DevLabel> dimensionLabel = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                     and(devLabel.labelCode, isIn(dimensionCodeList))));
             Set<Long> dimensionTblIdList = dimensionLabel.stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            List<MeasureDto> metricList = new ArrayList<>();
+            List<MeasureDto> dimensionList = new ArrayList<>();
             for (String labelCode : metricCodeList) {
-                metricList.addAll(dimensionService.findDimensionsByMetricCode(labelCode));
+                dimensionList.addAll(dimensionService.findDimensionsByMetricCode(labelCode));
             }
-            Set<String> metricCodes = metricList.stream().map(MeasureDto::getLabelCode).collect(Collectors.toSet());
-            Map<String, MeasureDto> metricMap = metricList.stream().collect(Collectors.toMap(
+            Set<String> dimensionCodes = dimensionList.stream().map(MeasureDto::getLabelCode).collect(Collectors.toSet());
+            Map<String, MeasureDto> dimensionMap = dimensionList.stream().collect(Collectors.toMap(
                     MeasureDto::getLabelCode, Function.identity(), (value1, value2) -> value1));
-            echoMeasureList = metricCodes.stream().map(metricMap::get).collect(Collectors.toList());
+            List<MeasureDto> useDimensionList = dimensionCodes.stream().map(dimensionMap::get).collect(Collectors.toList());
+            for (MeasureDto dimension : useDimensionList) {
+                if (dimensionTblIdList.contains(dimension.getMeasureLabels().get(0).getTableId())
+                        && !dimensionCodeList.contains(dimension.getLabelCode())) {
+                    echoMeasureList.add(dimension);
+                }
+            }
         }
         return echoMeasureList;
     }
