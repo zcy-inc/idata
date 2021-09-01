@@ -393,7 +393,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
             // 绘制行
             // 主键的钥匙
             listContainer.addShape('text', {
-              attrs: { ...textAttrs, x: 8, text: pk && '🔑' },
+              attrs: { ...textAttrs, x: 8, text: pk ? '🔑' : '' },
               draggable: true,
               name: `item-${Math.floor(startIndex) + i}`,
             });

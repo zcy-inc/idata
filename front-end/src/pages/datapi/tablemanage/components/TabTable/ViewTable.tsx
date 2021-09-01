@@ -10,6 +10,7 @@ import { ViewInitialColumns, TransformBoolean } from './constants';
 
 import Title from '../../../components/Title';
 import TableRelation from './components/TableRelation';
+import ER from './components/ER';
 
 export interface ViewTableProps {
   data: any;
@@ -90,7 +91,9 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
         {data?.tableLabels?.map((_: TableLable) => (
           <Item key={_.id} label={_.labelName} contentStyle={ellipsis}>
             {_.labelCode === 'metabaseUrl:LABEL' ? (
-              <a target='_blank' href={transformLabelValue(_)}>查看</a>
+              <a target="_blank" href={transformLabelValue(_)}>
+                查看
+              </a>
             ) : (
               <Tooltip placement="topLeft" title={transformLabelValue(_)}>
                 {transformLabelValue(_)}
@@ -110,7 +113,8 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
           />
         </TabPane>
         <TabPane key="fk" tab="关系" style={{ paddingTop: 24 }}>
-          <TableRelation id={data?.id} />
+          {/* <TableRelation id={data?.id} /> */}
+          <ER id={data?.id} />
         </TabPane>
       </Tabs>
     </Fragment>

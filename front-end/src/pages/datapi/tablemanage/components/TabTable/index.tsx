@@ -166,8 +166,8 @@ const TabTable: FC<TabTableProps> = ({ initialMode = 'view', fileCode }) => {
 
   const onDelete = () =>
     confirm({
-      title: '删除枚举',
-      content: '您确认要删除该枚举吗？',
+      title: '删除表',
+      content: '您确认要删除该表吗？',
       autoFocusButton: null,
       onOk: () =>
         delTable({ tableId: fileCode })

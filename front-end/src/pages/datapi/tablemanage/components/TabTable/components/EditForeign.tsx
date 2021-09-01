@@ -7,6 +7,7 @@ import styles from '../../../index.less';
 
 import IconFont from '@/components/IconFont';
 import TableRelation from './TableRelation';
+import ER from './ER';
 import Title from '../../../../components/Title';
 
 import { EROps } from '../constants';
@@ -232,7 +233,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
       {initial && (
         <Fragment>
           <Title>关系图预览</Title>
-          <TableRelation id={initial.id} />
+          {/* <TableRelation id={initial.id} /> */}
+          <ER id={initial.id} />
         </Fragment>
       )}
     </Fragment>

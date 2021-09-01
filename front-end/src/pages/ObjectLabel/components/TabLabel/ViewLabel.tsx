@@ -1,21 +1,33 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Space, Empty } from 'antd';
+import React, { CSSProperties, Fragment, useEffect, useState } from 'react';
+import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Empty } from 'antd';
+import { get } from 'lodash';
 import type { FC, Key } from 'react';
 import styles from '../../index.less';
 
 import Title from '../Title';
 import ViewRules from './components/ViewRules';
 
-import { getObjectLabelLayer, exportObjectLabel } from '@/services/objectlabel';
+import { getObjectLabelLayer } from '@/services/objectlabel';
 import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
 import { ObjectTypeView } from './constants';
 
 export interface ViewLabelProps {
   data: ObjectLabel;
 }
+interface Column {
+  columnName: string;
+  columnType: string;
+  dataType: string;
+}
 
 const { Item } = Descriptions;
 const { Link, Text } = Typography;
+const ellipsis: CSSProperties = {
+  display: 'inline-block',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
@@ -24,7 +36,6 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [activeKey, setActiveKey] = useState<string>('');
 
   const [loading, setLoading] = useState(false);
-  const [loadingExport, setLoadingExport] = useState(false);
   const [columns, setColumns] = useState<{ title: string; key: Key; dataIndex: Key }[][]>([]);
   const [list, setList] = useState<{ [key: string]: any }[][]>([]);
 
@@ -33,8 +44,10 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      setLayers(data.ruleLayers);
-      setActiveKey(`${data.ruleLayers[0].layerId}`);
+      const tmpRuleLayers = get(data, 'ruleLayers', []);
+      const tmpActiveKey = get(data, 'ruleLayers.[0].layerId', '');
+      setLayers(tmpRuleLayers);
+      setActiveKey(tmpActiveKey);
     }
   }, [data]);
 
@@ -44,12 +57,14 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
     setLoading(true);
     getObjectLabelLayer({ id: data.id, layerId: activeKey })
       .then((res) => {
-        const c = res.data?.columns?.map((column, i) => ({
+        const tmpColumns: Column[] = get(res, 'data.columns', []);
+        const c = tmpColumns.map((column, i) => ({
           title: column.columnName,
           key: i,
           dataIndex: i,
         }));
-        const d = res.data?.data?.map((r) => {
+        const tmpData: string[][] = get(res, 'data.data', []);
+        const d = tmpData.map((r) => {
           const tmp = { id: Date.now() };
           r?.forEach((v, i) => (tmp[i] = v));
           return tmp;
@@ -62,28 +77,6 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
       })
       .catch((err) => {})
       .finally(() => setLoading(false));
-  };
-
-  const onExport = () => {
-    setLoadingExport(true);
-    exportObjectLabel({ id: data.id, layerId: activeKey })
-      .then((res) => {
-        const body = document.querySelector('body');
-        const link = document.createElement('a');
-        const blob = new Blob([res], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
-        link.href = window.URL.createObjectURL(blob); // 创建URL对象 param: blob
-        link.download = `${data.name}_${activeKey}`;
-        // fix Firefox
-        link.style.display = 'none';
-        body?.appendChild(link);
-        link.click();
-        body?.removeChild(link);
-        window.URL.revokeObjectURL(link.href); // 释放创建的URL对象
-      })
-      .catch((err) => {})
-      .finally(() => setLoadingExport(false));
   };
 
   return (
@@ -102,7 +95,9 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
           <Link onClick={showModal}>查看详情</Link>
         </Item>
         <Item label="更新人">{data?.editor}</Item>
-        <Item label="最近编辑时间">{data?.editTime}</Item>
+        <Item label="最近编辑时间" contentStyle={ellipsis}>
+          {data?.editTime}
+        </Item>
         <Item label="备注" span={3}>
           {data?.remark}
         </Item>
@@ -112,16 +107,11 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
         <Tabs
           onChange={setActiveKey}
           tabBarExtraContent={{
-            right: (
-              <Space>
-                <Button onClick={onExport} loading={loadingExport} disabled={loading}>
-                  导出
-                </Button>
-                <Button onClick={getList} disabled={loading || loadingExport}>
-                  查询
-                </Button>
-              </Space>
-            ),
+            right: [
+              <Button key="search" onClick={getList} disabled={loading}>
+                查询
+              </Button>,
+            ],
           }}
         >
           {layers?.map((layer, i) => (

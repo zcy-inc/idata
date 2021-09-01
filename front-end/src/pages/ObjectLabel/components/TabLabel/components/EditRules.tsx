@@ -12,48 +12,27 @@ import {
   Typography,
 } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
-import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
+import { DimensionDef, ObjectLabel, ObjectType, RuleLayer } from '@/types/objectlabel';
 import { getDimensionList, getMetricList } from '@/services/objectlabel';
 import { Label } from '@/types/datapi';
+import { InitialLayer, ConditionOptions } from './constants';
 
-export interface EditRulesProps {
-  initial?: ObjectLabel;
-  objectType: string;
-}
-type ActionKey = 'copy' | 'delete';
-const initialLayer: RuleLayer = {
-  layerId: Date.now(),
-  layerName: '分层1',
-  ruleDef: {
-    rules: [
-      {
-        ruleId: Date.now(),
-        ruleName: '规则1',
-        indicatorDefs: [{ indicatorCode: null, condition: null, params: [] }],
-        dimensionDefs: [{ dimensionCode: null, params: [] }],
-      },
-    ],
-  },
-};
-const ConditionOptions = [
-  { label: '等于', value: 'equal' },
-  { label: '大于', value: 'greater' },
-  { label: '小于', value: 'less' },
-  { label: '大于等于', value: 'greaterOrEqual' },
-  { label: '小于等于', value: 'lessOrEqual' },
-  { label: '介于两个值之间', value: 'between' },
-];
 const { Panel } = Collapse;
 const { Link, Text } = Typography;
+export interface EditRulesProps {
+  initial?: ObjectLabel;
+  objectType: ObjectType;
+}
+type ActionKey = 'copy' | 'delete';
 
 const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
-  const [layers, setLayers] = useState<RuleLayer[]>([initialLayer]);
+  const [layers, setLayers] = useState<RuleLayer[]>([InitialLayer]);
   const [activeKey, setActiveKey] = useState(0); // 取的是数组的index而非layerId
   const [expandKeys, setExpandKeys] = useState<string[][]>([['indicator', 'dimension']]); // 折叠面板的展开key
   const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]);
@@ -80,12 +59,18 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       // 获取指标信息的options
       getMetric(initial.objectType);
       // 获取维度信息的一级options
-      const indicatorCode = initial.ruleLayers[0].ruleDef.rules[0].indicatorDefs[0].indicatorCode;
+      const indicatorCode = get(
+        initial,
+        'ruleLayers.[0].ruleDef.rules.[0].indicatorDefs.[0].indicatorCode',
+        '',
+      );
       getMetricList({
         labelTag: 'DIMENSION_LABEL',
         labelCodes: [objectType, indicatorCode as string],
       })
         .then((res) => {
+          console.log(res);
+
           const tmp = res.data?.map((label: Label) => ({
             label: label.labelName,
             value: label.labelCode,
@@ -95,7 +80,12 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         .catch((err) => {});
       // 获取维度信息的二级options
       const promises: Promise<any>[] = [];
-      initial.ruleLayers[0].ruleDef.rules[0].dimensionDefs?.forEach((dimension, i) => {
+      const dimensionDefs: DimensionDef[] = get(
+        initial,
+        'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs',
+        [],
+      );
+      dimensionDefs.forEach((dimension, i) => {
         if (dimension.dimensionCode) {
           promises[i] = getDimensionList({ dimensionCode: dimension.dimensionCode as string });
         }
@@ -108,13 +98,13 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         })
         .catch((err) => {});
     }
-  }, [initial]);
+  }, [initial, objectType]);
 
   useEffect(() => {
     setEditLayers(layers);
   }, [layers]);
 
-  const getMetric = (objectType: string) => {
+  const getMetric = (objectType: ObjectType) => {
     getMetricList({ labelTag: 'METRIC_LABEL', labelCodes: [objectType] })
       .then((res) => {
         const tmp = res.data?.map((label: Label) => ({
@@ -302,20 +292,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
             }}
             expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
           >
-            <Panel
-              header="指标信息"
-              key="indicator"
-              // extra={
-              //   <Link
-              //     onClick={(e) => {
-              //       e.stopPropagation();
-              //       createIndicator(iR);
-              //     }}
-              //   >
-              //     添加
-              //   </Link>
-              // }
-            >
+            <Panel header="指标信息" key="indicator">
               <Space direction="vertical">
                 {rule?.indicatorDefs?.map((_, iI) => (
                   <Space key={iI}>
@@ -324,6 +301,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       options={indicatorCodeOptions}
                       value={_.indicatorCode as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
+                      style={{ width: 120 }}
                     />
                     <Select
                       placeholder="关系"
@@ -334,7 +312,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                     {rule.indicatorDefs[iI].condition === 'between' ? (
                       <Input.Group compact>
                         <Input
-                          style={{ textAlign: 'center' }}
+                          style={{ textAlign: 'center', width: 120 }}
                           placeholder="最小值"
                           value={_.params[0]}
                           onChange={({ target: { value } }) =>
@@ -349,7 +327,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                         />
                         <Input
                           className="site-input-right"
-                          style={{ textAlign: 'center' }}
+                          style={{ textAlign: 'center', width: 120 }}
                           placeholder="最大值"
                           value={rule.indicatorDefs[iI].params[1]}
                           onChange={({ target: { value } }) =>

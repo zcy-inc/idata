@@ -5,6 +5,7 @@
     component: './Login',
   },
   { path: '/', redirect: '/datapi' },
+  // { name: '组件', path: '/components', component: './Components' },
   {
     path: '/datapi',
     name: '数据研发',
