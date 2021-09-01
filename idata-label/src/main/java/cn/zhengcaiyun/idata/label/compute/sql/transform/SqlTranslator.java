@@ -190,7 +190,9 @@ public class SqlTranslator {
     }
 
     private List<DimensionMetadata> getDimensionMetadata(List<DimensionDefDto> dimensionDefs, IndicatorMetadata indicatorMetadata) {
-        checkArgument(!CollectionUtils.isEmpty(dimensionDefs), "未选择维度.");
+        if (CollectionUtils.isEmpty(dimensionDefs)){
+            return Lists.newArrayList();
+        }
         List<String> dimensionCodes = dimensionDefs.stream()
                 .map(defDto -> defDto.getDimensionCode())
                 .collect(Collectors.toList());

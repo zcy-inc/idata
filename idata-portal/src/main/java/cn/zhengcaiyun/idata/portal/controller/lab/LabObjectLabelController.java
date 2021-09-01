@@ -93,7 +93,7 @@ public class LabObjectLabelController {
     public void exportLabelResultData(@PathVariable("id") Long id,
                                       @PathVariable("layerId") Long layerId,
                                       HttpServletResponse response) {
-        LabelQueryDataDto queryDataDto = objectLabelService.queryLabelResultData(id, layerId, 50000L, null);
+        LabelQueryDataDto queryDataDto = objectLabelService.queryLabelResultData(id, layerId, 1L, null);
         SXSSFWorkbook workbook = downloadAsExcel(queryDataDto);
         String fileName = queryDataDto.getLabelName() + "_" + queryDataDto.getLayerName() + "_" + System.currentTimeMillis();
         try {
