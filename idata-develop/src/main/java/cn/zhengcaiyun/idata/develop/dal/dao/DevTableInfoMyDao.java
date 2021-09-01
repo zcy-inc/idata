@@ -38,11 +38,11 @@ public interface DevTableInfoMyDao {
                     "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                         "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
                     "</foreach>" +
-                    "OR " +
+                    "OR (dev_label.column_name IS NULL AND dev_label.label_code = 'tblComment:LABEL' AND " +
                     "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
                         "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
                     "</foreach>" +
-                ") " +
+                ")) " +
             "</script>")
     List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
 }
