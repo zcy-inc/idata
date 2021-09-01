@@ -243,7 +243,7 @@ public class MeasureApiImpl implements MeasureApi {
                     echoMetric.setMeasureId(attribute.getAttributeValue());
                 }
                 else if (attribute.getAttributeKey().equals(METRIC_DEFINE)) {
-                    echoMetric.setMeasureId(attribute.getAttributeValue());
+                    echoMetric.setMeasureDefine(attribute.getAttributeValue());
                 }
                 else if (attribute.getAttributeKey().equals(BIZ_TYPE_CODE)) {
                     echoMetric.setBizTypeValue(bizTypeMap.get(attribute.getAttributeValue()));

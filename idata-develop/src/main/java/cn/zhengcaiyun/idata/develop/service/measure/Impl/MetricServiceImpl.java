@@ -33,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,8 +43,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelAttributes;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.*;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -378,6 +378,11 @@ public class MetricServiceImpl implements MetricService {
                 || metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
             List<MeasureDto> dimensionList = dimensionService.findDimensionsByMetricCode(metricCode);
             echoMetric.setDimensions(dimensionList);
+            SpecialAttributeDto metricSpecialAttribute = metric.getSpecialAttribute();
+            String aggregate = StringUtils.isNotBlank(metricSpecialAttribute.getAggregatorCode())
+                    ? metricSpecialAttribute.getAggregatorCode().split(":")[0].split("_")[1] : null;
+            metricSpecialAttribute.setAggregate(aggregate);
+            metric.setSpecialAttribute(metricSpecialAttribute);
             if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
                 List<MeasureDto> deriveMetricList = getMetricByAtomic(metricCode);
                 echoMetric.setDeriveMetrics(deriveMetricList);
