@@ -51,4 +51,15 @@ public interface DevLabelMyDao {
             "ORDER BY dev_label_define.label_index, dev_label_define.id" +
             "</script>")
     List<LabelDto> selectLabelsBySubject(Long tableId, String columnNames);
+
+    @Select("<script>" +
+            "SELECT DISTINCT dev_label.table_id " +
+            "FROM dev_label " +
+            "WHERE dev_label.del != 1 AND dev_label.column_name IS NOT NULL AND dev_label.label_code = 'columnComment:LABEL' AND (" +
+                "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
+                    "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
+                "</foreach>" +
+            ") " +
+            "</script>")
+    List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
 }

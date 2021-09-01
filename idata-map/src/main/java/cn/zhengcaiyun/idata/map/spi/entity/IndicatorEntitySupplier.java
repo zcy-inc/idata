@@ -78,7 +78,7 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
     @Override
     public List<DataEntityDto> getDataEntity(List<String> entityCodes) {
         // 从指标库查询指标数据
-        List<MeasureDto> measureDtoList = measureApi.getMeasures(entityCodes);
+        List<MeasureDto> measureDtoList = measureApi.getMetrics(entityCodes);
         if (ObjectUtils.isEmpty(measureDtoList)) return Lists.newArrayList();
 
         return measureDtoList.stream().map(this::toDataEntity).collect(Collectors.toList());

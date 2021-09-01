@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.label.SubjectTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.SecurityLevelEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
@@ -66,6 +67,10 @@ public class TableInfoApiImpl implements TableInfoApi {
     private DevTableInfoMyDao devTableInfoMyDao;
     @Autowired
     private DevColumnInfoDao devColumnInfoDao;
+    @Autowired
+    private DevLabelMyDao devLabelMyDao;
+    @Autowired
+    private DevColumnInfoMyDao devColumnInfoMyDao;
 
     private final String ASSET_CATALOGUE_LABEL = "assetCatalogue:LABEL";
     private final String ASSET_CATALOGUE_ENUM = "assetCatalogueEnum:ENUM";
@@ -89,7 +94,24 @@ public class TableInfoApiImpl implements TableInfoApi {
                     .stream().map(TableInfoDto::getId).collect(Collectors.toList());
         }
         else {
-            tableInfoIdList = devTableInfoMyDao.getSearchTableIds(searchType, searchTexts);
+            List<Long> labelTableIdList;
+            List<Long> columnTableIdList = null;
+            if (SubjectTypeEnum.COLUMN.name().equals(searchType)) {
+                labelTableIdList = devLabelMyDao.getSearchTableIds(null, searchTexts);
+                columnTableIdList = devColumnInfoMyDao.getSearchColumns(null, searchTexts);
+            }
+            else if (SubjectTypeEnum.TABLE.name().equals(searchType)) {
+                labelTableIdList = devTableInfoMyDao.getSearchTableIds("TABLE", searchTexts);
+            }
+            else {
+                labelTableIdList = devTableInfoMyDao.getSearchTableIds(null, searchTexts);
+                labelTableIdList.addAll(devLabelMyDao.getSearchTableIds(null, searchTexts));
+                columnTableIdList = devColumnInfoMyDao.getSearchColumns(null, searchTexts);
+            }
+            if (columnTableIdList != null) {
+                labelTableIdList.addAll(columnTableIdList);
+            }
+            tableInfoIdList = labelTableIdList;
         }
         Set<Long> tableIds = new HashSet<>(tableInfoIdList);
         List<Long> assetTableIdList = new ArrayList<>(tableIds);
@@ -135,7 +157,8 @@ public class TableInfoApiImpl implements TableInfoApi {
         columnInfoList.forEach(columnInfo -> {
             List<LabelDto> columnLabelList = tableInfoMap.get(columnInfo.getTableId());
             columnLabelList.stream().filter(columnLabel ->
-                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findFirst().ifPresent(commentLabel ->
+                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL) && columnLabel.getColumnName().equals(columnInfo.getColumnName()))
+                    .findFirst().ifPresent(commentLabel ->
                     columnInfo.setColumnComment(commentLabel.getLabelParamValue()));
         });
         Map<Long, List<ColumnInfoDto>> columnInfoMap = columnInfoList.stream().collect(Collectors.groupingBy(ColumnInfoDto::getTableId));

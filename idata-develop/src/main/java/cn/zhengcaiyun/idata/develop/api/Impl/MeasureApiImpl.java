@@ -227,6 +227,37 @@ public class MeasureApiImpl implements MeasureApi {
     }
 
     @Override
+    public List<MeasureDto> getMetrics(List<String> labelCodes) {
+        List<DevLabelDefine> measureList = devLabelDefineMyDao.selectLabelDefinesByLabelCodes(String.join(",", labelCodes));
+        Map<String, String> bizTypeMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(BIZ_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+        List<MeasureDto> echoMetricList = measureList.stream().map(metric -> {
+            MeasureDto echoMetric = PojoUtil.copyOne(metric, MeasureDto.class);
+            List<AttributeDto> attributeList = echoMetric.getLabelAttributes();
+            for (AttributeDto attribute : attributeList) {
+                if (attribute.getAttributeKey().equals(EN_NAME)) {
+                    echoMetric.setEnName(attribute.getAttributeValue());
+                }
+                else if (attribute.getAttributeKey().equals(METRIC_ID)) {
+                    echoMetric.setMeasureId(attribute.getAttributeValue());
+                }
+                else if (attribute.getAttributeKey().equals(METRIC_DEFINE)) {
+                    echoMetric.setMeasureId(attribute.getAttributeValue());
+                }
+                else if (attribute.getAttributeKey().equals(BIZ_TYPE_CODE)) {
+                    echoMetric.setBizTypeValue(bizTypeMap.get(attribute.getAttributeValue()));
+                }
+                else {
+                    continue;
+                }
+            }
+            return echoMetric;
+        }).collect(Collectors.toList());
+        return echoMetricList;
+    }
+
+    @Override
     public List<String> getMetricCodes(List<String> metricTexts, String bizTypeCode) {
         List<LabelDefineDto> metricList = PojoUtil.copyList(devLabelDefineDao.select(c ->
                 c.where(devLabelDefine.del,

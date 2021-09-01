@@ -23,26 +23,20 @@ import java.util.List;
 
 /**
  * @author caizhedong
- * @date 2021-07-26 17:23
+ * @date 2021-08-31 下午7:59
  */
 
 @Mapper
-public interface DevTableInfoMyDao {
+public interface DevColumnInfoMyDao {
 
     @Select("<script>" +
-                "SELECT dev_label.table_id " +
-                "FROM dev_label " +
-                "LEFT JOIN dev_table_info " +
-                "ON dev_label.table_id = dev_table_info.id " +
-                "WHERE dev_label.del != 1 AND dev_table_info.del != 1 AND (" +
-                    "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
-                        "dev_table_info.table_name LIKE CONCAT('%', #{searchText}, '%')" +
-                    "</foreach>" +
-                    "OR " +
-                    "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
-                        "dev_label.label_param_value LIKE CONCAT('%', #{searchText}, '%')" +
-                    "</foreach>" +
-                ") " +
+            "SELECT DISTINCT dev_column_info.table_id " +
+            "FROM dev_column_info " +
+            "WHERE dev_column_info.del != 1 AND (" +
+                "<foreach collection = 'searchTexts' item = 'searchText' index = 'index' open = '(' separator = 'AND' close = ')'>" +
+                    "dev_column_info.column_name LIKE CONCAT('%', #{searchText}, '%')" +
+                "</foreach>" +
+            ") " +
             "</script>")
-    List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
+    List<Long> getSearchColumns(String searchType, List<String> searchTexts);
 }
