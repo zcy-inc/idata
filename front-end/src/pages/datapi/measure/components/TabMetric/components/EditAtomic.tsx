@@ -58,7 +58,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
     if (initial) {
       let tableId = '';
       const tmpK: Key[] = [];
-      const tmp = initial.measureLabels?.map((label) => {
+      const tmp: DWD[] = initial.measureLabels?.map((label) => {
         tmpK.push(label.id);
         tableId = `${label.tableId}`;
         return {
@@ -76,6 +76,11 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
             setDWDStrings([...DWDStrings]);
           })
           .catch((err) => {});
+      }
+
+      if (tmp.length === 0) {
+        tmp.push(initialDWD);
+        tmpK.push(initialKey);
       }
       setDWDData(tmp);
       setDWDKeys(tmpK);

@@ -80,3 +80,19 @@ export async function getDimensionList(params: { dimensionCode: string }) {
     params,
   });
 }
+
+/**
+ * 获取维度信息的二级options
+ */
+export function getDimensionSecondaryOptions(data: {
+  dbSchema: string;
+  tableName: string;
+  pageSize: number;
+  dimensions: {
+    columnName: string;
+    dataType: string;
+    tableName: string;
+  }[];
+}) {
+  return request('/api/p1/dev/measure/dataQuery', { method: 'post', data });
+}

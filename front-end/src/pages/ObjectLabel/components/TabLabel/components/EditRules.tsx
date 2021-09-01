@@ -12,14 +12,18 @@ import {
   Typography,
 } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { cloneDeep, get } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
 import { DimensionDef, ObjectLabel, ObjectType, RuleLayer } from '@/types/objectlabel';
-import { getDimensionList, getMetricList } from '@/services/objectlabel';
+import {
+  getDimensionList,
+  getDimensionSecondaryOptions,
+  getMetricList,
+} from '@/services/objectlabel';
 import { Label } from '@/types/datapi';
 import { InitialLayer, ConditionOptions } from './constants';
 
@@ -39,6 +43,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]);
   const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]);
   const layerCount = useRef(1);
+  const dimensionsMap = useRef({});
   const { setEditLayers } = useModel('objectlabel', (_) => ({
     setEditLayers: _.setEditLayers,
   }));
@@ -48,53 +53,60 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   }, [objectType]);
 
   useEffect(() => {
-    if (initial) {
-      const tmpExpandKeys = [];
-      for (let i = 0; i < initial.ruleLayers.length; i++) {
-        tmpExpandKeys.push(['indicator', 'dimension']);
-      }
+    console.log({ initial, objectType });
+
+    if (initial && objectType) {
+      const tmpExpandKeys = initial.ruleLayers.map(() => ['indicator', 'dimension']);
       setExpandKeys(tmpExpandKeys);
       setLayers(initial.ruleLayers);
       layerCount.current = initial.ruleLayers.length;
-      // 获取指标信息的options
-      getMetric(initial.objectType);
-      // 获取维度信息的一级options
-      const indicatorCode = get(
-        initial,
-        'ruleLayers.[0].ruleDef.rules.[0].indicatorDefs.[0].indicatorCode',
-        '',
-      );
-      getMetricList({
-        labelTag: 'DIMENSION_LABEL',
-        labelCodes: [objectType, indicatorCode as string],
-      })
-        .then((res) => {
-          console.log(res);
+      getMetric(initial.objectType); // 获取指标信息的options
 
-          const tmp = res.data?.map((label: Label) => ({
-            label: label.labelName,
-            value: label.labelCode,
-          }));
-          setDimensionCodeOptions(tmp);
-        })
-        .catch((err) => {});
-      // 获取维度信息的二级options
-      const promises: Promise<any>[] = [];
-      const dimensionDefs: DimensionDef[] = get(
-        initial,
-        'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs',
-        [],
-      );
-      dimensionDefs.forEach((dimension, i) => {
-        if (dimension.dimensionCode) {
-          promises[i] = getDimensionList({ dimensionCode: dimension.dimensionCode as string });
-        }
-      });
-      Promise.all(promises)
-        .then((results) => {
-          results?.forEach((res, i) => {
-            dimensionParamOptions[i] = res.data?.map((v: string) => ({ label: v, value: v }));
+      const indicatorCodePath = 'ruleLayers.[0].ruleDef.rules.[0].indicatorDefs.[0].indicatorCode';
+      const indicatorCode = get(initial, indicatorCodePath, ''); // 获取维度信息的一级options
+      getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, `${indicatorCode}`] })
+        .then((res) => {
+          const tmp = res.data?.map((label: Label) => {
+            dimensionsMap.current[label.labelCode] = label;
+            return { label: label.labelName, value: label.labelCode };
           });
+          setDimensionCodeOptions(tmp);
+          // 获取维度信息的二级options
+          const promises: Promise<any>[] = [];
+          const dimensionDefsPath = 'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs';
+          const dimensionDefs: DimensionDef[] = get(initial, dimensionDefsPath, []);
+          dimensionDefs.forEach((dimension, i) => {
+            if (dimension?.dimensionCode) {
+              const tmp = get(
+                dimensionsMap.current[dimension.dimensionCode],
+                'measureLabels.[0]',
+                {},
+              );
+              promises[i] = getDimensionSecondaryOptions({
+                dbSchema: tmp.dbName,
+                tableName: tmp.tableName,
+                pageSize: 50,
+                dimensions: [
+                  {
+                    columnName: tmp.columnName,
+                    dataType: tmp.columnDataType,
+                    tableName: tmp.tableName,
+                  },
+                ],
+              });
+            }
+          });
+          Promise.all(promises)
+            .then((results) => {
+              results?.forEach((res, i) => {
+                const tmp = get(res, 'data.data', []);
+                dimensionParamOptions[i] = tmp.map((v: string[]) => ({ label: v[0], value: v[0] }));
+              });
+            })
+            .catch((err) => {})
+            .finally(() => {
+              setDimensionParamOptions([...dimensionParamOptions]);
+            });
         })
         .catch((err) => {});
     }
@@ -222,10 +234,10 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     if (prop === 'indicatorCode') {
       getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, v] })
         .then((res) => {
-          const tmp = res.data?.map((label: Label) => ({
-            label: label.labelName,
-            value: label.labelCode,
-          }));
+          const tmp = res.data?.map((label: Label) => {
+            dimensionsMap.current[label.labelCode] = label;
+            return { label: label.labelName, value: label.labelCode };
+          });
           setDimensionCodeOptions(tmp);
           layers[activeKey].ruleDef.rules[iR].dimensionDefs = [{ dimensionCode: null, params: [] }];
         })
@@ -238,10 +250,19 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].params[0] = v;
       setLayers([...layers]);
     } else {
-      getDimensionList({ dimensionCode: v })
+      const tmp = get(dimensionsMap.current[v], 'measureLabels.[0]', {});
+      getDimensionSecondaryOptions({
+        dbSchema: tmp.dbName,
+        tableName: tmp.tableName,
+        pageSize: 50,
+        dimensions: [
+          { columnName: tmp.columnName, dataType: tmp.columnDataType, tableName: tmp.tableName },
+        ],
+      })
         .then((res) => {
-          layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].dimensionCode = v;
-          dimensionParamOptions[iD] = res.data?.map((v: string) => ({ label: v, value: v }));
+          set(layers, `${activeKey}.ruleDef.rules.[${iR}].dimensionDefs.[${iD}].dimensionCode`, v);
+          const tmpList = get(res, 'data.data', []);
+          dimensionParamOptions[iD] = tmpList.map((v: string[]) => ({ label: v[0], value: v[0] }));
           setLayers([...layers]);
           setDimensionParamOptions([...dimensionParamOptions]);
         })

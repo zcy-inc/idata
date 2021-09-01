@@ -53,7 +53,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ data }) => {
       >
         <Item label="修饰词名称">{data?.labelName}</Item>
         {attributes?.map((attribute) => (
-          <Item label={KpiLabelsMap[attribute.attributeKey]}>
+          <Item key={attribute.attributeKey} label={KpiLabelsMap[attribute.attributeKey]}>
             {attribute.enumName || attribute.attributeValue || '-'}
           </Item>
         ))}

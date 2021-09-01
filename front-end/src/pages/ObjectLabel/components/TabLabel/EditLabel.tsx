@@ -23,7 +23,7 @@ export interface EditLableProps {
 
 const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial, form }, ref) => {
   const [folderOps, setFolderOps] = useState([]);
-  const [objectType, setObjectType] = useState<ObjectType>('supplier:LABEL');
+  const [objectType, setObjectType] = useState<ObjectType>();
   const { curNode } = useModel('objectlabel', (_) => ({
     curNode: _.curNode,
   }));
@@ -102,7 +102,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
         />
       </ProForm>
       <Title>标签规则</Title>
-      <EditRules initial={initial} objectType={objectType} />
+      {objectType ? <EditRules initial={initial} objectType={objectType as ObjectType} /> : null}
     </Fragment>
   );
 };
