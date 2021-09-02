@@ -36,6 +36,7 @@ public interface TableInfoService {
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
     TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
     boolean delete(Long tableId, String editor);
+    String syncMetabaseInfo(Long tableId, String editor);
 
     /**
      * 获取表技术相关信息

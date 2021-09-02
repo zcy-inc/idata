@@ -34,6 +34,7 @@ import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +61,13 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 @Service
 public class TableInfoServiceImpl implements TableInfoService {
+
+    @Value("${metabase.datasource.jdbcUrl:#{null}}")
+    private String METABASE_DATASOURCE_JDBCURL;
+    @Value("${metabase.datasource.username:#{null}}")
+    private String METABASE_DATASOURCE_USERNAME;
+    @Value("${metabase.datasource.password:#{null}}")
+    private String METABASE_DATASOURCE_PASSWORD;
 
     @Autowired
     private LabelService labelService;
@@ -369,6 +377,13 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .where(devTableInfo.id, isEqualTo(tableId)));
 
         return deleteSuccess;
+    }
+
+    @Override
+    public String syncMetabaseInfo(Long tableId, String editor) {
+        checkArgument(isNotEmpty(editor), "编辑者不能为空");
+        TableInfoDto tableInfo = getTableInfo(tableId);
+
     }
 
     @Override
