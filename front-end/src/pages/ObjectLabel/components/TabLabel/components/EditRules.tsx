@@ -285,6 +285,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
           });
           setDimensionCodeOptions(tmp);
           layers[activeKey].ruleDef.rules[iR].dimensionDefs = [{ dimensionCode: null, params: [] }];
+          setLayers([...layers]);
         })
         .catch((err) => {});
     }
@@ -314,7 +315,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         .then((res) => {
           set(layers, `${activeKey}.ruleDef.rules.[${iR}].dimensionDefs.[${iD}].dimensionCode`, v);
           const tmpList = get(res, 'data.data', []);
-          dimensionParamOptions[iD] = tmpList.map((v: string[]) => ({ label: v[0], value: v[0] }));
+          dimensionParamOptions[iD] = tmpList.map((_: string[]) => ({ label: _[0], value: _[0] }));
           setLayers([...layers]);
           setDimensionParamOptions([...dimensionParamOptions]);
         })
@@ -374,7 +375,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       options={indicatorCodeOptions}
                       value={_.indicatorCode as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
-                      style={{ width: 120 }}
+                      style={{ width: 240 }}
+                      showSearch
+                      filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
                     />
                     <Select
                       placeholder="关系"
@@ -415,11 +418,6 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                         onChange={({ target: { value } }) => setIndicator(value, iR, iI, 'params')}
                       />
                     )}
-                    {/* <IconFont
-                      type="icon-shanchuchanggui"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => deleteIndicator(iR, iI)}
-                    /> */}
                   </Space>
                 ))}
               </Space>
@@ -449,6 +447,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       placeholder="请选择维度"
                       value={_.dimensionCode as string}
                       options={dimensionCodeOptions}
+                      style={{ width: 120 }}
                       onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
                     />
                     <Select
@@ -456,6 +455,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       value={_.params[0]}
                       options={dimensionParamOptions[iD]}
                       onChange={(v) => setDimension(v as string, iR, iD, 'params')}
+                      style={{ width: 120 }}
+                      showSearch
+                      filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
                     />
                     <IconFont
                       type="icon-shanchuchanggui"

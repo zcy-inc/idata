@@ -82,6 +82,7 @@ export function getDimensionSecondaryOptions(data: {
   dbSchema: string;
   tableName: string;
   pageSize: number;
+  matchStr?: string;
   dimensions: {
     columnName: string;
     dataType: string;

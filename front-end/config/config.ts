@@ -41,7 +41,7 @@ export default defineConfig({
     'success-color': '#05cc87',
     'warning-color': '#ff9324',
     'error-color': '#ff5753',
-    'disabled-color': '#eeeff2',
+    // 'disabled-color': '#eeeff2',
 
     'text-color': '#2d3956',
     'border-color-base': '#ebedf3',
