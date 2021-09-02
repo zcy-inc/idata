@@ -404,6 +404,7 @@ public class LabelServiceImpl implements LabelService {
                     labelDto.setTableName(tableInfoMap.get(labelDto.getTableId()));
                     labelDto.setTableComment(tableCommentMap.get(labelDto.getTableId()));
                     labelDto.setDbName(dwdTableInfoMap.get(labelDto.getTableId()));
+                    labelDto.setDbTableName(dwdTableInfoMap.get(labelDto.getTableId()) + "." + tableInfoMap.get(labelDto.getTableId()));
                     String columnComment = columnCommentMap.containsKey(labelDto.getTableId() + "_" + labelDto.getColumnName())
                             ? columnCommentMap.get(labelDto.getTableId() + "_" + labelDto.getColumnName()) : labelDto.getColumnName();
                     labelDto.setColumnComment(columnComment);

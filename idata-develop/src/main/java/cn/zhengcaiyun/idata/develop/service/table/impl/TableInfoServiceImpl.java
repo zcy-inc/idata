@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
@@ -383,7 +384,10 @@ public class TableInfoServiceImpl implements TableInfoService {
     public String syncMetabaseInfo(Long tableId, String editor) {
         checkArgument(isNotEmpty(editor), "编辑者不能为空");
         TableInfoDto tableInfo = getTableInfo(tableId);
-
+        TableDetailDto tableDetail = PojoUtil.copyOne(tableInfo, TableDetailDto.class, "tableName", "dbName", "tableComment");
+        List<TableDetailDto> syncMetabaseTblsList = new ArrayList<>();
+        syncMetabaseTblsList.add(tableDetail);
+        return null;
     }
 
     @Override

@@ -24,6 +24,8 @@ package cn.zhengcaiyun.idata.develop.dto.table;
 public class ColumnDetailsDto extends ColumnInfoDto {
     private String securityLevel;
     private String columnDescription;
+    private String tableName;
+    private String dbName;
 
     // GaS
     public String getSecurityLevel() {

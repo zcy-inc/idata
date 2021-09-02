@@ -136,12 +136,16 @@ public class ModifierServiceImpl implements ModifierService {
 //                                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
 //                                and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
 //                        .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
-        return PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
+        Set<String> modifierCodes = devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
                 .from(devLabelDefine)
                 .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabel.del, isNotEqualTo(1)),
                         and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
                         and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
+                .build().render(RenderingStrategies.MYBATIS3)).stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toSet());
+        return PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
+                .from(devLabelDefine)
+                .where(devLabelDefine.labelCode, isIn(modifierCodes))
                 .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
     }
 
