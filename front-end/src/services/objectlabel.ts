@@ -6,8 +6,10 @@ export async function getFolderTree() {
   return request('/api/p1/lab/labFolder/tree', { method: 'GET', params: { belong: 'lab' } });
 }
 // 树 获取平铺的文件夹目录
-export async function getFolders(params?: {}) {
-  return request('/api/p1/lab/labFolders', { method: 'GET', params: { belong: 'lab' } });
+export async function getFolders() {
+  return request<{
+    data: { id: number; name: string }[];
+  }>('/api/p1/lab/labFolders', { method: 'GET', params: { belong: 'lab' } });
 }
 // 文件夹 创建
 export async function createFolder(data: { folderName: string; parentId: string }) {
@@ -73,14 +75,6 @@ export async function getMetricList(params: { labelTag: string; labelCodes: stri
     params,
   });
 }
-// 标签 维度信息二级 获取
-export async function getDimensionList(params: { dimensionCode: string }) {
-  return request(`/api/p1/dev/dimensionValues`, {
-    method: 'GET',
-    params,
-  });
-}
-
 /**
  * 获取维度信息的二级options
  */

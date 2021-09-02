@@ -19,11 +19,7 @@ import styles from '../../../index.less';
 
 import { IconFont } from '@/components';
 import { DimensionDef, ObjectLabel, ObjectType, RuleLayer } from '@/types/objectlabel';
-import {
-  getDimensionList,
-  getDimensionSecondaryOptions,
-  getMetricList,
-} from '@/services/objectlabel';
+import { getDimensionSecondaryOptions, getMetricList } from '@/services/objectlabel';
 import { Label } from '@/types/datapi';
 import { InitialLayer, ConditionOptions } from './constants';
 
@@ -36,34 +32,53 @@ export interface EditRulesProps {
 type ActionKey = 'copy' | 'delete';
 
 const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
-  const [layers, setLayers] = useState<RuleLayer[]>([InitialLayer]);
-  const [activeKey, setActiveKey] = useState(0); // 取的是数组的index而非layerId
+  const [layers, setLayers] = useState<RuleLayer[]>([InitialLayer]); // 规则分层
+  const [activeKey, setActiveKey] = useState(0); // 规则分层的key，取的是数组的index而非layerId
   const [expandKeys, setExpandKeys] = useState<string[][]>([['indicator', 'dimension']]); // 折叠面板的展开key
-  const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]);
-  const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]);
-  const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]);
-  const layerCount = useRef(1);
-  const dimensionsMap = useRef({});
+  const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]); // 指标信息中指标的ops，切换objectType时更新
+  const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]); // 维度信息中维度的ops，切换指标时更新
+  const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]); // 维度信息中维度具体值的ops，切换维度时更新
+  const layerCount = useRef(1); // 用以新增规则分层时区分层数的计数器
+  const dimensionsMap = useRef({}); // 维度的map，更新维度值的ops时需要用到
   const { setEditLayers } = useModel('objectlabel', (_) => ({
     setEditLayers: _.setEditLayers,
   }));
 
   useEffect(() => {
-    getMetric(objectType);
+    setLayers([
+      {
+        layerId: Date.now(),
+        layerName: '分层1',
+        ruleDef: {
+          rules: [
+            {
+              ruleId: Date.now(),
+              ruleName: '规则1',
+              indicatorDefs: [{ indicatorCode: null, condition: null, params: [] }],
+              dimensionDefs: [{ dimensionCode: null, params: [] }],
+            },
+          ],
+        },
+      },
+    ]);
+    layerCount.current = 1;
+    getIndicators(objectType);
   }, [objectType]);
 
   useEffect(() => {
-    console.log({ initial, objectType });
-
     if (initial && objectType) {
+      // 将每一层的指标和维度都展开
       const tmpExpandKeys = initial.ruleLayers.map(() => ['indicator', 'dimension']);
       setExpandKeys(tmpExpandKeys);
+      // 赋值分层
       setLayers(initial.ruleLayers);
+      // 基于已有的层数，赋值计数器
       layerCount.current = initial.ruleLayers.length;
-      getMetric(initial.objectType); // 获取指标信息的options
-
+      // 获取指标信息的ops
+      getIndicators(initial.objectType);
+      // 获取维度信息的一级维度ops
       const indicatorCodePath = 'ruleLayers.[0].ruleDef.rules.[0].indicatorDefs.[0].indicatorCode';
-      const indicatorCode = get(initial, indicatorCodePath, ''); // 获取维度信息的一级options
+      const indicatorCode = get(initial, indicatorCodePath, '');
       getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, `${indicatorCode}`] })
         .then((res) => {
           const tmp = res.data?.map((label: Label) => {
@@ -71,17 +86,15 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
             return { label: label.labelName, value: label.labelCode };
           });
           setDimensionCodeOptions(tmp);
-          // 获取维度信息的二级options
+          // 获取维度信息的二级维度值ops
+          // 可能存在复数个维度，用Promise.all来批量获取它们的二级维度值ops
           const promises: Promise<any>[] = [];
           const dimensionDefsPath = 'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs';
           const dimensionDefs: DimensionDef[] = get(initial, dimensionDefsPath, []);
           dimensionDefs.forEach((dimension, i) => {
             if (dimension?.dimensionCode) {
-              const tmp = get(
-                dimensionsMap.current[dimension.dimensionCode],
-                'measureLabels.[0]',
-                {},
-              );
+              const measureLabelPath = `${dimension.dimensionCode}.measureLabels.[0`;
+              const tmp = get(dimensionsMap.current, measureLabelPath, {});
               promises[i] = getDimensionSecondaryOptions({
                 dbSchema: tmp.dbName,
                 tableName: tmp.tableName,
@@ -110,13 +123,16 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         })
         .catch((err) => {});
     }
-  }, [initial, objectType]);
+  }, [initial]);
 
   useEffect(() => {
     setEditLayers(layers);
   }, [layers]);
 
-  const getMetric = (objectType: ObjectType) => {
+  /**
+   * 获取指标信息
+   */
+  const getIndicators = (objectType: ObjectType) => {
     getMetricList({ labelTag: 'METRIC_LABEL', labelCodes: [objectType] })
       .then((res) => {
         const tmp = res.data?.map((label: Label) => ({
@@ -128,6 +144,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       .catch((err) => {});
   };
 
+  /**
+   * 复制分层时处理名称
+   */
   const getCopyName = (name: string, i: number): string => {
     if (layers.findIndex((layer) => layer.layerName === `${name}${i}`) > -1) {
       return getCopyName(name, i + 1);
@@ -163,6 +182,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     </Menu>
   );
 
+  /**
+   * 创建分层
+   */
   const createLayer = () => {
     const layerId = Date.now();
     layerCount.current++;
@@ -185,11 +207,17 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     setActiveKey(layers.length - 1);
   };
 
+  /**
+   * 修改分层的名称
+   */
   const changeLayerName = (v: string) => {
     layers[activeKey].layerName = v;
     setLayers([...layers]);
   };
 
+  /**
+   * 新建指标
+   */
   // const createIndicator = (iR: number) => {
   //   if (layers[activeKey].ruleDef.rules[iR].indicatorDefs.length > 0) {
   //     message.info('同一规则中只能存在一条指标');
@@ -203,11 +231,17 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   //   setLayers([...layers]);
   // };
 
+  /**
+   * 删除指标
+   */
   // const deleteIndicator = (iR: number, iI: number) => {
   //   layers[activeKey].ruleDef.rules[iR].indicatorDefs.splice(iI, 1);
   //   setLayers([...layers]);
   // };
 
+  /**
+   * 新建维度
+   */
   const createDimension = (iR: number) => {
     layers[activeKey].ruleDef.rules[iR].dimensionDefs.push({
       dimensionCode: null,
@@ -216,6 +250,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     setLayers([...layers]);
   };
 
+  /**
+   * 删除维度
+   */
   const deleteDimension = (iR: number, iD: number) => {
     layers[activeKey].ruleDef.rules[iR].dimensionDefs.splice(iD, 1);
     dimensionParamOptions.splice(iD, 1);
@@ -223,6 +260,14 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     setLayers([...layers]);
   };
 
+  /**
+   * 修改指标信息
+   * @param v 修改的值
+   * @param iR 所属规则的下标
+   * @param iI 所属指标的下标
+   * @param prop 修改的键
+   * @param iP 当是区间值当时候，用来区分最小值和最大值
+   */
   const setIndicator = (v: string, iR: number, iI: number, prop: string, iP?: number) => {
     if (prop === 'params') {
       layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI].params[iP || 0] = v;
@@ -245,6 +290,13 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
     }
   };
 
+  /**
+   * 修改维度信息
+   * @param v 修改的值
+   * @param iR 所属规则的下标
+   * @param iD 所属维度的下标
+   * @param prop 修改的键
+   */
   const setDimension = (v: string, iR: number, iD: number, prop: string) => {
     if (prop === 'params') {
       layers[activeKey].ruleDef.rules[iR].dimensionDefs[iD].params[0] = v;

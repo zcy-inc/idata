@@ -22,7 +22,7 @@ export interface EditLableProps {
 }
 
 const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial, form }, ref) => {
-  const [folderOps, setFolderOps] = useState([]);
+  const [folderOps, setFolderOps] = useState<{ label: string; value: any }[]>([]);
   const [objectType, setObjectType] = useState<ObjectType>();
   const { curNode } = useModel('objectlabel', (_) => ({
     curNode: _.curNode,
@@ -33,8 +33,8 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data?.map((_: any) => ({ label: _.name, value: _.id }));
-        setFolderOps(fd);
+        const folders = res.data.map((_) => ({ label: _.name, value: _.id }));
+        setFolderOps(folders);
       })
       .catch((err) => {});
   }, []);
@@ -90,6 +90,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
             allowClear={false}
             options={ObjectTypeOptions}
             fieldProps={{ onChange: setObjectType }}
+            disabled={!!initial}
           />
         </ProFormGroup>
         <ProFormTextArea name="remark" label="备注" width="md" placeholder="请输入" />

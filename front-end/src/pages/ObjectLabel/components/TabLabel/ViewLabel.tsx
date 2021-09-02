@@ -47,29 +47,33 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
       const tmpRuleLayers = get(data, 'ruleLayers', []);
       const tmpActiveKey = get(data, 'ruleLayers.[0].layerId', '');
       setLayers(tmpRuleLayers);
-      setActiveKey(tmpActiveKey);
+      setActiveKey(`${tmpActiveKey}`);
     }
   }, [data]);
 
-  const getActiveIndex = () => layers.findIndex((layer) => `${layer.layerId}` === activeKey);
+  const getActiveIndex = () => layers.findIndex((layer) => `${layer.layerId}` === `${activeKey}`);
 
   const getList = () => {
     setLoading(true);
     getObjectLabelLayer({ id: data.id, layerId: activeKey })
       .then((res) => {
-        const tmpColumns: Column[] = get(res, 'data.columns', []);
-        const c = tmpColumns.map((column, i) => ({
+        // 处理列
+        const resColumns: Column[] = get(res, 'data.columns', []);
+        const c = resColumns.map((column, i) => ({
           title: column.columnName,
           key: i,
           dataIndex: i,
         }));
-        const tmpData: string[][] = get(res, 'data.data', []);
-        const d = tmpData.map((r) => {
+        // 处理数据
+        const resData: string[][] = get(res, 'data.data', []);
+        const d = resData.map((r) => {
           const tmp = { id: Date.now() };
-          r?.forEach((v, i) => (tmp[i] = v));
+          r.forEach((v, i) => (tmp[i] = v));
           return tmp;
         });
+        // 获取当前显示的分层下标
         const i = getActiveIndex();
+
         columns[i] = c;
         list[i] = d;
         setColumns([...columns]);
