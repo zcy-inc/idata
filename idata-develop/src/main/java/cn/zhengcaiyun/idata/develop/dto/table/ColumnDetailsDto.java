@@ -43,4 +43,20 @@ public class ColumnDetailsDto extends ColumnInfoDto {
     public void setColumnDescription(String columnDescription) {
         this.columnDescription = columnDescription;
     }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
 }

@@ -117,6 +117,12 @@ public class TableInfoController {
         return RestResult.success(echoTableInfo);
     }
 
+    @PostMapping("syncMetabaseInfo/{tableId}")
+    public RestResult<String> syncMetabaseInfo(@PathVariable("tableId") Long tableId,
+                                               HttpServletRequest request) {
+        return RestResult.success(tableInfoService.syncMetabaseInfo(tableId, tokenService.getNickname(request)));
+    }
+
     @DeleteMapping("tableInfo/{tableId}")
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
                                   HttpServletRequest request) {
