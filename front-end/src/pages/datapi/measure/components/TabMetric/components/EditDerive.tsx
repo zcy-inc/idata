@@ -111,8 +111,8 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
   };
 
   const getEnums = (labelCode: string, index: number) => {
-    const enumCode = modifierOptions.find((modifier) => (modifier.value = labelCode))
-      ?.enumCode as string;
+    const item = modifierOptions.find((modifier) => (modifier.value = labelCode));
+    const enumCode = item?.enumCode || '';
     getEnumValues({ enumCode })
       .then((res) => {
         const ops = res.data?.map((enumValue: EnumValue) => ({
@@ -137,18 +137,10 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
     if (schema.dataIndex === 'modifierCode') {
       if (value) {
         getEnums(value, schema.index);
-        // const i = modifierOptions.findIndex((item) => item.value === value);
-        // modifierOptions[i].disabled = true;
-      } else {
-        // const i = modifierOptions.findIndex(
-        //   (item) => item.value === DWDData[schema.index].modifierCode,
-        // );
-        // modifierOptions[i].disabled = false;
       }
     }
     DWDData[schema.index][schema.dataIndex] = value;
     setDWDData([...DWDData]);
-    // setModifierOptions([...modifierOptions]);
   };
 
   // 操作栏行为
@@ -224,7 +216,11 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
           type: 'multiple',
           editableKeys: DWDKeys,
           onChange: setDWDKeys,
-          actionRender: (row, _) => [<Link onClick={() => onAction(row, _)}>删除</Link>],
+          actionRender: (row, _) => [
+            <Link key="del" onClick={() => onAction(row, _)}>
+              删除
+            </Link>,
+          ],
         }}
       />
       <Link onClick={addData} style={{ display: 'inline-block', marginTop: 16 }}>

@@ -12,7 +12,7 @@ import {
   Typography,
 } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { cloneDeep, get, set } from 'lodash';
+import { cloneDeep, get, set, debounce } from 'lodash';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from '../../../index.less';
@@ -38,6 +38,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   const [indicatorCodeOptions, setIndicatorCodeOptions] = useState([]); // 指标信息中指标的ops，切换objectType时更新
   const [dimensionCodeOptions, setDimensionCodeOptions] = useState([]); // 维度信息中维度的ops，切换指标时更新
   const [dimensionParamOptions, setDimensionParamOptions] = useState<[][]>([]); // 维度信息中维度具体值的ops，切换维度时更新
+
   const layerCount = useRef(1); // 用以新增规则分层时区分层数的计数器
   const dimensionsMap = useRef({}); // 维度的map，更新维度值的ops时需要用到
   const { setEditLayers } = useModel('objectlabel', (_) => ({
@@ -79,49 +80,49 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       // 获取维度信息的一级维度ops
       const indicatorCodePath = 'ruleLayers.[0].ruleDef.rules.[0].indicatorDefs.[0].indicatorCode';
       const indicatorCode = get(initial, indicatorCodePath, '');
-      getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, `${indicatorCode}`] })
-        .then((res) => {
-          const tmp = res.data?.map((label: Label) => {
-            dimensionsMap.current[label.labelCode] = label;
-            return { label: label.labelName, value: label.labelCode };
-          });
-          setDimensionCodeOptions(tmp);
-          // 获取维度信息的二级维度值ops
-          // 可能存在复数个维度，用Promise.all来批量获取它们的二级维度值ops
-          const promises: Promise<any>[] = [];
-          const dimensionDefsPath = 'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs';
-          const dimensionDefs: DimensionDef[] = get(initial, dimensionDefsPath, []);
-          dimensionDefs.forEach((dimension, i) => {
-            if (dimension?.dimensionCode) {
-              const measureLabelPath = `${dimension.dimensionCode}.measureLabels.[0`;
-              const tmp = get(dimensionsMap.current, measureLabelPath, {});
-              promises[i] = getDimensionSecondaryOptions({
-                dbSchema: tmp.dbName,
-                tableName: tmp.tableName,
-                pageSize: 50,
-                dimensions: [
-                  {
-                    columnName: tmp.columnName,
-                    dataType: tmp.columnDataType,
-                    tableName: tmp.tableName,
-                  },
-                ],
-              });
-            }
-          });
-          Promise.all(promises)
-            .then((results) => {
-              results?.forEach((res, i) => {
-                const tmp = get(res, 'data.data', []);
-                dimensionParamOptions[i] = tmp.map((v: string[]) => ({ label: v[0], value: v[0] }));
-              });
-            })
-            .catch((err) => {})
-            .finally(() => {
-              setDimensionParamOptions([...dimensionParamOptions]);
+      getMetricList({
+        labelTag: 'DIMENSION_LABEL',
+        labelCodes: [objectType, `${indicatorCode}`],
+      }).then((res) => {
+        const tmp = res.data?.map((label: Label) => {
+          dimensionsMap.current[label.labelCode] = label;
+          return { label: label.labelName, value: label.labelCode };
+        });
+        setDimensionCodeOptions(tmp);
+        // 获取维度信息的二级维度值ops
+        // 可能存在复数个维度，用Promise.all来批量获取它们的二级维度值ops
+        const promises: Promise<any>[] = [];
+        const dimensionDefsPath = 'ruleLayers.[0].ruleDef.rules.[0].dimensionDefs';
+        const dimensionDefs: DimensionDef[] = get(initial, dimensionDefsPath, []);
+        dimensionDefs.forEach((dimension, i) => {
+          if (dimension?.dimensionCode) {
+            const measureLabelPath = `${dimension.dimensionCode}.measureLabels.[0`;
+            const tmp = get(dimensionsMap.current, measureLabelPath, {});
+            promises[i] = getDimensionSecondaryOptions({
+              dbSchema: tmp.dbName,
+              tableName: tmp.tableName,
+              pageSize: 50,
+              dimensions: [
+                {
+                  columnName: tmp.columnName,
+                  dataType: tmp.columnDataType,
+                  tableName: tmp.tableName,
+                },
+              ],
             });
-        })
-        .catch((err) => {});
+          }
+        });
+        Promise.all(promises)
+          .then((results) => {
+            results?.forEach((res, i) => {
+              const tmp = get(res, 'data.data', []);
+              dimensionParamOptions[i] = tmp.map((v: string[]) => ({ label: v[0], value: v[0] }));
+            });
+          })
+          .finally(() => {
+            setDimensionParamOptions([...dimensionParamOptions]);
+          });
+      });
     }
   }, [initial]);
 
@@ -275,7 +276,6 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI][prop] = v;
     }
     setLayers([...layers]);
-
     if (prop === 'indicatorCode') {
       getMetricList({ labelTag: 'DIMENSION_LABEL', labelCodes: [objectType, v] })
         .then((res) => {
@@ -285,6 +285,8 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
           });
           setDimensionCodeOptions(tmp);
           layers[activeKey].ruleDef.rules[iR].dimensionDefs = [{ dimensionCode: null, params: [] }];
+          layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI].condition = null;
+          layers[activeKey].ruleDef.rules[iR].indicatorDefs[iI].params = [];
           setLayers([...layers]);
         })
         .catch((err) => {});
@@ -304,26 +306,63 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
       setLayers([...layers]);
     } else {
       const tmp = get(dimensionsMap.current[v], 'measureLabels.[0]', {});
+      set(layers, `[${activeKey}].ruleDef.rules.[${iR}].dimensionDefs.[${iD}].dimensionCode`, v);
+      setLayers([...layers]);
       getDimensionSecondaryOptions({
         dbSchema: tmp.dbName,
         tableName: tmp.tableName,
         pageSize: 50,
         dimensions: [
-          { columnName: tmp.columnName, dataType: tmp.columnDataType, tableName: tmp.tableName },
+          {
+            columnName: tmp.columnName,
+            dataType: tmp.columnDataType,
+            tableName: tmp.tableName,
+          },
         ],
-      })
-        .then((res) => {
-          set(layers, `${activeKey}.ruleDef.rules.[${iR}].dimensionDefs.[${iD}].dimensionCode`, v);
-          const tmpList = get(res, 'data.data', []);
-          dimensionParamOptions[iD] = tmpList.map((_: string[]) => ({ label: _[0], value: _[0] }));
-          setLayers([...layers]);
-          setDimensionParamOptions([...dimensionParamOptions]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      }).then((res) => {
+        const tmpList = get(res, 'data.data', []);
+        dimensionParamOptions[iD] = tmpList.map((_: string[]) => ({ label: _[0], value: _[0] }));
+        setDimensionParamOptions([...dimensionParamOptions]);
+      });
     }
   };
+
+  const onSearch = (v: string, iR: number, iD: number) => {
+    const path = `[${activeKey}].ruleDef.rules.[${iR}].dimensionDefs.[${iD}].dimensionCode`;
+    const dimensionCode = get(layers, path, '');
+    const dimension = get(dimensionsMap.current[dimensionCode], 'measureLabels.[0]', {});
+    getDimensionSecondaryOptions({
+      dbSchema: dimension.dbName,
+      tableName: dimension.tableName,
+      pageSize: 50,
+      dimensions: [
+        {
+          columnName: dimension.columnName,
+          dataType: dimension.columnDataType,
+          tableName: dimension.tableName,
+        },
+      ],
+      filters: [
+        {
+          columnName: dimension.columnName,
+          dataType: dimension.columnDataType,
+          role: 'Dimension',
+          match: [
+            {
+              logicOp: 'and',
+              matchType: 'contains',
+              matchStr: v,
+            },
+          ],
+        },
+      ],
+    }).then((res) => {
+      const tmpList = get(res, 'data.data', []);
+      dimensionParamOptions[iD] = tmpList.map((_: string[]) => ({ label: _[0], value: _[0] }));
+      setDimensionParamOptions([...dimensionParamOptions]);
+    });
+  };
+  const debounceSearch = debounce(onSearch, 1000);
 
   return (
     <Card className={styles['edit-content']}>
@@ -375,7 +414,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       options={indicatorCodeOptions}
                       value={_.indicatorCode as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
-                      style={{ width: 240 }}
+                      style={{ width: 200 }}
                       showSearch
                       filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
                     />
@@ -384,6 +423,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       options={ConditionOptions}
                       value={_.condition as string}
                       onChange={(v) => setIndicator(v as string, iR, iI, 'condition')}
+                      style={{ width: 120 }}
                     />
                     {rule.indicatorDefs[iI].condition === 'between' ? (
                       <Input.Group compact>
@@ -447,7 +487,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       placeholder="请选择维度"
                       value={_.dimensionCode as string}
                       options={dimensionCodeOptions}
-                      style={{ width: 120 }}
+                      style={{ width: 240 }}
                       onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
                     />
                     <Select
@@ -455,9 +495,9 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
                       value={_.params[0]}
                       options={dimensionParamOptions[iD]}
                       onChange={(v) => setDimension(v as string, iR, iD, 'params')}
-                      style={{ width: 120 }}
+                      style={{ width: 240 }}
                       showSearch
-                      filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
+                      onSearch={(v) => debounceSearch(v, iR, iD)}
                     />
                     <IconFont
                       type="icon-shanchuchanggui"

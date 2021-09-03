@@ -64,7 +64,7 @@ const AvatarDropdown: React.FC = () => {
   return (
     <HeaderDropdown overlay={menuHeaderDropdown}>
       <div className={`${styles.action}`}>
-        <Avatar src={currentUser.avatar} />
+        <Avatar src={currentUser.avatar} size={25} />
         <span className={styles.nickname}>{currentUser.nickname}</span>
         <CaretDownOutlined className={styles.downIcon} />
       </div>

@@ -9,8 +9,8 @@
   {
     path: '/datapi',
     name: '数据研发',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/9843593b-a480-44ac-a100-0619ae98abfc.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/86e1ee76-1dd4-4777-b365-7dee1da134be.svg',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
     routes: [
       { path: '/datapi', redirect: '/datapi/tablemanage' },
       { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/tablemanage' },
@@ -21,14 +21,14 @@
     path: '/objectLabel',
     name: '数据标签',
     component: './ObjectLabel',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/cc456476-c985-46b6-ab4f-7deddba7c7c6.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/5e17814c-4576-4836-af93-281f6c13973e.svg',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/f43bf9ae-4be9-49e3-ab11-dfcc77c790be.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c3c8a043-e135-4abd-9137-8e16cd8b1097.svg',
   },
   {
     path: '/authority',
     name: '权限管理',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/fee8a9b7-4a2b-4494-ab96-45ee46829469.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/a1d2a516-d00e-4201-99ec-a963d0d14c31.svg',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/00a9bf27-b003-42c5-903a-4913fe8d28d7.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/fd305122-648f-4d7d-a77e-9868b302f761.svg',
     routes: [
       { path: '/authority', redirect: '/authority/role' },
       {

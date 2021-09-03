@@ -125,7 +125,7 @@ const Login = () => {
         <div className={styles.centerBox}>
           <img
             className={styles.loginTitle}
-            src="https://sitecdn.zcycdn.com/f2e-assets/b6808652-3e62-4296-80f6-af44e5fc4e6c.png"
+            src="https://sitecdn.zcycdn.com/f2e-assets/b609cee4-c7d7-45bf-86da-3f5263fb8fa1.svg"
           />
           <Tabs defaultActiveKey="1" size="large">
             <TabPane tab="登录" key="1">

@@ -82,11 +82,22 @@ export function getDimensionSecondaryOptions(data: {
   dbSchema: string;
   tableName: string;
   pageSize: number;
-  matchStr?: string;
   dimensions: {
     columnName: string;
     dataType: string;
     tableName: string;
+  }[];
+  filters?: {
+    columnName: string;
+    dataType: string;
+    role: string;
+    match: [
+      {
+        logicOp: string;
+        matchType: string;
+        matchStr: string;
+      },
+    ];
   }[];
 }) {
   return request('/api/p1/dev/measure/dataQuery', { method: 'post', data });

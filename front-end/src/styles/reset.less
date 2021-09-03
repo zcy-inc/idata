@@ -279,7 +279,7 @@ body {
 
   // pro-layout
   .ant-pro-global-header-layout-mix {
-    padding-left: 30px;
+    padding-left: 24px;
     background: #141736;
   }
   .ant-pro-basicLayout-content {
@@ -288,6 +288,40 @@ body {
 
     .ant-pro-page-container {
       margin: 0;
+    }
+  }
+  .ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed{
+    box-shadow: none;
+  }
+
+  .ant-tree{
+    .ant-tree-treenode {
+      width: 100%;
+      padding: 2px 0;
+      color: #545c75;
+      &:hover {
+        background-color: #f4f5f8;
+      }
+      .ant-tree-switcher-icon {
+        color: #c0c4da;
+      }
+      .ant-tree-node-content-wrapper {
+        width: 100%;
+        &:hover {
+          background-color: transparent;
+        }
+      }
+      .ant-tree-node-selected {
+        background-color: transparent;
+      }
+    } 
+    .ant-tree-treenode-selected {
+      background-color: #eff5ff;
+      color: @primary-color;
+      font-weight: 500;
+      &:hover {
+        background-color: #eff5ff;
+      }
     }
   }
 }
