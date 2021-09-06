@@ -134,7 +134,9 @@ public class DevFolderServiceImpl implements DevFolderService {
                 c.where(devFolder.del, isNotEqualTo(1), and(devFolder.folderName,
                         isEqualTo(developFolderDto.getFolderName()))))
                 .orElse(null);
-        checkArgument(checkFolder == null, "文件夹名称已存在");
+        if (checkFolder != null) {
+            checkArgument(!checkFolder.getParentId().equals(developFolderDto.getParentId()), "该文件夹下文件夹名称已存在");
+        }
 
         developFolderDto.setCreator(operator);
         DevFolder folder = PojoUtil.copyOne(developFolderDto, DevFolder.class);

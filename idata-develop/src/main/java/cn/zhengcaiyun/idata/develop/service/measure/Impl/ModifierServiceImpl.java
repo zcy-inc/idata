@@ -81,6 +81,9 @@ public class ModifierServiceImpl implements ModifierService {
         checkArgument(metric != null, "指标不存在");
         Map<String, List<String>> metricModifierMap = metric.getSpecialAttribute().getModifiers().stream()
                 .collect(Collectors.toMap(ModifierDto::getModifierCode, ModifierDto::getEnumValueCodes));
+        if (metricModifierMap.size() == 0) {
+            return new ArrayList<>();
+        }
         List<String> modifierCodeList = PojoUtil.copyOne(metric, MeasureDto.class).getSpecialAttribute().getModifiers()
                 .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
         List<MeasureDto> modifierList = PojoUtil.copyList(devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
@@ -95,14 +98,18 @@ public class ModifierServiceImpl implements ModifierService {
             if (modifierAttribute != null) {
                 echoModifier.setModifierAttribute(modifierAttribute);
             }
-            List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()))
-                    .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
-            echoModifier.setEnumValues(modifierEnumValueList);
-            echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
+            if (metricModifierMap.containsKey(modifier.getLabelCode())) {
+                List<String> modifierEnumValueList = enumService.getEnumValues(metricModifierMap.get(modifier.getLabelCode()))
+                        .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+                echoModifier.setEnumValues(modifierEnumValueList);
+                echoModifier.setEnumValueCodes(metricModifierMap.get(modifier.getLabelCode()));
+            }
             List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
-            echoModifier.setColumnName(modifierLabelList.get(0).getColumnName());
-            echoModifier.setColumnComment(modifierLabelList.get(0).getColumnComment());
-            echoModifier.setColumnDataType(modifierLabelList.get(0).getColumnDataType());
+            if (modifierLabelList.size() > 0) {
+                echoModifier.setColumnName(modifierLabelList.get(0).getColumnName());
+                echoModifier.setColumnComment(modifierLabelList.get(0).getColumnComment());
+                echoModifier.setColumnDataType(modifierLabelList.get(0).getColumnDataType());
+            }
 //            if (atomicTableId != null) {
 //                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
 //                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->

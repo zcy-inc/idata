@@ -98,7 +98,7 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
         entityDto.setMetabaseUrl(detailDto.getMetabaseUrl());
         entityDto.setCategoryPathNames(detailDto.getAssetCatalogues());
         if (Objects.nonNull(detailDto.getSecurityLevel())) {
-            entityDto.putMoreAttr(DataEntityDto.more_table_security_level, detailDto.getSecurityLevel().name());
+            entityDto.putMoreAttr(DataEntityDto.more_table_security_level, detailDto.getSecurityLevel());
         }
         List<ColumnInfoDto> columnInfoDtoList = detailDto.getColumnInfos();
         if (ObjectUtils.isNotEmpty(columnInfoDtoList)) {

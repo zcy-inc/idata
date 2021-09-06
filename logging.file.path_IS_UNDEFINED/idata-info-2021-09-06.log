@@ -1,0 +1,14 @@
+2021-09-06 20:23:19 [main] INFO  cn.zhengcaiyun.idata.portal.PortalApplication.logStarting(55) - Starting PortalApplication on MacBook-Pro-3.local with PID 46905 (/Users/caizhedong/idata/idata-portal/target/classes started by caizhedong in /Users/caizhedong/idata)
+2021-09-06 20:23:19 [main] INFO  cn.zhengcaiyun.idata.portal.PortalApplication.logStartupProfileInfo(651) - No active profile set, falling back to default profiles: default
+2021-09-06 20:23:19 [background-preinit] WARN  o.s.h.converter.json.Jackson2ObjectMapperBuilder.warn(127) - For Jackson Kotlin classes support please add "com.fasterxml.jackson.module:jackson-module-kotlin" to the classpath
+2021-09-06 20:23:22 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer.initialize(108) - Tomcat initialized with port(s): 8080 (http)
+2021-09-06 20:23:22 [main] INFO  org.apache.coyote.http11.Http11NioProtocol.log(173) - Initializing ProtocolHandler ["http-nio-8080"]
+2021-09-06 20:23:22 [main] INFO  org.apache.catalina.core.StandardService.log(173) - Starting service [Tomcat]
+2021-09-06 20:23:22 [main] INFO  org.apache.catalina.core.StandardEngine.log(173) - Starting Servlet engine: [Apache Tomcat/9.0.41]
+2021-09-06 20:23:22 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/].log(173) - Initializing Spring embedded WebApplicationContext
+2021-09-06 20:23:22 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext.prepareWebApplicationContext(285) - Root WebApplicationContext: initialization completed in 2757 ms
+2021-09-06 20:23:22 [main] INFO  org.apache.catalina.core.StandardService.log(173) - Stopping service [Tomcat]
+2021-09-06 20:23:22 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext.refresh(559) - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server; nested exception is org.springframework.boot.web.server.WebServerException: Unable to start embedded Tomcat
+2021-09-06 20:23:22 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLoggingListener.logMessage(136) - 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
