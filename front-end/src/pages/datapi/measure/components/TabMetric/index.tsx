@@ -209,8 +209,8 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewMetric data={data as Metric} />}
-      {mode === 'edit' && <EditMetric ref={refM} initial={data} />}
+      {mode === 'view' ? <ViewMetric data={data as Metric} /> : null}
+      {mode === 'edit' ? <EditMetric ref={refM} initial={data} /> : null}
       <div className={styles.submit}>
         {mode === 'view' && (
           <Space>

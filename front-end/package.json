@@ -49,7 +49,7 @@
     "@ant-design/pro-descriptions": "^1.0.19",
     "@ant-design/pro-form": "^1.25.0",
     "@ant-design/pro-layout": "^6.5.0",
-    "@ant-design/pro-table": "^2.38.0",
+    "@ant-design/pro-table": "^2.51.2",
     "@antv/g6": "^4.3.6",
     "@antv/g6-react-node": "^1.4.2",
     "@umijs/route-utils": "^1.0.33",

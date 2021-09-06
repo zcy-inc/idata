@@ -51,14 +51,9 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   const [form] = Form.useForm();
   const [bizProcessEnum, setBizProcessEnum] = useState([]);
   const [metricType, setMetricType] = useState('');
-  const refAtomic = useRef<AtomicExportProps>();
-  const refDerive = useRef<DeriveExportProps>();
-  const refComplex = useRef<ComplexExportProps>();
-  const EditRefMap = {
-    ATOMIC_METRIC_LABEL: <EditAtomic ref={refAtomic} initial={initial} />,
-    DERIVE_METRIC_LABEL: <EditDerive ref={refDerive} initial={initial} />,
-    COMPLEX_METRIC_LABEL: <EditComplex ref={refComplex} initial={initial} />,
-  };
+  const refAtomic = useRef<AtomicExportProps>(null);
+  const refDerive = useRef<DeriveExportProps>(null);
+  const refComplex = useRef<ComplexExportProps>(null);
 
   useImperativeHandle(ref, () => ({
     form: form,
@@ -123,6 +118,18 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       setMetricType(initial.labelTag);
     }
   }, [initial]);
+
+  const renderEditComponent = (metricType: string) => {
+    switch (metricType) {
+      case 'ATOMIC_METRIC_LABEL':
+        return <EditAtomic ref={refAtomic} initial={initial} />;
+      case 'DERIVE_METRIC_LABEL':
+        return <EditDerive ref={refDerive} initial={initial} />;
+      case 'COMPLEX_METRIC_LABEL':
+      default:
+        return <EditComplex ref={refComplex} initial={initial} />;
+    }
+  };
 
   return (
     <Fragment>
@@ -192,7 +199,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
         />
         <ProFormTextArea name="comment" label="备注" width="md" placeholder="请输入" />
       </ProForm>
-      {EditRefMap[metricType]}
+      {renderEditComponent(metricType)}
     </Fragment>
   );
 };

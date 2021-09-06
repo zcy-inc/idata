@@ -28,12 +28,9 @@ interface TableOptions {
 // const { Link } = Typography;
 const { TabPane } = Tabs;
 const initialKey = Date.now();
-const initialDWD: DWD = {
-  id: initialKey,
-};
 
 const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initial }, ref) => {
-  const [DWDData, setDWDData] = useState<DWD[]>([initialDWD]);
+  const [DWDData, setDWDData] = useState<DWD[]>([{ id: initialKey }]);
   const [DWDKeys, setDWDKeys] = useState<Key[]>([initialKey]);
   const [DWDTables, setDWDTables] = useState<TableOptions[]>([]);
   const [DWDStrings, setDWDStrings] = useState<[][]>([]);
@@ -79,7 +76,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
       }
 
       if (tmp.length === 0) {
-        tmp.push(initialDWD);
+        tmp.push({ id: initialKey });
         tmpK.push(initialKey);
       }
       setDWDData(tmp);
@@ -100,6 +97,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
   // };
 
   const setValue = (schema: any, value: any) => {
+    const tmp = { id: initialKey };
     if (schema.dataIndex === 'tableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
@@ -109,8 +107,10 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
         })
         .catch((err) => {});
     }
-    DWDData[schema.index][schema.dataIndex] = value;
-    setDWDData([...DWDData]);
+    tmp[schema.dataIndex] = value;
+    console.log(tmp);
+
+    setDWDData([tmp]);
   };
   // 操作栏行为
   // const onAction = (row: any, _: any) => {
