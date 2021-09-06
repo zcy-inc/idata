@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -43,6 +44,13 @@ public class MigrationController {
     @Transactional(rollbackFor = Throwable.class)
     public RestResult<EnumDto> syncBizProcess(){
         return RestResult.success(migrationService.syncBizProcess());
+    }
+
+    @PostMapping("syncTableFolder")
+    @Transactional(rollbackFor = Throwable.class)
+    public RestResult<List<DevelopFolderDto>> syncTableFolder(@RequestParam("parentFolderId") Long parentFolderId,
+                                                              @RequestParam("parentFolderName") String parentFolderName){
+        return RestResult.success(migrationService.syncFolderAndTables(parentFolderId, parentFolderName));
     }
 
     @PostMapping("syncTable")

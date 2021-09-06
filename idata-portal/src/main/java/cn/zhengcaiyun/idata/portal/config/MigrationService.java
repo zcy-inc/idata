@@ -19,12 +19,14 @@ package cn.zhengcaiyun.idata.portal.config;
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionDataService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
@@ -88,6 +90,32 @@ public class MigrationService {
     private DevColumnInfoDao devColumnInfoDao;
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
+    @Autowired
+    private DevFolderService devFolderService;
+
+    public List<DevelopFolderDto> syncFolderAndTables(Long parentFolderId, String parentFolderName) {
+        List<String> tableFolderNameList = dwMetaService.getTableFolders(parentFolderId);
+        List<String> tableNameList = dwMetaService.getTableByFolderId(parentFolderId);
+        Long idataParentFolderId = devFolderDao.selectOne(c -> c.where(devFolder.del, isNotEqualTo(1),
+                and(devFolder.folderName, isEqualTo(parentFolderName)))).get().getId();
+        List<DevTableInfo> idataTableList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.tableName, isIn(tableNameList))));
+
+        List<DevelopFolderDto> echoList = tableFolderNameList.stream().map(tableFolderName -> {
+            DevelopFolderDto echo = new DevelopFolderDto();
+            echo.setFolderName(tableFolderName);
+            echo.setFolderType("TABLE");
+            echo.setParentId(idataParentFolderId);
+            return devFolderService.create(echo, "系统管理员");
+        }).collect(Collectors.toList());
+        if (idataTableList != null && idataTableList.size() > 0) {
+            idataTableList.forEach(idataTable -> {
+                idataTable.setFolderId(idataParentFolderId);
+                devTableInfoDao.updateByPrimaryKeySelective(idataTable);
+            });
+        }
+        return echoList;
+    }
 
     public List<TableInfoDto> syncTableData(Long tableId){
         List<Map<String, Object>> tableList = dwMetaService.getTables(tableId);
