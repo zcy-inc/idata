@@ -111,7 +111,7 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
   };
 
   const getEnums = (labelCode: string, index: number) => {
-    const item = modifierOptions.find((modifier) => (modifier.value = labelCode));
+    const item = modifierOptions.find((modifier) => (modifier.value === labelCode));
     const enumCode = item?.enumCode || '';
     getEnumValues({ enumCode })
       .then((res) => {
@@ -200,7 +200,11 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
           placeholder="请选择"
           rules={require}
           options={atomicOptions}
-          fieldProps={{ onChange: getModifiers }}
+          fieldProps={{
+            onChange: getModifiers,
+            showSearch: true,
+            filterOption: (input, option) => `${option?.label}`.indexOf(input) > -1,
+          }}
         />
       </ProForm>
       <EditableProTable

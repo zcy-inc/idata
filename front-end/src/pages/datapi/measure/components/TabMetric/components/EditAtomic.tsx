@@ -128,7 +128,6 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
       key: 'tableId',
       renderFormItem: (schema) => (
         <Select
-          allowClear
           placeholder="请选择"
           options={DWDTables}
           onChange={(value) => setValue(schema, value)}
