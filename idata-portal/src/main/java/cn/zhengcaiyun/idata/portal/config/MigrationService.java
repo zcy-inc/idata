@@ -192,7 +192,7 @@ public class MigrationService {
             if (idataTableMap.containsKey(tableInfoDto.getTableName())) {
                 tableInfoDto.setId(idataTableMap.get(tableInfoDto.getTableName()));
             }
-            tableInfoDto.setFolderId(finalFolderMap.get(tableRecord.get("layer").toString()));
+            tableInfoDto.setFolderId(finalFolderMap.get(tableRecord.get("folder_name").toString()));
             // 表信息
             List<LabelDto> tableLabels = new ArrayList<>();
             for (Map.Entry<String, Object> entry : tableRecord.entrySet()) {

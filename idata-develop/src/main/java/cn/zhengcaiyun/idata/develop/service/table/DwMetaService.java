@@ -99,12 +99,14 @@ public class DwMetaService implements InitializingBean, DisposableBean {
     public List<Map<String, Object>> getTables(Long tableId) {
         String tableSql;
         if (tableId != null) {
-            tableSql = "select idata.table_info.* from idata.table_info " +
-                    "where idata.table_info.del = false and id = " + tableId;
+            tableSql = "select idata.table_info.*, idata.table_folder.folder_name from idata.table_info " +
+                    "left join idata.table_folder on idata.table_info.folder_id = idata.table_folder.id " +
+                    "where idata.table_folder.del = false and idata.table_info.del = false and id = " + tableId;
         }
         else {
-            tableSql = "select idata.table_info.* from idata.table_info " +
-                    "where idata.table_info.del = false order by id";
+            tableSql = "select idata.table_info.*, idata.table_folder.folder_name from idata.table_info " +
+                    "left join idata.table_folder on idata.table_info.folder_id = idata.table_folder.id " +
+                    "where idata.table_folder.del = false and idata.table_info.del = false order by id";
         }
         return dwMetaJdbcTemplate.queryForList(tableSql);
     }
