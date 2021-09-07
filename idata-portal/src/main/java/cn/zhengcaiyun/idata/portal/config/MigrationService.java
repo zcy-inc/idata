@@ -142,7 +142,7 @@ public class MigrationService {
         Map<String, String> idataBizProcessMap = enumService.getEnumValues("bizProcessEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<String, Long> folderMap = new HashMap<>();
-        if (folderId != null) {
+        if (folderId == null) {
             folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
                     .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
         }
