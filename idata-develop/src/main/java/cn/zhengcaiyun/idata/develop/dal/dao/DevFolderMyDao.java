@@ -40,7 +40,7 @@ public interface DevFolderMyDao {
                     "AND dev_folder.folder_name like '%${treeNodeName}%' " +
                 "</if>" +
                 "<if test = 'devTreeType != null'>" +
-                    "AND dev_folder.folder_type = #{devTreeType} " +
+                    "AND dev_folder.folder_type like '${devTreeType}' " +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"TABLE\") != -1'>" +
                     "UNION ALL " +
@@ -138,6 +138,7 @@ public interface DevFolderMyDao {
                             "AND dev_enum.enum_name like '%${treeNodeName}%' " +
                         "</if>" +
                 "</if>" +
+                "ORDER BY folderId desc" +
             "</script>")
     List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType, String treeNodeName);
 }

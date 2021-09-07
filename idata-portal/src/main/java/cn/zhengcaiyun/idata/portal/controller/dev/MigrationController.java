@@ -49,14 +49,16 @@ public class MigrationController {
     @PostMapping("syncTableFolder")
     @Transactional(rollbackFor = Throwable.class)
     public RestResult<List<DevelopFolderDto>> syncTableFolder(@RequestParam("parentFolderId") Long parentFolderId,
-                                                              @RequestParam("parentFolderName") String parentFolderName){
-        return RestResult.success(migrationService.syncFolderAndTables(parentFolderId, parentFolderName));
+                                                              @RequestParam("parentFolderName") String parentFolderName,
+                                                              @RequestParam(value = "idataParentFolderId", required = false) Long idataParentFolderId){
+        return RestResult.success(migrationService.syncFolderAndTables(parentFolderId, parentFolderName, idataParentFolderId));
     }
 
     @PostMapping("syncTable")
     @Transactional(rollbackFor = Throwable.class)
-    public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId){
-        return RestResult.success(migrationService.syncTableData(tableId));
+    public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId,
+                                                    @RequestParam(value = "folderId", required = false) Long folderId){
+        return RestResult.success(migrationService.syncTableData(tableId, folderId));
     }
 
     @PostMapping("syncForeignKey")
