@@ -48,7 +48,7 @@ export const BooleanOptions = [
 
 // 维度："enName", "dimensionId", "dimensionDefine"，"comment"
 // 修饰词："enName", "modifierEnum", "modifierDefine"，"comment"
-// 指标："enName", "metricId", "bizTypeCode", "metricDefine"，"comment"
+// 指标："enName", "metricId", "bizProcessCode", "metricDefine"，"comment"
 export const KpiLabelsMap = {
   enName: '英文别名',
   comment: '备注',
@@ -57,7 +57,7 @@ export const KpiLabelsMap = {
   modifierEnum: '枚举值',
   modifierDefine: '定义',
   metricId: '指标ID',
-  bizTypeCode: '业务过程',
+  bizProcessCode: '业务过程',
   metricDefine: '定义',
 };
 export enum AggregatorCodeMap {

@@ -5,16 +5,16 @@ import ProForm, {
   ProFormTextArea,
   ProFormGroup,
 } from '@ant-design/pro-form';
+import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from '../../index.less';
 
 import { getFolders } from '@/services/objectlabel';
+import { ObjectLabel, ObjectType } from '@/types/objectlabel';
 import Title from '../Title';
 import EditRules from './components/EditRules';
-import { rules, ObjectType } from './constants';
-import { ObjectLabel } from '@/types/objectlabel';
-import { useModel } from '@/.umi/plugin-model/useModel';
+import { rules, ObjectTypeOptions } from './constants';
 
 export interface EditLableProps {
   initial?: ObjectLabel;
@@ -22,8 +22,8 @@ export interface EditLableProps {
 }
 
 const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial, form }, ref) => {
-  const [folderOps, setFolderOps] = useState([]);
-  const [objectType, setObjectType] = useState('supplier:LABEL');
+  const [folderOps, setFolderOps] = useState<{ label: string; value: any }[]>([]);
+  const [objectType, setObjectType] = useState<ObjectType>();
   const { curNode } = useModel('objectlabel', (_) => ({
     curNode: _.curNode,
   }));
@@ -33,8 +33,8 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data.map((_: any) => ({ label: _.name, value: _.id }));
-        setFolderOps(fd);
+        const folders = res.data.map((_) => ({ label: _.name, value: _.id }));
+        setFolderOps(folders);
       })
       .catch((err) => {});
   }, []);
@@ -48,6 +48,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
         remark: initial.remark,
         folderId: initial.folderId === 0 ? null : initial.folderId,
       });
+      setObjectType(initial.objectType);
     }
   }, [initial]);
 
@@ -65,7 +66,6 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
     <Fragment>
       <Title>基本信息</Title>
       <ProForm
-        className={`${styles.reset} ${styles['reset-inline']}`}
         layout="horizontal"
         colon={false}
         form={form}
@@ -84,11 +84,12 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
             name="objectType"
             label="标签主体"
             width="sm"
-            placeholder="请输入"
+            placeholder="请选择"
             rules={rules}
-            options={ObjectType}
-            initialValue="supplier:LABEL"
+            allowClear={false}
+            options={ObjectTypeOptions}
             fieldProps={{ onChange: setObjectType }}
+            disabled={!!initial}
           />
         </ProFormGroup>
         <ProFormTextArea name="remark" label="备注" width="md" placeholder="请输入" />
@@ -101,7 +102,7 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
         />
       </ProForm>
       <Title>标签规则</Title>
-      <EditRules initial={initial} objectType={objectType} />
+      {objectType ? <EditRules initial={initial} objectType={objectType as ObjectType} /> : null}
     </Fragment>
   );
 };

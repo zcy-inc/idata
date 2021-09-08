@@ -2,6 +2,11 @@
   --tbl-body-height: '';
 
   :global {
+    .ant-table-thead > tr > th {
+      &::before {
+        background-color: transparent !important;
+      }
+    }
     .ant-table-body {
       height: var(--tbl-body-height);
     }

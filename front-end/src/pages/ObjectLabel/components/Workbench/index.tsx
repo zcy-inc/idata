@@ -2,9 +2,9 @@ import React from 'react';
 import { useModel } from 'umi';
 import { Empty, Tabs } from 'antd';
 import type { FC, Key } from 'react';
-import styles from '../../index.less';
+import styles from './index.less';
 
-import { IconFont } from '@/components';
+import TabCloseIcon from '@/components/TabCloseIcon';
 import TabLabel from '../TabLabel';
 
 const { TabPane } = Tabs;
@@ -17,30 +17,34 @@ const Workbench: FC = ({}) => {
     removeTab: _.removeTab,
   }));
 
-  return tabs.length ? (
-    <Tabs
-      type="editable-card"
-      onChange={(key) => setActiveTab(key)}
-      activeKey={activeTab}
-      tabBarGutter={0}
-      onEdit={(key, action) => action === 'remove' && removeTab(key as Key)}
-      tabBarStyle={{ background: '#F1F3F9' }}
-      hideAdd
-    >
-      {tabs.map((tab) => (
-        <TabPane
-          tabKey={`${tab.key}`}
-          className={styles['tab-pane']}
-          tab={tab.title}
-          key={tab.key}
-          closeIcon={<IconFont type="icon-guanbichanggui" />}
+  return (
+    <div className={styles.workbench}>
+      {tabs.length ? (
+        <Tabs
+          type="editable-card"
+          onChange={(key) => setActiveTab(key)}
+          activeKey={activeTab}
+          tabBarGutter={0}
+          onEdit={(key, action) => action === 'remove' && removeTab(key as Key)}
+          tabBarStyle={{ background: '#F1F3F9' }}
+          hideAdd
         >
-          <TabLabel initialMode={tab.mode} tabKey={`${tab.key}`} originId={tab.originId} />
-        </TabPane>
-      ))}
-    </Tabs>
-  ) : (
-    <Empty />
+          {tabs.map((tab) => (
+            <TabPane
+              tabKey={`${tab.key}`}
+              className={styles['tab-pane']}
+              tab={tab.title}
+              key={tab.key}
+              closeIcon={<TabCloseIcon />}
+            >
+              <TabLabel initialMode={tab.mode} tabKey={`${tab.key}`} originId={tab.originId} />
+            </TabPane>
+          ))}
+        </Tabs>
+      ) : (
+        <Empty />
+      )}
+    </div>
   );
 };
 

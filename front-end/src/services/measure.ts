@@ -10,7 +10,11 @@ export async function getFolders(params?: {}) {
   return request('/api/p1/dev/devFolders', { method: 'GET', params });
 }
 // 文件夹 创建
-export async function createFolder(data: { folderName: string; parentId: string }) {
+export async function createFolder(data: {
+  folderName: string;
+  parentId: string;
+  folderType: TreeNodeType;
+}) {
   return request('/api/p1/dev/devFolder', { method: 'POST', data });
 }
 // 文件夹 更新

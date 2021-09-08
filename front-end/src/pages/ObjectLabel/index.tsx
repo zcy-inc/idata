@@ -1,23 +1,23 @@
 import React from 'react';
 import { PageContainer } from '@/components';
+import SplitPane from 'react-split-pane';
 import type { FC } from 'react';
-import styles from './index.less';
 
 import FolderTree from './components/FolderTree';
 import Workbench from './components/Workbench';
 
 const ObjectLabel: FC = () => {
   return (
-    <PageContainer contentClassName={styles['object-label']}>
-      <div className={styles.board}>
-        <div className={styles.left}>
-          <FolderTree />
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.right}>
-          <Workbench />
-        </div>
-      </div>
+    <PageContainer contentClassName="split-panel">
+      <SplitPane
+        className="board"
+        defaultSize={300}
+        style={{ position: 'relative' }}
+        pane2Style={{ width: 0 }}
+      >
+        <FolderTree />
+        <Workbench />
+      </SplitPane>
     </PageContainer>
   );
 };

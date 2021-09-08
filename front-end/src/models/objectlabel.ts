@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode, Key } from 'react';
 
 import { getFolderTree } from '@/services/objectlabel';
-import { TreeNode } from '@/types/objectlabel';
+import { RuleLayer, TreeNode } from '@/types/objectlabel';
 
 interface ITab {
   key: Key; // `${originId}` | Date.now()
@@ -27,7 +27,7 @@ export default () => {
   const [tabs, setTabs] = useState<ITab[]>([]);
   const [activeTab, setActiveTab] = useState('');
   // editRules
-  const [editLayers, setEditLayers] = useState([]);
+  const [editLayers, setEditLayers] = useState<RuleLayer[]>([]);
 
   // 获取树
   const getTree = () => {

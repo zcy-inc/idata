@@ -1,0 +1,125 @@
+.enum-table-shadowbox {
+  position: relative;
+  .enum-table {
+    overflow: auto;
+    .columns {
+      display: flex;
+      .cell {
+        flex: none;
+        width: 200px;
+        border: solid 1px #ebedf3;
+        border-right: none;
+        .title {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          height: 56px;
+          padding: 0 25px;
+          font-weight: bold;
+          border-bottom: solid 1px #ebedf3;
+        }
+        .type {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 56px;
+        }
+      }
+      .cell-ops {
+        position: sticky;
+        top: 0;
+        right: 0;
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 114px;
+        background: #fff;
+        border: solid 1px #ebedf3;
+        cursor: pointer;
+        :global {
+          .anticon-plus-circle {
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+    .enum {
+      display: flex;
+      .enum-cell {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 200px;
+        height: 56px;
+        border: solid 1px #ebedf3;
+        border-top: none;
+        border-right: none;
+        :global {
+          .ant-input,
+          .ant-select {
+            width: 150px;
+          }
+        }
+      }
+      .enum-cell-ops {
+        position: sticky;
+        top: 0;
+        right: 0;
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 56px;
+        background: #fff;
+        border: solid 1px #ebedf3;
+        border-top: none;
+      }
+    }
+  }
+  .enum-table-left-shadow {
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 1;
+      width: 30px;
+      border-left: 1px solid #f0f0f0;
+      box-shadow: inset 10px 0px 8px -8px #ecedf7;
+      transition: box-shadow 0.3s;
+      content: '';
+      pointer-events: none;
+    }
+  }
+  .enum-table-right-shadow {
+    .cell-ops,
+    .enum-cell-ops {
+      &::after {
+        position: absolute;
+        top: 0;
+        bottom: -1px;
+        left: 0;
+        width: 30px;
+        border-right: 1px solid #f0f0f0;
+        box-shadow: inset -10px 0px 8px -8px #ecedf7;
+        transform: translateX(-100%);
+        transition: box-shadow 0.3s;
+        content: '';
+        pointer-events: none;
+      }
+    }
+  }
+}
+.plus-enum {
+  display: inline-block;
+  margin-top: 12px;
+  cursor: pointer;
+  :global {
+    .anticon-plus-circle {
+      margin-right: 4px;
+    }
+  }
+}

@@ -11,7 +11,11 @@ export async function getFolders(params?: {}) {
   return request('/api/p1/dev/devFolders', { method: 'GET', params });
 }
 // 文件夹 创建
-export async function createFolder(data: { folderName: string; parentId: string }) {
+export async function createFolder(data: {
+  folderName: string;
+  parentId: string;
+  folderType: TreeNodeType;
+}) {
   return request('/api/p1/dev/devFolder', { method: 'POST', data });
 }
 // 文件夹 更新
@@ -95,4 +99,12 @@ export async function getTableRelations(params: { tableId: string }) {
 // 表 删除
 export async function delTable(data: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${data.tableId}`, { method: 'DELETE', data });
+}
+// 表 DDL模式
+export async function getDDL(params: { tableId: any }) {
+  return request(`/api/p1/dev/tableDdl/${params.tableId}`, { method: 'GET', params });
+}
+// 表 同步MetaBase
+export async function postSyncMetabase(params: { tableId: any }) {
+  return request(`p1/dev/syncMetabaseInfo/${params.tableId}`, { method: 'POST', params });
 }

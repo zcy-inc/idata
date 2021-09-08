@@ -3,10 +3,11 @@ import { history } from 'umi';
 import { Button, Modal } from 'antd';
 import { TiledTable, Operation, PageContainer } from '@/components';
 import { usePaginated } from '@/hooks';
-import type { ColumnsType } from 'antd/es/table';
 import { getRoleList, deleteRole } from '@/services/role';
-import type { Trole } from '@/interfaces/role';
 import { getDeleteFn } from '@/utils/utils';
+import type { ColumnsType } from 'antd/es/table';
+import type { Trole } from '@/interfaces/role';
+
 import AuthSetting from '../../components/AuthSetting';
 import useAuthSetting from '../../hooks/useAuthSetting';
 
@@ -24,14 +25,8 @@ const List: React.FC = () => {
     setVisible(true);
   };
   const columns: ColumnsType<Trole> = [
-    {
-      title: '角色名称',
-      dataIndex: 'roleName',
-    },
-    {
-      title: '最近编辑人',
-      dataIndex: 'editor',
-    },
+    { title: '角色名称', dataIndex: 'roleName' },
+    { title: '最近编辑人', dataIndex: 'editor' },
     {
       title: '操作',
       width: 200,

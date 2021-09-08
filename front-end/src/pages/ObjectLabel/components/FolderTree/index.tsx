@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent } from 'react';
-import styles from '../../index.less';
+import styles from './index.less';
 
 import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
@@ -129,8 +129,8 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       const { name, type, cid } = _;
       const _i = name.indexOf(searchValue);
       const node = { ..._, key: cid };
-      const clsFolderRoot = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
-      const clsFolderMargin = ((type === 'FOLDER' || i === n - 1) && styles['folder-margin']) || '';
+      const clsFolderRoot = (!parentId && type === 'FOLDER' && 'folder-root') || '';
+      const clsFolderMargin = ((type === 'FOLDER' || i === n - 1) && 'folder-margin') || '';
       let _type = type;
       let title = (
         <span key="title" className={clsFolderRoot}>
@@ -148,7 +148,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         title = (
           <span key="title" className={clsFolderRoot}>
             {beforeStr}
-            <span className={styles['search-match']}>{searchValue}</span>
+            <span className="search-match">{searchValue}</span>
             {afterStr}
           </span>
         );
@@ -185,7 +185,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       return;
     }
     const keys = flatTree.current
-      .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
+      ?.map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
       .filter((_) => !!_);
     setExpandedKeys(keys);
     setSearchValue(value);
@@ -198,20 +198,19 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   };
 
   return (
-    <Fragment>
-      <div className={styles.search}>
+    <div className="folder-tree">
+      <div
+        className="search"
+        style={{ paddingBottom: 16, borderBottom: '1px solid #f0f0f0', marginBottom: 16 }}
+      >
         <Input
-          className={styles['search-input']}
+          className="search-input"
           placeholder="请输入关键字进行搜索"
           prefix={<IconFont type="icon-sousuo" />}
           onChange={onFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont
-            type="icon-xinjian"
-            className={styles['icon-plus']}
-            onClick={() => setCurNode(null)}
-          />
+          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode(null)} />
         </Dropdown>
       </div>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
@@ -231,7 +230,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         </Tree>
       </Dropdown>
       {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
-    </Fragment>
+    </div>
   );
 };
 

@@ -127,6 +127,6 @@ export interface Metric extends Dimension {
   modifiers: MetricModifier[];
   deriveMetrics: {
     labelName: string;
-    bizTypeValue: string;
+    bizProcessValue: string;
   }[];
 }

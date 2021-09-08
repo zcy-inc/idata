@@ -4,6 +4,8 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
 const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
@@ -16,7 +18,7 @@ export default defineConfig({
     hmr: true,
   },
   layout: {
-    siderWidth: 220,
+    siderWidth: 288,
     ...defaultSettings,
   },
   locale: {
@@ -36,10 +38,17 @@ export default defineConfig({
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
   theme: {
     'primary-color': '#304FFE',
-    'text-color': '#2D3956',
+    'success-color': '#05cc87',
+    'warning-color': '#ff9324',
+    'error-color': '#ff5753',
+    'disabled-color': '#eeeff2',
+
+    'text-color': '#2d3956',
+    'border-color-base': '#dce1ef',
+    'input-placeholder-color': '#a0a8c0',
+    'background-color-light': '#f8f8fa',
+
     'border-radius-base': '4px',
-    'border-color-base': '#EBEDF3',
-    'input-placeholder-color': '#BFC4D5',
   },
   esbuild: {},
   title: false,
@@ -58,5 +67,10 @@ export default defineConfig({
   },
   resolve: {
     includes: ['src/components'],
+  },
+  chainWebpack(memo, { env, webpack, createCSSRule }) {
+    // 设置 alias
+    memo.resolve.alias.set('foo', '/tmp/a/b/foo');
+    memo.plugin('monaco-editor').use(MonacoWebpackPlugin, [{ languages: ['sql'] }]);
   },
 });
