@@ -23,24 +23,21 @@ import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
+import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
+import cn.zhengcaiyun.idata.develop.service.table.MetabaseService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,6 +47,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSuppo
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -60,6 +58,13 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 @Service
 public class TableInfoServiceImpl implements TableInfoService {
+
+    @Value("${metabase.datasource.jdbcUrl:#{null}}")
+    private String METABASE_DATASOURCE_JDBCURL;
+    @Value("${metabase.datasource.username:#{null}}")
+    private String METABASE_DATASOURCE_USERNAME;
+    @Value("${metabase.datasource.password:#{null}}")
+    private String METABASE_DATASOURCE_PASSWORD;
 
     @Autowired
     private LabelService labelService;
@@ -77,6 +82,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private ForeignKeyService foreignKeyService;
     @Autowired
     private MetadataQueryApi metadataQueryApi;
+    @Autowired
+    private MetabaseService metabaseService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -89,6 +96,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
     private final String COLUMN_TYPE_LABEL = "columnType:LABEL";
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
+    private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -369,6 +377,61 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .where(devTableInfo.id, isEqualTo(tableId)));
 
         return deleteSuccess;
+    }
+
+    @Override
+    public String syncMetabaseInfo(Long tableId, String editor) {
+        checkArgument(isNotEmpty(editor), "编辑者不能为空");
+        if (METABASE_DATASOURCE_JDBCURL == null || METABASE_DATASOURCE_USERNAME == null || METABASE_DATASOURCE_PASSWORD == null) return null;
+        TableInfoDto tableInfo = getTableInfo(tableId);
+        TableDetailDto tableDetail = PojoUtil.copyOne(tableInfo, TableDetailDto.class, "id", "tableName", "dbName");
+        tableDetail.setTableComment(tableInfo.getTableLabels().stream().filter(tableLabel ->
+                TABLE_COMMENT_LABEL.equals(tableLabel.getLabelCode())).findAny().get().getLabelParamValue());
+        List<TableDetailDto> syncMetabaseTblsList = new ArrayList<>();
+        syncMetabaseTblsList.add(tableDetail);
+        List<ColumnDetailsDto> columnsList = tableInfo.getColumnInfos().stream().map(columnInfo -> {
+            ColumnDetailsDto echoColumnInfoDetail = new ColumnDetailsDto();
+            echoColumnInfoDetail.setColumnName(columnInfo.getColumnName());
+            echoColumnInfoDetail.setTableName(tableInfo.getTableName());
+            echoColumnInfoDetail.setDbName(tableInfo.getDbName());
+            String columnComment = columnInfo.getColumnLabels().stream().filter(columnLabel ->
+                            columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findAny().orElse(null) != null
+                    ? columnInfo.getColumnLabels().stream().filter(columnLabel ->
+                    columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)).findAny().get().getLabelParamValue() : null;
+            echoColumnInfoDetail.setColumnComment(columnComment);
+            String columnDescription = columnInfo.getColumnLabels().stream().filter(columnLabel ->
+                    columnLabel.getLabelCode().equals(COLUMN_DESCRIPTION_LABEL)).findAny().orElse(null) != null
+                    ? columnInfo.getColumnLabels().stream().filter(columnLabel ->
+                    columnLabel.getLabelCode().equals(COLUMN_DESCRIPTION_LABEL)).findAny().get().getLabelParamValue() : null;
+            echoColumnInfoDetail.setColumnDescription(columnDescription);
+            return echoColumnInfoDetail;
+        }).collect(Collectors.toList());
+        Map<String, List<ColumnDetailsDto>> syncMetabaseColMap = new HashMap<>();
+        String dbTblName = tableDetail.getDbName() + "." + tableDetail.getTableName();
+        syncMetabaseColMap.put(dbTblName, columnsList);
+
+        Map<String, List<String>> syncEchoMap = metabaseService.syncMetabaseTableInfo(syncMetabaseTblsList, syncMetabaseColMap);
+        // 同步字段结果
+        List<String> syncMissColsList = syncEchoMap.get("syncMissCols") != null ?
+                syncEchoMap.get("syncMissCols") : new ArrayList<>();
+        String syncMissColNames = null;
+        if (syncMissColsList != null && syncMissColsList.size() > 0) {
+            syncMissColNames = String.join(",", syncMissColsList);
+        }
+        // 同步表结果
+        List<String> syncMissTblsList = syncEchoMap.get("syncMissTbls") != null ?
+                syncEchoMap.get("syncMissTbls") : new ArrayList<>();
+        String syncMissTblNames = null;
+        if (syncMissTblsList != null && syncMissTblsList.size() > 0) {
+            syncMissTblNames = syncMissTblsList.get(0);
+        }
+
+        String colMsg = isEmpty(syncMissColNames) ?
+                " columns sync successful!" : syncMissColNames + " columns not found, sync failed!";
+        String tblMsg = isEmpty(syncMissTblNames) ?
+                "Table sync successful!" : syncMissTblNames + " not found, sync failed!";
+        String echoMsg = tblMsg + colMsg;
+        return echoMsg;
     }
 
     @Override

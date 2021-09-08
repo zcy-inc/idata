@@ -77,7 +77,8 @@ public class TableInfoApiImpl implements TableInfoApi {
     private final String DW_LAYER_LABEL = "dwLayer:LABEL";
     private final String METABASE_URL_LABEL = "metabaseUrl:LABEL";
     private final String TABLE_COMMENT_LABEL = "tblComment:LABEL";
-    private final String SECURITY_LEVEL_LABEL = "securityLevel:LABEL";
+    private final String SECURITY_LEVEL_LABEL = "tblSecurityLevel:LABEL";
+    private final String SECURITY_LEVEL_ENUM = "securityLevelEnum:ENUM";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
     private final String[] tableDetails = {TABLE_COMMENT_LABEL, ASSET_CATALOGUE_LABEL, SECURITY_LEVEL_LABEL,
             METABASE_URL_LABEL, COLUMN_COMMENT_LABEL};
@@ -162,16 +163,17 @@ public class TableInfoApiImpl implements TableInfoApi {
                     columnInfo.setColumnComment(commentLabel.getLabelParamValue()));
         });
         Map<Long, List<ColumnInfoDto>> columnInfoMap = columnInfoList.stream().collect(Collectors.groupingBy(ColumnInfoDto::getTableId));
+        Map<String, String> securityLevelMap = devEnumValueDao.select(c ->
+                c.where(devEnumValue.del, isNotEqualTo(1)).and(devEnumValue.enumCode, isEqualTo(SECURITY_LEVEL_ENUM)))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
         tableInfoList.forEach(tableDetail -> {
             if (tableInfoMap.containsKey(tableDetail.getId())) {
                 List<LabelDto> tableLabelList = tableInfoMap.get(tableDetail.getId());
                 tableDetail.setTableComment(tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(TABLE_COMMENT_LABEL)).findFirst().get().getLabelParamValue());
-//                tableDetail.setAssetCatalogues(getAssetCatalogues(tableLabelList.stream().filter(tableLabel ->
-//                        tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().get().getLabelParamValue()));
                 tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(SECURITY_LEVEL_LABEL)).findFirst().ifPresent(securityLabel ->
-                        tableDetail.setSecurityLevel(convertSecurityLevel(securityLabel.getLabelParamValue())));
+                        tableDetail.setSecurityLevel(securityLevelMap.get(securityLabel.getLabelParamValue())));
                 tableLabelList.stream().filter(tableLabel ->
                         tableLabel.getLabelCode().equals(ASSET_CATALOGUE_LABEL)).findFirst().ifPresent(assetCatalogueLabel ->
                         tableDetail.setAssetCatalogues(getAssetCatalogues(assetCatalogueLabel.getLabelParamValue())));

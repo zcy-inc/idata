@@ -19,12 +19,14 @@ package cn.zhengcaiyun.idata.portal.config;
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionDataService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
@@ -88,8 +90,43 @@ public class MigrationService {
     private DevColumnInfoDao devColumnInfoDao;
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
+    @Autowired
+    private DevFolderService devFolderService;
 
-    public List<TableInfoDto> syncTableData(Long tableId){
+    public List<DevelopFolderDto> syncFolderAndTables(Long parentFolderId, String parentFolderName,
+                                                      Long idataParentFolderId) {
+        List<String> tableFolderNameList = dwMetaService.getTableFolders(parentFolderId);
+        List<String> tableNameList = dwMetaService.getTableByFolderId(parentFolderId);
+        Long newParentId;
+        if (idataParentFolderId == null) {
+            newParentId = devFolderDao.selectOne(c -> c.where(devFolder.del,
+                    isNotEqualTo(1),
+                    and(devFolder.folderName, isEqualTo(parentFolderName)))).get().getId();
+        }
+        else {
+            newParentId = idataParentFolderId;
+        }
+        List<DevTableInfo> idataTableList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.tableName, isIn(tableNameList))));
+
+        Long finalNewParentId = newParentId;
+        List<DevelopFolderDto> echoList = tableFolderNameList.stream().map(tableFolderName -> {
+            DevelopFolderDto echo = new DevelopFolderDto();
+            echo.setFolderName(tableFolderName);
+            echo.setFolderType("TABLE");
+            echo.setParentId(finalNewParentId);
+            return devFolderService.create(echo, "系统管理员");
+        }).collect(Collectors.toList());
+        if (idataTableList != null && idataTableList.size() > 0) {
+            idataTableList.forEach(idataTable -> {
+                idataTable.setFolderId(finalNewParentId);
+                devTableInfoDao.updateByPrimaryKeySelective(idataTable);
+            });
+        }
+        return echoList;
+    }
+
+    public List<TableInfoDto> syncTableData(Long tableId, Long folderId) {
         List<Map<String, Object>> tableList = dwMetaService.getTables(tableId);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
@@ -104,8 +141,16 @@ public class MigrationService {
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<String, String> idataBizProcessMap = enumService.getEnumValues("bizProcessEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
-        Map<String, Long> folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
+        Map<String, Long> folderMap = new HashMap<>();
+        if (folderId == null) {
+            folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
+                    .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
+        }
+        else {
+            DevFolder tableFolder = devFolderDao.selectOne(c -> c.where(devFolder.del, isNotEqualTo(1),
+                    and(devFolder.id, isEqualTo(folderId)))).get();
+            folderMap.put(tableFolder.getFolderName(), tableFolder.getId());
+        }
         Map<String, String> idataColTypeMap = enumService.getEnumValues("hiveColTypeEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
@@ -140,13 +185,14 @@ public class MigrationService {
         List<TableInfoDto> addList = new ArrayList<>();
         List<TableInfoDto> echoList = new ArrayList<>();
         TableInfoDto echoTable;
+        Map<String, Long> finalFolderMap = folderMap;
         tableList.forEach(tableRecord -> {
             TableInfoDto tableInfoDto = new TableInfoDto();
             tableInfoDto.setTableName((String) tableRecord.get("tbl_name"));
             if (idataTableMap.containsKey(tableInfoDto.getTableName())) {
                 tableInfoDto.setId(idataTableMap.get(tableInfoDto.getTableName()));
             }
-            tableInfoDto.setFolderId(folderMap.get(tableRecord.get("layer").toString()));
+            tableInfoDto.setFolderId(finalFolderMap.get(tableRecord.get("layer").toString()));
             // 表信息
             List<LabelDto> tableLabels = new ArrayList<>();
             for (Map.Entry<String, Object> entry : tableRecord.entrySet()) {

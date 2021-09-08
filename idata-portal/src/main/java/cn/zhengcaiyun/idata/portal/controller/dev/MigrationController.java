@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -45,10 +46,19 @@ public class MigrationController {
         return RestResult.success(migrationService.syncBizProcess());
     }
 
+    @PostMapping("syncTableFolder")
+    @Transactional(rollbackFor = Throwable.class)
+    public RestResult<List<DevelopFolderDto>> syncTableFolder(@RequestParam("parentFolderId") Long parentFolderId,
+                                                              @RequestParam("parentFolderName") String parentFolderName,
+                                                              @RequestParam(value = "idataParentFolderId", required = false) Long idataParentFolderId){
+        return RestResult.success(migrationService.syncFolderAndTables(parentFolderId, parentFolderName, idataParentFolderId));
+    }
+
     @PostMapping("syncTable")
     @Transactional(rollbackFor = Throwable.class)
-    public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId){
-        return RestResult.success(migrationService.syncTableData(tableId));
+    public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId,
+                                                    @RequestParam(value = "folderId", required = false) Long folderId){
+        return RestResult.success(migrationService.syncTableData(tableId, folderId));
     }
 
     @PostMapping("syncForeignKey")

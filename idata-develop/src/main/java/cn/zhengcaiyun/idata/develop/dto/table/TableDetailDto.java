@@ -27,7 +27,7 @@ public class TableDetailDto extends TableInfoDto {
     private String tableComment;
     private List<String> assetCatalogues;
     private String metabaseUrl;
-    private SecurityLevelEnum securityLevel;
+    private String securityLevel;
 
     public String getTableComment() {
         return tableComment;
@@ -53,11 +53,11 @@ public class TableDetailDto extends TableInfoDto {
         this.metabaseUrl = metabaseUrl;
     }
 
-    public SecurityLevelEnum getSecurityLevel() {
+    public String getSecurityLevel() {
         return securityLevel;
     }
 
-    public void setSecurityLevel(SecurityLevelEnum securityLevel) {
+    public void setSecurityLevel(String securityLevel) {
         this.securityLevel = securityLevel;
     }
 }

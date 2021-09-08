@@ -83,10 +83,7 @@ public class DevFolderServiceImpl implements DevFolderService {
             }
         });
 
-        List<DevelopFolderTreeNodeDto> echoList = getFolderTreeNodeList(null, true, treeNodeName, folderTreeList).stream()
-                .filter(record -> record.getFolderType() == null || record.getFolderType().equals(devTreeType))
-                .collect(Collectors.toList());
-        return getFolderTreeNodeList(null, true, treeNodeName, folderTreeList).stream()
+        return getFolderTreeNodeList(0L, true, treeNodeName, folderTreeList).stream()
                 .filter(record -> record.getFolderType() == null || record.getFolderType().equals(devTreeType))
                 .collect(Collectors.toList());
     }
@@ -94,8 +91,8 @@ public class DevFolderServiceImpl implements DevFolderService {
     private List<DevelopFolderTreeNodeDto> getFolderTreeNodeList(Long parentId, boolean isRecursive, String treeNodeName,
                                                                  List<DevelopFolderTreeNodeDto> folderTreeNodeList) {
         List<DevelopFolderTreeNodeDto> echo = folderTreeNodeList.stream()
-                .filter(folderTreeNode -> parentId == folderTreeNode.getParentId())
-                .map(folderTreeNode -> {
+                .filter(folderTreeNode -> parentId.equals(folderTreeNode.getParentId())).collect(Collectors.toList())
+                .stream().map(folderTreeNode -> {
                     DevelopFolderTreeNodeDto echoFolderTreeNode = PojoUtil.copyOne(folderTreeNode, DevelopFolderTreeNodeDto.class,
                             "type", "name", "cid", "fileCode", "folderId", "folderType");
                     if (isRecursive && DevelopTreeTypeEnum.FOLDER.name().equals(folderTreeNode.getType())) {
@@ -130,10 +127,12 @@ public class DevFolderServiceImpl implements DevFolderService {
     public DevelopFolderDto create(DevelopFolderDto developFolderDto, String operator) {
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(developFolderDto.getFolderName()), "文件夹名不能为空");
-        DevFolder checkFolder = devFolderDao.selectOne(c ->
-                c.where(devFolder.del, isNotEqualTo(1), and(devFolder.folderName,
-                        isEqualTo(developFolderDto.getFolderName()))))
-                .orElse(null);
+        var builder = select(devFolder.allColumns()).from(devFolder).where(devFolder.del, isNotEqualTo(1))
+                .and(devFolder.folderName, isEqualTo(developFolderDto.getFolderName()));
+        if (developFolderDto.getParentId() != null) {
+            builder.and(devFolder.parentId, isEqualTo(developFolderDto.getParentId()));
+        }
+        DevFolder checkFolder = devFolderDao.selectOne(builder.build().render(RenderingStrategies.MYBATIS3)).orElse(null);
         checkArgument(checkFolder == null, "文件夹名称已存在");
 
         developFolderDto.setCreator(operator);

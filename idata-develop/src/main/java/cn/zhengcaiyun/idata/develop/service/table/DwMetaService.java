@@ -79,6 +79,23 @@ public class DwMetaService implements InitializingBean, DisposableBean {
         this.dwMetaJdbcTemplate = new JdbcTemplate(dwMetaDatasource);
     }
 
+    public List<String> getTableFolders(Long parentFolderId) {
+        List<String> tableFolderList = new ArrayList<>();
+        String folderSql = "select idata.table_folder.id, idata.table_folder.folder_name " +
+                "from idata.table_folder " +
+                "where idata.table_folder.del = false and idata.table_folder.parent_id = " + parentFolderId + " order by id";
+        dwMetaJdbcTemplate.queryForList(folderSql).stream().forEach(record -> tableFolderList.add((String) record.get("folder_name")));
+        return tableFolderList;
+    }
+
+    public List<String> getTableByFolderId(Long folderId) {
+        List<String> tableNameList = new ArrayList<>();
+        String tableSql = "select idata.table_info.tbl_name from idata.table_info " +
+                "where idata.table_info.del = false and folder_id = " + folderId;
+        dwMetaJdbcTemplate.queryForList(tableSql).stream().forEach(record -> tableNameList.add((String) record.get("tbl_name")));
+        return tableNameList;
+    }
+
     public List<Map<String, Object>> getTables(Long tableId) {
         String tableSql;
         if (tableId != null) {

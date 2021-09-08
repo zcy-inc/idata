@@ -94,6 +94,9 @@ public class MeasureApiImpl implements MeasureApi {
                         and(devLabel.labelCode, isEqualTo(DB_NAME))))
                         .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
                 measureLabelList.forEach(measureLabel -> {
+                    measureLabel.setDbName(dwdTableInfoMap.get(measureLabel.getTableId()));
+                    measureLabel.setTableName(devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                            and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
                     measureLabel.setDbTableName(dwdTableInfoMap.get(measureLabel.getTableId()) + "." +
                             devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
                                     and(devTableInfo.id, isEqualTo(measureLabel.getTableId())))).get().getTableName());
