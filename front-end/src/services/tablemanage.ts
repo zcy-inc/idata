@@ -100,7 +100,11 @@ export async function getTableRelations(params: { tableId: string }) {
 export async function delTable(data: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${data.tableId}`, { method: 'DELETE', data });
 }
-// DDL模式
+// 表 DDL模式
 export async function getDDL(params: { tableId: any }) {
   return request(`/api/p1/dev/tableDdl/${params.tableId}`, { method: 'GET', params });
+}
+// 表 同步MetaBase
+export async function postSyncMetabase(params: { tableId: any }) {
+  return request(`p1/dev/syncMetabaseInfo/${params.tableId}`, { method: 'POST', params });
 }

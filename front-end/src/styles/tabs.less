@@ -1,0 +1,65 @@
+body {
+  // Tabs - 标签页
+  .ant-tabs-card {
+    .ant-tabs-nav {
+      margin: 0;
+    }
+    .ant-tabs-content-holder {
+      background: #fff;
+    }
+    .ant-tabs-nav::before {
+      display: none;
+    }
+    .ant-tabs-nav .ant-tabs-tab {
+      margin-right: 0 !important;
+      color: #223345;
+      background: #fff;
+      border-bottom: none;
+    }
+    .ant-tabs-nav .ant-tabs-tab-active {
+      color: #fff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    .ant-tabs-nav .ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: #fff;
+    }
+    .ant-tabs-nav .ant-tabs-content {
+      margin-top: -16px;
+    }
+    .ant-tabs-nav .ant-tabs-content > .ant-tabs-tabpane {
+      padding: 24px;
+      background: #fff;
+    }
+  }
+
+  .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
+    height: 3px;
+  }
+
+  .reset-tabs {
+    .ant-tabs-nav {
+      border-bottom: 1px solid #f0f0f0;
+      .ant-tabs-tab {
+        margin-left: 0;
+        padding: 12px 24px;
+      }
+      .ant-tabs-tab-btn {
+        font-size: 16px;
+      }
+      .ant-tabs-tab-active {
+        font-weight: bold;
+        background: #fff;
+        .ant-tabs-tab-btn {
+          color: #304ffe;
+        }
+      }
+    }
+    .ant-card-body {
+      padding: 0;
+    }
+    .ant-space-item {
+      margin-right: 0 !important;
+    }
+  }
+}

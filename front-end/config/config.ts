@@ -41,11 +41,11 @@ export default defineConfig({
     'success-color': '#05cc87',
     'warning-color': '#ff9324',
     'error-color': '#ff5753',
-    // 'disabled-color': '#eeeff2',
+    'disabled-color': '#eeeff2',
 
     'text-color': '#2d3956',
-    'border-color-base': '#ebedf3',
-    'input-placeholder-color': '#bfc4d5',
+    'border-color-base': '#dce1ef',
+    'input-placeholder-color': '#a0a8c0',
     'background-color-light': '#f8f8fa',
 
     'border-radius-base': '4px',

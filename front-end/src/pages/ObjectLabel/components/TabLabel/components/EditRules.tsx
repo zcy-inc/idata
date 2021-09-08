@@ -5,6 +5,7 @@ import {
   Collapse,
   Divider,
   Dropdown,
+  Empty,
   Input,
   Menu,
   Select,
@@ -15,7 +16,7 @@ import { CaretRightOutlined } from '@ant-design/icons';
 import { cloneDeep, get, set, debounce } from 'lodash';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../../index.less';
+import styles from './index.less';
 
 import { IconFont } from '@/components';
 import { DimensionDef, ObjectLabel, ObjectType, RuleLayer } from '@/types/objectlabel';
@@ -217,30 +218,6 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
   };
 
   /**
-   * 新建指标
-   */
-  // const createIndicator = (iR: number) => {
-  //   if (layers[activeKey].ruleDef.rules[iR].indicatorDefs.length > 0) {
-  //     message.info('同一规则中只能存在一条指标');
-  //     return;
-  //   }
-  //   layers[activeKey].ruleDef.rules[iR].indicatorDefs.push({
-  //     indicatorCode: null,
-  //     condition: null,
-  //     params: [],
-  //   });
-  //   setLayers([...layers]);
-  // };
-
-  /**
-   * 删除指标
-   */
-  // const deleteIndicator = (iR: number, iI: number) => {
-  //   layers[activeKey].ruleDef.rules[iR].indicatorDefs.splice(iI, 1);
-  //   setLayers([...layers]);
-  // };
-
-  /**
    * 新建维度
    */
   const createDimension = (iR: number) => {
@@ -370,7 +347,7 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         {layers.map((layer, i) => (
           <Dropdown.Button
             key={layer.layerId}
-            className={layers[activeKey]?.layerId === layer.layerId && styles['layer-active']}
+            className={layers[activeKey]?.layerId !== layer.layerId ? styles['layer-normal'] : ''}
             onClick={() => setActiveKey(i)}
             onVisibleChange={() => {}}
             overlay={menu(i)}
@@ -386,131 +363,137 @@ const EditRules: FC<EditRulesProps> = ({ initial, objectType }) => {
         </Button>
       </Space>
       <Divider />
-      {layers[activeKey]?.ruleDef?.rules?.map((rule, iR) => (
-        <Fragment key={rule.ruleId}>
-          <Input
-            placeholder="请输入"
-            value={layers[activeKey]?.layerName}
-            onChange={({ target: { value } }) => changeLayerName(value)}
-          />
-          <div className={styles['title-bar']}>
-            <span className={styles.title}>规则1</span>
-          </div>
-          <Collapse
-            style={{ marginTop: 16, background: '#fff' }}
-            activeKey={expandKeys[iR]}
-            onChange={(key) => {
-              expandKeys[iR] = key as string[];
-              setExpandKeys([...expandKeys]);
-            }}
-            expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
-          >
-            <Panel header="指标信息" key="indicator">
-              <Space direction="vertical">
-                {rule?.indicatorDefs?.map((_, iI) => (
-                  <Space key={iI}>
-                    <Select
-                      placeholder="请选择指标"
-                      options={indicatorCodeOptions}
-                      value={_.indicatorCode as string}
-                      onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
-                      style={{ width: 200 }}
-                      showSearch
-                      filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
-                    />
-                    <Select
-                      placeholder="关系"
-                      options={ConditionOptions}
-                      value={_.condition as string}
-                      onChange={(v) => setIndicator(v as string, iR, iI, 'condition')}
-                      style={{ width: 120 }}
-                    />
-                    {rule.indicatorDefs[iI].condition === 'between' ? (
-                      <Input.Group compact>
+      {layers[activeKey]?.ruleDef?.rules?.length ? (
+        layers[activeKey]?.ruleDef?.rules?.map((rule, iR) => (
+          <Fragment key={rule.ruleId}>
+            <Input
+              placeholder="请输入"
+              value={layers[activeKey]?.layerName}
+              onChange={({ target: { value } }) => changeLayerName(value)}
+            />
+            <div className={styles['title-bar']}>
+              <span className={styles.title}>规则1</span>
+            </div>
+            <Collapse
+              style={{ marginTop: 16, background: '#fff' }}
+              activeKey={expandKeys[iR]}
+              onChange={(key) => {
+                expandKeys[iR] = key as string[];
+                setExpandKeys([...expandKeys]);
+              }}
+              expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+            >
+              <Panel header="指标信息" key="indicator">
+                <Space direction="vertical">
+                  {rule?.indicatorDefs?.map((_, iI) => (
+                    <Space key={iI}>
+                      <Select
+                        placeholder="请选择指标"
+                        options={indicatorCodeOptions}
+                        value={_.indicatorCode as string}
+                        onChange={(v) => setIndicator(v as string, iR, iI, 'indicatorCode')}
+                        style={{ width: 200 }}
+                        showSearch
+                        filterOption={(input, option) => `${option?.label}`.indexOf(input) > -1}
+                      />
+                      <Select
+                        placeholder="关系"
+                        options={ConditionOptions}
+                        value={_.condition as string}
+                        onChange={(v) => setIndicator(v as string, iR, iI, 'condition')}
+                        style={{ width: 120 }}
+                      />
+                      {rule.indicatorDefs[iI].condition === 'between' ? (
+                        <Input.Group compact>
+                          <Input
+                            style={{ textAlign: 'center', width: 120 }}
+                            placeholder="最小值"
+                            value={_.params[0]}
+                            onChange={({ target: { value } }) =>
+                              setIndicator(value, iR, iI, 'params')
+                            }
+                          />
+                          <Input
+                            className="site-input-split"
+                            style={{ width: 30, pointerEvents: 'none', background: '#fff' }}
+                            placeholder="~"
+                            disabled
+                          />
+                          <Input
+                            className="site-input-right"
+                            style={{ textAlign: 'center', width: 120 }}
+                            placeholder="最大值"
+                            value={rule.indicatorDefs[iI].params[1]}
+                            onChange={({ target: { value } }) =>
+                              setIndicator(value, iR, iI, 'params', 1)
+                            }
+                          />
+                        </Input.Group>
+                      ) : (
                         <Input
-                          style={{ textAlign: 'center', width: 120 }}
-                          placeholder="最小值"
-                          value={_.params[0]}
+                          placeholder="请输入"
+                          value={rule.indicatorDefs[iI].params[0]}
                           onChange={({ target: { value } }) =>
                             setIndicator(value, iR, iI, 'params')
                           }
                         />
-                        <Input
-                          className="site-input-split"
-                          style={{ width: 30, pointerEvents: 'none', background: '#fff' }}
-                          placeholder="~"
-                          disabled
-                        />
-                        <Input
-                          className="site-input-right"
-                          style={{ textAlign: 'center', width: 120 }}
-                          placeholder="最大值"
-                          value={rule.indicatorDefs[iI].params[1]}
-                          onChange={({ target: { value } }) =>
-                            setIndicator(value, iR, iI, 'params', 1)
-                          }
-                        />
-                      </Input.Group>
-                    ) : (
-                      <Input
-                        placeholder="请输入"
-                        value={rule.indicatorDefs[iI].params[0]}
-                        onChange={({ target: { value } }) => setIndicator(value, iR, iI, 'params')}
+                      )}
+                    </Space>
+                  ))}
+                </Space>
+              </Panel>
+              <Panel
+                header="维度信息"
+                key="dimension"
+                extra={
+                  <Link
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      createDimension(iR);
+                      if (!expandKeys[iR].includes('dimension')) {
+                        expandKeys[iR].push('dimension');
+                        setExpandKeys([...expandKeys]);
+                      }
+                    }}
+                  >
+                    添加
+                  </Link>
+                }
+              >
+                <Space direction="vertical">
+                  {rule?.dimensionDefs?.map((_, iD) => (
+                    <Space key={iD}>
+                      <Select
+                        placeholder="请选择维度"
+                        value={_.dimensionCode as string}
+                        options={dimensionCodeOptions}
+                        style={{ width: 240 }}
+                        onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
                       />
-                    )}
-                  </Space>
-                ))}
-              </Space>
-            </Panel>
-            <Panel
-              header="维度信息"
-              key="dimension"
-              extra={
-                <Link
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    createDimension(iR);
-                    if (!expandKeys[iR].includes('dimension')) {
-                      expandKeys[iR].push('dimension');
-                      setExpandKeys([...expandKeys]);
-                    }
-                  }}
-                >
-                  添加
-                </Link>
-              }
-            >
-              <Space direction="vertical">
-                {rule?.dimensionDefs?.map((_, iD) => (
-                  <Space key={iD}>
-                    <Select
-                      placeholder="请选择维度"
-                      value={_.dimensionCode as string}
-                      options={dimensionCodeOptions}
-                      style={{ width: 240 }}
-                      onChange={(v) => setDimension(v as string, iR, iD, 'dimensionCode')}
-                    />
-                    <Select
-                      placeholder="请选择"
-                      value={_.params[0]}
-                      options={dimensionParamOptions[iD]}
-                      onChange={(v) => setDimension(v as string, iR, iD, 'params')}
-                      style={{ width: 240 }}
-                      showSearch
-                      onSearch={(v) => debounceSearch(v, iR, iD)}
-                    />
-                    <IconFont
-                      type="icon-shanchuchanggui"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => deleteDimension(iR, iD)}
-                    />
-                  </Space>
-                ))}
-              </Space>
-            </Panel>
-          </Collapse>
-        </Fragment>
-      ))}
+                      <Select
+                        placeholder="请选择"
+                        value={_.params[0]}
+                        options={dimensionParamOptions[iD]}
+                        onChange={(v) => setDimension(v as string, iR, iD, 'params')}
+                        style={{ width: 240 }}
+                        showSearch
+                        onSearch={(v) => debounceSearch(v, iR, iD)}
+                      />
+                      <IconFont
+                        type="icon-shanchuchanggui"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => deleteDimension(iR, iD)}
+                      />
+                    </Space>
+                  ))}
+                </Space>
+              </Panel>
+            </Collapse>
+          </Fragment>
+        ))
+      ) : (
+        <Empty description="请添加分层" />
+      )}
     </Card>
   );
 };

@@ -1,8 +1,8 @@
 body {
   // Button 按钮
   .ant-btn {
-    height: 40px;
-    padding: 8px 20px;
+    height: 32px;
+    padding: 0 20px;
     color: var(--primary-color);
     border-color: var(--primary-color);
     &:focus,
@@ -18,8 +18,13 @@ body {
     }
   }
 
+  .ant-btn-lg {
+    height: 40px;
+    font-size: 14px;
+  }
+
   // secondary
-  .ant-btn.ant-btn-secondary {
+  .ant-btn.normal {
     color: var(--text-primary);
     border-color: var(--border-color-base);
     &:focus,

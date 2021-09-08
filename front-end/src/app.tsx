@@ -1,15 +1,17 @@
 import React from 'react';
 import { PageLoading } from '@ant-design/pro-layout';
-import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { history, Link } from 'umi';
-import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-import type { CurrentUser } from '@/interfaces/user';
-import type { Context } from 'umi-request';
 import { RightContent } from '@/components';
 import { skip2Login } from '@zcy-data/idata-utils';
 import { getSystemState } from '@/services/global';
 import { queryCurrent } from '@/services/user';
 import defaultSettings from '../config/defaultSettings';
+import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
+import type { CurrentUser } from '@/interfaces/user';
+import type { Context } from 'umi-request';
+import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
+
+import IconFont from '@/components/IconFont';
 
 const fetchCurrentUser = async () => {
   try {
@@ -22,7 +24,7 @@ const fetchCurrentUser = async () => {
 };
 
 const renderIcon = (src: string) => (
-  <img src={src} alt="icon" style={{ marginRight: 6, height: 14 }} />
+  <img src={src} alt="icon" style={{ marginRight: 6, height: 16, width: 16 }} />
 );
 
 /**
@@ -65,20 +67,44 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
+    menuProps: {
+      expandIcon: (props) => {
+        return props.isOpen ? (
+          <IconFont style={{ fontSize: 12 }} type="icon-xiala-jihuo" />
+        ) : (
+          <IconFont style={{ fontSize: 12 }} type="icon-xiala-changgui" />
+        );
+      },
+    },
     subMenuItemRender: (subMenu, defaultDom) => {
       let icon = location.hash.includes(subMenu.path as string)
         ? renderIcon(subMenu.iconActive)
         : renderIcon(subMenu.iconDefault);
-      return [icon, defaultDom];
+      return (
+        <div className="ant-submenu-box">
+          {icon}
+          {defaultDom}
+        </div>
+      );
     },
     menuItemRender: (item, defaultDom) => {
+      const path = item.path || '';
       let icon = null;
-      if (item.path === '/objectLabel') {
-        icon = location.hash.includes(item.path)
+      if (path === '/objectLabel') {
+        icon = location.hash.includes(path)
           ? renderIcon(item.iconActive)
           : renderIcon(item.iconDefault);
       }
-      return [icon, <Link to={item.path as string}>{defaultDom}</Link>];
+      return (
+        <div
+          className={
+            path.split('/').length > 2 ? 'ant-menu-item-child-padding' : 'ant-menu-item-sub-padding'
+          }
+        >
+          {icon}
+          <Link to={item.path as string}>{defaultDom}</Link>
+        </div>
+      );
     },
     ...initialState?.settings,
   };

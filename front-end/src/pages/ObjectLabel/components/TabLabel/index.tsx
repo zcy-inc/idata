@@ -1,8 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Form, message, Modal, Space } from 'antd';
+import { Button, Form, message, Modal, Space, Spin } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../index.less';
 
 import ViewLabel from './ViewLabel';
 import EditLabel from './EditLabel';
@@ -27,6 +26,7 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode, tabKey, originId
   const [mode, setMode] = useState<'view' | 'edit'>();
   const [data, setData] = useState<ObjectLabel>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [getLoading, setGetLoading] = useState(false);
   const [form] = Form.useForm();
   const { getTree, removeTab, editLayers, replaceTab } = useModel('objectlabel', (_) => ({
     getTree: _.getTree,
@@ -43,11 +43,14 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode, tabKey, originId
   }, [initialMode]);
 
   const getLabel = (originId: number) => {
+    setGetLoading(true);
     getObjectLabel({ id: originId })
       .then((res) => {
         setData(res.data);
       })
-      .catch((err) => {});
+      .finally(() => {
+        setGetLoading(false);
+      });
   };
 
   const onSubmit = () => {
@@ -112,25 +115,27 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode, tabKey, originId
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewLabel data={data as ObjectLabel} />}
-      {mode === 'edit' && <EditLabel initial={data} form={form} />}
-      <div className={styles.submit}>
+      <Spin spinning={getLoading}>
+        {mode === 'view' && <ViewLabel data={data as ObjectLabel} />}
+        {mode === 'edit' && <EditLabel initial={data} form={form} />}
+      </Spin>
+      <div className="workbench-submit">
         {mode === 'view' && (
           <Space>
-            <Button key="edit" type="primary" onClick={() => setMode('edit')}>
+            <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
               编辑
             </Button>
-            <Button key="del" onClick={onDelete}>
+            <Button key="del" size="large" onClick={onDelete}>
               删除
             </Button>
           </Space>
         )}
         {mode === 'edit' && (
           <Space>
-            <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
+            <Button key="save" size="large" type="primary" onClick={onSubmit} loading={loading}>
               保存
             </Button>
-            <Button key="cancel" onClick={onCancel}>
+            <Button key="cancel" size="large" onClick={onCancel}>
               取消
             </Button>
           </Space>

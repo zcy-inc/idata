@@ -66,7 +66,6 @@ const EditLable: ForwardRefRenderFunction<unknown, EditLableProps> = ({ initial,
     <Fragment>
       <Title>基本信息</Title>
       <ProForm
-        className={`${styles.reset} ${styles['reset-inline']}`}
         layout="horizontal"
         colon={false}
         form={form}

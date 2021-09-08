@@ -10,6 +10,7 @@ import FolderList from '../FolderList';
 import styles from './index.less';
 
 const { TabPane } = Tabs;
+const { TreeNode } = Tree;
 
 export interface AuthSettingProps {
   readonly?: boolean; // 是否为查看
@@ -27,8 +28,8 @@ export interface AuthSettingProps {
 const AuthSetting: React.FC<AuthSettingProps> = ({
   readonly,
   style,
-  featureTree,
-  folderTree,
+  featureTree = [],
+  folderTree = [],
   featureList,
   folderList,
   onFeatureTreeSelect,
@@ -80,6 +81,33 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
     setAutoExpandParent(false);
   };
   const placeholder = activeKey === '1' ? '请输入功能名称' : '请输入资源名称';
+
+  // 组装数据
+  const loop = (data: any[]): any => {
+    return data.map((_) => {
+      const { name, type, featureCode, parentCode } = _;
+      const clsFolderRoot = !parentCode && type === 'F_MENU' ? 'folder-root' : '';
+      console.log({clsFolderRoot});
+
+      let title = (
+        <span key="title" className={clsFolderRoot}>
+          {name}
+        </span>
+      );
+
+      const node: any = { ..._, key: featureCode };
+      node.className = clsFolderRoot;
+      node.title = title;
+      parentCode && (node.parentId = parentCode);
+
+      return _.children ? (
+        <TreeNode {...node}>{loop(_.children)}</TreeNode>
+      ) : (
+        <TreeNode {...node}></TreeNode>
+      );
+    });
+  };
+
   return (
     <div className={styles.wrap} style={style}>
       <div className={styles.left}>
@@ -87,23 +115,25 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
           <TabPane tab="功能" key="1">
             <Tree
-              className={styles.featureTree}
-              treeData={featureTree}
+              className={`${styles.featureTree} folder-tree`}
               autoExpandParent={autoExpandParent}
               onExpand={onFeatureExpand}
               expandedKeys={featureExpandedKeys}
               onSelect={onFeatureTreeSelect}
-            />
+            >
+              {loop(featureTree)}
+            </Tree>
           </TabPane>
           <TabPane tab="资源" key="2">
             <Tree
-              className={styles.folderTree}
+              className={`${styles.folderTree} folder-tree`}
               autoExpandParent={autoExpandParent}
               expandedKeys={floderExpandedKeys}
-              treeData={folderTree}
               onExpand={onFolderExpand}
               onSelect={onFolderTreeSelect}
-            />
+            >
+              {loop(folderTree)}
+            </Tree>
           </TabPane>
         </Tabs>
       </div>

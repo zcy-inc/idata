@@ -1,8 +1,7 @@
 import React, { CSSProperties, Fragment, useEffect, useState } from 'react';
-import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Empty } from 'antd';
+import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Empty, Spin } from 'antd';
 import { get } from 'lodash';
 import type { FC, Key } from 'react';
-import styles from '../../index.less';
 
 import Title from '../Title';
 import ViewRules from './components/ViewRules';
@@ -86,12 +85,7 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   return (
     <Fragment>
       <Title>基本信息</Title>
-      <Descriptions
-        column={3}
-        colon={false}
-        labelStyle={{ color: '#8A8FAE' }}
-        style={{ margin: '16px 0' }}
-      >
+      <Descriptions column={3} colon={false} style={{ margin: '16px 0' }}>
         <Item label="标签名称">{data?.name}</Item>
         <Item label="标签英文名">{data?.nameEn}</Item>
         <Item label="标签主体">{ObjectTypeView[data?.objectType]}</Item>
@@ -103,47 +97,52 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
           {data?.editTime}
         </Item>
         <Item label="备注" span={3}>
-          {data?.remark}
+          {data?.remark || '-'}
         </Item>
       </Descriptions>
       <Title>数据内容</Title>
-      <Card className={`${styles.content} ${styles.reset}`}>
-        <Tabs
-          onChange={setActiveKey}
-          tabBarExtraContent={{
-            right: [
-              <Button key="search" onClick={getList} disabled={loading}>
-                查询
-              </Button>,
-            ],
-          }}
-        >
-          {layers?.map((layer, i) => (
-            <Tabs.TabPane
-              tab={
-                <Text ellipsis style={{ maxWidth: 88 }}>
-                  {layer.layerName}
-                </Text>
-              }
-              key={layer.layerId}
-              style={{ marginTop: 16 }}
-            >
-              <Skeleton loading={loading} active>
-                {columns[i] ? (
-                  <Table
-                    rowKey="id"
-                    columns={columns[i]}
-                    dataSource={list[i]}
-                    pagination={false}
-                    scroll={{ x: 'max-content' }}
-                  />
-                ) : (
-                  <Empty />
-                )}
-              </Skeleton>
-            </Tabs.TabPane>
-          ))}
-        </Tabs>
+      <Card style={{ marginTop: 16 }}>
+        {layers.length ? (
+          <Tabs
+            className="reset-tabs"
+            onChange={setActiveKey}
+            tabBarExtraContent={{
+              right: [
+                <Button key="search" onClick={getList} disabled={loading}>
+                  查询
+                </Button>,
+              ],
+            }}
+          >
+            {layers?.map((layer, i) => (
+              <Tabs.TabPane
+                tab={
+                  <Text ellipsis style={{ maxWidth: 88 }}>
+                    {layer.layerName}
+                  </Text>
+                }
+                key={layer.layerId}
+                style={{ marginTop: 16 }}
+              >
+                <Skeleton loading={loading} active>
+                  {columns[i] ? (
+                    <Table
+                      rowKey="id"
+                      columns={columns[i]}
+                      dataSource={list[i]}
+                      pagination={false}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  ) : (
+                    <Empty />
+                  )}
+                </Skeleton>
+              </Tabs.TabPane>
+            ))}
+          </Tabs>
+        ) : (
+          <Empty />
+        )}
       </Card>
       {visible && <ViewRules layers={layers} visible={visible} onCancel={hideModal} />}
     </Fragment>
