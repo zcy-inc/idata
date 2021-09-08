@@ -149,7 +149,7 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
     }
 
     public Object getMoreAttrs(String attrKey) {
-        if (Objects.isNull(attrKey)) return null;
+        if (Objects.isNull(attrKey) || Objects.isNull(this.moreAttrs)) return null;
         return this.moreAttrs.get(attrKey);
     }
 
