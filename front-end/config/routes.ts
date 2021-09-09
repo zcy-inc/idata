@@ -13,8 +13,8 @@
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
     routes: [
       { path: '/datapi', redirect: '/datapi/tablemanage' },
-      { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/TableManage' },
-      { path: '/datapi/measure', name: '指标库', component: './datapi/Measure' },
+      { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/TableManages' },
+      { path: '/datapi/measure', name: '指标库', component: './datapi/Measures' },
     ],
   },
   {
