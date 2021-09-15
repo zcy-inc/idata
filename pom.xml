@@ -41,6 +41,7 @@
         <module>idata-label</module>
         <module>idata-map</module>
         <module>idata-connector</module>
+        <module>idata-datasource</module>
     </modules>
 
     <parent>
@@ -50,7 +51,6 @@
         <relativePath/>
     </parent>
     <properties>
-<!--        <revision>1.0.0</revision>-->
         <java.version>11</java.version>
         <mybatis-dynamic-sql.version>1.2.1</mybatis-dynamic-sql.version>
         <mybatis-generator-plugin.version>1.4.0</mybatis-generator-plugin.version>
