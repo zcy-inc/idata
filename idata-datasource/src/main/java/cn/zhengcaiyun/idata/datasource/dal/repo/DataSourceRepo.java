@@ -17,10 +17,33 @@
 
 package cn.zhengcaiyun.idata.datasource.dal.repo;
 
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
+import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
+
+import java.util.List;
+import java.util.Optional;
+
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-15 16:47
  **/
 public interface DataSourceRepo {
+
+    Page<DataSource> pagingDataSource(DataSourceCondition condition, PageParam pageParam);
+
+    List<DataSource> queryDataSource(DataSourceCondition condition, long limit, long offset);
+
+    long countDataSource(DataSourceCondition condition);
+
+    Optional<DataSource> queryDataSource(Long id);
+
+    Long createDataSource(DataSource source);
+
+    boolean updateDataSource(DataSource source);
+
+    boolean deleteDataSource(Long id, String operator);
+
 }

@@ -15,54 +15,31 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.datasource.bean.condition;
+package cn.zhengcaiyun.idata.datasource.manager;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * @description: 数据源
+ * @description:
  * @author: yangjianhua
- * @create: 2021-09-15 16:07
+ * @create: 2021-09-16 11:06
  **/
-public class DataSourceCondition {
+@Component
+public class DataSourceManager {
 
-    /**
-     * 数据源类型
-     */
-    private DataSourceTypeEnum type;
+    private final MetadataQueryApi metadataQueryApi;
 
-    /**
-     * 数据源名称
-     */
-    private String name;
-
-    /**
-     * 环境
-     */
-    private EnvEnum env;
-
-    public DataSourceTypeEnum getType() {
-        return type;
+    @Autowired
+    public DataSourceManager(MetadataQueryApi metadataQueryApi) {
+        this.metadataQueryApi = metadataQueryApi;
     }
 
-    public void setType(DataSourceTypeEnum type) {
-        this.type = type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public EnvEnum getEnv() {
-        return env;
-    }
-
-    public void setEnv(EnvEnum env) {
-        this.env = env;
+    public Boolean testConnectionWithJDBC(DataSourceTypeEnum dataSourceType, DbConfigDto dto) {
+        return metadataQueryApi.testConnection(dataSourceType, dto.getHost(), dto.getPort(), dto.getUsername(), dto.getPassword(),
+                dto.getDbName(), dto.getSchema());
     }
 }

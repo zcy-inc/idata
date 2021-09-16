@@ -17,10 +17,30 @@
 
 package cn.zhengcaiyun.idata.datasource.service;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-15 16:47
  **/
 public interface DataSourceService {
+
+    Page<DataSourceDto> pagingDataSource(DataSourceCondition condition, PageParam pageParam);
+
+    DataSourceDto getDataSource(Long id);
+
+    DataSourceDto addDataSource(DataSourceDto dto, Operator operator);
+
+    DataSourceDto editDataSource(DataSourceDto dto, Operator operator);
+
+    Boolean removeDataSource(Long id, Operator operator);
+
+    Boolean testConnection(DataSourceTypeEnum dataSourceType, DbConfigDto dto);
 }

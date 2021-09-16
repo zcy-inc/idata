@@ -17,11 +17,14 @@
 
 package cn.zhengcaiyun.idata.portal.controller.das;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
-import cn.zhengcaiyun.idata.datasource.constant.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -67,10 +70,10 @@ public class DataSourceController {
      * @return
      */
     @GetMapping("/datasources")
-    public RestResult<List<DataSourceDto>> pagingDataSource(DataSourceCondition condition,
+    public RestResult<Page<DataSourceDto>> pagingDataSource(DataSourceCondition condition,
                                                             @RequestParam(value = "limit") Long limit,
                                                             @RequestParam(value = "offset") Long offset) {
-        return RestResult.success();
+        return RestResult.success(dataSourceService.pagingDataSource(condition, PageParam.of(limit, offset)));
     }
 
     /**
@@ -81,7 +84,7 @@ public class DataSourceController {
      */
     @PostMapping("/datasources")
     public RestResult<DataSourceDto> addDataSource(@RequestBody DataSourceDto dto) {
-        return RestResult.success();
+        return RestResult.success(dataSourceService.addDataSource(dto, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -92,7 +95,7 @@ public class DataSourceController {
      */
     @PutMapping("/datasources")
     public RestResult<DataSourceDto> editDataSource(@RequestBody DataSourceDto dto) {
-        return RestResult.success();
+        return RestResult.success(dataSourceService.editDataSource(dto, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -102,8 +105,8 @@ public class DataSourceController {
      * @return
      */
     @GetMapping("/datasources/{id}")
-    public RestResult<List<DataSourceDto>> getDataSource(@PathVariable("id") Long id) {
-        return RestResult.success();
+    public RestResult<DataSourceDto> getDataSource(@PathVariable("id") Long id) {
+        return RestResult.success(dataSourceService.getDataSource(id));
     }
 
     /**
@@ -114,7 +117,7 @@ public class DataSourceController {
      */
     @DeleteMapping("/datasources/{id}")
     public RestResult<Boolean> deleteDataSource(@PathVariable("id") Long id) {
-        return RestResult.success();
+        return RestResult.success(dataSourceService.removeDataSource(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -124,7 +127,7 @@ public class DataSourceController {
      * @return
      */
     @PostMapping("/datasources/test")
-    public RestResult<Boolean> testDataSource(@RequestBody DbConfigDto dto) {
-        return RestResult.success();
+    public RestResult<Boolean> testConnection(@RequestBody DbConfigDto dto, DataSourceTypeEnum dataSourceType) {
+        return RestResult.success(dataSourceService.testConnection(dataSourceType, dto));
     }
 }

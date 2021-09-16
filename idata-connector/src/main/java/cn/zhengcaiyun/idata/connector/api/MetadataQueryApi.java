@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.connector.api;
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 
 /**
@@ -27,4 +28,7 @@ import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 public interface MetadataQueryApi {
 
     TableTechInfoDto getTableTechInfo(String db, String table);
+
+    Boolean testConnection(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
+                           String dbName, String schema);
 }

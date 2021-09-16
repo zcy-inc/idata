@@ -15,8 +15,15 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.datasource.constant.enums;
+package cn.zhengcaiyun.idata.commons.enums;
 
+
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @description: 数据源类型
@@ -33,4 +40,16 @@ public enum DataSourceTypeEnum {
     elasticsearch,
     csv,
     ;
+
+    private static final Map<String, DataSourceTypeEnum> map = Maps.newHashMap();
+
+    static {
+        Arrays.stream(DataSourceTypeEnum.values())
+                .forEach(enumObj -> map.put(enumObj.name(), enumObj));
+    }
+
+    public static Optional<DataSourceTypeEnum> getEnum(String enumName) {
+        if (StringUtils.isEmpty(enumName)) return Optional.empty();
+        return Optional.ofNullable(map.get(enumName));
+    }
 }

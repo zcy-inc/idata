@@ -16,6 +16,8 @@
  */
 package cn.zhengcaiyun.idata.commons.dto;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -84,6 +86,11 @@ public class BaseDto {
 
     public void setEditTime(Date editTime) {
         this.editTime = editTime;
+    }
+
+    public void setOperator(Operator operator) {
+        this.creator = operator.getNickname();
+        this.editor = operator.getNickname();
     }
 
     @Override

@@ -18,6 +18,13 @@
 package cn.zhengcaiyun.idata.commons.enums;
 
 
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * @description: 环境类型
  * @author: yangjianhua
@@ -27,4 +34,16 @@ public enum EnvEnum {
     stag,
     prod,
     ;
+
+    private static final Map<String, EnvEnum> map = Maps.newHashMap();
+
+    static {
+        Arrays.stream(EnvEnum.values())
+                .forEach(enumObj -> map.put(enumObj.name(), enumObj));
+    }
+
+    public static Optional<EnvEnum> getEnum(String enumName) {
+        if (StringUtils.isEmpty(enumName)) return Optional.empty();
+        return Optional.ofNullable(map.get(enumName));
+    }
 }

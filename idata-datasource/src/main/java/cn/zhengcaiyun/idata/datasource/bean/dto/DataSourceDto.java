@@ -18,10 +18,18 @@
 package cn.zhengcaiyun.idata.datasource.bean.dto;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
-import cn.zhengcaiyun.idata.datasource.constant.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @description: 数据源
@@ -107,4 +115,36 @@ public class DataSourceDto extends BaseDto {
     public void setDbConfigList(List<DbConfigDto> dbConfigList) {
         this.dbConfigList = dbConfigList;
     }
+
+    public static DataSourceDto from(DataSource dataSource) {
+        DataSourceDto dto = new DataSourceDto();
+        BeanUtils.copyProperties(dataSource, dto);
+
+        if (StringUtils.isNotBlank(dataSource.getEnvironments())) {
+            String[] envArray = dataSource.getEnvironments().split(",");
+            dto.setEnvList(Arrays.stream(envArray)
+                    .map(EnvEnum::getEnum)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get).collect(Collectors.toList()));
+        }
+        if (StringUtils.isNotBlank(dataSource.getDbConfigs())) {
+            dto.setDbConfigList(JSON.parseArray(dataSource.getDbConfigs(), DbConfigDto.class));
+        }
+        return dto;
+    }
+
+    public DataSource toModel() {
+        DataSource source = new DataSource();
+        BeanUtils.copyProperties(this, source);
+        if (ObjectUtils.isNotEmpty(envList)) {
+            source.setEnvironments(envList.stream()
+                    .map(Enum::name)
+                    .collect(Collectors.joining(",")));
+        }
+        if (ObjectUtils.isNotEmpty(dbConfigList)) {
+            source.setDbConfigs(JSON.toJSONString(dbConfigList));
+        }
+        return source;
+    }
+
 }

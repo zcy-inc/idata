@@ -38,6 +38,13 @@ public class Page<T> {
         return p;
     }
 
+    public static <T> Page<T> empty() {
+        Page<T> p = new Page<>();
+        p.setContent(null);
+        p.setTotal(0);
+        return p;
+    }
+
     public static int limitCheck(Integer limit) {
         return limit != null &&  limit >= 0 && limit <= PAGE_SIZE_LIMIT
                 ? limit : Page.PAGE_SIZE_LIMIT;

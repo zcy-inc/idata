@@ -17,12 +17,98 @@
 
 package cn.zhengcaiyun.idata.datasource.dal.repo.impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
+import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDao;
+import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.datasource.dal.repo.DataSourceRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
+import static cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDynamicSqlSupport.dataSource;
+import static java.util.Objects.nonNull;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-15 16:47
  **/
+@Repository
 public class DataSourceRepoImpl implements DataSourceRepo {
+
+    private final DataSourceDao dataSourceDao;
+
+    @Autowired
+    public DataSourceRepoImpl(DataSourceDao dataSourceDao) {
+        this.dataSourceDao = dataSourceDao;
+    }
+
+    @Override
+    public Page<DataSource> pagingDataSource(DataSourceCondition condition, PageParam pageParam) {
+        long total = countDataSource(condition);
+        List<DataSource> dataSources = null;
+        if (total > 0) {
+            dataSources = queryDataSource(condition, pageParam.getLimit(), pageParam.getLimit());
+        }
+        return Page.newOne(dataSources, total);
+    }
+
+    @Override
+    public List<DataSource> queryDataSource(DataSourceCondition condition, long limit, long offset) {
+        String type = nonNull(condition.getType()) ? condition.getType().name() : null;
+        String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
+        return dataSourceDao.select(dsl -> dsl.where(
+                                dataSource.type, isEqualToWhenPresent(type),
+                                and(dataSource.environments, isLikeWhenPresent(env)),
+                                and(dataSource.name, isLikeWhenPresent(condition.getName())),
+                                and(dataSource.del, isEqualTo(DEL_NO.val))
+                        ).orderBy(dataSource.id.descending())
+                        .limit(limit).offset(offset)
+        );
+    }
+
+    @Override
+    public long countDataSource(DataSourceCondition condition) {
+        String type = nonNull(condition.getType()) ? condition.getType().name() : null;
+        String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
+        return dataSourceDao.count(dsl -> dsl.where(
+                dataSource.type, isEqualToWhenPresent(type),
+                and(dataSource.environments, isLikeWhenPresent(env)),
+                and(dataSource.name, isLikeWhenPresent(condition.getName())),
+                and(dataSource.del, isEqualTo(DEL_NO.val))
+        ));
+    }
+
+    @Override
+    public Optional<DataSource> queryDataSource(Long id) {
+        return dataSourceDao.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public Long createDataSource(DataSource source) {
+        int ret = dataSourceDao.insertSelective(source);
+        if (ret <= 0) return null;
+        return source.getId();
+    }
+
+    @Override
+    public boolean updateDataSource(DataSource source) {
+        int ret = dataSourceDao.updateByPrimaryKeySelective(source);
+        return ret > 0;
+    }
+
+    @Override
+    public boolean deleteDataSource(Long id, String operator) {
+        int ret = dataSourceDao.update(dsl -> dsl.set(dataSource.del).equalTo(DEL_YES.val)
+                .set(dataSource.editor).equalTo(operator)
+                .where(dataSource.id, isEqualTo(id)));
+        return ret > 0;
+    }
 }

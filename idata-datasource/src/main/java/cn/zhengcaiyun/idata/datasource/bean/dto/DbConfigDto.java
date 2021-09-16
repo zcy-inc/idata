@@ -32,15 +32,15 @@ public class DbConfigDto {
     /**
      * 数据库名
      */
-    private String db_name;
+    private String dbName;
     /**
      * 数据库账号
      */
-    private String db_username;
+    private String username;
     /**
      * 数据库密码
      */
-    private String db_password;
+    private String password;
     /**
      * 数据库连接地址
      */
@@ -48,9 +48,65 @@ public class DbConfigDto {
     /**
      * 数据库连接端口
      */
-    private String port;
+    private Integer port;
     /**
      * 目录
      */
     private String schema;
+
+    public EnvEnum getEnv() {
+        return env;
+    }
+
+    public void setEnv(EnvEnum env) {
+        this.env = env;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
 }
