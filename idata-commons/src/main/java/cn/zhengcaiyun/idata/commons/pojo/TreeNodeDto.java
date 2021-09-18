@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.commons.pojo;
 
 import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -33,21 +34,17 @@ import java.util.List;
  **/
 public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
     /**
-     * 节点唯一标识，生成方式为：type + "_" + id.toString()，如type为空，则直接为id.toString()
+     * 节点唯一标识，生成方式为：type + belong + id
      */
     private String cid;
+    /**
+     * 父节点cid
+     */
+    private String parentCid;
     /**
      * 节点业务标识，不同类型节点的id可重复，相同类型节点id不可重复
      */
     private T id;
-    /**
-     * 父节点标识
-     */
-    private T parentId;
-    /**
-     * 子节点列表
-     */
-    private List<N> children;
     /**
      * 节点名称
      */
@@ -56,10 +53,18 @@ public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
      * 节点类型，如所有节点类型都相同，type可以为空
      */
     private String type;
-
-    public String getCid() {
-        return type == null ? id.toString() : type + "_" + id.toString();
-    }
+    /**
+     * 文件夹所属业务功能
+     */
+    private String belong;
+    /**
+     * 父节点标识
+     */
+    private T parentId;
+    /**
+     * 子节点列表
+     */
+    private List<N> children;
 
     public T getId() {
         return id;
@@ -102,6 +107,33 @@ public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
         this.name = name;
     }
 
+    public String getBelong() {
+        return belong;
+    }
+
+    public void setBelong(String belong) {
+        this.belong = belong;
+    }
+
+    public String getCid() {
+        if (StringUtils.isEmpty(this.cid)) {
+            this.cid = assembleCid(this.type, this.belong, this.id.toString());
+        }
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
+    public String getParentCid() {
+        return parentCid;
+    }
+
+    public void setParentCid(String parentCid) {
+        this.parentCid = parentCid;
+    }
+
     /**
      * 部分类型的节点不能有子节点，如文件夹节点可以有子节点，但文件夹下的具体业务节点（如：数据标签节点）不能有子节点
      * 由具体业务节点实现
@@ -109,4 +141,16 @@ public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
      * @return
      */
     public abstract boolean canHasChildren();
+
+    public static final String assembleCid(String type, String belong, String id) {
+        // 生成方式为：type + belong + id
+        String cidPrefix = "";
+        if (StringUtils.isNotEmpty(type)) {
+            cidPrefix += type + "_";
+        }
+        if (StringUtils.isNotEmpty(type)) {
+            cidPrefix += belong + "_";
+        }
+        return cidPrefix + id;
+    }
 }

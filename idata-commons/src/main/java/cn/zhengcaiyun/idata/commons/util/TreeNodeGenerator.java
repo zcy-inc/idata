@@ -74,19 +74,27 @@ public class TreeNodeGenerator<N extends TreeNodeDto> {
         expandedNodes.stream().forEach(nodeDto -> treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto));
 
         int curLevel = 1;
-        List<N> treeList = makeTree(parentIdProvider.get(), treeListMultimap, curLevel, maxLevel);
+        List<N> treeList = makeTree(parentIdProvider.get(), null, treeListMultimap, curLevel, maxLevel);
         return treeList == null ? Lists.newArrayList() : treeList;
     }
 
-    private List<N> makeTree(String parentId, ListMultimap<String, N> listMultimap, int curLevel, final Integer maxLevel) {
+    private List<N> makeTree(String parentId, N parentNode, ListMultimap<String, N> listMultimap, int curLevel, final Integer maxLevel) {
         if (Objects.nonNull(maxLevel) && curLevel > maxLevel) {
             return null;
         }
         List<N> nodeDtoList = listMultimap.get(parentId);
         if (CollectionUtils.isEmpty(nodeDtoList)) return null;
 
+        String parentCid;
+        if (Objects.isNull(parentNode)) {
+            // 最上层节点没有 parentNode，特殊处理生成 parentCid
+            parentCid = "##top##node_" + parentId;
+        } else {
+            parentCid = parentNode.getCid();
+        }
         for (N nodeDto : nodeDtoList) {
-            nodeDto.setChildren(makeTree(nodeDto.getId().toString(), listMultimap, curLevel + 1, maxLevel));
+            nodeDto.setParentCid(parentCid);
+            nodeDto.setChildren(makeTree(nodeDto.getId().toString(), nodeDto, listMultimap, curLevel + 1, maxLevel));
         }
         return nodeDtoList;
     }

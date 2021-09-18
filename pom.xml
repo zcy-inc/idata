@@ -63,6 +63,7 @@
         <hive-jdbc.version>2.1.1</hive-jdbc.version>
         <antlr.version>4.7.2</antlr.version>
         <postgresql.version>42.2.10</postgresql.version>
+        <caffeine.version>2.9.1</caffeine.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -130,6 +131,11 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
 
         </dependencies>

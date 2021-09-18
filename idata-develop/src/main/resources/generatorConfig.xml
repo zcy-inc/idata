@@ -12,47 +12,23 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model" targetProject="src/main/java"/>
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao" targetProject="src/main/java"/>
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.folder" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.folder" targetProject="src/main/java"/>
 
-        <table tableName="dev_folder" mapperName="DevFolderDao">
+<!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="label_required" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="label_attributes" javaType="java.util.List"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--            <columnOverride column="special_attribute" javaType="cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
+
+        <table tableName="dev_composite_folder" domainObjectName="CompositeFolder" mapperName="CompositeFolderDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
-        <table tableName="dev_table_info" mapperName="DevTableInfoDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_column_info" mapperName="DevColumnInfoDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="label_required" javaType="java.lang.Integer"/>
-            <columnOverride column="label_attributes" javaType="java.util.List"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-            <columnOverride column="special_attribute" javaType="cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-        </table>
-        <table tableName="dev_label" mapperName="DevLabelDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_enum" mapperName="DevEnumDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_enum_value" mapperName="DevEnumValueDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="enum_attributes" javaType="java.util.List"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-        </table>
-        <table tableName="dev_foreign_key" mapperName="DevForeignKeyDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
+
     </context>
 </generatorConfiguration>
