@@ -43,4 +43,9 @@ public class DesignEnumTreeNodeSupplier implements BizTreeNodeSupplier {
     public List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum) {
         return null;
     }
+
+    @Override
+    public Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId) {
+        return Long.MAX_VALUE;
+    }
 }

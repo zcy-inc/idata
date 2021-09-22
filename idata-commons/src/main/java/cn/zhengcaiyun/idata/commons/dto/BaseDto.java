@@ -93,6 +93,10 @@ public class BaseDto {
         this.editor = operator.getNickname();
     }
 
+    public void resetEditor(Operator operator) {
+        this.editor = operator.getNickname();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

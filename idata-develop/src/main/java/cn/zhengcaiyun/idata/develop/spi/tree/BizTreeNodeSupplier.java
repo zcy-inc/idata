@@ -28,5 +28,8 @@ import java.util.List;
  * @create: 2021-09-18 14:20
  **/
 public interface BizTreeNodeSupplier {
+
     List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum);
+
+    Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId);
 }

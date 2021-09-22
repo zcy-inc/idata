@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
@@ -36,5 +37,19 @@ public interface CompositeFolderRepo {
     List<CompositeFolder> queryAllFolder();
 
     List<CompositeFolder> queryFolder(FunctionModuleEnum moduleEnum);
+
+    List<CompositeFolder> querySubFolder(Long parentId);
+
+    Long createFolder(CompositeFolder folder);
+
+    Boolean updateFolder(CompositeFolder folder);
+
+    Boolean deleteFolder(Long id, String operator);
+
+    Optional<CompositeFolder> queryFolder(Long id);
+
+    Optional<CompositeFolder> queryFolder(String name, Long parentId);
+
+    Optional<CompositeFolder> queryFolder(String name, FunctionModuleEnum moduleEnum);
 
 }

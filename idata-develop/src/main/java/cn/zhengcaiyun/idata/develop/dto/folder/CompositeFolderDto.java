@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.folder;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @description: 复合文件夹
@@ -71,5 +73,17 @@ public class CompositeFolderDto extends BaseDto {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public static CompositeFolderDto from(CompositeFolder folder) {
+        CompositeFolderDto dto = new CompositeFolderDto();
+        BeanUtils.copyProperties(folder, dto);
+        return dto;
+    }
+
+    public CompositeFolder toModel() {
+        CompositeFolder folder = new CompositeFolder();
+        BeanUtils.copyProperties(this, folder);
+        return folder;
     }
 }

@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderDynamicSqlSupport.compositeFolder;
 import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
@@ -59,19 +61,73 @@ public class CompositeFolderRepoImpl implements CompositeFolderRepo {
 
     @Override
     public List<CompositeFolder> queryAllFolder() {
-        return compositeFolderDao.select(dsl -> dsl.where(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)));
+        return compositeFolderDao.select(dsl -> dsl.where(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val))
+                .orderBy(compositeFolder.id.descending()));
     }
 
     @Override
     public List<CompositeFolder> queryFolder(FunctionModuleEnum moduleEnum) {
         return compositeFolderDao.select(dsl -> dsl.where(
-                compositeFolder.belong, isEqualTo(moduleEnum.name()),
-                and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+                        compositeFolder.belong, isEqualTo(moduleEnum.name()),
+                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(compositeFolder.id.descending()));
+    }
+
+    @Override
+    public List<CompositeFolder> querySubFolder(Long parentId) {
+        return compositeFolderDao.select(dsl -> dsl.where(compositeFolder.parentId, isEqualTo(parentId),
+                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(compositeFolder.id.descending()));
+    }
+
+    @Override
+    public Long createFolder(CompositeFolder folder) {
+        int ret = compositeFolderDao.insertSelective(folder);
+        if (ret <= 0) return null;
+        return folder.getId();
+    }
+
+    @Override
+    public Boolean updateFolder(CompositeFolder folder) {
+        int ret = compositeFolderDao.updateByPrimaryKeySelective(folder);
+        return ret > 0;
+    }
+
+    @Override
+    public Boolean deleteFolder(Long id, String operator) {
+        int ret = compositeFolderDao.update(dsl -> dsl.set(compositeFolder.del).equalTo(DEL_YES.val)
+                .set(compositeFolder.editor).equalTo(operator)
+                .where(compositeFolder.id, isEqualTo(id)));
+        return ret > 0;
+    }
+
+    @Override
+    public Optional<CompositeFolder> queryFolder(Long id) {
+        return compositeFolderDao.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public Optional<CompositeFolder> queryFolder(String name, Long parentId) {
+        return compositeFolderDao.selectOne(dsl -> dsl.where(compositeFolder.name, isEqualTo(name),
+                        and(compositeFolder.parentId, isEqualTo(parentId)),
+                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(compositeFolder.id.descending())
+                .limit(1));
+    }
+
+    @Override
+    public Optional<CompositeFolder> queryFolder(String name, FunctionModuleEnum moduleEnum) {
+        return compositeFolderDao.selectOne(dsl -> dsl.where(compositeFolder.name, isEqualTo(name),
+                        and(compositeFolder.belong, isEqualTo(moduleEnum.name())),
+                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(compositeFolder.id.descending())
+                .limit(1));
     }
 
     private List<CompositeFolder> queryGeneralFolder(FolderTypeEnum typeEnum) {
         return compositeFolderDao.select(dsl -> dsl.where(
-                compositeFolder.type, isEqualTo(typeEnum.name()),
-                and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+                        compositeFolder.type, isEqualTo(typeEnum.name()),
+                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(compositeFolder.id.descending()));
     }
 }
