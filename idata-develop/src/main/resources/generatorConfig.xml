@@ -25,7 +25,11 @@
 <!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
 <!--        </table>-->
 
-        <table tableName="dev_composite_folder" domainObjectName="CompositeFolder" mapperName="CompositeFolderDao">
+        <table tableName="dev_dag_info" domainObjectName="DAGInfo" mapperName="DAGInfoDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="dev_dag_schedule" domainObjectName="DAGSchedule" mapperName="DAGScheduleDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>

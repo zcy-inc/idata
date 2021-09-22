@@ -53,7 +53,7 @@ public class CompositeFolderController {
      * @return
      */
     @PostMapping("/tree")
-    RestResult<List<DevTreeNodeDto>> searchDevTree(@RequestBody DevTreeCondition condition) {
+    public RestResult<List<DevTreeNodeDto>> searchDevTree(@RequestBody DevTreeCondition condition) {
         return RestResult.success(compositeFolderService.searchDevTree(condition));
     }
 
@@ -63,7 +63,7 @@ public class CompositeFolderController {
      * @return
      */
     @GetMapping("/functions/tree")
-    RestResult<List<DevTreeNodeDto>> getFunctionTree() {
+    public RestResult<List<DevTreeNodeDto>> getFunctionTree() {
         return RestResult.success(compositeFolderService.getFunctionTree());
     }
 
