@@ -21,18 +21,27 @@ import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
+import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
+import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
+import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
+import cn.zhengcaiyun.idata.connector.util.CreateTableListener;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
+import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.service.table.MetabaseService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
-import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import com.jayway.jsonpath.internal.function.ParamType;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +49,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -87,6 +98,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private MetabaseService metabaseService;
     @Autowired
     private DevTreeNodeLocalCache devTreeNodeLocalCache;
+    @Autowired
+    private EnumService enumService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -100,37 +113,11 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_TYPE_LABEL = "columnType:LABEL";
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
+    private final String COLUMN_PK_LABEL = "pk:LABEL";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
-        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
-                and(devTableInfo.del, isNotEqualTo(1))))
-                .orElseThrow(() -> new IllegalArgumentException("表不存在"));
-        TableInfoDto echoTableInfo = PojoUtil.copyOne(tableInfo, TableInfoDto.class, tableInfoFields);
-
-        List<DevForeignKey> foreignKeyList = devForeignKeyDao.selectMany(
-                select(devForeignKey.allColumns()).from(devForeignKey)
-                        .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
-                .build().render(RenderingStrategies.MYBATIS3));
-        List<ForeignKeyDto> foreignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, foreignKeyFields);
-        foreignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
-                foreignKeyDto.setReferTableName(devTableInfoDao.selectOne(c ->
-                c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id,
-                        isEqualTo(foreignKeyDto.getReferTableId())))).get().getTableName());
-                foreignKeyDto.setReferDbName(getDbName(tableId));
-                return foreignKeyDto;
-        }).collect(Collectors.toList());
-        List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
-        List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
-
-        echoTableInfo.setTableLabels(tableLabelList);
-        echoTableInfo.setColumnInfos(columnInfoDtoList);
-        echoTableInfo.setForeignKeys(foreignKeyDtoList);
-        echoTableInfo.setDbName(tableLabelList
-                .stream().filter(tableLabel -> DB_NAME_LABEL.equals(tableLabel.getLabelCode()))
-                .findAny().get().getLabelParamValue());
-
-        return echoTableInfo;
+        return getTableInfoById(tableId);
     }
 
     @Override
@@ -216,6 +203,41 @@ public class TableInfoServiceImpl implements TableInfoService {
         ddl.append("stored as orc \n");
         ddl.append(String.format("location 'hdfs://nameservice1/hive/%s.db/%s' \n", tableDbName, tableInfo.getTableName()));
         return ddl.toString();
+    }
+
+    @Override
+    public TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto) {
+        checkArgument(tableDdlDto.getTableId() != null, "tableId不能为空");
+        checkArgument(isNotEmpty(tableDdlDto.getTableDdl()), "ddl不能为空");
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.id, isEqualTo(tableDdlDto.getTableId())))).orElse(null);
+        checkArgument(tableInfo != null, "表id不存在");
+
+        // 表相关
+        Map<String, Object> tableInfoMap = getCreateTableInfo(tableDdlDto.getTableDdl());
+        TableInfoDto existTableInfo = getTableInfo(tableDdlDto.getTableId());
+        TableInfoDto echo = PojoUtil.copyOne(existTableInfo);
+        checkArgument(tableInfoMap.containsKey("tblName"), "DDL表名解析失败");
+        echo.setTableName((String) tableInfoMap.get("tblName"));
+        if (tableInfoMap.get("dbName") != null) {
+            echo.getTableLabels().forEach(tableLabel -> {
+                if (DB_NAME_LABEL.equals(tableLabel.getLabelCode())) {
+                    tableLabel.setLabelParamValue((String) tableInfoMap.get("dbName"));
+                }
+            });
+        }
+        if (tableInfoMap.get("tblComment") != null) {
+            echo.getTableLabels().forEach(tableLabel -> {
+                if (TABLE_COMMENT_LABEL.equals(tableLabel.getLabelCode())) {
+                    tableLabel.setLabelParamValue((String) tableInfoMap.get("tblComment"));
+                }
+            });
+        }
+        // 字段相关
+        List<ColumnInfoDto> ddlColumnInfoList = getColumnInfosByDdl(tableInfoMap, existTableInfo.getColumnInfos(), tableDdlDto.getTableId());
+        echo.setColumnInfos(ddlColumnInfoList);
+
+        return echo;
     }
 
     @Override
@@ -320,7 +342,12 @@ public class TableInfoServiceImpl implements TableInfoService {
         // 字段表相关操作
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                 ? tableInfoDto.getColumnInfos() : null;
-        if (columnInfoDtoList != null) {
+        if (columnInfoDtoList == null) {
+            List<Long> existColumnIdList = columnInfoService.getColumns(tableInfoDto.getId())
+                    .stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
+            existColumnIdList.forEach(columnId -> columnInfoService.delete(columnId, operator));
+        }
+        else {
             List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
                     tableInfo.getId(), columnNameList, operator);
@@ -451,11 +478,148 @@ public class TableInfoServiceImpl implements TableInfoService {
         return metadataQueryApi.getTableTechInfo(getDbName(tableId), tableInfo.getTableName());
     }
 
+    private TableInfoDto getTableInfoById(Long tableId) {
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
+                and(devTableInfo.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("表不存在"));
+        TableInfoDto echoTableInfo = PojoUtil.copyOne(tableInfo, TableInfoDto.class, tableInfoFields);
+
+        List<DevForeignKey> foreignKeyList = devForeignKeyDao.selectMany(
+                select(devForeignKey.allColumns()).from(devForeignKey)
+                        .where(devForeignKey.del, isNotEqualTo(1), and(devForeignKey.tableId, isEqualTo(tableId)))
+                        .build().render(RenderingStrategies.MYBATIS3));
+        List<ForeignKeyDto> foreignKeyDtoList = PojoUtil.copyList(foreignKeyList, ForeignKeyDto.class, foreignKeyFields);
+        foreignKeyDtoList = foreignKeyDtoList.stream().map(foreignKeyDto -> {
+            foreignKeyDto.setReferTableName(devTableInfoDao.selectOne(c ->
+                    c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id,
+                            isEqualTo(foreignKeyDto.getReferTableId())))).get().getTableName());
+            foreignKeyDto.setReferDbName(getDbName(tableId));
+            return foreignKeyDto;
+        }).collect(Collectors.toList());
+        List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
+        List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
+
+        echoTableInfo.setTableLabels(tableLabelList);
+        echoTableInfo.setColumnInfos(columnInfoDtoList);
+        echoTableInfo.setForeignKeys(foreignKeyDtoList);
+        echoTableInfo.setDbName(tableLabelList
+                .stream().filter(tableLabel -> DB_NAME_LABEL.equals(tableLabel.getLabelCode()))
+                .findAny().get().getLabelParamValue());
+        return echoTableInfo;
+    }
+
     private String getDbName(Long tableId) {
         return devLabelDao.selectOne(c -> c
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.tableId, isEqualTo(tableId))))
                 .get().getLabelParamValue();
+    }
+
+    private static Map<String, Object> getCreateTableInfo(String sql) {
+        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(sql), true));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SparkSqlParser parser = new SparkSqlParser(tokenStream);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        CreateTableListener listener = new CreateTableListener();
+        walker.walk(listener, parser.statement());
+        return listener.tableInfoMap;
+    }
+
+    private List<ColumnInfoDto> getColumnInfosByDdl(Map<String, Object> tableInfoMap,
+                                                    List<ColumnInfoDto> existColumnInfoList, Long tableId) {
+        List<ColumnInfoDto> echoColumnInfoList = new ArrayList<>();
+        Map<String, ColumnInfoDto> existColumnInfoMap = existColumnInfoList.size() > 0 ?
+                existColumnInfoList.stream().collect(Collectors.toMap(ColumnInfoDto::getColumnName, Function.identity()))
+                : new HashMap<>();
+        Map<String, String> hiveColumnTypeMap = enumService.getEnumValues(COLUMN_TYPE_ENUM)
+                .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
+        List<Map<String, String>> tableInfoColumnList = new ArrayList<>();
+        List<String> partitionColumnList = (tableInfoMap.get("partitionColumns")) != null ?
+                ((List<Map<String, String>>) tableInfoMap.get("partitionColumns")).stream()
+                .map(columnMap -> columnMap.get("colName")).collect(Collectors.toList()) : new ArrayList<>();
+        if (tableInfoMap.get("partitionColumns") != null) {
+            tableInfoColumnList.addAll((List<Map<String, String>>) tableInfoMap.get("partitionColumns"));
+        }
+        if (tableInfoMap.get("columns") != null) {
+            tableInfoColumnList.addAll((List<Map<String, String>>) tableInfoMap.get("columns"));
+        }
+        if (tableInfoColumnList.size() > 0) {
+            tableInfoColumnList.stream().forEach(columnMap -> {
+                checkColumn(columnMap.get("colName"), columnMap.get("colType"));
+                ColumnInfoDto columnInfoDto;
+                if (existColumnInfoMap.containsKey(columnMap.get("colName"))) {
+                    columnInfoDto = existColumnInfoMap.get(columnMap.get("colName"));
+                    columnInfoDto.getColumnLabels().forEach(columnLabel -> {
+                        if (COLUMN_TYPE_LABEL.equals(columnLabel.getLabelCode())) {
+                            columnLabel.setLabelParamValue(hiveColumnTypeMap.get(columnMap.get("colType")));
+                        }
+                        if (COLUMN_COMMENT_LABEL.equals(columnLabel.getLabelCode())) {
+                            columnLabel.setLabelParamValue(columnMap.get("colComment"));
+                        }
+                        if (COLUMN_PT_LABEL.equals(columnLabel.getLabelCode())) {
+                            if (partitionColumnList.contains(columnMap.get("colName"))) {
+                                columnLabel.setLabelParamValue(String.valueOf(true));
+                            }
+                            else {
+                                columnLabel.setLabelParamValue(String.valueOf(false));
+                            }
+                        }
+                    });
+                } else {
+                    columnInfoDto = new ColumnInfoDto();
+                    columnInfoDto.setTableId(tableId);
+                    columnInfoDto.setColumnName(columnMap.get("colName"));
+                    List<LabelDto> columnLabelList = new ArrayList<>();
+                    for (Map.Entry<String, String> entry : columnMap.entrySet()) {
+                        LabelDto columnLabel = new LabelDto();
+                        columnLabel.setColumnName(columnMap.get("colName"));
+                        columnLabel.setTableId(tableId);
+                        if ("colComment".equals(entry.getKey())) {
+                            columnLabel.setLabelTag(LabelTagEnum.STRING_LABEL.name());
+                            columnLabel.setLabelCode(COLUMN_COMMENT_LABEL);
+                            columnLabel.setLabelParamValue(columnMap.get("colComment"));
+                            columnLabel.setLabelParamType(MetaTypeEnum.STRING.name());
+                            columnLabelList.add(columnLabel);
+                        }
+                        if ("colType".equals(entry.getKey())) {
+                            columnLabel.setLabelTag(LabelTagEnum.ENUM_VALUE_LABEL.name());
+                            columnLabel.setLabelCode(COLUMN_TYPE_LABEL);
+                            columnLabel.setLabelParamValue(hiveColumnTypeMap.get(columnMap.get("colType")));
+                            columnLabel.setLabelParamType(COLUMN_TYPE_ENUM);
+                            columnLabelList.add(columnLabel);
+                        }
+                    }
+                    LabelDto partitionedLabel = new LabelDto();
+                    partitionedLabel.setColumnName(columnMap.get("colName"));
+                    partitionedLabel.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
+                    partitionedLabel.setLabelCode(COLUMN_PT_LABEL);
+                    partitionedLabel.setLabelParamValue(String.valueOf(partitionColumnList.contains(columnMap.get("colName"))));
+                    partitionedLabel.setLabelParamType(MetaTypeEnum.BOOLEAN.name());
+                    columnLabelList.add(partitionedLabel);
+                    LabelDto pkLabel = new LabelDto();
+                    pkLabel.setColumnName(columnMap.get("colName"));
+                    pkLabel.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
+                    pkLabel.setLabelCode(COLUMN_PK_LABEL);
+                    pkLabel.setLabelParamValue(String.valueOf(false));
+                    pkLabel.setLabelParamType(MetaTypeEnum.BOOLEAN.name());
+                    columnLabelList.add(pkLabel);
+                    columnInfoDto.setColumnLabels(columnLabelList);
+                }
+                echoColumnInfoList.add(columnInfoDto);
+            });
+        }
+        for (int i = 0; i < echoColumnInfoList.size(); i++) {
+            echoColumnInfoList.get(i).setColumnIndex(i);
+        }
+        return echoColumnInfoList;
+    }
+
+    private void checkColumn(String colName, String colType) {
+        checkArgument(isNotEmpty(colName), "字段名称不能为空");
+        checkArgument(isNotEmpty(colType), "字段类型不能为空");
+        List<String> hiveColumnTypeList = enumService.getEnumValues(COLUMN_TYPE_ENUM)
+                .stream().map(EnumValueDto::getEnumValue).collect(Collectors.toList());
+        checkArgument(hiveColumnTypeList.contains(colType), colName + "字段，" + colType + "暂不支持");
     }
 //
 //    private List<String> getAssetCatalogues(String assetCatalogueCode) {

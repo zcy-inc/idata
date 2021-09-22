@@ -59,6 +59,11 @@ public class MetricController {
         return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 
+    @GetMapping("metricSql")
+    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
+        return RestResult.success(metricService.getMetricSql(metricCode));
+    }
+
     @PostMapping("metric")
     public RestResult<MeasureDto> addOrUpdateMetric(@RequestBody MeasureDto metric,
                                                     HttpServletRequest request) {

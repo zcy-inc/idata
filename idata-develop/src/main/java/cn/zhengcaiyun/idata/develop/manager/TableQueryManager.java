@@ -27,16 +27,23 @@ import cn.zhengcaiyun.idata.connector.constant.enums.DataSourceEnum;
 import cn.zhengcaiyun.idata.connector.service.Query;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.query.TableDataQueryDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -56,14 +63,20 @@ public class TableQueryManager {
     private final SysConfigDao sysConfigDao;
     private final Query query;
     private final MetadataQueryApi metadataQueryApi;
+    private final TableInfoService tableInfoService;
+    private final ColumnInfoService columnInfoService;
 
     @Autowired
     public TableQueryManager(SysConfigDao sysConfigDao,
                              Query query,
-                             MetadataQueryApi metadataQueryApi) {
+                             MetadataQueryApi metadataQueryApi,
+                             TableInfoService tableInfoService,
+                             ColumnInfoService columnInfoService) {
         this.sysConfigDao = sysConfigDao;
         this.query = query;
         this.metadataQueryApi = metadataQueryApi;
+        this.tableInfoService = tableInfoService;
+        this.columnInfoService = columnInfoService;
     }
 
     public QueryResultDto queryData(TableDataQueryDto dataQueryDto) {
@@ -88,6 +101,17 @@ public class TableQueryManager {
         if (Objects.isNull(resultDto)) {
             return null;
         }
+        // add columnAlias
+        Map<String, Long> tableInfoMap = tableInfoService.getTablesByDataBase(dataQueryDto.getDbSchema().toLowerCase())
+                .stream().collect(Collectors.toMap(TableInfoDto::getTableName, TableInfoDto::getId));
+        checkArgument(tableInfoMap.containsKey(dataQueryDto.getTableName()), "数仓分层或表名有误");
+        Map<String, String> columnNameAliasMap = columnInfoService.getColumnDetails(tableInfoMap.get(dataQueryDto.getTableName()))
+                .stream().collect(Collectors.toMap(ColumnDetailsDto::getColumnName,
+                        columnDetails -> StringUtils.isNotEmpty(columnDetails.getColumnComment())
+                                ? columnDetails.getColumnComment() : columnDetails.getColumnName()));
+        resultDto.getMeta().forEach(columnInfoDto ->
+                columnInfoDto.setColumnAlias(columnNameAliasMap.containsKey(columnInfoDto.getColumnName())
+                        ? columnNameAliasMap.get(columnInfoDto.getColumnName()) : columnInfoDto.getColumnName()));
         return resultDto;
     }
 

@@ -14,25 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.measure;
-
-import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
-import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.table;
 
 /**
  * @author caizhedong
- * @date 2021-06-22 10:34
+ * @date 2021-10-25 下午7:44
  */
 
-public interface MetricService {
-    MetricDto findMetric(String metricCode);
-    List<MeasureDto> findMetrics(String labelTag);
-    List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag);
-    String getMetricSql(String metricCode);
-    MeasureDto create(MeasureDto metric, String operator);
-    MeasureDto edit(MeasureDto metric, String operator);
-    MeasureDto disableOrAble(String metricCode, String labelTag, String operator);
-    boolean delete(String metricCode, String operator);
+public class TableDdlDto {
+    private String tableDdl;
+    private Long tableId;
+
+    // GaS
+
+    public String getTableDdl() {
+        return tableDdl;
+    }
+
+    public void setTableDdl(String tableDdl) {
+        this.tableDdl = tableDdl;
+    }
+
+    public Long getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(Long tableId) {
+        this.tableId = tableId;
+    }
 }

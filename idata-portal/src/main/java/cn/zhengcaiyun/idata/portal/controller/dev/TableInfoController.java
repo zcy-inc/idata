@@ -27,15 +27,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
+import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -115,6 +112,11 @@ public class TableInfoController {
             echoTableInfo = tableInfoService.create(tableInfoDto, tokenService.getNickname(request));
         }
         return RestResult.success(echoTableInfo);
+    }
+
+    @PostMapping("ddl/syncTableInfo")
+    public RestResult<TableInfoDto> syncTableInfo(@RequestBody TableDdlDto tableDdlDto) {
+        return RestResult.success(tableInfoService.syncTableInfoByDDL(tableDdlDto));
     }
 
     @PostMapping("syncMetabaseInfo/{tableId}")

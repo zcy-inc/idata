@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.table;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public interface TableInfoService {
 //    List<TableInfoDto> getTablesByEnumValue(String enumValue);
     List<LabelDto> getDbNames();
     String getTableDDL(Long tableId);
+    TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto);
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
     TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
     boolean delete(Long tableId, String editor);

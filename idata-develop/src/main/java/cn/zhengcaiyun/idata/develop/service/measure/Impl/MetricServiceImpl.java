@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.constant.enums.AggregatorEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
@@ -33,6 +34,7 @@ import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,6 +152,60 @@ public class MetricServiceImpl implements MetricService {
             }
         }
         return echoMeasureList;
+    }
+
+    @Override
+    public String getMetricSql(String metricCode) {
+        DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElse(null);
+        if (metric == null) {
+            return null;
+        }
+
+        String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
+        String metricSql;
+        List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
+        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
+        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
+            if (ObjectUtils.isEmpty(metricLabelList)) {
+                return null;
+            }
+            String selectColSql = StringUtils.isEmpty(metric.getSpecialAttribute().getAggregatorCode())
+                    ? metricLabelList.get(0).getColumnName()
+                    : changeAggregate(metricLabelList.get(0).getColumnName(),
+                    metric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
+                    metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
+        }
+        else if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
+            DevLabelDefine atomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get();
+            List<LabelDto> atomicLabelList = labelService.findLabelsByCode(metric.getSpecialAttribute().getAtomicMetricCode());
+            List<ModifierDto> modifierList = modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId());
+            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
+                    ? atomicLabelList.get(0).getColumnName()
+                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
+                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, atomicMetric.getLabelName(),
+                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
+            if (modifierList != null && modifierList.size() > 0) {
+                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
+                        modifierList.get(0).getColumnName(),
+                        String.join(",", modifierList.get(0).getEnumValues())));
+                if (modifierList.size() > 1) {
+                    for (int i = 1; i < modifierList.size(); i++) {
+                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
+                                String.join(",", modifierList.get(i).getEnumValues())));
+                    }
+                }
+                metricSql += modifierSql;
+            }
+        }
+        else {
+            metricSql = metric.getSpecialAttribute().getComplexMetricFormula();
+        }
+        return metricSql;
     }
 
     @Override
@@ -402,5 +458,29 @@ public class MetricServiceImpl implements MetricService {
             }
         }
         return echoMetric;
+    }
+
+    private String changeAggregate(String columnName, String aggregator) {
+        AggregatorEnum aggregatorEnum = AggregatorEnum.valueOf(aggregator);
+        String aggregateSql;
+        if (AggregatorEnum.SUM.equals(aggregatorEnum)) {
+            aggregateSql = String.format("SUM(%s)", columnName);
+        }
+        else if (AggregatorEnum.AVG.equals(aggregatorEnum)) {
+            aggregateSql = String.format("AVG(%s)", columnName);
+        }
+        else if (AggregatorEnum.MAX.equals(aggregatorEnum)) {
+            aggregateSql = String.format("MAX(%s)", columnName);
+        }
+        else if (AggregatorEnum.MIN.equals(aggregatorEnum)) {
+            aggregateSql = String.format("MIN(%s)", columnName);
+        }
+        else if (AggregatorEnum.CNT.equals(aggregatorEnum)) {
+            aggregateSql = String.format("COUNT(%s)", columnName);
+        }
+        else {
+            aggregateSql = String.format("COUNT(DISTINCT(%s))", columnName);
+        }
+        return aggregateSql;
     }
 }

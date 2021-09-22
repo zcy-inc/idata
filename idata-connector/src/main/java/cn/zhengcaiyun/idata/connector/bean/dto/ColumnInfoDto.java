@@ -27,6 +27,10 @@ public class ColumnInfoDto {
      */
     private String columnName;
     /**
+     * 字段别名
+     */
+    private String columnAlias;
+    /**
      * 字段类型（数据库具体类型）
      */
     private String columnType;
@@ -45,6 +49,14 @@ public class ColumnInfoDto {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    public String getColumnAlias() {
+        return columnAlias;
+    }
+
+    public void setColumnAlias(String columnAlias) {
+        this.columnAlias = columnAlias;
     }
 
     public String getColumnType() {

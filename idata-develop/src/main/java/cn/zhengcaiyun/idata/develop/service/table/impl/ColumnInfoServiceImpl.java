@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
@@ -84,15 +85,21 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Override
     public List<ColumnInfoDto> getColumns(Long tableId) {
         List<ColumnInfoDto> echoList = new ArrayList<>();
-        List<DevColumnInfo> columnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
+        List<DevColumnInfo> devColumnInfoList = devColumnInfoDao.selectMany(select(devColumnInfo.allColumns())
                 .from(devColumnInfo)
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        if (columnInfoList.size() > 0) {
-            echoList = PojoUtil.copyList(columnInfoList, ColumnInfoDto.class, columnInfoFields);
-            List<String> columnNameList = echoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
+        if (devColumnInfoList.size() > 0) {
+            List<ColumnInfoDto> columnInfoList = PojoUtil.copyList(devColumnInfoList, ColumnInfoDto.class, columnInfoFields);
+            List<String> columnNameList = columnInfoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             Map<String, List<LabelDto>> columnInfoMap = labelService.findColumnLabelMap(tableId, columnNameList);
-            echoList = echoList.stream().peek(columnInfoDto ->
+            Map<Integer, ColumnInfoDto> columnIndexMap = columnInfoList
+                    .stream().collect(Collectors.toMap(ColumnInfoDto::getColumnIndex, Function.identity()));
+            List<ColumnInfoDto> indexColumnList = new ArrayList<>();
+            for (int i = 0; i < columnIndexMap.size(); i++) {
+                indexColumnList.add(columnIndexMap.get(i));
+            }
+            echoList = indexColumnList.stream().peek(columnInfoDto ->
                     columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
             ).collect(Collectors.toList());
         }
@@ -120,7 +127,13 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             columnInfoList = columnInfoList.stream().peek(columnInfoDto ->
                     columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
             ).collect(Collectors.toList());
-            echoList = columnInfoList.stream().map(columnInfo -> {
+            Map<Integer, ColumnInfoDto> columnIndexMap = columnInfoList
+                    .stream().collect(Collectors.toMap(ColumnInfoDto::getColumnIndex, Function.identity()));
+            List<ColumnInfoDto> indexColumnList = new ArrayList<>();
+            for (int i = 0; i < columnIndexMap.size(); i++) {
+                indexColumnList.add(columnIndexMap.get(i));
+            }
+            echoList = indexColumnList.stream().map(columnInfo -> {
                 ColumnDetailsDto echo = PojoUtil.copyOne(columnInfo, ColumnDetailsDto.class);
                 columnInfo.getColumnLabels().forEach(columnLabel -> {
                     if (columnLabel.getLabelCode().equals(COLUMN_COMMENT_LABEL)) {

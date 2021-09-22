@@ -29,6 +29,7 @@ public class TableDetailDto extends TableInfoDto {
     private String metabaseUrl;
     private String securityLevel;
 
+    // GaS
     public String getTableComment() {
         return tableComment;
     }

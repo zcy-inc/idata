@@ -30,6 +30,10 @@ public class MeasureDataQueryDto {
      */
     private String dbSchema;
     /**
+     * 数据库名
+     */
+    private String dbName;
+    /**
      * 表名称
      */
     private String tableName;
