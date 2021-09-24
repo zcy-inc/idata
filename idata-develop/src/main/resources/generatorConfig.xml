@@ -12,8 +12,8 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.folder" targetProject="src/main/java"/>
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.folder" targetProject="src/main/java"/>
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java"/>
 
 <!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
@@ -25,11 +25,17 @@
 <!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
 <!--        </table>-->
 
-        <table tableName="dev_dag_info" domainObjectName="DAGInfo" mapperName="DAGInfoDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_dag_schedule" domainObjectName="DAGSchedule" mapperName="DAGScheduleDao">
+<!--        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_execute_config" domainObjectName="JobExecuteConfig" mapperName="JobExecuteConfigDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="sch_dry_run" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+        <table tableName="dev_job_publish_record" domainObjectName="JobPublishRecord" mapperName="JobPublishRecordDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>

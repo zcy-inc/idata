@@ -85,18 +85,21 @@ create table if not exists dev_job_content_di
     job_id                 bigint(20) unsigned not null comment '作业id',
     editable               tinyint(4)          not null comment '是否可编辑，0否，1是',
     version                int(11) unsigned    not null comment '作业版本号',
+    src_data_source_type   varchar(20)         not null comment '数据来源-数据源类型',
     src_data_source_id     bigint(20) unsigned not null comment '数据来源-数据源id',
-    src_tables             varchar(20000)      not null comment '数据来源-表',
+    src_tables             text                not null comment '数据来源-表',
     src_read_mode          varchar(20)         not null comment '数据来源-读取模式，all：全量，incremental：增量',
     src_read_filter        varchar(1000)       not null default '' comment '数据来源-过滤条件',
     src_read_shard_key     varchar(50)         not null default '' comment '数据来源-切分键',
-    src_columns            varchar(20000)      not null default '' comment '数据来源-字段信息，json格式',
+    src_columns            text                not null comment '数据来源-字段信息，json格式',
+    dest_data_source_type  varchar(20)         not null comment '数据去向-数据源类型',
     dest_data_source_id    bigint(20) unsigned not null comment '数据去向-数据源id',
     dest_table_id          bigint(20) unsigned not null comment '数据去向-数仓表id',
     src_write_mode         varchar(20)         not null comment '数据去向-写入模式，override，upsert',
     dest_before_write      varchar(1000)       not null default '' comment '数据去向-写入前语句',
     dest_after_write       varchar(1000)       not null default '' comment '数据去向-写入后语句',
-    dest_columns           varchar(20000)      not null default '' comment '数据去向-字段信息，json格式',
+    dest_columns           text                not null comment '数据去向-字段信息，json格式',
+    content_hash           varchar(50)         not null default '' comment '作业内容hash',
     key idx_job_id_version(job_id, version)
 ) engine = innodb
   auto_increment = 1000
@@ -113,16 +116,16 @@ create table if not exists dev_job_execute_config
     job_id                 bigint(20) unsigned not null comment '作业id',
     environment            varchar(20)         not null comment '环境',
     sch_dag_id             bigint(20) unsigned not null comment '调度配置-dag编号',
-    sch_rerun_mode         varchar(20)         not null comment '调度配置-重跑配置，always：运行成功或失败后皆可重跑，failure：运行成功后不可重跑，运行失败后可以重跑，never：运行成功或失败后皆不可重跑',
+    sch_rerun_mode         varchar(20)         not null comment '调度配置-重跑配置，always：皆可重跑，failed：失败后可重跑，never：皆不可重跑',
     sch_time_out           int(11)             not null comment '调度配置-超时时间，单位：秒',
     sch_dry_run            tinyint(4)          not null comment '调度配置-是否空跑，0否，1是',
+    exec_queue             varchar(30)         not null comment '运行配置-队列',
     exec_max_parallelism   int(11) unsigned    not null default 0 comment '运行配置-作业最大并发数，配置为0时表示使用默认并发数',
     exec_warn_level        varchar(30)         not null default '' comment '运行配置-告警等级',
-    dep_job_ids            varchar(500)        not null default '' comment '依赖配置-依赖作业id，多个作业,号分隔',
-    key idx_job_id_version(job_id, version)
+    key idx_job_id(job_id)
 ) engine = innodb
   auto_increment = 1000
-  default charset = utf8mb4 comment '数据开发-DI作业内容';
+  default charset = utf8mb4 comment '数据开发-作业运行配置';
 
 create table if not exists dev_job_publish_record
 (
@@ -135,13 +138,15 @@ create table if not exists dev_job_publish_record
     job_id                 bigint(20) unsigned not null comment '作业id',
     job_content_id         bigint(20) unsigned not null comment '作业内容id',
     job_content_version    int(11) unsigned    not null comment '作业内容版本号',
+    job_type_code          varchar(20)         not null comment '作业类型',
+    dw_layer_code          varchar(50)         not null comment '数仓分层',
     environment            varchar(20)         not null comment '环境',
     publish_status         int(11)             not null comment '发布状态，1：待发布，2：已发布，4：已驳回，9：已归档',
-    submit_remark          varchar(200)        not null default '' comment '数据来源-表',
+    submit_remark          varchar(200)        not null default '' comment '提交备注',
     approve_operator       varchar(20)         not null default '' comment '审批人',
     approve_time           datetime            null comment '审批时间',
-    approve_remark         varchar(200)        not null default '' comment '数据来源-表',
-    key idx_job_id_version(job_id,job_content_id, job_content_version)
+    approve_remark         varchar(200)        not null default '' comment '审批备注',
+    key idx_job_id_version(job_id, job_content_id, job_content_version)
 ) engine = innodb
   auto_increment = 1000
   default charset = utf8mb4 comment '数据开发-作业发布记录';

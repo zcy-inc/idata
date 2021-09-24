@@ -15,101 +15,101 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.portal.controller.dev.dag;
+package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
-import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
-import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * dag-controller
+ * job-basic-controller
  *
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-22 14:51
+ * @create: 2021-09-23 10:24
  **/
 @RestController
-@RequestMapping(path = "/p1/dev/dags")
-public class DAGController {
+@RequestMapping(path = "/p1/dev/jobs")
+public class JobInfoController {
 
     /**
-     * 创建DAG
+     * 获取作业类型
      *
-     * @param dagDto
+     * @param catalog 作业分类，DI：数据集成作业（获取数据集成分类下的作业类型：离线作业、实时作业），为空时获取所有作业类型
+     * @return
+     */
+    @GetMapping("/types")
+    public RestResult<List<JobTypeDto>> getJobType(String catalog) {
+        return RestResult.success();
+    }
+
+    /**
+     * 新增作业
+     *
+     * @param jobInfoDto 作业基础信息
      * @return
      */
     @PostMapping
-    public RestResult<Long> addDAG(@RequestBody DAGDto dagDto) {
+    public RestResult<Long> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
         return RestResult.success();
     }
 
     /**
-     * 编辑DAG
+     * 编辑作业信息
      *
-     * @param dagDto
+     * @param jobInfoDto 作业基础信息
      * @return
      */
     @PutMapping
-    public RestResult<Boolean> editDAG(@RequestBody DAGDto dagDto) {
+    public RestResult<Boolean> editJobInfo(@RequestBody JobInfoDto jobInfoDto) {
         return RestResult.success();
     }
 
     /**
-     * 获取DAG
+     * 获取作业信息
      *
-     * @param id
+     * @param id 作业id
      * @return
      */
     @GetMapping("/{id}")
-    public RestResult<DAGDto> getDAG(@PathVariable Long id) {
+    public RestResult<JobInfoDto> getJobInfo(@PathVariable Long id) {
         return RestResult.success();
     }
 
     /**
-     * 删除DAG
+     * 删除作业
      *
-     * @param id
+     * @param id 作业id
      * @return
      */
     @DeleteMapping("/{id}")
-    public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) {
+    public RestResult<Boolean> removeJobInfo(@PathVariable Long id) {
         return RestResult.success();
     }
 
     /**
-     * 启用DAG
+     * 恢复作业
      *
-     * @param id
+     * @param id 作业id
      * @return
      */
     @PutMapping("/{id}/enable")
-    public RestResult<Boolean> enableDAG(@PathVariable("id") Long id) {
+    public RestResult<Boolean> enableJobInfo(@PathVariable Long id) {
         return RestResult.success();
     }
 
     /**
-     * 停用DAG
+     * 暂停作业
      *
-     * @param id
+     * @param id 作业id
      * @return
      */
     @PutMapping("/{id}/disable")
-    public RestResult<Boolean> disableDAG(@PathVariable("id") Long id) {
+    public RestResult<Boolean> disableJobInfo(@PathVariable Long id) {
         return RestResult.success();
     }
 
-    /**
-     * 查询dag列表
-     *
-     * @param condition 查询条件
-     * @return
-     */
-    @GetMapping("/info")
-    public RestResult<List<DAGInfoDto>> getDAGInfoList(DAGInfoCondition condition) {
-        return RestResult.success();
-    }
 }
