@@ -77,12 +77,12 @@ public interface DAGInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, DAGInfo, completer);
+        return MyBatis3Utils.countFrom(this::count, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, DAGInfo, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
@@ -94,7 +94,7 @@ public interface DAGInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default int insert(DAGInfo record) {
-        return MyBatis3Utils.insert(this::insert, record, DAGInfo, c ->
+        return MyBatis3Utils.insert(this::insert, record, dag_info, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -110,7 +110,7 @@ public interface DAGInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default int insertSelective(DAGInfo record) {
-        return MyBatis3Utils.insert(this::insert, record, DAGInfo, c ->
+        return MyBatis3Utils.insert(this::insert, record, dag_info, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -126,17 +126,17 @@ public interface DAGInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default Optional<DAGInfo> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, DAGInfo, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default List<DAGInfo> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, DAGInfo, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default List<DAGInfo> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DAGInfo, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
@@ -148,7 +148,7 @@ public interface DAGInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, DAGInfo, completer);
+        return MyBatis3Utils.update(this::update, dag_info, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")

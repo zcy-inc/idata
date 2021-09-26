@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.impl;
+package cn.zhengcaiyun.idata.develop.dal.repo.folder.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderDao;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
-import cn.zhengcaiyun.idata.develop.dal.repo.CompositeFolderRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

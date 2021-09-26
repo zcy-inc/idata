@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.dag;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
 
@@ -99,5 +101,17 @@ public class DAGScheduleDto extends BaseDto {
 
     public void setCronExpression(String cronExpression) {
         this.cronExpression = cronExpression;
+    }
+
+    public static DAGScheduleDto from(DAGSchedule schedule) {
+        DAGScheduleDto dto = new DAGScheduleDto();
+        BeanUtils.copyProperties(schedule, dto);
+        return dto;
+    }
+
+    public DAGSchedule toModel() {
+        DAGSchedule schedule = new DAGSchedule();
+        BeanUtils.copyProperties(this, schedule);
+        return schedule;
     }
 }

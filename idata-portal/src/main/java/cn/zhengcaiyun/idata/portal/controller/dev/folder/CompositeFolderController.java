@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * composite-folder-controller
@@ -74,8 +75,10 @@ public class CompositeFolderController {
      * @return
      */
     @PostMapping("")
-    public RestResult<Long> addFolder(@RequestBody CompositeFolderDto folderDto) {
-        return RestResult.success(compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator()));
+    public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
+        Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
+        if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
+        return getFolder(id);
     }
 
     /**
@@ -85,8 +88,9 @@ public class CompositeFolderController {
      * @return
      */
     @PutMapping("")
-    public RestResult<Boolean> editFolder(@RequestBody CompositeFolderDto folderDto) {
-        return RestResult.success(compositeFolderService.editFolder(folderDto, OperatorContext.getCurrentOperator()));
+    public RestResult<CompositeFolderDto> editFolder(@RequestBody CompositeFolderDto folderDto) {
+        compositeFolderService.editFolder(folderDto, OperatorContext.getCurrentOperator());
+        return getFolder(folderDto.getId());
     }
 
     /**

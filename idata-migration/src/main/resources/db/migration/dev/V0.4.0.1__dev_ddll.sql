@@ -50,7 +50,7 @@ create table if not exists dev_dag_schedule
     period_range  varchar(20)         not null comment '周期范围，year, month, week, day, hour, minute',
     trigger_mode  varchar(20)         not null comment '触发方式，interval: 时间间隔，point: 指定时间',
     cron_expression   varchar(200)        null comment 'cron表达式',
-    key idx_dag_id(dag_id)
+    unique key idx_dag_id(dag_id)
 ) engine = innodb
   auto_increment = 1000
   default charset = utf8mb4 comment '数据开发-dag-调度配置表';

@@ -78,12 +78,12 @@ public interface DAGScheduleDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, DAGSchedule, completer);
+        return MyBatis3Utils.countFrom(this::count, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, DAGSchedule, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
@@ -95,7 +95,7 @@ public interface DAGScheduleDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default int insert(DAGSchedule record) {
-        return MyBatis3Utils.insert(this::insert, record, DAGSchedule, c ->
+        return MyBatis3Utils.insert(this::insert, record, dag_schedule, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -112,7 +112,7 @@ public interface DAGScheduleDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default int insertSelective(DAGSchedule record) {
-        return MyBatis3Utils.insert(this::insert, record, DAGSchedule, c ->
+        return MyBatis3Utils.insert(this::insert, record, dag_schedule, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -129,17 +129,17 @@ public interface DAGScheduleDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default Optional<DAGSchedule> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, DAGSchedule, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default List<DAGSchedule> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, DAGSchedule, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default List<DAGSchedule> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DAGSchedule, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
@@ -151,7 +151,7 @@ public interface DAGScheduleDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, DAGSchedule, completer);
+        return MyBatis3Utils.update(this::update, dag_schedule, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_schedule")

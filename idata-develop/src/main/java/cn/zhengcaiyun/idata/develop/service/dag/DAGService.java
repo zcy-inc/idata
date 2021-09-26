@@ -15,23 +15,33 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.spi.tree;
+package cn.zhengcaiyun.idata.develop.service.dag;
 
-import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
-import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
+import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
+import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 
 import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-18 14:20
+ * @create: 2021-09-26 13:41
  **/
-public interface BizTreeNodeSupplier<T> {
+public interface DAGService {
 
-    List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum);
+    Long addDAG(DAGDto dto, Operator operator);
 
-    Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId);
+    Boolean editDAG(DAGDto dto, Operator operator);
 
-    DevTreeNodeDto assemble(FunctionModuleEnum moduleEnum, T bizRecord);
+    DAGDto getDag(Long id);
+
+    Boolean removeDag(Long id, Operator operator);
+
+    Boolean enableDag(Long id, Operator operator);
+
+    Boolean disableDag(Long id, Operator operator);
+
+    List<DAGInfoDto> getDAGInfoList(DAGInfoCondition condition);
 }

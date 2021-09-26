@@ -46,4 +46,6 @@ public interface DataSourceRepo {
 
     boolean deleteDataSource(Long id, String operator);
 
+    List<DataSource> queryDataSource(String name);
+
 }

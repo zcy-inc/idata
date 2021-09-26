@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.spi.tree;
-
-import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
-import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.commons.enums;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-18 14:20
+ * @create: 2021-09-26 15:30
  **/
-public interface BizTreeNodeSupplier<T> {
+public enum UsingStatusEnum {
+    DISABLE(0, "停用"),
+    ENABLE(1, "启用");
 
-    List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum);
+    public final int val;
+    public final String desc;
 
-    Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId);
-
-    DevTreeNodeDto assemble(FunctionModuleEnum moduleEnum, T bizRecord);
+    UsingStatusEnum(int val, String desc) {
+        this.val = val;
+        this.desc = desc;
+    }
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo;
+package cn.zhengcaiyun.idata.develop.dal.repo.folder;
 
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;

@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.spi.tree.impl;
 
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
@@ -32,7 +33,7 @@ import java.util.List;
  * @create: 2021-09-18 14:29
  **/
 @Component
-public class DITreeNodeSupplier implements BizTreeNodeSupplier {
+public class DITreeNodeSupplier implements BizTreeNodeSupplier<JobInfo> {
 
     @PostConstruct
     public void register() {
@@ -47,5 +48,10 @@ public class DITreeNodeSupplier implements BizTreeNodeSupplier {
     @Override
     public Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId) {
         return Long.MAX_VALUE;
+    }
+
+    @Override
+    public DevTreeNodeDto assemble(FunctionModuleEnum moduleEnum, JobInfo bizRecord) {
+        return null;
     }
 }

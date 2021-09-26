@@ -17,13 +17,18 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.dag;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
+import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * dag-controller
@@ -36,6 +41,13 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev/dags")
 public class DAGController {
 
+    private final DAGService dagService;
+
+    @Autowired
+    public DAGController(DAGService dagService) {
+        this.dagService = dagService;
+    }
+
     /**
      * 创建DAG
      *
@@ -43,8 +55,11 @@ public class DAGController {
      * @return
      */
     @PostMapping
-    public RestResult<Long> addDAG(@RequestBody DAGDto dagDto) {
-        return RestResult.success();
+    public RestResult<DAGDto> addDAG(@RequestBody DAGDto dagDto) {
+        Long id = dagService.addDAG(dagDto, OperatorContext.getCurrentOperator());
+        if (Objects.isNull(id)) return RestResult.error("创建DAG失败", "");
+
+        return getDAG(id);
     }
 
     /**
@@ -54,8 +69,11 @@ public class DAGController {
      * @return
      */
     @PutMapping
-    public RestResult<Boolean> editDAG(@RequestBody DAGDto dagDto) {
-        return RestResult.success();
+    public RestResult<DAGDto> editDAG(@RequestBody DAGDto dagDto) {
+        Boolean ret = dagService.editDAG(dagDto, OperatorContext.getCurrentOperator());
+        if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑DAG失败", "");
+
+        return getDAG(dagDto.getDagInfoDto().getId());
     }
 
     /**
@@ -66,7 +84,7 @@ public class DAGController {
      */
     @GetMapping("/{id}")
     public RestResult<DAGDto> getDAG(@PathVariable Long id) {
-        return RestResult.success();
+        return RestResult.success(dagService.getDag(id));
     }
 
     /**
@@ -77,7 +95,7 @@ public class DAGController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) {
-        return RestResult.success();
+        return RestResult.success(dagService.removeDag(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -88,7 +106,7 @@ public class DAGController {
      */
     @PutMapping("/{id}/enable")
     public RestResult<Boolean> enableDAG(@PathVariable("id") Long id) {
-        return RestResult.success();
+        return RestResult.success(dagService.enableDag(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -99,7 +117,7 @@ public class DAGController {
      */
     @PutMapping("/{id}/disable")
     public RestResult<Boolean> disableDAG(@PathVariable("id") Long id) {
-        return RestResult.success();
+        return RestResult.success(dagService.disableDag(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -110,6 +128,6 @@ public class DAGController {
      */
     @GetMapping("/info")
     public RestResult<List<DAGInfoDto>> getDAGInfoList(DAGInfoCondition condition) {
-        return RestResult.success();
+        return RestResult.success(dagService.getDAGInfoList(condition));
     }
 }

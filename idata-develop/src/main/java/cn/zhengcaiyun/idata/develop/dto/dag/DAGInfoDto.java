@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.dag;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @description: dag信息
@@ -84,5 +86,17 @@ public class DAGInfoDto extends BaseDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    public static DAGInfoDto from(DAGInfo info) {
+        DAGInfoDto dto = new DAGInfoDto();
+        BeanUtils.copyProperties(info, dto);
+        return dto;
+    }
+
+    public DAGInfo toModel() {
+        DAGInfo info = new DAGInfo();
+        BeanUtils.copyProperties(this, info);
+        return info;
     }
 }

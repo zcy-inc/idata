@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -89,6 +90,9 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public DataSourceDto addDataSource(DataSourceDto dto, Operator operator) {
         checkDataSource(dto);
+        List<DataSource> dupNameDataSources = dataSourceRepo.queryDataSource(dto.getName());
+        checkArgument(ObjectUtils.isEmpty(dupNameDataSources), "数据源名称已存在");
+
         dto.setDel(DeleteEnum.DEL_NO.val);
         dto.setOperator(operator);
         Long id = dataSourceRepo.createDataSource(dto.toModel());
@@ -102,6 +106,12 @@ public class DataSourceServiceImpl implements DataSourceService {
     public DataSourceDto editDataSource(DataSourceDto dto, Operator operator) {
         checkArgument(nonNull(dto.getId()), "数据源编号为空");
         checkDataSource(dto);
+        List<DataSource> dupNameDataSources = dataSourceRepo.queryDataSource(dto.getName());
+        if (ObjectUtils.isNotEmpty(dupNameDataSources)) {
+            DataSource dupNameDataSource = dupNameDataSources.get(0);
+            checkArgument(Objects.equals(dto.getId(), dupNameDataSource.getId()), "数据源名称已存在");
+        }
+
         Optional<DataSource> optional = dataSourceRepo.queryDataSource(dto.getId());
         checkArgument(optional.isPresent(), "数据源不存在");
         DataSource source = optional.get();

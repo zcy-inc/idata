@@ -111,4 +111,10 @@ public class DataSourceRepoImpl implements DataSourceRepo {
                 .where(dataSource.id, isEqualTo(id)));
         return ret > 0;
     }
+
+    @Override
+    public List<DataSource> queryDataSource(String name) {
+        return dataSourceDao.select(dsl -> dsl.where(dataSource.name, isEqualTo(name),
+                and(dataSource.del, isEqualTo(DEL_NO.val))));
+    }
 }

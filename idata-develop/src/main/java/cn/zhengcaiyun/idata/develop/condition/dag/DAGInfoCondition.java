@@ -12,11 +12,24 @@ public class DAGInfoCondition {
      */
     private String dwLayerCode;
 
+    /**
+     * 状态，1启用，0停用
+     */
+    private Integer status;
+
     public String getDwLayerCode() {
         return dwLayerCode;
     }
 
     public void setDwLayerCode(String dwLayerCode) {
         this.dwLayerCode = dwLayerCode;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

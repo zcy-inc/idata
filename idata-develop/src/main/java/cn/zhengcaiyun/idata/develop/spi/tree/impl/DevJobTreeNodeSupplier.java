@@ -32,7 +32,7 @@ import java.util.List;
  * @create: 2021-09-18 14:29
  **/
 @Component
-public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier {
+public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier<String> {
 
     @PostConstruct
     public void register() {
@@ -47,5 +47,10 @@ public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier {
     @Override
     public Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId) {
         return Long.MAX_VALUE;
+    }
+
+    @Override
+    public DevTreeNodeDto assemble(FunctionModuleEnum moduleEnum, String bizRecord) {
+        return null;
     }
 }

@@ -26,7 +26,7 @@ import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
-import cn.zhengcaiyun.idata.develop.dal.repo.CompositeFolderRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
@@ -129,7 +129,9 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
 
         checkArgument(StringUtils.isNotBlank(folderDto.getName()), "文件夹名称为空");
         Optional<CompositeFolder> dupNameFolderOptional = compositeFolderRepo.queryFolder(folderDto.getName(), folderDto.getParentId());
-        checkArgument(dupNameFolderOptional.isPresent(), "父文件夹下存在同名文件夹");
+        if (dupNameFolderOptional.isPresent()) {
+            checkArgument(Objects.equals(folderDto.getId(), dupNameFolderOptional.get().getId()), "父文件夹下存在同名文件夹");
+        }
 
         folderDto.resetEditor(operator);
         CompositeFolder folder = folderDto.toModel();
