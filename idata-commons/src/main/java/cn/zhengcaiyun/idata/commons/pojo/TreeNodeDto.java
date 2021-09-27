@@ -51,10 +51,20 @@ public abstract class TreeNodeDto<T, N extends TreeNodeDto<T, N>> {
     private String name;
     /**
      * 节点类型，如所有节点类型都相同，type可以为空
+     * 示例：FUNCTION：功能性文件夹，FOLDER：普通文件夹，RECORD：业务数据
      */
     private String type;
     /**
      * 文件夹所属业务功能
+     * 示例：
+     * DESIGN：数仓设计
+     *     DESIGN.TABLE：表
+     *     DESIGN.LABEL：标签
+     *     DESIGN.ENUM：枚举
+     * DAG：DAG
+     * DI：数据集成
+     * DEV：数据开发
+     *     DEV.JOB：作业
      */
     private String belong;
     /**

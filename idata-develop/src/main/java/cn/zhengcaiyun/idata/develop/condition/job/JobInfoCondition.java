@@ -1,20 +1,30 @@
-package cn.zhengcaiyun.idata.develop.dto.job;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+package cn.zhengcaiyun.idata.develop.condition.job;
+
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-23 11:20
+ * @create: 2021-09-26 16:53
  **/
-public class JobInfoDto extends BaseDto {
-    /**
-     * 主键
-     */
-    private Long id;
+public class JobInfoCondition {
     /**
      * 作业名称
      */
@@ -32,21 +42,9 @@ public class JobInfoDto extends BaseDto {
      */
     private Integer status;
     /**
-     * 备注
-     */
-    private String remark;
-    /**
      * 文件夹id
      */
     private Long folderId;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -80,31 +78,11 @@ public class JobInfoDto extends BaseDto {
         this.status = status;
     }
 
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-
     public Long getFolderId() {
         return folderId;
     }
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
-    }
-
-    public static JobInfoDto from(JobInfo info) {
-        JobInfoDto dto = new JobInfoDto();
-        BeanUtils.copyProperties(info, dto);
-        return dto;
-    }
-
-    public JobInfo toModel() {
-        JobInfo info = new JobInfo();
-        BeanUtils.copyProperties(this, info);
-        return info;
     }
 }

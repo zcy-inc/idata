@@ -17,12 +17,21 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * job-basic-controller
@@ -35,6 +44,13 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev/jobs")
 public class JobInfoController {
 
+    private final JobInfoService jobInfoService;
+
+    @Autowired
+    public JobInfoController(JobInfoService jobInfoService) {
+        this.jobInfoService = jobInfoService;
+    }
+
     /**
      * 获取作业类型
      *
@@ -43,7 +59,20 @@ public class JobInfoController {
      */
     @GetMapping("/types")
     public RestResult<List<JobTypeDto>> getJobType(String catalog) {
-        return RestResult.success();
+        List<JobTypeEnum> typeEnumList;
+        if (StringUtils.isEmpty(catalog)) {
+            typeEnumList = Lists.newArrayList(JobTypeEnum.values());
+        } else {
+            typeEnumList = JobTypeEnum.getCatalogEnum(catalog).orElse(null);
+        }
+
+        List<JobTypeDto> dtoList = null;
+        if (typeEnumList != null) {
+            dtoList = typeEnumList.stream()
+                    .map(JobTypeDto::from)
+                    .collect(Collectors.toList());
+        }
+        return RestResult.success(dtoList);
     }
 
     /**
@@ -53,8 +82,11 @@ public class JobInfoController {
      * @return
      */
     @PostMapping
-    public RestResult<Long> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
-        return RestResult.success();
+    public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
+        Long id = jobInfoService.addJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
+
+        return getJobInfo(id);
     }
 
     /**
@@ -64,8 +96,11 @@ public class JobInfoController {
      * @return
      */
     @PutMapping
-    public RestResult<Boolean> editJobInfo(@RequestBody JobInfoDto jobInfoDto) {
-        return RestResult.success();
+    public RestResult<JobInfoDto> editJobInfo(@RequestBody JobInfoDto jobInfoDto) {
+        Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
+
+        return getJobInfo(jobInfoDto.getId());
     }
 
     /**
@@ -76,7 +111,7 @@ public class JobInfoController {
      */
     @GetMapping("/{id}")
     public RestResult<JobInfoDto> getJobInfo(@PathVariable Long id) {
-        return RestResult.success();
+        return RestResult.success(jobInfoService.getJobInfo(id));
     }
 
     /**
@@ -87,7 +122,7 @@ public class JobInfoController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeJobInfo(@PathVariable Long id) {
-        return RestResult.success();
+        return RestResult.success(jobInfoService.removeJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -98,7 +133,7 @@ public class JobInfoController {
      */
     @PutMapping("/{id}/enable")
     public RestResult<Boolean> enableJobInfo(@PathVariable Long id) {
-        return RestResult.success();
+        return RestResult.success(jobInfoService.enableJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -109,7 +144,7 @@ public class JobInfoController {
      */
     @PutMapping("/{id}/disable")
     public RestResult<Boolean> disableJobInfo(@PathVariable Long id) {
-        return RestResult.success();
+        return RestResult.success(jobInfoService.disableJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
 }

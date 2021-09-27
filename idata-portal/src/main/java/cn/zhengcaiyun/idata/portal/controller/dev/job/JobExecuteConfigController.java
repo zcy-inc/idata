@@ -17,9 +17,12 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.dto.job.JobExecuteConfigDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,17 +38,24 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev/jobs/{jobId}/execConfigs")
 public class JobExecuteConfigController {
 
+    private final JobExecuteConfigService jobExecuteConfigService;
+
+    @Autowired
+    public JobExecuteConfigController(JobExecuteConfigService jobExecuteConfigService) {
+        this.jobExecuteConfigService = jobExecuteConfigService;
+    }
+
     /**
-     * 创建作业运行配置
+     * 保存作业运行配置
      *
      * @param jobId     作业id
      * @param configDto 配置
      * @return
      */
     @PostMapping()
-    public RestResult<JobExecuteConfigDto> addJobExecuteConfig(@PathVariable("jobId") Long jobId,
-                                                               @RequestBody JobExecuteConfigDto configDto) {
-        return RestResult.success();
+    public RestResult<JobExecuteConfigDto> saveJobExecuteConfig(@PathVariable("jobId") Long jobId,
+                                                                @RequestBody JobExecuteConfigDto configDto) {
+        return RestResult.success(jobExecuteConfigService.save(jobId, configDto, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -57,6 +67,6 @@ public class JobExecuteConfigController {
     @GetMapping()
     public RestResult<List<JobExecuteConfigDto>> getJobExecuteConfig(@PathVariable("jobId") Long jobId,
                                                                      JobExecuteConfigCondition condition) {
-        return RestResult.success();
+        return RestResult.success(jobExecuteConfigService.getList(jobId, condition));
     }
 }

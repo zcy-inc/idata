@@ -1,11 +1,15 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import org.springframework.beans.BeanUtils;
+
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-23 11:20
  **/
-public class JobExecuteConfigDto {
+public class JobExecuteConfigDto extends BaseDto {
     /**
      * 主键
      */
@@ -134,5 +138,21 @@ public class JobExecuteConfigDto {
 
     public void setExecWarnLevel(String execWarnLevel) {
         this.execWarnLevel = execWarnLevel;
+    }
+
+    public static JobExecuteConfigDto from(JobExecuteConfig config) {
+        JobExecuteConfigDto dto = new JobExecuteConfigDto();
+        BeanUtils.copyProperties(config, dto);
+
+        if (dto.getSchTimeOut() <= 0) dto.setSchTimeOut(null);
+        if (dto.getExecMaxParallelism() <= 0) dto.setExecMaxParallelism(null);
+
+        return dto;
+    }
+
+    public JobExecuteConfig toModel() {
+        JobExecuteConfig config = new JobExecuteConfig();
+        BeanUtils.copyProperties(this, config);
+        return config;
     }
 }

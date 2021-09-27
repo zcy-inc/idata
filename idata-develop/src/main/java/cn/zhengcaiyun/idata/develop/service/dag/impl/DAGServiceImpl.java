@@ -72,35 +72,21 @@ public class DAGServiceImpl implements DAGService {
         return dagRepo.saveDAG(info, schedule);
     }
 
-    private void checkDag(DAGInfoDto dagInfoDto, DAGScheduleDto dagScheduleDto) {
-        checkArgument(Objects.nonNull(dagInfoDto), "DAG信息为空");
-        checkArgument(StringUtils.isNotBlank(dagInfoDto.getName()), "DAG名称为空");
-        checkArgument(StringUtils.isNotBlank(dagInfoDto.getDwLayerCode()), "DAG所属数仓分层为空");
-        checkArgument(Objects.nonNull(dagInfoDto.getFolderId()), "DAG所属文件夹为空");
-
-        checkArgument(Objects.nonNull(dagScheduleDto), "DAG调度信息为空");
-        checkArgument(Objects.nonNull(dagScheduleDto.getBeginTime()) && Objects.nonNull(dagScheduleDto.getEndTime()), "DAG调度起止时间为空");
-        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getPeriodRange()), "DAG调度周期类型为空");
-        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getTriggerMode()), "DAG调度触发方式为空");
-        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getCronExpression()), "DAG调度时间为空");
-    }
-
     @Override
     public Boolean editDAG(DAGDto dto, Operator operator) {
         DAGInfoDto dagInfoDto = dto.getDagInfoDto();
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
         checkArgument(Objects.nonNull(dagInfoDto.getId()) && Objects.nonNull(dagScheduleDto.getId()), "DAG编号为空");
+        tryFetchDAGInfo(dagInfoDto.getId());
 
-        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(dagInfoDto.getId());
-        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
         List<DAGInfo> dupNameDag = dagRepo.queryDAGInfo(dagInfoDto.getName());
         if (ObjectUtils.isNotEmpty(dupNameDag)) {
             DAGInfo dupNameInfo = dupNameDag.get(0);
             checkArgument(Objects.equals(dagInfoDto.getId(), dupNameInfo.getId()), "DAG名称已存在");
         }
 
-        dagInfoDto.setStatus(UsingStatusEnum.ENABLE.val);
+        dagInfoDto.setStatus(null);
         dagInfoDto.resetEditor(operator);
         DAGInfo info = dagInfoDto.toModel();
 
@@ -114,33 +100,26 @@ public class DAGServiceImpl implements DAGService {
 
     @Override
     public DAGDto getDag(Long id) {
-        checkArgument(Objects.nonNull(id), "DAG编号为空");
-        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(id);
-        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
+        DAGInfo dagInfo = tryFetchDAGInfo(id);
         Optional<DAGSchedule> optionalDAGSchedule = dagRepo.queryDAGSchedule(id);
         checkArgument(optionalDAGSchedule.isPresent(), "DAG不存在或已删除");
 
         DAGDto dto = new DAGDto();
-        dto.setDagInfoDto(DAGInfoDto.from(optionalDAGInfo.get()));
+        dto.setDagInfoDto(DAGInfoDto.from(dagInfo));
         dto.setDagScheduleDto(DAGScheduleDto.from(optionalDAGSchedule.get()));
         return dto;
     }
 
     @Override
     public Boolean removeDag(Long id, Operator operator) {
-        checkArgument(Objects.nonNull(id), "DAG编号为空");
-        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(id);
-        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
-
+        tryFetchDAGInfo(id);
         // todo 删除时确定是否有作业依赖，有则不能删除
         return dagRepo.deleteDAG(id, operator.getNickname());
     }
 
     @Override
     public Boolean enableDag(Long id, Operator operator) {
-        checkArgument(Objects.nonNull(id), "DAG编号为空");
-        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(id);
-        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
+        tryFetchDAGInfo(id);
 
         DAGInfo info = new DAGInfo();
         info.setId(id);
@@ -158,9 +137,7 @@ public class DAGServiceImpl implements DAGService {
      */
     @Override
     public Boolean disableDag(Long id, Operator operator) {
-        checkArgument(Objects.nonNull(id), "DAG编号为空");
-        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(id);
-        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
+        tryFetchDAGInfo(id);
 
         DAGInfo info = new DAGInfo();
         info.setId(id);
@@ -177,5 +154,25 @@ public class DAGServiceImpl implements DAGService {
         return dagInfoList.stream()
                 .map(DAGInfoDto::from)
                 .collect(Collectors.toList());
+    }
+
+    private DAGInfo tryFetchDAGInfo(Long id) {
+        checkArgument(Objects.nonNull(id), "DAG编号为空");
+        Optional<DAGInfo> optionalDAGInfo = dagRepo.queryDAGInfo(id);
+        checkArgument(optionalDAGInfo.isPresent(), "DAG不存在或已删除");
+        return optionalDAGInfo.get();
+    }
+
+    private void checkDag(DAGInfoDto dagInfoDto, DAGScheduleDto dagScheduleDto) {
+        checkArgument(Objects.nonNull(dagInfoDto), "DAG信息为空");
+        checkArgument(StringUtils.isNotBlank(dagInfoDto.getName()), "DAG名称为空");
+        checkArgument(StringUtils.isNotBlank(dagInfoDto.getDwLayerCode()), "DAG所属数仓分层为空");
+        checkArgument(Objects.nonNull(dagInfoDto.getFolderId()), "DAG所属文件夹为空");
+
+        checkArgument(Objects.nonNull(dagScheduleDto), "DAG调度信息为空");
+        checkArgument(Objects.nonNull(dagScheduleDto.getBeginTime()) && Objects.nonNull(dagScheduleDto.getEndTime()), "DAG调度起止时间为空");
+        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getPeriodRange()), "DAG调度周期类型为空");
+        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getTriggerMode()), "DAG调度触发方式为空");
+        checkArgument(StringUtils.isNotBlank(dagScheduleDto.getCronExpression()), "DAG调度时间为空");
     }
 }
