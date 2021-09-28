@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobTableDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobTableDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

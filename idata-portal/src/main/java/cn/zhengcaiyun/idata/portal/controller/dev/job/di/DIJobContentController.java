@@ -22,6 +22,8 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * job-di-controller
  *
@@ -66,7 +68,7 @@ public class DIJobContentController {
      * @return
      */
     @GetMapping("/versions")
-    public RestResult<JobContentVersionDto> getJobContentVersion(@PathVariable("jobId") Long jobId) {
+    public RestResult<List<JobContentVersionDto>> getJobContentVersion(@PathVariable("jobId") Long jobId) {
         return RestResult.success();
     }
 
@@ -81,7 +83,7 @@ public class DIJobContentController {
     @PostMapping("/contents/{version}/submit/{env}")
     public RestResult<DIJobContentDto> submitJob(@PathVariable("jobId") Long jobId,
                                                  @PathVariable("version") Long version,
-                                                 @PathVariable("env") Long env) {
+                                                 @PathVariable("env") String env) {
         return RestResult.success();
     }
 

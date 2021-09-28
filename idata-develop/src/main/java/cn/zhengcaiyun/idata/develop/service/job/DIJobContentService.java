@@ -15,20 +15,26 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.model.job;
+package cn.zhengcaiyun.idata.develop.service.job;
+
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-24 16:00
+ * @create: 2021-09-28 14:07
  **/
-public class JobTableDto {
-    /**
-     * 表id（从数仓设计模块查询时有id）
-     */
-    private Long tableId;
-    /**
-     * 表名（从外部数据库查询出的表只有表名）
-     */
-    private String name;
+public interface DIJobContentService {
+
+    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
+
+    DIJobContentDto get(Long jobId, Integer version);
+
+    DIJobContentDto submit(Long jobId, Long version, String env, Operator operator);
+
+    List<JobContentVersionDto> getVersions(Long jobId);
 }

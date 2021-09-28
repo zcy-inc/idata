@@ -95,7 +95,7 @@ create table if not exists dev_job_content_di
     dest_data_source_type  varchar(20)         not null comment '数据去向-数据源类型',
     dest_data_source_id    bigint(20) unsigned not null comment '数据去向-数据源id',
     dest_table_id          bigint(20) unsigned not null comment '数据去向-数仓表id',
-    src_write_mode         varchar(20)         not null comment '数据去向-写入模式，override，upsert',
+    dest_write_mode         varchar(20)         not null comment '数据去向-写入模式，override，upsert',
     dest_before_write      varchar(1000)       not null default '' comment '数据去向-写入前语句',
     dest_after_write       varchar(1000)       not null default '' comment '数据去向-写入后语句',
     dest_columns           text                not null comment '数据去向-字段信息，json格式',
@@ -146,7 +146,8 @@ create table if not exists dev_job_publish_record
     approve_operator       varchar(20)         not null default '' comment '审批人',
     approve_time           datetime            null comment '审批时间',
     approve_remark         varchar(200)        not null default '' comment '审批备注',
-    key idx_job_id_version(job_id, job_content_id, job_content_version)
+    key idx_job_content_environment(job_id, job_content_id, environment),
+    key idx_job_version_environment(job_id, job_content_version,environment)
 ) engine = innodb
   auto_increment = 100000
   default charset = utf8mb4 comment '数据开发-作业发布记录';

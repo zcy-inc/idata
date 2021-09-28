@@ -1,6 +1,11 @@
 package cn.zhengcaiyun.idata.develop.dto.job.di;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
@@ -64,9 +69,9 @@ public class DIJobContentDto extends BaseDto {
     private Long destTableId;
 
     /**
-     * 数据去向-写入模式，override，upsert
+     * 数据去向-写入模式，init: 重建表，override：覆盖表
      */
-    private String srcWriteMode;
+    private String destWriteMode;
 
     /**
      * 数据去向-写入前语句
@@ -183,12 +188,12 @@ public class DIJobContentDto extends BaseDto {
         this.destTableId = destTableId;
     }
 
-    public String getSrcWriteMode() {
-        return srcWriteMode;
+    public String getDestWriteMode() {
+        return destWriteMode;
     }
 
-    public void setSrcWriteMode(String srcWriteMode) {
-        this.srcWriteMode = srcWriteMode;
+    public void setDestWriteMode(String destWriteMode) {
+        this.destWriteMode = destWriteMode;
     }
 
     public String getDestBeforeWrite() {
@@ -237,5 +242,35 @@ public class DIJobContentDto extends BaseDto {
 
     public void setContentHash(String contentHash) {
         this.contentHash = contentHash;
+    }
+
+    public static DIJobContentDto from(DIJobContent content) {
+        DIJobContentDto dto = new DIJobContentDto();
+        BeanUtils.copyProperties(content, dto);
+
+        if (StringUtils.isNotBlank(content.getSrcColumns())) {
+            dto.setSrcCols(JSON.parseArray(content.getSrcColumns(), MappingColumnDto.class));
+        }
+        if (StringUtils.isNotBlank(content.getDestColumns())) {
+            dto.setDestCols(JSON.parseArray(content.getDestColumns(), MappingColumnDto.class));
+        }
+        return dto;
+    }
+
+    public DIJobContent toModel() {
+        DIJobContent content = new DIJobContent();
+        BeanUtils.copyProperties(this, content);
+
+        if (ObjectUtils.isNotEmpty(this.srcCols)) {
+            content.setSrcColumns(JSON.toJSONString(this.srcCols));
+        } else {
+            content.setSrcColumns("");
+        }
+        if (ObjectUtils.isNotEmpty(this.destCols)) {
+            content.setDestColumns(JSON.toJSONString(this.destCols));
+        } else {
+            content.setDestColumns("");
+        }
+        return content;
     }
 }
