@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import org.springframework.beans.BeanUtils;
+
 import java.util.Date;
 
 /**
@@ -162,5 +165,17 @@ public class JobPublishRecordDto {
 
     public void setApproveRemark(String approveRemark) {
         this.approveRemark = approveRemark;
+    }
+
+    public static JobPublishRecordDto from(JobPublishRecord record) {
+        JobPublishRecordDto dto = new JobPublishRecordDto();
+        BeanUtils.copyProperties(record, dto);
+        return dto;
+    }
+
+    public JobPublishRecord toModel() {
+        JobPublishRecord record = new JobPublishRecord();
+        BeanUtils.copyProperties(this, record);
+        return record;
     }
 }

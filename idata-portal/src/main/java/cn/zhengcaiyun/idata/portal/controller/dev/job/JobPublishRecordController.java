@@ -17,10 +17,14 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +40,13 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev/jobs/publishRecords")
 public class JobPublishRecordController {
 
+    private final JobPublishRecordService jobPublishRecordService;
+
+    @Autowired
+    public JobPublishRecordController(JobPublishRecordService jobPublishRecordService) {
+        this.jobPublishRecordService = jobPublishRecordService;
+    }
+
     /**
      * 分页查询版本发布记录
      *
@@ -43,8 +54,10 @@ public class JobPublishRecordController {
      * @return
      */
     @GetMapping("/page")
-    public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(@RequestParam JobPublishRecordCondition condition) {
-        return RestResult.success();
+    public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(@RequestParam JobPublishRecordCondition condition,
+                                                                        @RequestParam(value = "limit") Long limit,
+                                                                        @RequestParam(value = "offset") Long offset) {
+        return RestResult.success(jobPublishRecordService.paging(condition, PageParam.of(limit, offset)));
     }
 
     /**
@@ -55,7 +68,7 @@ public class JobPublishRecordController {
      */
     @PostMapping("/approve")
     public RestResult<Boolean> approve(@RequestBody JobApproveParam param) {
-        return RestResult.success();
+        return RestResult.success(jobPublishRecordService.approve(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -66,7 +79,7 @@ public class JobPublishRecordController {
      */
     @PostMapping("/reject")
     public RestResult<Boolean> reject(@RequestBody JobApproveParam param) {
-        return RestResult.success();
+        return RestResult.success(jobPublishRecordService.reject(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
     public static class JobApproveParam {

@@ -30,10 +30,10 @@ import java.util.Optional;
  * @create: 2021-09-26 15:30
  **/
 public enum PublishStatusEnum {
-    submitted(1, "待发布"),
-    published(2, "已发布"),
-    rejected(4, "已驳回"),
-    Archived(9, "已归档"),
+    SUBMITTED(1, "待发布"),
+    PUBLISHED(2, "已发布"),
+    REJECTED(4, "已驳回"),
+    ARCHIVED(9, "已归档"),
     ;
 
     public final int val;

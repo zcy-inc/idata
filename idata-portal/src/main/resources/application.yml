@@ -58,3 +58,8 @@ hdfs:
   nn2: 172.29.108.185:8020
   basePath: /tmp/shiyin/
   user: hdfs
+
+dev:
+  job:
+    publish:
+      whitelist: 熠然

@@ -19,13 +19,17 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
@@ -87,7 +91,28 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
     }
 
     @Override
-    public Boolean submit(DIJobContent content) {
-        return null;
+    @Transactional
+    public Boolean submit(DIJobContent content, JobPublishRecord publishRecord, String operator) {
+        if (publishRecord.getId() == null) {
+            // 第一次提交
+            updateEditable(content.getId(), EditableEnum.NO, operator);
+            publishRecord.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
+            jobPublishRecordRepo.save(publishRecord);
+        } else {
+            // 归档后再次提交
+            JobPublishRecord submitStatus = new JobPublishRecord();
+            submitStatus.setId(publishRecord.getId());
+            submitStatus.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
+            submitStatus.setEditor(operator);
+            jobPublishRecordRepo.update(submitStatus);
+        }
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public List<DIJobContent> queryList(Long jobId) {
+        return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.jobId, isEqualTo(jobId),
+                        and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(DI_JOB_CONTENT.version));
     }
 }

@@ -19,7 +19,9 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -39,5 +41,7 @@ public interface DIJobContentRepo {
 
     Optional<DIJobContent> query(Long jobId, Integer version);
 
-    Boolean submit(DIJobContent content);
+    Boolean submit(DIJobContent content, JobPublishRecord publishRecord, String operator);
+
+    List<DIJobContent> queryList(Long jobId);
 }

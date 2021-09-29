@@ -18,16 +18,20 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,14 +55,17 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     private final DIJobContentRepo diJobContentRepo;
     private final JobInfoRepo jobInfoRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
+    private final JobPublishManager jobPublishManager;
 
     @Autowired
     public DIJobContentServiceImpl(DIJobContentRepo diJobContentRepo,
                                    JobInfoRepo jobInfoRepo,
-                                   JobPublishRecordRepo jobPublishRecordRepo) {
+                                   JobPublishRecordRepo jobPublishRecordRepo,
+                                   JobPublishManager jobPublishManager) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobInfoRepo = jobInfoRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
+        this.jobPublishManager = jobPublishManager;
     }
 
     @Override
@@ -69,22 +76,24 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
 
         Integer version = contentDto.getVersion();
-        boolean newVersion = true;
+        boolean startNewVersion = true;
         if (Objects.nonNull(version)) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在或已删除");
             DIJobContent existJobContent = jobContentOptional.get();
             if (existJobContent.getEditable().equals(EditableEnum.YES.val)) {
                 // 版本可以编辑，直接覆盖
-                newVersion = false;
+                startNewVersion = false;
                 contentDto.setId(existJobContent.getId());
                 contentDto.setJobId(jobId);
                 contentDto.resetEditor(operator);
                 diJobContentRepo.update(contentDto.toModel());
+            }else {
+                //todo 版本不可编辑时，判断提交内容是否有变化，无变化则不处理，有变化则继续执行新增版本逻辑
             }
         }
 
-        if (newVersion) {
+        if (startNewVersion) {
             // 版本为空或不可编辑，新增版本
             version = diJobContentRepo.newVersion(jobId);
             contentDto.setId(null);
@@ -95,6 +104,56 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         }
 
         return get(jobId, version);
+    }
+
+    @Override
+    public DIJobContentDto get(Long jobId, Integer version) {
+        checkArgument(Objects.nonNull(jobId), "作业编号为空");
+        checkArgument(Objects.nonNull(version), "作业版本号为空");
+
+        Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
+        checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
+        return DIJobContentDto.from(jobContentOptional.get());
+    }
+
+    @Override
+    public DIJobContentDto submit(Long jobId, Integer version, String env, Operator operator) {
+        checkArgument(Objects.nonNull(jobId), "作业编号为空");
+        checkArgument(Objects.nonNull(version), "作业版本号为空");
+        Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
+        checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
+        Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
+        checkArgument(envEnumOptional.isPresent(), "提交环境为空");
+
+        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), operator);
+        return DIJobContentDto.from(jobContentOptional.get());
+    }
+
+    @Override
+    public List<JobContentVersionDto> getVersions(Long jobId) {
+        checkArgument(Objects.nonNull(jobId), "作业编号为空");
+
+        List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(jobId);
+        List<DIJobContent> contentList = diJobContentRepo.queryList(jobId);
+        return assembleContentVersion(publishRecordList, contentList);
+    }
+
+    private List<JobContentVersionDto> assembleContentVersion(List<JobPublishRecord> publishRecordList,
+                                                              List<DIJobContent> contentList) {
+        List<JobContentVersionDto> versionDtoList = Lists.newArrayList();
+        if (ObjectUtils.isNotEmpty(contentList)) {
+            versionDtoList.addAll(contentList.stream()
+                    .filter(content -> content.getEditable().equals(EditableEnum.YES.val))
+                    .map(JobContentVersionDto::from)
+                    .collect(Collectors.toList()));
+        }
+
+        if (ObjectUtils.isNotEmpty(publishRecordList)) {
+            versionDtoList.addAll(publishRecordList.stream()
+                    .map(JobContentVersionDto::from)
+                    .collect(Collectors.toList()));
+        }
+        return versionDtoList;
     }
 
     private void checkJobContent(DIJobContentDto contentDto) {
@@ -113,25 +172,5 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 .filter(columnDto -> Objects.nonNull(columnDto.getMappedColumn()))
                 .collect(Collectors.toList());
         checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");
-    }
-
-    @Override
-    public DIJobContentDto get(Long jobId, Integer version) {
-        checkArgument(Objects.nonNull(jobId), "作业编号为空");
-        checkArgument(Objects.nonNull(version), "作业版本号为空");
-
-        Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
-        checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
-        return DIJobContentDto.from(jobContentOptional.get());
-    }
-
-    @Override
-    public DIJobContentDto submit(Long jobId, Long version, String env, Operator operator) {
-        return null;
-    }
-
-    @Override
-    public List<JobContentVersionDto> getVersions(Long jobId) {
-        return null;
     }
 }

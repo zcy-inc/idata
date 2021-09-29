@@ -17,9 +17,12 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
-import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,10 +32,19 @@ import java.util.Optional;
  **/
 public interface JobPublishRecordRepo {
 
+    Page<JobPublishRecord> paging(JobPublishRecordCondition condition, PageParam pageParam);
+
+    List<JobPublishRecord> queryList(JobPublishRecordCondition condition, long limit, long offset);
+
+    long count(JobPublishRecordCondition condition);
+
     Long save(JobPublishRecord record);
 
-    Boolean updatePublishStatus(Long jobId, Integer version, String environment,
-                                PublishStatusEnum statusEnum, String operator);
+    Boolean update(JobPublishRecord record);
 
     Optional<JobPublishRecord> query(Long jobId, Integer version, String environment);
+
+    Optional<JobPublishRecord> query(Long id);
+
+    List<JobPublishRecord> queryList(Long jobId);
 }

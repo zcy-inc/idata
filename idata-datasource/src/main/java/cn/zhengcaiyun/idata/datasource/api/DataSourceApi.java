@@ -15,26 +15,16 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.datasource.api;
 
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
 
-import java.util.List;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-28 14:07
+ * @create: 2021-09-29 16:57
  **/
-public interface DIJobContentService {
-
-    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
-
-    DIJobContentDto get(Long jobId, Integer version);
-
-    DIJobContentDto submit(Long jobId, Integer version, String env, Operator operator);
-
-    List<JobContentVersionDto> getVersions(Long jobId);
+public interface DataSourceApi {
+    DataSourceDto getDataSource(Long id);
 }

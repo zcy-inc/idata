@@ -17,14 +17,21 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
-import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -42,17 +49,82 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
     }
 
     @Override
-    public Long save(JobPublishRecord record) {
-        return null;
+    public Page<JobPublishRecord> paging(JobPublishRecordCondition condition, PageParam pageParam) {
+        long total = count(condition);
+        List<JobPublishRecord> publishRecordList = null;
+        if (total > 0) {
+            publishRecordList = queryList(condition, pageParam.getLimit(), pageParam.getOffset());
+        }
+        return Page.newOne(publishRecordList, total);
     }
 
     @Override
-    public Boolean updatePublishStatus(Long jobId, Integer version, String environment, PublishStatusEnum statusEnum, String operator) {
-        return null;
+    public List<JobPublishRecord> queryList(JobPublishRecordCondition condition, long limit, long offset) {
+        return jobPublishRecordDao.select(dsl -> dsl.where(
+                                jobPublishRecord.jobId, isEqualToWhenPresent(condition.getJobId()),
+                                and(jobPublishRecord.jobContentVersion, isEqualToWhenPresent(condition.getJobContentVersion())),
+                                and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
+                                and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                                and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                                and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
+                                and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+                        ).orderBy(jobPublishRecord.id.descending())
+                        .limit(limit).offset(offset)
+        );
+    }
+
+    @Override
+    public long count(JobPublishRecordCondition condition) {
+        return jobPublishRecordDao.count(dsl -> dsl.where(
+                jobPublishRecord.jobId, isEqualToWhenPresent(condition.getJobId()),
+                and(jobPublishRecord.jobContentVersion, isEqualToWhenPresent(condition.getJobContentVersion())),
+                and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
+                and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
+                and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+        ));
+    }
+
+    @Override
+    public Long save(JobPublishRecord record) {
+        int ret = jobPublishRecordDao.insertSelective(record);
+        if (ret <= 0) return null;
+        return record.getId();
+    }
+
+    @Override
+    public Boolean update(JobPublishRecord record) {
+        jobPublishRecordDao.updateByPrimaryKeySelective(record);
+        return Boolean.TRUE;
     }
 
     @Override
     public Optional<JobPublishRecord> query(Long jobId, Integer version, String environment) {
-        return Optional.empty();
+        return jobPublishRecordDao.selectOne(dsl -> dsl.where(jobPublishRecord.jobId, isEqualTo(jobId),
+                and(jobPublishRecord.jobContentVersion, isEqualTo(version)),
+                and(jobPublishRecord.environment, isEqualTo(environment)),
+                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
+    public Optional<JobPublishRecord> query(Long id) {
+        Optional<JobPublishRecord> optional = jobPublishRecordDao.selectByPrimaryKey(id);
+        if (optional.isPresent()) {
+            if (optional.get().getDel().equals(DeleteEnum.DEL_YES.val)) {
+                return Optional.empty();
+            }
+        }
+        return optional;
+    }
+
+    @Override
+    public List<JobPublishRecord> queryList(Long jobId) {
+        return jobPublishRecordDao.select(dsl -> dsl.where(jobPublishRecord.jobId, isEqualTo(jobId),
+                        and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(jobPublishRecord.jobContentVersion.descending(),
+                        jobPublishRecord.id.descending()));
     }
 }

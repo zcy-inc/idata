@@ -17,6 +17,9 @@
 
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -70,5 +73,22 @@ public class JobContentVersionDto {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public static JobContentVersionDto from(JobPublishRecord record) {
+        JobContentVersionDto versionDto = new JobContentVersionDto();
+        versionDto.setJobId(record.getJobId());
+        versionDto.setVersion(record.getJobContentVersion());
+        versionDto.setEnvironment(record.getEnvironment());
+        versionDto.setVersionStatus(record.getPublishStatus());
+        return versionDto;
+    }
+
+    public static JobContentVersionDto from(DIJobContent content) {
+        JobContentVersionDto versionDto = new JobContentVersionDto();
+        versionDto.setJobId(content.getJobId());
+        versionDto.setVersion(content.getVersion());
+        versionDto.setVersionStatus(0);
+        return versionDto;
     }
 }

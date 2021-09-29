@@ -47,4 +47,67 @@ public class JobPublishRecordCondition {
      */
     private String submitOperator;
 
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
+    }
+
+    public Long getJobContentId() {
+        return jobContentId;
+    }
+
+    public void setJobContentId(Long jobContentId) {
+        this.jobContentId = jobContentId;
+    }
+
+    public Integer getJobContentVersion() {
+        return jobContentVersion;
+    }
+
+    public void setJobContentVersion(Integer jobContentVersion) {
+        this.jobContentVersion = jobContentVersion;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
+
+    public Integer getPublishStatus() {
+        return publishStatus;
+    }
+
+    public void setPublishStatus(Integer publishStatus) {
+        this.publishStatus = publishStatus;
+    }
+
+    public String getJobTypeCode() {
+        return jobTypeCode;
+    }
+
+    public void setJobTypeCode(String jobTypeCode) {
+        this.jobTypeCode = jobTypeCode;
+    }
+
+    public String getDwLayerCode() {
+        return dwLayerCode;
+    }
+
+    public void setDwLayerCode(String dwLayerCode) {
+        this.dwLayerCode = dwLayerCode;
+    }
+
+    public String getSubmitOperator() {
+        return submitOperator;
+    }
+
+    public void setSubmitOperator(String submitOperator) {
+        this.submitOperator = submitOperator;
+    }
 }

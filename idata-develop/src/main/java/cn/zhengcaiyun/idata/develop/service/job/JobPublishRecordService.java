@@ -18,23 +18,27 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
+import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 
 import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-28 14:07
+ * @create: 2021-09-29 14:34
  **/
-public interface DIJobContentService {
+public interface JobPublishRecordService {
 
-    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
+    Page<JobPublishRecordDto> paging(JobPublishRecordCondition condition, PageParam pageParam);
 
-    DIJobContentDto get(Long jobId, Integer version);
+    Boolean approve(Long id, String remark, Operator operator);
 
-    DIJobContentDto submit(Long jobId, Integer version, String env, Operator operator);
+    Boolean approve(List<Long> ids, String remark, Operator operator);
 
-    List<JobContentVersionDto> getVersions(Long jobId);
+    Boolean reject(Long id, String remark, Operator operator);
+
+    Boolean reject(List<Long> ids, String remark, Operator operator);
 }

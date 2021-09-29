@@ -21,6 +21,11 @@
             <artifactId>idata-connector</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>cn.zhengcaiyun.idata</groupId>
+            <artifactId>idata-datasource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
