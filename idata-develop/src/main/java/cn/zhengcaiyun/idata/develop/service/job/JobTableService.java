@@ -15,4 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.condition;
+package cn.zhengcaiyun.idata.develop.service.job;
+
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.JobTableDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+
+import java.util.List;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-09-30 13:43
+ **/
+public interface JobTableService {
+
+    List<JobTableDto> getTable(DataSourceTypeEnum dataSourceType, Long dataSourceId);
+
+    List<MappingColumnDto> getTableColumn(DataSourceTypeEnum dataSourceType, Long dataSourceId, String tableName);
+}

@@ -21,10 +21,14 @@ import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTableDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobTableService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * job-basic-controller
@@ -37,6 +41,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/p1/dev/jobTables")
 public class JobTableController {
 
+    private final JobTableService jobTableService;
+
+    @Autowired
+    public JobTableController(JobTableService jobTableService) {
+        this.jobTableService = jobTableService;
+    }
+
     /**
      * 获取表
      *
@@ -44,7 +55,7 @@ public class JobTableController {
      * @return
      */
     @GetMapping()
-    public RestResult<JobTableDto> getJobTable(@RequestParam JobTableParam param) {
+    public RestResult<List<JobTableDto>> getJobTable(@RequestParam JobTableParam param) {
         return RestResult.success();
     }
 
@@ -55,7 +66,7 @@ public class JobTableController {
      * @return
      */
     @GetMapping("/columns")
-    public RestResult<MappingColumnDto> getJobTableColumn(@RequestParam JobTableColumnParam param) {
+    public RestResult<List<MappingColumnDto>> getJobTableColumn(@RequestParam JobTableColumnParam param) {
         return RestResult.success();
     }
 
@@ -88,28 +99,16 @@ public class JobTableController {
 
     public static class JobTableColumnParam extends JobTableParam {
         /**
-         * 表id（从数仓设计模块查询时有id）
+         * 表名
          */
-        private Long tableId;
-        /**
-         * 表名（从外部数据库查询出的表只有表名）
-         */
-        private String name;
+        private String tableName;
 
-        public Long getTableId() {
-            return tableId;
+        public String getTableName() {
+            return tableName;
         }
 
-        public void setTableId(Long tableId) {
-            this.tableId = tableId;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
         }
     }
 

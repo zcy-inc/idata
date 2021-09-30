@@ -15,24 +15,31 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dto.job;
+package cn.zhengcaiyun.idata.develop.service.job.impl;
+
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.JobTableDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobTableService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-24 16:00
+ * @create: 2021-09-30 13:44
  **/
-public class JobTableDto {
-    /**
-     * 表名
-     */
-    private String tableName;
+@Service
+public class JobTableServiceImpl implements JobTableService {
 
-    public String getTableName() {
-        return tableName;
+    @Override
+    public List<JobTableDto> getTable(DataSourceTypeEnum dataSourceType, Long dataSourceId) {
+        return null;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    @Override
+    public List<MappingColumnDto> getTableColumn(DataSourceTypeEnum dataSourceType, Long dataSourceId, Long tableId, String tableName) {
+        return null;
     }
 }

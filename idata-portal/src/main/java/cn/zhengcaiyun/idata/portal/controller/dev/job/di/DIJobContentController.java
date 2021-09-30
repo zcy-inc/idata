@@ -17,9 +17,12 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +38,13 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev/jobs/{jobId}/di")
 public class DIJobContentController {
 
+    private final DIJobContentService diJobContentService;
+
+    @Autowired
+    public DIJobContentController(DIJobContentService diJobContentService) {
+        this.diJobContentService = diJobContentService;
+    }
+
     /**
      * 保存作业内容
      *
@@ -45,7 +55,7 @@ public class DIJobContentController {
     @PostMapping("/contents")
     public RestResult<DIJobContentDto> saveContent(@PathVariable("jobId") Long jobId,
                                                    @RequestBody DIJobContentDto contentDto) {
-        return RestResult.success();
+        return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -58,7 +68,7 @@ public class DIJobContentController {
     @GetMapping("/contents/{version}")
     public RestResult<DIJobContentDto> getContent(@PathVariable("jobId") Long jobId,
                                                   @PathVariable("version") Integer version) {
-        return RestResult.success();
+        return RestResult.success(diJobContentService.get(jobId, version));
     }
 
     /**
@@ -69,7 +79,7 @@ public class DIJobContentController {
      */
     @GetMapping("/versions")
     public RestResult<List<JobContentVersionDto>> getJobContentVersion(@PathVariable("jobId") Long jobId) {
-        return RestResult.success();
+        return RestResult.success(diJobContentService.getVersions(jobId));
     }
 
     /**
@@ -82,9 +92,9 @@ public class DIJobContentController {
      */
     @PostMapping("/contents/{version}/submit/{env}")
     public RestResult<DIJobContentDto> submitJob(@PathVariable("jobId") Long jobId,
-                                                 @PathVariable("version") Long version,
+                                                 @PathVariable("version") Integer version,
                                                  @PathVariable("env") String env) {
-        return RestResult.success();
+        return RestResult.success(diJobContentService.submit(jobId, version, env, OperatorContext.getCurrentOperator()));
     }
 
 }

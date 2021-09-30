@@ -63,3 +63,5 @@ dev:
   job:
     publish:
       whitelist: 熠然
+  env:
+    executeQueues: root.offline, root.realtime

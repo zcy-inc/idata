@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, destDataSourceType, destDataSourceId, destTableId, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -73,7 +73,7 @@ public interface DIJobContentDao {
         @Result(column="src_read_shard_key", property="srcReadShardKey", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_type", property="destDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_id", property="destDataSourceId", jdbcType=JdbcType.BIGINT),
-        @Result(column="dest_table_id", property="destTableId", jdbcType=JdbcType.BIGINT),
+        @Result(column="dest_table", property="destTable", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_write_mode", property="destWriteMode", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_before_write", property="destBeforeWrite", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_after_write", property="destAfterWrite", jdbcType=JdbcType.VARCHAR),
@@ -90,12 +90,12 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.countFrom(this::count, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -107,7 +107,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int insert(DIJobContent record) {
-        return MyBatis3Utils.insert(this::insert, record, DI_JOB_CONTENT, c ->
+        return MyBatis3Utils.insert(this::insert, record, DIJobContent, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -123,7 +123,7 @@ public interface DIJobContentDao {
             .map(srcReadShardKey).toProperty("srcReadShardKey")
             .map(destDataSourceType).toProperty("destDataSourceType")
             .map(destDataSourceId).toProperty("destDataSourceId")
-            .map(destTableId).toProperty("destTableId")
+            .map(destTable).toProperty("destTable")
             .map(destWriteMode).toProperty("destWriteMode")
             .map(destBeforeWrite).toProperty("destBeforeWrite")
             .map(destAfterWrite).toProperty("destAfterWrite")
@@ -136,7 +136,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int insertSelective(DIJobContent record) {
-        return MyBatis3Utils.insert(this::insert, record, DI_JOB_CONTENT, c ->
+        return MyBatis3Utils.insert(this::insert, record, DIJobContent, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -152,7 +152,7 @@ public interface DIJobContentDao {
             .map(srcReadShardKey).toPropertyWhenPresent("srcReadShardKey", record::getSrcReadShardKey)
             .map(destDataSourceType).toPropertyWhenPresent("destDataSourceType", record::getDestDataSourceType)
             .map(destDataSourceId).toPropertyWhenPresent("destDataSourceId", record::getDestDataSourceId)
-            .map(destTableId).toPropertyWhenPresent("destTableId", record::getDestTableId)
+            .map(destTable).toPropertyWhenPresent("destTable", record::getDestTable)
             .map(destWriteMode).toPropertyWhenPresent("destWriteMode", record::getDestWriteMode)
             .map(destBeforeWrite).toPropertyWhenPresent("destBeforeWrite", record::getDestBeforeWrite)
             .map(destAfterWrite).toPropertyWhenPresent("destAfterWrite", record::getDestAfterWrite)
@@ -165,17 +165,17 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default Optional<DIJobContent> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default List<DIJobContent> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default List<DIJobContent> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -187,7 +187,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.update(this::update, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -207,7 +207,7 @@ public interface DIJobContentDao {
                 .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
                 .set(destDataSourceType).equalTo(record::getDestDataSourceType)
                 .set(destDataSourceId).equalTo(record::getDestDataSourceId)
-                .set(destTableId).equalTo(record::getDestTableId)
+                .set(destTable).equalTo(record::getDestTable)
                 .set(destWriteMode).equalTo(record::getDestWriteMode)
                 .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalTo(record::getDestAfterWrite)
@@ -234,7 +234,7 @@ public interface DIJobContentDao {
                 .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
                 .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
                 .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
-                .set(destTableId).equalToWhenPresent(record::getDestTableId)
+                .set(destTable).equalToWhenPresent(record::getDestTable)
                 .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
                 .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)
@@ -262,7 +262,7 @@ public interface DIJobContentDao {
             .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
             .set(destDataSourceType).equalTo(record::getDestDataSourceType)
             .set(destDataSourceId).equalTo(record::getDestDataSourceId)
-            .set(destTableId).equalTo(record::getDestTableId)
+            .set(destTable).equalTo(record::getDestTable)
             .set(destWriteMode).equalTo(record::getDestWriteMode)
             .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
             .set(destAfterWrite).equalTo(record::getDestAfterWrite)
@@ -292,7 +292,7 @@ public interface DIJobContentDao {
             .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
             .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
             .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
-            .set(destTableId).equalToWhenPresent(record::getDestTableId)
+            .set(destTable).equalToWhenPresent(record::getDestTable)
             .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
             .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
             .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)

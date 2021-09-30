@@ -75,6 +75,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
 
+        // todo 判断目标表是否在其他job中已经存在
+
         Integer version = contentDto.getVersion();
         boolean startNewVersion = true;
         if (Objects.nonNull(version)) {
@@ -88,7 +90,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 contentDto.setJobId(jobId);
                 contentDto.resetEditor(operator);
                 diJobContentRepo.update(contentDto.toModel());
-            }else {
+            } else {
                 //todo 版本不可编辑时，判断提交内容是否有变化，无变化则不处理，有变化则继续执行新增版本逻辑
             }
         }
@@ -162,7 +164,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getDestDataSourceType()), "目标数据源类型为空");
         checkArgument(Objects.nonNull(contentDto.getDestDataSourceId()), "目标数据源编号为空");
-        checkArgument(Objects.nonNull(contentDto.getDestTableId()), "目标数据表为空");
+        checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()), "来源数据表为空");
         checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");

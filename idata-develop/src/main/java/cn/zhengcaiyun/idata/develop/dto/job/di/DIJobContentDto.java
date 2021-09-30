@@ -66,7 +66,7 @@ public class DIJobContentDto extends BaseDto {
     /**
      * 数据去向-数仓表id
      */
-    private Long destTableId;
+    private String destTable;
 
     /**
      * 数据去向-写入模式，init: 重建表，override：覆盖表
@@ -180,12 +180,12 @@ public class DIJobContentDto extends BaseDto {
         this.destDataSourceId = destDataSourceId;
     }
 
-    public Long getDestTableId() {
-        return destTableId;
+    public String getDestTable() {
+        return destTable;
     }
 
-    public void setDestTableId(Long destTableId) {
-        this.destTableId = destTableId;
+    public void setDestTable(String destTable) {
+        this.destTable = destTable;
     }
 
     public String getDestWriteMode() {
