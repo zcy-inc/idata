@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.condition.job;
 
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -33,6 +35,11 @@ public class JobInfoCondition {
      * 作业类型
      */
     private JobTypeEnum jobType;
+
+    /**
+     * 作业类型枚举code集合
+     */
+    private List<String> jobTypeCodes;
     /**
      * 数仓分层
      */
@@ -84,5 +91,13 @@ public class JobInfoCondition {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    public List<String> getJobTypeCodes() {
+        return jobTypeCodes;
+    }
+
+    public void setJobTypeCodes(List<String> jobTypeCodes) {
+        this.jobTypeCodes = jobTypeCodes;
     }
 }

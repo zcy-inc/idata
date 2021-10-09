@@ -42,6 +42,11 @@ public class JobPublishRecordDto {
     private String dwLayerCode;
 
     /**
+     * 数仓分层（ods, dwd, dws, dim, ads）
+     */
+    private String dwLayerValue;
+
+    /**
      * 环境
      */
     private String environment;
@@ -165,6 +170,14 @@ public class JobPublishRecordDto {
 
     public void setApproveRemark(String approveRemark) {
         this.approveRemark = approveRemark;
+    }
+
+    public String getDwLayerValue() {
+        return dwLayerValue;
+    }
+
+    public void setDwLayerValue(String dwLayerValue) {
+        this.dwLayerValue = dwLayerValue;
     }
 
     public static JobPublishRecordDto from(JobPublishRecord record) {

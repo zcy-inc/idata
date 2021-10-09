@@ -17,11 +17,15 @@
 
 package cn.zhengcaiyun.idata.develop.manager;
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
 import cn.zhengcaiyun.idata.connector.constant.enums.DataSourceEnum;
 import cn.zhengcaiyun.idata.connector.service.Query;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.query.TableDataQueryDto;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
@@ -31,12 +35,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
@@ -49,10 +53,18 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 public class TableQueryManager {
     private static final Logger logger = LoggerFactory.getLogger(TableQueryManager.class);
 
+    private final SysConfigDao sysConfigDao;
+    private final Query query;
+    private final MetadataQueryApi metadataQueryApi;
+
     @Autowired
-    private SysConfigDao sysConfigDao;
-    @Autowired
-    private Query query;
+    public TableQueryManager(SysConfigDao sysConfigDao,
+                             Query query,
+                             MetadataQueryApi metadataQueryApi) {
+        this.sysConfigDao = sysConfigDao;
+        this.query = query;
+        this.metadataQueryApi = metadataQueryApi;
+    }
 
     public QueryResultDto queryData(TableDataQueryDto dataQueryDto) {
         ConnectionCfg connectionDto = getConnectionInfo();
@@ -114,5 +126,20 @@ public class TableQueryManager {
             cfg.setDataSourceEnum(DataSourceEnum.PRESTO);
         }
         return cfg;
+    }
+
+    public List<String> getTableNames(DataSourceTypeEnum sourceTypeEnum, DbConfigDto configDto) {
+        return metadataQueryApi.getTableNames(sourceTypeEnum, configDto.getHost(), configDto.getPort(),
+                configDto.getUsername(), configDto.getPassword(), configDto.getDbName(), configDto.getSchema());
+    }
+
+    public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, DbConfigDto configDto, String tableName) {
+        return metadataQueryApi.getTableColumns(sourceTypeEnum, configDto.getHost(), configDto.getPort(),
+                configDto.getUsername(), configDto.getPassword(), configDto.getDbName(), configDto.getSchema(), tableName);
+    }
+
+    public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, DbConfigDto configDto, String tableName) {
+        return metadataQueryApi.getTablePrimaryKeys(sourceTypeEnum, configDto.getHost(), configDto.getPort(),
+                configDto.getUsername(), configDto.getPassword(), configDto.getDbName(), configDto.getSchema(), tableName);
     }
 }

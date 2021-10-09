@@ -44,4 +44,6 @@ public interface DIJobContentRepo {
     Boolean submit(DIJobContent content, JobPublishRecord publishRecord, String operator);
 
     List<DIJobContent> queryList(Long jobId);
+
+    List<DIJobContent> queryList(String destTable);
 }

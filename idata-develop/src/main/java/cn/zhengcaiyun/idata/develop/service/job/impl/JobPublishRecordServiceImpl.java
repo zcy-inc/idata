@@ -21,20 +21,21 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
+import cn.zhengcaiyun.idata.develop.constant.Constants;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
+import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
+import cn.zhengcaiyun.idata.develop.service.label.EnumService;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -50,12 +51,15 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobPublishManager jobPublishManager;
+    private final EnumService enumService;
 
     @Autowired
     public JobPublishRecordServiceImpl(JobPublishRecordRepo jobPublishRecordRepo,
-                                       JobPublishManager jobPublishManager) {
+                                       JobPublishManager jobPublishManager,
+                                       EnumService enumService) {
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobPublishManager = jobPublishManager;
+        this.enumService = enumService;
     }
 
     @Override
@@ -64,10 +68,16 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         if (ObjectUtils.isEmpty(page.getContent())) {
             return Page.empty();
         }
-        return Page.newOne(page.getContent().stream()
-                        .map(JobPublishRecordDto::from)
-                        .collect(Collectors.toList()),
-                page.getTotal());
+
+        // 获取数仓分层
+        Map<String, String> dwLayerMap = getDwLayer();
+        List<JobPublishRecordDto> dtoList = page.getContent().stream()
+                .map(record -> {
+                    JobPublishRecordDto dto = JobPublishRecordDto.from(record);
+                    dto.setDwLayerValue(dwLayerMap.get(dto.getDwLayerCode()));
+                    return dto;
+                }).collect(Collectors.toList());
+        return Page.newOne(dtoList, page.getTotal());
     }
 
     @Override
@@ -120,5 +130,13 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         checkArgument(ids == null || ids.size() == 0, "记录编号为空");
         ids.stream().forEach(id -> reject(id, remark, operator));
         return Boolean.TRUE;
+    }
+
+    private Map<String, String> getDwLayer() {
+        List<EnumValueDto> enumValueDtoList = enumService.getEnumValues(Constants.DW_LAYER_ENUM_CODE);
+        if (ObjectUtils.isEmpty(enumValueDtoList)) return Maps.newHashMap();
+
+        return enumValueDtoList.stream()
+                .collect(Collectors.toMap(EnumValueDto::getValueCode, EnumValueDto::getEnumValue));
     }
 }

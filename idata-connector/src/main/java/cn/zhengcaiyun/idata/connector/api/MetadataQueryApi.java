@@ -18,7 +18,10 @@
 package cn.zhengcaiyun.idata.connector.api;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+
+import java.util.List;
 
 /**
  * @description:
@@ -31,4 +34,13 @@ public interface MetadataQueryApi {
 
     Boolean testConnection(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
                            String dbName, String schema);
+
+    List<String> getTableNames(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
+                               String dbName, String schema);
+
+    List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
+                                        String dbName, String schema, String tableName);
+
+    List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
+                                           String dbName, String schema, String tableName);
 }

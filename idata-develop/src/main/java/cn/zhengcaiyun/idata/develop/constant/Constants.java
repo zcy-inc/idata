@@ -15,34 +15,15 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
-
-import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-
-import java.util.List;
-import java.util.Optional;
+package cn.zhengcaiyun.idata.develop.constant;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-26 16:56
+ * @create: 2021-10-09 17:41
  **/
-public interface JobInfoRepo {
+public class Constants {
 
-    Long saveJobInfo(JobInfo info);
+    public static final String DW_LAYER_ENUM_CODE = "dwLayerEnum:ENUM";
 
-    Boolean updateJobInfo(JobInfo info);
-
-    Optional<JobInfo> queryJobInfo(Long id);
-
-    Boolean deleteJobInfo(Long id, String operator);
-
-    List<JobInfo> queryJobInfoByName(String name);
-
-    Long countJobInfo(JobInfoCondition condition);
-
-    List<JobInfo> queryJobInfo(JobInfoCondition condition);
-
-    long count(JobInfoCondition condition);
 }

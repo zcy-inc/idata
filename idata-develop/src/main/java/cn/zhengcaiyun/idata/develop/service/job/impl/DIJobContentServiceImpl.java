@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -74,8 +75,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkJobContent(contentDto);
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
-
-        // todo 判断目标表是否在其他job中已经存在
+        // 判断目标表是否在其他job中已经存在
+        checkArgument(unUsedDestTable(contentDto.getDestTable(), jobId), "目标表已经被其他作业使用");
 
         Integer version = contentDto.getVersion();
         boolean startNewVersion = true;
@@ -175,4 +176,17 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 .collect(Collectors.toList());
         checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");
     }
+
+    private boolean unUsedDestTable(String destTable, Long excludeJobId) {
+        List<DIJobContent> diJobContents = diJobContentRepo.queryList(destTable);
+        if (ObjectUtils.isEmpty(diJobContents)) return true;
+
+        Set<Long> jobIdSet = diJobContents.stream()
+                .map(DIJobContent::getJobId)
+                .distinct()
+                .filter(job_id -> !job_id.equals(excludeJobId))
+                .collect(Collectors.toSet());
+        return ObjectUtils.isEmpty(jobIdSet);
+    }
+
 }

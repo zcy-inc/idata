@@ -99,6 +99,19 @@ public class JobInfoRepoImpl implements JobInfoRepo {
         String jobType = Objects.isNull(condition.getJobType()) ? null : condition.getJobType().getCode();
         return jobInfoDao.select(dsl -> dsl.where(jobInfo.folderId, isEqualToWhenPresent(condition.getFolderId()),
                 and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
+                and(jobInfo.jobType, isInWhenPresent(condition.getJobTypeCodes())),
+                and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
+                and(jobInfo.name, isLikeWhenPresent(condition.getName())),
+                and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
+    public long count(JobInfoCondition condition) {
+        String jobType = Objects.isNull(condition.getJobType()) ? null : condition.getJobType().getCode();
+        return jobInfoDao.count(dsl -> dsl.where(jobInfo.folderId, isEqualToWhenPresent(condition.getFolderId()),
+                and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
+                and(jobInfo.jobType, isInWhenPresent(condition.getJobTypeCodes())),
                 and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
                 and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
                 and(jobInfo.name, isLikeWhenPresent(condition.getName())),

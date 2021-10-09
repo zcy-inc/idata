@@ -19,10 +19,12 @@ package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
@@ -76,6 +80,88 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
             logger.warn("test connection failed. ex: {}", ex);
         }
         return false;
+    }
+
+    @Override
+    public List<String> getTableNames(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema) {
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+            return Lists.newArrayList();
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        if (StringUtils.isBlank(jdbcUrl)) {
+            return Lists.newArrayList();
+        }
+
+        List<String> tableNames = Lists.newArrayList();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+             ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
+            while (rs.next()) {
+                String tableName = rs.getString("TABLE_NAME");  //表名
+                String tableType = rs.getString("TABLE_TYPE");  //表类型
+                String remarks = rs.getString("REMARKS");       //表备注
+                tableNames.add(tableName);
+            }
+        } catch (SQLException ex) {
+            logger.warn("getTableNames failed. ex: {}", ex);
+        }
+        return tableNames;
+    }
+
+    @Override
+    public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+            return Lists.newArrayList();
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        if (StringUtils.isBlank(jdbcUrl)) {
+            return Lists.newArrayList();
+        }
+
+        List<ColumnInfoDto> tableColumns = Lists.newArrayList();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+             ResultSet rs = conn.getMetaData().getColumns(null, "%", tableName, "%")) {
+            while (rs.next()) {
+                String columnName = rs.getString("COLUMN_NAME");  //列名
+                String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
+                String remarks = rs.getString("REMARKS");  //列描述
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                columnInfoDto.setColumnName(columnName);
+                columnInfoDto.setColumnComment(remarks);
+                columnInfoDto.setColumnType(dataTypeName);
+                tableColumns.add(columnInfoDto);
+            }
+        } catch (SQLException ex) {
+            logger.warn("getTableColumns failed. ex: {}", ex);
+        }
+        return tableColumns;
+    }
+
+    @Override
+    public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+            return Lists.newArrayList();
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        if (StringUtils.isBlank(jdbcUrl)) {
+            return Lists.newArrayList();
+        }
+
+        List<ColumnInfoDto> tableNames = Lists.newArrayList();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+             ResultSet rs = conn.getMetaData().getPrimaryKeys(null, null, tableName)) {
+            while (rs.next()) {
+                short keySeq = rs.getShort("KEY_SEQ"); //序列号(主键内值1表示主键第一列，值2代表主键内的第二列)
+                String pkName = rs.getString("PK_NAME"); //主键名称
+                String columnName = rs.getString("COLUMN_NAME");  //列名
+                String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
+                String remarks = rs.getString("REMARKS");  //列描述
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                columnInfoDto.setColumnName(columnName);
+                columnInfoDto.setColumnComment(remarks);
+                columnInfoDto.setColumnType(dataTypeName);
+                tableNames.add(columnInfoDto);
+            }
+        } catch (SQLException ex) {
+            logger.warn("getTablePrimaryKey failed. ex: {}", ex);
+        }
+        return tableNames;
     }
 
     private String getConnectionCfg() {

@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
+import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -41,12 +42,12 @@ public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier<String> {
 
     @Override
     public List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum) {
-        return null;
+        return Lists.newArrayList();
     }
 
     @Override
     public Long countBizNode(FunctionModuleEnum moduleEnum, Long folderId) {
-        return Long.MAX_VALUE;
+        return 0L;
     }
 
     @Override

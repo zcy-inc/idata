@@ -56,7 +56,7 @@ public class JobTableController {
      */
     @GetMapping()
     public RestResult<List<JobTableDto>> getJobTable(@RequestParam JobTableParam param) {
-        return RestResult.success();
+        return RestResult.success(jobTableService.getTable(param.getDataSourceType(), param.getDataSourceId()));
     }
 
     /**
@@ -67,7 +67,7 @@ public class JobTableController {
      */
     @GetMapping("/columns")
     public RestResult<List<MappingColumnDto>> getJobTableColumn(@RequestParam JobTableColumnParam param) {
-        return RestResult.success();
+        return RestResult.success(jobTableService.getTableColumn(param.getDataSourceType(), param.getDataSourceId(), param.getTableName()));
     }
 
     public static class JobTableParam {
