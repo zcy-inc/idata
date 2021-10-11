@@ -214,6 +214,12 @@ public class LabelServiceImpl implements LabelService {
     }
 
     @Override
+    public String getLabelDefineCode(Long labelDefineId) {
+        return devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.id, isEqualTo(labelDefineId)))).get().getLabelCode();
+    }
+
+    @Override
     public List<LabelDefineDto> findDefines(String subjectType, String labelTag) {
         checkArgument(subjectType != null || labelTag != null,
                 "subjectType和labelTag不能同时为空");
@@ -243,6 +249,28 @@ public class LabelServiceImpl implements LabelService {
         }
         return devLabelDefineDao.selectMany(builder.orderBy(devLabelDefine.labelIndex).build()
                         .render(RenderingStrategies.MYBATIS3))
+                .stream().map(devLabelDefine -> {
+                    LabelDefineDto labelDefineDto = PojoUtil.copyOne(devLabelDefine, LabelDefineDto.class);
+                    if (labelDefineDto.getLabelParamType() != null
+                            && labelDefineDto.getLabelParamType().endsWith(":ENUM")) {
+                        labelDefineDto.setEnumValues(
+                                enumService.getEnumValues(
+                                        labelDefineDto.getLabelParamType()));
+                    }
+                    return labelDefineDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LabelDefineDto> findAllDefines() {
+        var builder = select(devLabelDefine.allColumns()).from(devLabelDefine)
+                .where(devLabelDefine.del, isNotEqualTo(1))
+                .and(devLabelDefine.labelTag, isNotLike("%_METRIC_LABEL%"))
+                .and(devLabelDefine.labelTag, isNotLike(LabelTagEnum.DIMENSION_LABEL.name() + "%"))
+                .and(devLabelDefine.labelTag, isNotLike(LabelTagEnum.MODIFIER_LABEL.name() + "%"));
+        return devLabelDefineDao.selectMany(builder.orderBy(devLabelDefine.labelIndex).build()
+                .render(RenderingStrategies.MYBATIS3))
                 .stream().map(devLabelDefine -> {
                     LabelDefineDto labelDefineDto = PojoUtil.copyOne(devLabelDefine, LabelDefineDto.class);
                     if (labelDefineDto.getLabelParamType() != null

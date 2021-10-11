@@ -175,7 +175,13 @@ public class EnumServiceImpl implements EnumService {
     }
 
     @Override
-    public List<EnumDto> getEnumNames() {
+    public String getEnumCode(Long enumId) {
+        return devEnumDao.selectOne(c -> c.where(devEnum.del, isNotEqualTo(1), and(devLabel.id, isEqualTo(enumId))))
+                .get().getEnumCode();
+    }
+
+    @Override
+    public List<EnumDto> getEnums() {
         return PojoUtil.copyList(devEnumDao.select(c ->
                 c.where(devEnum.del, isNotEqualTo(1))), EnumDto.class);
     }

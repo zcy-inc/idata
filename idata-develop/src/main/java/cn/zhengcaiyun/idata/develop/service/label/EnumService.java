@@ -30,7 +30,8 @@ import java.util.List;
 public interface EnumService {
     EnumDto createOrEdit(EnumDto enumDto, String operator);
     EnumDto findEnum(String enumCode);
-    List<EnumDto> getEnumNames();
+    String getEnumCode(Long enumId);
+    List<EnumDto> getEnums();
     List<EnumValueDto> getEnumValues(String enumCode);
     String getEnumName(String enumCode);
     String getEnumValue(String valueCode);

@@ -49,7 +49,7 @@ public class EnumController {
 
     @GetMapping("enumNames")
     public RestResult<List<EnumDto>> getEnumNames() {
-        return RestResult.success(enumService.getEnumNames());
+        return RestResult.success(enumService.getEnums());
     }
 
     @GetMapping("enumValues")
