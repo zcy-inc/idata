@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.schDagId;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -72,4 +73,11 @@ public class JobExecuteConfigRepoImpl implements JobExecuteConfigRepo {
                 and(jobExecuteConfig.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
+
+    @Override
+    public Long countDagJob(Long dagId) {
+        return jobExecuteConfigDao.count(dsl -> dsl.where(jobExecuteConfig.schDagId, isEqualTo(schDagId),
+                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
 }

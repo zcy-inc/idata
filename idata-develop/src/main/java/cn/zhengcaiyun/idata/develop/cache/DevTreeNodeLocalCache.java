@@ -68,7 +68,7 @@ public class DevTreeNodeLocalCache {
 
     @PostConstruct
     public void initCache() {
-        refreshAll();
+//        refreshAll();
     }
 
     private DevTreeNodeCacheValue load(FunctionModuleEnum moduleEnum) {

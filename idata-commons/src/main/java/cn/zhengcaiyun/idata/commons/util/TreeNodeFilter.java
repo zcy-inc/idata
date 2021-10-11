@@ -59,7 +59,7 @@ public class TreeNodeFilter<N extends TreeNodeDto> {
         public FilterCondition(String keyWord, Long id) {
             this.keyWord = keyWord;
             this.id = id;
-            this.keyWordPattern = Pattern.compile(keyWord);
+            this.keyWordPattern = Pattern.compile("^(.*" + keyWord + ".*)$", Pattern.CASE_INSENSITIVE);
             // 重用 Matcher，不可用于多线程场景
             this.keyWordMatcher = this.keyWordPattern.matcher("");
         }

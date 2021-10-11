@@ -62,22 +62,22 @@ public class CompositeFolderRepoImpl implements CompositeFolderRepo {
     @Override
     public List<CompositeFolder> queryAllFolder() {
         return compositeFolderDao.select(dsl -> dsl.where(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val))
-                .orderBy(compositeFolder.id.descending()));
+                .orderBy(compositeFolder.id));
     }
 
     @Override
     public List<CompositeFolder> queryFolder(FunctionModuleEnum moduleEnum) {
         return compositeFolderDao.select(dsl -> dsl.where(
-                        compositeFolder.belong, isEqualTo(moduleEnum.name()),
+                        compositeFolder.belong, isEqualTo(moduleEnum.code),
                         and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(compositeFolder.id.descending()));
+                .orderBy(compositeFolder.id));
     }
 
     @Override
     public List<CompositeFolder> querySubFolder(Long parentId) {
         return compositeFolderDao.select(dsl -> dsl.where(compositeFolder.parentId, isEqualTo(parentId),
                         and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(compositeFolder.id.descending()));
+                .orderBy(compositeFolder.id));
     }
 
     @Override
@@ -118,7 +118,7 @@ public class CompositeFolderRepoImpl implements CompositeFolderRepo {
     @Override
     public Optional<CompositeFolder> queryFolder(String name, FunctionModuleEnum moduleEnum) {
         return compositeFolderDao.selectOne(dsl -> dsl.where(compositeFolder.name, isEqualTo(name),
-                        and(compositeFolder.belong, isEqualTo(moduleEnum.name())),
+                        and(compositeFolder.belong, isEqualTo(moduleEnum.code)),
                         and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(compositeFolder.id.descending())
                 .limit(1));
@@ -128,6 +128,6 @@ public class CompositeFolderRepoImpl implements CompositeFolderRepo {
         return compositeFolderDao.select(dsl -> dsl.where(
                         compositeFolder.type, isEqualTo(typeEnum.name()),
                         and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(compositeFolder.id.descending()));
+                .orderBy(compositeFolder.id));
     }
 }

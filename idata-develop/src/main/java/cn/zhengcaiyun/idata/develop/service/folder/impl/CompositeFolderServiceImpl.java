@@ -32,7 +32,6 @@ import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
@@ -105,11 +104,13 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
 
         checkArgument(StringUtils.isNotBlank(folderDto.getName()), "文件夹名称为空");
         Optional<CompositeFolder> dupNameFolderOptional = compositeFolderRepo.queryFolder(folderDto.getName(), folderDto.getParentId());
-        checkArgument(dupNameFolderOptional.isPresent(), "父文件夹下存在同名文件夹");
+        checkArgument(dupNameFolderOptional.isEmpty(), "父文件夹下存在同名文件夹");
 
         folderDto.setOperator(operator);
         CompositeFolder folder = folderDto.toModel();
-        return compositeFolderRepo.createFolder(folder);
+        Long folderId = compositeFolderRepo.createFolder(folder);
+        devTreeNodeLocalCache.invalidate(moduleEnumOptional.get());
+        return folderId;
     }
 
     @Override
@@ -135,7 +136,9 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
 
         folderDto.resetEditor(operator);
         CompositeFolder folder = folderDto.toModel();
-        return compositeFolderRepo.updateFolder(folder);
+        Boolean ret = compositeFolderRepo.updateFolder(folder);
+        devTreeNodeLocalCache.invalidate(moduleEnumOptional.get());
+        return ret;
     }
 
     @Override
@@ -164,10 +167,12 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         if (supplierOptional.isEmpty()) return false;
         BizTreeNodeSupplier supplier = supplierOptional.get();
         Long bizNodeCount = supplier.countBizNode(moduleEnumOptional.get(), id);
-        checkArgument(bizNodeCount != null && bizNodeCount > 0, "存在子文件，不能删除该文件夹");
+        checkArgument(bizNodeCount == null || bizNodeCount <= 0, "存在子文件，不能删除该文件夹");
 
         // 软删除，修改del状态
-        return compositeFolderRepo.deleteFolder(id, operator.getNickname());
+        Boolean ret = compositeFolderRepo.deleteFolder(id, operator.getNickname());
+        devTreeNodeLocalCache.invalidate(moduleEnumOptional.get());
+        return ret;
     }
 
     @Override
@@ -191,16 +196,13 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         }
 
         Set<String> funCodeSet = Sets.newHashSet();
-        Splitter splitter = Splitter.on(".").omitEmptyStrings().trimResults();
         for (String belong : belongFunctions) {
             if (StringUtils.isNotBlank(belong)) {
-                List<String> codes = splitter.splitToList(belong);
                 funCodeSet.add(belong);
-                funCodeSet.add(codes.get(0));
             }
         }
         return moduleEnumList.stream()
-                .filter(moduleEnum -> funCodeSet.contains(moduleEnum.name()))
+                .filter(moduleEnum -> funCodeSet.contains(moduleEnum.code))
                 .collect(Collectors.toList());
     }
 

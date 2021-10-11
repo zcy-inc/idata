@@ -52,7 +52,7 @@ create table if not exists dev_dag_schedule
     cron_expression   varchar(200)        null comment 'cron表达式',
     unique key idx_dag_id(dag_id)
 ) engine = innodb
-  auto_increment = 1000
+  auto_increment = 10001
   default charset = utf8mb4 comment '数据开发-dag-调度配置表';
 
 create table if not exists dev_job_info

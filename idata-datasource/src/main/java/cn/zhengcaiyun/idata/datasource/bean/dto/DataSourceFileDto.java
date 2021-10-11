@@ -27,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -118,6 +119,7 @@ public class DataSourceFileDto extends BaseDto {
         DataSourceFileDto dto = new DataSourceFileDto();
         BeanUtils.copyProperties(file, dto);
 
+        dto.setType(DataSourceTypeEnum.valueOf(file.getType()));
         if (StringUtils.isNotBlank(file.getEnvironments())) {
             String[] envArray = file.getEnvironments().split(",");
             dto.setEnvList(Arrays.stream(envArray)
@@ -131,6 +133,7 @@ public class DataSourceFileDto extends BaseDto {
     public DataSourceFile toModel() {
         DataSourceFile file = new DataSourceFile();
         BeanUtils.copyProperties(this, file);
+        file.setType(Objects.isNull(this.type) ? null : this.type.name());
         if (ObjectUtils.isNotEmpty(envList)) {
             file.setEnvironments(envList.stream()
                     .map(Enum::name)

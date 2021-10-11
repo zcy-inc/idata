@@ -17,8 +17,11 @@
 
 package cn.zhengcaiyun.idata.datasource.dal.repo.impl;
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDao;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
@@ -32,7 +35,6 @@ import java.util.Optional;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDynamicSqlSupport.dataSource;
-import static java.util.Objects.nonNull;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -55,19 +57,17 @@ public class DataSourceRepoImpl implements DataSourceRepo {
         long total = countDataSource(condition);
         List<DataSource> dataSources = null;
         if (total > 0) {
-            dataSources = queryDataSource(condition, pageParam.getLimit(), pageParam.getLimit());
+            dataSources = queryDataSource(condition, pageParam.getLimit(), pageParam.getOffset());
         }
         return Page.newOne(dataSources, total);
     }
 
     @Override
     public List<DataSource> queryDataSource(DataSourceCondition condition, long limit, long offset) {
-        String type = nonNull(condition.getType()) ? condition.getType().name() : null;
-        String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
         return dataSourceDao.select(dsl -> dsl.where(
-                                dataSource.type, isEqualToWhenPresent(type),
-                                and(dataSource.environments, isLikeWhenPresent(env)),
-                                and(dataSource.name, isLikeWhenPresent(condition.getName())),
+                                dataSource.type, isEqualToWhenPresent(condition.getType()).map(DataSourceTypeEnum::name),
+                                and(dataSource.environments, isLikeWhenPresent(condition.getEnv()).map(EnvEnum::name).map(MybatisHelper::appendWildCards)),
+                                and(dataSource.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                                 and(dataSource.del, isEqualTo(DEL_NO.val))
                         ).orderBy(dataSource.id.descending())
                         .limit(limit).offset(offset)
@@ -76,12 +76,10 @@ public class DataSourceRepoImpl implements DataSourceRepo {
 
     @Override
     public long countDataSource(DataSourceCondition condition) {
-        String type = nonNull(condition.getType()) ? condition.getType().name() : null;
-        String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
         return dataSourceDao.count(dsl -> dsl.where(
-                dataSource.type, isEqualToWhenPresent(type),
-                and(dataSource.environments, isLikeWhenPresent(env)),
-                and(dataSource.name, isLikeWhenPresent(condition.getName())),
+                dataSource.type, isEqualToWhenPresent(condition.getType()).map(DataSourceTypeEnum::name),
+                and(dataSource.environments, isLikeWhenPresent(condition.getEnv()).map(EnvEnum::name).map(MybatisHelper::appendWildCards)),
+                and(dataSource.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(dataSource.del, isEqualTo(DEL_NO.val))
         ));
     }

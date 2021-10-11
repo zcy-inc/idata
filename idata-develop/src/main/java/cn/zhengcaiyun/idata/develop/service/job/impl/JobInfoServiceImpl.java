@@ -86,6 +86,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     public Boolean removeJobInfo(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
         //todo 更新后通知 ds
+        // todo 删除作业其他信息
         return jobInfoRepo.deleteJobInfo(jobInfo.getId(), operator.getNickname());
     }
 

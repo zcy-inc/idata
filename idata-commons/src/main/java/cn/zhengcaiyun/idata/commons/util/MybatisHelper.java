@@ -15,28 +15,15 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
-
-import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
-
-import java.util.List;
-import java.util.Optional;
+package cn.zhengcaiyun.idata.commons.util;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-27 16:14
+ * @create: 2021-10-11 15:21
  **/
-public interface JobExecuteConfigRepo {
-
-    Long save(JobExecuteConfig config);
-
-    Boolean update(JobExecuteConfig config);
-
-    Optional<JobExecuteConfig> query(Long jobId, String environment);
-
-    List<JobExecuteConfig> queryList(Long jobId, JobExecuteConfigCondition condition);
-
-    Long countDagJob(Long dagId);
+public class MybatisHelper {
+    public static String appendWildCards(String in) {
+        return "%" + in + "%";
+    }
 }

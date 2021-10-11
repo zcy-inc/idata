@@ -83,7 +83,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         Optional<DataSource> optional = dataSourceRepo.queryDataSource(id);
         checkArgument(optional.isPresent(), "数据源不存在");
         DataSource source = optional.get();
-        checkState(Objects.equals(DeleteEnum.DEL_YES.val, source.getDel()), "数据源已删除");
+        checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
         return DataSourceDto.from(source);
     }
 
@@ -115,7 +115,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         Optional<DataSource> optional = dataSourceRepo.queryDataSource(dto.getId());
         checkArgument(optional.isPresent(), "数据源不存在");
         DataSource source = optional.get();
-        checkState(Objects.equals(DeleteEnum.DEL_YES.val, source.getDel()), "数据源已删除");
+        checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
 
         dto.setEditor(operator.getNickname());
         boolean ret = dataSourceRepo.updateDataSource(dto.toModel());
@@ -185,7 +185,6 @@ public class DataSourceServiceImpl implements DataSourceService {
                 checkArgument(StringUtils.isNotBlank(cfg.getDbName()), "数据库名称为空");
                 checkArgument(StringUtils.isNotBlank(cfg.getUsername()), "数据库用户名为空");
                 checkArgument(StringUtils.isNotBlank(cfg.getPassword()), "数据库密码为空");
-                checkArgument(StringUtils.isNotBlank(cfg.getSchema()), "数据库目录为空");
             }
 
             cfgMap.put(cfg.getEnv(), cfg);

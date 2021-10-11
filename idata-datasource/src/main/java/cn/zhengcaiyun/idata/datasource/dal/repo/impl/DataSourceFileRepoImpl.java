@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.datasource.dal.repo.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceFileCondition;
 import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceFileDao;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSourceFile;
@@ -54,7 +55,7 @@ public class DataSourceFileRepoImpl implements DataSourceFileRepo {
         long total = countDataSourceFile(condition);
         List<DataSourceFile> dataSourceFiles = null;
         if (total > 0) {
-            dataSourceFiles = queryDataSourceFile(condition, pageParam.getLimit(), pageParam.getLimit());
+            dataSourceFiles = queryDataSourceFile(condition, pageParam.getLimit(), pageParam.getOffset());
         }
         return Page.newOne(dataSourceFiles, total);
     }
@@ -65,8 +66,8 @@ public class DataSourceFileRepoImpl implements DataSourceFileRepo {
         String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
         return dataSourceFileDao.select(dsl -> dsl.where(
                                 dataSourceFile.type, isEqualToWhenPresent(type),
-                                and(dataSourceFile.environments, isLikeWhenPresent(env)),
-                                and(dataSourceFile.name, isLikeWhenPresent(condition.getName())),
+                                and(dataSourceFile.environments, isLikeWhenPresent(env).map(MybatisHelper::appendWildCards)),
+                                and(dataSourceFile.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                                 and(dataSourceFile.del, isEqualTo(DEL_NO.val))
                         ).orderBy(dataSourceFile.id.descending())
                         .limit(limit).offset(offset)
@@ -79,8 +80,8 @@ public class DataSourceFileRepoImpl implements DataSourceFileRepo {
         String env = nonNull(condition.getEnv()) ? condition.getEnv().name() : null;
         return dataSourceFileDao.count(dsl -> dsl.where(
                 dataSourceFile.type, isEqualToWhenPresent(type),
-                and(dataSourceFile.environments, isLikeWhenPresent(env)),
-                and(dataSourceFile.name, isLikeWhenPresent(condition.getName())),
+                and(dataSourceFile.environments, isLikeWhenPresent(env).map(MybatisHelper::appendWildCards)),
+                and(dataSourceFile.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(dataSourceFile.del, isEqualTo(DEL_NO.val))
         ));
     }

@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGScheduleDto;
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @description:
@@ -49,10 +51,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class DAGServiceImpl implements DAGService {
 
     private final DAGRepo dagRepo;
+    private final JobExecuteConfigRepo jobExecuteConfigRepo;
 
     @Autowired
-    public DAGServiceImpl(DAGRepo dagRepo) {
+    public DAGServiceImpl(DAGRepo dagRepo,
+                          JobExecuteConfigRepo jobExecuteConfigRepo) {
         this.dagRepo = dagRepo;
+        this.jobExecuteConfigRepo = jobExecuteConfigRepo;
     }
 
     @Override
@@ -113,7 +118,9 @@ public class DAGServiceImpl implements DAGService {
     @Override
     public Boolean removeDag(Long id, Operator operator) {
         tryFetchDAGInfo(id);
-        // todo 删除时确定是否有作业依赖，有则不能删除
+        // 删除时确定是否有作业依赖，有则不能删除
+        long jobCount = jobExecuteConfigRepo.countDagJob(id);
+        checkState(jobCount > 0, "该DAG存在作业依赖，不能删除");
         return dagRepo.deleteDAG(id, operator.getNickname());
     }
 

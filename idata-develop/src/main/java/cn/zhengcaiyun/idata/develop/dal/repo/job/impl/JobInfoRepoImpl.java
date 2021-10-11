@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
@@ -90,7 +91,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
                 and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
                 and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
-                and(jobInfo.name, isLikeWhenPresent(condition.getName())),
+                and(jobInfo.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
@@ -102,7 +103,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 and(jobInfo.jobType, isInWhenPresent(condition.getJobTypeCodes())),
                 and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
                 and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
-                and(jobInfo.name, isLikeWhenPresent(condition.getName())),
+                and(jobInfo.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
@@ -114,7 +115,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 and(jobInfo.jobType, isInWhenPresent(condition.getJobTypeCodes())),
                 and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
                 and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
-                and(jobInfo.name, isLikeWhenPresent(condition.getName())),
+                and(jobInfo.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 }
