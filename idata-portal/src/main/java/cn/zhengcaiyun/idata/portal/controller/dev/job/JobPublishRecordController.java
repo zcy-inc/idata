@@ -54,7 +54,7 @@ public class JobPublishRecordController {
      * @return
      */
     @GetMapping("/page")
-    public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(@RequestParam JobPublishRecordCondition condition,
+    public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(JobPublishRecordCondition condition,
                                                                         @RequestParam(value = "limit") Long limit,
                                                                         @RequestParam(value = "offset") Long offset) {
         return RestResult.success(jobPublishRecordService.paging(condition, PageParam.of(limit, offset)));

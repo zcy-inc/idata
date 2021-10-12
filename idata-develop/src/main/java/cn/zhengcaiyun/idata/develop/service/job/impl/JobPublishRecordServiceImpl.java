@@ -100,7 +100,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     @Override
     public Boolean approve(List<Long> ids, String remark, Operator operator) {
         checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
-        checkArgument(ids == null || ids.size() == 0, "记录编号为空");
+        checkArgument(ObjectUtils.isNotEmpty(ids), "记录编号为空");
         ids.stream().forEach(id -> approve(id, remark, operator));
         return Boolean.TRUE;
     }
@@ -127,7 +127,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     @Override
     public Boolean reject(List<Long> ids, String remark, Operator operator) {
         checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
-        checkArgument(ids == null || ids.size() == 0, "记录编号为空");
+        checkArgument(ObjectUtils.isNotEmpty(ids), "记录编号为空");
         ids.stream().forEach(id -> reject(id, remark, operator));
         return Boolean.TRUE;
     }

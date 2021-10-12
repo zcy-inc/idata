@@ -21,12 +21,16 @@ import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,5 +130,23 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                         and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(jobPublishRecord.jobContentVersion.descending(),
                         jobPublishRecord.id.descending()));
+    }
+
+    @Override
+    @Transactional
+    public Boolean publish(JobPublishRecord record, String operator) {
+        jobPublishRecordDao.update(dsl -> dsl.set(jobPublishRecord.publishStatus).equalTo(PublishStatusEnum.ARCHIVED.val)
+                .where(jobPublishRecord.jobId, isEqualTo(record.getJobId()),
+                        and(jobPublishRecord.environment, isEqualTo(record.getEnvironment())),
+                        and(jobPublishRecord.publishStatus, isEqualTo(PublishStatusEnum.PUBLISHED.val))));
+        //更新状态为发布
+        JobPublishRecord publishedRecord = new JobPublishRecord();
+        publishedRecord.setId(record.getId());
+        publishedRecord.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+        publishedRecord.setApproveOperator(operator);
+        publishedRecord.setApproveTime(new Date());
+        publishedRecord.setApproveRemark(Strings.nullToEmpty(record.getApproveRemark()));
+        update(publishedRecord);
+        return Boolean.TRUE;
     }
 }

@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -125,7 +124,8 @@ public class JobPublishManager {
 
     private void postSubmit(JobPublishRecord publishRecord, Operator operator) {
         // 确定提交人是否有发布权限，有则直接发布
-        if (!hasPublishPermission(operator)) return;
+        if (EnvEnum.prod.name().equals(publishRecord.getEnvironment())
+                && !hasPublishPermission(operator)) return;
 
         //更新状态为发布
         toPublish(publishRecord, operator);
@@ -134,13 +134,7 @@ public class JobPublishManager {
     }
 
     private void toPublish(JobPublishRecord publishRecord, Operator operator) {
-        //更新状态为发布
-        JobPublishRecord toPublished = new JobPublishRecord();
-        toPublished.setId(publishRecord.getId());
-        toPublished.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
-        toPublished.setApproveOperator(operator.getNickname());
-        toPublished.setApproveTime(new Date());
-        jobPublishRecordRepo.update(toPublished);
+        jobPublishRecordRepo.publish(publishRecord, operator.getNickname());
     }
 
     public boolean publish(JobPublishRecord publishRecord, Operator operator) {

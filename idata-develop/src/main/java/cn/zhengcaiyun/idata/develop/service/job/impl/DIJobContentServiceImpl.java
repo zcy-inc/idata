@@ -90,9 +90,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 contentDto.setId(existJobContent.getId());
                 contentDto.setJobId(jobId);
                 contentDto.resetEditor(operator);
-                diJobContentRepo.update(contentDto.toModel());
-            } else {
-                //todo 版本不可编辑时，判断提交内容是否有变化，无变化则不处理，有变化则继续执行新增版本逻辑
+                DIJobContent updateContent = contentDto.toModel();
+                updateContent.setEditable(EditableEnum.YES.val);
+                diJobContentRepo.update(updateContent);
             }
         }
 
@@ -103,7 +103,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
             contentDto.setJobId(jobId);
             contentDto.setVersion(version);
             contentDto.setOperator(operator);
-            diJobContentRepo.save(contentDto.toModel());
+            DIJobContent newVersionContent = contentDto.toModel();
+            newVersionContent.setEditable(EditableEnum.YES.val);
+            diJobContentRepo.save(newVersionContent);
         }
 
         return get(jobId, version);
