@@ -211,7 +211,7 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
 
         List<DevTreeNodeDto> nodeDtoList = Lists.newArrayList();
         for (FunctionModuleEnum moduleEnum : moduleEnumList) {
-            Optional<DevTreeNodeCacheValue> optional = devTreeNodeLocalCache.get(moduleEnum);
+            Optional<DevTreeNodeCacheValue> optional = devTreeNodeLocalCache.getDuplicate(moduleEnum);
             if (optional.isPresent()) {
                 DevTreeNodeCacheValue cacheValue = optional.get();
                 if (ObjectUtils.isNotEmpty(cacheValue.getFolders())) {

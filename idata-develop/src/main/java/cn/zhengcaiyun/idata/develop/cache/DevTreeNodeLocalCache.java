@@ -93,9 +93,9 @@ public class DevTreeNodeLocalCache {
         return new DevTreeNodeCacheValue(moduleEnum, folders, records);
     }
 
-    public Optional<DevTreeNodeCacheValue> get(FunctionModuleEnum moduleEnum) {
+    public Optional<DevTreeNodeCacheValue> getDuplicate(FunctionModuleEnum moduleEnum) {
         try {
-            return Optional.ofNullable(cache.get(moduleEnum));
+            return Optional.ofNullable(cache.get(moduleEnum)).map(val -> val.copy());
         } catch (Exception ex) {
             logger.warn("get DevTreeNodeCacheValue of {} failed. ex: {}.", moduleEnum.name(), Throwables.getStackTraceAsString(ex));
         }

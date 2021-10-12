@@ -94,7 +94,8 @@ public class TreeNodeGenerator<N extends TreeNodeDto> {
         }
         for (N nodeDto : nodeDtoList) {
             nodeDto.setParentCid(parentCid);
-            nodeDto.setChildren(makeTree(nodeDto.getId().toString(), nodeDto, listMultimap, curLevel + 1, maxLevel));
+            if (nodeDto.canHasChildren())
+                nodeDto.setChildren(makeTree(nodeDto.getId().toString(), nodeDto, listMultimap, curLevel + 1, maxLevel));
         }
         return nodeDtoList;
     }

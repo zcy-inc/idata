@@ -21,6 +21,9 @@ import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import com.google.common.collect.ImmutableList;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -49,5 +52,35 @@ public class DevTreeNodeCacheValue {
 
     public ImmutableList<DevTreeNodeDto> getRecords() {
         return records;
+    }
+
+    public DevTreeNodeCacheValue copy() {
+        ImmutableList<DevTreeNodeDto> newFolders = null;
+        if (this.folders != null && this.folders.size() > 0) {
+            List<DevTreeNodeDto> dtoList = this.folders.parallelStream()
+                    .map(this::copyTreeNode)
+                    .collect(Collectors.toList());
+            newFolders = ImmutableList.copyOf(dtoList);
+        }
+
+        ImmutableList<DevTreeNodeDto> newRecords = null;
+        if (this.records != null && this.records.size() > 0) {
+            List<DevTreeNodeDto> dtoList = this.records.parallelStream()
+                    .map(this::copyTreeNode)
+                    .collect(Collectors.toList());
+            newRecords = ImmutableList.copyOf(dtoList);
+        }
+
+        return new DevTreeNodeCacheValue(this.moduleEnum, newFolders, newRecords);
+    }
+
+    private DevTreeNodeDto copyTreeNode(DevTreeNodeDto old) {
+        DevTreeNodeDto dto = new DevTreeNodeDto();
+        dto.setId(old.getId());
+        dto.setName(old.getName());
+        dto.setParentId(old.getParentId());
+        dto.setType(old.getType());
+        dto.setBelong(old.getBelong());
+        return dto;
     }
 }

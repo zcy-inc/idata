@@ -5,6 +5,9 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -99,12 +102,15 @@ public class JobInfoDto extends BaseDto {
     public static JobInfoDto from(JobInfo info) {
         JobInfoDto dto = new JobInfoDto();
         BeanUtils.copyProperties(info, dto);
+        Optional<JobTypeEnum> typeEnumOptional = JobTypeEnum.getEnum(info.getJobType());
+        typeEnumOptional.ifPresent(typeEnum -> dto.setJobType(typeEnum));
         return dto;
     }
 
     public JobInfo toModel() {
         JobInfo info = new JobInfo();
         BeanUtils.copyProperties(this, info);
+        info.setJobType(Objects.isNull(this.jobType) ? null : this.jobType.getCode());
         return info;
     }
 }
