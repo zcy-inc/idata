@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
@@ -38,7 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
@@ -84,6 +85,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private MetadataQueryApi metadataQueryApi;
     @Autowired
     private MetabaseService metabaseService;
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -269,6 +272,8 @@ public class TableInfoServiceImpl implements TableInfoService {
                 echoTableInfoDto.setForeignKeys(echoForeignKeyDtoList);
             }
         }
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_TABLE);
 
         return echoTableInfoDto;
     }
@@ -333,6 +338,8 @@ public class TableInfoServiceImpl implements TableInfoService {
                 existForeignKeyList.forEach(existForeignKey -> foreignKeyService.delete(existForeignKey.getId(), operator));
             }
         }
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_TABLE);
 
         return echoTableInfoDto;
     }
@@ -375,6 +382,8 @@ public class TableInfoServiceImpl implements TableInfoService {
         // 删除tableInfo表记录
         devTableInfoDao.update(c -> c.set(devTableInfo.del).equalTo(1).set(devTableInfo.editor).equalTo(operator)
                 .where(devTableInfo.id, isEqualTo(tableId)));
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_TABLE);
 
         return deleteSuccess;
     }
