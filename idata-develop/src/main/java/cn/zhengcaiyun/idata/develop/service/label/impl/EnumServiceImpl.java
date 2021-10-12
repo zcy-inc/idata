@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.service.label.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
@@ -60,6 +62,8 @@ public class EnumServiceImpl implements EnumService {
     private DevTableInfoDao devTableInfoDao;
     @Autowired
     private DevLabelDefineMyDao devLabelDefineMyDao;
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -119,6 +123,9 @@ public class EnumServiceImpl implements EnumService {
                 });
             }
         }
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+
         return PojoUtil.copyOne(devEnumDao.selectOne(c ->
                 c.where(devEnum.enumCode, isEqualTo(enumDto.getEnumCode()))).get(), EnumDto.class);
     }
@@ -176,8 +183,9 @@ public class EnumServiceImpl implements EnumService {
 
     @Override
     public String getEnumCode(Long enumId) {
-        return devEnumDao.selectOne(c -> c.where(devEnum.del, isNotEqualTo(1), and(devLabel.id, isEqualTo(enumId))))
-                .get().getEnumCode();
+        DevEnum enumDto = devEnumDao.selectOne(c -> c.where(devEnum.del, isNotEqualTo(1), and(devLabel.id, isEqualTo(enumId))))
+                .orElseThrow(() -> new IllegalArgumentException("枚举不存在"));
+        return enumDto.getEnumCode();
     }
 
     @Override
@@ -267,6 +275,9 @@ public class EnumServiceImpl implements EnumService {
                 .set(devEnumValue.editor).equalTo(operator)
                 .where(devEnumValue.enumCode, isEqualTo(enumCode),
                         and(devEnumValue.del, isNotEqualTo(1))));
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+
         return true;
     }
 }

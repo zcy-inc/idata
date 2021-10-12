@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.service.label.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
@@ -71,6 +73,8 @@ public class LabelServiceImpl implements LabelService {
     private EnumService enumService;
     @Autowired
     private DevEnumValueDao devEnumValueDao;
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     private final String DB_NAME = "dbName:LABEL";
     private final String COL_COMMENT = "columnComment:LABEL";
@@ -160,6 +164,9 @@ public class LabelServiceImpl implements LabelService {
             labelDefine.setEditTime(new Timestamp(System.currentTimeMillis()));
             devLabelDefineDao.updateByPrimaryKey(labelDefine);
         }
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
+
         return PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
                         c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
                 LabelDefineDto.class);
@@ -215,8 +222,9 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public String getLabelDefineCode(Long labelDefineId) {
-        return devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.id, isEqualTo(labelDefineId)))).get().getLabelCode();
+        DevLabelDefine labelDefineDto = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.id, isEqualTo(labelDefineId)))).orElseThrow(() -> new IllegalArgumentException("标签不存在"));
+        return labelDefineDto.getLabelCode();
     }
 
     @Override
@@ -300,6 +308,9 @@ public class LabelServiceImpl implements LabelService {
         devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
                 .where(devLabel.labelCode, isEqualTo(labelCode),
                         and(devLabel.del, isNotEqualTo(1))));
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
+
         return true;
     }
 
