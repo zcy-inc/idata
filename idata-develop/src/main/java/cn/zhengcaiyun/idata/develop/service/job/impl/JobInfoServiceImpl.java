@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
@@ -43,10 +45,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JobInfoServiceImpl implements JobInfoService {
 
     private final JobInfoRepo jobInfoRepo;
+    private final DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Autowired
-    public JobInfoServiceImpl(JobInfoRepo jobInfoRepo) {
+    public JobInfoServiceImpl(JobInfoRepo jobInfoRepo, DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
+        this.devTreeNodeLocalCache = devTreeNodeLocalCache;
     }
 
     @Override
@@ -59,7 +63,9 @@ public class JobInfoServiceImpl implements JobInfoService {
         dto.setOperator(operator);
 
         JobInfo info = dto.toModel();
-        return jobInfoRepo.saveJobInfo(info);
+        Long jobId = jobInfoRepo.saveJobInfo(info);
+        devTreeNodeLocalCache.invalidate(dto.getJobType().belong());
+        return jobId;
     }
 
     @Override
@@ -73,7 +79,10 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         dto.setStatus(null);
         dto.resetEditor(operator);
-        return jobInfoRepo.updateJobInfo(dto.toModel());
+
+        Boolean ret = jobInfoRepo.updateJobInfo(dto.toModel());
+        devTreeNodeLocalCache.invalidate(dto.getJobType().belong());
+        return ret;
     }
 
     @Override
@@ -87,7 +96,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobInfo jobInfo = tryFetchJobInfo(id);
         //todo 更新后通知 ds
         // todo 删除作业其他信息
-        return jobInfoRepo.deleteJobInfo(jobInfo.getId(), operator.getNickname());
+
+        Boolean ret = jobInfoRepo.deleteJobInfo(jobInfo.getId(), operator.getNickname());
+
+        JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
+        return ret;
     }
 
     @Override

@@ -19,7 +19,9 @@ package cn.zhengcaiyun.idata.develop.service.dag.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -52,12 +54,15 @@ public class DAGServiceImpl implements DAGService {
 
     private final DAGRepo dagRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
+    private final DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Autowired
     public DAGServiceImpl(DAGRepo dagRepo,
-                          JobExecuteConfigRepo jobExecuteConfigRepo) {
+                          JobExecuteConfigRepo jobExecuteConfigRepo,
+                          DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.dagRepo = dagRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
+        this.devTreeNodeLocalCache = devTreeNodeLocalCache;
     }
 
     @Override
@@ -74,7 +79,9 @@ public class DAGServiceImpl implements DAGService {
 
         DAGInfo info = dagInfoDto.toModel();
         DAGSchedule schedule = dagScheduleDto.toModel();
-        return dagRepo.saveDAG(info, schedule);
+        Long dagId = dagRepo.saveDAG(info, schedule);
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
+        return dagId;
     }
 
     @Override
@@ -98,9 +105,10 @@ public class DAGServiceImpl implements DAGService {
         dagScheduleDto.setDagId(info.getId());
         dagScheduleDto.resetEditor(operator);
         DAGSchedule schedule = dagScheduleDto.toModel();
-
+        Boolean ret = dagRepo.updateDAG(info, schedule);
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
         //todo 更新后通知 ds
-        return dagRepo.updateDAG(info, schedule);
+        return ret;
     }
 
     @Override
@@ -121,7 +129,9 @@ public class DAGServiceImpl implements DAGService {
         // 删除时确定是否有作业依赖，有则不能删除
         long jobCount = jobExecuteConfigRepo.countDagJob(id);
         checkState(jobCount > 0, "该DAG存在作业依赖，不能删除");
-        return dagRepo.deleteDAG(id, operator.getNickname());
+        Boolean ret = dagRepo.deleteDAG(id, operator.getNickname());
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
+        return ret;
     }
 
     @Override
