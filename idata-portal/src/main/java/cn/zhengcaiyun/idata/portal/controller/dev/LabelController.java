@@ -17,14 +17,17 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author caizhedong
@@ -42,6 +45,13 @@ public class LabelController {
 
     @GetMapping("labelDefine")
     public RestResult<LabelDefineDto> findDefine(@RequestParam("labelCode") String labelCode) {
+        return RestResult.success(labelService.findDefine(labelCode));
+    }
+
+    @GetMapping("labelDefines/{labelDefineId}")
+    public RestResult<LabelDefineDto> getLabelDefine(@PathVariable(value = "labelDefineId") Long labelDefineId) {
+        String labelCode = labelService.getLabelDefineCode(labelDefineId);
+        checkArgument(StringUtils.isNotBlank(labelCode), "标签编号不存在");
         return RestResult.success(labelService.findDefine(labelCode));
     }
 
