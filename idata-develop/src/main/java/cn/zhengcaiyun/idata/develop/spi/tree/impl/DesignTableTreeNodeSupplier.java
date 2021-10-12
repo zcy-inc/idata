@@ -60,8 +60,7 @@ public class DesignTableTreeNodeSupplier implements BizTreeNodeSupplier<DevTable
     public List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum) {
         List<DevTableInfo> tableInfoList = devTableInfoDao.selectMany(select(devTableInfo.allColumns())
                 .from(devTableInfo)
-                .leftJoin(devLabel).on(devTableInfo.id, equalTo(devLabel.tableId))
-                .where(devLabel.del, isNotEqualTo(1))
+                .where(devTableInfo.del, isNotEqualTo(1))
                 .build().render(RenderingStrategies.MYBATIS3));
         if (tableInfoList.size() <= 0) return Lists.newArrayList();
 
