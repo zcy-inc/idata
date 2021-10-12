@@ -57,7 +57,7 @@ public class DevTreeNodeCacheValue {
     public DevTreeNodeCacheValue copy() {
         ImmutableList<DevTreeNodeDto> newFolders = null;
         if (this.folders != null && this.folders.size() > 0) {
-            List<DevTreeNodeDto> dtoList = this.folders.parallelStream()
+            List<DevTreeNodeDto> dtoList = this.folders.stream()
                     .map(this::copyTreeNode)
                     .collect(Collectors.toList());
             newFolders = ImmutableList.copyOf(dtoList);
@@ -65,7 +65,7 @@ public class DevTreeNodeCacheValue {
 
         ImmutableList<DevTreeNodeDto> newRecords = null;
         if (this.records != null && this.records.size() > 0) {
-            List<DevTreeNodeDto> dtoList = this.records.parallelStream()
+            List<DevTreeNodeDto> dtoList = this.records.stream()
                     .map(this::copyTreeNode)
                     .collect(Collectors.toList());
             newRecords = ImmutableList.copyOf(dtoList);
