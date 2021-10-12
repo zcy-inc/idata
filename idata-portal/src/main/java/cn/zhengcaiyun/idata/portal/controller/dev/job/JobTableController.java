@@ -25,7 +25,6 @@ import cn.zhengcaiyun.idata.develop.service.job.JobTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -55,7 +54,7 @@ public class JobTableController {
      * @return
      */
     @GetMapping()
-    public RestResult<List<JobTableDto>> getJobTable(@RequestParam JobTableParam param) {
+    public RestResult<List<JobTableDto>> getJobTable(JobTableParam param) {
         return RestResult.success(jobTableService.getTable(param.getDataSourceType(), param.getDataSourceId()));
     }
 
@@ -66,7 +65,7 @@ public class JobTableController {
      * @return
      */
     @GetMapping("/columns")
-    public RestResult<List<MappingColumnDto>> getJobTableColumn(@RequestParam JobTableColumnParam param) {
+    public RestResult<List<MappingColumnDto>> getJobTableColumn(JobTableColumnParam param) {
         return RestResult.success(jobTableService.getTableColumn(param.getDataSourceType(), param.getDataSourceId(), param.getTableName()));
     }
 

@@ -84,7 +84,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public List<String> getTableNames(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema) {
-        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
         String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
         if (StringUtils.isBlank(jdbcUrl)) {
@@ -93,7 +93,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
         List<String> tableNames = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
+             ResultSet rs = conn.getMetaData().getTables(dbName, "%", "%", new String[]{"TABLE"})) {
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");  //表名
                 String tableType = rs.getString("TABLE_TYPE");  //表类型
@@ -108,7 +108,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
-        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
         String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
         if (StringUtils.isBlank(jdbcUrl)) {
@@ -117,7 +117,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
         List<ColumnInfoDto> tableColumns = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getColumns(null, "%", tableName, "%")) {
+             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");  //列名
                 String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
@@ -136,32 +136,30 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
-        if (DataSourceTypeEnum.mysql != sourceTypeEnum || DataSourceTypeEnum.postgresql != sourceTypeEnum)
+        if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
         String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
         if (StringUtils.isBlank(jdbcUrl)) {
             return Lists.newArrayList();
         }
 
-        List<ColumnInfoDto> tableNames = Lists.newArrayList();
+        List<ColumnInfoDto> tableColumns = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getPrimaryKeys(null, null, tableName)) {
+             ResultSet rs = conn.getMetaData().getPrimaryKeys(dbName, "%", tableName)) {
             while (rs.next()) {
                 short keySeq = rs.getShort("KEY_SEQ"); //序列号(主键内值1表示主键第一列，值2代表主键内的第二列)
                 String pkName = rs.getString("PK_NAME"); //主键名称
                 String columnName = rs.getString("COLUMN_NAME");  //列名
-                String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
-                String remarks = rs.getString("REMARKS");  //列描述
                 ColumnInfoDto columnInfoDto = new ColumnInfoDto();
                 columnInfoDto.setColumnName(columnName);
-                columnInfoDto.setColumnComment(remarks);
-                columnInfoDto.setColumnType(dataTypeName);
-                tableNames.add(columnInfoDto);
+                columnInfoDto.setColumnComment(null);
+                columnInfoDto.setColumnType(null);
+                tableColumns.add(columnInfoDto);
             }
         } catch (SQLException ex) {
             logger.warn("getTablePrimaryKey failed. ex: {}", ex);
         }
-        return tableNames;
+        return tableColumns;
     }
 
     private String getConnectionCfg() {

@@ -119,6 +119,7 @@ public class DataSourceDto {
         DataSourceDto dto = new DataSourceDto();
         BeanUtils.copyProperties(dataSource, dto);
 
+        dto.setType(DataSourceTypeEnum.valueOf(dataSource.getType()));
         if (StringUtils.isNotBlank(dataSource.getEnvironments())) {
             String[] envArray = dataSource.getEnvironments().split(",");
             dto.setEnvList(Arrays.stream(envArray)

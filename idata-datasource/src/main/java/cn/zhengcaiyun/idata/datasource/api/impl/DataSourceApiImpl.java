@@ -53,7 +53,7 @@ public class DataSourceApiImpl implements DataSourceApi {
         Optional<DataSource> optional = dataSourceRepo.queryDataSource(id);
         checkArgument(optional.isPresent(), "数据源不存在");
         DataSource source = optional.get();
-        checkState(Objects.equals(DeleteEnum.DEL_YES.val, source.getDel()), "数据源已删除");
+        checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
         return DataSourceDto.from(source);
     }
 }
