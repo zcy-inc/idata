@@ -44,7 +44,8 @@ pg:
     password: MUhSwEHb1Yx0
 
 livy:
-  baseUrl: http://cdh4.cai-inc.com:8998
+#  baseUrl: http://cdh4.cai-inc.com:8998
+  baseUrl: http://172.29.108.194:8998
   sessionMax: 10
   dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
 
@@ -62,6 +63,6 @@ hdfs:
 dev:
   job:
     publish:
-      whitelist: 熠然
+      whitelist: 熠然,大时,惜文,缤纷
   env:
     executeQueues: root.offline, root.realtime

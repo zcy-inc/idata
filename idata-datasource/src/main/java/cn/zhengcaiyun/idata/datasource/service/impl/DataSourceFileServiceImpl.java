@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.datasource.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.connector.api.DataQueryApi;
@@ -29,11 +30,14 @@ import cn.zhengcaiyun.idata.datasource.dal.model.DataSourceFile;
 import cn.zhengcaiyun.idata.datasource.dal.repo.DataSourceFileRepo;
 import cn.zhengcaiyun.idata.datasource.manager.DataSourceFileManager;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceFileService;
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,8 +105,37 @@ public class DataSourceFileServiceImpl implements DataSourceFileService {
     @Override
     public QueryResultDto getDataSourceFileData(DataSourceFileDto dto, PageParam pageParam) {
         checkDataSourceFile(dto);
-        QueryResultDto resultDto = dataQueryApi.queryData("", "", pageParam.getLimit(), pageParam.getOffset());
+        List<String> db_table = Splitter.on(".").omitEmptyStrings().splitToList(dto.getName());
+        checkArgument(db_table.size() == 2, "名称格式不正确");
+
+        EnvEnum prodEnvEnum = null;
+        for (EnvEnum envEnum : dto.getEnvList()) {
+            if (EnvEnum.prod == envEnum) prodEnvEnum = envEnum;
+        }
+        String envPrefix = prodEnvEnum != null ? "" : dto.getEnvList().get(0).name() + "_";
+        QueryResultDto resultDto = dataQueryApi.queryData(envPrefix + db_table.get(0), db_table.get(1), pageParam.getLimit(), pageParam.getOffset());
         return resultDto;
+    }
+
+    @Override
+    public String importSourceFileData(InputStream originFileStream, String originFileName, String destTableName, String environments) {
+        checkArgument(Objects.nonNull(originFileStream), "文件未上传成功");
+        checkArgument(StringUtils.isNotBlank(originFileName), "文件名称为空");
+        checkArgument(StringUtils.isNotBlank(destTableName), "目标表名为空");
+        checkArgument(StringUtils.isNotBlank(environments), "环境名称为空");
+        List<String> db_table = Splitter.on(".").omitEmptyStrings().splitToList(destTableName);
+        checkArgument(db_table.size() == 2, "目标表名称格式不正确");
+
+        List<String> envList = Splitter.on(",").omitEmptyStrings().splitToList(environments);
+        List<EnvEnum> envEnumList = envList.stream()
+                .map(EnvEnum::getEnum)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        checkArgument(envEnumList.size() == envList.size(), "环境名称不正确");
+
+        dataSourceFileManager.importSourceFileData(originFileStream, originFileName, destTableName, envEnumList);
+        return destTableName;
     }
 
     private void checkDataSourceFile(DataSourceFileDto dto) {

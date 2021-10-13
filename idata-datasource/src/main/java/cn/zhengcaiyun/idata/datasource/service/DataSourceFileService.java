@@ -24,6 +24,8 @@ import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceFileCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceFileDto;
 
+import java.io.InputStream;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -37,4 +39,6 @@ public interface DataSourceFileService {
     DataSourceFileDto addDataSourceFile(DataSourceFileDto dto, Operator operator);
 
     QueryResultDto getDataSourceFileData(DataSourceFileDto dto, PageParam pageParam);
+
+    String importSourceFileData(InputStream originFileStream, String originFileName, String destTableName, String environments);
 }

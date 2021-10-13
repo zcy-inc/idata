@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Random;
 
 @Service
 public class HdfsService implements InitializingBean, DisposableBean {
@@ -100,7 +99,7 @@ public class HdfsService implements InitializingBean, DisposableBean {
     }
 
     private String uploadFile(InputStream inputStream, String filePath, String originalName) {
-        String hdfsFilePath = filePath + (10000 + new Random().nextInt(9999)) + "_" + originalName;
+        String hdfsFilePath = filePath + System.currentTimeMillis() + "_" + originalName;
         try {
             IOUtils.copyBytes(inputStream, fs.create(new Path(hdfsFilePath)), 4096, true);
             return hdfsFilePath;

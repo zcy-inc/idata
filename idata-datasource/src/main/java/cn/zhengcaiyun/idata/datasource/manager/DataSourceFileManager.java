@@ -17,7 +17,16 @@
 
 package cn.zhengcaiyun.idata.datasource.manager;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
+import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * @description:
@@ -26,4 +35,32 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class DataSourceFileManager {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFileManager.class);
+
+    private final HdfsService hdfsService;
+    private final LivyService livyService;
+
+    @Autowired
+    public DataSourceFileManager(HdfsService hdfsService, LivyService livyService) {
+        this.hdfsService = hdfsService;
+        this.livyService = livyService;
+    }
+
+    public Boolean importSourceFileData(InputStream fileStream, String originFileName, String destTableName, List<EnvEnum> envList) {
+        String hdfsFilePath = hdfsService.uploadFileToCsv(fileStream, originFileName);
+        for (EnvEnum envEnum : envList) {
+            String tableName = EnvEnum.prod == envEnum ? destTableName : (envEnum.name() + "_" + destTableName);
+            String code = String.format("spark.read.option(\"header\", true).option(\"inferSchema\", true)"
+                            + ".csv(\"%s\").write.mode(\"overwrite\").saveAsTable(\"%s\")",
+                    hdfsFilePath, tableName);
+            livyService.submitSparkCode(code);
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException ex) {
+                LOGGER.warn("spark 导入数据失败", ex);
+            }
+        }
+        return Boolean.TRUE;
+    }
 }

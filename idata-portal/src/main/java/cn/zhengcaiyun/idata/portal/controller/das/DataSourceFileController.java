@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.portal.controller.das;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -29,6 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -80,18 +83,25 @@ public class DataSourceFileController {
      * 上传csv文件数据源
      *
      * @param file
-     * @param dto
+     * @param destTableName 表名，格式：库名.表名
+     * @param environments  环境，多环境用,号分隔
      * @return
      */
     @PostMapping("/datasources/files/upload")
     public RestResult<String> uploadDataSourceFile(@RequestPart MultipartFile file,
-                                                   @RequestBody DataSourceFileDto dto) {
+                                                   @RequestParam(value = "destTableName") String destTableName,
+                                                   @RequestParam(value = "environments") String environments) {
         checkArgument(!file.isEmpty(), "上传的文件不能为空");
         checkArgument(file.getSize() > 0, "上传的文件大小需要大于0kb");
         String originFileName = file.getOriginalFilename();
         checkArgument(StringUtils.isNotBlank(originFileName), "文件名称不能为空");
-
-        return RestResult.success();
+        String tableName = null;
+        try {
+            tableName = dataSourceFileService.importSourceFileData(file.getInputStream(), originFileName, destTableName, environments);
+        } catch (IOException ex) {
+            throw new GeneralException("上传文件失败", ex);
+        }
+        return RestResult.success(tableName);
     }
 
     /**
