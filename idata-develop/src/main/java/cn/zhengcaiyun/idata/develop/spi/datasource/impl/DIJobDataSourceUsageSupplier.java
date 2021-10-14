@@ -19,9 +19,12 @@ package cn.zhengcaiyun.idata.develop.spi.datasource.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.datasource.spi.DataSourceUsageSupplier;
+import cn.zhengcaiyun.idata.datasource.spi.DataSourceUsageSupplierFactory;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @description:
@@ -36,6 +39,11 @@ public class DIJobDataSourceUsageSupplier implements DataSourceUsageSupplier {
     @Autowired
     public DIJobDataSourceUsageSupplier(DIJobContentRepo diJobContentRepo) {
         this.diJobContentRepo = diJobContentRepo;
+    }
+
+    @PostConstruct
+    public void register() {
+        DataSourceUsageSupplierFactory.register("DIJob", this);
     }
 
     @Override

@@ -99,23 +99,24 @@ public class JobInfoRepoImpl implements JobInfoRepo {
     @Override
     @Transactional
     public Boolean deleteJobAndSubInfo(JobInfo job, String operator) {
+        final Long jobId = job.getId();
         jobInfoDao.update(dsl -> dsl.set(jobInfo.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobInfo.editor).equalTo(operator)
-                .where(jobInfo.id, isEqualTo(job.getId())));
+                .where(jobInfo.id, isEqualTo(jobId)));
 
         jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobExecuteConfig.editor).equalTo(operator)
-                .where(jobExecuteConfig.jobId, isEqualTo(job.getId())));
+                .where(jobExecuteConfig.jobId, isEqualTo(jobId)));
 
         jobPublishRecordDao.update(dsl -> dsl.set(jobPublishRecord.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobPublishRecord.editor).equalTo(operator)
-                .where(jobPublishRecord.jobId, isEqualTo(job.getId())));
+                .where(jobPublishRecord.jobId, isEqualTo(jobId)));
 
         if (JobTypeEnum.DI_BATCH.getCode().equals(job.getJobType())
                 || JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
             diJobContentDao.update(dsl -> dsl.set(DI_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
                     .set(DI_JOB_CONTENT.editor).equalTo(operator)
-                    .where(DI_JOB_CONTENT.jobId, isEqualTo(job.getId())));
+                    .where(DI_JOB_CONTENT.jobId, isEqualTo(jobId)));
         }
         return Boolean.TRUE;
     }
