@@ -38,6 +38,8 @@ public interface JobInfoRepo {
 
     Boolean deleteJobInfo(Long id, String operator);
 
+    Boolean deleteJobAndSubInfo(JobInfo jobInfo, String operator);
+
     List<JobInfo> queryJobInfoByName(String name);
 
     Long countJobInfo(JobInfoCondition condition);

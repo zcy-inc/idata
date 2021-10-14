@@ -20,8 +20,13 @@ package cn.zhengcaiyun.idata.datasource.manager;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+import cn.zhengcaiyun.idata.datasource.spi.DataSourceUsageSupplier;
+import cn.zhengcaiyun.idata.datasource.spi.DataSourceUsageSupplierFactory;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @description:
@@ -32,14 +37,28 @@ import org.springframework.stereotype.Component;
 public class DataSourceManager {
 
     private final MetadataQueryApi metadataQueryApi;
+    private final DataSourceUsageSupplierFactory dataSourceUsageSupplierFactory;
 
     @Autowired
-    public DataSourceManager(MetadataQueryApi metadataQueryApi) {
+    public DataSourceManager(MetadataQueryApi metadataQueryApi,
+                             DataSourceUsageSupplierFactory dataSourceUsageSupplierFactory) {
         this.metadataQueryApi = metadataQueryApi;
+        this.dataSourceUsageSupplierFactory = dataSourceUsageSupplierFactory;
     }
 
     public Boolean testConnectionWithJDBC(DataSourceTypeEnum dataSourceType, DbConfigDto dto) {
         return metadataQueryApi.testConnection(dataSourceType, dto.getHost(), dto.getPort(), dto.getUsername(), dto.getPassword(),
                 dto.getDbName(), dto.getSchema());
+    }
+
+    public boolean checkInUsing(DataSourceTypeEnum dataSourceType, Long dataSourceId) {
+        List<DataSourceUsageSupplier> suppliers = dataSourceUsageSupplierFactory.getSuppliers();
+        if (ObjectUtils.isEmpty(suppliers)) return false;
+
+        for (DataSourceUsageSupplier supplier : suppliers) {
+            boolean inUsing = supplier.inUsing(dataSourceType, dataSourceId);
+            if (inUsing) return true;
+        }
+        return false;
     }
 }

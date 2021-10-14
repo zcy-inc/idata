@@ -15,4 +15,15 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.spi;
+package cn.zhengcaiyun.idata.datasource.spi;
+
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-10-14 10:32
+ **/
+public interface DataSourceUsageSupplier {
+    boolean inUsing(DataSourceTypeEnum dataSourceType, Long dataSourceId);
+}

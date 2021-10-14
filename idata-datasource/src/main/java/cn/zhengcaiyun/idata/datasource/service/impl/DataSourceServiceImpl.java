@@ -133,6 +133,9 @@ public class DataSourceServiceImpl implements DataSourceService {
         DataSource source = optional.get();
         if (Objects.equals(DeleteEnum.DEL_YES.val, source.getDel())) return true;
 
+        boolean isUsing = dataSourceManager.checkInUsing(DataSourceTypeEnum.getEnum(source.getType()).orElse(null),
+                id);
+        checkArgument(!isUsing, "数据源正在被使用，不能删除");
         boolean ret = dataSourceRepo.deleteDataSource(id, operator.getNickname());
         checkState(ret, "删除数据源失败");
         return true;

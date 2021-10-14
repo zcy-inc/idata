@@ -15,37 +15,36 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
+package cn.zhengcaiyun.idata.datasource.spi;
 
-import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-28 13:48
+ * @create: 2021-10-14 10:34
  **/
-public interface DIJobContentRepo {
+@Component
+public class DataSourceUsageSupplierFactory {
+    private static final Map<String, DataSourceUsageSupplier> supplierMap = Maps.newConcurrentMap();
 
-    Long save(DIJobContent content);
+    public static void register(String function, DataSourceUsageSupplier supplier) {
+        supplierMap.put(function, supplier);
+    }
 
-    Boolean update(DIJobContent content);
+    public Optional<DataSourceUsageSupplier> getSupplier(String function) {
+        if (StringUtils.isEmpty(function)) return Optional.empty();
+        return Optional.ofNullable(supplierMap.get(function));
+    }
 
-    Integer newVersion(Long jobId);
-
-    Boolean updateEditable(Long id, EditableEnum editable, String operator);
-
-    Optional<DIJobContent> query(Long jobId, Integer version);
-
-    Boolean submit(DIJobContent content, JobPublishRecord publishRecord, String operator);
-
-    List<DIJobContent> queryList(Long jobId);
-
-    List<DIJobContent> queryList(String destTable);
-
-    long countByDataSource(Long dataSourceId);
+    public List<DataSourceUsageSupplier> getSuppliers() {
+        return Lists.newArrayList(supplierMap.values());
+    }
 }

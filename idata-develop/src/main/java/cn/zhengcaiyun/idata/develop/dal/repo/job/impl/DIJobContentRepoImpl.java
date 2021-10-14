@@ -33,8 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -121,5 +120,12 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
         return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.destTable, isEqualTo(destTable),
                         and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(DI_JOB_CONTENT.version));
+    }
+
+    @Override
+    public long countByDataSource(Long dataSourceId) {
+        return diJobContentDao.count(dsl -> dsl.where(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                and(DI_JOB_CONTENT.srcDataSourceId, isEqualTo(dataSourceId), or(DI_JOB_CONTENT.destDataSourceId, isEqualTo(dataSourceId))))
+        );
     }
 }

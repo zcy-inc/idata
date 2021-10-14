@@ -20,17 +20,25 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDynamicSqlSupport.jobInfo;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -42,10 +50,20 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class JobInfoRepoImpl implements JobInfoRepo {
 
     private final JobInfoDao jobInfoDao;
+    private final JobExecuteConfigDao jobExecuteConfigDao;
+    private final JobPublishRecordDao jobPublishRecordDao;
+    private final DIJobContentDao diJobContentDao;
+
 
     @Autowired
-    public JobInfoRepoImpl(JobInfoDao jobInfoDao) {
+    public JobInfoRepoImpl(JobInfoDao jobInfoDao,
+                           JobExecuteConfigDao jobExecuteConfigDao,
+                           JobPublishRecordDao jobPublishRecordDao,
+                           DIJobContentDao diJobContentDao) {
         this.jobInfoDao = jobInfoDao;
+        this.jobExecuteConfigDao = jobExecuteConfigDao;
+        this.jobPublishRecordDao = jobPublishRecordDao;
+        this.diJobContentDao = diJobContentDao;
     }
 
     @Override
@@ -75,6 +93,30 @@ public class JobInfoRepoImpl implements JobInfoRepo {
         jobInfoDao.update(dsl -> dsl.set(jobInfo.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobInfo.editor).equalTo(operator)
                 .where(jobInfo.id, isEqualTo(id)));
+        return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional
+    public Boolean deleteJobAndSubInfo(JobInfo job, String operator) {
+        jobInfoDao.update(dsl -> dsl.set(jobInfo.del).equalTo(DeleteEnum.DEL_YES.val)
+                .set(jobInfo.editor).equalTo(operator)
+                .where(jobInfo.id, isEqualTo(job.getId())));
+
+        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.del).equalTo(DeleteEnum.DEL_YES.val)
+                .set(jobExecuteConfig.editor).equalTo(operator)
+                .where(jobExecuteConfig.jobId, isEqualTo(job.getId())));
+
+        jobPublishRecordDao.update(dsl -> dsl.set(jobPublishRecord.del).equalTo(DeleteEnum.DEL_YES.val)
+                .set(jobPublishRecord.editor).equalTo(operator)
+                .where(jobPublishRecord.jobId, isEqualTo(job.getId())));
+
+        if (JobTypeEnum.DI_BATCH.getCode().equals(job.getJobType())
+                || JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
+            diJobContentDao.update(dsl -> dsl.set(DI_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(DI_JOB_CONTENT.editor).equalTo(operator)
+                    .where(DI_JOB_CONTENT.jobId, isEqualTo(job.getId())));
+        }
         return Boolean.TRUE;
     }
 
