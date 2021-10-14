@@ -1,0 +1,66 @@
+.form {
+  :global {
+    .ant-form-item {
+      margin-bottom: 32px;
+    }
+    .ant-form-item-label label {
+      height: 40px;
+    }
+  }
+  .name,
+  .env {
+    margin-bottom: 24px;
+  }
+  .env {
+    :global {
+      .ant-form-item-label label {
+        height: 32px;
+      }
+    }
+  }
+  .comment {
+    margin-bottom: 12px;
+    :global {
+      .ant-form-item-label label {
+        height: 32px;
+      }
+    }
+  }
+  .connection {
+    margin-bottom: 0;
+    :global {
+      .ant-form-item-label label {
+        height: 32px;
+      }
+    }
+  }
+  .host {
+    width: 170px;
+    border-right-color: transparent;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    &:hover,
+    &:focus {
+      border-right-color: var(--primary-color);
+    }
+  }
+  .port {
+    width: 100px;
+    border-left-color: transparent;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    &:hover,
+    &:focus {
+      border-left-color: var(--primary-color);
+    }
+  }
+  .colon {
+    width: 30px;
+    background-color: #fff !important;
+    border-top-color: var(--border-color-base) !important;
+    border-bottom-color: var(--border-color-base) !important;
+    border-left-width: 0;
+    border-radius: 0;
+    pointer-events: none;
+  }
+}

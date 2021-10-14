@@ -1,5 +1,12 @@
 import { request } from 'umi';
 
+export interface DefaultResponse {
+  success: boolean;
+  code: string;
+  msg: string;
+  causeMsg: string;
+}
+
 export async function getSystemFeatureTree() {
   return request('/api/p1/sys/featureTree');
 }

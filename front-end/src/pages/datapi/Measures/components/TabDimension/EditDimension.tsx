@@ -15,7 +15,7 @@ import Title from '@/components/Title';
 import { getFolders } from '@/services/measure';
 import { rules, BooleanOptions } from '@/constants/datapi';
 import { Dimension } from '@/types/datapi';
-import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
+import { getTableReferStr, getTableReferTbs } from '@/services/datadev';
 
 interface EditDimensionProps {
   initial?: Dimension;
@@ -92,7 +92,7 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
       // form initial
       const values = {
         labelName: initial.labelName,
-        folderId: initial.folderId,
+        folderId: initial.folderId || null,
       };
       initial.labelAttributes?.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;

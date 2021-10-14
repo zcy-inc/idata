@@ -37,6 +37,7 @@ export default defineConfig({
   routes,
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
   theme: {
+    'root-entry-name': 'default', // 修复4.17alpha的问题
     'primary-color': '#304FFE',
     'success-color': '#05cc87',
     'warning-color': '#ff9324',

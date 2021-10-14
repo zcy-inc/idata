@@ -8,7 +8,7 @@ import IconFont from '@/components/IconFont';
 import Title from '@/components/Title';
 import { LabelTag, rules } from '@/constants/datapi';
 import { EnumValue, Label, Metric, Modifier } from '@/types/datapi';
-import { getEnumValues, getTableLabels } from '@/services/tablemanage';
+import { getEnumValues, getTableLabels } from '@/services/datadev';
 import { getAtomicMetrics } from '@/services/measure';
 
 interface EditDeriveProps {

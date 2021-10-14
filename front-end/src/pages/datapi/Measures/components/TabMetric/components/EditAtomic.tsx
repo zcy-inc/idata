@@ -6,7 +6,7 @@ import type { ForwardRefRenderFunction, Key } from 'react';
 
 import Title from '@/components/Title';
 import { Metric, Table } from '@/types/datapi';
-import { getTableReferStr, getTableReferTbs } from '@/services/tablemanage';
+import { getTableReferStr, getTableReferTbs } from '@/services/datadev';
 import { AggregatorCodeOptions } from '@/constants/datapi';
 
 export interface EditAtomicProps {

@@ -19,7 +19,7 @@ export interface TreeNode {
   children?: TreeNode[];
   [key: string]: any;
 }
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   key: string;
   name: string;
   parentId?: string;
@@ -39,7 +39,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
-  const flatTree = useRef<FlatTreeNode[]>([]);
+  const flatTree = useRef<TreeNodeOption[]>([]);
 
   const [visible, setVisible] = useState(false);
 

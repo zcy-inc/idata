@@ -65,7 +65,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
     }
     const params = {
       labelName: form.labelName,
-      folderId: form.folderId,
+      folderId: form.folderId || 0,
       subjectType: 'COLUMN',
       labelTag: 'DIMENSION_LABEL',
       labelAttributes,
@@ -210,6 +210,8 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
       .catch((err) => {});
   };
 
+  const generateSQL = () => {};
+
   return (
     <Fragment>
       <Spin spinning={getLoading}>
@@ -221,6 +223,9 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
           <Space>
             <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
               编辑
+            </Button>
+            <Button key="sql" size="large" onClick={generateSQL}>
+              生成SQL
             </Button>
             <Button key="labelTag" size="large" onClick={switchStatus}>
               {transformLabelTagText(data?.labelTag as LabelTag)}

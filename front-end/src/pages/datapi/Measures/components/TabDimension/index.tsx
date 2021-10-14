@@ -79,7 +79,7 @@ const TabDimension: FC<TabDimensionProps> = ({ initialMode = 'view', tabKey, fil
     }
     const params = {
       labelName: form.labelName,
-      folderId: form.folderId,
+      folderId: form.folderId || 0,
       subjectType: 'COLUMN',
       labelTag: 'DIMENSION_LABEL',
       labelAttributes,

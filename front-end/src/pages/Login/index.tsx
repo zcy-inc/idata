@@ -5,8 +5,9 @@ import { useLocation, useModel } from 'umi';
 import { ValidateStatus } from 'antd/es/form/FormItem';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { mainPublicPath } from '@/constants/common';
-import { OutlinedInput, OutlinedPassword } from '@/components';
 import { queryRegister, queryLogin } from '@/services/user';
+
+import OutlinedInput, { OutlinedPassword } from './components/OutlinedInput';
 
 import styles from './index.less';
 

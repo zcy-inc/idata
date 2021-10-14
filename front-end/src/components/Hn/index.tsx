@@ -1,5 +1,5 @@
 import React from 'react';
-import Tip from '../Tip';
+import Tip from './components/Tip';
 import styles from './index.less';
 
 export interface HnProps {

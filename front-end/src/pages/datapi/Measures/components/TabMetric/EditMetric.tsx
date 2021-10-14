@@ -22,7 +22,7 @@ import EditComplex from './components/EditComplex';
 import { getFolders } from '@/services/measure';
 import { rules } from '@/constants/datapi';
 import { EnumValue, Metric } from '@/types/datapi';
-import { getEnumValues } from '@/services/tablemanage';
+import { getEnumValues } from '@/services/datadev';
 
 export interface ViewModifierProps {
   initial?: Metric;
@@ -108,7 +108,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       // form initial
       const values = {
         labelName: initial.labelName,
-        folderId: initial.folderId,
+        folderId: initial.folderId || null,
         labelTag: initial.labelTag,
       };
       initial.labelAttributes?.forEach((labelAttribute) => {

@@ -1,4 +1,4 @@
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   id: number;
   folderName: string;
 }

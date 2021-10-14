@@ -8,10 +8,12 @@ export enum TreeNodeType {
   MODIFIER_LABEL = 'MODIFIER',
   METRIC_LABEL = 'METRIC',
 }
+
 export enum LabelRequired {
   NOT_REQUIRED = 0,
   REQUIRED = 1,
 }
+
 export enum LabelTag {
   STRING_LABEL = 'STRING_LABEL',
   BOOLEAN_LABEL = 'BOOLEAN_LABEL',
@@ -30,6 +32,7 @@ export enum LabelTag {
   COMPLEX_METRIC_LABEL = 'COMPLEX_METRIC_LABEL',
   COMPLEX_METRIC_LABEL_DISABLE = 'COMPLEX_METRIC_LABEL_DISABLE',
 }
+
 export enum ERType {
   I2I = 'I2I',
   I2N = 'I2N',
@@ -41,6 +44,7 @@ export enum ERType {
 export const rules = {
   require: [{ required: true, message: '必填' }],
 };
+
 export const BooleanOptions = [
   { label: '是', value: true },
   { label: '否', value: false },
@@ -60,6 +64,7 @@ export const KpiLabelsMap = {
   bizProcessCode: '业务过程',
   metricDefine: '定义',
 };
+
 export enum AggregatorCodeMap {
   SUM = 'AGGREGATOR_SUM:ENUM_VALUE',
   AVG = 'AGGREGATOR_AVG:ENUM_VALUE',
@@ -68,6 +73,7 @@ export enum AggregatorCodeMap {
   CNT = 'AGGREGATOR_CNT:ENUM_VALUE',
   CNTD = 'AGGREGATOR_CNTD:ENUM_VALUE',
 }
+
 export const AggregatorCodeTransform = {
   [AggregatorCodeMap.SUM]: '求和',
   [AggregatorCodeMap.AVG]: '求平均',
@@ -76,6 +82,7 @@ export const AggregatorCodeTransform = {
   [AggregatorCodeMap.CNT]: '计数',
   [AggregatorCodeMap.CNTD]: '去重计数',
 };
+
 export const AggregatorCodeOptions = [
   { label: '求和', value: AggregatorCodeMap.SUM },
   { label: '求平均', value: AggregatorCodeMap.AVG },

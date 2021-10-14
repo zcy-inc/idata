@@ -14,13 +14,13 @@ import IconFont from '@/components/IconFont';
 import Title from '@/components/Title';
 import { getFolders } from '@/services/measure';
 import { rules } from '@/constants/datapi';
-import { FlatTreeNode, Modifier, EnumName, EnumValue, LabelAttribute } from '@/types/datapi';
+import { TreeNodeOption, Modifier, EnumName, EnumValue, LabelAttribute } from '@/types/datapi';
 import {
   getEnumNames,
   getEnumValues,
   getTableReferStr,
   getTableReferTbs,
-} from '@/services/tablemanage';
+} from '@/services/datadev';
 
 export interface ViewModifierProps {
   initial?: Modifier;
@@ -59,7 +59,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
   useEffect(() => {
     getFolders()
       .then((res) => {
-        const fd = res.data?.map((_: FlatTreeNode) => ({
+        const fd = res.data?.map((_: TreeNodeOption) => ({
           label: _.folderName,
           value: _.id,
         }));
@@ -91,7 +91,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
       // form initial
       const values = {
         labelName: initial.labelName,
-        folderId: initial.folderId,
+        folderId: initial.folderId || null,
       };
       initial.labelAttributes?.forEach((labelAttribute) => {
         values[labelAttribute.attributeKey] = labelAttribute.attributeValue;

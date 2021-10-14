@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Tabs, Tree, TreeProps } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import { debounce } from 'lodash';
-import { UnderLinedSearch } from '@/components';
 import { getAllParentsKey } from '@/utils/utils';
 import type { FeatureTreeNode, FolderNode } from '@/interfaces/global';
+import UnderLinedSearch from './components/SearchInput/UnderLinedSearch';
 import FeatureList from '../FeatureList';
 import FolderList from '../FolderList';
 import styles from './index.less';
@@ -87,8 +87,6 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
     return data.map((_) => {
       const { name, type, featureCode, parentCode } = _;
       const clsFolderRoot = !parentCode && type === 'F_MENU' ? 'folder-root' : '';
-      console.log({clsFolderRoot});
-
       let title = (
         <span key="title" className={clsFolderRoot}>
           {name}

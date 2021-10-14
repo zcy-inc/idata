@@ -5,13 +5,13 @@ import { useModel } from 'umi';
 import type { FC } from 'react';
 
 import { createFolder, getFolders, updateFolder } from '@/services/measure';
-import { FlatTreeNode } from '@/types/datapi';
+import { TreeNodeOption } from '@/types/datapi';
 
 export interface CreateFolderProps {
   visible: boolean;
   onCancel: () => void;
 }
-interface FlatTreeNodeOption extends FlatTreeNode {
+interface FlatTreeNodeOption extends TreeNodeOption {
   label: string;
   value: string;
 }

@@ -1,6 +1,6 @@
 import { TreeNodeType, LabelRequired, LabelTag, ERType } from '@/constants/datapi';
 
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   id: number;
   folderName: string;
 }
@@ -13,6 +13,7 @@ export interface TreeNode {
   fileCode?: number;
   children?: TreeNode[];
 }
+
 export interface Label {
   id: number;
   labelName: string;

@@ -12,9 +12,11 @@
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
     routes: [
-      { path: '/datapi', redirect: '/datapi/tablemanage' },
-      { path: '/datapi/tablemanage', name: '数仓设计', component: './datapi/TableManages' },
+      { path: '/datapi', redirect: '/datapi/datadev' },
+      { path: '/datapi/datadev', name: '数据开发', component: './datapi/DataDev' },
       { path: '/datapi/measure', name: '指标库', component: './datapi/Measures' },
+      { path: '/datapi/datasource', name: '数据源管理', component: './datapi/DataSource' },
+      { path: '/datapi/tasks', name: '任务列表', component: './datapi/Tasks' },
     ],
   },
   {

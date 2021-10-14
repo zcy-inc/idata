@@ -1,10 +1,14 @@
 import React from 'react';
-import type { FC } from 'react';
+import type { CSSProperties, FC } from 'react';
 import styles from './index.less';
 
-const Title: FC = ({ children }) => {
+interface TitleProps {
+  style?: CSSProperties;
+}
+
+const Title: FC<TitleProps> = ({ style, children }) => {
   return (
-    <div className={styles.title}>
+    <div className={styles.title} style={style}>
       <div className={styles.border} />
       {children}
     </div>

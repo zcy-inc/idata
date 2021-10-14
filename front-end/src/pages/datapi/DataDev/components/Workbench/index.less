@@ -1,0 +1,39 @@
+.workbench {
+  position: relative;
+  height: 100%;
+  padding-bottom: 64px;
+  :global {
+    .ant-empty {
+      position: relative;
+      top: calc(50% - 65px);
+    }
+  }
+  .tab-pane {
+    height: 100%;
+    padding: 24px;
+    padding-bottom: 160px;
+  }
+  .reset-tabs {
+    .struct {
+      :global {
+        .ant-table-tbody {
+          .ant-table-cell {
+            padding: 16px 8px;
+          }
+        }
+      }
+    }
+    .fk {
+      :global {
+        .ant-table-tbody {
+          .ant-table-cell {
+            padding: 16px 8px;
+          }
+        }
+        .ant-select-selection-item-content {
+          color: #15172f;
+        }
+      }
+    }
+  }
+}

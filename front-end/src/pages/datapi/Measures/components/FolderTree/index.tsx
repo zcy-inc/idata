@@ -198,7 +198,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           onChange={deFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode(null)} />
+          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode({})} />
         </Dropdown>
       </div>
       <Tabs activeKey={treeType} onChange={(key) => getTree(key as TreeNodeType)}>

@@ -69,7 +69,7 @@ const TabModifier: FC<TabModifierProps> = ({ initialMode = 'view', tabKey, fileC
     }
     const params = {
       labelName: form.labelName,
-      folderId: form.folderId,
+      folderId: form.folderId || 0,
       subjectType: 'COLUMN',
       labelTag: 'MODIFIER_LABEL',
       labelAttributes,

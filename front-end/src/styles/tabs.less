@@ -1,35 +1,35 @@
 body {
-  // Tabs - 标签页
-  .ant-tabs-card {
+  .workbench-tabs {
+    height: 100%;
     .ant-tabs-nav {
-      margin: 0;
+      margin-bottom: 0;
+      .ant-tabs-tab.ant-tabs-tab-with-remove {
+        display: flex;
+        justify-content: space-between;
+        width: 160px;
+        background: #f1f3f9;
+        border-color: #f1f3f9;
+        .ant-tabs-tab-btn {
+          max-width: 100px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+      .ant-tabs-tab-active.ant-tabs-tab-with-remove {
+        background: #fff;
+        border-color: #fff;
+        .ant-tabs-tab-btn {
+          max-width: 100px;
+          overflow: hidden;
+          color: #304ffe;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
     }
     .ant-tabs-content-holder {
-      background: #fff;
-    }
-    .ant-tabs-nav::before {
-      display: none;
-    }
-    .ant-tabs-nav .ant-tabs-tab {
-      margin-right: 0 !important;
-      color: #223345;
-      background: #fff;
-      border-bottom: none;
-    }
-    .ant-tabs-nav .ant-tabs-tab-active {
-      color: #fff;
-      background: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    .ant-tabs-nav .ant-tabs-tab-active .ant-tabs-tab-btn {
-      color: #fff;
-    }
-    .ant-tabs-nav .ant-tabs-content {
-      margin-top: -16px;
-    }
-    .ant-tabs-nav .ant-tabs-content > .ant-tabs-tabpane {
-      padding: 24px;
-      background: #fff;
+      overflow-y: auto;
     }
   }
 
