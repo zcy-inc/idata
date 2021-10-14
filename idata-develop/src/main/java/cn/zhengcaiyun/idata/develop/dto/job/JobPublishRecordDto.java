@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import org.springframework.beans.BeanUtils;
 
@@ -10,7 +11,7 @@ import java.util.Date;
  * @author: yangjianhua
  * @create: 2021-09-23 11:20
  **/
-public class JobPublishRecordDto {
+public class JobPublishRecordDto extends BaseDto {
     /**
      * 主键
      */
