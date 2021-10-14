@@ -23,7 +23,9 @@ import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.Constants;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
@@ -36,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -49,14 +52,17 @@ import static com.google.common.base.Preconditions.checkState;
 @Service
 public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
+    private final JobInfoRepo jobInfoRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobPublishManager jobPublishManager;
     private final EnumService enumService;
 
     @Autowired
-    public JobPublishRecordServiceImpl(JobPublishRecordRepo jobPublishRecordRepo,
+    public JobPublishRecordServiceImpl(JobInfoRepo jobInfoRepo,
+                                       JobPublishRecordRepo jobPublishRecordRepo,
                                        JobPublishManager jobPublishManager,
                                        EnumService enumService) {
+        this.jobInfoRepo = jobInfoRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobPublishManager = jobPublishManager;
         this.enumService = enumService;
@@ -69,15 +75,29 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
             return Page.empty();
         }
 
+        Map<Long, JobInfo> jobInfoMap = getJobInfo(page.getContent());
         // 获取数仓分层
         Map<String, String> dwLayerMap = getDwLayer();
         List<JobPublishRecordDto> dtoList = page.getContent().stream()
                 .map(record -> {
                     JobPublishRecordDto dto = JobPublishRecordDto.from(record);
                     dto.setDwLayerValue(dwLayerMap.get(dto.getDwLayerCode()));
+                    JobInfo jobInfo = jobInfoMap.get(record.getJobId());
+                    dto.setJobName(jobInfo == null ? "" : jobInfo.getName());
                     return dto;
                 }).collect(Collectors.toList());
         return Page.newOne(dtoList, page.getTotal());
+    }
+
+    private Map<Long, JobInfo> getJobInfo(List<JobPublishRecord> recordList) {
+        List<Long> jobIds = recordList.stream()
+                .map(JobPublishRecord::getJobId)
+                .collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(jobIds)) return Maps.newHashMap();
+
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(jobIds);
+        return jobInfoList.stream()
+                .collect(Collectors.toMap(JobInfo::getId, Function.identity()));
     }
 
     @Override

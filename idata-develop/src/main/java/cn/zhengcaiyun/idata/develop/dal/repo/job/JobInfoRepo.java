@@ -46,5 +46,7 @@ public interface JobInfoRepo {
 
     List<JobInfo> queryJobInfo(JobInfoCondition condition);
 
+    List<JobInfo> queryJobInfo(List<Long> ids);
+
     long count(JobInfoCondition condition);
 }

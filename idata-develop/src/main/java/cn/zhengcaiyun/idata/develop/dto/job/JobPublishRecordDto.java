@@ -22,6 +22,11 @@ public class JobPublishRecordDto {
     private Long jobId;
 
     /**
+     * 作业名称
+     */
+    private String jobName;
+
+    /**
      * 作业内容id
      */
     private Long jobContentId;
@@ -178,6 +183,14 @@ public class JobPublishRecordDto {
 
     public void setDwLayerValue(String dwLayerValue) {
         this.dwLayerValue = dwLayerValue;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
     }
 
     public static JobPublishRecordDto from(JobPublishRecord record) {
