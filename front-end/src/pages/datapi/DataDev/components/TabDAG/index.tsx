@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import type { FC } from 'react';
 
 import { createDAG, deleteDAG, disableDAG, editDAG, enableDAG, getDAG } from '@/services/datadev';
-import { PeriodRange } from '@/constants/datadev';
+import { PeriodRange, TriggerMode } from '@/constants/datadev';
 import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
 
@@ -36,57 +36,63 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const getDAGWrapped = () => getDAG({ id: pane.id }).then((res) => setData(res.data));
 
+  const renderCronExpression = (values: any) => {
+    const time: string = values.time?.format('HH:mm') || '';
+    const hour = time.split(':')[0];
+    const minute = time.split(':')[1];
+    const day: string[] = get(values, 'dayofmonth', []);
+    const month: string[] = get(values, 'month', []);
+    const triggerMode = values.triggerMode || 'specified';
+
+    let cronExpression = ''; // 秒 / 分 / 时 / 日(月) / 月 / 日(星期) / 年，可参阅https://www.cnblogs.com/linjiqin/p/3178452.html
+
+    switch (values.periodRange) {
+      case PeriodRange.YEAR:
+        cronExpression = `0 ${minute} ${hour} ${day.join(',')} ${month.join(',')} ? *`;
+        break;
+      case PeriodRange.MONTH:
+        cronExpression = `0 ${minute} ${hour} ${day.join(',')} * ? *`;
+        break;
+      case PeriodRange.WEEK:
+        const week: string[] = get(values, 'dayofweek', []);
+        cronExpression = `0 ${minute} ${hour} ? * ${week.join(',')} *`;
+        break;
+      case PeriodRange.DAY:
+        cronExpression = `0 ${minute} ${hour} * * ? *`;
+        break;
+      case PeriodRange.HOUR:
+        if (triggerMode === 'interval') {
+          const start: string = values.start.format('HH:mm');
+          const startHour = start.split(':')[0];
+          const startMinute = start.split(':')[1];
+          const interval: string = get(values, 'interval', 0);
+          const endHour = values.start.format('HH');
+          cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
+        }
+        if (triggerMode === 'specified') {
+          const hours: string[] = get(values, 'hours', []);
+          cronExpression = `0 0 ${hours.join(',')} * * ? *`;
+        }
+        break;
+      case PeriodRange.MINUTE:
+        const startHour = values.start.format('HH');
+        const interval: string = get(values, 'interval', 0);
+        const endHour = values.end.format('HH');
+        cronExpression = `0 0/${interval} ${startHour}-${endHour} * * ? *`;
+        break;
+
+      default:
+        break;
+    }
+
+    return cronExpression;
+  };
+
   const onSubmit = () => {
     setLoading(true);
     form.validateFields().then(() => {
       const values = form.getFieldsValue();
-      const time: string = values.time.format('HH:mm');
-      const hour = time.split(':')[0];
-      const minute = time.split(':')[1];
-      const day: string[] = get(values, 'dayofmonth', []);
-      const month: string[] = get(values, 'month', []);
-      const triggerMode = values.triggerMode || 'specified';
-
-      let cronExpression = ''; // 秒 / 分 / 时 / 日(月) / 月 / 日(星期) / 年，可参阅https://www.cnblogs.com/linjiqin/p/3178452.html
-
-      switch (values.periodRange) {
-        case PeriodRange.YEAR:
-          cronExpression = `0 ${minute} ${hour} ${day.join(',')} ${month.join(',')} ? *`;
-          break;
-        case PeriodRange.MONTH:
-          cronExpression = `0 ${minute} ${hour} ${day.join(',')} * ? *`;
-          break;
-        case PeriodRange.WEEK:
-          const week: string[] = get(values, 'dayofweek', []);
-          cronExpression = `0 ${minute} ${hour} ? * ${week.join(',')} *`;
-          break;
-        case PeriodRange.DAY:
-          cronExpression = `0 ${minute} ${hour} * * ? *`;
-          break;
-        case PeriodRange.HOUR:
-          if (triggerMode === 'interval') {
-            const start: string = values.start.format('HH:mm');
-            const startHour = start.split(':')[0];
-            const startMinute = start.split(':')[1];
-            const interval: string = get(values, 'interval', 0);
-            const endHour = values.start.format('HH');
-            cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
-          }
-          if (triggerMode === 'specified') {
-            const hours: string[] = get(values, 'hours', []);
-            cronExpression = `0 0 ${hours.join(',')} * * ? *`;
-          }
-          break;
-        case PeriodRange.MINUTE:
-          const startHour = values.start.format('HH');
-          const interval: string = get(values, 'interval', 0);
-          const endHour = values.end.format('HH');
-          cronExpression = `0 0/${interval} ${startHour}-${endHour} * * ? *`;
-          break;
-
-        default:
-          break;
-      }
+      const cronExpression = renderCronExpression(values);
       const params = {
         dagInfoDto: {
           name: values.name,
@@ -97,7 +103,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
           beginTime: values.range[0].valueOf(),
           endTime: values.range[1].valueOf(),
           periodRange: values.periodRange,
-          triggerMode,
+          triggerMode: values.triggerMode || 'specified',
           cronExpression,
         },
       };
@@ -206,7 +212,9 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
   return (
     <Fragment>
       {mode === 'view' && <ViewDAG data={data} />}
-      {mode === 'edit' && <EditDAG data={data} form={form} />}
+      {mode === 'edit' && (
+        <EditDAG data={data} form={form} renderCronExpression={renderCronExpression} />
+      )}
       <div className="workbench-submit">
         {mode === 'view' && (
           <Space>

@@ -28,8 +28,10 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
   }));
 
   const renderData = () => {
-    const srcNodes = srcColumns.map((_, i) => {
-      srcMap.current[`${_.name}-src`] = _; // 赋srcMap的初始值
+    // 画来源表的节点
+    const srcNodes = srcColumns.map((column, i) => {
+      const _ = cloneDeep(column);
+      srcMap.current[`${_.name}-src`] = _; // 赋srcMap的值
       return {
         id: `${_.name}-src`,
         x: 160,
@@ -39,8 +41,10 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
     });
-    const destNodes = destColumns.map((_, i) => {
-      destMap.current[`${_.name}-dest`] = _; // 赋destMap的初始值
+    // 画去向表的节点
+    const destNodes = destColumns.map((column, i) => {
+      const _ = cloneDeep(column);
+      destMap.current[`${_.name}-dest`] = _; // 赋destMap的值
       return {
         id: `${_.name}-dest`,
         x: 540,
@@ -50,6 +54,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
     });
+    // 画线
     const edges = srcColumns
       .filter((_) => _.mappedColumn)
       .map((_) => ({
@@ -209,13 +214,11 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     graphRef.current = graph;
     graph.data(renderedData);
     graph.render();
-
-    // 当边创建完成时将会触发该时机事件
+    // 当边创建完成时触发该时机事件
     graph.on('aftercreateedge', (e: any) => {
       // update the sourceAnchor and targetAnchor for the newly added edge
       graph.updateItem(e.edge, { sourceAnchor: sourceAnchorIdx, targetAnchor: targetAnchorIdx });
     });
-
     // if create-edge is canceled before ending, update the 'links' on the anchor-point circles
     // 调用 graph.remove / graph.removeItem 方法之后触发
     graph.on('afterremoveitem', (e: any) => {
@@ -224,20 +227,26 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         const targetNode = graph.findById(e.item.target);
         const { sourceAnchor, targetAnchor } = e.item;
         if (sourceNode && !isNaN(sourceAnchor)) {
-          const sourceAnchorShape = sourceNode.getContainer().find((ele) => {
-            ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === sourceAnchor;
-          });
+          const sourceAnchorShape = sourceNode
+            .getContainer()
+            .find(
+              (ele) =>
+                ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === sourceAnchor,
+            );
           sourceAnchorShape && sourceAnchorShape.set('links', sourceAnchorShape.get('links') - 1);
         }
         if (targetNode && !isNaN(targetAnchor)) {
-          const targetAnchorShape = targetNode.getContainer().find((ele) => {
-            ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === targetAnchor;
-          });
+          const targetAnchorShape = targetNode
+            .getContainer()
+            .find(
+              (ele) =>
+                ele.get('name') === 'anchor-point' && ele.get('anchorPointIdx') === targetAnchor,
+            );
           targetAnchorShape && targetAnchorShape.set('links', targetAnchorShape.get('links') - 1);
         }
         /* ===== start 删除数据 ===== */
         // 怎么分辨这儿的source和target分别来自哪张表？
-        // 一时规避，通过做检查来删除
+        // 一时规避，通过两边做检查来删除
         if (srcMap.current[e.item.source]) {
           delete srcMap.current[e.item.source].mappedColumn;
         }
@@ -253,7 +262,6 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         /* ===== end 删除数据 ===== */
       }
     });
-
     graph.on('afteradditem', (e) => {
       if (e.item && e.item.getType() === 'edge') {
         graph.updateItem(e.item, {
@@ -261,7 +269,6 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         });
       }
     });
-
     // 小圆点hover效果
     graph.on('anchor-point:mouseenter', (e: any) => {
       graph.setItemState(e.item, 'circle-active', { target: e.target, isHover: true });

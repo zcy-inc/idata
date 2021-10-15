@@ -6,6 +6,7 @@ import ProForm, {
   ProFormText,
   ProFormTimePicker,
 } from '@ant-design/pro-form';
+import { Form } from 'antd';
 import moment from 'moment';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
@@ -20,18 +21,21 @@ import { getEnumValues, getFolders } from '@/services/datadev';
 interface EditDAGProps {
   data?: DAG;
   form: FormInstance;
+  renderCronExpression: (values: any) => string;
 }
 
 const width = 400;
 const format = 'HH:mm';
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
+const { Item } = Form;
 
-const EditDAG: FC<EditDAGProps> = ({ data, form }) => {
+const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [periodRange, setPeriodRange] = useState<PeriodRange>(PeriodRange.YEAR);
   const [triggerMode, setTriggerMode] = useState(TriggerMode.INTERVAL);
+  const [cronExpression, setCronExpression] = useState('');
 
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' }).then((res) => setLayers(res.data));
@@ -48,6 +52,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form }) => {
         periodRange: data.dagScheduleDto.periodRange,
       };
       const cron = data.dagScheduleDto.cronExpression.split(' ');
+      setCronExpression(data.dagScheduleDto.cronExpression);
       // 0秒 / 1分 / 2时 / 3日(月) / 4月 / 5日(星期) / 6年
       switch (data.dagScheduleDto.periodRange) {
         case PeriodRange.YEAR:
@@ -265,9 +270,20 @@ const EditDAG: FC<EditDAGProps> = ({ data, form }) => {
     }
   };
 
+  const renderCronExpressionWrapped = () => {
+    const cron = renderCronExpression(form.getFieldsValue());
+    setCronExpression(cron);
+  };
+
   return (
     <div className={styles['edit-dag']}>
-      <ProForm form={form} layout="horizontal" colon={false} submitter={false}>
+      <ProForm
+        form={form}
+        layout="horizontal"
+        colon={false}
+        submitter={false}
+        onValuesChange={renderCronExpressionWrapped}
+      >
         <ProFormText
           name="name"
           label="DAG名称"
@@ -318,6 +334,9 @@ const EditDAG: FC<EditDAGProps> = ({ data, form }) => {
           fieldProps={{ onChange: ({ target: { value } }) => setPeriodRange(value) }}
         />
         {renderPeriod()}
+        <Item label="CRON表达式">
+          <span style={{ color: '#737b96' }}>{cronExpression}</span>
+        </Item>
       </ProForm>
     </div>
   );

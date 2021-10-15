@@ -121,6 +121,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
           {MapPeriodRangeTranslated[data?.dagScheduleDto.periodRange as PeriodRange] || '-'}
         </Item>
         {renderPeriod()}
+        <Item label="CRON表达式">{data?.dagScheduleDto.cronExpression}</Item>
       </Descriptions>
     </div>
   );

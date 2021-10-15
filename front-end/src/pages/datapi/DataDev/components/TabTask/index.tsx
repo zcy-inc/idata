@@ -302,8 +302,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const onEponymousMapping = () => {
     const cloneSrcColumns = cloneDeep(srcColumns);
     const cloneDestColumns = cloneDeep(destColumns);
-    srcColumns.forEach((_, i) => (_.mappedColumn = cloneDestColumns[i]));
-    destColumns.forEach((_, i) => (_.mappedColumn = cloneSrcColumns[i]));
+    srcColumns.forEach((_, i) => (_.mappedColumn = cloneDeep(cloneDestColumns[i])));
+    destColumns.forEach((_, i) => (_.mappedColumn = cloneDeep(cloneSrcColumns[i])));
     setSrcColumns([...srcColumns]);
     setSrcColumns([...destColumns]);
   };
@@ -484,7 +484,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           <div className={styles['string-map-title']}>
             <span>字段映射</span>
             <Space>
-              <Button className="normal" onClick={() => setDestColumns([...srcColumns])}>
+              <Button
+                className="normal"
+                onClick={() => {
+                  const newColumns = cloneDeep(srcColumns);
+                  setDestColumns(newColumns);
+                }}
+              >
                 复制来源表
               </Button>
               <Button className="normal" onClick={onCancelMapping}>
