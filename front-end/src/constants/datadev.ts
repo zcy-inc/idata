@@ -43,7 +43,7 @@ export enum SrcReadMode {
   INCREMENTAL = 'incremental', // 增量
 }
 
-export enum SrcWriteMode {
+export enum DestWriteMode {
   INIT = 'init', // 新建表
   OVERRIDE = 'override', // 覆盖表
 }

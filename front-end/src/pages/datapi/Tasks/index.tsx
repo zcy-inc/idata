@@ -96,14 +96,30 @@ const DataSource: FC = () => {
   const onPushlish = async (remark: string) => {
     const recordIds = actionRecords.map((_) => _.id);
     publishTask({ recordIds, remark })
-      .then((res) => {})
+      .then((res) => {
+        if (res.success) {
+          message.success('发布成功');
+          setVisibleSubmit(false);
+          getTasksWrapped(0);
+        } else {
+          message.error(`发布失败：${res.msg}`);
+        }
+      })
       .catch((err) => {});
   };
 
   const onReject = async (remark: string) => {
     const recordIds = actionRecords.map((_) => _.id);
     rejectTask({ recordIds, remark })
-      .then((res) => {})
+      .then((res) => {
+        if (res.success) {
+          message.success('驳回成功');
+          setVisibleSubmit(false);
+          getTasksWrapped(0);
+        } else {
+          message.error(`驳回失败：${res.msg}`);
+        }
+      })
       .catch((err) => {});
   };
 
@@ -176,6 +192,7 @@ const DataSource: FC = () => {
         </Button>
       </div>
       <Table<TaskListItem>
+        rowKey="id"
         columns={columns}
         dataSource={data}
         scroll={{ x: 'max-content' }}
@@ -188,6 +205,8 @@ const DataSource: FC = () => {
         }}
         rowSelection={{
           onChange: (selectedRowKeys: React.Key[], selectedRows: TaskListItem[]) => {
+            console.log(selectedRowKeys, selectedRows);
+
             setActionRecords(selectedRows);
           },
         }}

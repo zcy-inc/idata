@@ -4,7 +4,7 @@ import {
   PeriodRange,
   SchRerunMode,
   SrcReadMode,
-  SrcWriteMode,
+  DestWriteMode,
   TaskCategory,
   TaskTypes,
   TriggerMode,
@@ -96,7 +96,7 @@ export interface TaskContent {
   destTable: string; // 数据去向-数仓表的表名
   destBeforeWrite: string; // 数据去向-写入前语句
   destAfterWrite: string; // 数据去向-写入后语句
-  destWriteMode: SrcWriteMode; //数据去向-写入模式
+  destWriteMode: DestWriteMode; //数据去向-写入模式
   srcCols: MappedColumn[];
   destCols: MappedColumn[];
   contentHash: string; // 作业内容hash，查询作业内容时返回，保存新的作业内容时需将该值一起提交，用于判断作业内容是否有变更

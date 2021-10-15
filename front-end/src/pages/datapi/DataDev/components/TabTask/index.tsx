@@ -27,7 +27,7 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
-import { SrcReadMode, SrcWriteMode } from '@/constants/datadev';
+import { SrcReadMode, DestWriteMode } from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
@@ -151,8 +151,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getDataSourceListWrapped = (type: DataSourceTypes, dir: 'src' | 'dest') => {
     getDataSourceList({ type, limit: 10000, offset: 0 })
       .then((res) => {
-        dir === 'src' && setDSSrcList(res.data.content);
-        dir === 'dest' && setDSDestList(res.data.content);
+        const content = get(res, 'data.content', []);
+        dir === 'src' && setDSSrcList(content);
+        dir === 'dest' && setDSDestList(content);
       })
       .catch((err) => {});
   };
@@ -277,6 +278,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       .then((res) => {
         if (res.success) {
           message.success('保存成功');
+          getTaskVersionsWrapped();
         } else {
           message.error(`保存失败：${res.msg}`);
         }
@@ -349,7 +351,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         <div className={styles['form-box']}>
           <div className={styles['form-box-item']}>
             <Title>数据来源</Title>
-            <Form form={srcForm} layout="horizontal" colon={false}>
+            <Form
+              form={srcForm}
+              layout="horizontal"
+              colon={false}
+              initialValues={{ srcReadMode: SrcReadMode.ALL }}
+            >
               <Item name="srcDataSourceType" label="数据源类型" rules={ruleSlct}>
                 <Select
                   size="large"
@@ -413,7 +420,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           </div>
           <div className={styles['form-box-item']}>
             <Title>数据去向</Title>
-            <Form form={destForm} layout="horizontal" colon={false}>
+            <Form
+              form={destForm}
+              layout="horizontal"
+              colon={false}
+              initialValues={{ destWriteMode: DestWriteMode.INIT }}
+            >
               <Item name="destDataSourceType" label="数据源类型" rules={ruleSlct}>
                 <Select
                   size="large"
@@ -449,8 +461,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
                 <Radio.Group
                   options={[
-                    { label: '新建表', value: SrcWriteMode.INIT },
-                    { label: '覆盖表', value: SrcWriteMode.OVERRIDE },
+                    { label: '新建表', value: DestWriteMode.INIT },
+                    { label: '覆盖表', value: DestWriteMode.OVERRIDE },
                   ]}
                 />
               </Item>
