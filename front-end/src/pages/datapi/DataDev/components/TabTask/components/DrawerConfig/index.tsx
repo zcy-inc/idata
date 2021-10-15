@@ -52,7 +52,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getDAGList({ dwLayerCode: data?.dwLayerCode as string })
         .then((res) => setDAGList(res.data))
         .catch((err) => {});
-      getEnumValues({ enumCode: 'securityLevelEnum:ENUM' })
+      getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
         .then((res) => setSecurity(res.data))
         .catch((err) => {});
       getExecuteQueues()
