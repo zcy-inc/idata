@@ -50,6 +50,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
     dataSource: [],
   });
   const [loading, setLoading] = useState(false);
+  const [connectionLoading, setConnectionLoading] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -66,6 +67,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
         remark: initial.remark,
       };
       const dbConfigList = get(initial, 'dbConfigList', []);
+      setActiveKey(dbConfigList[0].env);
       dbConfigList.forEach((_) => {
         const tmp = {};
         for (let [key, value] of Object.entries(_)) {
@@ -76,10 +78,11 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
       form.setFieldsValue(values);
       setEnv(initial.envList);
     }
-  }, [initial]);
+  }, [initial, visible]);
 
   const connectionTest = () => {
     const values = form.getFieldsValue();
+    setConnectionLoading(true);
     testConnection(
       { dataSourceType: DSType },
       {
@@ -91,13 +94,15 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
         password: values[`${activeKey}_password`],
         schema: values[`${activeKey}_schema`],
       },
-    ).then((res) => {
-      if (res.data) {
-        message.success('已连通');
-      } else {
-        message.warning('连接失败，可重试连接');
-      }
-    });
+    )
+      .then((res) => {
+        if (res.data) {
+          message.success('已连通');
+        } else {
+          message.warning('连接失败，可重试连接');
+        }
+      })
+      .finally(() => setConnectionLoading(false));
   };
 
   const renderRules = () => {
@@ -140,12 +145,13 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
         submitButtonProps: { size: 'large', loading },
         resetButtonProps: { size: 'large' },
       }}
+      onFinishFailed={(err) => {
+        message.info('请检查必填项');
+      }}
       onFinish={async (values) => {
         setLoading(true);
         if (DSType === 'csv') {
           const values = form.getFieldsValue();
-          console.log(values);
-
           createDataSourceCSV({ ...values, fileName: values.name })
             .then((res) => {
               if (res.success) {
@@ -253,7 +259,9 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
                     <Input size="large" style={{ width }} placeholder="请输入" />
                   </Item>
                   <Item className={styles.connection} label="测试连通性">
-                    <Button onClick={connectionTest}>测试连通性</Button>
+                    <Button onClick={connectionTest} loading={connectionLoading}>
+                      测试连通性
+                    </Button>
                   </Item>
                 </>
               )}
@@ -271,41 +279,46 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
               setShowUpload(true);
               return true;
             }}
-            customRequest={({ file, onSuccess }) => {
+            customRequest={({ file, onSuccess, onError }) => {
               setShowUpload(false);
               const destTableName = form.getFieldValue('name');
               const data = new FormData();
               data.append('file', file);
-              postCSV({ destTableName, environments: Environments.STAG }, data).then((res) => {
-                if (res.success) {
-                  onSuccess?.(res, file as unknown as XMLHttpRequest);
-                  getCSVPreview({
-                    type: form.getFieldValue('type'),
-                    name: form.getFieldValue('name'),
-                    envList: [Environments.STAG],
-                    fileName: form.getFieldValue('name'),
-                  }).then((resP) => {
-                    const keys: string[] = [];
-                    const columns = resP.data.meta.map((_) => {
-                      keys.push(_.columnName);
-                      return {
-                        title: _.columnName,
-                        key: _.columnName,
-                        dataIndex: _.columnName,
-                      };
+              postCSV({ destTableName, environments: Environments.STAG }, data)
+                .then((res) => {
+                  if (res.success) {
+                    onSuccess?.(res, file as unknown as XMLHttpRequest);
+                    getCSVPreview({
+                      type: form.getFieldValue('type'),
+                      name: form.getFieldValue('name'),
+                      envList: [Environments.STAG],
+                      fileName: form.getFieldValue('name'),
+                    }).then((resP) => {
+                      const keys: string[] = [];
+                      const columns = resP.data.meta.map((_) => {
+                        keys.push(_.columnName);
+                        return {
+                          title: _.columnName,
+                          key: _.columnName,
+                          dataIndex: _.columnName,
+                        };
+                      });
+                      const dataSource = resP.data.data.map((_) => {
+                        const record: any = {};
+                        for (let i = 0; i < _.length; i++) {
+                          record[keys[i]] = _[i];
+                        }
+                        return record;
+                      });
+                      setPreview({ columns, dataSource });
                     });
-                    const dataSource = resP.data.data.map((_) => {
-                      const record: any = {};
-                      for (let i = 0; i < _.length; i++) {
-                        record[keys[i]] = _[i];
-                      }
-                      return record;
-                    });
-                    setPreview({ columns, dataSource });
-                  });
-                } else {
-                }
-              });
+                  } else {
+                    message.error(`上传失败：${res.msg}`);
+                  }
+                })
+                .catch((err) => {
+                  onError?.(err, file as unknown as XMLHttpRequest);
+                });
             }}
           >
             {showUpload && <Button icon={<UploadOutlined />}>上传文件</Button>}

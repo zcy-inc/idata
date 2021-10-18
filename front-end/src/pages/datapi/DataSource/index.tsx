@@ -196,7 +196,10 @@ const DataSource: FC = () => {
           size="large"
           icon={<ReloadOutlined />}
           style={{ marginLeft: 14 }}
-          onClick={() => form.resetFields()}
+          onClick={() => {
+            form.resetFields();
+            onSearch();
+          }}
         >
           重置
         </Button>
@@ -237,7 +240,7 @@ const DataSource: FC = () => {
         visible={visible}
         onCancel={() => setVisible(false)}
         initial={current}
-        refresh={getList}
+        refresh={onSearch}
       />
     </PageContainer>
   );

@@ -27,7 +27,12 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
-import { SrcReadMode, DestWriteMode } from '@/constants/datadev';
+import {
+  SrcReadMode,
+  DestWriteMode,
+  VersionStatus,
+  VersionStatusDisplayMap,
+} from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
@@ -43,6 +48,33 @@ const maxWidth = 400;
 const minWidth = 200;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
+
+const RefreshSelect: FC<{
+  srcTables: TaskTable[];
+  getTaskTableColumnsWrapped: () => void;
+  value?: string[];
+  onChange?: (value: string[]) => void;
+}> = ({ srcTables, getTaskTableColumnsWrapped, value, onChange }) => {
+  return (
+    <>
+      <Select
+        size="large"
+        mode="multiple"
+        style={{ maxWidth, minWidth }}
+        placeholder="请选择"
+        optionFilterProp="label"
+        filterOption={(input, option) => {
+          const label = get(option, 'label', '') as string;
+          return label.indexOf(input) >= 0;
+        }}
+        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
+        value={value}
+        onChange={onChange}
+      />
+      <a className={styles.refresh} onClick={getTaskTableColumnsWrapped}></a>
+    </>
+  );
+};
 
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
@@ -331,7 +363,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     <>
       <div className={styles.task}>
         <div className={styles.toolbar}>
-          <div className={styles.version}>{`当前版本：${data?.version || '-'}`}</div>
+          <div className={styles.version}>{`当前版本：${data?.versionDisplay || '-'}`}</div>
           <Space size={16}>
             <a onClick={() => setVisibleBasic(true)}>基本信息</a>
             <a onClick={() => setVisibleConfig(true)}>配置</a>
@@ -342,9 +374,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         <Title style={{ marginTop: 16 }}>版本切换</Title>
         <Select
           size="large"
-          style={{ width: minWidth }}
+          style={{ width: maxWidth }}
           placeholder="请选择"
-          options={versions.map((_) => ({ label: _.version, value: _.version }))}
+          options={versions.map((_) => ({
+            label: `${_.versionDisplay}${_.environment ? '-' + _.environment : ''}-${
+              VersionStatusDisplayMap[_.versionStatus]
+            }`,
+            value: _.version,
+          }))}
           value={version}
           onChange={(v) => setVersion(v as number)}
         />
@@ -375,25 +412,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   onChange={(v) => getTaskTablesWrapped(v as number)}
                 />
               </Item>
-              <Row className={styles['src-tables']}>
-                <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
-                  <Select
-                    size="large"
-                    mode="multiple"
-                    style={{ maxWidth, minWidth }}
-                    placeholder="请选择"
-                    optionFilterProp="label"
-                    filterOption={(input, option) => {
-                      const label = get(option, 'label', '') as string;
-                      return label.indexOf(input) >= 0;
-                    }}
-                    options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
-                  />
-                </Item>
-                <a className={styles.refresh} onClick={getTaskTableColumnsWrapped}>
-                  刷新
-                </a>
-              </Row>
+              <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
+                <RefreshSelect
+                  srcTables={srcTables}
+                  getTaskTableColumnsWrapped={getTaskTableColumnsWrapped}
+                />
+              </Item>
               {/* 这个位置放动态增删的表单，后续版本有需要可以从 ./FormList 里复制 */}
               <Item name="srcReadFilter" label="数据过滤">
                 <TextArea

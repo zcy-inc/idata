@@ -49,12 +49,20 @@ export enum DestWriteMode {
 }
 
 export enum VersionStatus {
-  EDITING = 0,
-  TO_BE_PUBLISHED = 1,
-  PUBLISHED = 2,
-  REJECTED = 4,
-  ARCHIVED = 9,
+  EDITING = 0, // 编辑中
+  TO_BE_PUBLISHED = 1, // 待发布
+  PUBLISHED = 2, // 已发布
+  REJECTED = 4, // 已驳回
+  ARCHIVED = 9, // 已归档
 }
+
+export const VersionStatusDisplayMap = {
+  [VersionStatus.EDITING]: '编辑中',
+  [VersionStatus.TO_BE_PUBLISHED]: '待发布',
+  [VersionStatus.PUBLISHED]: '已发布',
+  [VersionStatus.REJECTED]: '已驳回',
+  [VersionStatus.ARCHIVED]: '已归档',
+};
 
 export enum SchRerunMode {
   ALWAYS = 'always', // 皆可重跑
