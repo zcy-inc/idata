@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.dto.job.di;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,11 @@ public class DIJobContentDto extends BaseDto {
      * 作业版本号
      */
     private Integer version;
+
+    /**
+     * 作业版本号描述
+     */
+    private String versionDisplay;
     /**
      * 数据来源-数据源类型
      */
@@ -244,6 +250,14 @@ public class DIJobContentDto extends BaseDto {
         this.contentHash = contentHash;
     }
 
+    public String getVersionDisplay() {
+        return versionDisplay;
+    }
+
+    public void setVersionDisplay(String versionDisplay) {
+        this.versionDisplay = versionDisplay;
+    }
+
     public static DIJobContentDto from(DIJobContent content) {
         DIJobContentDto dto = new DIJobContentDto();
         BeanUtils.copyProperties(content, dto);
@@ -254,6 +268,7 @@ public class DIJobContentDto extends BaseDto {
         if (StringUtils.isNotBlank(content.getDestColumns())) {
             dto.setDestCols(JSON.parseArray(content.getDestColumns(), MappingColumnDto.class));
         }
+        dto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
         return dto;
     }
 

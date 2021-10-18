@@ -38,6 +38,11 @@ public class JobPublishRecordDto extends BaseDto {
     private Integer jobContentVersion;
 
     /**
+     * 作业内容版本号描述
+     */
+    private String jobContentVersionDisplay;
+
+    /**
      * 作业类型
      */
     private String jobTypeCode;
@@ -192,6 +197,14 @@ public class JobPublishRecordDto extends BaseDto {
 
     public void setJobName(String jobName) {
         this.jobName = jobName;
+    }
+
+    public String getJobContentVersionDisplay() {
+        return jobContentVersionDisplay;
+    }
+
+    public void setJobContentVersionDisplay(String jobContentVersionDisplay) {
+        this.jobContentVersionDisplay = jobContentVersionDisplay;
     }
 
     public static JobPublishRecordDto from(JobPublishRecord record) {

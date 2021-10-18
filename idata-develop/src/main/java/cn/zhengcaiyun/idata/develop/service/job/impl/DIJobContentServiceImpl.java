@@ -32,15 +32,13 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -145,20 +143,33 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
     private List<JobContentVersionDto> assembleContentVersion(List<JobPublishRecord> publishRecordList,
                                                               List<DIJobContent> contentList) {
-        List<JobContentVersionDto> versionDtoList = Lists.newArrayList();
-        if (ObjectUtils.isNotEmpty(contentList)) {
-            versionDtoList.addAll(contentList.stream()
-                    .filter(content -> content.getEditable().equals(EditableEnum.YES.val))
-                    .map(JobContentVersionDto::from)
-                    .collect(Collectors.toList()));
+        Map<Integer, List<JobPublishRecord>> versionMap;
+        if (ObjectUtils.isNotEmpty(publishRecordList)) {
+            versionMap = publishRecordList.stream()
+                    .collect(Collectors.groupingBy(JobPublishRecord::getJobContentVersion));
+        } else {
+            versionMap = Maps.newHashMap();
         }
 
-        if (ObjectUtils.isNotEmpty(publishRecordList)) {
-            versionDtoList.addAll(publishRecordList.stream()
-                    .map(JobContentVersionDto::from)
-                    .collect(Collectors.toList()));
+        List<JobContentVersionDto> versionDtoList = Lists.newArrayList();
+        if (ObjectUtils.isNotEmpty(contentList)) {
+            for (DIJobContent content : contentList) {
+                List<JobPublishRecord> publishRecords = versionMap.get(content.getVersion());
+                if (publishRecords == null || publishRecords.size() == 0) {
+                    versionDtoList.add(JobContentVersionDto.from(content));
+                    continue;
+                }
+
+                for (JobPublishRecord record : publishRecords) {
+                    JobContentVersionDto versionDto = JobContentVersionDto.from(content);
+                    versionDto.setEnvironment(record.getEnvironment());
+                    versionDtoList.add(versionDto);
+                }
+            }
         }
-        return versionDtoList;
+        return versionDtoList.stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     private void checkJobContent(DIJobContentDto contentDto) {

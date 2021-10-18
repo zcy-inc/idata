@@ -18,14 +18,15 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-24 15:24
  **/
-public class JobContentVersionDto {
+public class JobContentVersionDto implements Comparable<JobContentVersionDto> {
     /**
      * 作业id
      */
@@ -34,6 +35,11 @@ public class JobContentVersionDto {
      * 作业内容版本号
      */
     private Integer version;
+
+    /**
+     * 作业内容版本号（显示）
+     */
+    private String versionDisplay;
     /**
      * 版本状态，1：待发布，2：已发布，4：已驳回，9：已归档，0：编辑中
      */
@@ -75,20 +81,38 @@ public class JobContentVersionDto {
         this.environment = environment;
     }
 
-    public static JobContentVersionDto from(JobPublishRecord record) {
-        JobContentVersionDto versionDto = new JobContentVersionDto();
-        versionDto.setJobId(record.getJobId());
-        versionDto.setVersion(record.getJobContentVersion());
-        versionDto.setEnvironment(record.getEnvironment());
-        versionDto.setVersionStatus(record.getPublishStatus());
-        return versionDto;
+    public String getVersionDisplay() {
+        return versionDisplay;
+    }
+
+    public void setVersionDisplay(String versionDisplay) {
+        this.versionDisplay = versionDisplay;
     }
 
     public static JobContentVersionDto from(DIJobContent content) {
         JobContentVersionDto versionDto = new JobContentVersionDto();
         versionDto.setJobId(content.getJobId());
         versionDto.setVersion(content.getVersion());
+        versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
         versionDto.setVersionStatus(0);
+        versionDto.setEnvironment("");
         return versionDto;
+    }
+
+    @Override
+    public int compareTo(@NotNull JobContentVersionDto o) {
+        int ret = 0;
+        if (this.versionStatus == 0 && o.getVersionStatus() != 0)
+            ret = -1;
+        if (this.versionStatus != 0 && o.getVersionStatus() == 0)
+            ret = 1;
+
+        if (ret == 0) {
+            ret = Integer.compare(o.getVersion(), this.version);
+        }
+        if (ret == 0) {
+            ret = o.getEnvironment().compareTo(this.environment);
+        }
+        return ret;
     }
 }
