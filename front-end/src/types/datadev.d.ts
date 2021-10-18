@@ -77,6 +77,7 @@ export interface Task {
 export interface TaskVersion {
   jobId: number;
   version: number;
+  versionDisplay: string;
   versionStatus: VersionStatus;
   environment: string;
 }
@@ -85,6 +86,7 @@ export interface TaskContent {
   id: number;
   jobId: number; // 作业id
   version: number; // 作业版本号
+  versionDisplay: number; // 显示用的作业版本号
   srcDataSourceType: DataSourceTypes; // 数据来源-数据源类型
   srcDataSourceId: numebr; // 数据来源-数据源id
   srcTables: string; // 数据来源-表

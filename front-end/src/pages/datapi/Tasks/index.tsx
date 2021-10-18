@@ -57,7 +57,7 @@ const DataSource: FC = () => {
   const columns: ColumnsType<TaskListItem> = [
     { title: '数仓分层', key: 'dwLayerValue', dataIndex: 'dwLayerValue' },
     { title: '任务名称', key: 'jobName', dataIndex: 'jobName' },
-    { title: '任务版本', key: 'jobContentVersion', dataIndex: 'jobContentVersion' },
+    { title: '任务版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay' },
     { title: '任务环境', key: 'environment', dataIndex: 'environment' },
     { title: '作业类型', key: 'jobTypeCode', dataIndex: 'jobTypeCode' },
     { title: '提交人', key: 'creator', dataIndex: 'creator' },

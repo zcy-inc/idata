@@ -45,12 +45,14 @@
       //     cursor: pointer;
       //   }
       // }
-      .src-tables {
+      .refresh {
         position: relative;
-        .refresh {
+        &::after {
           position: absolute;
-          right: -36px;
-          bottom: 32px;
+          top: -4px;
+          left: 8px;
+          width: 32px;
+          content: '刷新';
         }
       }
     }

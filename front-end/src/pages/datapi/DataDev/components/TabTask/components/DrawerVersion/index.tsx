@@ -5,6 +5,8 @@ import styles from './index.less';
 import { Task } from '@/types/datadev';
 import { getTasks } from '@/services/task';
 import { TaskListItem } from '@/types/tasks';
+import moment from 'moment';
+import { VersionStatusDisplayMap } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -49,18 +51,36 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       <Table
         rowKey="id"
         columns={[
-          { title: '版本', dataIndex: 'jobContentVersion', key: 'jobContentVersion', width: 52 },
-          { title: '环境', dataIndex: 'environment', key: 'environment', width: 80 },
-          { title: '状态', dataIndex: 'publishStatus', key: 'publishStatus', width: 80 },
+          {
+            title: '版本',
+            dataIndex: 'jobContentVersionDisplay',
+            key: 'jobContentVersionDisplay',
+            width: 130,
+          },
+          { title: '环境', dataIndex: 'environment', key: 'environment', width: 60 },
+          {
+            title: '状态',
+            dataIndex: 'publishStatus',
+            key: 'publishStatus',
+            width: 70,
+            render: (_) => VersionStatusDisplayMap[_],
+          },
           {
             title: '提交备注',
             dataIndex: 'approveRemark',
             key: 'approveRemark',
             width: 178,
             ellipsis: true,
+            render: (_) => _ || '-',
           },
-          { title: '操作人', dataIndex: 'approveOperator', key: 'approveOperator', width: 66 },
-          { title: '操作时间', dataIndex: 'approveTime', key: 'approveTime', width: 172 },
+          { title: '操作人', dataIndex: 'approveOperator', key: 'approveOperator', width: 80 },
+          {
+            title: '操作时间',
+            dataIndex: 'approveTime',
+            key: 'approveTime',
+            width: 170,
+            render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss'),
+          },
         ]}
         dataSource={versions}
         pagination={{
