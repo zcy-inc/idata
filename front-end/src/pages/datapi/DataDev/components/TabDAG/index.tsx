@@ -31,8 +31,10 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
   }));
 
   useEffect(() => {
+    console.log(1, pane);
+
     pane.id !== -1 && getDAGWrapped();
-  }, [pane]);
+  }, [pane.id]);
 
   const getDAGWrapped = () => getDAG({ id: pane.id }).then((res) => setData(res.data));
 
@@ -62,11 +64,11 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
         break;
       case PeriodRange.HOUR:
         if (triggerMode === 'interval') {
-          const start: string = values.start.format('HH:mm');
+          const start: string = values.start?.format('HH:mm');
           const startHour = start.split(':')[0];
           const startMinute = start.split(':')[1];
           const interval: string = get(values, 'interval', 0);
-          const endHour = values.start.format('HH');
+          const endHour = values.start?.format('HH');
           cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
         }
         if (triggerMode === 'specified') {
@@ -75,9 +77,9 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
         }
         break;
       case PeriodRange.MINUTE:
-        const startHour = values.start.format('HH');
+        const startHour = values.start?.format('HH');
         const interval: string = get(values, 'interval', 0);
-        const endHour = values.end.format('HH');
+        const endHour = values.end?.format('HH');
         cronExpression = `0 0/${interval} ${startHour}-${endHour} * * ? *`;
         break;
 
@@ -117,7 +119,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
                 oldKey: 'newDAG',
                 newKey: `${pane.type}_${pane.belong}_${res.data.dagInfoDto.id}`,
                 title: res.data.dagInfoDto.name,
-                pane,
+                pane: { ...pane, id: res.data.dagInfoDto.id },
               });
             } else {
               message.error('创建DAG失败');
