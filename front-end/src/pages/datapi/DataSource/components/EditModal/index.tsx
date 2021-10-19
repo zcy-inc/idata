@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ModalForm } from '@ant-design/pro-form';
 import { Button, Checkbox, Form, Input, message, Select, Table, Tabs, Upload } from 'antd';
 import { get } from 'lodash';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import styles from './index.less';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
@@ -19,6 +19,7 @@ import {
   updateDataSource,
 } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
+import { IconFont } from '@/components';
 
 const { Item } = Form;
 const { TextArea } = Input;
@@ -27,6 +28,14 @@ const { TabPane } = Tabs;
 const width = 300;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
+const ConnectionSuccessMsg = [
+  <IconFont type="icon-liantong" />,
+  <span style={{ color: '#05cc87' }}>已连通</span>,
+];
+const ConnectionFailedMsg = [
+  <IconFont type="icon-lianjieshibai" />,
+  <span style={{ color: '#fa8c15' }}>连接失败，可重试连接</span>,
+];
 
 interface CreateModalProps {
   visible: boolean;
@@ -51,6 +60,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
   });
   const [loading, setLoading] = useState(false);
   const [connectionLoading, setConnectionLoading] = useState(false);
+  const [connectionMsg, setConnectionMsg] = useState<ReactNode>();
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -82,6 +92,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
 
   const connectionTest = () => {
     const values = form.getFieldsValue();
+    setConnectionMsg(undefined);
     setConnectionLoading(true);
     testConnection(
       { dataSourceType: DSType },
@@ -97,11 +108,12 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
     )
       .then((res) => {
         if (res.data) {
-          message.success('已连通');
+          setConnectionMsg(ConnectionSuccessMsg);
         } else {
-          message.warning('连接失败，可重试连接');
+          setConnectionMsg(ConnectionFailedMsg);
         }
       })
+      .catch((err) => {})
       .finally(() => setConnectionLoading(false));
   };
 
@@ -119,6 +131,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
     setShowUpload(true);
     setPreview({ columns: [], dataSource: [] });
     onCancel();
+    setConnectionMsg(undefined);
     refresh();
   };
 
@@ -134,6 +147,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
       preserve={false}
       modalProps={{
         destroyOnClose: true,
+        bodyStyle: { maxHeight: 510, overflowY: 'scroll' },
         onCancel: () => {
           setDSType(DataSourceTypes.MYSQL);
           setEnv([]);
@@ -262,6 +276,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
                     <Button onClick={connectionTest} loading={connectionLoading}>
                       测试连通性
                     </Button>
+                    <span style={{ marginLeft: 8 }}>{connectionMsg}</span>
                   </Item>
                 </>
               )}
@@ -324,9 +339,14 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
             {showUpload && <Button icon={<UploadOutlined />}>上传文件</Button>}
           </Upload>
           <Table
+            className={styles.table}
             columns={preview.columns}
             dataSource={preview.dataSource}
             style={{ marginTop: 16 }}
+            pagination={{
+              total: preview.dataSource?.length,
+              showTotal: (t) => `共${t}条`,
+            }}
             scroll={{ x: 'max-content' }}
           />
         </>

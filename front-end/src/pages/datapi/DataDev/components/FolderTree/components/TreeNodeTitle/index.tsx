@@ -39,7 +39,7 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
       case FolderBelong.DI:
         return <Menu.Item key="CreateDI">新建数据集成</Menu.Item>;
       case FolderBelong.DEVJOB:
-        return <Menu.Item key="CreateJob">新建作业</Menu.Item>;
+        return <Menu.Item key="CreateJob">新建任务</Menu.Item>;
       default:
         return null;
     }
@@ -71,11 +71,10 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
   };
 
   const renderIcon = () => {
-    // hover、不是根目录、不是文件节点
+    // 在hover状态下、不是根目录节点、不是文件节点，这三个条件下显示图标
     if (
       isHover &&
       node.belong !== FolderBelong.DESIGN &&
-      node.belong !== FolderBelong.DAG &&
       node.belong !== FolderBelong.DI &&
       node.belong !== FolderBelong.DEV &&
       node.type !== FolderTypes.RECORD

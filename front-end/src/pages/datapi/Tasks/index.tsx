@@ -59,7 +59,7 @@ const DataSource: FC = () => {
     { title: '任务名称', key: 'jobName', dataIndex: 'jobName' },
     { title: '任务版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay' },
     { title: '任务环境', key: 'environment', dataIndex: 'environment' },
-    { title: '作业类型', key: 'jobTypeCode', dataIndex: 'jobTypeCode' },
+    { title: '任务类型', key: 'jobTypeCode', dataIndex: 'jobTypeCode' },
     { title: '提交人', key: 'creator', dataIndex: 'creator' },
     {
       title: '提交备注',

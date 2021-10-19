@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, message, Modal, Radio, Row, Select, Space } from 'antd';
+import { Button, Form, Input, message, Modal, Radio, Select, Space } from 'antd';
 import { useModel } from 'umi';
 import { get, cloneDeep } from 'lodash';
 import type { FC } from 'react';
@@ -27,12 +27,7 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
-import {
-  SrcReadMode,
-  DestWriteMode,
-  VersionStatus,
-  VersionStatusDisplayMap,
-} from '@/constants/datadev';
+import { SrcReadMode, DestWriteMode, VersionStatusDisplayMap } from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
@@ -85,11 +80,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [DSDestList, setDSDestList] = useState<DataSourceItem[]>([]);
   const [srcTables, setSrcTables] = useState<TaskTable[]>([]);
   const [data, setData] = useState<TaskContent>();
+  const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
+  const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
+
   const [srcForm] = Form.useForm();
   const [destForm] = Form.useForm();
   const [parallelismForm] = Form.useForm();
-  const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
-  const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
   const mapRef = useRef<{
     srcMap: { [key: string]: any };
     destMap: { [key: string]: any };
@@ -114,7 +110,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   }, [pane]);
 
   useEffect(() => {
-    if (version > -1) {
+    if (version && version > 0) {
       /**
        * 获取作业内容
        */
@@ -376,13 +372,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           size="large"
           style={{ width: maxWidth }}
           placeholder="请选择"
+          disabled={versions.length <= 0}
           options={versions.map((_) => ({
             label: `${_.versionDisplay}${_.environment ? '-' + _.environment : ''}-${
               VersionStatusDisplayMap[_.versionStatus]
             }`,
             value: _.version,
           }))}
-          value={version}
           onChange={(v) => setVersion(v as number)}
         />
         <div className={styles['form-box']}>

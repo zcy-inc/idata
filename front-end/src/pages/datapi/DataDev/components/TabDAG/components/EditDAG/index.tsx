@@ -53,6 +53,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
       };
       const cron = data.dagScheduleDto.cronExpression.split(' ');
       setCronExpression(data.dagScheduleDto.cronExpression);
+      setPeriodRange(data.dagScheduleDto.periodRange);
       // 0秒 / 1分 / 2时 / 3日(月) / 4月 / 5日(星期) / 6年
       switch (data.dagScheduleDto.periodRange) {
         case PeriodRange.YEAR:
@@ -297,6 +298,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           placeholder="请选择"
           options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
           fieldProps={{ size: 'large', style: { width } }}
+          rules={ruleSlct}
         />
         <ProFormSelect
           name="folderId"
@@ -335,7 +337,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
         />
         {renderPeriod()}
         <Item label="CRON表达式">
-          <span style={{ color: '#737b96' }}>{cronExpression}</span>
+          <span style={{ color: '#737b96' }}>{cronExpression || '-'}</span>
         </Item>
       </ProForm>
     </div>

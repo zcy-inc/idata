@@ -62,11 +62,11 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
         createTask(values)
           .then((res) => {
             if (res.success) {
-              message.success('创建作业成功');
+              message.success('创建任务成功');
               setVisibleTask(false);
               getTreeWrapped();
             } else {
-              message.success(`创建作业失败：${res.msg}`);
+              message.success(`创建任务失败：${res.msg}`);
             }
           })
           .catch((err) => {});

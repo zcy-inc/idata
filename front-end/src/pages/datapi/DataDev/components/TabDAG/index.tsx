@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import type { FC } from 'react';
 
 import { createDAG, deleteDAG, disableDAG, editDAG, enableDAG, getDAG } from '@/services/datadev';
-import { PeriodRange, TriggerMode } from '@/constants/datadev';
+import { PeriodRange } from '@/constants/datadev';
 import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
 
@@ -38,8 +38,8 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const renderCronExpression = (values: any) => {
     const time: string = values.time?.format('HH:mm') || '';
-    const hour = time.split(':')[0];
-    const minute = time.split(':')[1];
+    const hour = time.split(':')[0] || '';
+    const minute = time.split(':')[1] || '';
     const day: string[] = get(values, 'dayofmonth', []);
     const month: string[] = get(values, 'month', []);
     const triggerMode = values.triggerMode || 'specified';
@@ -203,7 +203,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const onCancel = () => {
     if (pane.id === -1) {
-      onRemovePane('newTable');
+      onRemovePane('newDAG');
     } else {
       getDAGWrapped().then(() => setMode('view'));
     }

@@ -11,6 +11,8 @@ import { FolderBelong, FolderTypes } from '@/constants/datadev';
 
 import CreateFolder from './components/CreateFolder';
 import TreeNodeTitle from './components/TreeNodeTitle';
+import IconCreate from './components/IconCreate';
+import IconFilter from './components/IconFilter';
 
 const { TreeNode } = Tree;
 const { confirm } = Modal;
@@ -80,7 +82,7 @@ const FolderTree: FC = () => {
       </Menu.Item>
       <Menu.Item key="CreateJob">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
-        新建作业
+        新建任务
       </Menu.Item>
     </Menu>
   );
@@ -206,7 +208,7 @@ const FolderTree: FC = () => {
           onChange={({ target: { value } }) => setKeyWord(value)}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode(null)} />
+          <IconCreate onClick={() => setCurNode(null)} />
         </Dropdown>
         <Popover
           content={
@@ -233,7 +235,7 @@ const FolderTree: FC = () => {
           placement="bottomLeft"
           trigger="click"
         >
-          <IconFont type="icon-shaixuan" className="icon-plus" />
+          <IconFilter />
         </Popover>
       </div>
       {tree.length ? (

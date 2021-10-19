@@ -199,8 +199,8 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       <div className="workbench-submit">
         {mode === 'view' && (
           <Space>
-            <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
-              编辑
+            <Button key="del" size="large" onClick={onDelete}>
+              删除
             </Button>
             <Button key="edit" size="large" onClick={() => setVisible(true)}>
               DDL模式
@@ -208,8 +208,8 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
             <Button key="metabase" size="large" onClick={syncMetabase} loading={metabaseLoading}>
               同步Metabase
             </Button>
-            <Button key="del" size="large" onClick={onDelete}>
-              删除
+            <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
+              编辑
             </Button>
           </Space>
         )}

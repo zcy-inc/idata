@@ -120,6 +120,7 @@ const DataSource: FC = () => {
         setList(res.data.content);
         setTotal(res.data.total);
       })
+      .catch((err) => {})
       .finally(() => setLoading(false));
   };
 
@@ -141,6 +142,7 @@ const DataSource: FC = () => {
         setListCSV(get(res, 'data.content', []));
         setTotalCSV(get(res, 'data.total', 0));
       })
+      .catch((err) => {})
       .finally(() => setLoading(false));
   };
 
@@ -238,7 +240,10 @@ const DataSource: FC = () => {
       </Tabs>
       <EditModal
         visible={visible}
-        onCancel={() => setVisible(false)}
+        onCancel={() => {
+          setVisible(false);
+          setCurrent(undefined);
+        }}
         initial={current}
         refresh={onSearch}
       />
