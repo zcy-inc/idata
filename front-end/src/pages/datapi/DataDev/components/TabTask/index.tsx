@@ -5,7 +5,6 @@ import { get, cloneDeep } from 'lodash';
 import type { FC } from 'react';
 import styles from './index.less';
 
-import { IconFont } from '@/components';
 import { IPane } from '@/models/datadev';
 import {
   getTaskContent,
@@ -31,6 +30,8 @@ import { SrcReadMode, DestWriteMode, VersionStatusDisplayMap } from '@/constants
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
+import IconRun from './components/IconRun';
+import IconPause from './components/IconPause';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -74,7 +75,7 @@ const RefreshSelect: FC<{
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
   const [versions, setVersions] = useState<TaskVersion[]>([]);
-  const [version, setVersion] = useState<number>(-1);
+  const [version, setVersion] = useState<number | undefined>(-1);
   const [DSTypes, setDSTypes] = useState<string[]>([]);
   const [DSSrcList, setDSSrcList] = useState<DataSourceItem[]>([]);
   const [DSDestList, setDSDestList] = useState<DataSourceItem[]>([]);
@@ -107,7 +108,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       getTaskVersionsWrapped();
       getDataSourceTypesWrapped();
     }
-  }, [pane]);
+  }, [pane.id]);
 
   useEffect(() => {
     if (version && version > 0) {
@@ -161,6 +162,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         setVersions(res.data);
         if (res.data[0]?.version) {
           setVersion(res.data[0]?.version);
+        } else {
+          setVersion(undefined);
         }
       })
       .catch((err) => {});
@@ -379,6 +382,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             }`,
             value: _.version,
           }))}
+          value={version}
           onChange={(v) => setVersion(v as number)}
         />
         <div className={styles['form-box']}>
@@ -537,18 +541,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </div>
       <div className="workbench-submit">
         <Space>
-          {task?.status === 0 && (
-            <div key="run" style={{ cursor: 'pointer', marginRight: 12 }} onClick={onRun}>
-              <IconFont type="icon-yunhang" />
-              <span style={{ color: '#a4a6ad', marginLeft: 8 }}>运行</span>
-            </div>
-          )}
-          {task?.status === 1 && (
-            <div key="pause" style={{ cursor: 'pointer', marginRight: 12 }} onClick={onPause}>
-              <IconFont type="icon-zanting" />
-              <span style={{ color: '#a4a6ad', marginLeft: 8 }}>暂停</span>
-            </div>
-          )}
+          {task?.status === 0 && <IconRun onClick={onRun} />}
+          {task?.status === 1 && <IconPause onClick={onPause} />}
           <Button key="delete" size="large" className="normal" onClick={onDelete}>
             删除
           </Button>

@@ -9,7 +9,7 @@ const IconFilter: FC<{}> = ({}) => {
     <div
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
-      style={{ marginLeft: 8, cursor: isHover ? 'pointer' : 'auto', lineHeight: 1 }}
+      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1 }}
     >
       {isHover ? (
         <IconFont type="icon-shaixuan-copy" style={{ fontSize: 18 }} />

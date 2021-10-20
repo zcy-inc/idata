@@ -31,8 +31,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
   }));
 
   useEffect(() => {
-    console.log(1, pane);
-
     pane.id !== -1 && getDAGWrapped();
   }, [pane.id]);
 
@@ -40,8 +38,8 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const renderCronExpression = (values: any) => {
     const time: string = values.time?.format('HH:mm') || '';
-    const hour = time.split(':')[0] || '';
-    const minute = time.split(':')[1] || '';
+    const hour = time?.split(':')[0] || '';
+    const minute = time?.split(':')[1] || '';
     const day: string[] = get(values, 'dayofmonth', []);
     const month: string[] = get(values, 'month', []);
     const triggerMode = values.triggerMode || 'specified';
@@ -65,10 +63,10 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
       case PeriodRange.HOUR:
         if (triggerMode === 'interval') {
           const start: string = values.start?.format('HH:mm');
-          const startHour = start.split(':')[0];
-          const startMinute = start.split(':')[1];
+          const startHour = start?.split(':')[0] || '';
+          const startMinute = start?.split(':')[1] || '';
           const interval: string = get(values, 'interval', 0);
-          const endHour = values.start?.format('HH');
+          const endHour = values.start?.format('HH') || '';
           cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
         }
         if (triggerMode === 'specified') {
@@ -77,9 +75,9 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
         }
         break;
       case PeriodRange.MINUTE:
-        const startHour = values.start?.format('HH');
+        const startHour = values.start?.format('HH') || '';
         const interval: string = get(values, 'interval', 0);
-        const endHour = values.end?.format('HH');
+        const endHour = values.end?.format('HH') || '';
         cronExpression = `0 0/${interval} ${startHour}-${endHour} * * ? *`;
         break;
 

@@ -235,7 +235,9 @@ const FolderTree: FC = () => {
           placement="bottomLeft"
           trigger="click"
         >
-          <IconFilter />
+          <div>
+            <IconFilter />
+          </div>
         </Popover>
       </div>
       {tree.length ? (

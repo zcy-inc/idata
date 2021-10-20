@@ -6,7 +6,7 @@ interface IconCreateProps {
   onClick: () => void;
 }
 
-const IconCreate: FC<IconCreateProps> = ({ onClick }) => {
+const IconRun: FC<IconCreateProps> = ({ onClick }) => {
   const [isHover, setIsHover] = useState(false);
 
   return (
@@ -14,15 +14,12 @@ const IconCreate: FC<IconCreateProps> = ({ onClick }) => {
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       onClick={onClick}
-      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1 }}
+      style={{ cursor: 'pointer', marginRight: 12, lineHeight: 1 }}
     >
-      {isHover ? (
-        <IconFont type="icon-tianjia" style={{ fontSize: 18 }} />
-      ) : (
-        <IconFont type="icon-xinjian1" style={{ fontSize: 18 }} />
-      )}
+      {isHover ? <IconFont type="icon-yunhang-copy" /> : <IconFont type="icon-yunhang" />}
+      <span style={{ color: isHover ? '#304ffe' : '#a4a6ad', marginLeft: 8 }}>运行</span>
     </div>
   );
 };
 
-export default IconCreate;
+export default IconRun;
