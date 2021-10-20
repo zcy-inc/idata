@@ -163,6 +163,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 for (JobPublishRecord record : publishRecords) {
                     JobContentVersionDto versionDto = JobContentVersionDto.from(content);
                     versionDto.setEnvironment(record.getEnvironment());
+                    versionDto.setVersionStatus(record.getPublishStatus());
                     versionDtoList.add(versionDto);
                 }
             }
