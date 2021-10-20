@@ -12,7 +12,7 @@ import type { FC } from 'react';
 import type { FormInstance } from 'antd';
 import styles from './index.less';
 
-import { dayOptions, hourOptions, monthOptions, weekOptions } from './constants';
+import { dayOptions, hourOptions, minuteOptions, monthOptions, weekOptions } from './constants';
 import { IconFont } from '@/components';
 import { DAG, Folder } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
@@ -250,12 +250,13 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
               fieldProps={{ size: 'large', format: 'HH', style: { width } }}
               rules={ruleSlct}
             />
-            <ProFormText
+            <ProFormSelect
               name="interval"
               label="时间间隔"
-              placeholder="请输入"
-              fieldProps={{ size: 'large', style: { width }, suffix: '分' }}
-              rules={ruleText}
+              placeholder="分"
+              fieldProps={{ size: 'large', style: { width } }}
+              options={minuteOptions}
+              rules={ruleSlct}
             />
             <ProFormTimePicker
               name="end"

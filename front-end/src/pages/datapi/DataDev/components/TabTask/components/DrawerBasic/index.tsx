@@ -15,6 +15,7 @@ interface DrawerConfigProps {
   onClose: () => void;
   data?: Task;
   pane: IPane;
+  getTaskWrapped: () => Promise<void>;
 }
 
 const { Item } = Form;
@@ -23,7 +24,7 @@ const widthL = 400;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
 
-const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane }) => {
+const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, getTaskWrapped }) => {
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [form] = Form.useForm();
@@ -73,6 +74,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane }) =
             pane,
           });
           onClose();
+          getTaskWrapped();
         } else {
           message.error(`保存失败：${res.msg}`);
         }

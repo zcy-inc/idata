@@ -112,36 +112,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
 
   useEffect(() => {
     if (version && version > 0) {
-      /**
-       * 获取作业内容
-       */
-      getTaskContent({ jobId: pane.id, version })
-        .then((r) => {
-          const srcData = {
-            srcDataSourceType: r.data.srcDataSourceType,
-            srcDataSourceId: r.data.srcDataSourceId,
-            srcTables: r.data.srcTables.split(','),
-            srcReadFilter: r.data.srcReadFilter,
-            srcReadShardKey: r.data.srcReadShardKey,
-            srcReadMode: r.data.srcReadMode,
-          };
-          const destData = {
-            destDataSourceType: r.data.destDataSourceType,
-            destDataSourceId: r.data.destDataSourceId,
-            destTable: r.data.destTable,
-            destBeforeWrite: r.data.destBeforeWrite,
-            destAfterWrite: r.data.destAfterWrite,
-            destWriteMode: r.data.destWriteMode,
-          };
-          getDataSourceListWrapped(srcData.srcDataSourceType, 'src');
-          getDataSourceListWrapped(destData.destDataSourceType, 'dest');
-          srcForm.setFieldsValue(srcData);
-          destForm.setFieldsValue(destData);
-          setData(r.data);
-          setSrcColumns(r.data.srcCols);
-          setDestColumns(r.data.destCols);
-        })
-        .catch((err) => {});
+      getTaskContentWrapped();
     }
   }, [version]);
 
@@ -165,6 +136,38 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         } else {
           setVersion(undefined);
         }
+      })
+      .catch((err) => {});
+
+  /**
+   * 获取作业内容
+   */
+  const getTaskContentWrapped = () =>
+    getTaskContent({ jobId: pane.id, version: version as number })
+      .then((r) => {
+        const srcData = {
+          srcDataSourceType: r.data.srcDataSourceType,
+          srcDataSourceId: r.data.srcDataSourceId,
+          srcTables: r.data.srcTables.split(','),
+          srcReadFilter: r.data.srcReadFilter,
+          srcReadShardKey: r.data.srcReadShardKey,
+          srcReadMode: r.data.srcReadMode,
+        };
+        const destData = {
+          destDataSourceType: r.data.destDataSourceType,
+          destDataSourceId: r.data.destDataSourceId,
+          destTable: r.data.destTable,
+          destBeforeWrite: r.data.destBeforeWrite,
+          destAfterWrite: r.data.destAfterWrite,
+          destWriteMode: r.data.destWriteMode,
+        };
+        getDataSourceListWrapped(srcData.srcDataSourceType, 'src');
+        getDataSourceListWrapped(destData.destDataSourceType, 'dest');
+        srcForm.setFieldsValue(srcData);
+        destForm.setFieldsValue(destData);
+        setData(r.data);
+        setSrcColumns(r.data.srcCols);
+        setDestColumns(r.data.destCols);
       })
       .catch((err) => {});
 
@@ -530,6 +533,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           onClose={() => setVisibleBasic(false)}
           data={task}
           pane={pane}
+          getTaskWrapped={getTaskWrapped}
         />
         <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
         <DrawerVersion

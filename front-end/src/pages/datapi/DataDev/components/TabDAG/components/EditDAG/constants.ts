@@ -32,3 +32,11 @@ export const hourOptions = [...Array(24)].map((_, i) => ({
   label: `${i}时`,
   value: i,
 }));
+
+export const minuteOptions = [
+  { label: '5', value: 5 },
+  { label: '10', value: 10 },
+  { label: '15', value: 15 },
+  { label: '20', value: 20 },
+  { label: '30', value: 30 },
+];
