@@ -12,8 +12,8 @@ interface MapProps {
     destColumns: MappedColumn[];
   };
 }
-const SrcNodesTitle = [{ id: 'srcNodesTitle', x: 180, y: 60, tableType: 'title' }];
-const DestNodesTitle = [{ id: 'destNodesTitle', x: 480, y: 60, tableType: 'title' }];
+// const SrcNodesTitle = [{ id: 'srcNodesTitle', x: 180, y: 60, tableType: 'title' }];
+// const DestNodesTitle = [{ id: 'destNodesTitle', x: 480, y: 60, tableType: 'title' }];
 
 const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
   { data: { srcColumns, destColumns } },
@@ -36,8 +36,9 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       srcMap.current[`${_.name}-src`] = _; // 赋srcMap的值
       return {
         id: `${_.name}-src`,
-        x: 80,
+        x: 160,
         y: 100 + 40 * i,
+        label: `${_.name} ${_.dataType}`,
         tableType: 'src',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -49,8 +50,9 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       destMap.current[`${_.name}-dest`] = _; // 赋destMap的值
       return {
         id: `${_.name}-dest`,
-        x: 480,
+        x: 540,
         y: 100 + 40 * i,
+        label: `${_.name} ${_.dataType}`,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -77,38 +79,44 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     G6.registerNode(
       'rect-node',
       {
-        draw(cfg, group) {
-          // const isTitle = cfg.dataType === 'title';
-          const keyShape = group?.addShape('rect', {
-            attrs: {
-              x: 0,
-              y: 0,
-              height: 32,
-              width: 240,
-              radius: [4],
-              fill: '#fff',
-              stroke: '#ebedf3',
-            },
-          }) as IShape;
-          group?.addShape('text', {
-            attrs: {
-              x: 20,
-              y: 22,
-              text: cfg.data?.name,
-              fill: '#2d3956',
-            },
-          });
-          group?.addShape('text', {
-            attrs: {
-              x: 140,
-              y: 22,
-              text: cfg.data?.dataType,
-              fill: '#2d3956',
-            },
-          });
+        // draw(cfg, group) {
+        //   // const isTitle = cfg.dataType === 'title';
+        //   const {
+        //     x,
+        //     y,
+        //     data: { name, dataType },
+        //   } = cfg;
 
-          return keyShape;
-        },
+        //   const keyShape = group?.addShape('rect', {
+        //     attrs: {
+        //       x,
+        //       y,
+        //       height: 32,
+        //       width: 240,
+        //       radius: [4],
+        //       fill: '#fff',
+        //       stroke: '#ebedf3',
+        //     },
+        //   }) as IShape;
+        //   group?.addShape('text', {
+        //     attrs: {
+        //       x: x + 20,
+        //       y: y + 22,
+        //       text: name,
+        //       fill: '#2d3956',
+        //     },
+        //   });
+        //   group?.addShape('text', {
+        //     attrs: {
+        //       x: x + 140,
+        //       y: y + 22,
+        //       text: dataType,
+        //       fill: '#2d3956',
+        //     },
+        //   });
+
+        //   return keyShape;
+        // },
         /**
          * 绘制后的附加操作，默认没有任何操作
          * @param  {Object} cfg 节点的配置项
@@ -116,9 +124,6 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
          */
         afterDraw(cfg, group: any) {
           // draw anchor-point circles according to the anchorPoints in afterDraw
-          if (cfg.tableType === 'title') {
-            return;
-          }
           const bbox = group.getBBox();
           const anchorPoints = this.getAnchorPoints(cfg);
           anchorPoints.forEach((anchorPos: any, i: number) => {
@@ -242,7 +247,10 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
           },
         ],
       },
-      defaultNode: { type: 'rect-node', style: {} },
+      defaultNode: {
+        type: 'rect-node',
+        style: { fill: '#fff', stroke: '#ebedf3', width: 240, radius: 4 },
+      },
       defaultEdge: { type: 'line', style: { stroke: '#304ffe', lineWidth: 2, lineDash: [3] } },
     });
     graphRef.current = graph;
