@@ -77,16 +77,18 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
         remark: initial.remark,
       };
       const dbConfigList = get(initial, 'dbConfigList', []);
+      const tmpEnvList: Environments[] = [];
       setActiveKey(dbConfigList[0].env);
       dbConfigList.forEach((_) => {
         const tmp = {};
+        tmpEnvList.push(_.env);
         for (let [key, value] of Object.entries(_)) {
           tmp[`${_.env}_${key}`] = value;
         }
         Object.assign(values, tmp);
       });
       form.setFieldsValue(values);
-      setEnv(initial.envList);
+      setEnv(tmpEnvList);
       setDSType(initial.type);
     }
   }, [initial, visible]);
@@ -247,7 +249,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
       {env.length ? (
         <Tabs className="reset-tabs" onChange={(k) => setActiveKey(k as Environments)}>
           {env.map((e) => (
-            <TabPane tab={e} key={`${e}`}>
+            <TabPane tab={e} key={`${e}`} forceRender>
               {DSType !== 'csv' && (
                 <>
                   <Item name={`${e}_dbName`} label="数据库名称" rules={renderRules()}>

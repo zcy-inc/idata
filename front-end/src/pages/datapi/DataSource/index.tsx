@@ -221,6 +221,7 @@ const DataSource: FC = () => {
       <Tabs className="reset-tabs" style={{ marginTop: 8 }} onChange={(k) => setActiveKey(k)}>
         <TabPane tab="数据库数据源" key="db">
           <Table<DataSourceItem>
+            rowKey="id"
             columns={columns}
             dataSource={list}
             scroll={{ x: 'max-content' }}
@@ -230,6 +231,7 @@ const DataSource: FC = () => {
         </TabPane>
         <TabPane tab="文件型数据源" key="file">
           <Table<CSVItem>
+            rowKey="id"
             columns={columnsCSV}
             dataSource={listCSV}
             scroll={{ x: 'max-content' }}
