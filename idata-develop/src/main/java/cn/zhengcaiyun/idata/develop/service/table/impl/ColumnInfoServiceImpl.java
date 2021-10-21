@@ -261,7 +261,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             if (columnLabelList != null) {
                 List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                         .from(devLabel)
-                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)),
+                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
                                 and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())))
                         .build().render(RenderingStrategies.MYBATIS3)),
                         LabelDto.class, "id", "tableId", "labelCode", "columnName");
