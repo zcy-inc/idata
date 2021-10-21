@@ -87,6 +87,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
       });
       form.setFieldsValue(values);
       setEnv(initial.envList);
+      setDSType(initial.type);
     }
   }, [initial, visible]);
 

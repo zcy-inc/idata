@@ -116,8 +116,6 @@ export async function testConnection(
     schema?: string;
   },
 ) {
-  console.log(params, data);
-
   return request<{ data: boolean }>('/api/p1/das/datasources/test', {
     method: 'POST',
     params,

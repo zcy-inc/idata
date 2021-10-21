@@ -86,7 +86,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
 
   const [srcForm] = Form.useForm();
   const [destForm] = Form.useForm();
-  const [parallelismForm] = Form.useForm();
   const mapRef = useRef<{
     srcMap: { [key: string]: any };
     destMap: { [key: string]: any };
@@ -295,11 +294,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     const destCols: MappedColumn[] = Object.values(destMap);
     const srcFormValues = srcForm.getFieldsValue();
     const destFormValues = destForm.getFieldsValue();
-    const parallelismFormValues = parallelismForm.getFieldsValue();
     const params = {
       ...srcFormValues,
       ...destFormValues,
-      ...parallelismFormValues,
       srcTables: srcFormValues.srcTables.join(','),
       id: pane.id,
       jobId: pane.id,
@@ -496,17 +493,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             </Form>
           </div>
         </div>
-        <Title>通道控制</Title>
-        <Form layout="horizontal" colon={false} form={parallelismForm}>
-          <Item name="execMaxParallelism" label="任务期望最大并发数">
-            <Select
-              size="large"
-              style={{ maxWidth, minWidth }}
-              placeholder="默认"
-              options={[...Array(20)].map((_, i) => ({ label: i + 1, value: i + 1 }))}
-            />
-          </Item>
-        </Form>
         <Title>
           <div className={styles['string-map-title']}>
             <span>字段映射</span>
