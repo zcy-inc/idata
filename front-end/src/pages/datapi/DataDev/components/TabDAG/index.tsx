@@ -90,64 +90,67 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const onSubmit = () => {
     setLoading(true);
-    form.validateFields().then(() => {
-      const values = form.getFieldsValue();
-      const cronExpression = renderCronExpression(values);
-      const params = {
-        dagInfoDto: {
-          name: values.name,
-          dwLayerCode: values.dwLayerCode,
-          folderId: values.folderId,
-        },
-        dagScheduleDto: {
-          beginTime: values.range[0].valueOf(),
-          endTime: values.range[1].valueOf(),
-          periodRange: values.periodRange,
-          triggerMode: values.triggerMode || 'specified',
-          cronExpression,
-        },
-      };
-      if (pane.id === -1) {
-        createDAG(params)
-          .then((res) => {
-            if (res.success) {
-              message.success('创建DAG成功');
-              getTreeWrapped();
-              replaceTab({
-                oldKey: 'newDAG',
-                newKey: `${pane.type}_${pane.belong}_${res.data.dagInfoDto.id}`,
-                title: res.data.dagInfoDto.name,
-                pane: { ...pane, id: res.data.dagInfoDto.id },
-              });
-            } else {
-              message.error('创建DAG失败');
-            }
-          })
-          .catch((err) => {})
-          .finally(() => setLoading(false));
-      } else {
-        Object.assign(params.dagInfoDto, { id: data?.dagInfoDto.id });
-        Object.assign(params.dagScheduleDto, { id: data?.dagScheduleDto.id });
-        editDAG(params)
-          .then((res) => {
-            if (res.success) {
-              message.success('编辑DAG成功');
-              replaceTab({
-                oldKey: pane.cid,
-                newKey: pane.cid,
-                title: res.data.dagInfoDto.name,
-                pane,
-              });
-              getDAGWrapped().then(() => setMode('view'));
-              getTreeWrapped();
-            } else {
-              message.error('编辑DAG失败');
-            }
-          })
-          .catch((err) => {})
-          .finally(() => setLoading(false));
-      }
-    });
+    form
+      .validateFields()
+      .then(() => {
+        const values = form.getFieldsValue();
+        const cronExpression = renderCronExpression(values);
+        const params = {
+          dagInfoDto: {
+            name: values.name,
+            dwLayerCode: values.dwLayerCode,
+            folderId: values.folderId,
+          },
+          dagScheduleDto: {
+            beginTime: values.range[0].valueOf(),
+            endTime: values.range[1].valueOf(),
+            periodRange: values.periodRange,
+            triggerMode: values.triggerMode || 'specified',
+            cronExpression,
+          },
+        };
+        if (pane.id === -1) {
+          createDAG(params)
+            .then((res) => {
+              if (res.success) {
+                message.success('创建DAG成功');
+                getTreeWrapped();
+                replaceTab({
+                  oldKey: 'newDAG',
+                  newKey: `${pane.type}_${pane.belong}_${res.data.dagInfoDto.id}`,
+                  title: res.data.dagInfoDto.name,
+                  pane: { ...pane, id: res.data.dagInfoDto.id },
+                });
+              } else {
+                message.error('创建DAG失败');
+              }
+            })
+            .catch((err) => {})
+            .finally(() => setLoading(false));
+        } else {
+          Object.assign(params.dagInfoDto, { id: data?.dagInfoDto.id });
+          Object.assign(params.dagScheduleDto, { id: data?.dagScheduleDto.id });
+          editDAG(params)
+            .then((res) => {
+              if (res.success) {
+                message.success('编辑DAG成功');
+                replaceTab({
+                  oldKey: pane.cid,
+                  newKey: pane.cid,
+                  title: res.data.dagInfoDto.name,
+                  pane,
+                });
+                getDAGWrapped().then(() => setMode('view'));
+                getTreeWrapped();
+              } else {
+                message.error('编辑DAG失败');
+              }
+            })
+            .catch((err) => {})
+            .finally(() => setLoading(false));
+        }
+      })
+      .finally(() => setLoading(false));
   };
 
   const onDelete = () =>
