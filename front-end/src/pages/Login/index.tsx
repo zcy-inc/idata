@@ -87,10 +87,10 @@ const Login = () => {
       return;
     }
 
-    if (redirect) {
-      window.location.href = redirect;
-      return;
-    }
+    // if (redirect) {
+    //   window.location.href = redirect;
+    //   return;
+    // }
     window.location.href = mainPublicPath;
   };
 
