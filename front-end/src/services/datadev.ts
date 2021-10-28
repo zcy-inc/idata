@@ -102,6 +102,10 @@ export async function getDDL(params: { tableId: any }) {
 export async function postSyncMetabase(params: { tableId: any }) {
   return request(`/api/p1/dev/syncMetabaseInfo/${params.tableId}`, { method: 'POST', params });
 }
+// 表 生成表结构
+export async function getTableConstruct(data: { tableDdl: string; tableId: number }) {
+  return request('/api/p1/dev/ddl/syncTableInfo', { method: 'POST', data });
+}
 
 /* ==================== DataDev ==================== */
 /**
@@ -388,7 +392,12 @@ export async function saveTask(data: TaskContent) {
 /**
  * 提交作业
  */
-export async function submitTask(params: { jobId: number; version: number; env: Environments }) {
+export async function submitTask(params: {
+  jobId: number;
+  version: number;
+  env: Environments;
+  remark: string;
+}) {
   return request<DefaultResponse & { data: TaskContent }>(
     `/api/p1/dev/jobs/${params.jobId}/di/contents/${params.version}/submit/${params.env}`,
     {

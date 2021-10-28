@@ -32,7 +32,7 @@ export async function getTasks(params: {
 /**
  * 发布版本
  */
-export async function publishTask(data: { recordIds: number[]; remark: string }) {
+export async function publishTask(data: { recordIds: number[] }) {
   return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/approve', {
     method: 'POST',
     data,
@@ -42,7 +42,7 @@ export async function publishTask(data: { recordIds: number[]; remark: string })
 /**
  * 驳回版本
  */
-export async function rejectTask(data: { recordIds: number[]; remark: string }) {
+export async function rejectTask(data: { recordIds: number[] }) {
   return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/reject', {
     method: 'POST',
     data,

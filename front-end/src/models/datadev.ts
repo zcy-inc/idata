@@ -29,7 +29,10 @@ export default () => {
    */
   const getTreeWrapped = () =>
     getTree({ belongFunctions, keyWord })
-      .then((res) => setTree(res.data))
+      .then((res) => {
+        setTree(res.data);
+        return res;
+      })
       .catch(() => setTree(mockTree));
 
   /**
@@ -150,6 +153,7 @@ export default () => {
     setCurNode, // 设置当前操作的节点
     belongFunctions, // 筛选树的belongs
     setBelongFunctions, // 设置树的belongs
+    keyWord, // 筛选树的keyword
     setKeyWord, // 设置筛选树的keyWord
     panes,
     activeKey,

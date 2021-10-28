@@ -32,6 +32,7 @@ import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
 import IconRun from './components/IconRun';
 import IconPause from './components/IconPause';
+import { ModalForm } from '@ant-design/pro-form';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -83,6 +84,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [data, setData] = useState<TaskContent>();
   const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
   const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
+  const [visible, setVisible] = useState(false);
+  const [publishEnv, setPublishEnv] = useState<Environments>(Environments.STAG);
+  const [loading, setLoading] = useState(false);
 
   const [srcForm] = Form.useForm();
   const [destForm] = Form.useForm();
@@ -182,6 +186,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    * 获取该数据源类型下的数据源列表
    */
   const getDataSourceListWrapped = (type: DataSourceTypes, dir: 'src' | 'dest') => {
+    if (dir === 'src') {
+      // 修改来源类型时置空来源数据源和表
+      srcForm.setFieldsValue({ srcDataSourceId: null, srcTables: [] });
+    }
+    if (dir === 'dest') {
+      // 修改目标类型时置空目标数据源
+      destForm.setFieldsValue({ destDataSourceId: null });
+    }
     getDataSourceList({ type, limit: 10000, offset: 0 })
       .then((res) => {
         const content = get(res, 'data.content', []);
@@ -195,6 +207,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    * 获取该数据源下的表
    */
   const getTaskTablesWrapped = (dataSourceId: number) => {
+    // 置空来源表的表单项
+    srcForm.setFieldsValue({ srcTables: [] });
     const dataSourceType = srcForm.getFieldValue('srcDataSourceType');
     getTaskTables({ dataSourceType, dataSourceId })
       .then((res) => setSrcTables(res.data))
@@ -337,25 +351,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     destColumns.forEach((_, i) => (_.mappedColumn = cloneDeep(cloneSrcColumns[i])));
     setSrcColumns([...srcColumns]);
     setSrcColumns([...destColumns]);
-  };
-
-  /**
-   * 提交预发/真线
-   */
-  const onSubmit = (env: Environments) => {
-    submitTask({
-      jobId: pane.id,
-      version: data?.version as number,
-      env,
-    })
-      .then((res) => {
-        if (res.success) {
-          message.success('提交成功');
-        } else {
-          message.error(`提交失败：${res.msg}`);
-        }
-      })
-      .catch((err) => {});
   };
 
   return (
@@ -543,7 +538,10 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             key="stag"
             size="large"
             type="primary"
-            onClick={() => onSubmit(Environments.STAG)}
+            onClick={() => {
+              setVisible(true);
+              setPublishEnv(Environments.STAG);
+            }}
           >
             提交预发
           </Button>
@@ -551,11 +549,53 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             key="prod"
             size="large"
             type="primary"
-            onClick={() => onSubmit(Environments.PROD)}
+            onClick={() => {
+              setVisible(true);
+              setPublishEnv(Environments.PROD);
+            }}
           >
             提交真线
           </Button>
         </Space>
+        <ModalForm
+          title={`提交${publishEnv === Environments.STAG ? '预发' : '真线'}`}
+          layout="horizontal"
+          width={536}
+          labelCol={{ span: 6 }}
+          colon={false}
+          preserve={false}
+          modalProps={{ destroyOnClose: true, onCancel: () => setVisible(false) }}
+          visible={visible}
+          submitter={{
+            submitButtonProps: { size: 'large', loading },
+            resetButtonProps: { size: 'large' },
+          }}
+          onFinish={async (values) => {
+            setLoading(true);
+            submitTask({
+              jobId: pane.id,
+              version: data?.version as number,
+              env: publishEnv,
+              remark: values.remark,
+            })
+              .then((res) => {
+                if (res.success) {
+                  message.success('提交成功');
+                  setVisible(false);
+                  return true;
+                } else {
+                  message.error(`提交失败：${res.msg}`);
+                  return false;
+                }
+              })
+              .catch((err) => {})
+              .finally(() => setLoading(false));
+          }}
+        >
+          <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
+            <TextArea placeholder="请输入" />
+          </Item>
+        </ModalForm>
       </div>
     </>
   );

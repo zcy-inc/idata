@@ -1,9 +1,16 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Button, Form, message, Modal, Space } from 'antd';
 import { useModel } from 'umi';
+import { cloneDeep, get, set } from 'lodash';
 import type { FC } from 'react';
 
-import { createTable, delTable, getTable, postSyncMetabase } from '@/services/datadev';
+import {
+  createTable,
+  delTable,
+  getTable,
+  getTableConstruct,
+  postSyncMetabase,
+} from '@/services/datadev';
 import { Table, ForeignKey } from '@/types/datapi';
 
 import ViewTable from './ViewTable';
@@ -41,8 +48,6 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
   }));
 
   useEffect(() => {
-    console.log(pane);
-
     pane.id !== -1 && getTableInfo(pane.id);
   }, [pane]);
 
@@ -192,6 +197,23 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       });
   };
 
+  const generateTableConstruct = (value: string) =>
+    getTableConstruct({
+      tableDdl: value,
+      tableId: data?.id as number,
+    })
+      .then((res) => {
+        if (res.success) {
+          const tmp = cloneDeep(data as Table);
+          const columnInfos = get(res, 'data.columnInfos');
+          set(tmp, 'columnInfos', columnInfos);
+          setData(tmp);
+          setMode('edit');
+        }
+        return res;
+      })
+      .catch((err) => {});
+
   return (
     <Fragment>
       {mode === 'view' && <ViewTable data={data} />}
@@ -224,7 +246,14 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           </Space>
         )}
       </div>
-      {visible && <DDLModal visible={visible} onCancel={() => setVisible(false)} data={data} />}
+      {visible && (
+        <DDLModal
+          visible={visible}
+          onCancel={() => setVisible(false)}
+          data={data}
+          generateTableConstruct={generateTableConstruct}
+        />
+      )}
     </Fragment>
   );
 };

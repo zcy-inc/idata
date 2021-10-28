@@ -33,9 +33,9 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     if (initial) {
       const tmpKeys: Key[] = [];
       const tmpData = initial.columnInfos?.map((column: ColumnLabel) => {
+        const tmpKey = new Date().getTime();
         const tmp = {
-          key: column.id,
-          id: column.id,
+          key: column.columnName || tmpKey,
           columnName: column.columnName,
         };
         column.columnLabels?.forEach((label: TableLable) => {
@@ -43,7 +43,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
           label.labelTag === 'BOOLEAN_LABEL' && (v = v === 'true');
           tmp[label.labelCode] = v;
         });
-        tmpKeys.push(column.id);
+        tmpKeys.push(tmp.key);
         return tmp;
       });
 

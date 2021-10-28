@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import G6, { Graph, IShape } from '@antv/g6';
+import G6, { Graph } from '@antv/g6';
 import { findDOMNode } from 'react-dom';
 import { get, set, cloneDeep } from 'lodash';
 import type { ForwardRefRenderFunction } from 'react';
@@ -38,7 +38,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-src`,
         x: 160,
         y: 100 + 40 * i,
-        label: `${_.name} ${_.dataType}`,
+        label: `${_.name} ${_.dataType || '-'}`,
         tableType: 'src',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -52,7 +52,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-dest`,
         x: 540,
         y: 100 + 40 * i,
-        label: `${_.name} ${_.dataType}`,
+        label: `${_.name} ${_.dataType || '-'}`,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };

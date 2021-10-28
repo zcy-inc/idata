@@ -1,13 +1,20 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Button, message, Modal, Space, Spin } from 'antd';
 import { useModel } from 'umi';
+import MonacoEditor from 'react-monaco-editor';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
 
 import ViewMetric from './ViewMetric';
 import EditMetric from './EditMetric';
 import { Metric } from '@/types/datapi';
-import { createMetric, deleteMetric, getMetric, switchMetric } from '@/services/measure';
+import {
+  createMetric,
+  deleteMetric,
+  generateSQL,
+  getMetric,
+  switchMetric,
+} from '@/services/measure';
 import { LabelTag, TreeNodeType } from '@/constants/datapi';
 
 export interface TabMetricProps {
@@ -26,7 +33,11 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
   const [getLoading, setGetLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<Metric>();
+  const [visible, setVisible] = useState(false);
+  const [SQL, setSQL] = useState('');
+  const [SQLLoading, setSQLLoading] = useState(false);
   const refM = useRef<MetricExportProps>();
+
   const { getTree, removeTab, replaceTab } = useModel('measure', (_) => ({
     getTree: _.getTree,
     removeTab: _.removeTab,
@@ -210,7 +221,21 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
       .catch((err) => {});
   };
 
-  const generateSQL = () => {};
+  const generateSQLWrapped = () => {
+    setSQLLoading(true);
+    generateSQL({ metricCode: data?.labelCode as string })
+      .then((res) => {
+        if (res.success) {
+          message.success('生成SQL成功');
+          setSQL(res.data);
+          setVisible(true);
+        } else {
+          message.error(`生成SQL失败：${res.msg}`);
+        }
+      })
+      .catch((err) => {})
+      .finally(() => setSQLLoading(false));
+  };
 
   return (
     <Fragment>
@@ -224,7 +249,7 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
             <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
               编辑
             </Button>
-            <Button key="sql" size="large" onClick={generateSQL}>
+            <Button key="sql" size="large" onClick={generateSQLWrapped} loading={SQLLoading}>
               生成SQL
             </Button>
             <Button key="labelTag" size="large" onClick={switchStatus}>
@@ -246,6 +271,22 @@ const TabMetric: FC<TabMetricProps> = ({ initialMode = 'view', tabKey, fileCode 
           </Space>
         )}
       </div>
+      <Modal
+        title="生成SQL"
+        width={800}
+        bodyStyle={{ padding: 16 }}
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        footer={null}
+      >
+        <MonacoEditor
+          height="400"
+          language="sql"
+          theme="vs-dark"
+          value={SQL}
+          options={{ readOnly: true }}
+        />
+      </Modal>
     </Fragment>
   );
 };

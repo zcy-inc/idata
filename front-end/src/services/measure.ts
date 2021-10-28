@@ -83,3 +83,7 @@ export async function switchMetric(params: { metricCode: string; labelTag: Label
 export async function getAtomicMetrics(params: { atomicMetricCode: string }) {
   return request(`/api/p1/dev/modifiersByAtomic`, { method: 'GET', params });
 }
+// 指标 生成SQL
+export async function generateSQL(params: { metricCode: string }) {
+  return request(`/api/p1/dev/metricSql`, { method: 'GET', params });
+}

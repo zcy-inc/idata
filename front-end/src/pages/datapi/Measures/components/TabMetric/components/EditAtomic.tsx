@@ -1,6 +1,7 @@
 import React, { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react';
 import { Select, Tabs } from 'antd';
 import { EditableProTable } from '@ant-design/pro-table';
+import { get } from 'lodash';
 import type { ProColumns } from '@ant-design/pro-table';
 import type { ForwardRefRenderFunction, Key } from 'react';
 
@@ -95,7 +96,9 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
   // };
 
   const setValue = (schema: any, value: any) => {
-    const tmp = { id: initialKey };
+    const id = get(schema, 'entry.id');
+    const d = DWDData[0] || {};
+    const tmp = { ...d, id };
     if (schema.dataIndex === 'tableId') {
       getTableReferStr({ tableId: value })
         .then((res) => {
@@ -105,10 +108,10 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
         })
         .catch((err) => {});
     }
-    tmp[schema.dataIndex] = value;
-
+    tmp[schema.dataIndex] = value; // tmp.tableId = value
     setDWDData([tmp]);
   };
+
   // 操作栏行为
   // const onAction = (row: any, _: any) => {
   //   const i = DWDData.findIndex((_) => _.id === row.id);
@@ -128,6 +131,8 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
           placeholder="请选择"
           options={DWDTables}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(input, option) => `${option?.label}`.indexOf(input) >= 0}
         />
       ),
     },
@@ -141,6 +146,8 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
           placeholder="请选择"
           options={DWDStrings[schema.index as number]}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(input, option) => `${option?.label}`.indexOf(input) >= 0}
         />
       ),
     },
@@ -175,7 +182,7 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
             editable={{
               type: 'multiple',
               editableKeys: DWDKeys,
-              onChange: setDWDKeys,
+              onChange: (keys, rows) => setDWDKeys(keys),
               // actionRender: (row, _) => [<Link onClick={() => onAction(row, _)}>删除</Link>],
             }}
           />

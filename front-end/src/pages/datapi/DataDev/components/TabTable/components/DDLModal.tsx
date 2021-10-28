@@ -10,9 +10,10 @@ interface DDLModalProps {
   visible: boolean;
   onCancel: () => void;
   data?: Table;
+  generateTableConstruct: (value: string) => Promise<any>;
 }
 
-const DDLModal: FC<DDLModalProps> = ({ visible, onCancel, data }) => {
+const DDLModal: FC<DDLModalProps> = ({ visible, onCancel, data, generateTableConstruct }) => {
   const [v, setV] = useState('');
 
   useEffect(() => {
@@ -25,8 +26,6 @@ const DDLModal: FC<DDLModalProps> = ({ visible, onCancel, data }) => {
     }
   }, [visible]);
 
-  const generateTableConstruct = () => {};
-
   return (
     <Modal
       title="DDL模式"
@@ -34,7 +33,16 @@ const DDLModal: FC<DDLModalProps> = ({ visible, onCancel, data }) => {
       onCancel={onCancel}
       width={800}
       footer={[
-        <Button size="large" onClick={generateTableConstruct}>
+        <Button
+          size="large"
+          onClick={() =>
+            generateTableConstruct(v).then((res) => {
+              if (res.success) {
+                onCancel();
+              }
+            })
+          }
+        >
           生成表结构
         </Button>,
       ]}
@@ -45,7 +53,8 @@ const DDLModal: FC<DDLModalProps> = ({ visible, onCancel, data }) => {
         language="sql"
         theme="vs-dark"
         value={v}
-        options={{ readOnly: true }}
+        onChange={(value, e) => setV(value)}
+        options={{}}
       />
     </Modal>
   );

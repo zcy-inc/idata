@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Descriptions, Table, Tabs, Tooltip } from 'antd';
 import type { FC, CSSProperties } from 'react';
 
-import { getDWOwner } from '@/services/datadev';
+import { getDWOwner, getTableLabels } from '@/services/datadev';
 import { ColumnLabel, TableLable, User } from '@/types/datapi';
 import { LabelTag } from '@/constants/datapi';
 import { ViewInitialColumns, TransformBoolean } from './constants';
@@ -38,28 +38,31 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      const columnInfos = Array.isArray(data.columnInfos) ? data.columnInfos : [];
-      const columnLabels = Array.isArray(columnInfos[0]?.columnLabels)
-        ? columnInfos[0].columnLabels
-        : [];
-      const exCols = columnLabels.map((_: ColumnLabel) => ({
-        title: _.labelName,
-        dataIndex: _.labelCode,
-        key: _.labelCode,
-        render: (_: any) => _ || '-',
-      }));
-      const dt = columnInfos.map((columnInfo: ColumnLabel) => {
-        const tmp = { columnName: columnInfo.columnName };
-        columnInfo.columnLabels?.forEach(
-          (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
-        );
-        return tmp;
+      getTableLabels({ subjectType: 'COLUMN' }).then((res) => {
+        const columnInfos = Array.isArray(data.columnInfos) ? data.columnInfos : [];
+        const columnLabels = Array.isArray(res.data) ? res.data : [];
+        const exCols = columnLabels.map((_: ColumnLabel) => ({
+          title: _.labelName,
+          dataIndex: _.labelCode,
+          key: _.labelCode,
+          render: (_: any) => _ || '-',
+        }));
+        const dt = columnInfos.map((columnInfo: ColumnLabel) => {
+          const tmp = { columnName: columnInfo.columnName };
+          columnInfo.columnLabels?.forEach(
+            (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
+          );
+          return tmp;
+        });
+        setColumns(ViewInitialColumns.concat(exCols));
+        setDataSource(dt);
       });
-
-      setColumns(ViewInitialColumns.concat(exCols));
-      setDataSource(dt);
     }
   }, [data]);
+
+  console.log(columns);
+  console.log(dataSource);
+  
 
   const transformLabelValue = (_: any) => {
     switch (_.labelTag) {

@@ -29,6 +29,7 @@ const FolderTree: FC = () => {
     setCurNode,
     belongFunctions,
     setBelongFunctions,
+    keyWord,
     setKeyWord,
     onCreateEnum,
     onCreateTable,
@@ -45,6 +46,7 @@ const FolderTree: FC = () => {
     setCurNode: _.setCurNode,
     belongFunctions: _.belongFunctions,
     setBelongFunctions: _.setBelongFunctions,
+    keyWord: _.keyWord,
     setKeyWord: _.setKeyWord,
     onCreateEnum: _.onCreateEnum,
     onCreateTable: _.onCreateTable,
@@ -162,18 +164,31 @@ const FolderTree: FC = () => {
     }
   }, []);
 
-  // 为了加上样式所以使用这种方式
+  // 为了加上样式所以使用TreeNode，不然可以用treeData属性
   const loop = (data: Treenode[]): any => {
     const n = data.length;
     return data.map((_, i) => {
+      let tmp: any = _.name;
       // 按组件的属性赋值key
       _.key = _.cid;
       // 给node加上样式
       if (isRootFolder(_.belong) || i === n - 1) {
         _.className = 'folder-margin';
       }
+      const index = _.name.indexOf(keyWord);
+      if (index > -1) {
+        const beforeStr = _.name.substr(0, index);
+        const afterStr = _.name.substr(index + keyWord.length);
+        tmp = (
+          <span>
+            {beforeStr}
+            <span style={{ color: 'red' }}>{keyWord}</span>
+            {afterStr}
+          </span>
+        );
+      }
       // 给title加上样式
-      let title = <span className={_.parentId ? '' : 'folder-root'}>{_.name}</span>;
+      let title = <span className={_.parentId ? '' : 'folder-root'}>{tmp}</span>;
       // 给type不为FolderTypes.RECORD的节点加上icon
       if (_.type === FolderTypes.RECORD) {
         _.title = title;
@@ -250,12 +265,12 @@ const FolderTree: FC = () => {
               // 可以通过这个来判断是选中节点还是浮窗点击。
               if (selectedKeys.length) {
                 const nodeForTSLint: any = node;
-                // setCurNode(null);
                 if (nodeForTSLint.type === FolderTypes.RECORD) {
                   onViewTree(nodeForTSLint);
                 }
               }
             }}
+            defaultExpandAll={!!keyWord}
           >
             {loop(tree)}
           </Tree>

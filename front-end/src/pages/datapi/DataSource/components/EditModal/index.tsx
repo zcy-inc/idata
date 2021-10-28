@@ -237,7 +237,13 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
           onChange={(v) => setDSType(`${v}` as DataSourceTypes)}
         />
       </Item>
-      <Item className={styles.name} name="name" label="数据源名称" rules={ruleText}>
+      <Item
+        className={styles.name}
+        name="name"
+        label="数据源名称"
+        rules={ruleText}
+        extra={DSType === DataSourceTypes.CSV ? '文件会覆盖同名数据源，请谨慎操作' : ''}
+      >
         <Input size="large" style={{ width }} placeholder="请输入" />
       </Item>
       <Item className={styles.env} name="envList" label="环境" rules={ruleSelc}>

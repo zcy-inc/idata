@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import type { FC } from 'react';
 
 import { createDAG, deleteDAG, disableDAG, editDAG, enableDAG, getDAG } from '@/services/datadev';
-import { PeriodRange } from '@/constants/datadev';
+import { PeriodRange, TriggerMode } from '@/constants/datadev';
 import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
 
@@ -61,7 +61,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
         cronExpression = `0 ${minute} ${hour} * * ? *`;
         break;
       case PeriodRange.HOUR:
-        if (triggerMode === 'interval') {
+        if (triggerMode === TriggerMode.INTERVAL) {
           const start: string = values.start?.format('HH:mm');
           const startHour = start?.split(':')[0] || '';
           const startMinute = start?.split(':')[1] || '';
@@ -69,7 +69,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
           const endHour = values.start?.format('HH') || '';
           cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
         }
-        if (triggerMode === 'specified') {
+        if (triggerMode === TriggerMode.POINT) {
           const hours: string[] = get(values, 'hours', []);
           cronExpression = `0 0 ${hours.join(',')} * * ? *`;
         }

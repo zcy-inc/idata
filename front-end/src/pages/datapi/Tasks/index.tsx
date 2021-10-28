@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import ProForm, { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Form, Input, message, Space, Table } from 'antd';
+import { Button, Form, message, Modal, Space, Table } from 'antd';
 import { PageContainer } from '@/components';
 
 import type { FC } from 'react';
@@ -16,9 +16,7 @@ import { TaskCategory, VersionStatus } from '@/constants/datadev';
 import { TaskType } from '@/types/datadev';
 import moment from 'moment';
 
-const { Item } = Form;
-const { TextArea } = Input;
-const ruleText = [{ required: true, message: '请输入' }];
+const { confirm } = Modal;
 type ActionType = 'approve' | 'reject';
 
 const DataSource: FC = () => {
@@ -27,8 +25,6 @@ const DataSource: FC = () => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [actionRecords, setActionRecords] = useState<TaskListItem[]>([]);
-  const [actionType, setActionType] = useState<ActionType>('approve');
-  const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
@@ -88,18 +84,30 @@ const DataSource: FC = () => {
   ];
 
   const onAction = (records: TaskListItem[], actionType: ActionType) => {
-    setActionType(actionType);
-    setVisibleSubmit(true);
     setActionRecords(records);
+    onPublishOrReject(actionType);
   };
 
-  const onPushlish = async (remark: string) => {
+  const onPublishOrReject = (type: ActionType) =>
+    confirm({
+      title: '确认',
+      content: `您确认要${type === 'approve' ? '发布' : '驳回'}吗？`,
+      onOk: () => {
+        if (type === 'approve') {
+          onPublish();
+        }
+        if (type === 'reject') {
+          onReject();
+        }
+      },
+    });
+
+  const onPublish = async () => {
     const recordIds = actionRecords.map((_) => _.id);
-    publishTask({ recordIds, remark })
+    publishTask({ recordIds })
       .then((res) => {
         if (res.success) {
           message.success('发布成功');
-          setVisibleSubmit(false);
           getTasksWrapped(0);
         } else {
           message.error(`发布失败：${res.msg}`);
@@ -108,13 +116,12 @@ const DataSource: FC = () => {
       .catch((err) => {});
   };
 
-  const onReject = async (remark: string) => {
+  const onReject = async () => {
     const recordIds = actionRecords.map((_) => _.id);
-    rejectTask({ recordIds, remark })
+    rejectTask({ recordIds })
       .then((res) => {
         if (res.success) {
           message.success('驳回成功');
-          setVisibleSubmit(false);
           getTasksWrapped(0);
         } else {
           message.error(`驳回失败：${res.msg}`);
@@ -181,8 +188,7 @@ const DataSource: FC = () => {
         <Button
           onClick={() => {
             if (actionRecords.length) {
-              setActionType('approve');
-              setVisibleSubmit(true);
+              onPublishOrReject('approve');
             } else {
               message.info('请选择任务');
             }
@@ -205,39 +211,10 @@ const DataSource: FC = () => {
         }}
         rowSelection={{
           onChange: (selectedRowKeys: React.Key[], selectedRows: TaskListItem[]) => {
-            console.log(selectedRowKeys, selectedRows);
-
             setActionRecords(selectedRows);
           },
         }}
       />
-      <ModalForm
-        title="提交新版本"
-        layout="horizontal"
-        width={536}
-        labelCol={{ span: 6 }}
-        colon={false}
-        preserve={false}
-        modalProps={{ destroyOnClose: true, onCancel: () => setVisibleSubmit(false) }}
-        visible={visibleSubmit}
-        submitter={{
-          submitButtonProps: { size: 'large' },
-          resetButtonProps: { size: 'large' },
-        }}
-        onFinish={async (values) => {
-          if (actionType === 'approve') {
-            await onPushlish(values.remark);
-          }
-          if (actionType === 'reject') {
-            await onReject(values.remark);
-          }
-          return true;
-        }}
-      >
-        <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
-          <TextArea placeholder="请输入" />
-        </Item>
-      </ModalForm>
     </PageContainer>
   );
 };
