@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty } from 'antd';
 import { useModel } from 'umi';
 import type { FC, Key } from 'react';
@@ -16,10 +16,17 @@ import IconFilter from './components/IconFilter';
 
 const { TreeNode } = Tree;
 const { confirm } = Modal;
+interface FolderListItem {
+  key: string;
+  title: string;
+}
 
 const FolderTree: FC = () => {
   const [functionTree, setFunctionTree] = useState<Treenode[]>([]);
   const [visible, setVisible] = useState(false);
+
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
+  const [autoExpandParent, setAutoExpandParent] = useState(false);
 
   const {
     tree,
@@ -38,6 +45,7 @@ const FolderTree: FC = () => {
     onCreateDAG,
     setVisibleTask,
     setCurLabel,
+    folderList,
   } = useModel('datadev', (_) => ({
     tree: _.tree,
     getTreeWrapped: _.getTreeWrapped,
@@ -55,6 +63,7 @@ const FolderTree: FC = () => {
     onCreateDAG: _.onCreateDAG,
     setVisibleTask: _.setVisibleTask,
     setCurLabel: _.setCurLabel,
+    folderList: _.folderList,
   }));
 
   useEffect(() => {
@@ -212,6 +221,22 @@ const FolderTree: FC = () => {
       );
     });
 
+  // 获取父节点的key
+  const getParentKey = (key: string, tree: Treenode[]): string => {
+    let parentKey = '';
+    for (let i = 0; i < tree.length; i++) {
+      const node = tree[i];
+      if (node.children) {
+        if (node.children.some((item) => item.cid === key)) {
+          parentKey = node.cid;
+        } else if (getParentKey(key, node.children)) {
+          parentKey = getParentKey(key, node.children);
+        }
+      }
+    }
+    return parentKey;
+  };
+
   return (
     <div className="folder-tree">
       <div className="search">
@@ -219,7 +244,23 @@ const FolderTree: FC = () => {
           className="search-input"
           placeholder="请输入关键字进行搜索"
           prefix={<IconFont type="icon-sousuo" />}
-          onKeyDown={(e) => e.key === 'Enter' && getTreeWrapped()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              getTreeWrapped();
+              const tmpKeys = !!keyWord
+                ? folderList.current
+                    .map((item) => {
+                      if (item.title.indexOf(keyWord) > -1) {
+                        return getParentKey(item.key, tree);
+                      }
+                      return null;
+                    })
+                    .filter((item, i, self) => item && self.indexOf(item) === i)
+                : [];
+              setExpandedKeys(tmpKeys as Key[]);
+              setAutoExpandParent(true);
+            }
+          }}
           onChange={({ target: { value } }) => setKeyWord(value)}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
@@ -270,7 +311,12 @@ const FolderTree: FC = () => {
                 }
               }
             }}
-            defaultExpandAll={!!keyWord}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+            onExpand={(keys) => {
+              setExpandedKeys(keys);
+              setAutoExpandParent(false);
+            }}
           >
             {loop(tree)}
           </Tree>

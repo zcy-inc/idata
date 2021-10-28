@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getTree } from '@/services/datadev';
 import { TreeNode } from '@/types/datadev';
 import { newEnum, newTable, newDAG, mockTree } from './constants';
@@ -6,6 +6,10 @@ import { FolderBelong } from '@/constants/datadev';
 
 export interface IPane extends TreeNode {
   mode: 'view' | 'edit';
+}
+interface FolderListItem {
+  key: string;
+  title: string;
 }
 
 export default () => {
@@ -19,6 +23,7 @@ export default () => {
   const [visibleLabel, setVisibleLabel] = useState<boolean>(false);
   const [visibleTask, setVisibleTask] = useState<boolean>(false);
   const [curLabel, setCurLabel] = useState(-1); // 存储label的id，用来判断新建和编辑
+  const folderList = useRef<FolderListItem[]>([]);
 
   useEffect(() => {
     getTreeWrapped();
@@ -31,9 +36,22 @@ export default () => {
     getTree({ belongFunctions, keyWord })
       .then((res) => {
         setTree(res.data);
+        if (!folderList.current.length) {
+          generateFolderList(res.data);
+        }
         return res;
       })
       .catch(() => setTree(mockTree));
+
+  const generateFolderList = (data: TreeNode[]) => {
+    for (let i = 0; i < data.length; i++) {
+      const node = data[i] as TreeNode;
+      folderList.current.push({ key: node.cid, title: node.name });
+      if (node.children) {
+        generateFolderList(node.children);
+      }
+    }
+  };
 
   /**
    * 切换当前 active 的tab
@@ -155,6 +173,7 @@ export default () => {
     setBelongFunctions, // 设置树的belongs
     keyWord, // 筛选树的keyword
     setKeyWord, // 设置筛选树的keyWord
+    folderList,
     panes,
     activeKey,
     onChangeTab,
