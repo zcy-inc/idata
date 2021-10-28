@@ -187,7 +187,7 @@ public class MetricServiceImpl implements MetricService {
                     ? atomicLabelList.get(0).getColumnName()
                     : changeAggregate(atomicLabelList.get(0).getColumnName(),
                     atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-            metricSql = String.format(metricBaseSql, selectColSql, atomicMetric.getLabelName(),
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
                     atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
             if (modifierList != null && modifierList.size() > 0) {
                 StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
