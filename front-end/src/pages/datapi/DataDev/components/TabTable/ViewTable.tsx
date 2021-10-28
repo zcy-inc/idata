@@ -60,10 +60,6 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
     }
   }, [data]);
 
-  console.log(columns);
-  console.log(dataSource);
-  
-
   const transformLabelValue = (_: any) => {
     switch (_.labelTag) {
       case LabelTag.ENUM_VALUE_LABEL:

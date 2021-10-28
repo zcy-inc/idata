@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty } from 'antd';
 import { useModel } from 'umi';
 import type { FC, Key } from 'react';
@@ -16,10 +16,6 @@ import IconFilter from './components/IconFilter';
 
 const { TreeNode } = Tree;
 const { confirm } = Modal;
-interface FolderListItem {
-  key: string;
-  title: string;
-}
 
 const FolderTree: FC = () => {
   const [functionTree, setFunctionTree] = useState<Treenode[]>([]);
@@ -147,8 +143,6 @@ const FolderTree: FC = () => {
       title: '您确定要删除该文件夹吗？',
       autoFocusButton: null,
       onOk: () => {
-        console.log(curNode);
-
         if (curNode) {
           deleteFolder({ id: curNode.id }).then((res) => {
             if (res.success) {
