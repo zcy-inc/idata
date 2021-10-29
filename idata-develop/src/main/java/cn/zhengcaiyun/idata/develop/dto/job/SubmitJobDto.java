@@ -15,26 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.job;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-28 14:07
+ * @create: 2021-10-29 10:35
  **/
-public interface DIJobContentService {
+public class SubmitJobDto {
 
-    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
+    private String remark;
 
-    DIJobContentDto get(Long jobId, Integer version);
+    public String getRemark() {
+        return remark;
+    }
 
-    DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
-
-    List<JobContentVersionDto> getVersions(Long jobId);
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

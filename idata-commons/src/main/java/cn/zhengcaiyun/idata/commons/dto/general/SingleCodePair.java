@@ -15,26 +15,38 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.commons.dto.general;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-28 14:07
+ * @create: 2021-10-29 10:10
  **/
-public interface DIJobContentService {
+public class SingleCodePair<C> {
+    private C code;
+    private String name;
 
-    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
+    public SingleCodePair() {
+    }
 
-    DIJobContentDto get(Long jobId, Integer version);
+    public SingleCodePair(C code, String name) {
+        this.code = code;
+        this.name = name;
+    }
 
-    DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+    public C getCode() {
+        return code;
+    }
 
-    List<JobContentVersionDto> getVersions(Long jobId);
+    public void setCode(C code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

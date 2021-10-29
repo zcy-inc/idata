@@ -77,7 +77,7 @@ public class JobPublishManager {
         this.dataSourceApi = dataSourceApi;
     }
 
-    public boolean submit(DIJobContent content, EnvEnum envEnum, Operator operator) {
+    public boolean submit(DIJobContent content, EnvEnum envEnum, String remark, Operator operator) {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(content.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
 
@@ -95,7 +95,9 @@ public class JobPublishManager {
 
         if (publishRecord == null) {
             // 第一次提交
-            publishRecord = getJobPublishRecord(jobInfoOptional.get(), content, envEnum, operator);
+            publishRecord = getJobPublishRecord(jobInfoOptional.get(), content, envEnum, remark, operator);
+        } else {
+            publishRecord.setSubmitRemark(remark);
         }
         diJobContentRepo.submit(content, publishRecord, operator.getNickname());
 
@@ -103,7 +105,7 @@ public class JobPublishManager {
         return true;
     }
 
-    private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, DIJobContent content, EnvEnum envEnum, Operator operator) {
+    private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, DIJobContent content, EnvEnum envEnum, String remark, Operator operator) {
         JobPublishRecord record = new JobPublishRecord();
         record.setJobId(content.getJobId());
         record.setJobContentId(content.getId());
@@ -114,6 +116,7 @@ public class JobPublishManager {
         record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
         record.setCreator(operator.getNickname());
         record.setEditor(operator.getNickname());
+        record.setSubmitRemark(remark);
         return record;
     }
 
@@ -123,12 +126,11 @@ public class JobPublishManager {
     }
 
     private void postSubmit(JobPublishRecord publishRecord, Operator operator) {
-        // 确定提交人是否有发布权限，有则直接发布
-        if (EnvEnum.prod.name().equals(publishRecord.getEnvironment())
-                && !hasPublishPermission(operator)) return;
-
-        //更新状态为发布
-        toPublish(publishRecord, operator);
+        // 预发环境直接发布
+        if (EnvEnum.stag.name().equals(publishRecord.getEnvironment())) {
+            //更新状态为发布
+            toPublish(publishRecord, operator);
+        }
 
         // todo 同步ds
     }

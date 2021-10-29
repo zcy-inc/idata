@@ -63,6 +63,4 @@ hdfs:
 dev:
   job:
     publish:
-      whitelist: 熠然,大时,惜文,缤纷
-  env:
-    executeQueues: root.offline, root.realtime
+      whitelist: 熠然,大时

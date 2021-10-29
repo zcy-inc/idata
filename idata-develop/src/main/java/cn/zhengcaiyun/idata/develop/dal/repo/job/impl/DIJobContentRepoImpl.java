@@ -103,6 +103,7 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
             submitStatus.setId(publishRecord.getId());
             submitStatus.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
             submitStatus.setEditor(operator);
+            submitStatus.setSubmitRemark(publishRecord.getSubmitRemark());
             jobPublishRecordRepo.update(submitStatus);
         }
         return Boolean.TRUE;

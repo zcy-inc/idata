@@ -109,7 +109,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
         record.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
         record.setApproveOperator(operator.getNickname());
-        record.setApproveRemark(remark);
+        record.setApproveRemark(Strings.nullToEmpty(remark));
         record.setApproveTime(new Date());
         jobPublishManager.publish(record, operator);
         return Boolean.TRUE;
@@ -136,7 +136,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         publishRecord.setId(existRecord.getId());
         publishRecord.setPublishStatus(PublishStatusEnum.REJECTED.val);
         publishRecord.setApproveOperator(operator.getNickname());
-        publishRecord.setApproveRemark(remark);
+        publishRecord.setApproveRemark(Strings.nullToEmpty(remark));
         publishRecord.setApproveTime(new Date());
         jobPublishRecordRepo.update(publishRecord);
         return Boolean.TRUE;

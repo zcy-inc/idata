@@ -120,7 +120,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public DIJobContentDto submit(Long jobId, Integer version, String env, Operator operator) {
+    public DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkArgument(Objects.nonNull(version), "作业版本号为空");
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
@@ -128,7 +128,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
-        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), operator);
+        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), remark, operator);
         return DIJobContentDto.from(jobContentOptional.get());
     }
 

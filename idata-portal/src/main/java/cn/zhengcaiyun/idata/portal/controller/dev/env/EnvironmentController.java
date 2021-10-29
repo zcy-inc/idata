@@ -17,11 +17,10 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.env;
 
+import cn.zhengcaiyun.idata.commons.dto.general.SingleCodePair;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import com.google.common.base.Splitter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
+import cn.zhengcaiyun.idata.develop.constant.enums.ExecuteQueueEnum;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,9 +40,6 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/p1/dev")
 public class EnvironmentController {
 
-    @Value("${dev.env.executeQueues}")
-    private String executeQueues;
-
     @GetMapping("/environments")
     public RestResult<List<EnvEnum>> getEnvironments() {
         return RestResult.success(Arrays.stream(EnvEnum.values()).collect(Collectors.toList()));
@@ -55,12 +51,10 @@ public class EnvironmentController {
      * @return
      */
     @GetMapping("/executeQueues")
-    public RestResult<List<String>> getJobExecuteQueue() {
-        List<String> queues = null;
-        if (StringUtils.isNotBlank(executeQueues)) {
-            queues = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(executeQueues);
-        }
-        return RestResult.success(queues);
+    public RestResult<List<SingleCodePair<String>>> getJobExecuteQueue() {
+        return RestResult.success(Arrays.stream(ExecuteQueueEnum.values())
+                .map(queueEnum -> new SingleCodePair<String>(queueEnum.code, queueEnum.name))
+                .collect(Collectors.toList()));
     }
 
 }
