@@ -35,7 +35,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [activeKey, setActiveKey] = useState<Environments>(Environments.STAG);
   const [DAGList, setDAGList] = useState<DAGListItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [executeQueues, setExecuteQueues] = useState<string[]>([]);
+  const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
 
   // const [dataParent, setDataParent] = useState<any[]>([]);
   // const [keysParent, setKeysParent] = useState<React.Key[]>([]);
@@ -213,7 +213,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       size="large"
                       style={{ width }}
                       placeholder="请选择"
-                      options={executeQueues.map((_) => ({ label: _, value: _ }))}
+                      options={executeQueues.map((_) => ({ label: _.name, value: _.code }))}
                     />
                   </Item>
                 </Col>

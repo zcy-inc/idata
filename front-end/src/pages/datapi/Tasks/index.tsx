@@ -59,8 +59,8 @@ const DataSource: FC = () => {
     { title: '提交人', key: 'creator', dataIndex: 'creator' },
     {
       title: '提交备注',
-      key: 'approveRemark',
-      dataIndex: 'approveRemark',
+      key: 'submitRemark',
+      dataIndex: 'submitRemark',
       render: (_) => _ || '-',
     },
     {
@@ -76,34 +76,31 @@ const DataSource: FC = () => {
       fixed: 'right',
       render: (value, record) => (
         <Space size={16}>
-          <a onClick={() => onAction([record], 'approve')}>发布</a>
-          <a onClick={() => onAction([record], 'reject')}>驳回</a>
+          <a onClick={() => onPublishOrReject([record], 'approve')}>发布</a>
+          <a onClick={() => onPublishOrReject([record], 'reject')}>驳回</a>
         </Space>
       ),
     },
   ];
 
-  const onAction = (records: TaskListItem[], actionType: ActionType) => {
-    setActionRecords(records);
-    onPublishOrReject(actionType);
-  };
-
-  const onPublishOrReject = (type: ActionType) =>
+  const onPublishOrReject = (records: TaskListItem[], type: ActionType) => {
     confirm({
       title: '确认',
       content: `您确认要${type === 'approve' ? '发布' : '驳回'}吗？`,
       onOk: () => {
         if (type === 'approve') {
-          onPublish();
+          onPublish(records);
         }
         if (type === 'reject') {
-          onReject();
+          onReject(records);
         }
       },
     });
+  };
 
-  const onPublish = async () => {
-    const recordIds = actionRecords.map((_) => _.id);
+  const onPublish = async (records?: TaskListItem[]) => {
+    const list = records || actionRecords;
+    const recordIds = list.map((_) => _.id);
     publishTask({ recordIds })
       .then((res) => {
         if (res.success) {
@@ -116,8 +113,9 @@ const DataSource: FC = () => {
       .catch((err) => {});
   };
 
-  const onReject = async () => {
-    const recordIds = actionRecords.map((_) => _.id);
+  const onReject = async (records?: TaskListItem[]) => {
+    const list = records || actionRecords;
+    const recordIds = list.map((_) => _.id);
     rejectTask({ recordIds })
       .then((res) => {
         if (res.success) {
@@ -188,7 +186,7 @@ const DataSource: FC = () => {
         <Button
           onClick={() => {
             if (actionRecords.length) {
-              onPublishOrReject('approve');
+              onPublish();
             } else {
               message.info('请选择任务');
             }

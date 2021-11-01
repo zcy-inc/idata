@@ -233,6 +233,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           if (res.success) {
             message.success('刷新成功');
             setSrcColumns(res.data);
+            setDestColumns([]);
           } else {
             message.error(`刷新失败：${res.msg}`);
           }
@@ -572,12 +573,16 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }}
           onFinish={async (values) => {
             setLoading(true);
-            submitTask({
-              jobId: pane.id,
-              version: data?.version as number,
-              env: publishEnv,
-              remark: values.remark,
-            })
+            submitTask(
+              {
+                jobId: pane.id,
+                version: data?.version as number,
+                env: publishEnv,
+              },
+              {
+                remark: values.remark,
+              },
+            )
               .then((res) => {
                 if (res.success) {
                   message.success('提交成功');

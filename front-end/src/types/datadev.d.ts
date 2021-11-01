@@ -106,7 +106,7 @@ export interface TaskContent {
 
 export interface MappedColumn {
   name: string;
-  dataType: string;
+  dataType?: string;
   primaryKey: boolean;
   mappedColumn?: MappedColumn;
 }
