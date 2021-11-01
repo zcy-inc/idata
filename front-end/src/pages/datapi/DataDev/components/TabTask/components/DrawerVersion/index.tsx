@@ -67,8 +67,8 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           },
           {
             title: '提交备注',
-            dataIndex: 'approveRemark',
-            key: 'approveRemark',
+            dataIndex: 'submitRemark',
+            key: 'submitRemark',
             width: 178,
             ellipsis: true,
             render: (_) => _ || '-',

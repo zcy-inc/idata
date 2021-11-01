@@ -572,12 +572,16 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }}
           onFinish={async (values) => {
             setLoading(true);
-            submitTask({
-              jobId: pane.id,
-              version: data?.version as number,
-              env: publishEnv,
-              remark: values.remark,
-            })
+            submitTask(
+              {
+                jobId: pane.id,
+                version: data?.version as number,
+                env: publishEnv,
+              },
+              {
+                remark: values.remark,
+              },
+            )
               .then((res) => {
                 if (res.success) {
                   message.success('提交成功');

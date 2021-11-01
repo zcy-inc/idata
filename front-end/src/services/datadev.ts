@@ -392,16 +392,21 @@ export async function saveTask(data: TaskContent) {
 /**
  * 提交作业
  */
-export async function submitTask(params: {
-  jobId: number;
-  version: number;
-  env: Environments;
-  remark: string;
-}) {
+export async function submitTask(
+  params: {
+    jobId: number;
+    version: number;
+    env: Environments;
+  },
+  data: {
+    remark: string;
+  },
+) {
   return request<DefaultResponse & { data: TaskContent }>(
     `/api/p1/dev/jobs/${params.jobId}/di/contents/${params.version}/submit/${params.env}`,
     {
       method: 'POST',
+      data,
     },
   );
 }
@@ -433,9 +438,12 @@ export async function getDAGList(params: { dwLayerCode: string }) {
  * 获取运行队列
  */
 export async function getExecuteQueues() {
-  return request<DefaultResponse & { data: string[] }>('/api/p1/dev/executeQueues', {
-    method: 'GET',
-  });
+  return request<DefaultResponse & { data: { name: string; code: string }[] }>(
+    '/api/p1/dev/executeQueues',
+    {
+      method: 'GET',
+    },
+  );
 }
 
 /**

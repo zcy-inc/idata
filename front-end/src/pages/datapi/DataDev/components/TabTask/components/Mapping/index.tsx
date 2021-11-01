@@ -38,7 +38,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-src`,
         x: 160,
         y: 100 + 40 * i,
-        label: `${_.name} ${_.dataType || '-'}`,
+        label: `${_.name} ${_.dataType || ''}`,
         tableType: 'src',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -52,7 +52,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-dest`,
         x: 540,
         y: 100 + 40 * i,
-        label: `${_.name} ${_.dataType || '-'}`,
+        label: _.name,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
