@@ -17,8 +17,11 @@
 package cn.zhengcaiyun.idata.user.service.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
@@ -47,6 +50,8 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class UserAccessServiceImpl implements UserAccessService {
     @Autowired
     private SystemService systemService;
+    @Autowired
+    private SystemConfigService systemConfigService;
     @Autowired
     private UacUserDao uacUserDao;
     @Autowired
@@ -171,5 +176,31 @@ public class UserAccessServiceImpl implements UserAccessService {
                 and(uacRoleAccess.del, isNotEqualTo(1)))).stream().map(UacRoleAccess::getAccessCode)
                 .collect(Collectors.toSet());
         return roleAccessCodes.size() == accessCodes.size();
+    }
+
+    // 只校验菜单的List
+    @Override
+    public boolean checkFeatureAccess(Long userId, String controllerPath) {
+        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
+                and(uacUser.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
+        List<String> roleCodes = uacUserRoleDao.select(c -> c.where(uacUserRole.userId, isEqualTo(userId),
+                and(uacUserRole.del, isNotEqualTo(1)))).stream().map(UacUserRole::getRoleCode)
+                .collect(Collectors.toList());
+        if (roleCodes.size() == 0) {
+            return false;
+        }
+        Set<String> accessCodes = uacRoleAccessDao.select(c -> c.where(uacRoleAccess.del, isNotEqualTo(1),
+                and(uacRoleAccess.roleCode, isIn(roleCodes)))).stream().map(UacRoleAccess::getAccessCode)
+                .collect(Collectors.toSet());
+        String controllerUrl = controllerPath.split("api")[1];
+        SysFeature feature = systemConfigService.getFeature(controllerUrl);
+        if (feature == null) {
+            return false;
+        }
+        else {
+            return accessCodes.contains(feature.getFeatureCode());
+        }
     }
 }

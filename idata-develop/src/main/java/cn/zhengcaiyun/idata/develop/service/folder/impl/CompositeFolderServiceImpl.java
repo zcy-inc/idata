@@ -239,4 +239,18 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         return TreeNodeFilter.withTreeNodes(treeNodeDtoList).filterTree(condition);
     }
 
+    private List<DevTreeNodeDto> filterAllTreeNodes(List<DevTreeNodeDto> treeNodeDtoList, String keyWord) {
+        if (ObjectUtils.isEmpty(treeNodeDtoList)) return treeNodeDtoList;
+        if (StringUtils.isBlank(keyWord)) return treeNodeDtoList;
+
+        Long id = null;
+        try {
+            id = Long.parseLong(keyWord);
+        } catch (Exception ex) {
+            // 转换失败，不是数字，不用判断id是否匹配
+        }
+        TreeNodeFilter.FilterCondition<DevTreeNodeDto> condition = new TreeNodeFilter.FilterCondition<>(keyWord, id);
+        return TreeNodeFilter.withTreeNodes(treeNodeDtoList).filterTree(condition);
+    }
+
 }

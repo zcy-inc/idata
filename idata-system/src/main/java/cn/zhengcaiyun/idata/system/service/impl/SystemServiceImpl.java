@@ -58,7 +58,9 @@ public class SystemServiceImpl implements SystemService {
         systemStateDto.setSysStartTime(IDataSystem.getSysStartTime());
         SysConfig config = sysConfigDao.selectOne(c -> c.where(sysConfig.keyOne,
                 isEqualTo(SysConfKeyEnum.REGISTER_ENABLE.name()))).orElse(null);
-        if (config != null && config.getValueOne().trim().equalsIgnoreCase("true") ) {
+        // 修改valueOne类型
+        if (config != null && PojoUtil.copyOne(config, ConfigDto.class).getValueOne().get(SysConfKeyEnum.REGISTER_ENABLE.name())
+                .getConfigValue().trim().equalsIgnoreCase("true") ) {
             systemStateDto.setRegisterEnable(true);
         }
         else {

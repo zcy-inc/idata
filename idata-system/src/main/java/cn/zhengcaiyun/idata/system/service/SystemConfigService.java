@@ -14,23 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
+package cn.zhengcaiyun.idata.system.service;
 
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import cn.zhengcaiyun.idata.system.dto.ConfigValueDto;
+import cn.zhengcaiyun.idata.system.dto.ConnectionDto;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author shiyin
- * @date 2021-03-30 20:22
+ * @author caizhedong
+ * @date 2021-11-03 下午4:39
  */
-public interface UserAccessService {
-    List<FeatureTreeNodeDto> getUserFeatureTree(Long userId);
-    List<FolderTreeNodeDto> getUserFolderTree(Long userId);
-    List<String> getAccessKeys(Long userId, String accessType);
-    boolean checkAccess(Long userId, String accessCode);
-    boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
-    boolean checkFeatureAccess(Long userId, String controllerPath);
-//    boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey);
+
+public interface SystemConfigService {
+    List<String> getConfigTypes();
+    List<ConfigDto> getSystemConfigs(String configType);
+    SysFeature getFeature(String urlPath);
+    boolean checkConnection(ConnectionDto connection);
+    Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile file) throws IOException;
+    List<ConfigDto> editSystemConfigs(List<ConfigDto> configs, String editor);
 }

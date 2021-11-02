@@ -17,12 +17,15 @@
 
 package cn.zhengcaiyun.idata.connector.api.impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.DataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.connector.connection.ConnectionCfg;
 import cn.zhengcaiyun.idata.connector.spi.presto.PrestoService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import cn.zhengcaiyun.idata.system.dto.ConfigValueDto;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +65,20 @@ public class DataQueryApiImpl implements DataQueryApi {
                 .orElse(null);
         checkState(Objects.nonNull(trinoConfig), "数据源连接信息不正确");
 
-        ConnectionCfg connectionCfg = JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+        // 修改valueOne类型
+//        ConnectionCfg connectionCfg = JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+        ConnectionCfg connectionCfg = new ConnectionCfg();
+        PojoUtil.copyOne(trinoConfig, ConfigDto.class).getValueOne().forEach((key, configValue) -> {
+            if ("port".equals(key)) {
+                connectionCfg.setPort(Integer.valueOf(configValue.getConfigValue()));
+            }
+            else if ("host".equals(key)) {
+                connectionCfg.setHost(configValue.getConfigValue());
+            }
+            else if ("dbCatalog".equals(key)) {
+                connectionCfg.setDbCatalog(configValue.getConfigValue());
+            }
+        });
         String jdbcUrl = String.format("jdbc:presto://%s:%d/%s",
                 connectionCfg.getHost(), connectionCfg.getPort(), connectionCfg.getDbCatalog());
         return jdbcUrl;

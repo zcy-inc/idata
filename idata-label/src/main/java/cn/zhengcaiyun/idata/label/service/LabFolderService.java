@@ -76,4 +76,13 @@ public interface LabFolderService {
      * @return
      */
     List<LabFolderTreeNodeDto> getFolderTree(String belong);
+
+    /**
+     * 校验文件夹权限
+     *
+     * @param userId
+     * @param folderId
+     * @return
+     */
+    Boolean checkResAccess(Long userId, String folderId);
 }

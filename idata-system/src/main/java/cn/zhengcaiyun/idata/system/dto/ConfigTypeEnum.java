@@ -14,23 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
-
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.system.dto;
 
 /**
- * @author shiyin
- * @date 2021-03-30 20:22
+ * @author caizhedong
+ * @date 2021-11-02 下午1:36
  */
-public interface UserAccessService {
-    List<FeatureTreeNodeDto> getUserFeatureTree(Long userId);
-    List<FolderTreeNodeDto> getUserFolderTree(Long userId);
-    List<String> getAccessKeys(Long userId, String accessType);
-    boolean checkAccess(Long userId, String accessCode);
-    boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
-    boolean checkFeatureAccess(Long userId, String controllerPath);
-//    boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey);
+
+public enum ConfigTypeEnum {
+    LDAP,
+    DS,
+    HIVE_METASTORE,
+    HADOOP,
+    HTOOL,
+    LIVY;
 }

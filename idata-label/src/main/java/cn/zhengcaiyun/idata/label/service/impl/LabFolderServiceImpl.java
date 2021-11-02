@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.label.service.impl;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.label.dal.dao.LabFolderDao;
 import cn.zhengcaiyun.idata.label.dal.model.LabFolder;
 import cn.zhengcaiyun.idata.label.dto.LabFolderDto;
@@ -25,6 +26,8 @@ import cn.zhengcaiyun.idata.label.service.LabFolderService;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderManager;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplier;
 import cn.zhengcaiyun.idata.label.service.folder.LabFolderTreeNodeSupplierFactory;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -34,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,9 +45,12 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
+import static cn.zhengcaiyun.idata.label.dal.dao.LabFolderDynamicSqlSupport.labFolder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description: 文件夹接口实现
@@ -55,14 +62,16 @@ public class LabFolderServiceImpl implements LabFolderService {
 
     private final LabFolderDao labFolderDao;
     private final LabFolderManager labFolderManager;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public LabFolderServiceImpl(LabFolderDao labFolderDao,
-                                LabFolderManager labFolderManager) {
+    public LabFolderServiceImpl(LabFolderManager labFolderManager, UserAccessService userAccessService,
+                                LabFolderDao labFolderDao) {
         checkNotNull(labFolderDao, "labFolderDao must not be null.");
         checkNotNull(labFolderManager, "labFolderManager must not be null.");
         this.labFolderDao = labFolderDao;
         this.labFolderManager = labFolderManager;
+        this.userAccessService = userAccessService;
     }
 
     @Override
@@ -141,6 +150,26 @@ public class LabFolderServiceImpl implements LabFolderService {
         treeNodeDtoList.addAll(convertTreeNodes(folders));
         treeNodeDtoList.addAll(getBizEntityTreeNodes(belong));
         return makeTree(treeNodeDtoList);
+    }
+
+    @Override
+    public Boolean checkResAccess(Long userId, String folderId) {
+        if (!"0".equals(folderId)) {
+            if (!userAccessService.checkAccess(userId, Arrays.asList(ResourceTypeEnum.R_DATA_LABEL_DIR.name()),
+                    folderId)) {
+                return checkResAccess(userId, String.valueOf(getParentFolderId(Long.valueOf(folderId))));
+            }
+            else {
+                return true;
+            }
+        }
+        return userAccessService.checkAccess(userId, Arrays.asList(ResourceTypeEnum.R_DATA_LABEL_DIR.name()), folderId);
+    }
+
+    private Long getParentFolderId(Long folderId) {
+        LabFolder folder = labFolderDao.selectOne(c -> c.where(labFolder.del, isNotEqualTo(1),
+                and(labFolder.id, isEqualTo(folderId)))).orElse(null);
+        return folder != null ? folder.getParentId() : 0L;
     }
 
     private List<LabFolderTreeNodeDto> makeTree(List<LabFolderTreeNodeDto> nodeDtoList) {

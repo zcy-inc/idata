@@ -29,6 +29,7 @@ import java.util.Map;
 
 public interface LabelService {
     LabelDefineDto defineLabel(LabelDefineDto labelDefineDto, String operator);
+    LabelDefineDto defineLabelAndEnum(LabelDefineDto labelDefineDto, String operator);
     LabelDefineDto findDefine(String labelCode);
     String getLabelDefineCode(Long labelDefineId);
     List<LabelDefineDto> findDefines(String subjectType, String labelTag);
