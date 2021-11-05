@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { EditableProTable } from '@ant-design/pro-table';
-import { PoweroffOutlined, UploadOutlined } from '@ant-design/icons';
-import type {UploadProps } from 'antd';
-import { Button, Alert, Space, Upload,message } from 'antd';
-
+import { UploadOutlined } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
+import { Button, Upload, message } from 'antd';
 const props: UploadProps = {
   name: 'file',
   action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
@@ -58,57 +57,76 @@ export default () => {
     {
       title: '参数名称',
       dataIndex: 'configValueKey',
-      width: '100px',
-      editable: false
+      width: '220px',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            whitespace: true,
+            message: '此项是必填项',
+          }]
+      }
     },
     {
       title: '值',
       dataIndex: 'configValue',
       width: '280px',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            whitespace: true,
+            message: '此项是必填项',
+          }]
+      }
     },
     {
       title: '备注',
       dataIndex: 'configValueRemarks',
-    },
+    }, {
+      title: '操作',
+      valueType: 'option',
+      width: 250,
+      render: () => {
+        return null;
+      },
+    }
   ];
 
   return (
     <>
-      <Upload {...props}>
-        <Button icon={<UploadOutlined />}>上传文件</Button>
-      </Upload>
       <EditableProTable<DataSourceType>
+        headerTitle="core-site"
         columns={columns}
         rowKey="id"
         value={dataSource}
         actionRef={actionRef}
         onChange={setDataSource}
-        recordCreatorProps={false}
+        recordCreatorProps={{
+          newRecordType: 'dataSource',
+          record: () => ({
+            id: Date.now(),
+          }),
+        }}
+        toolBarRender={() => {
+          return [
+            <Upload {...props}>
+              <Button icon={<UploadOutlined />}>上传文件</Button>
+            </Upload>,
+          ];
+        }}
         editable={{
           type: 'multiple',
           editableKeys,
           onValuesChange: (record, recordList) => {
             setDataSource(recordList);
           },
+          actionRender: (row, config, defaultDoms) => {
+            return [defaultDoms.delete];
+          },
           onChange: setEditableRowKeys,
         }}
       />
-      <div>
-        <Space>
-          <Button
-            type="primary"
-            size="small"
-            icon={<PoweroffOutlined />}
-          >
-            点击测试联调性
-          </Button>
-          <Alert message="连接成功" type="success" showIcon />
-          <Alert message="连接失败" type="error" showIcon />
-        </Space>
-      </div>
-      <div style={{ textAlign: 'right' }}>
-        <Button type="primary"> 保存</Button>
-      </div>
     </>
   );
 };
