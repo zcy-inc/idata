@@ -47,6 +47,10 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.cronutils</groupId>
+            <artifactId>cron-utils</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

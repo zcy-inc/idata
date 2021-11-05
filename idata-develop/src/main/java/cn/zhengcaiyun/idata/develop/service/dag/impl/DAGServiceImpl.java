@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGScheduleDto;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
+import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +77,8 @@ public class DAGServiceImpl implements DAGService {
         dagInfoDto.setStatus(UsingStatusEnum.ENABLE.val);
         dagInfoDto.setOperator(operator);
         dagScheduleDto.setOperator(operator);
+
+        // todo dag调度状态，下线
 
         DAGInfo info = dagInfoDto.toModel();
         DAGSchedule schedule = dagScheduleDto.toModel();
@@ -191,5 +194,8 @@ public class DAGServiceImpl implements DAGService {
         checkArgument(StringUtils.isNotBlank(dagScheduleDto.getPeriodRange()), "DAG调度周期类型为空");
         checkArgument(StringUtils.isNotBlank(dagScheduleDto.getTriggerMode()), "DAG调度触发方式为空");
         checkArgument(StringUtils.isNotBlank(dagScheduleDto.getCronExpression()), "DAG调度时间为空");
+
+        // 检查cron是否合法
+        checkArgument(CronExpressionUtil.isValidExpression(dagScheduleDto.getCronExpression()), "DAG调度时间不合法");
     }
 }

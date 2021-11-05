@@ -64,6 +64,8 @@
         <antlr.version>4.7.2</antlr.version>
         <postgresql.version>42.2.10</postgresql.version>
         <caffeine.version>2.9.1</caffeine.version>
+        <cron-utils.version>9.1.5</cron-utils.version>
+        <guava.version>28.2-jre</guava.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -136,6 +138,16 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cronutils</groupId>
+                <artifactId>cron-utils</artifactId>
+                <version>${cron-utils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
 
         </dependencies>
