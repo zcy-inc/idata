@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { EditableProTable } from '@ant-design/pro-table';
-import { Button } from 'antd';
+import { PoweroffOutlined } from '@ant-design/icons';
+import { Button,Alert,Space } from 'antd';
 type DataSourceType = {
   id: React.Key;
   configValue?: string;
@@ -61,6 +62,19 @@ export default () => {
             onChange: setEditableRowKeys,
           }}
         />
+        <div>
+        <Space>
+        <Button
+            type="primary"
+            size="small"
+            icon={<PoweroffOutlined />}
+          >
+              点击测试联调性
+          </Button>
+          <Alert message="连接成功" type="success" showIcon />
+          <Alert message="连接失败" type="error" showIcon />
+          </Space>
+        </div>
         <div style={{textAlign: 'right'}}>
           <Button type="primary"> 保存</Button>
         </div>

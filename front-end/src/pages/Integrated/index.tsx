@@ -2,6 +2,7 @@ import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs } from 'antd';
 import Scheduling from './Components/Scheduling';
+import Hadoop  from './Components/Hadoop';
 import "./index.less";
 const { TabPane } = Tabs;
 export default () => (
@@ -26,10 +27,13 @@ export default () => (
     <div className="zcy-content" >
       <Tabs defaultActiveKey="1">
         <TabPane tab="调度系统" key="1">
+          <Scheduling/>
+        </TabPane>
+        <TabPane tab="Hive MetaStore" key="2">
           <Scheduling />
         </TabPane>
-        <TabPane tab="Tab 3" key="3">
-          Content of Tab Pane 3
+        <TabPane tab="Hadoop" key="3">
+          <Hadoop />
         </TabPane>
       </Tabs>
     </div>
