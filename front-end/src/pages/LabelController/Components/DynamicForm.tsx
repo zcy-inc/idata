@@ -1,8 +1,8 @@
 import React from 'react';
 import type { ProFormColumnsType } from '@ant-design/pro-form';
 import { BetaSchemaForm } from '@ant-design/pro-form';
-import { Input,Space } from 'antd'
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { Input,Space,Button } from 'antd'
+import { MinusCircleOutlined,PlusOutlined } from '@ant-design/icons';
 import './index.less'
 
 type DataItem = {
@@ -35,6 +35,14 @@ const columns: ProFormColumnsType<DataItem>[] = [
       },
       {
         title: '标题4',
+      },
+      {
+        title: ' ',
+        renderFormItem: () => {
+          return (
+            <Button type="primary"  icon={<PlusOutlined />}> 添加属性</Button>
+          )
+        }
       },
     ],
   },
