@@ -16,46 +16,58 @@ export default [
     routes: [
       {
         path: '/configuration',
-        redirect: '/configuration/role',
+        redirect: '/configuration/authority',
       },
       {
-        path: '/configuration/role',
+        path: '/configuration/authority',
         name: '权限管理',
+        component: './authority',
         routes: [
           {
-            path: '/configuration/role',
-            redirect: '/configuration/role/list',
+            path: '/configuration/authority',
+            redirect: '/configuration/authority/role',
           },
           {
-            path: '/configuration/role/list',
-            name: '角色列表',
-            hideInMenu: true,
-            component: './authority/role/List',
-          },
-          {
-            path: '/configuration/role/create',
-            name: '新增角色',
-            hideInMenu: true,
-            component: './authority/role/Create',
-          },
-          {
-            path: '/configuration/role/edit/:id/:name',
-            name: '编辑角色',
-            hideInMenu: true,
-            component: './authority/role/Edit',
-          },
-          {
-            path: '/configuration/user',
-            name: '用户管理',
+            path: '/configuration/authority/role',
+            //name: '角色管理',
             hideInMenu: true,
             routes: [
               {
-                path: '/configuration/user',
-                redirect: '/authority/user/list',
+                path: '/configuration/authority/role',
+                redirect: '/configuration/authority/role/list',
               },
               {
-                path: '/configuration/user/list',
-                name: '用户列表',
+                name: '角色管理',
+                hideInMenu: true,
+                path: '/configuration/authority/role/list',
+                component: './authority/role/List',
+              },
+              {
+                path: '/configuration/authority/role/create',
+                name: '角色新增',
+                hideInMenu: true,
+                component: './authority/role/Create',
+              },
+              {
+                path: '/configuration/authority/role/edit/:id/:name',
+                name: '角色编辑',
+                hideInMenu: true,
+                component: './authority/role/Edit',
+              },
+            ],
+          },
+          {
+            path: '/configuration/authority/user',
+            //name: '用户管理',
+            hideInMenu: true,
+            routes: [
+              {
+                path: '/configuration/authority/user',
+                redirect: '/configuration/authority/user/list',
+              },
+              {
+                path: '/configuration/authority/user/list',
+                name: '用户管理',
                 hideInMenu: true,
                 component: './authority/user/List',
               },
@@ -74,12 +86,6 @@ export default [
         component: './LabelController',
       },
     ],
-  },
-  {
-    name: '搜索列表',
-    icon: 'smile',
-    path: '/listsearch',
-    component: './ListSearch',
   },
   {
     component: './404',

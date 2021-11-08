@@ -1,5 +1,4 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Input } from 'antd';
 import type { FC } from 'react';
 import { history } from 'umi';
 
@@ -44,9 +43,11 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
     const { match, location } = props;
     const url = match.path === '/' ? '' : match.path;
     const tabKey = location.pathname.replace(`${url}/`, '');
-    if (tabKey && tabKey !== '/') {
-      return tabKey;
+    const paths = tabKey.split('/');
+    if (paths[0] && paths[0] !== '/') {
+      return paths[0];
     }
+
     return 'role';
   };
 

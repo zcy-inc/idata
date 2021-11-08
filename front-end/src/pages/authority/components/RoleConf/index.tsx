@@ -1,8 +1,10 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { history } from 'umi';
-import { H4, PageContainer } from '@/components';
-import { Button, Form, Input, FormInstance, ButtonProps } from 'antd';
-import AuthSetting, { AuthSettingProps } from '../../components/AuthSetting';
+import { H4 } from '@/components';
+import type { FormInstance, ButtonProps } from 'antd';
+import { Button, Form, Input } from 'antd';
+import type { AuthSettingProps } from '../../components/AuthSetting';
+import AuthSetting from '../../components/AuthSetting';
 
 const RoleConf: React.FC<{
   authSettingProps: Partial<AuthSettingProps>;
@@ -10,16 +12,13 @@ const RoleConf: React.FC<{
   saveBtnProps: Partial<ButtonProps>;
 }> = ({ authSettingProps, form, saveBtnProps }) => {
   return (
-    <PageContainer
-      extra={
-        <Fragment>
-          <Button onClick={history.goBack}>取消</Button>
-          <Button type="primary" style={{ marginLeft: 16 }} {...saveBtnProps}>
-            保存
-          </Button>
-        </Fragment>
-      }
-    >
+    <>
+      <div style={{ textAlign: "right" }}>
+        <Button onClick={history.goBack}>取消</Button>
+        <Button type="primary" style={{ marginLeft: 16 }} {...saveBtnProps}>
+          保存
+        </Button>
+      </div>
       <H4>基本信息</H4>
       <Form form={form}>
         <Form.Item label="角色名称" name="roleName" rules={[{ required: true }]}>
@@ -28,7 +27,7 @@ const RoleConf: React.FC<{
       </Form>
       <H4>权限信息</H4>
       <AuthSetting style={{ height: 680, marginBottom: 24 }} {...authSettingProps} />
-    </PageContainer>
+    </>
   );
 };
 

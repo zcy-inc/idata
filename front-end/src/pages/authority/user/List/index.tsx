@@ -109,7 +109,7 @@ const List: React.FC = () => {
     },
   ];
   return (
-    <PageContainer>
+    <>
       <SearchPanel
         templateColumns="280px"
         options={[
@@ -198,7 +198,7 @@ const List: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </PageContainer>
+    </>
   );
 };
 

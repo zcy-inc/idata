@@ -17,9 +17,9 @@ const List: React.FC = () => {
   const { fetchData, authSettingProps } = useAuthSetting();
 
   const skip2Edit = (record: Trole) =>
-    history.push(`/authority/role/edit/${record.id}/${record.roleName}`);
+    history.push(`/configuration/authority/role/edit/${record.id}/${record.roleName}`);
   const onDelete = getDeleteFn(deleteRole, refresh);
-  const skip2Add = () => history.push('/authority/role/create');
+  const skip2Add = () => history.push('/configuration/authority/role/create');
   const showAuth = (id: number) => {
     fetchData({ roleId: id });
     setVisible(true);
