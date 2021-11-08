@@ -20,7 +20,7 @@ export default [
       },
       {
         path: '/configuration/role',
-        name: '角色管理',
+        name: '权限管理',
         routes: [
           {
             path: '/configuration/role',
@@ -44,21 +44,22 @@ export default [
             hideInMenu: true,
             component: './authority/role/Edit',
           },
-        ],
-      },
-      {
-        path: '/configuration/user',
-        name: '用户管理',
-        routes: [
           {
             path: '/configuration/user',
-            redirect: '/authority/user/list',
-          },
-          {
-            path: '/configuration/user/list',
-            name: '用户列表',
+            name: '用户管理',
             hideInMenu: true,
-            component: './authority/user/List',
+            routes: [
+              {
+                path: '/configuration/user',
+                redirect: '/authority/user/list',
+              },
+              {
+                path: '/configuration/user/list',
+                name: '用户列表',
+                hideInMenu: true,
+                component: './authority/user/List',
+              },
+            ],
           },
         ],
       },
