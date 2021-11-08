@@ -76,6 +76,12 @@ export default [
     ],
   },
   {
+    name: '搜索列表',
+    icon: 'smile',
+    path: '/listsearch',
+    component: './ListSearch',
+  },
+  {
     component: './404',
   },
 ];
