@@ -67,6 +67,11 @@ export default [
         name: '集成配置',
         component: './Integrated',
       },
+      {
+        path: '/configuration/labelController',
+        name: '元数据属性配置',
+        component: './LabelController',
+      },
     ],
   },
   {

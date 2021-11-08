@@ -3,7 +3,6 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs } from 'antd';
 import Scheduling from './Components/Scheduling';
 import Hadoop from './Components/Hadoop';
-import "./index.less";
 const { TabPane } = Tabs;
 export default () => (
   <PageContainer
