@@ -1,6 +1,9 @@
 import React from 'react';
 import type { ProFormColumnsType } from '@ant-design/pro-form';
 import { BetaSchemaForm } from '@ant-design/pro-form';
+import { Input,Space } from 'antd'
+import { MinusCircleOutlined } from '@ant-design/icons';
+import './index.less'
 
 type DataItem = {
   name: string;
@@ -9,31 +12,32 @@ type DataItem = {
 
 const columns: ProFormColumnsType<DataItem>[] = [
   {
-    title: '标题',
-    dataIndex: 'title',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: '此项为必填项',
-        },
-      ],
-    },
-    width: 'sm',
+    valueType: 'group',
+    columns: [
+      {
+        title: '标题12',
+        renderFormItem: () => {
+          return (
+            <Space>
+              <Input  readOnly/>
+              <MinusCircleOutlined
+                className="dynamic-delete-button"
+              />
+            </Space>
+          )
+        }
+      },
+      {
+        title: '标题2',
+      },
+      {
+        title: '标题3',
+      },
+      {
+        title: '标题4',
+      },
+    ],
   },
-  {
-    title: '标题',
-    dataIndex: 'title2',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: '此项为必填项',
-        },
-      ],
-    },
-    width: 'sm',
-  }
 ];
 
 export default () => {
@@ -43,9 +47,6 @@ export default () => {
         layout="horizontal"
         colon={false}
         submitter={false}
-        onFinish={async (values) => {
-          console.log(values);
-        }}
         columns={columns}
       />
     </>
