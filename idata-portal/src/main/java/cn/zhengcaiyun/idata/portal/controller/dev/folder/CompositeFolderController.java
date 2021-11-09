@@ -55,7 +55,7 @@ public class CompositeFolderController {
      */
     @PostMapping("/tree")
     public RestResult<List<DevTreeNodeDto>> searchDevTree(@RequestBody DevTreeCondition condition) {
-        return RestResult.success(compositeFolderService.searchDevTree(condition));
+        return RestResult.success(compositeFolderService.searchDevTree(condition, OperatorContext.getCurrentOperator().getId()));
     }
 
     /**

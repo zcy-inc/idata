@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author caizhedong
@@ -68,6 +70,11 @@ public class DevelopFolderController {
     public RestResult deleteDevFolder(@PathVariable("folderId") Long folderId,
                                       HttpServletRequest request) {
         return RestResult.success(devFolderService.delete(folderId, tokenService.getNickname(request)));
+    }
+
+    @GetMapping("/testFolder")
+    public RestResult<Set<String>> test() {
+        return RestResult.success(devFolderService.getUserTableFolderIds(OperatorContext.getCurrentOperator().getId()));
     }
 
 }

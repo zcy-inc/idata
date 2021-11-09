@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.util.TreeNodeFilter;
 import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeAccessFilter;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
@@ -30,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
 import com.google.common.collect.Lists;
@@ -59,14 +61,17 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     private final CompositeFolderRepo compositeFolderRepo;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory;
+    private final DevFolderService devFolderService;
 
     @Autowired
     public CompositeFolderServiceImpl(CompositeFolderRepo compositeFolderRepo,
                                       DevTreeNodeLocalCache devTreeNodeLocalCache,
-                                      BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory) {
+                                      BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory,
+                                      DevFolderService devFolderService) {
         this.compositeFolderRepo = compositeFolderRepo;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.bizTreeNodeSupplierFactory = bizTreeNodeSupplierFactory;
+        this.devFolderService = devFolderService;
     }
 
     @Override
@@ -81,14 +86,16 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     }
 
     @Override
-    public List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition) {
+    public List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition, Long userId) {
         // 获取选择的功能模块，未选择则默认所有功能模块
         List<FunctionModuleEnum> moduleEnumList = getSelectModuleOrAll(condition.getBelongFunctions());
         // 获取功能模块下的所有文件夹和文件
         List<DevTreeNodeDto> expandedNodeDtoList = getExpandedDevTreeNodes(moduleEnumList);
         // 生成文件树
         List<DevTreeNodeDto> treeNodeDtoList = TreeNodeGenerator.withExpandedNodes(expandedNodeDtoList).makeTree(() -> "0");
-        return filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
+        List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
+        Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId);
+        return filterAccessTreeNodes(teList, folderIdList);
     }
 
     @Override
@@ -239,18 +246,12 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         return TreeNodeFilter.withTreeNodes(treeNodeDtoList).filterTree(condition);
     }
 
-    private List<DevTreeNodeDto> filterAllTreeNodes(List<DevTreeNodeDto> treeNodeDtoList, String keyWord) {
+    private List<DevTreeNodeDto> filterAccessTreeNodes(List<DevTreeNodeDto> treeNodeDtoList, Set<String> folderIds) {
+        if (ObjectUtils.isEmpty(folderIds)) return Lists.newArrayList();
         if (ObjectUtils.isEmpty(treeNodeDtoList)) return treeNodeDtoList;
-        if (StringUtils.isBlank(keyWord)) return treeNodeDtoList;
 
-        Long id = null;
-        try {
-            id = Long.parseLong(keyWord);
-        } catch (Exception ex) {
-            // 转换失败，不是数字，不用判断id是否匹配
-        }
-        TreeNodeFilter.FilterCondition<DevTreeNodeDto> condition = new TreeNodeFilter.FilterCondition<>(keyWord, id);
-        return TreeNodeFilter.withTreeNodes(treeNodeDtoList).filterTree(condition);
+        TreeNodeAccessFilter.FilterCondition<DevTreeNodeDto> condition = new TreeNodeAccessFilter.FilterCondition<>(folderIds);
+        return TreeNodeAccessFilter.withTreeNodes(treeNodeDtoList).filterTree(condition);
     }
 
 }

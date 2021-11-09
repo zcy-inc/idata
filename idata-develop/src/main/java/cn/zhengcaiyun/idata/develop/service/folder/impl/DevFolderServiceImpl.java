@@ -23,6 +23,8 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
@@ -72,6 +74,8 @@ public class DevFolderServiceImpl implements DevFolderService {
     private UserAccessService userAccessService;
     @Autowired
     private UserManagerService userManagerService;
+    @Autowired
+    private CompositeFolderRepo compositeFolderRepo;
 
     @Override
     public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType, String treeNodeName) {
@@ -198,22 +202,22 @@ public class DevFolderServiceImpl implements DevFolderService {
     }
 
     @Override
-    public boolean checkMeasureResAccess(Long userId, String folderId) {
+    public boolean checkMeasureResAccess(Long userId, String folderId, String accessType) {
         if (!"0".equals(folderId)) {
-            if (!userAccessService.checkAccess(userId, Arrays.asList(ResourceTypeEnum.R_MEASURE_MANAGE_DIR.name()),
+            if (!userAccessService.checkAccess(userId, Arrays.asList(accessType),
                     folderId)) {
-                return checkMeasureResAccess(userId, String.valueOf(getParentFolderId(Long.valueOf(folderId))));
+                return checkMeasureResAccess(userId, String.valueOf(getParentFolderId(Long.valueOf(folderId))), accessType);
             }
             else {
                 return true;
             }
         }
-        return userAccessService.checkAccess(userId, Arrays.asList(ResourceTypeEnum.R_DATA_LABEL_DIR.name()), folderId);
+        return userAccessService.checkAccess(userId, Arrays.asList(accessType), folderId);
     }
 
     @Override
-    public List<Long> getTableFolderIds() {
-        UserInfoDto user = userManagerService.getUserInfo(OperatorContext.getCurrentOperator().getId());
+    public Set<String> getUserTableFolderIds(Long userId) {
+        UserInfoDto user = userManagerService.getUserInfo(userId);
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllTableFolderIds();
 
         List<String> folderIdList = userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
@@ -222,16 +226,13 @@ public class DevFolderServiceImpl implements DevFolderService {
                 ResourceTypeEnum.R_DATA_DEVELOP_DW_DIR.name() + "_W"));
         folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
                 ResourceTypeEnum.R_DATA_DEVELOP_DW_DIR.name() + "_D"));
-        if (folderIdList.size() == 0) return Lists.newArrayList();
-        Set<Long> folderIds = new HashSet<>(folderIdList).stream().map(Long::valueOf).collect(Collectors.toSet());
-        return new ArrayList<>(getSubTableFolderIds(folderIds));
+        if (folderIdList.size() == 0) return new HashSet<>();
+        return new HashSet<>(folderIdList);
     }
 
-    private List<Long> getAllTableFolderIds() {
-        return devFolderDao.selectMany(select(devFolder.allColumns())
-                .from(devFolder)
-                .where(devFolder.del, isNotEqualTo(1))
-                .build().render(RenderingStrategies.MYBATIS3)).stream().map(DevFolder::getId).collect(Collectors.toList());
+    private Set<String> getAllTableFolderIds() {
+        return compositeFolderRepo.queryAllFolder()
+                .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
     }
 
     private Set<Long> getSubTableFolderIds(Set<Long> folderIds) {
