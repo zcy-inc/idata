@@ -36,6 +36,6 @@ public interface SystemConfigService {
     List<ConfigDto> getSystemConfigs(String configType);
     SysFeature getFeature(String urlPath);
     boolean checkConnection(ConnectionDto connection);
-    Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile file) throws IOException;
+    Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile xmlFile) throws IOException;
     List<ConfigDto> editSystemConfigs(List<ConfigDto> configs, String editor);
 }

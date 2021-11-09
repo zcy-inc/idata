@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
@@ -193,7 +194,8 @@ public class LabelServiceImpl implements LabelService {
             checkArgument(labelDefineDto.getLabelName() != null, "labelName不能为空");
             checkArgument(labelDefineDto.getLabelTag() != null, "labelTag不能为空");
             LabelTagEnum labelTagEnum = LabelTagEnum.valueOf(labelDefineDto.getLabelTag());
-            checkLabelParamType(labelTagEnum, labelDefineDto.getLabelParamType());
+            // 暂不做校验
+//            checkLabelParamType(labelTagEnum, labelDefineDto.getLabelParamType());
             checkArgument(labelDefineDto.getSubjectType() != null, "subjectType不能为空");
             SubjectTypeEnum.valueOf(labelDefineDto.getSubjectType());
             labelDefineDto.setCreator(operator);
@@ -227,12 +229,12 @@ public class LabelServiceImpl implements LabelService {
         LabelDefineDto echoLabelDefine = PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
                         c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
                 LabelDefineDto.class);
-        if (labelDefineDto.getLabelEnum() != null) {
-            if (StringUtils.isEmpty(labelDefineDto.getLabelEnum().getEnumName())) {
-                labelDefineDto.getLabelEnum().setEnumName(labelDefineDto.getLabelName());
-            }
-            EnumDto echoEnum = enumService.createOrEdit(labelDefineDto.getLabelEnum(), operator);
-            echoLabelDefine.setLabelEnum(echoEnum);
+        if (labelDefineDto.getEnumValues() != null && labelDefineDto.getEnumValues().size() > 0) {
+            EnumDto enumDto = new EnumDto();
+            enumDto.setEnumName(labelDefineDto.getLabelName());
+            enumDto.setEnumValues(labelDefineDto.getEnumValues());
+            EnumDto echoEnum = enumService.createOrEdit(enumDto, operator);
+            echoLabelDefine.setEnumValues(enumService.getEnumValues(echoEnum.getEnumCode()));
         }
 
         return echoLabelDefine;
@@ -365,8 +367,14 @@ public class LabelServiceImpl implements LabelService {
                 and(devLabelDefine.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelCode));
 
-        checkArgument(Integer.valueOf(0).equals(labelDefine.getLabelRequired()), "必须打标的标签不能删除");
+
         checkArgument(!checkSysLabelCode(labelCode), "系统依赖的标签不能删除");
+        // 查表若被引用则不准被删
+        if (!checkSysLabelCode(labelCode)) {
+            List<DevLabel> existLabelList = devLabelDao.select(c -> c.where(devLabel.del ,isNotEqualTo(1),
+                    and(devLabel.labelCode, isEqualTo(labelCode))));
+            checkArgument(ObjectUtils.isEmpty(existLabelList), "标签被依赖，不能删除");
+        }
         devLabelDefineDao.update(c -> c.set(devLabelDefine.del).equalTo(1)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.labelCode, isEqualTo(labelCode),

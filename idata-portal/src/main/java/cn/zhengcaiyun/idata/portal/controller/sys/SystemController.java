@@ -70,12 +70,12 @@ public class SystemController {
         return RestResult.success(systemConfigService.getSystemConfigs(configType));
     }
 
-    @GetMapping("/p1/sys/xmlConfigValue")
-    public RestResult<Map<String, ConfigValueDto>> getXmlConfigValue(@RequestParam("resourceFile") MultipartFile file) throws IOException {
-        return RestResult.success(systemConfigService.getXmlConfigValues(file));
+    @PostMapping("/p1/sys/xmlConfigValue")
+    public RestResult<Map<String, ConfigValueDto>> getXmlConfigValue(@RequestParam("xmlFile") MultipartFile xmlFile) throws IOException {
+        return RestResult.success(systemConfigService.getXmlConfigValues(xmlFile));
     }
 
-    @GetMapping("/p1/sys/checkConnection")
+    @PostMapping("/p1/sys/checkConnection")
     public RestResult<Boolean> checkConfigConnection(@RequestBody ConnectionDto connection) {
         return RestResult.success(systemConfigService.checkConnection(connection));
     }

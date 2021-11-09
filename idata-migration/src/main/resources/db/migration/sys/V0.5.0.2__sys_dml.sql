@@ -33,15 +33,21 @@ values ('F_ICON_RELEASE_DATA_JOB', '作业发布真线', 'F_ICON', 'F_MENU_JOB_L
 
 -- table sys_config
 insert into sys_config(creator ,key_one, value_one, type)
-values ('系统管理员', 'ds-config','{"dolphinScheduler.url":{},"dolphinScheduler.token":{}}', 'DS');
+values ('系统管理员', 'ds-config','{"url":{},"token":{}}', 'DS');
 insert into sys_config(creator ,key_one, value_one, type)
-values ('系统管理员', 'hive-config','{"hive.jdbc.url":{},"username":{},"password":{}}', 'HIVE_METASTORE');
+values ('系统管理员', 'hive-config','{"url":{},"username":{},"password":{}}', 'HIVE_METASTORE');
 insert into sys_config(creator ,key_one, value_one, type)
-values ('系统管理员', 'htool-config','{"jobDetails.apiUrl":{},"sqoop.log.path":{}}', 'HTOOL');
+values ('系统管理员', 'htool-config','{"jobDetails.apiUrl":{},"sqoop.log.path":{},"hive2.jdbc.url":{},"hive2.jdbc.username":{},"hive2.jdbc.password":{},"hdfs.addr":{},"yarn.addr":{},"sqlRewrite.apiUrl":{},"kylin.auth":{},"kylin.apiUrl":{},"htool.addr":{}}', 'HTOOL');
 insert into sys_config(creator ,key_one, value_one, type)
-values ('系统管理员', 'livy-config','{"livy.url":{},"livy.sessionMax":{}}', 'LIVY');
+values ('系统管理员', 'livy-config','{"url":{},"livy.sessionMax":{}}', 'LIVY');
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'ldap-config','{"ldap.url":{},"ldap.base":{},"ldap.userDn":{},"ldap.password":{}}', 'LDAP');
+insert into sys_config(creator ,key_one, value_one, type)
+values ('系统管理员', 'core-site','{}', 'HADOOP');
+insert into sys_config(creator ,key_one, value_one, type)
+values ('系统管理员', 'hdfs-site','{}', 'HADOOP');
+insert into sys_config(creator ,key_one, value_one, type)
+values ('系统管理员', 'yarn-site','{}', 'HADOOP');
 
 update sys_config set value_one = '{"port":{"configValue":"80"},"host":{"configValue":"presto-new.bigdata.cai-inc.com"},"type":{"configValue":"presto"},"dbCatalog":{"configValue":"hive"},"username":{"configValue":"presto"}}'
 where key_one = 'trino-info';

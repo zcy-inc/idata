@@ -65,7 +65,7 @@ public class LabelController {
     @PostMapping("labelDefine")
     public RestResult<LabelDefineDto> defineLabel(@RequestBody LabelDefineDto labelDefineDto,
                                                   HttpServletRequest request) {
-        return RestResult.success(labelService.defineLabel(labelDefineDto, tokenService.getNickname(request)));
+        return RestResult.success(labelService.defineLabelAndEnum(labelDefineDto, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("labelDefine")

@@ -128,7 +128,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 Document doc = reader.read(file);
                 Element root = doc.getRootElement();
                 Element foo;
-                for (Iterator i = root.elementIterator("VALUE"); i.hasNext();) {
+                for (Iterator i = root.elementIterator(); i.hasNext();) {
                     foo = (Element) i.next();
                     ConfigValueDto echo = new ConfigValueDto();
                     echo.setConfigValue(foo.elementText("value"));
@@ -138,7 +138,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                 e.printStackTrace();
             }
         }
-        return echoConfigValueMap.size() == 0 ? null : echoConfigValueMap;
+        return echoConfigValueMap.size() == 0 ? new HashMap<>() : echoConfigValueMap;
     }
 
     @Override

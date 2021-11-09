@@ -53,7 +53,6 @@ public class LabelDefineDto {
     private Integer labelRequired;
     private Long labelScope;
     private Long folderId;
-    private EnumDto labelEnum;
 
     // GaS
     public Long getId() {
@@ -198,13 +197,5 @@ public class LabelDefineDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
-    }
-
-    public EnumDto getLabelEnum() {
-        return labelEnum;
-    }
-
-    public void setLabelEnum(EnumDto labelEnum) {
-        this.labelEnum = labelEnum;
     }
 }
