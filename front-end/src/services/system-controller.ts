@@ -6,3 +6,15 @@ export const getConfigByType = (configType: TConfigType) => {
     params: { configType }
   });
 }
+export const editSystemConfig = (config: IConfigs[]) => {
+  return request<Tresponse>('/api/p1/sys/configs', {
+    method: "PUT",
+    data: config
+  });
+}
+export const checkConfigConnection = (config: IConfigs[]) => {
+  return request<Tresponse>('/api/p1/sys/configs', {
+    method: "PUT",
+    data: config
+  });
+}
