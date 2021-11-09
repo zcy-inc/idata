@@ -28,8 +28,8 @@ export default () => (
         <TabPane tab="调度系统" key="DS">
           <Scheduling hasConnection type="DS" />
         </TabPane>
-        <TabPane tab="Hive MetaStore" key="2">
-        <Scheduling hasConnection type="DS"/>
+        <TabPane tab="Hive MetaStore" key="HIVE_METASTORE">
+        <Scheduling hasConnection type="HIVE_METASTORE"/>
         </TabPane>
         <TabPane tab="Hadoop" key="3">
           <Hadoop />

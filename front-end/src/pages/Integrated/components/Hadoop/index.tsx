@@ -4,6 +4,8 @@ import { EditableProTable } from '@ant-design/pro-table';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Button, Upload, message, Collapse } from 'antd';
+import type { IDataSourceType } from '@/types/system-controller'
+import { v4 as uuidv4 } from 'uuid';
 const { Panel } = Collapse;
 const props: UploadProps = {
   name: 'file',
@@ -31,34 +33,17 @@ const props: UploadProps = {
   },
 };
 
-type DataSourceType = {
-  id: React.Key;
-  configValue?: string;
-  configValueKey?: string;
-  configValueRemarks?: string;
-};
-
-const defaultData: DataSourceType[] = new Array(3).fill(1).map((_, index) => {
-  return {
-    id: (Date.now() + index).toString(),
-    configValueKey: `活动名称${index}`,
-    configValue: '这个活动真好玩',
-    configValueRemarks: 'open',
-  };
-});
 
 export default () => {
-  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() =>
-    defaultData.map((item) => item.id),
-  );
+  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const actionRef = useRef<ActionType>();
-  const [dataSource, setDataSource] = useState<DataSourceType[]>(() => defaultData);
+  const [dataSource, setDataSource] = useState<IDataSourceType[]>([]);
 
-  const columns: ProColumns<DataSourceType>[] = [
+  const columns: ProColumns<IDataSourceType>[] = [
     {
       title: '参数名称',
       dataIndex: 'configValueKey',
-      width: '220px',
+      width: '280px',
       formItemProps: {
         rules: [
           {
@@ -71,7 +56,6 @@ export default () => {
     {
       title: '值',
       dataIndex: 'configValue',
-      width: '280px',
       formItemProps: {
         rules: [
           {
@@ -83,6 +67,7 @@ export default () => {
     },
     {
       title: '备注',
+      width: '280px',
       dataIndex: 'configValueRemarks',
     }, {
       title: '操作',
@@ -95,83 +80,88 @@ export default () => {
   ];
 
   return (
-    <Collapse >
-      <Panel header="集群全局参数" key="1">
-        <EditableProTable<DataSourceType>
-          headerTitle="core-site"
-          columns={columns}
-          rowKey="id"
-          value={dataSource}
-          actionRef={actionRef}
-          onChange={setDataSource}
-          recordCreatorProps={{
-            newRecordType: 'dataSource',
-            record: () => ({
-              id: Date.now(),
-            }),
-          }}
-          toolBarRender={() => {
-            return [
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>上传文件</Button>
-              </Upload>,
-            ];
-          }}
-          editable={{
-            type: 'multiple',
-            editableKeys,
-            onValuesChange: (record, recordList) => {
-              setDataSource(recordList);
-            },
-            actionRender: (row, config, defaultDoms) => {
-              return [defaultDoms.delete];
-            },
-            onChange: setEditableRowKeys,
-          }}
-        />
-      </Panel>
-      <Panel header="hdfs-site(HDFS参数)" key="2">
-        <Upload {...props}>
-          <Button icon={<UploadOutlined />}>上传文件</Button>
-        </Upload>
-        <EditableProTable<DataSourceType>
-          columns={columns}
-          rowKey="id"
-          value={dataSource}
-          actionRef={actionRef}
-          onChange={setDataSource}
-          recordCreatorProps={false}
-          editable={{
-            type: 'multiple',
-            editableKeys,
-            onValuesChange: (record, recordList) => {
-              setDataSource(recordList);
-            },
-            onChange: setEditableRowKeys,
-          }}
-        />
-      </Panel>
-      <Panel header="yarn-site(集群资源管理参数)" key="3">
-        <Upload {...props}>
-          <Button icon={<UploadOutlined />}>上传文件</Button>
-        </Upload>
-        <EditableProTable<DataSourceType>
-          columns={columns}
-          rowKey="id"
-          value={dataSource}
-          actionRef={actionRef}
-          onChange={setDataSource}
-          recordCreatorProps={false}
-          editable={{
-            type: 'multiple',
-            editableKeys,
-            onValuesChange: (record, recordList) => {
-              setDataSource(recordList);
-            },
-            onChange: setEditableRowKeys,
-          }}
-        />
-      </Panel>
-    </Collapse>
+    <>
+      <Collapse >
+        <Panel header="集群全局参数" key="1">
+          <EditableProTable<IDataSourceType>
+            headerTitle="core-site"
+            columns={columns}
+            rowKey="id"
+            value={dataSource}
+            actionRef={actionRef}
+            onChange={setDataSource}
+            recordCreatorProps={{
+              newRecordType: 'dataSource',
+              record: () => ({
+                id: uuidv4(),
+              }),
+            }}
+            toolBarRender={() => {
+              return [
+                <Upload {...props}>
+                  <Button icon={<UploadOutlined />}>上传文件</Button>
+                </Upload>,
+              ];
+            }}
+            editable={{
+              type: 'multiple',
+              editableKeys,
+              onValuesChange: (record, recordList) => {
+                setDataSource(recordList);
+              },
+              actionRender: (row, config, defaultDoms) => {
+                return [defaultDoms.delete];
+              },
+              onChange: setEditableRowKeys,
+            }}
+          />
+        </Panel>
+        <Panel header="hdfs-site(HDFS参数)" key="2">
+          <Upload {...props}>
+            <Button icon={<UploadOutlined />}>上传文件</Button>
+          </Upload>
+          <EditableProTable<IDataSourceType>
+            columns={columns}
+            rowKey="id"
+            value={dataSource}
+            actionRef={actionRef}
+            onChange={setDataSource}
+            recordCreatorProps={false}
+            editable={{
+              type: 'multiple',
+              editableKeys,
+              onValuesChange: (record, recordList) => {
+                setDataSource(recordList);
+              },
+              onChange: setEditableRowKeys,
+            }}
+          />
+        </Panel>
+        <Panel header="yarn-site(集群资源管理参数)" key="3">
+          <Upload {...props}>
+            <Button icon={<UploadOutlined />}>上传文件</Button>
+          </Upload>
+          <EditableProTable<IDataSourceType>
+            columns={columns}
+            rowKey="id"
+            value={dataSource}
+            actionRef={actionRef}
+            onChange={setDataSource}
+            recordCreatorProps={false}
+            editable={{
+              type: 'multiple',
+              editableKeys,
+              onValuesChange: (record, recordList) => {
+                setDataSource(recordList);
+              },
+              onChange: setEditableRowKeys,
+            }}
+          />
+        </Panel>
+      </Collapse>
+      <div style={{ textAlign: 'right',padding:'10px' } }>
+        <Button type="primary" > 保存</Button>
+      </div>
+    </>
   );
 };

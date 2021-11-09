@@ -74,7 +74,8 @@
     "react-split-pane": "0.1.92",
     "umi": "^3.2.14",
     "umi-request": "^1.0.8",
-    "use-merge-value": "^1.0.1"
+    "use-merge-value": "^1.0.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",
@@ -87,6 +88,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-helmet": "^6.1.0",
+    "@types/uuid": "^8.3.1",
     "@umijs/fabric": "^2.3.0",
     "@umijs/plugin-blocks": "^2.0.5",
     "@umijs/plugin-esbuild": "^1.0.1",

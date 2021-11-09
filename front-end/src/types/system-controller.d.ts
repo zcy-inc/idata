@@ -5,10 +5,11 @@ export interface IConfigs{
   valueOne: Record<string,any>
 }
 export interface IDataSourceType extends IConfigItem {
-  configValueKey: string;
+  configValueKey?: string;
 };
 
 export  interface IConfigItem{
+  id?: React.Key
   configValue?: string;
   configValueRemarks?: string;
 }

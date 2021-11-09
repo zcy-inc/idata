@@ -43,7 +43,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
   const [dataSource, setDataSource] = useState<IDataSourceType[]>([]);
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [configId, setConfigId] = useState<string>("");
-  const [connectionStatus, setConnectionStatus] = useState<boolean| null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<boolean | null>(null);
   const [editForm] = Form.useForm()
   const { loading: fetchLoading } = useRequest(() => getConfigByType(type), {
     onSuccess: (data) => {
@@ -75,8 +75,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
     if (!error) {
       const config = listToData(dataSource);
       const connection = configToConnection(type, config)
-      const { data } = await checkConfigConnection(connection)
-      console.log(data);
+      return checkConfigConnection(connection)
     }
     return false;
   }, {
@@ -85,6 +84,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
       setConnectionStatus(false)
     },
     onSuccess: (data) => {
+      console.log(data);
       setConnectionStatus(!!data)
     }
   });
@@ -120,7 +120,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
             connectionStatus === true ? <Alert message="连接成功" type="success" showIcon /> : null
           }
           {
-            connectionStatus === false ? <Alert message="连接失败" type="error" showIcon />: null
+            connectionStatus === false ? <Alert message="连接失败" type="error" showIcon /> : null
           }
         </Space>
         : null}
