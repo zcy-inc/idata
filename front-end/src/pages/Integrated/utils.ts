@@ -12,9 +12,11 @@ export function dataToList(data: Record<string, IConfigItem>) {
   })
 }
 function listReducer(config: Record<string, IConfigItem>, item: IDataSourceType) {
-  config[item.configValueKey] = {
-    configValue: item.configValue,
-    configValueRemarks: item.configValueRemarks,
+  if(item.configValueKey){
+    config[item.configValueKey] = {
+      configValue: item.configValue,
+      configValueRemarks: item.configValueRemarks,
+    }
   }
   return config;
 }

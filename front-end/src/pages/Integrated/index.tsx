@@ -34,11 +34,11 @@ export default () => (
         <TabPane tab="Hadoop" key="3">
           <Hadoop />
         </TabPane>
-        <TabPane tab="抽数配置" key="4">
-          <Scheduling type="DS"/>
+        <TabPane tab="抽数配置" key="HTOOL">
+          <Scheduling type="HTOOL"/>
         </TabPane>
-        <TabPane tab="livy" key="5">
-          <Scheduling type="DS"/>
+        <TabPane tab="livy" key="LIVY">
+          <Scheduling type="LIVY"/>
         </TabPane>
       </Tabs>
     </div>

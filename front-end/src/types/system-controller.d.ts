@@ -2,6 +2,7 @@ export type TConfigType = "LDAP" | "DS" | "HIVE_METASTORE" | "HADOOP" | "HTOOL" 
 
 export interface IConfigs{
   id: string;
+  keyOne: string;
   valueOne: Record<string,any>
 }
 export interface IDataSourceType extends IConfigItem {

@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import type { FC} from 'react';
+import React, {useState, useRef,useEffect } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { EditableProTable } from '@ant-design/pro-table';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Button, Upload, message } from 'antd';
-const props: UploadProps = {
+import { v4 as uuidv4 } from 'uuid';
+const upLoadProps: UploadProps = {
   name: 'file',
   action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
   headers: {
@@ -30,29 +32,19 @@ const props: UploadProps = {
   },
 };
 
-type DataSourceType = {
-  configValue?: string;
-  configValueKey: string;
-  configValueRemarks?: string;
-};
+interface HadoopPanelProps{
+  id: string
+  headerTitle: string
+  dataSource?: IDataSourceType[]
+}
+import type { IDataSourceType } from '@/types/system-controller'
 
-const defaultData: DataSourceType[] = new Array(3).fill(1).map((_, index) => {
-  return {
-    id: (Date.now() + index).toString(),
-    configValueKey: `活动名称${index}`,
-    configValue: '这个活动真好玩',
-    configValueRemarks: 'open',
-  };
-});
-
-export default () => {
-  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() =>
-    defaultData.map((item) => item.id),
-  );
+const HadoopPanel: FC<HadoopPanelProps>= (props) => {
+  const {headerTitle,dataSource} =props;
+  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const actionRef = useRef<ActionType>();
-  const [dataSource, setDataSource] = useState<DataSourceType[]>(() => defaultData);
-
-  const columns: ProColumns<DataSourceType>[] = [
+  const [dataSourceState, setDataSource] = useState<IDataSourceType[]>([]);
+  const columns: ProColumns<IDataSourceType>[] = [
     {
       title: '参数名称',
       dataIndex: 'configValueKey',
@@ -91,25 +83,27 @@ export default () => {
       },
     }
   ];
-
+  useEffect(()=>{
+    setDataSource(dataSource||[])
+  },[dataSource])
   return (
     <>
-      <EditableProTable<DataSourceType>
-        headerTitle="core-site"
+      <EditableProTable<IDataSourceType>
+        headerTitle={headerTitle}
         columns={columns}
         rowKey="id"
-        value={dataSource}
+        value={dataSourceState}
         actionRef={actionRef}
         onChange={setDataSource}
         recordCreatorProps={{
           newRecordType: 'dataSource',
           record: () => ({
-            id: Date.now(),
+            id: uuidv4(),
           }),
         }}
         toolBarRender={() => {
           return [
-            <Upload {...props}>
+            <Upload {...upLoadProps}>
               <Button icon={<UploadOutlined />}>上传文件</Button>
             </Upload>,
           ];
@@ -129,3 +123,4 @@ export default () => {
     </>
   );
 };
+export  default HadoopPanel
