@@ -25,11 +25,11 @@ export default () => (
   >
     <div className="zcy-content" >
       <Tabs defaultActiveKey="1">
-        <TabPane tab="调度系统" key="1">
-          <Scheduling connection={{url:""}} type="DS" />
+        <TabPane tab="调度系统" key="DS">
+          <Scheduling hasConnection type="DS" />
         </TabPane>
         <TabPane tab="Hive MetaStore" key="2">
-        <Scheduling connection={{url:""}} type="DS"/>
+        <Scheduling hasConnection type="DS"/>
         </TabPane>
         <TabPane tab="Hadoop" key="3">
           <Hadoop />

@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { EditableProTable } from '@ant-design/pro-table';
 import { PoweroffOutlined } from '@ant-design/icons';
-import { Button, Alert, Space, Spin, Form } from 'antd';
-import { getConfigByType, editSystemConfig } from '@/services/system-controller'
+import { Button, Alert, Space, Spin, Form, message } from 'antd';
+import { getConfigByType, editSystemConfig, checkConfigConnection } from '@/services/system-controller'
 import { useRequest } from 'umi';
-import { dataToList, listToData } from '../utils'
+import { dataToList, listToData, configToConnection } from '../utils'
 import type { TConfigType, IDataSourceType } from '@/types/system-controller'
 import type { FC } from 'react';
 import type { ProColumns } from '@ant-design/pro-table';
-interface IConnection {
-  url: string;
-  token?: string;
-  username?: string;
-  password?: string
-}
 interface IBaseConfiguration {
-  connection?: IConnection
+  hasConnection?: boolean,
   type: TConfigType
 }
 
@@ -37,20 +31,21 @@ const columns: ProColumns<IDataSourceType>[] = [
           message: '此项是必填项',
         }]
     },
-    width: '280px',
   },
   {
     title: '备注',
+    width: '360px',
     dataIndex: 'configValueRemarks',
   },
 ];
 const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
-  const { connection, type } = props;
+  const { type, hasConnection } = props;
   const [dataSource, setDataSource] = useState<IDataSourceType[]>([]);
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [configId, setConfigId] = useState<string>("");
+  const [connectionStatus, setConnectionStatus] = useState<boolean| null>(null);
   const [editForm] = Form.useForm()
-  const { loading } = useRequest(() => getConfigByType(type), {
+  const { loading: fetchLoading } = useRequest(() => getConfigByType(type), {
     onSuccess: (data) => {
       const newDataSource = dataToList(data?.[0]?.valueOne)
       setConfigId(data?.[0]?.id);
@@ -59,19 +54,42 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
         newDataSource.map(({ configValueKey }) => configValueKey))
     }
   });
-
-  const save = async () => {
+  const { loading: saveLoading, run: save } = useRequest(async () => {
     const { error } = await editForm.validateFields()
     if (!error) {
       const config = listToData(dataSource);
-      editSystemConfig([{
+      return editSystemConfig([{
         id: configId,
         valueOne: config
       }])
     }
-  }
+    return false;
+  }, {
+    manual: true,
+    onSuccess: () => {
+      message.success('保存成功')
+    }
+  });
+  const { loading: connectionLoading, run: checkConnection } = useRequest(async () => {
+    const { error } = await editForm.validateFields()
+    if (!error) {
+      const config = listToData(dataSource);
+      const connection = configToConnection(type, config)
+      const { data } = await checkConfigConnection(connection)
+      console.log(data);
+    }
+    return false;
+  }, {
+    manual: true,
+    onError: () => {
+      setConnectionStatus(false)
+    },
+    onSuccess: (data) => {
+      setConnectionStatus(!!data)
+    }
+  });
   return (
-    <Spin spinning={loading}>
+    <Spin spinning={fetchLoading || saveLoading || connectionLoading}>
       <EditableProTable<IDataSourceType>
         columns={columns}
         rowKey="configValueKey"
@@ -88,17 +106,22 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
           onChange: setEditableRowKeys,
         }}
       />
-      {connection ?
+      {hasConnection ?
         <Space>
           <Button
             type="primary"
             size="small"
             icon={<PoweroffOutlined />}
+            onClick={checkConnection}
           >
-            点击测试联调性
+            点击测试连通性
           </Button>
-          <Alert message="连接成功" type="success" showIcon />
-          <Alert message="连接失败" type="error" showIcon />
+          {
+            connectionStatus === true ? <Alert message="连接成功" type="success" showIcon /> : null
+          }
+          {
+            connectionStatus === false ? <Alert message="连接失败" type="error" showIcon />: null
+          }
         </Space>
         : null}
 

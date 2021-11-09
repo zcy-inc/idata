@@ -12,3 +12,11 @@ export  interface IConfigItem{
   configValue?: string;
   configValueRemarks?: string;
 }
+
+export interface IConnection{
+    connectionType: TConfigType
+    connectionUri?: string
+    token?: string
+    username?: string
+    password?: string
+}
