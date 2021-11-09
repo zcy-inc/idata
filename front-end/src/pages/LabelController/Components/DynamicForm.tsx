@@ -16,6 +16,15 @@ const columns: ProFormColumnsType<DataItem>[] = [
     columns: [
       {
         title: '标题12',
+        dataIndex: 'a',
+        formItemProps: {
+          rules: [
+            {
+              required: true,
+              message: '此项为必填项',
+            },
+          ],
+        },
         renderFormItem: () => {
           return (
             <Space>

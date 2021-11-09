@@ -1,8 +1,8 @@
-import { VersionStatus } from '@/constants/datadev';
-import { Environments } from '@/constants/datasource';
-import { TaskListItem } from '@/types/tasks';
+import type { VersionStatus } from '@/constants/datadev';
+import type { Environments } from '@/constants/datasource';
+import type { TaskListItem } from '@/types/tasks';
 import { request } from 'umi';
-import { DefaultResponse } from './global';
+import type { DefaultResponse } from './global';
 
 /**
  * 查询版本发布记录
