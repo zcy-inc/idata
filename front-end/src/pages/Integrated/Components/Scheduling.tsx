@@ -1,4 +1,4 @@
-import React, { useState, useRef,useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { EditableProTable } from '@ant-design/pro-table';
 import { PoweroffOutlined } from '@ant-design/icons';
 import { Button, Alert, Space,Spin } from 'antd';
@@ -43,7 +43,10 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
   const actionRef = useRef<ActionType>();
   const { loading } = useRequest(()=>getConfigByType(type), {
     onSuccess: (data) => {
-      setDataSource(dataToList(data?.[0]?.valueOne))
+      const newDataSource = dataToList(data?.[0]?.valueOne)
+      setDataSource(newDataSource)
+      setEditableRowKeys(() =>
+      newDataSource.map(({ configValueKey }) => configValueKey))
     }
   });
 
@@ -51,7 +54,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
     <Spin spinning={loading}>
       <EditableProTable<TDataSourceType>
         columns={columns}
-        rowKey="id"
+        rowKey="configValueKey"
         value={dataSource}
         actionRef={actionRef}
         onChange={setDataSource}
