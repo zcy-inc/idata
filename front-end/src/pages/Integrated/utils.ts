@@ -2,9 +2,9 @@ import type { IDataSourceType, IConfigItem, IConnection } from 'src/types/system
 import { v4 as uuidv4 } from 'uuid';
 export function dataToList(data: Record<string, IConfigItem>) {
   return Object.keys(data).map(configValueKey => {
-    const { configValue, configValueRemarks } = data[configValueKey];
+    const { configValue, configValueRemarks,id } = data[configValueKey];
     return {
-      id:uuidv4(),
+      id:id?id:uuidv4(),
       configValueKey,
       configValue,
       configValueRemarks
@@ -16,6 +16,13 @@ function listReducer(config: Record<string, IConfigItem>, item: IDataSourceType)
     config[item.configValueKey] = {
       configValue: item.configValue,
       configValueRemarks: item.configValueRemarks,
+      id:item.id
+    }
+  }else{
+    config["请输入参数名"] = {
+      configValue: item.configValue,
+      configValueRemarks: item.configValueRemarks,
+      id:item.id
     }
   }
   return config;
