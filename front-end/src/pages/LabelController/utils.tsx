@@ -1,16 +1,22 @@
 import React from 'react'
-import { Space, Input, Select, Button } from 'antd';
+import { Space, Input, Select } from 'antd';
 import type { ILabelDefines } from 'src/types/labelController'
 import type { ProFormColumnsType } from '@ant-design/pro-form';
 import BooleanComponent from './components/BooleanComponent';
-import { MinusCircleOutlined, PlusOutlined, FormOutlined } from '@ant-design/icons';
-
+import { MinusCircleOutlined, FormOutlined } from '@ant-design/icons';
+import Modal  from './components/Modal';
+import type {TSubjectType} from '@/types/labelController'
 const componentMap = {
   "STRING_LABEL": Input,
   "ENUM_VALUE_LABEL": Select,
   "BOOLEAN_LABEL": BooleanComponent
 }
-export  function dataToColumns(data: ILabelDefines[]): ProFormColumnsType[]{
+interface IDataToColumnsParams{
+  data: ILabelDefines[]
+  callback: () => void
+  subjectType: TSubjectType
+}
+export  function dataToColumns({data,callback,subjectType}: IDataToColumnsParams): ProFormColumnsType[]{
   const columns: ProFormColumnsType[] = data?.map?.((item) => {
     const FormComponent = componentMap[item.labelTag]||Input;
     const column: ProFormColumnsType = {
@@ -43,10 +49,10 @@ export  function dataToColumns(data: ILabelDefines[]): ProFormColumnsType[]{
     return column
   })
   columns.push({
-      title: '',
+      title: ' ',
       renderFormItem: () => {
         return (
-          <Button type="primary" icon={<PlusOutlined />}> 添加属性</Button>
+                <Modal callback={callback} subjectType={subjectType}/>
         )
       }
   })

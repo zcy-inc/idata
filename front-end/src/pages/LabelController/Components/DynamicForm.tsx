@@ -19,9 +19,13 @@ interface IDynamicFormProps {
 const DynamicForm: FC<IDynamicFormProps> = (props) => {
   const { subjectType } = props;
   const [columns, setColumns] = useState<ProFormColumnsType[]>([])
-  const { loading: fetchLoading } = useRequest(() => findDefines(subjectType), {
+  const { loading: fetchLoading,run } = useRequest(() => findDefines(subjectType), {
     onSuccess: (data) => {
-      const newColumns = dataToColumns(data)
+      const newColumns = dataToColumns({
+        data,
+        callback:run,
+        subjectType
+      })
       setColumns(newColumns)
     }
   });

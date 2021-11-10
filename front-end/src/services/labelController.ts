@@ -8,3 +8,9 @@ export const findDefines = (subjectType: TSubjectType) => {
     }
   });
 }
+export const defineLabel = (label: ILabelDefines) => {
+  return request<Tresponse<ILabelDefines[]>>('/api/p1/dev/labelDefine', {
+    method: 'POST',
+    data: label
+  });
+}
