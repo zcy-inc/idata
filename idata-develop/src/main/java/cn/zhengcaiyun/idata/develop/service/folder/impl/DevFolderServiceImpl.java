@@ -230,12 +230,17 @@ public class DevFolderServiceImpl implements DevFolderService {
         return new HashSet<>(folderIdList);
     }
 
+    @Override
+    public Set<String> getUserMeasureFolderIds(Long userId) {
+        return null;
+    }
+
     private Set<String> getAllTableFolderIds() {
         return compositeFolderRepo.queryAllFolder()
                 .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
     }
 
-    private Set<Long> getSubTableFolderIds(Set<Long> folderIds) {
+    private Set<Long> getSubMeasureFolderIds(Set<Long> folderIds) {
         Set<Long> echoList = new HashSet<>(folderIds);
         Set<Long> parentFolderIdList = getParentFolderIds(folderIds);
         Set<Long> childFolderIdList = getChildFolderIds(folderIds);
