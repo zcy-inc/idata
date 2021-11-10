@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs } from 'antd';
-import DynamicForm from './Components/DynamicForm';
+import DynamicForm from './components/DynamicForm';
 const { TabPane } = Tabs;
 export default () => (
   <PageContainer
@@ -24,11 +24,11 @@ export default () => (
   >
     <div className="zcy-content" >
       <Tabs defaultActiveKey="1">
-        <TabPane tab="表单基本信息" key="1">
-          <DynamicForm  />
+        <TabPane tab="表单基本信息" key="TABLE">
+          <DynamicForm  subjectType="TABLE" />
         </TabPane>
-        <TabPane tab="表结构设计" key="3">
-          <DynamicForm />
+        <TabPane tab="表结构设计" key="COLUMN">
+          <DynamicForm  subjectType="COLUMN"/>
         </TabPane>
       </Tabs>
     </div>
