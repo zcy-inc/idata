@@ -1,9 +1,10 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { Button, Collapse, Spin } from 'antd';
+import { Button, Collapse, Spin,message } from 'antd';
 import { useRequest } from 'umi';
 import { getConfigByType } from '@/services/system-controller'
 import type { IConfigs } from '@/types/system-controller'
+import {editSystemConfig} from '@/services/system-controller'
 import _cloneDeep from 'lodash/cloneDeep'
 import { dataToList,listToData } from "../../utils"
 import HadoopPanel from './Panel';
@@ -17,16 +18,21 @@ const Hadoop: FC = () => {
       setConfigs(data)
     }
   });
-
+  const { loading: saveLoading, run: save } = useRequest(async () => {
+      return editSystemConfig(configs)
+  }, {
+    manual: true,
+    onSuccess: () => {
+      message.success('保存成功')
+    }
+  });
 // TODO 需要做一个临时的列表的数据接口，现有每次变化都转换一次效率和显示都是有一个小缺陷的
   return (
-    <Spin spinning={fetchLoading}>
+    <Spin spinning={fetchLoading||saveLoading}>
       <div style={{ textAlign: 'right', padding: '0 10px 15px 10px', background: '#fff' }}>
         <Button
           type="primary"
-          onClick={() => {
-              console.log(configs)
-          }}>
+          onClick={save}>
           保存
         </Button>
       </div>

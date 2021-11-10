@@ -60,7 +60,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
       const config = listToData(dataSource);
       return editSystemConfig([{
         id: configId,
-        keyOne:configId,
+        type,
         valueOne: config
       }])
     }

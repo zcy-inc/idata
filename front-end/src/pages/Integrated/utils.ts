@@ -11,25 +11,26 @@ export function dataToList(data: Record<string, IConfigItem>) {
     }
   })
 }
+
 function listReducer(config: Record<string, IConfigItem>, item: IDataSourceType) {
   if(item.configValueKey){
     config[item.configValueKey] = {
       configValue: item.configValue,
       configValueRemarks: item.configValueRemarks,
-      id:item.id
     }
   }else{
     config["请输入参数名"] = {
       configValue: item.configValue,
       configValueRemarks: item.configValueRemarks,
-      id:item.id
     }
   }
   return config;
 }
+
 export function listToData(list: IDataSourceType[]) {
   return list.reduce(listReducer, {})
 }
+
 export function configToConnection(type: IConnection["connectionType"], config: Record<string, IConfigItem>) {
   return {
     connectionType: type,
@@ -39,3 +40,4 @@ export function configToConnection(type: IConnection["connectionType"], config: 
     password: config?.password?.configValue
   }
 }
+
