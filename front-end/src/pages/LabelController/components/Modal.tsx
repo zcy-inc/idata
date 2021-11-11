@@ -1,4 +1,6 @@
+import {useRef} from 'react';
 import type {FC} from 'react';
+import type { ProFormInstance } from '@ant-design/pro-form';
 import React ,{useEffect,useState} from 'react';
 import { message } from 'antd';
 import ProForm, {
@@ -25,21 +27,26 @@ interface IModalProps {
 }
 
 const Modal: FC<IModalProps>=  (props) => {
+  const formRef = useRef<ProFormInstance>();
   const {callback,onCancel,subjectType,visible,labelDefineId} = props;
-  const [initialValues,setInitialValues] = useState<ILabelDefines>({
-    labelRequired:0
-  })
   useEffect(()=>{
     if(labelDefineId){
-      getLabel({labelDefineId}).then((data)=>{
-        setInitialValues(data)
+      getLabel({labelDefineId}).then(({data})=>{
+        formRef.current?.setFieldsValue(data);
       })
+    }else{
+      formRef.current?.setFieldsValue({
+        labelDefineId:0
+      });
     }
   },[subjectType,labelDefineId])
   return (
     <ModalForm<ILabelDefines>
       {...layout}
-      initialValues={initialValues}
+      initialValues={{
+        labelRequired:0
+      }}
+      formRef={formRef}
       visible={visible}
       autoFocusFirstInput
       modalProps={{
@@ -100,7 +107,7 @@ const Modal: FC<IModalProps>=  (props) => {
         {({ labelTag }) => {
           if (labelTag === "ENUM_VALUE_LABEL") {
             return (<ProFormList
-              name="labelEnumValues"
+              name="enumValues"
               label="选型列表"
               creatorButtonProps={{
                 position: 'bottom',

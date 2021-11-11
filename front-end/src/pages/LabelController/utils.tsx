@@ -14,10 +14,11 @@ const componentMap = {
 interface IDataToColumnsParams {
   data: ILabelDefines[]
   del: (params: { labelCode: string }) => void
+  edit: (id: number|undefined) => void
 }
-export function dataToColumns({ data, del }: IDataToColumnsParams): ProFormColumnsType[] {
+export function dataToColumns({ data, del,edit }: IDataToColumnsParams): ProFormColumnsType[] {
   const columns: ProFormColumnsType[] = data?.map?.((item) => {
-    const FormComponent = componentMap[item.labelTag] || Input;
+    const FormComponent = componentMap[item.labelTag||"STRING_LABEL"] || Input;
     const column: ProFormColumnsType = {
       title: item.labelName,
       dataIndex: item.labelCode,
@@ -25,7 +26,7 @@ export function dataToColumns({ data, del }: IDataToColumnsParams): ProFormColum
         return (
           <Space>
             <FormComponent style={{ width: "120px" }} />
-            <FormOutlined  className="dynamic-delete-button" />
+            <FormOutlined  className="dynamic-delete-button" onClick={() =>edit(item.id)}/>
             <Popconfirm
               title="是否确认删除该项?"
               onConfirm={() => {

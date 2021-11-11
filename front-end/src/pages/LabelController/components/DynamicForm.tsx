@@ -31,15 +31,16 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
       reload()
     }
   });
-  const addLabel = () => {
-    setLabelDefineId(undefined);
+  const editLabel =(id?: number)=>{
+    setLabelDefineId(id);
     setVisible(true)
   }
   const { loading: fetchLoading, run: reload } = useRequest(() => findDefines(subjectType), {
     onSuccess: (data) => {
       const newColumns = dataToColumns({
         data,
-        del: deleteLabelRun
+        del: deleteLabelRun,
+        edit:editLabel
       })
       newColumns?.push?.({
         title: ' ',
@@ -47,7 +48,7 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
           return (
             <Button
               type="primary"
-              onClick={addLabel}
+              onClick={()=>{editLabel()}}
             >
               <PlusOutlined />
               新建属性
@@ -72,7 +73,10 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
         columns={columns}
       />
       <Modal
-        callback={reload}
+        callback={()=>{
+          setVisible(false)
+          reload()
+        }}
         onCancel={() => setVisible(false)}
         subjectType={subjectType}
         visible={modelVisible}
