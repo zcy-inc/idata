@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.folder.impl;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevEnum;
@@ -28,6 +29,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopTreeTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
@@ -80,11 +82,15 @@ public class DevFolderServiceImpl implements DevFolderService {
     @Override
     public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType, String treeNodeName) {
         treeNodeName = isNotEmpty(treeNodeName) ? treeNodeName : null;
-        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType, treeNodeName);
+        Set<String> accessFolderIdList = getUserMeasureFolderIds(OperatorContext.getCurrentOperator().getId(), devTreeType);
+        if (accessFolderIdList.size() == 0) return Lists.newArrayList();
+        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType,
+                String.join(",", accessFolderIdList), treeNodeName);
         List<Long> folderIdList = folderTreeList
                 .stream().filter(folderTree -> "FOLDER".equals(folderTree.getType())).collect(Collectors.toList())
                 .stream().map(DevelopFolderTreeNodeDto::getFolderId).collect(Collectors.toList());
-        List<DevFolder> folderList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)));
+        List<DevFolder> folderList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
+                and(devFolder.id, isIn(accessFolderIdList.stream().map(Long::valueOf).collect(Collectors.toList())))));
         folderList.forEach(folder -> {
             if (!folderIdList.contains(folder.getId())) {
                 DevelopFolderTreeNodeDto folderTreeNode = new DevelopFolderTreeNodeDto();
@@ -231,8 +237,17 @@ public class DevFolderServiceImpl implements DevFolderService {
     }
 
     @Override
-    public Set<String> getUserMeasureFolderIds(Long userId) {
-        return null;
+    public Set<String> getUserMeasureFolderIds(Long userId, String folderType) {
+        UserInfoDto user = userManagerService.getUserInfo(userId);
+        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllMeasureFolderIds(folderType);
+
+        List<String> folderIdList = userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
+                ResourceTypeEnum.R_MEASURE_MANAGE_DIR.name() + "_R");
+        folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
+                ResourceTypeEnum.R_MEASURE_MANAGE_DIR.name() + "_W"));
+        folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
+                ResourceTypeEnum.R_MEASURE_MANAGE_DIR.name() + "_D"));
+        return getSubMeasureFolderIds(new HashSet<>(folderIdList), folderType);
     }
 
     private Set<String> getAllTableFolderIds() {
@@ -240,38 +255,51 @@ public class DevFolderServiceImpl implements DevFolderService {
                 .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
     }
 
-    private Set<Long> getSubMeasureFolderIds(Set<Long> folderIds) {
-        Set<Long> echoList = new HashSet<>(folderIds);
-        Set<Long> parentFolderIdList = getParentFolderIds(folderIds);
-        Set<Long> childFolderIdList = getChildFolderIds(folderIds);
-        echoList.addAll(childFolderIdList);
-        echoList.addAll(parentFolderIdList);
-        return echoList;
+    private Set<String> getAllMeasureFolderIds(String folderType) {
+        return devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
+                and(devFolder.folderType, isEqualTo(folderType))))
+                .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
     }
 
-    private Set<Long> getChildFolderIds(Set<Long> folderIds) {
+    private Set<String> getSubMeasureFolderIds(Set<String> folderIds, String folderType) {
+        Set<Long> folderIdList = folderIds.stream().map(Long::valueOf).collect(Collectors.toSet());
+        // 判断folderIds符合指标类型
+        Set<Long> echoFolderIdList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
+                and(devFolder.folderType, isEqualTo(folderType)), and(devFolder.id, isIn(folderIdList))))
+                .stream().map(DevFolder::getId).collect(Collectors.toSet());
+        if (echoFolderIdList.size() == 0) return new HashSet<>();
+        Set<Long> echoList = new HashSet<>(echoFolderIdList);
+        Set<Long> parentFolderIdList = getParentFolderIds(echoFolderIdList, folderType);
+        Set<Long> childFolderIdList = getChildFolderIds(echoFolderIdList, folderType);
+        echoList.addAll(childFolderIdList);
+        echoList.addAll(parentFolderIdList);
+        return echoList.stream().map(String::valueOf).collect(Collectors.toSet());
+    }
+
+    private Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType) {
         Set<Long> childFolderIdList = devFolderDao.selectMany(select(devFolder.allColumns())
                 .from(devFolder)
-                .where(devFolder.del, isNotEqualTo(1), and(devFolder.parentId, isIn(folderIds)))
+                .where(devFolder.del, isNotEqualTo(1), and(devFolder.parentId, isIn(folderIds)),
+                        and(devFolder.folderType, isEqualTo(folderType)))
                 .build().render(RenderingStrategies.MYBATIS3))
                 .stream().map(DevFolder::getId).collect(Collectors.toSet());
         folderIds.addAll(childFolderIdList);
         if (childFolderIdList.size() > 0) {
-            return getChildFolderIds(childFolderIdList);
+            return getChildFolderIds(childFolderIdList, folderType);
         }
         return folderIds;
     }
 
-    private Set<Long> getParentFolderIds(Set<Long> folderIds) {
+    private Set<Long> getParentFolderIds(Set<Long> folderIds,String folderType) {
         Set<Long> parentFolderIdList = devFolderDao.selectMany(select(devFolder.allColumns())
                 .from(devFolder)
                 .where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isIn(folderIds)),
-                        and(devFolder.parentId, isNotEqualTo(0L)))
+                        and(devFolder.parentId, isNotEqualTo(0L)), and(devFolder.folderType, isEqualTo(folderType)))
                 .build().render(RenderingStrategies.MYBATIS3))
                 .stream().map(DevFolder::getParentId).collect(Collectors.toSet());
         folderIds.addAll(parentFolderIdList);
         if (parentFolderIdList.size() > 0) {
-            return getParentFolderIds(parentFolderIdList);
+            return getParentFolderIds(parentFolderIdList, folderType);
         }
         return folderIds;
     }

@@ -72,9 +72,4 @@ public class DevelopFolderController {
         return RestResult.success(devFolderService.delete(folderId, tokenService.getNickname(request)));
     }
 
-    @GetMapping("/testFolder")
-    public RestResult<Set<String>> test() {
-        return RestResult.success(devFolderService.getUserTableFolderIds(OperatorContext.getCurrentOperator().getId()));
-    }
-
 }

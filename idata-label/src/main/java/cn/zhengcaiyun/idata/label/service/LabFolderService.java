@@ -75,7 +75,7 @@ public interface LabFolderService {
      * @param belong
      * @return
      */
-    List<LabFolderTreeNodeDto> getFolderTree(String belong);
+    List<LabFolderTreeNodeDto> getFolderTree(String belong, Long userId);
 
     /**
      * 校验文件夹权限
