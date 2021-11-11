@@ -33,7 +33,7 @@ public interface CompositeFolderService {
 
     List<DevTreeNodeDto> getFunctionTree();
 
-    List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition);
+    List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition, Long userId);
 
     Long addFolder(CompositeFolderDto folderDto, Operator operator);
 

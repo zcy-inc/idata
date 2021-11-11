@@ -65,6 +65,13 @@ public class SysFeature {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.parent_code")
     private String parentCode;
 
+    /**
+     * Database Column Remarks:
+     *   功能请求路径
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.feature_url_path")
+    private String featureUrlPath;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.id")
     public Long getId() {
         return id;
@@ -143,5 +150,15 @@ public class SysFeature {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.parent_code")
     public void setParentCode(String parentCode) {
         this.parentCode = parentCode;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.feature_url_path")
+    public String getFeatureUrlPath() {
+        return featureUrlPath;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.feature_url_path")
+    public void setFeatureUrlPath(String featureUrlPath) {
+        this.featureUrlPath = featureUrlPath;
     }
 }

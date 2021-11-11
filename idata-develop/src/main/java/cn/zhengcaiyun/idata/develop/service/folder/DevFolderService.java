@@ -16,10 +16,12 @@
  */
 package cn.zhengcaiyun.idata.develop.service.folder;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author caizhedong
@@ -31,5 +33,8 @@ public interface DevFolderService {
     List<DevelopFolderDto> getDevelopFolders(String folderName);
     DevelopFolderDto create(DevelopFolderDto developFolderDto, String operator);
     DevelopFolderDto edit(DevelopFolderDto developFolderDto, String operator);
+    Set<String> getUserTableFolderIds(Long userId);
+    Set<String> getUserMeasureFolderIds(Long userId, String folderType);
     boolean delete(Long devFolderId, String operator);
+    boolean checkMeasureResAccess(Long userId, String folderId, String accessType);
 }

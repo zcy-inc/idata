@@ -30,6 +30,8 @@ import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +174,72 @@ public class LabelServiceImpl implements LabelService {
                 LabelDefineDto.class);
     }
 
+    @Override
+    public LabelDefineDto defineLabelAndEnum(LabelDefineDto labelDefineDto, String operator) {
+        if (labelDefineDto.getLabelCode() == null) {
+            if (labelDefineDto.getLabelIndex() == null || labelDefineDto.getLabelIndex() < 0) {
+                int existBiggestLabelIndex = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.subjectType, isEqualTo(labelDefineDto.getSubjectType())))
+                        .orderBy(devLabelDefine.labelIndex.descending())).get(0).getLabelIndex();
+                labelDefineDto.setLabelIndex(existBiggestLabelIndex + 1);
+            }
+            else {
+                DevLabelDefine checkLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.subjectType, isEqualTo(labelDefineDto.getSubjectType())),
+                        and(devLabelDefine.labelIndex, isEqualTo(labelDefineDto.getLabelIndex()))))
+                        .orElse(null);
+                checkArgument(checkLabelDefine == null, "相同主体的排序编号已存在");
+            }
+            labelDefineDto.setLabelCode(RandomUtil.randomStr(10) + ":LABEL");
+            checkArgument(labelDefineDto.getLabelName() != null, "labelName不能为空");
+            checkArgument(labelDefineDto.getLabelTag() != null, "labelTag不能为空");
+            LabelTagEnum labelTagEnum = LabelTagEnum.valueOf(labelDefineDto.getLabelTag());
+            // 暂不做校验
+//            checkLabelParamType(labelTagEnum, labelDefineDto.getLabelParamType());
+            checkArgument(labelDefineDto.getSubjectType() != null, "subjectType不能为空");
+            SubjectTypeEnum.valueOf(labelDefineDto.getSubjectType());
+            labelDefineDto.setCreator(operator);
+            devLabelDefineDao.insertSelective(PojoUtil.copyOne(labelDefineDto, DevLabelDefine.class,
+                    "labelCode", "labelName", "labelTag", "labelParamType",
+                    "labelAttributes", "specialAttribute", "subjectType", "labelIndex",
+                    "labelRequired", "labelScope", "folderId", "creator"));
+        }
+        else {
+            DevLabelDefine labelDefine = devLabelDefineDao.selectOne(c ->
+                    c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()),
+                            and(devLabelDefine.del, isNotEqualTo(1)))).orElseThrow(
+                    () -> new IllegalArgumentException("labelCode不存在, " + labelDefineDto.getLabelCode()));
+
+            if (labelDefineDto.getLabelIndex() == null) {
+                labelDefineDto.setLabelIndex(null);
+            }
+            else if (labelDefineDto.getLabelIndex() < 0) {
+                labelDefineDto.setLabelIndex(labelDefine.getLabelIndex());
+            }
+            PojoUtil.copyTo(labelDefineDto, labelDefine, "labelName", "specialAttribute",
+                    "folderId", "labelAttributes", "labelIndex");
+            if (labelDefineDto.getLabelRequired() != null) {
+                labelDefine.setLabelRequired(labelDefineDto.getLabelRequired());
+            }
+            labelDefine.setEditor(operator);
+            labelDefine.setEditTime(new Timestamp(System.currentTimeMillis()));
+            devLabelDefineDao.updateByPrimaryKey(labelDefine);
+        }
+
+        LabelDefineDto echoLabelDefine = PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
+                        c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
+                LabelDefineDto.class);
+        if (labelDefineDto.getEnumValues() != null && labelDefineDto.getEnumValues().size() > 0) {
+            EnumDto enumDto = new EnumDto();
+            enumDto.setEnumName(labelDefineDto.getLabelName());
+            enumDto.setEnumValues(labelDefineDto.getEnumValues());
+            EnumDto echoEnum = enumService.createOrEdit(enumDto, operator);
+            echoLabelDefine.setEnumValues(enumService.getEnumValues(echoEnum.getEnumCode()));
+        }
+
+        return echoLabelDefine;
+    }
+
     private void checkLabelParamType(LabelTagEnum labelTagEnum, String labelParamType) {
         if (LabelTagEnum.STRING_LABEL.equals(labelTagEnum)) {
             checkArgument(MetaTypeEnum.STRING.name().equals(labelParamType),
@@ -299,8 +367,14 @@ public class LabelServiceImpl implements LabelService {
                 and(devLabelDefine.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("labelCode不存在, " + labelCode));
 
-        checkArgument(Integer.valueOf(0).equals(labelDefine.getLabelRequired()), "必须打标的标签不能删除");
+
         checkArgument(!checkSysLabelCode(labelCode), "系统依赖的标签不能删除");
+        // 查表若被引用则不准被删
+        if (!checkSysLabelCode(labelCode)) {
+            List<DevLabel> existLabelList = devLabelDao.select(c -> c.where(devLabel.del ,isNotEqualTo(1),
+                    and(devLabel.labelCode, isEqualTo(labelCode))));
+            checkArgument(ObjectUtils.isEmpty(existLabelList), "标签被依赖，不能删除");
+        }
         devLabelDefineDao.update(c -> c.set(devLabelDefine.del).equalTo(1)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.labelCode, isEqualTo(labelCode),

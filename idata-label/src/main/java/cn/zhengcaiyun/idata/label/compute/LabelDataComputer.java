@@ -17,14 +17,17 @@
 package cn.zhengcaiyun.idata.label.compute;
 
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.label.compute.query.Query;
 import cn.zhengcaiyun.idata.label.compute.query.dto.ConnectionDto;
 import cn.zhengcaiyun.idata.label.compute.query.dto.WideTableDataDto;
+import cn.zhengcaiyun.idata.label.compute.query.enums.ConnectionTypeEnum;
 import cn.zhengcaiyun.idata.label.compute.sql.transform.SqlTranslator;
 import cn.zhengcaiyun.idata.label.dto.LabelQueryDataDto;
 import cn.zhengcaiyun.idata.label.dto.label.rule.LabelRuleDto;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +86,27 @@ public class LabelDataComputer {
         SysConfig trinoConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("trino-info")))
                 .orElse(null);
         if (trinoConfig != null) {
-            return JSON.parseObject(trinoConfig.getValueOne(), ConnectionDto.class);
+            // 修改valueOne类型
+//            return JSON.parseObject(trinoConfig.getValueOne(), ConnectionDto.class);
+            ConnectionDto connection = new ConnectionDto();
+            PojoUtil.copyOne(trinoConfig, ConfigDto.class).getValueOne().forEach((key, configValue) -> {
+                if ("port".equals(key)) {
+                    connection.setPort(Integer.valueOf(configValue.getConfigValue()));
+                }
+                else if ("host".equals(key)) {
+                    connection.setHost(configValue.getConfigValue());
+                }
+                else if ("dbCatalog".equals(key)) {
+                    connection.setDbCatalog(configValue.getConfigValue());
+                }
+                else if ("username".equals(key)) {
+                    connection.setUsername(configValue.getConfigValue());
+                }
+                else {
+                    connection.setType(ConnectionTypeEnum.valueOf(configValue.getConfigValue()));
+                }
+            });
+            return connection;
         }
         return null;
     }

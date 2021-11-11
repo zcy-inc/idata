@@ -18,12 +18,14 @@
 package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -166,7 +168,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
         SysConfig hiveConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("hive-info")))
                 .orElse(null);
         checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
-        return hiveConfig.getValueOne();
+        return PojoUtil.copyOne(hiveConfig, ConfigDto.class).getValueOne().get("hive-info").getConfigValue();
     }
 
     private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {

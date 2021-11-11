@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.lab;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.label.dto.LabFolderDto;
 import cn.zhengcaiyun.idata.label.dto.LabFolderTreeNodeDto;
@@ -118,7 +119,7 @@ public class LabFolderController {
      */
     @GetMapping("/labFolder/tree")
     public RestResult<List<LabFolderTreeNodeDto>> getFolderTree(@RequestParam(value = "belong") String belong) {
-        return RestResult.success(folderService.getFolderTree(belong));
+        return RestResult.success(folderService.getFolderTree(belong, OperatorContext.getCurrentOperator().getId()));
     }
 
 }
