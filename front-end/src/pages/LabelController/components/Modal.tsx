@@ -1,6 +1,6 @@
 import type {FC} from 'react';
-import React from 'react';
-import { Button, message } from 'antd';
+import React ,{useEffect,useState} from 'react';
+import { message } from 'antd';
 import ProForm, {
   ModalForm,
   ProFormText,
@@ -9,8 +9,8 @@ import ProForm, {
   ProFormList,
   ProFormDependency
 } from '@ant-design/pro-form';
-import { PlusOutlined } from '@ant-design/icons';
 import { defineLabel } from '@/services/labelController'
+import { getLabel } from '@/services/datadev'
 import type { ILabelDefines,TSubjectType } from '@/types/labelController'
 const layout = {
   labelCol: { span: 8 },
@@ -18,23 +18,33 @@ const layout = {
 };
 interface IModalProps {
   callback: () => void;
+  onCancel?: () => void;
   subjectType: TSubjectType
+  labelDefineId?: number
+  visible?: boolean;
 }
+
 const Modal: FC<IModalProps>=  (props) => {
-  const {callback,subjectType} = props;
+  const {callback,onCancel,subjectType,visible,labelDefineId} = props;
+  const [initialValues,setInitialValues] = useState<ILabelDefines>({
+    labelRequired:0
+  })
+  useEffect(()=>{
+    if(labelDefineId){
+      getLabel({labelDefineId}).then((data)=>{
+        setInitialValues(data)
+      })
+    }
+  },[subjectType,labelDefineId])
   return (
     <ModalForm<ILabelDefines>
       {...layout}
-      initialValues={{
-        labelRequired: 0,
-      }}
-      trigger={
-        <Button type="primary">
-          <PlusOutlined />
-          新建属性
-        </Button>
-      }
+      initialValues={initialValues}
+      visible={visible}
       autoFocusFirstInput
+      modalProps={{
+        onCancel:onCancel
+      }}
       onFinish={async (values) => {
         const { success } = await defineLabel({
           subjectType,
