@@ -34,9 +34,7 @@ const Modal: FC<IModalProps>=  (props) => {
         formRef.current?.setFieldsValue(data);
       })
     }else{
-      formRef.current?.setFieldsValue({
-        labelDefineId:0
-      });
+      formRef.current?.resetFields()
     }
   },[subjectType,labelCode])
   return (
@@ -73,12 +71,12 @@ const Modal: FC<IModalProps>=  (props) => {
       <ProFormSelect
         options={[
           {
-            value: 'ENUM_VALUE_LABEL',
-            label: '选择器',
-          },
-          {
             value: 'STRING_LABEL',
             label: '输入框',
+          },
+          {
+            value: 'ENUM_VALUE_LABEL',
+            label: '选择器',
           },
           {
             value: 'BOOLEAN_LABEL',
