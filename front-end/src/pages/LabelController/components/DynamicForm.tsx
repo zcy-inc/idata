@@ -24,15 +24,15 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
   const { subjectType } = props;
   const [columns, setColumns] = useState<ProFormColumnsType[]>([]);
   const [modelVisible, setVisible] = useState<boolean>(false);
-  const [labelDefineId, setLabelDefineId] = useState<number>();
+  const [labelCode, setLabelCode] = useState<string>();
   const { loading: delLoading, run: deleteLabelRun } = useRequest(deleteLabel, {
     onSuccess: () => {
       message.success('删除成功')
       reload()
     }
   });
-  const editLabel =(id?: number)=>{
-    setLabelDefineId(id);
+  const editLabel =(code?: string)=>{
+    setLabelCode(code);
     setVisible(true)
   }
   const { loading: fetchLoading, run: reload } = useRequest(() => findDefines(subjectType), {
@@ -80,7 +80,7 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
         onCancel={() => setVisible(false)}
         subjectType={subjectType}
         visible={modelVisible}
-        labelDefineId={labelDefineId}
+        labelCode={labelCode}
       />
     </Spin>
   );

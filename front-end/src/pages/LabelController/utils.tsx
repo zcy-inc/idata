@@ -4,17 +4,16 @@ import type { ILabelDefines } from 'src/types/labelController'
 import type { ProFormColumnsType } from '@ant-design/pro-form';
 import BooleanComponent from './components/BooleanComponent';
 import { MinusCircleOutlined ,FormOutlined} from '@ant-design/icons';
-import Modal from './components/Modal';
-import type { TSubjectType } from '@/types/labelController'
+interface IDataToColumnsParams {
+  data: ILabelDefines[]
+  del: (params: { labelCode: string }) => void
+  edit: (id: string|undefined) => void
+}
+
 const componentMap = {
   "STRING_LABEL": Input,
   "ENUM_VALUE_LABEL": Select,
   "BOOLEAN_LABEL": BooleanComponent
-}
-interface IDataToColumnsParams {
-  data: ILabelDefines[]
-  del: (params: { labelCode: string }) => void
-  edit: (id: number|undefined) => void
 }
 export function dataToColumns({ data, del,edit }: IDataToColumnsParams): ProFormColumnsType[] {
   const columns: ProFormColumnsType[] = data?.map?.((item) => {
@@ -26,7 +25,7 @@ export function dataToColumns({ data, del,edit }: IDataToColumnsParams): ProForm
         return (
           <Space>
             <FormComponent style={{ width: "120px" }} />
-            <FormOutlined  className="dynamic-delete-button" onClick={() =>edit(item.id)}/>
+            <FormOutlined  className="dynamic-delete-button" onClick={() =>edit(item.labelCode)}/>
             <Popconfirm
               title="是否确认删除该项?"
               onConfirm={() => {

@@ -1,7 +1,7 @@
 import {useRef} from 'react';
 import type {FC} from 'react';
 import type { ProFormInstance } from '@ant-design/pro-form';
-import React ,{useEffect,useState} from 'react';
+import React ,{useEffect} from 'react';
 import { message } from 'antd';
 import ProForm, {
   ModalForm,
@@ -11,8 +11,7 @@ import ProForm, {
   ProFormList,
   ProFormDependency
 } from '@ant-design/pro-form';
-import { defineLabel } from '@/services/labelController'
-import { getLabel } from '@/services/datadev'
+import { defineLabel,findDefine } from '@/services/labelController'
 import type { ILabelDefines,TSubjectType } from '@/types/labelController'
 const layout = {
   labelCol: { span: 8 },
@@ -22,16 +21,16 @@ interface IModalProps {
   callback: () => void;
   onCancel?: () => void;
   subjectType: TSubjectType
-  labelDefineId?: number
+  labelCode?: string
   visible?: boolean;
 }
 
 const Modal: FC<IModalProps>=  (props) => {
   const formRef = useRef<ProFormInstance>();
-  const {callback,onCancel,subjectType,visible,labelDefineId} = props;
+  const {callback,onCancel,subjectType,visible,labelCode} = props;
   useEffect(()=>{
-    if(labelDefineId){
-      getLabel({labelDefineId}).then(({data})=>{
+    if(labelCode){
+      findDefine(labelCode).then(({data})=>{
         formRef.current?.setFieldsValue(data);
       })
     }else{
@@ -39,7 +38,7 @@ const Modal: FC<IModalProps>=  (props) => {
         labelDefineId:0
       });
     }
-  },[subjectType,labelDefineId])
+  },[subjectType,labelCode])
   return (
     <ModalForm<ILabelDefines>
       {...layout}
@@ -50,11 +49,12 @@ const Modal: FC<IModalProps>=  (props) => {
       visible={visible}
       autoFocusFirstInput
       modalProps={{
-        onCancel:onCancel
+        onCancel:onCancel,
       }}
       onFinish={async (values) => {
         const { success } = await defineLabel({
           subjectType,
+          labelCode,
           ...values
         });
         if (success) {
@@ -114,7 +114,6 @@ const Modal: FC<IModalProps>=  (props) => {
               }}
             >
               <ProForm.Group size={8}>
-                <ProFormText name="enumValue" label="编码" />
                 <ProFormText name="valueCode" label="名称" />
               </ProForm.Group>
             </ProFormList>)

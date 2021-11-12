@@ -1,7 +1,7 @@
 export type TSubjectType = "TABLE" | "COLUMN" ;
 
 export interface ILabelDefines {
-  id?: number
+  id: number
   labelName?: string
   labelCode?: string
   labelRequired?: 1|0
