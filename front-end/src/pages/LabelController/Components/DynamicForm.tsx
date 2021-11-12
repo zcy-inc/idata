@@ -26,6 +26,7 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
   const [modelVisible, setVisible] = useState<boolean>(false);
   const [labelCode, setLabelCode] = useState<string>();
   const { loading: delLoading, run: deleteLabelRun } = useRequest(deleteLabel, {
+    manual: true,
     onSuccess: () => {
       message.success('删除成功')
       reload()
