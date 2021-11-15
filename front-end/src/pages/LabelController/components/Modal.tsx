@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef,useState} from 'react';
 import type { FC } from 'react';
 import type { ProFormInstance } from '@ant-design/pro-form';
 import React, { useEffect } from 'react';
@@ -28,13 +28,17 @@ interface IModalProps {
 const Modal: FC<IModalProps> = (props) => {
   const formRef = useRef<ProFormInstance>();
   const { callback, onCancel, subjectType, visible, labelCode } = props;
+  // TODO 后端硬要加 labelParamType 参数
+  const [labelParamType,setLabelParamType] = useState<string| undefined>()
   useEffect(() => {
     if (labelCode) {
       findDefine(labelCode).then(({ data }) => {
         formRef.current?.setFieldsValue(data);
+        setLabelParamType(data?.labelParamType)
       })
     } else {
       formRef.current?.resetFields()
+      setLabelParamType(undefined)
     }
   }, [subjectType, labelCode])
   return (
@@ -53,6 +57,7 @@ const Modal: FC<IModalProps> = (props) => {
         const { success } = await defineLabel({
           subjectType,
           labelCode,
+          labelParamType,
           ...values
         });
         if (success) {

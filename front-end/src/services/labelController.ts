@@ -16,7 +16,7 @@ export const defineLabel = (label: ILabelDefines) => {
 }
 
 export const findDefine = (labelCode: string) => {
-  return request<Tresponse<ILabelDefines[]>>('/api/p1/dev/labelDefine', {
+  return request<Tresponse<ILabelDefines>>('/api/p1/dev/labelDefine', {
     params: {labelCode}
   });
 }

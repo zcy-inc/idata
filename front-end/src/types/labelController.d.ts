@@ -6,5 +6,6 @@ export interface ILabelDefines {
   labelCode?: string
   labelRequired?: 1|0
   subjectType?: TSubjectType
+  labelParamType?: string
   labelTag?: "ENUM_VALUE_LABEL"|"STRING_LABEL"|"BOOLEAN_LABEL"
 }
