@@ -81,6 +81,11 @@ export default [
         component: './Integrated',
       },
       {
+        path: '/configuration/LDAP',
+        name: 'LDAP',
+        component: './LDAP',
+      },
+      {
         path: '/configuration/labelController',
         name: '元数据属性配置',
         component: './LabelController',
