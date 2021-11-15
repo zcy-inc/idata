@@ -6,7 +6,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/datapi',
+    redirect: '/configuration',
   },
   {
     path: '/configuration',
