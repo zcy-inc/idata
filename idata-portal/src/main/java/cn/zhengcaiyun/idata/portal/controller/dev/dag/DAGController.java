@@ -99,25 +99,25 @@ public class DAGController {
     }
 
     /**
-     * 启用DAG
+     * 上线DAG
      *
      * @param id
      * @return
      */
-    @PutMapping("/{id}/enable")
-    public RestResult<Boolean> enableDAG(@PathVariable("id") Long id) {
-        return RestResult.success(dagService.enableDag(id, OperatorContext.getCurrentOperator()));
+    @PutMapping("/{id}/online")
+    public RestResult<Boolean> online(@PathVariable("id") Long id) {
+        return RestResult.success(dagService.online(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
-     * 停用DAG
+     * 下线DAG
      *
      * @param id
      * @return
      */
-    @PutMapping("/{id}/disable")
-    public RestResult<Boolean> disableDAG(@PathVariable("id") Long id) {
-        return RestResult.success(dagService.disableDag(id, OperatorContext.getCurrentOperator()));
+    @PutMapping("/{id}/offline")
+    public RestResult<Boolean> offline(@PathVariable("id") Long id) {
+        return RestResult.success(dagService.offline(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -130,4 +130,34 @@ public class DAGController {
     public RestResult<List<DAGInfoDto>> getDAGInfoList(DAGInfoCondition condition) {
         return RestResult.success(dagService.getDAGInfoList(condition));
     }
+
+    /**
+     * 保存DAG依赖
+     *
+     * @param id
+     * @param param
+     * @return
+     */
+    @PostMapping("/{id}/dependencies")
+    @Deprecated
+    public RestResult<Boolean> saveDependence(@PathVariable("id") Long id,
+                                              @RequestBody DependenceParam param) {
+        return RestResult.success(dagService.saveDependence(id, param.getDependenceIds(), OperatorContext.getCurrentOperator()));
+    }
+
+    public static class DependenceParam {
+        /**
+         * 依赖DAG id
+         */
+        private List<Long> dependenceIds;
+
+        public List<Long> getDependenceIds() {
+            return dependenceIds;
+        }
+
+        public void setDependenceIds(List<Long> dependenceIds) {
+            this.dependenceIds = dependenceIds;
+        }
+    }
+
 }

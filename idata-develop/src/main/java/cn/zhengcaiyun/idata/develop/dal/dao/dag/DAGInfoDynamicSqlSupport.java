@@ -87,6 +87,13 @@ public final class DAGInfoDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.folder_id")
     public static final SqlColumn<Long> folderId = dag_info.folderId;
 
+    /**
+     * Database Column Remarks:
+     *   环境
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.environment")
+    public static final SqlColumn<String> environment = dag_info.environment;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     public static final class DAGInfo extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -110,6 +117,8 @@ public final class DAGInfoDynamicSqlSupport {
         public final SqlColumn<String> remark = column("remark", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> folderId = column("folder_id", JDBCType.BIGINT);
+
+        public final SqlColumn<String> environment = column("environment", JDBCType.VARCHAR);
 
         public DAGInfo() {
             super("dev_dag_info");

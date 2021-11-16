@@ -19,7 +19,9 @@ package cn.zhengcaiyun.idata.develop.event.job.subscriber.impl;
 
 import cn.zhengcaiyun.idata.develop.event.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.subscriber.IJobEventSubscriber;
+import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import com.google.common.eventbus.Subscribe;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,6 +31,13 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class JobIntegrationSubscriber implements IJobEventSubscriber {
+
+    private final IJobIntegrator jobIntegrator;
+
+    @Autowired
+    public JobIntegrationSubscriber(IJobIntegrator jobIntegrator) {
+        this.jobIntegrator = jobIntegrator;
+    }
 
     @Override
     @Subscribe
@@ -67,7 +76,14 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
     }
 
     @Override
-    public void onDagChanged(JobDagChangedEvent event) {
+    @Subscribe
+    public void onUnbindDag(JobUnBindDagEvent event) {
+
+    }
+
+    @Override
+    @Subscribe
+    public void onBindDag(JobBindDagEvent event) {
 
     }
 

@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DAGInfoDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, dwLayerCode, status, remark, folderId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, dwLayerCode, status, remark, folderId, environment);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -67,7 +67,8 @@ public interface DAGInfoDao {
         @Result(column="dw_layer_code", property="dwLayerCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="status", property="status", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
-        @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT)
+        @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT),
+        @Result(column="environment", property="environment", jdbcType=JdbcType.VARCHAR)
     })
     List<DAGInfo> selectMany(SelectStatementProvider selectStatement);
 
@@ -105,6 +106,7 @@ public interface DAGInfoDao {
             .map(status).toProperty("status")
             .map(remark).toProperty("remark")
             .map(folderId).toProperty("folderId")
+            .map(environment).toProperty("environment")
         );
     }
 
@@ -121,6 +123,7 @@ public interface DAGInfoDao {
             .map(status).toPropertyWhenPresent("status", record::getStatus)
             .map(remark).toPropertyWhenPresent("remark", record::getRemark)
             .map(folderId).toPropertyWhenPresent("folderId", record::getFolderId)
+            .map(environment).toPropertyWhenPresent("environment", record::getEnvironment)
         );
     }
 
@@ -162,7 +165,8 @@ public interface DAGInfoDao {
                 .set(dwLayerCode).equalTo(record::getDwLayerCode)
                 .set(status).equalTo(record::getStatus)
                 .set(remark).equalTo(record::getRemark)
-                .set(folderId).equalTo(record::getFolderId);
+                .set(folderId).equalTo(record::getFolderId)
+                .set(environment).equalTo(record::getEnvironment);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
@@ -176,7 +180,8 @@ public interface DAGInfoDao {
                 .set(dwLayerCode).equalToWhenPresent(record::getDwLayerCode)
                 .set(status).equalToWhenPresent(record::getStatus)
                 .set(remark).equalToWhenPresent(record::getRemark)
-                .set(folderId).equalToWhenPresent(record::getFolderId);
+                .set(folderId).equalToWhenPresent(record::getFolderId)
+                .set(environment).equalToWhenPresent(record::getEnvironment);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_dag_info")
@@ -192,6 +197,7 @@ public interface DAGInfoDao {
             .set(status).equalTo(record::getStatus)
             .set(remark).equalTo(record::getRemark)
             .set(folderId).equalTo(record::getFolderId)
+            .set(environment).equalTo(record::getEnvironment)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -209,6 +215,7 @@ public interface DAGInfoDao {
             .set(status).equalToWhenPresent(record::getStatus)
             .set(remark).equalToWhenPresent(record::getRemark)
             .set(folderId).equalToWhenPresent(record::getFolderId)
+            .set(environment).equalToWhenPresent(record::getEnvironment)
             .where(id, isEqualTo(record::getId))
         );
     }

@@ -17,12 +17,29 @@
 
 package cn.zhengcaiyun.idata.develop.event.dag.subscriber.impl;
 
+import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
+import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.event.core.Subscriber;
 import cn.zhengcaiyun.idata.develop.event.dag.*;
 import cn.zhengcaiyun.idata.develop.event.dag.bus.DagEventBus;
 import cn.zhengcaiyun.idata.develop.event.dag.subscriber.IDagEventSubscriber;
+import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
+import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -33,40 +50,145 @@ import org.springframework.stereotype.Component;
 @Subscriber(DagEventBus.EVENT_BUS_EXPRESSION)
 public class DagIntegrationSubscriber implements IDagEventSubscriber {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DagIntegrationSubscriber.class);
+
+    private final DAGRepo dagRepo;
+    private final JobExecuteConfigRepo jobExecuteConfigRepo;
+    private final IDagIntegrator dagIntegrator;
+
+    @Autowired
+    public DagIntegrationSubscriber(DAGRepo dagRepo,
+                                    JobExecuteConfigRepo jobExecuteConfigRepo,
+                                    IDagIntegrator dagIntegrator) {
+        this.dagRepo = dagRepo;
+        this.jobExecuteConfigRepo = jobExecuteConfigRepo;
+        this.dagIntegrator = dagIntegrator;
+    }
+
     @Override
     @Subscribe
     public void onCreated(DagCreatedEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            Optional<DAGSchedule> scheduleOptional = dagRepo.queryDAGSchedule(event.getDagId());
+            if (dagInfoOptional.isEmpty() || scheduleOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            DAGSchedule dagSchedule = scheduleOptional.get();
+            dagIntegrator.create(dagInfo, dagSchedule);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
     public void onUpdated(DagCreatedEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            Optional<DAGSchedule> scheduleOptional = dagRepo.queryDAGSchedule(event.getDagId());
+            if (dagInfoOptional.isEmpty() || scheduleOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            DAGSchedule dagSchedule = scheduleOptional.get();
+            dagIntegrator.update(dagInfo, dagSchedule);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
     public void onDeleted(DagDeletedEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            dagIntegrator.delete(dagInfo);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
     public void onOnline(DagOnlineEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            dagIntegrator.online(dagInfo);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
     public void onOffline(DagOfflineEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            dagIntegrator.offline(dagInfo);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
     public void onScheduleUpdated(DagScheduleUpdatedEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            Optional<DAGSchedule> scheduleOptional = dagRepo.queryDAGSchedule(event.getDagId());
+            if (dagInfoOptional.isEmpty() || scheduleOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            DAGSchedule dagSchedule = scheduleOptional.get();
+            dagIntegrator.updateSchedule(dagInfo, dagSchedule);
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
@@ -77,13 +199,66 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
 
     @Override
     @Subscribe
+    @Deprecated
     public void addDependence(DagAddDependenceEvent event) {
-
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            // 获取dag下的作业信息
+            List<Long> dagJobs = getDagJobs(dagInfo);
+            dagIntegrator.addDependence(dagInfo, dagJobs, event.getDependDagIds());
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
     }
 
     @Override
     @Subscribe
+    @Deprecated
     public void removeDependence(DagRemoveDependenceEvent event) {
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            // 获取dag下的作业信息
+            List<Long> dagJobs = getDagJobs(dagInfo);
+            dagIntegrator.removeDependence(dagInfo, dagJobs, event.getDependDagIds());
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("");
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("");
+        }
+    }
 
+    private List<Long> getDagJobs(DAGInfo dagInfo) {
+        JobExecuteConfigCondition condition = new JobExecuteConfigCondition();
+        condition.setEnvironment(condition.getEnvironment());
+        List<JobExecuteConfig> jobExecuteConfigs = jobExecuteConfigRepo.queryDagJobList(dagInfo.getId(), condition);
+        if (ObjectUtils.isEmpty(jobExecuteConfigs)) {
+            return Lists.newArrayList();
+        }
+        return jobExecuteConfigs.stream()
+                .filter(this::isDagLevelDependence)
+                .map(JobExecuteConfig::getJobId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private boolean isDagLevelDependence(JobExecuteConfig config) {
+        // 默认根据任务优先级判断，最高优先级的任务单独创建依赖
+        return true;
     }
 }

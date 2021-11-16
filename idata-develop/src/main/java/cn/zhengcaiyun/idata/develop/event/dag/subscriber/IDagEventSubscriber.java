@@ -40,7 +40,9 @@ public interface IDagEventSubscriber {
 
     void onRun(DagRunEvent event);
 
+    @Deprecated
     void addDependence(DagAddDependenceEvent event);
 
+    @Deprecated
     void removeDependence(DagRemoveDependenceEvent event);
 }

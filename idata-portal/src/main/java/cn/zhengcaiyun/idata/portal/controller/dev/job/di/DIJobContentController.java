@@ -19,17 +19,13 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
- * job-di-controller
+ * job-content-controller
  *
  * @description:
  * @author: yangjianhua
@@ -47,7 +43,7 @@ public class DIJobContentController {
     }
 
     /**
-     * 保存作业内容
+     * 保存DI作业内容
      *
      * @param jobId      作业id
      * @param contentDto 作业内容信息
@@ -60,7 +56,7 @@ public class DIJobContentController {
     }
 
     /**
-     * 获取作业内容
+     * 获取DI作业内容
      *
      * @param jobId   作业id
      * @param version 作业版本号
@@ -70,33 +66,6 @@ public class DIJobContentController {
     public RestResult<DIJobContentDto> getContent(@PathVariable("jobId") Long jobId,
                                                   @PathVariable("version") Integer version) {
         return RestResult.success(diJobContentService.get(jobId, version));
-    }
-
-    /**
-     * 获取作业内容版本
-     *
-     * @param jobId 作业id
-     * @return
-     */
-    @GetMapping("/versions")
-    public RestResult<List<JobContentVersionDto>> getJobContentVersion(@PathVariable("jobId") Long jobId) {
-        return RestResult.success(diJobContentService.getVersions(jobId));
-    }
-
-    /**
-     * 提交作业
-     *
-     * @param jobId   作业id
-     * @param version 作业内容版本号
-     * @param env     提交环境
-     * @return
-     */
-    @PostMapping("/contents/{version}/submit/{env}")
-    public RestResult<DIJobContentDto> submitJob(@PathVariable("jobId") Long jobId,
-                                                 @PathVariable("version") Integer version,
-                                                 @PathVariable("env") String env,
-                                                 @RequestBody SubmitJobDto submitJobDto) {
-        return RestResult.success(diJobContentService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
 }

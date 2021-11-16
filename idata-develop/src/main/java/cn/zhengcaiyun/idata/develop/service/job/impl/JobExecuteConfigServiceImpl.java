@@ -67,7 +67,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(StringUtils.isNotBlank(dto.getSchRerunMode()), "重跑属性为空");
         Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(dto.getSchDagId());
         checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
-        checkState(dagInfoOptional.get().getStatus().equals(UsingStatusEnum.ENABLE.val), "DAG已停用");
+        checkState(dagInfoOptional.get().getStatus().equals(UsingStatusEnum.ONLINE.val), "DAG已停用");
 
         Optional<JobExecuteConfig> optional = jobExecuteConfigRepo.query(jobId, dto.getEnvironment());
         if (optional.isEmpty()) {

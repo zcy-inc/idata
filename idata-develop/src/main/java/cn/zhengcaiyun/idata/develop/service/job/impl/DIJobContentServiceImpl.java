@@ -18,27 +18,23 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
-import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -53,18 +49,12 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
     private final DIJobContentRepo diJobContentRepo;
     private final JobInfoRepo jobInfoRepo;
-    private final JobPublishRecordRepo jobPublishRecordRepo;
-    private final JobPublishManager jobPublishManager;
 
     @Autowired
     public DIJobContentServiceImpl(DIJobContentRepo diJobContentRepo,
-                                   JobInfoRepo jobInfoRepo,
-                                   JobPublishRecordRepo jobPublishRecordRepo,
-                                   JobPublishManager jobPublishManager) {
+                                   JobInfoRepo jobInfoRepo) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobInfoRepo = jobInfoRepo;
-        this.jobPublishRecordRepo = jobPublishRecordRepo;
-        this.jobPublishManager = jobPublishManager;
     }
 
     @Override
@@ -117,60 +107,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
         return DIJobContentDto.from(jobContentOptional.get());
-    }
-
-    @Override
-    public DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator) {
-        checkArgument(Objects.nonNull(jobId), "作业编号为空");
-        checkArgument(Objects.nonNull(version), "作业版本号为空");
-        Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
-        checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
-        Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
-        checkArgument(envEnumOptional.isPresent(), "提交环境为空");
-
-        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), remark, operator);
-        return DIJobContentDto.from(jobContentOptional.get());
-    }
-
-    @Override
-    public List<JobContentVersionDto> getVersions(Long jobId) {
-        checkArgument(Objects.nonNull(jobId), "作业编号为空");
-
-        List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(jobId);
-        List<DIJobContent> contentList = diJobContentRepo.queryList(jobId);
-        return assembleContentVersion(publishRecordList, contentList);
-    }
-
-    private List<JobContentVersionDto> assembleContentVersion(List<JobPublishRecord> publishRecordList,
-                                                              List<DIJobContent> contentList) {
-        Map<Integer, List<JobPublishRecord>> versionMap;
-        if (ObjectUtils.isNotEmpty(publishRecordList)) {
-            versionMap = publishRecordList.stream()
-                    .collect(Collectors.groupingBy(JobPublishRecord::getJobContentVersion));
-        } else {
-            versionMap = Maps.newHashMap();
-        }
-
-        List<JobContentVersionDto> versionDtoList = Lists.newArrayList();
-        if (ObjectUtils.isNotEmpty(contentList)) {
-            for (DIJobContent content : contentList) {
-                List<JobPublishRecord> publishRecords = versionMap.get(content.getVersion());
-                if (publishRecords == null || publishRecords.size() == 0) {
-                    versionDtoList.add(JobContentVersionDto.from(content));
-                    continue;
-                }
-
-                for (JobPublishRecord record : publishRecords) {
-                    JobContentVersionDto versionDto = JobContentVersionDto.from(content);
-                    versionDto.setEnvironment(record.getEnvironment());
-                    versionDto.setVersionStatus(record.getPublishStatus());
-                    versionDtoList.add(versionDto);
-                }
-            }
-        }
-        return versionDtoList.stream()
-                .sorted()
-                .collect(Collectors.toList());
     }
 
     private void checkJobContent(DIJobContentDto contentDto) {

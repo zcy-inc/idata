@@ -15,12 +15,21 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
+package cn.zhengcaiyun.idata.develop.dal.repo.integration;
+
+import cn.zhengcaiyun.idata.develop.dal.model.integration.DSEntityMapping;
+
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 14:56
+ * @create: 2021-11-10 16:02
  **/
-public interface JobEventRepo {
+public interface DSEntityMappingRepo {
+    Long create(DSEntityMapping mapping);
+
+    Optional<Long> queryDsEntityCode(Long entityId, String dsEntityType, String environment);
+
+    Optional<Long> queryEntityId(Long dsEntityCode, String dsEntityType, String environment);
 }

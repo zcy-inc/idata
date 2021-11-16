@@ -40,6 +40,11 @@ public class DAGInfoDto extends BaseDto {
      */
     private Long folderId;
 
+    /**
+     * 环境
+     */
+    private String environment;
+
     public Long getId() {
         return id;
     }
@@ -86,6 +91,14 @@ public class DAGInfoDto extends BaseDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 
     public static DAGInfoDto from(DAGInfo info) {

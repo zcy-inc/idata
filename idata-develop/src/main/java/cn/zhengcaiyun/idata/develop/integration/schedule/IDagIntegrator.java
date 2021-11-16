@@ -17,6 +17,12 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule;
 
+import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
+
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -24,17 +30,29 @@ package cn.zhengcaiyun.idata.develop.integration.schedule;
  **/
 public interface IDagIntegrator {
 
-    void create();
+    void create(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
 
-    void update();
+    void update(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
 
-    void delete();
+    void delete(DAGInfo dagInfo) throws ExternalIntegrationException;
 
-    void online();
+    void online(DAGInfo dagInfo) throws ExternalIntegrationException;
 
-    void offline();
+    void offline(DAGInfo dagInfo) throws ExternalIntegrationException;
 
-    void updateSchedule();
+    void updateSchedule(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
 
-    void run();
+    void run(DAGInfo dagInfo) throws ExternalIntegrationException;
+
+    @Deprecated
+    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException;
+
+    @Deprecated
+    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException;
+
+    @Deprecated
+    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException;
+
+    @Deprecated
+    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException;
 }

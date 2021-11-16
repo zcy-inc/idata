@@ -170,7 +170,7 @@ public class JobPublishManager {
 
         Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(optional.get().getSchDagId());
         checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
-        checkArgument(Objects.equals(UsingStatusEnum.ENABLE.val, dagInfoOptional.get().getStatus()), "DAG已停用");
+        checkArgument(Objects.equals(UsingStatusEnum.ONLINE.val, dagInfoOptional.get().getStatus()), "DAG已停用");
     }
 
     public boolean hasPublishPermission(Operator operator) {

@@ -147,4 +147,15 @@ public class JobInfoController {
         return RestResult.success(jobInfoService.disableJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
+    /**
+     * 运行作业
+     *
+     * @param id 作业id
+     * @return
+     */
+    @PostMapping("/{id}/run")
+    public RestResult<Boolean> runJob(@PathVariable Long id) {
+        return RestResult.success(jobInfoService.runJob(id, OperatorContext.getCurrentOperator()));
+    }
+
 }

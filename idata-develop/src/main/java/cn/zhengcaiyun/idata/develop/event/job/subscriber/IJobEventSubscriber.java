@@ -38,7 +38,9 @@ public interface IJobEventSubscriber {
 
     void onPublished(JobPublishedEvent event);
 
-    void onDagChanged(JobDagChangedEvent event);
+    void onUnbindDag(JobUnBindDagEvent event);
+
+    void onBindDag(JobBindDagEvent event);
 
     void onRun(JobRunEvent event);
 }

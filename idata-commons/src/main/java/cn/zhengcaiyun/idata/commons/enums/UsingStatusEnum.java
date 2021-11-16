@@ -23,8 +23,8 @@ package cn.zhengcaiyun.idata.commons.enums;
  * @create: 2021-09-26 15:30
  **/
 public enum UsingStatusEnum {
-    DISABLE(0, "停用"),
-    ENABLE(1, "启用");
+    OFFLINE(0, "停用"),
+    ONLINE(1, "启用");
 
     public final int val;
     public final String desc;

@@ -115,6 +115,48 @@ public final class JobExecuteConfigDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
     public static final SqlColumn<String> execWarnLevel = jobExecuteConfig.execWarnLevel;
 
+    /**
+     * Database Column Remarks:
+     *   调度配置-超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_time_out_strategy")
+    public static final SqlColumn<String> schTimeOutStrategy = jobExecuteConfig.schTimeOutStrategy;
+
+    /**
+     * Database Column Remarks:
+     *   调度配置-优先级，1：低，2：中，3：高
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_priority")
+    public static final SqlColumn<Integer> schPriority = jobExecuteConfig.schPriority;
+
+    /**
+     * Database Column Remarks:
+     *   调度配置-失败策略，fail：失败，success：成功
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
+    public static final SqlColumn<String> schFailStrategy = jobExecuteConfig.schFailStrategy;
+
+    /**
+     * Database Column Remarks:
+     *   运行配置-驱动器内存
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
+    public static final SqlColumn<Integer> execDriverMem = jobExecuteConfig.execDriverMem;
+
+    /**
+     * Database Column Remarks:
+     *   运行配置-执行器内存
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_worker_mem")
+    public static final SqlColumn<Integer> execWorkerMem = jobExecuteConfig.execWorkerMem;
+
+    /**
+     * Database Column Remarks:
+     *   扩展配置字段
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
+    public static final SqlColumn<String> extensionCfg = jobExecuteConfig.extensionCfg;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     public static final class JobExecuteConfig extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -146,6 +188,18 @@ public final class JobExecuteConfigDynamicSqlSupport {
         public final SqlColumn<Integer> execMaxParallelism = column("exec_max_parallelism", JDBCType.INTEGER);
 
         public final SqlColumn<String> execWarnLevel = column("exec_warn_level", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> schTimeOutStrategy = column("sch_time_out_strategy", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> schPriority = column("sch_priority", JDBCType.INTEGER);
+
+        public final SqlColumn<String> schFailStrategy = column("sch_fail_strategy", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> execDriverMem = column("exec_driver_mem", JDBCType.INTEGER);
+
+        public final SqlColumn<Integer> execWorkerMem = column("exec_worker_mem", JDBCType.INTEGER);
+
+        public final SqlColumn<String> extensionCfg = column("extension_cfg", JDBCType.VARCHAR);
 
         public JobExecuteConfig() {
             super("dev_job_execute_config");

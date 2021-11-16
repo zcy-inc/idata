@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.manager;
+package cn.zhengcaiyun.idata.develop.dal.repo.dag;
 
-import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGEventRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import org.springframework.stereotype.Component;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGEventLog;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 14:54
+ * @create: 2021-11-04 14:55
  **/
-@Component
-public class DAGManager {
+public interface DAGEventLogRepo {
 
-    private final DAGRepo dagRepo;
-    private final DAGEventRepo dagEventRepo;
+    Long create(DAGEventLog eventLog);
 
-    public DAGManager(DAGRepo dagRepo, DAGEventRepo dagEventRepo) {
-        this.dagRepo = dagRepo;
-        this.dagEventRepo = dagEventRepo;
-    }
+    Boolean update(DAGEventLog eventLog);
 
+    Optional<DAGEventLog> query(Long id);
 
+    List<DAGEventLog> query(Long dagId, String event, Integer status);
+
+    List<DAGEventLog> query(Long dagId, Integer status);
 }

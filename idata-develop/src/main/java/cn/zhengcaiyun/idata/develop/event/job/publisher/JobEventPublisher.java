@@ -17,7 +17,15 @@
 
 package cn.zhengcaiyun.idata.develop.event.job.publisher;
 
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobEventLogRepo;
 import cn.zhengcaiyun.idata.develop.event.job.*;
+import cn.zhengcaiyun.idata.develop.event.job.bus.JobEventBus;
+import com.google.common.base.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,35 +36,143 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobEventPublisher {
 
-    public boolean onCreated(JobCreatedEvent event) {
+    private final JobEventLogRepo jobEventLogRepo;
+
+    @Autowired
+    public JobEventPublisher(JobEventLogRepo jobEventLogRepo) {
+        this.jobEventLogRepo = jobEventLogRepo;
+    }
+
+    public void whenCreated(JobEventLog eventLog) {
+        if (!EventTypeEnum.CREATED.name().equals(eventLog.getJobEvent()))
+            return;
+
+        JobCreatedEvent event = new JobCreatedEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
 
     }
 
-    public boolean onUpdated(JobUpdatedEvent event) {
+    public void whenUpdated(JobEventLog eventLog) {
+        if (!EventTypeEnum.UPDATED.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobUpdatedEvent event = new JobUpdatedEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onDeleted(JobDeletedEvent event) {
+    public void whenDeleted(JobEventLog eventLog) {
+        if (!EventTypeEnum.DELETED.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobDeletedEvent event = new JobDeletedEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onEnabled(JobEnabledEvent event) {
+    public void whenEnabled(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_ENABLE.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobEnabledEvent event = new JobEnabledEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onDisabled(JobDisabledEvent event) {
+    public void whenDisabled(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_DISABLE.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobDisabledEvent event = new JobDisabledEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onPublished(JobPublishedEvent event) {
+    public void whenPublished(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_PUBLISH.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobPublishedEvent event = new JobPublishedEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onDagChanged(JobDagChangedEvent event) {
+    public void whenBindDag(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_BIND_DAG.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobBindDagEvent event = new JobBindDagEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
     }
 
-    public boolean onRun(JobRunEvent event) {
+    public void whenUnBindDag(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_UNBIND_DAG.name().equals(eventLog.getJobEvent()))
+            return;
 
+        JobUnBindDagEvent event = new JobUnBindDagEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
+    }
+
+    public void whenToRun(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_RUN.name().equals(eventLog.getJobEvent()))
+            return;
+
+        JobRunEvent event = new JobRunEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
+    }
+
+    private void processResult(JobBaseEvent event) {
+        JobEventLog updateEventLog = new JobEventLog();
+        updateEventLog.setId(event.getEventId());
+        if (event.hasFailed()) {
+            // 处理失败
+            updateEventLog.setHandleStatus(EventStatusEnum.FAIL.val);
+            updateEventLog.setHandleMsg(Strings.nullToEmpty(event.fetchFailedMessage()));
+            throw new GeneralException(event.fetchFailedMessage());
+        } else {
+            // 处理成功，标记事件已处理
+            updateEventLog.setHandleStatus(EventStatusEnum.SUCCESS.val);
+        }
+        jobEventLogRepo.update(updateEventLog);
     }
 }

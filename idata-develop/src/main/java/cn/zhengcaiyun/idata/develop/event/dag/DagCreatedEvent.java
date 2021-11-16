@@ -23,4 +23,5 @@ package cn.zhengcaiyun.idata.develop.event.dag;
  * @create: 2021-11-04 15:20
  **/
 public class DagCreatedEvent extends DagBaseEvent {
+
 }

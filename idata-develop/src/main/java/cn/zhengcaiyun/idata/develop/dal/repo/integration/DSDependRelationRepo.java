@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
+package cn.zhengcaiyun.idata.develop.dal.repo.integration;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-03 17:41
+ * @create: 2021-11-15 14:17
  **/
-public class JobDsIntegrator {
+public interface DSDependRelationRepo {
 }

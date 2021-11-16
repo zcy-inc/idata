@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.dag;
 
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 
@@ -56,4 +57,16 @@ public interface DAGRepo {
     Long countDag(Long folderId);
 
     List<DAGInfo> queryDAGInfo(DAGInfoCondition condition);
+
+    @Deprecated
+    List<DAGDependence> queryDependence(Long dagId);
+
+    @Deprecated
+    List<DAGDependence> queryDependence(List<Long> dagIds);
+
+    @Deprecated
+    Boolean addDependence(List<DAGDependence> dependenceList);
+
+    @Deprecated
+    Boolean deleteDependence(Long dagId);
 }

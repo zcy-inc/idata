@@ -17,22 +17,30 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
-import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
+import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
+import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-03 17:40
+ * @create: 2021-11-03 17:41
  **/
 @Component
-public class DagDsIntegrator implements IDagIntegrator {
+public class TaskIntegrator implements IJobIntegrator {
+
+    public static final String ENTITY_TYPE = "task";
+
+    private final DSEntityMappingRepo dsEntityMappingRepo;
+
+    @Autowired
+    public TaskIntegrator(DSEntityMappingRepo dsEntityMappingRepo) {
+        this.dsEntityMappingRepo = dsEntityMappingRepo;
+    }
+
     @Override
     public void create() {
-        // 创建空工作流
-        // 创建定时器
-
-        // 存储dag和工作流集成记录及日志
 
     }
 
@@ -47,17 +55,27 @@ public class DagDsIntegrator implements IDagIntegrator {
     }
 
     @Override
-    public void online() {
+    public void enable() {
 
     }
 
     @Override
-    public void offline() {
+    public void disable() {
 
     }
 
     @Override
-    public void updateSchedule() {
+    public void publish() {
+
+    }
+
+    @Override
+    public void bindDag() {
+
+    }
+
+    @Override
+    public void UnBindDag() {
 
     }
 

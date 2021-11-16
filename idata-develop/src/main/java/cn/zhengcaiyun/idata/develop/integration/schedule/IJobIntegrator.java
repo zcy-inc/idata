@@ -36,7 +36,9 @@ public interface IJobIntegrator {
 
     void publish();
 
-    void updateDag();
+    void bindDag();
+
+    void UnBindDag();
 
     void run();
 }

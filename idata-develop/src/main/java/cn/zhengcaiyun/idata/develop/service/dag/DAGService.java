@@ -39,9 +39,11 @@ public interface DAGService {
 
     Boolean removeDag(Long id, Operator operator);
 
-    Boolean enableDag(Long id, Operator operator);
+    Boolean online(Long id, Operator operator);
 
-    Boolean disableDag(Long id, Operator operator);
+    Boolean offline(Long id, Operator operator);
+
+    Boolean saveDependence(Long id, List<Long> dependenceIds, Operator operator);
 
     List<DAGInfoDto> getDAGInfoList(DAGInfoCondition condition);
 }

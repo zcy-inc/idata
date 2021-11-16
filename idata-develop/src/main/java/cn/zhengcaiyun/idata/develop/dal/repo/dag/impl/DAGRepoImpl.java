@@ -18,8 +18,11 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.dag.impl;
 
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
+import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceCustomizeDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGScheduleDao;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -28,11 +31,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
+import static cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceDynamicSqlSupport.DAG_DEPENDENCE;
 import static cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGInfoDynamicSqlSupport.dag_info;
 import static cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGScheduleDynamicSqlSupport.dag_schedule;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -47,11 +50,18 @@ public class DAGRepoImpl implements DAGRepo {
 
     private final DAGInfoDao dagInfoDao;
     private final DAGScheduleDao dagScheduleDao;
+    private final DAGDependenceDao dagDependenceDao;
+    private final DAGDependenceCustomizeDao dagDependenceCustomizeDao;
 
     @Autowired
-    public DAGRepoImpl(DAGInfoDao dagInfoDao, DAGScheduleDao dagScheduleDao) {
+    public DAGRepoImpl(DAGInfoDao dagInfoDao,
+                       DAGScheduleDao dagScheduleDao,
+                       DAGDependenceDao dagDependenceDao,
+                       DAGDependenceCustomizeDao dagDependenceCustomizeDao) {
         this.dagInfoDao = dagInfoDao;
         this.dagScheduleDao = dagScheduleDao;
+        this.dagDependenceDao = dagDependenceDao;
+        this.dagDependenceCustomizeDao = dagDependenceCustomizeDao;
     }
 
     @Override
@@ -72,11 +82,8 @@ public class DAGRepoImpl implements DAGRepo {
     @Transactional
     public Long saveDAG(DAGInfo info, DAGSchedule schedule) {
         Long dagId = saveDAGInfo(info);
-        if (Objects.isNull(dagId)) return null;
-
         schedule.setDagId(dagId);
-        Long schId = saveDAGSchedule(schedule);
-        if (Objects.isNull(schId)) return null;
+        saveDAGSchedule(schedule);
         return dagId;
     }
 
@@ -148,6 +155,31 @@ public class DAGRepoImpl implements DAGRepo {
     public List<DAGInfo> queryDAGInfo(DAGInfoCondition condition) {
         return dagInfoDao.select(dsl -> dsl.where(dag_info.del, isEqualTo(DEL_NO.val),
                 and(dag_info.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                and(dag_info.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(dag_info.status, isEqualToWhenPresent(condition.getStatus()))));
+    }
+
+    @Override
+    @Deprecated
+    public List<DAGDependence> queryDependence(Long dagId) {
+        return dagDependenceDao.select(dsl -> dsl.where(DAG_DEPENDENCE.dagId, isEqualTo(dagId)));
+    }
+
+    @Override
+    @Deprecated
+    public List<DAGDependence> queryDependence(List<Long> dagIds) {
+        return dagDependenceDao.select(dsl -> dsl.where(DAG_DEPENDENCE.dagId, isIn(dagIds)));
+    }
+
+    @Override
+    @Deprecated
+    public Boolean addDependence(List<DAGDependence> dependenceList) {
+        return dagDependenceCustomizeDao.insertMultiple(dependenceList) > 0;
+    }
+
+    @Override
+    @Deprecated
+    public Boolean deleteDependence(Long dagId) {
+        return dagDependenceDao.delete(dsl -> dsl.where(DAG_DEPENDENCE.dagId, isEqualTo(dagId))) > 0;
     }
 }

@@ -15,12 +15,28 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.dag;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
+
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 14:55
+ * @create: 2021-11-04 14:56
  **/
-public class DAGEventRepo {
+public interface JobEventLogRepo {
+
+    Long create(JobEventLog eventLog);
+
+    Boolean update(JobEventLog eventLog);
+
+    Optional<JobEventLog> query(Long id);
+
+    List<JobEventLog> query(Long jobId, String event, Integer status);
+
+    List<JobEventLog> query(Long jobId, Integer status);
+
 }

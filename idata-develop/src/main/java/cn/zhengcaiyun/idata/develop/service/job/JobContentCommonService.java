@@ -15,12 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.event.job;
+package cn.zhengcaiyun.idata.develop.service.job;
+
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 17:53
+ * @create: 2021-09-28 14:07
  **/
-public class JobDagChangedEvent extends JobBaseEvent {
+public interface JobContentCommonService {
+
+    DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+
+    List<JobContentVersionDto> getVersions(Long jobId);
 }

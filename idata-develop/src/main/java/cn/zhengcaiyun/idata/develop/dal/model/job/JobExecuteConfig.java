@@ -114,6 +114,48 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
     private String execWarnLevel;
 
+    /**
+     * Database Column Remarks:
+     *   调度配置-超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_time_out_strategy")
+    private String schTimeOutStrategy;
+
+    /**
+     * Database Column Remarks:
+     *   调度配置-优先级，1：低，2：中，3：高
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_priority")
+    private Integer schPriority;
+
+    /**
+     * Database Column Remarks:
+     *   调度配置-失败策略
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
+    private String schFailStrategy;
+
+    /**
+     * Database Column Remarks:
+     *   运行配置-驱动器内存
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
+    private Integer execDriverMem;
+
+    /**
+     * Database Column Remarks:
+     *   运行配置-执行器内存
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_worker_mem")
+    private Integer execWorkerMem;
+
+    /**
+     * Database Column Remarks:
+     *   扩展配置字段
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
+    private String extensionCfg;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
         return id;
@@ -262,5 +304,65 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
     public void setExecWarnLevel(String execWarnLevel) {
         this.execWarnLevel = execWarnLevel;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_time_out_strategy")
+    public String getSchTimeOutStrategy() {
+        return schTimeOutStrategy;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_time_out_strategy")
+    public void setSchTimeOutStrategy(String schTimeOutStrategy) {
+        this.schTimeOutStrategy = schTimeOutStrategy;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_priority")
+    public Integer getSchPriority() {
+        return schPriority;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_priority")
+    public void setSchPriority(Integer schPriority) {
+        this.schPriority = schPriority;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
+    public String getSchFailStrategy() {
+        return schFailStrategy;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
+    public void setSchFailStrategy(String schFailStrategy) {
+        this.schFailStrategy = schFailStrategy;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
+    public Integer getExecDriverMem() {
+        return execDriverMem;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
+    public void setExecDriverMem(Integer execDriverMem) {
+        this.execDriverMem = execDriverMem;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_worker_mem")
+    public Integer getExecWorkerMem() {
+        return execWorkerMem;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_worker_mem")
+    public void setExecWorkerMem(Integer execWorkerMem) {
+        this.execWorkerMem = execWorkerMem;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
+    public String getExtensionCfg() {
+        return extensionCfg;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
+    public void setExtensionCfg(String extensionCfg) {
+        this.extensionCfg = extensionCfg;
     }
 }

@@ -86,6 +86,13 @@ public class DAGInfo {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.folder_id")
     private Long folderId;
 
+    /**
+     * Database Column Remarks:
+     *   环境
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.environment")
+    private String environment;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.id")
     public Long getId() {
         return id;
@@ -194,5 +201,15 @@ public class DAGInfo {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.folder_id")
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.environment")
+    public String getEnvironment() {
+        return environment;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_dag_info.environment")
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

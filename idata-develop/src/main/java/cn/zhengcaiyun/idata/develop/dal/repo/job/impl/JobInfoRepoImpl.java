@@ -112,12 +112,16 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .set(jobPublishRecord.editor).equalTo(operator)
                 .where(jobPublishRecord.jobId, isEqualTo(jobId)));
 
+        // todo 不同类型作业删除
         if (JobTypeEnum.DI_BATCH.getCode().equals(job.getJobType())
                 || JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
             diJobContentDao.update(dsl -> dsl.set(DI_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
                     .set(DI_JOB_CONTENT.editor).equalTo(operator)
                     .where(DI_JOB_CONTENT.jobId, isEqualTo(jobId)));
         }
+
+        // todo 删除作业输出
+
         return Boolean.TRUE;
     }
 

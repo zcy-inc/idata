@@ -39,4 +39,6 @@ public interface JobInfoService {
 
     Boolean disableJobInfo(Long id, Operator operator);
 
+    Boolean runJob(Long id, Operator operator);
+
 }
