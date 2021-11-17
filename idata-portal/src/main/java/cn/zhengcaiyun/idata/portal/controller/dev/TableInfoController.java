@@ -145,7 +145,7 @@ public class TableInfoController {
      * 将表元数据信息同步至HIVE，若是修改则进行增量操作，删减字段不做修改。
      * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
      */
-    @PostMapping("/syncHiveInfo/{tableId")
+    @PostMapping("/syncHiveInfo/{tableId}")
     public RestResult<Boolean> syncHiveInfo(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableInfoService.syncHiveInfo(tableId));
     }
