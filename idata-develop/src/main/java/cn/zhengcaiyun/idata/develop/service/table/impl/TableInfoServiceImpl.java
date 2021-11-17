@@ -525,6 +525,13 @@ public class TableInfoServiceImpl implements TableInfoService {
         return listener.tableInfoMap;
     }
 
+    /**
+     * 校验列信息并封装
+     * @param tableInfoMap
+     * @param existColumnInfoList
+     * @param tableId
+     * @return
+     */
     private List<ColumnInfoDto> getColumnInfosByDdl(Map<String, Object> tableInfoMap,
                                                     List<ColumnInfoDto> existColumnInfoList, Long tableId) {
         List<ColumnInfoDto> echoColumnInfoList = new ArrayList<>();
@@ -543,6 +550,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (tableInfoMap.get("columns") != null) {
             tableInfoColumnList.addAll((List<Map<String, String>>) tableInfoMap.get("columns"));
         }
+        // 兼容类型大小写，将colType统一转化成大写，便于后续映射、校验
+        tableInfoColumnList.forEach(map -> map.put("colType", StringUtils.upperCase(map.get("colType"))));
+
         if (tableInfoColumnList.size() > 0) {
             tableInfoColumnList.stream().forEach(columnMap -> {
                 checkColumn(columnMap.get("colName"), columnMap.get("colType"));
@@ -614,6 +624,11 @@ public class TableInfoServiceImpl implements TableInfoService {
         return echoColumnInfoList;
     }
 
+    /**
+     * 校验字段类型和维护的枚举字段类型是否一致
+     * @param colName
+     * @param colType
+     */
     private void checkColumn(String colName, String colType) {
         checkArgument(isNotEmpty(colName), "字段名称不能为空");
         checkArgument(isNotEmpty(colType), "字段类型不能为空");
