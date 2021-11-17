@@ -114,6 +114,11 @@ public class TableInfoController {
         return RestResult.success(echoTableInfo);
     }
 
+    /**
+     * DDL模式生成表结构
+     * @param tableDdlDto
+     * @return
+     */
     @PostMapping("ddl/syncTableInfo")
     public RestResult<TableInfoDto> syncTableInfo(@RequestBody TableDdlDto tableDdlDto) {
         return RestResult.success(tableInfoService.syncTableInfoByDDL(tableDdlDto));
@@ -134,6 +139,15 @@ public class TableInfoController {
     @GetMapping("table/techInfo/{tableId}")
     public RestResult<TableTechInfoDto> getTableTechInfo(@PathVariable("tableId") Long tableId){
         return RestResult.success(tableInfoService.getTableTechInfo(tableId));
+    }
+
+    /**
+     * 将表元数据信息同步至HIVE，若是修改则进行增量操作，删减字段不做修改。
+     * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
+     */
+    @PostMapping("/syncHiveInfo/{tableId")
+    public RestResult<Boolean> syncHiveInfo(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(tableInfoService.syncHiveInfo(tableId));
     }
 
 }

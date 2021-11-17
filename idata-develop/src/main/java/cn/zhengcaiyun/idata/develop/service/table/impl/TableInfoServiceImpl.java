@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlQuery;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
@@ -35,13 +37,10 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.service.table.MetabaseService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
-import com.jayway.jsonpath.internal.function.ParamType;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +51,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -100,6 +98,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private DevTreeNodeLocalCache devTreeNodeLocalCache;
     @Autowired
     private EnumService enumService;
+    @Autowired
+    LivyService livyService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -476,6 +476,69 @@ public class TableInfoServiceImpl implements TableInfoService {
                 and(devTableInfo.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("表不存在"));
         return metadataQueryApi.getTableTechInfo(getDbName(tableId), tableInfo.getTableName());
+    }
+
+    @Override
+    public boolean syncHiveInfo(Long tableId) {
+        TableInfoDto tableInfoDto = getTableInfoById(tableId);
+        String tableName = tableInfoDto.getTableName();
+        String dbName = tableInfoDto.getDbName();
+
+        boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
+
+        // 远端hive中不存在该表则直接创建即可
+        if (!exist) {
+            String createTableDDL = getTableDDL(tableId);
+            LivySqlQuery query = new LivySqlQuery();
+            query.setSql(createTableDDL);
+            livyService.createStatement(query);
+            return true;
+        }
+
+        // 远端表存在则需要判断字段的增删，增量新增列
+        // 根据tableName获取远端Hive表元数据信息
+        List<String> hiveTableColumnNameList = metadataQueryApi.getHiveTableColumns(dbName, tableName)
+                .stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.toList());
+        List<ColumnInfoDto> localTableColumns = tableInfoDto.getColumnInfos();
+
+        //取出在本地表中存在而hive中不存在的列集合
+        Set<ColumnInfoDto> exceptColumnSet = localTableColumns
+                .stream()
+                .filter(e -> !hiveTableColumnNameList.contains(e.getColumnName()))
+                .collect(Collectors.toSet());
+
+        // 进行alter table的DDL SQL封装
+        String alterTableDDL = assembleHiveAlterSQL(exceptColumnSet, dbName, tableName);
+        LivySqlQuery query = new LivySqlQuery();
+        query.setSql(alterTableDDL);
+        livyService.createStatement(query);
+
+        return true;
+    }
+
+    /**
+     * 封装hive alter DDL语句
+     * @param addColumns
+     * @param dbName
+     * @param tableName
+     * @return 例子"alter table `dws`.`t_user` add columns (sex string, address string);"
+     */
+    private String assembleHiveAlterSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
+        StringBuilder builder = new StringBuilder("alter table ")
+                .append("`")
+                .append(dbName)
+                .append("`.`")
+                .append(tableName)
+                .append("` add columns (");
+        List<String> columnsInfoList = addColumns
+                .stream()
+                .map(e -> e.getColumnName() + " " + e.getColumnType())
+                .collect(Collectors.toList());
+        builder.append(StringUtils.join(columnsInfoList, ","));
+        builder.append(");");
+        return builder.toString();
     }
 
     private TableInfoDto getTableInfoById(Long tableId) {

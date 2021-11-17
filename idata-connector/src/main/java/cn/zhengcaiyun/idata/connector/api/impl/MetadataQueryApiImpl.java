@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
@@ -31,10 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,6 +64,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
         techInfoDto.setTableSize(tableSize);
         return techInfoDto;
     }
+
 
     @Override
     public Boolean testConnection(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema) {
@@ -135,6 +134,28 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     }
 
     @Override
+    public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
+        String jdbcUrl = getConnectionCfg();
+        List<ColumnInfoDto> tableColumns = Lists.newArrayList();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl);
+             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
+            while (rs.next()) {
+                String columnName = rs.getString("COLUMN_NAME");  //列名
+                String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
+                String remarks = rs.getString("REMARKS");  //列描述
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                columnInfoDto.setColumnName(columnName);
+                columnInfoDto.setColumnComment(remarks);
+                columnInfoDto.setColumnType(dataTypeName);
+                tableColumns.add(columnInfoDto);
+            }
+        } catch (SQLException ex) {
+            logger.warn("getTableColumns failed. ex: {}", ex);
+        }
+        return tableColumns;
+    }
+
+    @Override
     public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
@@ -160,6 +181,23 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
             logger.warn("getTablePrimaryKey failed. ex: {}", ex);
         }
         return tableColumns;
+    }
+
+    @Override
+    public boolean existHiveTable(String dbName, String tableName) {
+        String jdbcUrl = getConnectionCfg();
+        try (Connection conn = DriverManager.getConnection(jdbcUrl);
+             ResultSet rs = conn.getMetaData().getTables(dbName, "%", "%", new String[]{"TABLE"})) {
+            while (rs.next()) {
+                String hiveTableName = rs.getString("TABLE_NAME");  //表名
+                if (StringUtils.equalsIgnoreCase(hiveTableName, tableName)) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
+            logger.warn("getTableNames failed. ex: {}", ex);
+        }
+        return false;
     }
 
     private String getConnectionCfg() {

@@ -33,6 +33,12 @@ public interface TableInfoService {
     List<TableInfoDto> getTablesByDataBase(String database);
 //    List<TableInfoDto> getTablesByEnumValue(String enumValue);
     List<LabelDto> getDbNames();
+
+    /**
+     * 获取table的创建语句DDL
+     * @param tableId
+     * @return
+     */
     String getTableDDL(Long tableId);
     TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto);
     TableInfoDto create(TableInfoDto tableInfoDto, String creator);
@@ -46,4 +52,11 @@ public interface TableInfoService {
      * @return
      */
     TableTechInfoDto getTableTechInfo(Long tableId);
+
+    /**
+     * 将本地表元数据信息通过Livy同步至HIVE
+     * @param tableId 表id
+     * @return
+     */
+    boolean syncHiveInfo(Long tableId);
 }
