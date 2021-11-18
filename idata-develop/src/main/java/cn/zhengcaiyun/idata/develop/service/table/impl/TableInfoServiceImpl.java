@@ -496,26 +496,65 @@ public class TableInfoServiceImpl implements TableInfoService {
             return livyService.createStatement(query);
         }
 
-        // 远端表存在则需要判断字段的增删，增量新增列
+        // 远端hive表新增列
         // 根据tableName获取远端Hive表元数据信息
-        List<String> hiveTableColumnNameList = metadataQueryApi.getHiveTableColumns(dbName, tableName)
+        List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(dbName, tableName);
+        List<String> hiveTableColumnNameList = hiveTableColumns
                 .stream()
                 .map(e -> e.getColumnName())
                 .collect(Collectors.toList());
         List<ColumnDetailsDto> localTableColumns = columnInfoService.getColumnDetails(tableId);
-
         //取出在本地表中存在而hive中不存在的列集合
         Set<ColumnInfoDto> exceptColumnSet = localTableColumns
                 .stream()
                 .filter(e -> !hiveTableColumnNameList.contains(e.getColumnName()))
                 .collect(Collectors.toSet());
-
         // 进行alter table的DDL SQL封装
-        String alterTableDDL = assembleHiveAlterSQL(exceptColumnSet, dbName, tableName);
+        String alterTableDDL = assembleHiveAddColumnSQL(exceptColumnSet, dbName, tableName);
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(alterTableDDL);
+        LivyStatementDto statement = livyService.createStatement(query);
 
-        return livyService.createStatement(query);
+        // 远端hive表修改注释
+        // 对比相同字段，取出注释不相同的进行更新
+        Set<String> sameColumnNameSet = localTableColumns
+                .stream()
+                .filter(e -> hiveTableColumnNameList.contains(e.getColumnName()))
+                .map(e -> e.getColumnName())
+                .collect(Collectors.toSet());
+        Map<String, ColumnInfoDto> localColumnMap = localTableColumns
+                .stream()
+                .collect(Collectors.toMap(ColumnInfoDto::getColumnName, e -> e));
+        Map<String, cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveColumnMap = hiveTableColumns
+                .stream()
+                .collect(Collectors.toMap(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto::getColumnName, e -> e));
+        // 依次对比相同字段是否注释不同，不同则更新
+        for (String columnName : sameColumnNameSet) {
+            cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto hiveColumn = hiveColumnMap.get(columnName);
+            ColumnInfoDto localColumn = localColumnMap.get(columnName);
+            if (!StringUtils.equalsIgnoreCase(localColumn.getColumnComment(), hiveColumn.getColumnComment())) {
+                String changeTableDDL = assembleHiveChangeColumnSQL(dbName, tableName, columnName, hiveColumn.getColumnType(), localColumn.getColumnComment());
+                query = new LivySqlQuery();
+                query.setSql(changeTableDDL);
+                livyService.createStatement(query);
+            }
+        }
+
+        return statement;
+    }
+
+    /**
+     * 封装hive alter DDL语句
+     * @param dbName
+     * @param tableName
+     * @param columnName
+     * @param columnType
+     * @param columnComment
+     * @return 例子 alter table `dws`.tmp_sync_hive change address address string COMMENT '新的地址'
+     */
+    private String assembleHiveChangeColumnSQL(String dbName, String tableName, String columnName, String columnType, String columnComment) {
+
+        return "alter table `" + dbName + "`." + tableName + " change " + columnName + " " + columnName + " " + columnType + " " + columnType + " '" + columnComment + "'";
     }
 
     /**
@@ -525,7 +564,7 @@ public class TableInfoServiceImpl implements TableInfoService {
      * @param tableName
      * @return 例子"alter table `dws`.t_user add columns (sex string comment '性别', address string comment '地址')" 注意不能带;
      */
-    private String assembleHiveAlterSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
+    private String assembleHiveAddColumnSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
         StringBuilder builder = new StringBuilder("alter table ")
                 .append("`")
                 .append(dbName)
