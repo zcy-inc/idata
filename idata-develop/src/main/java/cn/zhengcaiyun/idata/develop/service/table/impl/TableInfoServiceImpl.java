@@ -484,6 +484,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
 
+//        metadataQueryApi.getTableTechInfo(getDbName(tableId), tableInfoDto.getTableName());
         boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
 
         // 远端hive中不存在该表则直接创建即可
@@ -501,7 +502,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .stream()
                 .map(e -> e.getColumnName())
                 .collect(Collectors.toList());
-        List<ColumnInfoDto> localTableColumns = tableInfoDto.getColumnInfos();
+        List<ColumnDetailsDto> localTableColumns = columnInfoService.getColumnDetails(tableId);
 
         //取出在本地表中存在而hive中不存在的列集合
         Set<ColumnInfoDto> exceptColumnSet = localTableColumns
@@ -523,21 +524,27 @@ public class TableInfoServiceImpl implements TableInfoService {
      * @param addColumns
      * @param dbName
      * @param tableName
-     * @return 例子"alter table `dws`.`t_user` add columns (sex string, address string);"
+     * @return 例子"alter table `dws`.t_user add columns (sex string comment '性别', address string comment '地址')" 注意不能带;
      */
     private String assembleHiveAlterSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
         StringBuilder builder = new StringBuilder("alter table ")
                 .append("`")
                 .append(dbName)
-                .append("`.`")
+                .append("`.")
                 .append(tableName)
-                .append("` add columns (");
+                .append(" add columns (");
+
+        // 拼接每一个新增列的语法，如：sex string comment '性别'
         List<String> columnsInfoList = addColumns
                 .stream()
-                .map(e -> e.getColumnName() + " " + e.getColumnType())
+                .map(e -> e.getColumnName()
+                        + " " + e.getColumnType()
+                        + " comment '"
+                        + StringUtils.getIfEmpty(e.getColumnComment(), () -> "")
+                        + "'")
                 .collect(Collectors.toList());
         builder.append(StringUtils.join(columnsInfoList, ","));
-        builder.append(");");
+        builder.append(")");
         return builder.toString();
     }
 
