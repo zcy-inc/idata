@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.table;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -58,5 +59,5 @@ public interface TableInfoService {
      * @param tableId 表id
      * @return
      */
-    boolean syncHiveInfo(Long tableId);
+    LivyStatementDto syncHiveInfo(Long tableId);
 }

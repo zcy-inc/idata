@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDao;
@@ -146,7 +147,7 @@ public class TableInfoController {
      * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
      */
     @PostMapping("/syncHiveInfo/{tableId}")
-    public RestResult<Boolean> syncHiveInfo(@PathVariable("tableId") Long tableId) {
+    public RestResult<LivyStatementDto> syncHiveInfo(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableInfoService.syncHiveInfo(tableId));
     }
 

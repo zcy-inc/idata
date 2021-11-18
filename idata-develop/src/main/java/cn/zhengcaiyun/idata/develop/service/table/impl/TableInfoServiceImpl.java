@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlQuery;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
@@ -479,7 +480,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public boolean syncHiveInfo(Long tableId) {
+    public LivyStatementDto syncHiveInfo(Long tableId) {
         TableInfoDto tableInfoDto = getTableInfoById(tableId);
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
@@ -492,8 +493,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             String createTableDDL = getTableDDL(tableId);
             LivySqlQuery query = new LivySqlQuery();
             query.setSql(createTableDDL);
-            livyService.createStatement(query);
-            return true;
+            return livyService.createStatement(query);
         }
 
         // 远端表存在则需要判断字段的增删，增量新增列
@@ -514,9 +514,8 @@ public class TableInfoServiceImpl implements TableInfoService {
         String alterTableDDL = assembleHiveAlterSQL(exceptColumnSet, dbName, tableName);
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(alterTableDDL);
-        livyService.createStatement(query);
 
-        return true;
+        return livyService.createStatement(query);
     }
 
     /**
