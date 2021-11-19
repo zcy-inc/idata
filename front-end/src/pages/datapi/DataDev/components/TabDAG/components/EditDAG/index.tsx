@@ -306,7 +306,12 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           label="目标文件夹"
           placeholder="请选择"
           options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          fieldProps={{ size: 'large', style: { width } }}
+          fieldProps={{
+            size: 'large',
+            style: { width },
+            showSearch: true,
+            filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+          }}
           rules={ruleSlct}
         />
         <ProFormDateTimeRangePicker

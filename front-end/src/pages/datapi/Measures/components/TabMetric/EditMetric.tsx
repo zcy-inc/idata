@@ -150,7 +150,11 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             placeholder="请选择"
             rules={require}
             options={MetricTypeOps}
-            fieldProps={{ onChange: setMetricType }}
+            fieldProps={{
+              onChange: setMetricType,
+              showSearch: true,
+              filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+            }}
           />
           <ProFormText
             name="labelName"
@@ -182,6 +186,10 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             placeholder="请选择"
             rules={require}
             options={bizProcessEnum}
+            fieldProps={{
+              showSearch: true,
+              filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+            }}
           />
           <ProFormSelect
             name="folderId"
@@ -189,6 +197,10 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             width="sm"
             placeholder="根目录"
             options={folderOps}
+            fieldProps={{
+              showSearch: true,
+              filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+            }}
           />
         </ProFormGroup>
         <ProFormText

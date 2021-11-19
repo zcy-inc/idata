@@ -126,6 +126,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
           maxTagCount="responsive"
           options={strOps}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -141,6 +143,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
           placeholder="请选择"
           options={dbs}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -156,6 +160,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
           placeholder="请选择"
           options={tbs[schema.index]}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -172,6 +178,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
           maxTagCount="responsive"
           options={str[schema.index]}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },

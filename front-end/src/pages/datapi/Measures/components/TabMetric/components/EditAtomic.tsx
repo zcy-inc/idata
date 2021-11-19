@@ -161,6 +161,8 @@ const EditAtomic: ForwardRefRenderFunction<unknown, EditAtomicProps> = ({ initia
           placeholder="请选择"
           options={AggregatorCodeOptions}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },

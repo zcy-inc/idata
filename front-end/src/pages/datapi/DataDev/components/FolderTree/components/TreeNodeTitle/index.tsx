@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconFont } from '@/components';
+import { useModel } from 'umi';
 import type { FC } from 'react';
 import { FolderBelong, FolderTypes } from '@/constants/datadev';
 import { TreeNode } from '@/types/datadev';
@@ -26,6 +27,10 @@ const MapFolderIcon = {
 const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
   const [isHover, setIsHover] = useState(false);
 
+  const { setCurNode } = useModel('datadev', (_) => ({
+    setCurNode: _.setCurNode,
+  }));
+
   const renderPrimaryMenu = () => {
     switch (node.belong) {
       case FolderBelong.DESIGNTABLE:
@@ -37,7 +42,7 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
       case FolderBelong.DAG:
         return <Menu.Item key="CreateDAG">新建DAG</Menu.Item>;
       case FolderBelong.DI:
-        return <Menu.Item key="CreateDI">新建数据集成</Menu.Item>;
+        return <Menu.Item key="CreateDI">新建DI</Menu.Item>;
       case FolderBelong.DEVJOB:
         return <Menu.Item key="CreateJob">新建任务</Menu.Item>;
       default:
@@ -72,40 +77,30 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
 
   const renderIcon = () => {
     // 在hover状态下、不是根目录节点、不是文件节点，这三个条件下显示图标
-    if (
+    const visible =
       isHover &&
       node.belong !== FolderBelong.DESIGN &&
-      node.belong !== FolderBelong.DI &&
       node.belong !== FolderBelong.DEV &&
-      node.type !== FolderTypes.RECORD
-    ) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <IconFont
-              type={
-                MapFolderIcon[node.type === FolderTypes.FOLDER ? FolderTypes.FOLDER : node.belong]
-              }
-            />
-            {title}
-          </div>
-          <Dropdown overlay={renderDropdownMenu()} placement="bottomLeft" trigger={['click']}>
-            <IconFont type="icon-gengduo2" />
-          </Dropdown>
-        </div>
-      );
-    } else {
-      return (
-        <>
+      node.type !== FolderTypes.RECORD;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
           <IconFont
             type={
               MapFolderIcon[node.type === FolderTypes.FOLDER ? FolderTypes.FOLDER : node.belong]
             }
           />
           {title}
-        </>
-      );
-    }
+        </div>
+        <Dropdown overlay={renderDropdownMenu()} placement="bottomLeft" trigger={['click']}>
+          <IconFont
+            type="icon-gengduo2"
+            onClick={() => setCurNode(node)}
+            style={{ visibility: visible ? 'visible' : 'hidden', paddingLeft: 16 }}
+          />
+        </Dropdown>
+      </div>
+    );
   };
 
   return (
