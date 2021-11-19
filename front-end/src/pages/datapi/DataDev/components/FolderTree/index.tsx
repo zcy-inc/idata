@@ -87,9 +87,9 @@ const FolderTree: FC = () => {
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianDAG" />
         新建DAG
       </Menu.Item>
-      <Menu.Item key="CreateJob">
+      <Menu.Item key="CreateDI">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
-        新建任务
+        新建DI
       </Menu.Item>
     </Menu>
   );
@@ -98,39 +98,34 @@ const FolderTree: FC = () => {
   const onAction = (key: Key, node?: Treenode) => {
     switch (key) {
       case 'CreateFolder':
-        setCurNode(node);
         setFolderMode('create');
         setVisible(true);
         break;
       case 'EditFolder':
-        setCurNode(node);
         setFolderMode('edit');
         setVisible(true);
         break;
       case 'DeleteFolder':
-        setCurNode(node);
         onDeleteFolder();
         break;
       case 'CreateTable':
-        setCurNode(node);
         onCreateTable();
         break;
       case 'CreateLabel':
-        setCurNode(node);
         setCurLabel(-1);
         showLabel();
         break;
       case 'CreateEnum':
-        setCurNode(node);
         onCreateEnum();
         break;
       case 'CreateDAG':
-        setCurNode(node);
         onCreateDAG();
         break;
-      case 'CreateJob':
-        setCurNode(node);
+      case 'CreateDI':
         setVisibleTask(true);
+        break;
+      case 'CreateJob':
+        message.info('功能暂未上线');
         break;
 
       default:

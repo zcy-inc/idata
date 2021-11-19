@@ -13,6 +13,7 @@ import ProForm, {
   ProFormCheckbox,
 } from '@ant-design/pro-form';
 import { Checkbox, Popover } from 'antd';
+import { useModel } from 'umi';
 import type { FormInstance } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 
@@ -51,6 +52,10 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
   const [labels, setLabels] = useState<TableLableOptions[]>([]); // 用以渲染checklist的完整obj
   const labelsMap = useRef(new Map()); // 方便检索做的map
   const labelValues = useRef(new Map()); // 表单的数据（应要求checklist只做显隐, 数据还是全量）
+
+  const { curNode } = useModel('datadev', (_) => ({
+    curNode: _.curNode,
+  }));
 
   useImperativeHandle(ref, () => ({ labels: labelValues.current }));
 
@@ -94,7 +99,6 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
               list.push(_.labelCode);
               return tmp;
             });
-
           // 如果有初始值, 就进行赋值操作
           if (initial) {
             const tableLabels = initial.tableLabels;
@@ -107,6 +111,12 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
               initialValue[_.labelCode] = v;
             });
             form.setFieldsValue(initialValue);
+          } else {
+            if (curNode) {
+              const folderId = curNode.id;
+              labelValues.current.set('folderId', folderId);
+              form.setFieldsValue({ folderId });
+            }
           }
           setCheckedList(list);
           setLabels(ops);
@@ -177,7 +187,11 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
               width="sm"
               rules={!!_.labelRequired ? require : []}
               options={_.enums}
-              fieldProps={{ onChange: (v) => labelValues.current.set(_.labelCode, v) }}
+              fieldProps={{
+                onChange: (v) => labelValues.current.set(_.labelCode, v),
+                showSearch: true,
+                filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+              }}
             />
           );
         case 'ATTRIBUTE_LABEL':
@@ -235,7 +249,11 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
           placeholder="请选择"
           rules={require}
           options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          fieldProps={{ onChange: (v) => labelValues.current.set('folderId', v) }}
+          fieldProps={{
+            onChange: (v) => labelValues.current.set('folderId', v),
+            showSearch: true,
+            filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+          }}
         />
       </ProForm>
     </Fragment>

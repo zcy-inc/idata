@@ -59,14 +59,15 @@ const RefreshSelect: FC<{
         mode="multiple"
         style={{ maxWidth, minWidth }}
         placeholder="请选择"
+        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
+        value={value}
+        onChange={onChange}
         optionFilterProp="label"
+        showSearch
         filterOption={(input, option) => {
           const label = get(option, 'label', '') as string;
           return label.indexOf(input) >= 0;
         }}
-        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
-        value={value}
-        onChange={onChange}
       />
       <a className={styles.refresh} onClick={getTaskTableColumnsWrapped}></a>
     </>
@@ -379,6 +380,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }))}
           value={version}
           onChange={(v) => setVersion(v as number)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
         <div className={styles['form-box']}>
           <div className={styles['form-box-item']}>
@@ -405,6 +408,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   placeholder="请选择"
                   options={DSSrcList.map((_) => ({ label: _.name, value: _.id }))}
                   onChange={(v) => getTaskTablesWrapped(v as number)}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
@@ -452,6 +457,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   placeholder="请选择"
                   options={DSTypes.map((_) => ({ label: _, value: _ }))}
                   onChange={(v) => getDataSourceListWrapped(v as DataSourceTypes, 'dest')}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct}>
@@ -460,6 +467,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   style={{ maxWidth, minWidth }}
                   placeholder="请选择"
                   options={DSDestList.map((_) => ({ label: _.name, value: _.id }))}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="destTable" label="表" rules={ruleText}>

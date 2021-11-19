@@ -235,6 +235,8 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
           placeholder="请选择"
           options={DSTypes.map((_) => ({ label: _, value: _ }))}
           onChange={(v) => setDSType(`${v}` as DataSourceTypes)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       </Item>
       <Item
