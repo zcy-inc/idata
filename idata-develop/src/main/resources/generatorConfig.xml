@@ -25,11 +25,11 @@
 <!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
 <!--        </table>-->
 
-        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="editable" javaType="java.lang.Integer"/>
-        </table>
+<!--        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
 <!--        <table tableName="dev_job_execute_config" domainObjectName="JobExecuteConfig" mapperName="JobExecuteConfigDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
@@ -39,6 +39,10 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
+        <table tableName="dev_table_info" domainObjectName="DevTableInfo" mapperName="DevTableInfoDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+        </table>
 
     </context>
 </generatorConfiguration>

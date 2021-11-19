@@ -103,7 +103,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     LivyService livyService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
-            "tableName", "folderId"};
+            "tableName", "hiveTableName", "folderId"};
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String DB_NAME_LABEL = "dbName:LABEL";
@@ -484,18 +484,32 @@ public class TableInfoServiceImpl implements TableInfoService {
         TableInfoDto tableInfoDto = getTableInfoById(tableId);
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
+        String hiveTableName = tableInfoDto.getHiveTableName();
 
-//        metadataQueryApi.getTableTechInfo(getDbName(tableId), tableInfoDto.getTableName());
         boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
 
-        // 远端hive中不存在该表则直接创建即可
-        if (!exist) {
+        // 情况1：远端hive表不存在 && 该表未曾同步过hive  ---> 新建hive表
+        if (!exist && StringUtils.isBlank(hiveTableName)) {
             String createTableDDL = getTableDDL(tableId);
             LivySqlQuery query = new LivySqlQuery();
             query.setSql(createTableDDL);
             return livyService.createStatement(query);
         }
 
+        // 情况2：远端hive表存在 && 该表未曾同步过hive  ---> 不可新建，远端hive表已存在
+        if (exist && StringUtils.isBlank(hiveTableName)) {
+            throw new IllegalArgumentException("远端hive表'" + dbName + "'." + tableName + "已存在不可新建");
+        }
+
+        // 情况3：远端hive表不存在 && 该表已同步过hive  ---> 需要额外rename表，并同时维护表的其他元数据信息（即情况4）
+        if (!exist && StringUtils.isNoneBlank(hiveTableName)) {
+            String renameTableDDL = getTableRenameDDL(hiveTableName, tableName, dbName);
+            LivySqlQuery query = new LivySqlQuery();
+            query.setSql(renameTableDDL);
+            livyService.createStatement(query);
+        }
+
+        // 情况4：远端hive表存在 && 该表已同步过hive  ---> 说明表名没有表，做字段相关元数据信息的比对同步
         // 远端hive表新增列
         // 根据tableName获取远端Hive表元数据信息
         List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(dbName, tableName);
@@ -514,7 +528,6 @@ public class TableInfoServiceImpl implements TableInfoService {
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(alterTableDDL);
         LivyStatementDto statement = livyService.createStatement(query);
-
         // 远端hive表修改注释
         // 对比相同字段，取出注释不相同的进行更新
         Set<String> sameColumnNameSet = localTableColumns
@@ -544,25 +557,36 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     /**
-     * 封装hive alter DDL语句
+     * 封装hive rename语句 例子 ALTER TABLE table_name RENAME TO new_table_name
+     * @param hiveTableName 上次同步的hive表，包括database前缀，格式：database.tableName
+     * @param tableName 当前表名
+     * @param dbName 当前数据库名
+     * @return
+     */
+    private String getTableRenameDDL(String hiveTableName, String tableName, String dbName) {
+        return "alter table `" + hiveTableName + " rename to " + dbName + "`." + tableName ;
+    }
+
+    /**
+     * 封装hive alter DDL语句 例子 alter table `dws`.tmp_sync_hive change address address string COMMENT '新的地址'
      * @param dbName
      * @param tableName
      * @param columnName
      * @param columnType
      * @param columnComment
-     * @return 例子 alter table `dws`.tmp_sync_hive change address address string COMMENT '新的地址'
+     * @return
      */
     private String assembleHiveChangeColumnSQL(String dbName, String tableName, String columnName, String columnType, String columnComment) {
-
-        return "alter table `" + dbName + "`." + tableName + " change " + columnName + " " + columnName + " " + columnType + " " + columnType + " '" + columnComment + "'";
+        return "alter table `" + dbName + "`." + tableName + " change " + columnName + " " + columnName + " "
+                + columnType + " " + columnType + " '" + columnComment + "'";
     }
 
     /**
-     * 封装hive alter DDL语句
+     * 封装hive alter DDL语句 例子"alter table `dws`.t_user add columns (sex string comment '性别', address string comment '地址')" 注意不能带;
      * @param addColumns
      * @param dbName
      * @param tableName
-     * @return 例子"alter table `dws`.t_user add columns (sex string comment '性别', address string comment '地址')" 注意不能带;
+     * @return
      */
     private String assembleHiveAddColumnSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
         StringBuilder builder = new StringBuilder("alter table ")
