@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
@@ -41,6 +43,7 @@ import cn.zhengcaiyun.idata.user.service.UserManagerService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONString;
@@ -147,8 +150,20 @@ public class TableInfoController {
      * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
      */
     @PostMapping("/syncHiveInfo/{tableId}")
-    public RestResult<LivyStatementDto> syncHiveInfo(@PathVariable("tableId") Long tableId) {
+    public RestResult<SyncHiveDTO> syncHiveInfo(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableInfoService.syncHiveInfo(tableId));
     }
+
+    /**
+     * 比较本地表和远端hive表的区别
+     * @param tableId
+     * @return
+     */
+    @PostMapping("/compareHiveInfo/{tableId}")
+    public RestResult<CompareInfoDTO> compareHiveInfo(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(tableInfoService.compareHiveInfo(tableId));
+    }
+
+
 
 }

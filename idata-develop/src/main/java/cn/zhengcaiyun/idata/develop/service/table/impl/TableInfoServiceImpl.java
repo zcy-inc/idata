@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlQuery;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
@@ -38,6 +40,7 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.service.table.MetabaseService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import com.google.common.collect.Lists;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -480,11 +483,13 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public LivyStatementDto syncHiveInfo(Long tableId) {
+    public SyncHiveDTO syncHiveInfo(Long tableId) {
         TableInfoDto tableInfoDto = getTableInfoById(tableId);
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
         String hiveTableName = tableInfoDto.getHiveTableName();
+
+        checkDatabase(hiveTableName, dbName);
 
         boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
 
@@ -493,7 +498,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             String createTableDDL = getTableDDL(tableId);
             LivySqlQuery query = new LivySqlQuery();
             query.setSql(createTableDDL);
-            return livyService.createStatement(query);
+            return new SyncHiveDTO();
         }
 
         // 情况2：远端hive表存在 && 该表未曾同步过hive  ---> 不可新建，远端hive表已存在
@@ -510,7 +515,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         }
 
         // 情况4：远端hive表存在 && 该表已同步过hive  ---> 说明表名没有表，做字段相关元数据信息的比对同步
-        // 远端hive表新增列
+        // 4.1:远端hive表新增列
         // 根据tableName获取远端Hive表元数据信息
         List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(dbName, tableName);
         List<String> hiveTableColumnNameList = hiveTableColumns
@@ -528,8 +533,8 @@ public class TableInfoServiceImpl implements TableInfoService {
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(alterTableDDL);
         LivyStatementDto statement = livyService.createStatement(query);
-        // 远端hive表修改注释
-        // 对比相同字段，取出注释不相同的进行更新
+        // 4.2远端hive表修改列（类型和注释）
+        // 对比相同字段，取出类型和注释不相同的进行更新
         Set<String> sameColumnNameSet = localTableColumns
                 .stream()
                 .filter(e -> hiveTableColumnNameList.contains(e.getColumnName()))
@@ -542,23 +547,175 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .stream()
                 .collect(Collectors.toMap(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto::getColumnName, e -> e));
         // 依次对比相同字段是否注释不同，不同则更新
+        List<String> warningList = Lists.newArrayList();
         for (String columnName : sameColumnNameSet) {
             cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto hiveColumn = hiveColumnMap.get(columnName);
             ColumnInfoDto localColumn = localColumnMap.get(columnName);
-            if (!StringUtils.equalsIgnoreCase(localColumn.getColumnComment(), hiveColumn.getColumnComment())) {
-                String changeTableDDL = assembleHiveChangeColumnSQL(dbName, tableName, columnName, hiveColumn.getColumnType(), localColumn.getColumnComment());
+            // 注释或者类型不一致即更新
+            String localColumnComment = localColumn.getColumnComment();
+            String localColumnType = localColumn.getColumnType();
+            String hiveColumnType = hiveColumn.getColumnType();
+            if (!StringUtils.equalsIgnoreCase(localColumnComment, hiveColumn.getColumnComment())
+                    || !StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
+                String changeTableDDL = assembleHiveChangeColumnSQL(dbName, tableName, columnName, localColumnType, localColumnComment);
                 query = new LivySqlQuery();
                 query.setSql(changeTableDDL);
                 livyService.createStatement(query);
+
+                if (!StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
+                    warningList.add(String.format("修改了`%s`.%s表%s列类型（HIVE中原类型：%s，修改目标类型：%s）", dbName, tableName, columnName, hiveColumnType, localColumnType));
+                }
             }
         }
 
-        return statement;
+        SyncHiveDTO syncHiveDTO = new SyncHiveDTO();
+        syncHiveDTO.setWarningList(warningList);
+        return syncHiveDTO;
+    }
+
+    /**
+     * 校验databse是否被修改
+     * @param hiveTableName
+     * @param dbName
+     */
+    private void checkDatabase(String hiveTableName, String dbName) {
+        if (StringUtils.isBlank(hiveTableName)) {
+            return;
+        }
+
+        String[] tableMetaInfo = hiveTableName.split(".");
+        if (!StringUtils.equalsIgnoreCase(dbName, tableMetaInfo[0])) {
+            throw new IllegalArgumentException("已同步过到hive的表不能更改database");
+        }
+    }
+
+    @Override
+    public CompareInfoDTO compareHiveInfo(Long tableId) {
+        TableInfoDto tableInfoDto = getTableInfoById(tableId);
+        String hiveTableName = tableInfoDto.getHiveTableName();
+
+        if (StringUtils.isBlank(hiveTableName)) {
+            return new CompareInfoDTO(false);
+        }
+
+        String[] tableMetaInfo = hiveTableName.split(".");
+        List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(tableMetaInfo[0], tableMetaInfo[1]);
+
+        return doCompare(tableInfoDto, hiveTableColumns);
+    }
+
+    /**
+     * 比较本地表和hive表元数据属性
+     * @param localTableInfoDto
+     * @param hiveTableColumns
+     * @return
+     */
+    private CompareInfoDTO doCompare(TableInfoDto localTableInfoDto, List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns) {
+        CompareInfoDTO compareInfoDTO = new CompareInfoDTO(true);
+        compareInfoDTO.setHiveTableName(localTableInfoDto.getHiveTableName());
+        compareInfoDTO.setLocalTableName(localTableInfoDto.getDbName() + "." + localTableInfoDto.getTableName());
+
+        //比较列
+        List<ColumnDetailsDto> localTableColumns = columnInfoService.getColumnDetails(localTableInfoDto.getId());
+        Map<String, ColumnDetailsDto> localColumnMap = localTableColumns
+                .stream()
+                .collect(Collectors.toMap(ColumnDetailsDto::getColumnName, e -> e));
+        Map<String, cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveColumnMap = hiveTableColumns
+                .stream()
+                .collect(Collectors.toMap(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto::getColumnName, e -> e));
+        List<String> hiveTableColumnNameList = hiveTableColumns
+                .stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.toList());
+        List<String> localTableColumnNameList = localTableColumns
+                .stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.toList());
+        Set<String> columnNameSet = new HashSet<>();
+        columnNameSet.addAll(hiveTableColumnNameList);
+        columnNameSet.addAll(localTableColumnNameList);
+
+        for (String columnName : columnNameSet) {
+            if (localColumnMap.containsKey(columnName) && hiveColumnMap.containsKey(columnName)) {
+                // different
+                ColumnDetailsDto localColumnDto = localColumnMap.get(columnName);
+                cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto hiveColumnDto = hiveColumnMap.get(columnName);
+                doCompareColumn(compareInfoDTO, columnName, localColumnDto, hiveColumnDto);
+            } else if (localColumnMap.containsKey(columnName)) {
+                // more
+                ColumnDetailsDto columnDetailsDto = localColumnMap.get(columnName);
+                compareInfoDTO.getMoreList().add(assembleBasicColumnInfo(columnDetailsDto));
+            } else if (hiveColumnMap.containsKey(columnName)) {
+                // less
+                cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto columnInfoDto = hiveColumnMap.get(columnName);
+                compareInfoDTO.getMoreList().add(assembleBasicColumnInfo(columnInfoDto));
+            }
+        }
+        return compareInfoDTO;
+    }
+
+    /**
+     * 比较列的元数据信息，并加入到返回集中
+     * @param compareInfoDTO
+     * @param columnName
+     * @param localColumnDto
+     * @param hiveColumnDto
+     * @return
+     */
+    private void doCompareColumn(CompareInfoDTO compareInfoDTO, String columnName, ColumnDetailsDto localColumnDto,
+                                                           cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto hiveColumnDto) {
+        String localColumnType = localColumnDto.getColumnType();
+        String localColumnComment = localColumnDto.getColumnComment();
+
+        String hiveColumnType = hiveColumnDto.getColumnType();
+        String hiveColumnComment = hiveColumnDto.getColumnComment();
+
+        CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
+        boolean added = false;
+        if (StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
+            added = true;
+            basicColumnInfo.setColumnType(localColumnType + "/" + hiveColumnType);
+        }
+
+        if (StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment)) {
+            added = true;
+            basicColumnInfo.setColumnType(localColumnComment + "/" + hiveColumnComment);
+        }
+
+        if (added) {
+            compareInfoDTO.getDifferentList().add(basicColumnInfo);
+        }
+    }
+
+    /**
+     * hive列类类型封装成BasicCloumnInfo
+     * @param columnInfoDto
+     * @return
+     */
+    private CompareInfoDTO.BasicColumnInfo assembleBasicColumnInfo(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto columnInfoDto) {
+        CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
+        basicColumnInfo.setColumnDesc(columnInfoDto.getColumnComment());
+        basicColumnInfo.setColumnName(columnInfoDto.getColumnName());
+        basicColumnInfo.setColumnType(columnInfoDto.getColumnType());
+        return basicColumnInfo;
+    }
+
+    /**
+     *
+     * @param columnDetailsDto
+     * @return
+     */
+    private CompareInfoDTO.BasicColumnInfo assembleBasicColumnInfo(ColumnDetailsDto columnDetailsDto) {
+        CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
+        basicColumnInfo.setColumnDesc(columnDetailsDto.getColumnComment());
+        basicColumnInfo.setColumnName(columnDetailsDto.getColumnName());
+        basicColumnInfo.setColumnType(columnDetailsDto.getColumnType());
+        return basicColumnInfo;
     }
 
     /**
      * 封装hive rename语句 例子 ALTER TABLE table_name RENAME TO new_table_name
-     * @param hiveTableName 上次同步的hive表，包括database前缀，格式：database.tableName
+     * @param hiveTableName 上次同步的hive表名称，包括database前缀，格式：database.tableName
      * @param tableName 当前表名
      * @param dbName 当前数据库名
      * @return
@@ -569,16 +726,16 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     /**
      * 封装hive alter DDL语句 例子 alter table `dws`.tmp_sync_hive change address address string COMMENT '新的地址'
-     * @param dbName
-     * @param tableName
-     * @param columnName
-     * @param columnType
-     * @param columnComment
+     * @param dbName        库名
+     * @param tableName     表名
+     * @param columnName    列名字
+     * @param columnType    列类型
+     * @param columnComment 列注释
      * @return
      */
     private String assembleHiveChangeColumnSQL(String dbName, String tableName, String columnName, String columnType, String columnComment) {
         return "alter table `" + dbName + "`." + tableName + " change " + columnName + " " + columnName + " "
-                + columnType + " " + columnType + " '" + columnComment + "'";
+                + columnType + " comment '" + columnComment + "'";
     }
 
     /**
