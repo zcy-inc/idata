@@ -648,7 +648,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             } else if (hiveColumnMap.containsKey(columnName)) {
                 // less
                 cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto columnInfoDto = hiveColumnMap.get(columnName);
-                compareInfoDTO.getMoreList().add(assembleBasicColumnInfo(columnInfoDto));
+                compareInfoDTO.getLessList().add(assembleBasicColumnInfo(columnInfoDto));
             }
         }
         return compareInfoDTO;
@@ -671,6 +671,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         String hiveColumnComment = hiveColumnDto.getColumnComment();
 
         CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
+        basicColumnInfo.setColumnName(columnName);
         boolean added = false;
         if (StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
             added = true;
