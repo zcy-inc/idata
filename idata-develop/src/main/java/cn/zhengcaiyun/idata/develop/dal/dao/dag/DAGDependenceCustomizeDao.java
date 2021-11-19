@@ -16,7 +16,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceDynamicSqlSu
 @Mapper
 public interface DAGDependenceCustomizeDao {
 
-    BasicColumn[] selectList = BasicColumn.columnList(id, creator, createTime, dagId, dependenceDagId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, creator, createTime, dagId, prevDagId);
 
     @InsertProvider(type = SqlProviderAdapter.class, method = "insertMultiple")
     int insertMultiple(MultiRowInsertStatementProvider<DAGDependence> insertStatement);
@@ -30,7 +30,7 @@ public interface DAGDependenceCustomizeDao {
                 c.map(creator).toProperty("creator")
                         .map(createTime).toProperty("createTime")
                         .map(dagId).toProperty("dagId")
-                        .map(dependenceDagId).toProperty("dependenceDagId")
+                        .map(prevDagId).toProperty("prevDagId")
         );
     }
 

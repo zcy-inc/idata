@@ -15,31 +15,30 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.event.job;
+package cn.zhengcaiyun.idata.develop.util;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 17:53
+ * @create: 2021-11-18 19:48
  **/
-public class JobBindDagEvent extends JobBaseEvent {
+public class DagJobPair {
 
-    private String environment;
-    private Boolean firstBind;
+    private final Long dagId;
+    private final List<Long> jobIds;
 
-    public Boolean getFirstBind() {
-        return firstBind;
+    public DagJobPair(Long dagId, List<Long> jobIds) {
+        this.dagId = dagId;
+        this.jobIds = jobIds;
     }
 
-    public void setFirstBind(Boolean firstBind) {
-        this.firstBind = firstBind;
+    public Long getDagId() {
+        return dagId;
     }
 
-    public String getEnvironment() {
-        return environment;
-    }
-
-    public void setEnvironment(String environment) {
-        this.environment = environment;
+    public List<Long> getJobIds() {
+        return jobIds;
     }
 }

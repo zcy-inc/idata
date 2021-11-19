@@ -19,13 +19,10 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
-import cn.zhengcaiyun.idata.develop.dto.job.JobExecuteConfigDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * job-config-controller
@@ -35,7 +32,7 @@ import java.util.List;
  * @create: 2021-09-23 11:52
  **/
 @RestController
-@RequestMapping(path = "/p1/dev/jobs/{jobId}/execConfigs")
+@RequestMapping(path = "/p1/dev/jobs/{jobId}")
 public class JobExecuteConfigController {
 
     private final JobExecuteConfigService jobExecuteConfigService;
@@ -46,27 +43,30 @@ public class JobExecuteConfigController {
     }
 
     /**
-     * 保存作业运行配置
+     * 保存配置
      *
-     * @param jobId     作业id
-     * @param configDto 配置
+     * @param jobId       作业id
+     * @param environment 环境
+     * @param dto         配置
      * @return
      */
-    @PostMapping()
-    public RestResult<JobExecuteConfigDto> saveJobExecuteConfig(@PathVariable("jobId") Long jobId,
-                                                                @RequestBody JobExecuteConfigDto configDto) {
-        return RestResult.success(jobExecuteConfigService.save(jobId, configDto, OperatorContext.getCurrentOperator()));
+    @PostMapping("environments/{environment}/configs")
+    public RestResult<JobConfigCombinationDto> saveJobConfig(@PathVariable("jobId") Long jobId,
+                                                             @PathVariable("environment") String environment,
+                                                             @RequestBody JobConfigCombinationDto dto) {
+        return RestResult.success(jobExecuteConfigService.save(jobId, environment, dto, OperatorContext.getCurrentOperator()));
     }
 
     /**
-     * 获取作业运行配置列表
+     * 获取配置
      *
-     * @param condition 条件
+     * @param jobId       作业id
+     * @param environment 环境
      * @return
      */
-    @GetMapping()
-    public RestResult<List<JobExecuteConfigDto>> getJobExecuteConfig(@PathVariable("jobId") Long jobId,
-                                                                     JobExecuteConfigCondition condition) {
-        return RestResult.success(jobExecuteConfigService.getList(jobId, condition));
+    @GetMapping("environments/{environment}/configs")
+    public RestResult<JobConfigCombinationDto> getJobConfig(@PathVariable("jobId") Long jobId,
+                                                            @PathVariable("environment") String environment) {
+        return RestResult.success(jobExecuteConfigService.getCombineConfig(jobId, environment));
     }
 }

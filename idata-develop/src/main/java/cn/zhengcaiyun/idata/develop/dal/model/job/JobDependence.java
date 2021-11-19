@@ -63,7 +63,7 @@ public class JobDependence {
      *   上游作业所属dag id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_dependence.prev_job_dag_id")
-    private String prevJobDagId;
+    private Long prevJobDagId;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_dependence.id")
     public Long getId() {
@@ -136,12 +136,12 @@ public class JobDependence {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_dependence.prev_job_dag_id")
-    public String getPrevJobDagId() {
+    public Long getPrevJobDagId() {
         return prevJobDagId;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_dependence.prev_job_dag_id")
-    public void setPrevJobDagId(String prevJobDagId) {
+    public void setPrevJobDagId(Long prevJobDagId) {
         this.prevJobDagId = prevJobDagId;
     }
 }

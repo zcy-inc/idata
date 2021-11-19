@@ -23,4 +23,13 @@ package cn.zhengcaiyun.idata.develop.event.job;
  * @create: 2021-11-04 17:53
  **/
 public class JobEnabledEvent extends JobBaseEvent {
+    private String environment;
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
 }

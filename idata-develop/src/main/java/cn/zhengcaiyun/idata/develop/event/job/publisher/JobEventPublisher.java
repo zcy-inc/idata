@@ -24,9 +24,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobEventLogRepo;
 import cn.zhengcaiyun.idata.develop.event.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.bus.JobEventBus;
+import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @description:
@@ -90,6 +93,7 @@ public class JobEventPublisher {
         JobEnabledEvent event = new JobEnabledEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
@@ -103,6 +107,7 @@ public class JobEventPublisher {
         JobDisabledEvent event = new JobDisabledEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
@@ -116,19 +121,22 @@ public class JobEventPublisher {
         JobPublishedEvent event = new JobPublishedEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
         processResult(event);
     }
 
-    public void whenBindDag(JobEventLog eventLog) {
+    public void whenBindDag(JobEventLog eventLog, Boolean isFirst) {
         if (!EventTypeEnum.JOB_BIND_DAG.name().equals(eventLog.getJobEvent()))
             return;
 
         JobBindDagEvent event = new JobBindDagEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setFirstBind(isFirst);
+        event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
@@ -142,6 +150,7 @@ public class JobEventPublisher {
         JobUnBindDagEvent event = new JobUnBindDagEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
@@ -155,6 +164,23 @@ public class JobEventPublisher {
         JobRunEvent event = new JobRunEvent();
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
+    }
+
+    public void whenBuildPrevRelation(JobEventLog eventLog, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) {
+        if (!EventTypeEnum.JOB_RUN.name().equals(eventLog.getJobEvent()))
+            return;
+
+        JobBuildPrevRelationEvent event = new JobBuildPrevRelationEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
+        event.setAddingPrevRelations(addingPrevRelations);
+        event.setRemovingPrevRelations(removingPrevRelations);
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果

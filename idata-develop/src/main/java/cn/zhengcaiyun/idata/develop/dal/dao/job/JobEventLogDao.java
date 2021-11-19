@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobEventLogDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_event_log")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, jobEvent, eventInfo, handleStatus, handleMsg);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, jobEvent, eventInfo, handleStatus, handleMsg);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_event_log")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -64,6 +64,7 @@ public interface JobEventLogDao {
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="job_id", property="jobId", jdbcType=JdbcType.BIGINT),
+        @Result(column="environment", property="environment", jdbcType=JdbcType.VARCHAR),
         @Result(column="job_event", property="jobEvent", jdbcType=JdbcType.VARCHAR),
         @Result(column="event_info", property="eventInfo", jdbcType=JdbcType.VARCHAR),
         @Result(column="handle_status", property="handleStatus", jdbcType=JdbcType.INTEGER),
@@ -101,6 +102,7 @@ public interface JobEventLogDao {
             .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(jobId).toProperty("jobId")
+            .map(environment).toProperty("environment")
             .map(jobEvent).toProperty("jobEvent")
             .map(eventInfo).toProperty("eventInfo")
             .map(handleStatus).toProperty("handleStatus")
@@ -117,6 +119,7 @@ public interface JobEventLogDao {
             .map(editor).toPropertyWhenPresent("editor", record::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(jobId).toPropertyWhenPresent("jobId", record::getJobId)
+            .map(environment).toPropertyWhenPresent("environment", record::getEnvironment)
             .map(jobEvent).toPropertyWhenPresent("jobEvent", record::getJobEvent)
             .map(eventInfo).toPropertyWhenPresent("eventInfo", record::getEventInfo)
             .map(handleStatus).toPropertyWhenPresent("handleStatus", record::getHandleStatus)
@@ -159,6 +162,7 @@ public interface JobEventLogDao {
                 .set(editor).equalTo(record::getEditor)
                 .set(editTime).equalTo(record::getEditTime)
                 .set(jobId).equalTo(record::getJobId)
+                .set(environment).equalTo(record::getEnvironment)
                 .set(jobEvent).equalTo(record::getJobEvent)
                 .set(eventInfo).equalTo(record::getEventInfo)
                 .set(handleStatus).equalTo(record::getHandleStatus)
@@ -173,6 +177,7 @@ public interface JobEventLogDao {
                 .set(editor).equalToWhenPresent(record::getEditor)
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(jobId).equalToWhenPresent(record::getJobId)
+                .set(environment).equalToWhenPresent(record::getEnvironment)
                 .set(jobEvent).equalToWhenPresent(record::getJobEvent)
                 .set(eventInfo).equalToWhenPresent(record::getEventInfo)
                 .set(handleStatus).equalToWhenPresent(record::getHandleStatus)
@@ -188,6 +193,7 @@ public interface JobEventLogDao {
             .set(editor).equalTo(record::getEditor)
             .set(editTime).equalTo(record::getEditTime)
             .set(jobId).equalTo(record::getJobId)
+            .set(environment).equalTo(record::getEnvironment)
             .set(jobEvent).equalTo(record::getJobEvent)
             .set(eventInfo).equalTo(record::getEventInfo)
             .set(handleStatus).equalTo(record::getHandleStatus)
@@ -205,6 +211,7 @@ public interface JobEventLogDao {
             .set(editor).equalToWhenPresent(record::getEditor)
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(jobId).equalToWhenPresent(record::getJobId)
+            .set(environment).equalToWhenPresent(record::getEnvironment)
             .set(jobEvent).equalToWhenPresent(record::getJobEvent)
             .set(eventInfo).equalToWhenPresent(record::getEventInfo)
             .set(handleStatus).equalToWhenPresent(record::getHandleStatus)

@@ -17,23 +17,20 @@
 
 package cn.zhengcaiyun.idata.develop.event.job;
 
+import cn.zhengcaiyun.idata.develop.util.DagJobPair;
+
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 17:53
+ * @create: 2021-11-04 15:24
  **/
-public class JobBindDagEvent extends JobBaseEvent {
+public class JobBuildPrevRelationEvent extends JobBaseEvent {
 
     private String environment;
-    private Boolean firstBind;
-
-    public Boolean getFirstBind() {
-        return firstBind;
-    }
-
-    public void setFirstBind(Boolean firstBind) {
-        this.firstBind = firstBind;
-    }
+    private List<DagJobPair> addingPrevRelations;
+    private List<DagJobPair> removingPrevRelations;
 
     public String getEnvironment() {
         return environment;
@@ -41,5 +38,21 @@ public class JobBindDagEvent extends JobBaseEvent {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public List<DagJobPair> getAddingPrevRelations() {
+        return addingPrevRelations;
+    }
+
+    public void setAddingPrevRelations(List<DagJobPair> addingPrevRelations) {
+        this.addingPrevRelations = addingPrevRelations;
+    }
+
+    public List<DagJobPair> getRemovingPrevRelations() {
+        return removingPrevRelations;
+    }
+
+    public void setRemovingPrevRelations(List<DagJobPair> removingPrevRelations) {
+        this.removingPrevRelations = removingPrevRelations;
     }
 }

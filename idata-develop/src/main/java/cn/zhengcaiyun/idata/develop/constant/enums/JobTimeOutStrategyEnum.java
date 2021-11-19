@@ -17,27 +17,40 @@
 
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
+import com.google.common.collect.Maps;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-10 14:56
+ * @create: 2021-11-18 14:11
  **/
-public enum EventTypeEnum {
-    CREATED,
-    UPDATED,
-    DELETED,
-    DAG_SCHEDULE_UPDATED,
-    DAG_OFFLINE,
-    DAG_ONLINE,
-    DAG_RUN,
-    DAG_ADD_DEPENDENCE,
-    DAG_DEL_DEPENDENCE,
-    JOB_DISABLE,
-    JOB_ENABLE,
-    JOB_PUBLISH,
-    JOB_BIND_DAG,
-    JOB_UNBIND_DAG,
-    JOB_RUN,
-    JOB_BUILD_PREV,
+public enum JobTimeOutStrategyEnum {
+    ALARM("alarm", "超时告警"),
+    FAIL("fail", "超时失败"),
     ;
+
+    public final String code;
+    public final String desc;
+
+    JobTimeOutStrategyEnum(String code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    private static final Map<String, JobTimeOutStrategyEnum> map = Maps.newHashMap();
+
+    static {
+        Arrays.stream(JobTimeOutStrategyEnum.values())
+                .forEach(enumObj -> map.put(enumObj.code, enumObj));
+    }
+
+    public static Optional<JobTimeOutStrategyEnum> getEnum(Integer val) {
+        if (Objects.isNull(val)) return Optional.empty();
+        return Optional.ofNullable(map.get(val));
+    }
 }

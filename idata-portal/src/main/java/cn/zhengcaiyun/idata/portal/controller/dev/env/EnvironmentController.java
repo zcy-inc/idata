@@ -18,9 +18,12 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.env;
 
 import cn.zhengcaiyun.idata.commons.dto.general.SingleCodePair;
+import cn.zhengcaiyun.idata.commons.dto.general.SingleValuePair;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.ExecuteQueueEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTimeOutStrategyEnum;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,6 +57,30 @@ public class EnvironmentController {
     public RestResult<List<SingleCodePair<String>>> getJobExecuteQueue() {
         return RestResult.success(Arrays.stream(ExecuteQueueEnum.values())
                 .map(queueEnum -> new SingleCodePair<String>(queueEnum.code, queueEnum.name))
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * 获取作业优先级
+     *
+     * @return
+     */
+    @GetMapping("/JobPriorities")
+    public RestResult<List<SingleValuePair<Integer>>> getJobPriorities() {
+        return RestResult.success(Arrays.stream(JobPriorityEnum.values())
+                .map(queueEnum -> new SingleValuePair<Integer>(queueEnum.val, queueEnum.desc))
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * 获取作业超时策略
+     *
+     * @return
+     */
+    @GetMapping("/JobTimeOutStrategies")
+    public RestResult<List<SingleCodePair<String>>> getJobTimeOutStrategies() {
+        return RestResult.success(Arrays.stream(JobTimeOutStrategyEnum.values())
+                .map(queueEnum -> new SingleCodePair<String>(queueEnum.code, queueEnum.desc))
                 .collect(Collectors.toList()));
     }
 

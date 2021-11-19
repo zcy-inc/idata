@@ -3,10 +3,8 @@ alter table dev_dag_info add column environment varchar(20) not null default "" 
 
 alter table dev_job_execute_config add column sch_time_out_strategy varchar(20) not null comment '调度配置-超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔';
 alter table dev_job_execute_config add column sch_priority int(11) not null comment '调度配置-优先级，1：低，2：中，3：高';
-alter table dev_job_execute_config add column sch_fail_strategy varchar(10) not null comment '调度配置-失败策略';
 alter table dev_job_execute_config add column exec_driver_mem int(11) unsigned not null default 0 comment '运行配置-驱动器内存';
 alter table dev_job_execute_config add column exec_worker_mem int(11) unsigned not null default 0 comment '运行配置-执行器内存';
-alter table dev_job_execute_config add column extension_cfg varchar(300) not null default '' comment '扩展配置字段';
 
 create table if not exists dev_dag_dependence
 (
@@ -48,11 +46,12 @@ create table if not exists dev_job_event_log
     editor        varchar(20)         not null default '' comment '修改者',
     edit_time     datetime            not null default current_timestamp on update current_timestamp comment '修改时间',
     job_id        bigint(20) unsigned not null comment 'dag id',
+    environment   varchar(20)         not null default "" comment '环境',
     job_event     varchar(20)         not null comment '事件，created, updated, deleted ...',
     event_info    varchar(300)        null comment '事件信息，用于事件重放处理时使用',
     handle_status int(11)             not null comment '事件处理状态，0: 待处理，1: 处理成功，9：处理失败',
     handle_msg    varchar(150)        null comment '处理结果信息',
-    key idx_job_id_event(job_id, job_event)
+    key idx_job_id_env_event(job_id, environment, job_event)
 ) engine = innodb
   auto_increment = 1
   default charset = utf8mb4 comment '数据开发-作业事件日志表';
@@ -65,8 +64,8 @@ create table if not exists dev_job_dependence
     create_time            datetime            not null default current_timestamp comment '创建时间',
     job_id                 bigint(20) unsigned not null comment '作业id',
     environment            varchar(20)         not null comment '环境',
-    prev_job_id             bigint(20) unsigned not null comment '上游作业id',
-    prev_job_dag_id         varchar(20)         not null comment '上游作业所属dag id',
+    prev_job_id            bigint(20) unsigned not null comment '上游作业id',
+    prev_job_dag_id        bigint(20) unsigned not null comment '上游作业所属dag id',
     key idx_job_env_prev (job_id, environment, prev_job_id),
     key idx_prev_env_job (prev_job_id, environment, job_id)
 ) engine = innodb
@@ -84,7 +83,7 @@ create table if not exists dev_job_output
     dest_data_source_type  varchar(20)         not null comment '数据去向-数据源类型',
     dest_data_source_id    bigint(20) unsigned not null comment '数据去向-数据源id',
     dest_table             varchar(100)        not null comment '数据去向-目标表',
-    dest_write_mode        varchar(20)         not null comment '数据去向-写入模式，init: 新建表，override: 覆盖表',
+    dest_write_mode        varchar(20)         not null comment '数据去向-写入模式，override，upsert',
     key idx_job_env (job_id, environment),
     key idx_table (dest_table(40))
 ) engine = innodb

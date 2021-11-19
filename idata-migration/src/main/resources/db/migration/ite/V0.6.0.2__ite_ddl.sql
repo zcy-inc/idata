@@ -17,12 +17,9 @@ create table if not exists ite_ds_depend_relation
 (
     id                     bigint(20) unsigned primary key auto_increment comment '主键',
     create_time            datetime            not null default current_timestamp comment '创建时间',
-    workflow_code          bigint(20) unsigned not null comment 'ds工作流code',
-    task_code              bigint(20) unsigned not null comment 'ds任务节点code，depend_level是workflow时为0',
-    prev_workflow_code     bigint(20) unsigned not null comment '上游ds工作流code，depend_level是task时为0',
-    prev_task_code         bigint(20) unsigned not null comment '上游ds业务实体code，depend_level是workflow时为0',
+    task_code              bigint(20) unsigned not null comment 'ds任务节点code',
+    prev_task_code         bigint(20) unsigned not null comment '上游ds业务实体code',
     depend_node_code       bigint(20) unsigned not null comment 'ds依赖节点code',
-    depend_level           varchar(10)         not null comment '依赖level: workflow, task',
     key idx_task_prev(task_code, prev_task_code),
     key idx_prev_task(prev_task_code, task_code)
 ) engine = innodb

@@ -52,7 +52,7 @@ public class DevTreeNodeLocalCache {
 
     private final LoadingCache<FunctionModuleEnum, DevTreeNodeCacheValue> cache = Caffeine.newBuilder()
             .maximumSize(100)
-            .expireAfterAccess(Duration.ofMinutes(60 * 24 * 7))
+            .expireAfterAccess(Duration.ofMinutes(10))
             .build(key -> load(key));
 
     private final BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory;

@@ -28,12 +28,14 @@ import java.util.List;
  **/
 public interface JobDependenceRepo {
 
-    List<JobDependence> queryPrevJob(Long jobId);
+    List<JobDependence> queryPrevJob(Long jobId, String environment);
+
+    List<JobDependence> queryPostJob(Long jobId, String environment);
 
     List<JobDependence> queryPostJob(Long jobId);
 
     Boolean addDependence(List<JobDependence> dependenceList);
 
-    Boolean deleteDependence(Long jobId);
+    Boolean deleteDependence(Long jobId, String environment);
 
 }

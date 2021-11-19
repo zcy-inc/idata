@@ -17,27 +17,41 @@
 
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
+import com.google.common.collect.Maps;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
- * @description:
+ * @description: 调度配置-优先级，1：低，2：中，3：高
  * @author: yangjianhua
- * @create: 2021-11-10 14:56
+ * @create: 2021-11-18 14:11
  **/
-public enum EventTypeEnum {
-    CREATED,
-    UPDATED,
-    DELETED,
-    DAG_SCHEDULE_UPDATED,
-    DAG_OFFLINE,
-    DAG_ONLINE,
-    DAG_RUN,
-    DAG_ADD_DEPENDENCE,
-    DAG_DEL_DEPENDENCE,
-    JOB_DISABLE,
-    JOB_ENABLE,
-    JOB_PUBLISH,
-    JOB_BIND_DAG,
-    JOB_UNBIND_DAG,
-    JOB_RUN,
-    JOB_BUILD_PREV,
+public enum JobPriorityEnum {
+    low(1, "低"),
+    middle(2, "中"),
+    high(3, "高"),
     ;
+
+    public final int val;
+    public final String desc;
+
+    JobPriorityEnum(int val, String desc) {
+        this.val = val;
+        this.desc = desc;
+    }
+
+    private static final Map<Integer, JobPriorityEnum> map = Maps.newHashMap();
+
+    static {
+        Arrays.stream(JobPriorityEnum.values())
+                .forEach(enumObj -> map.put(enumObj.val, enumObj));
+    }
+
+    public static Optional<JobPriorityEnum> getEnum(Integer val) {
+        if (Objects.isNull(val)) return Optional.empty();
+        return Optional.ofNullable(map.get(val));
+    }
 }

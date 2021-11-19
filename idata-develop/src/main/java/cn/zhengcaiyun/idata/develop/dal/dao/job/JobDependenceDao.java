@@ -64,7 +64,7 @@ public interface JobDependenceDao {
         @Result(column="job_id", property="jobId", jdbcType=JdbcType.BIGINT),
         @Result(column="environment", property="environment", jdbcType=JdbcType.VARCHAR),
         @Result(column="prev_job_id", property="prevJobId", jdbcType=JdbcType.BIGINT),
-        @Result(column="prev_job_dag_id", property="prevJobDagId", jdbcType=JdbcType.VARCHAR)
+        @Result(column="prev_job_dag_id", property="prevJobDagId", jdbcType=JdbcType.BIGINT)
     })
     List<JobDependence> selectMany(SelectStatementProvider selectStatement);
 
@@ -74,12 +74,12 @@ public interface JobDependenceDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.countFrom(this::count, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
@@ -91,7 +91,7 @@ public interface JobDependenceDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default int insert(JobDependence record) {
-        return MyBatis3Utils.insert(this::insert, record, JOB_DEPENDENCE, c ->
+        return MyBatis3Utils.insert(this::insert, record, jobDependence, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -104,7 +104,7 @@ public interface JobDependenceDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default int insertSelective(JobDependence record) {
-        return MyBatis3Utils.insert(this::insert, record, JOB_DEPENDENCE, c ->
+        return MyBatis3Utils.insert(this::insert, record, jobDependence, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -117,17 +117,17 @@ public interface JobDependenceDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default Optional<JobDependence> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default List<JobDependence> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default List<JobDependence> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
@@ -139,7 +139,7 @@ public interface JobDependenceDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, JOB_DEPENDENCE, completer);
+        return MyBatis3Utils.update(this::update, jobDependence, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_dependence")

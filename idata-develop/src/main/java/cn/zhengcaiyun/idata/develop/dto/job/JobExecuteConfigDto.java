@@ -60,6 +60,26 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     private String execWarnLevel;
 
+    /**
+     * 调度配置-超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔
+     */
+    private String schTimeOutStrategy;
+
+    /**
+     * 调度配置-优先级，1：低，2：中，3：高
+     */
+    private Integer schPriority;
+
+    /**
+     * 运行配置-驱动器内存
+     */
+    private Integer execDriverMem;
+
+    /**
+     * 运行配置-执行器内存
+     */
+    private Integer execWorkerMem;
+
     public Long getId() {
         return id;
     }
@@ -138,6 +158,38 @@ public class JobExecuteConfigDto extends BaseDto {
 
     public void setExecWarnLevel(String execWarnLevel) {
         this.execWarnLevel = execWarnLevel;
+    }
+
+    public String getSchTimeOutStrategy() {
+        return schTimeOutStrategy;
+    }
+
+    public void setSchTimeOutStrategy(String schTimeOutStrategy) {
+        this.schTimeOutStrategy = schTimeOutStrategy;
+    }
+
+    public Integer getSchPriority() {
+        return schPriority;
+    }
+
+    public void setSchPriority(Integer schPriority) {
+        this.schPriority = schPriority;
+    }
+
+    public Integer getExecDriverMem() {
+        return execDriverMem;
+    }
+
+    public void setExecDriverMem(Integer execDriverMem) {
+        this.execDriverMem = execDriverMem;
+    }
+
+    public Integer getExecWorkerMem() {
+        return execWorkerMem;
+    }
+
+    public void setExecWorkerMem(Integer execWorkerMem) {
+        this.execWorkerMem = execWorkerMem;
     }
 
     public static JobExecuteConfigDto from(JobExecuteConfig config) {

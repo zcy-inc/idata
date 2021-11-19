@@ -18,10 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
-import cn.zhengcaiyun.idata.develop.dto.job.JobExecuteConfigDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 
 /**
  * @description:
@@ -29,7 +26,8 @@ import java.util.List;
  * @create: 2021-09-27 16:27
  **/
 public interface JobExecuteConfigService {
-    JobExecuteConfigDto save(Long jobId, JobExecuteConfigDto dto, Operator operator);
 
-    List<JobExecuteConfigDto> getList(Long jobId, JobExecuteConfigCondition condition);
+    JobConfigCombinationDto save(Long jobId, String environment, JobConfigCombinationDto dto, Operator operator);
+
+    JobConfigCombinationDto getCombineConfig(Long jobId, String environment);
 }

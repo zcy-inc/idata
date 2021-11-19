@@ -20,7 +20,6 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
-import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
@@ -31,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobEventLogRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -53,19 +53,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JobInfoServiceImpl implements JobInfoService {
 
     private final JobInfoRepo jobInfoRepo;
-    private final JobEventLogRepo jobEventLogRepo;
     private final JobDependenceRepo jobDependenceRepo;
+    private final JobManager jobManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
-                              JobEventLogRepo jobEventLogRepo,
                               JobDependenceRepo jobDependenceRepo,
+                              JobManager jobManager,
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
-        this.jobEventLogRepo = jobEventLogRepo;
+        this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
@@ -84,31 +84,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobInfo info = dto.toModel();
         Long jobId = jobInfoRepo.saveJobInfo(info);
         // 保存后发布job创建事件
-        JobEventLog eventLog = logEvent(jobId, EventTypeEnum.CREATED, operator);
+        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.CREATED, operator);
         jobEventPublisher.whenCreated(eventLog);
 
         devTreeNodeLocalCache.invalidate(dto.getJobType().belong());
         return jobId;
-    }
-
-    private JobEventLog logEvent(Long jobId, EventTypeEnum typeEnum, Operator operator) {
-        return logEvent(jobId, typeEnum, null, operator);
-    }
-
-    private JobEventLog logEvent(Long jobId, EventTypeEnum typeEnum, String eventInfo, Operator operator) {
-        JobEventLog eventLog = new JobEventLog();
-        eventLog.setJobId(jobId);
-        eventLog.setJobEvent(typeEnum.name());
-        eventLog.setHandleStatus(EventStatusEnum.PENDING.val);
-        eventLog.setCreator(operator.getNickname());
-        eventLog.setEditor(operator.getNickname());
-        eventLog.setEventInfo(eventInfo);
-        jobEventLogRepo.create(eventLog);
-        return eventLog;
-    }
-
-    private boolean checkJobInfoUpdated(JobInfo newJobInfo, JobInfo oldJobInfo) {
-        return !Objects.equals(newJobInfo.getName(), oldJobInfo.getName());
     }
 
     @Override
@@ -125,12 +105,12 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         dto.setStatus(null);
         dto.resetEditor(operator);
-        JobInfo newJobInfo =dto.toModel();
+        JobInfo newJobInfo = dto.toModel();
         Boolean ret = jobInfoRepo.updateJobInfo(newJobInfo);
-        if (BooleanUtils.isTrue(ret)){
-            if(checkJobInfoUpdated(newJobInfo,oldJobInfo)){
+        if (BooleanUtils.isTrue(ret)) {
+            if (checkJobInfoUpdated(newJobInfo, oldJobInfo)) {
                 // 保存后发布job更新事件
-                JobEventLog eventLog = logEvent(newJobInfo.getId(), EventTypeEnum.UPDATED, operator);
+                JobEventLog eventLog = jobManager.logEvent(newJobInfo.getId(), EventTypeEnum.UPDATED, operator);
                 jobEventPublisher.whenUpdated(eventLog);
             }
         }
@@ -151,12 +131,12 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "作业未停用，不能删除");
 
         List<JobDependence> postJobs = jobDependenceRepo.queryPostJob(id);
-        checkArgument(ObjectUtils.isEmpty(postJobs),"作业被其他作业依赖，不能删除");
+        checkArgument(ObjectUtils.isEmpty(postJobs), "作业被其他作业依赖，不能删除");
 
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
-        if (BooleanUtils.isTrue(ret)){
+        if (BooleanUtils.isTrue(ret)) {
             // 发布job删除事件
-            JobEventLog eventLog = logEvent(id, EventTypeEnum.DELETED, operator);
+            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.DELETED, operator);
             jobEventPublisher.whenDeleted(eventLog);
         }
         JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
@@ -173,11 +153,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         updateJobInfo.setId(id);
         updateJobInfo.setStatus(UsingStatusEnum.ONLINE.val);
         updateJobInfo.setEditor(operator.getNickname());
-        Boolean ret =  jobInfoRepo.updateJobInfo(updateJobInfo);
-        if (BooleanUtils.isTrue(ret)){
+        Boolean ret = jobInfoRepo.updateJobInfo(updateJobInfo);
+        if (BooleanUtils.isTrue(ret)) {
             // 发布job启用事件
-            JobEventLog eventLog = logEvent(id, EventTypeEnum.JOB_ENABLE, operator);
-            jobEventPublisher.whenEnabled(eventLog);
+            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_ENABLE, operator);
+//            jobEventPublisher.whenEnabled(eventLog);
         }
         return ret;
     }
@@ -192,11 +172,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         updateJobInfo.setId(id);
         updateJobInfo.setStatus(UsingStatusEnum.OFFLINE.val);
         updateJobInfo.setEditor(operator.getNickname());
-        Boolean ret =  jobInfoRepo.updateJobInfo(updateJobInfo);
-        if (BooleanUtils.isTrue(ret)){
+        Boolean ret = jobInfoRepo.updateJobInfo(updateJobInfo);
+        if (BooleanUtils.isTrue(ret)) {
             // 发布job停用事件
-            JobEventLog eventLog = logEvent(id, EventTypeEnum.JOB_DISABLE, operator);
-            jobEventPublisher.whenDisabled(eventLog);
+            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_DISABLE, operator);
+//            jobEventPublisher.whenDisabled(eventLog);
         }
         return ret;
     }
@@ -208,8 +188,8 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.ONLINE.val), "作业已停用，先启用再运行");
 
         // 发布job 运行事件
-        JobEventLog eventLog = logEvent(id, EventTypeEnum.JOB_RUN, operator);
-        jobEventPublisher.whenToRun(eventLog);
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, operator);
+//        jobEventPublisher.whenToRun(eventLog);
         return Boolean.TRUE;
     }
 
@@ -225,5 +205,9 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(dto.getJobType()), "作业类型为空");
         checkArgument(StringUtils.isNotBlank(dto.getDwLayerCode()), "作业分层为空");
         checkArgument(Objects.nonNull(dto.getFolderId()), "作业所属文件夹为空");
+    }
+
+    private boolean checkJobInfoUpdated(JobInfo newJobInfo, JobInfo oldJobInfo) {
+        return !Objects.equals(newJobInfo.getName(), oldJobInfo.getName());
     }
 }

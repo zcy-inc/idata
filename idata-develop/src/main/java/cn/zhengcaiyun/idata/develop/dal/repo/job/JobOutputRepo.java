@@ -15,31 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.event.job;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
+
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobOutput;
+
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 17:53
+ * @create: 2021-11-18 15:14
  **/
-public class JobBindDagEvent extends JobBaseEvent {
+public interface JobOutputRepo {
 
-    private String environment;
-    private Boolean firstBind;
+    Long save(JobOutput output);
 
-    public Boolean getFirstBind() {
-        return firstBind;
-    }
+    Optional<JobOutput> query(Long jobId, String environment);
 
-    public void setFirstBind(Boolean firstBind) {
-        this.firstBind = firstBind;
-    }
-
-    public String getEnvironment() {
-        return environment;
-    }
-
-    public void setEnvironment(String environment) {
-        this.environment = environment;
-    }
+    Boolean delete(Long jobId, String environment);
 }

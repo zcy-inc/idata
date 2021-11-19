@@ -17,6 +17,12 @@
 
 package cn.zhengcaiyun.idata.develop.manager;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobEventLogRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,4 +32,33 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class JobManager {
+
+    private final JobEventLogRepo jobEventLogRepo;
+
+    @Autowired
+    public JobManager(JobEventLogRepo jobEventLogRepo) {
+        this.jobEventLogRepo = jobEventLogRepo;
+    }
+
+    public JobEventLog logEvent(Long jobId, EventTypeEnum typeEnum, Operator operator) {
+        return logEvent(jobId, typeEnum, "", operator);
+    }
+
+    public JobEventLog logEvent(Long jobId, EventTypeEnum typeEnum, String environment, Operator operator) {
+        return logEvent(jobId, typeEnum, environment, null, operator);
+    }
+
+    public JobEventLog logEvent(Long jobId, EventTypeEnum typeEnum, String environment, String eventInfo, Operator operator) {
+        JobEventLog eventLog = new JobEventLog();
+        eventLog.setJobId(jobId);
+        eventLog.setJobEvent(typeEnum.name());
+        eventLog.setEnvironment(environment);
+        eventLog.setHandleStatus(EventStatusEnum.PENDING.val);
+        eventLog.setCreator(operator.getNickname());
+        eventLog.setEditor(operator.getNickname());
+        eventLog.setEventInfo(eventInfo);
+        jobEventLogRepo.create(eventLog);
+        return eventLog;
+    }
+
 }

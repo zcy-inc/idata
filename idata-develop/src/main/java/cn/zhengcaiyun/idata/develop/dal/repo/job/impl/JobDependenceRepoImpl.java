@@ -17,12 +17,19 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceCustomizeDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDynamicSqlSupport.JOB_DEPENDENCE;
+import static org.mybatis.dynamic.sql.SqlBuilder.and;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @description:
@@ -32,30 +39,44 @@ import java.util.List;
 @Repository
 public class JobDependenceRepoImpl implements JobDependenceRepo {
 
-    private final JobDependenceRepo jobDependenceRepo;
+    private final JobDependenceDao jobDependenceDao;
+    private final JobDependenceCustomizeDao jobDependenceCustomizeDao;
 
     @Autowired
-    public JobDependenceRepoImpl(JobDependenceRepo jobDependenceRepo) {
-        this.jobDependenceRepo = jobDependenceRepo;
+    public JobDependenceRepoImpl(JobDependenceDao jobDependenceDao,
+                                 JobDependenceCustomizeDao jobDependenceCustomizeDao) {
+        this.jobDependenceDao = jobDependenceDao;
+        this.jobDependenceCustomizeDao = jobDependenceCustomizeDao;
     }
 
     @Override
-    public List<JobDependence> queryPrevJob(Long jobId) {
-        return null;
+    public List<JobDependence> queryPrevJob(Long jobId, String environment) {
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.environment, isEqualTo(environment)),
+                and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
+    public List<JobDependence> queryPostJob(Long jobId, String environment) {
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.prevJobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.environment, isEqualTo(environment)),
+                and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public List<JobDependence> queryPostJob(Long jobId) {
-        return null;
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.prevJobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public Boolean addDependence(List<JobDependence> dependenceList) {
-        return null;
+        return jobDependenceCustomizeDao.insertMultiple(dependenceList) > 0;
     }
 
     @Override
-    public Boolean deleteDependence(Long jobId) {
-        return null;
+    public Boolean deleteDependence(Long jobId, String environment) {
+        return jobDependenceDao.delete(dsl -> dsl.where(JOB_DEPENDENCE.prevJobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.environment, isEqualTo(environment)))) > 0;
     }
 }

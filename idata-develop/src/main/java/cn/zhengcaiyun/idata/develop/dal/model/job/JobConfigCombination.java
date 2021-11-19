@@ -15,31 +15,37 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.event.job;
+package cn.zhengcaiyun.idata.develop.dal.model.job;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 17:53
+ * @create: 2021-11-19 11:14
  **/
-public class JobBindDagEvent extends JobBaseEvent {
+public class JobConfigCombination {
 
-    private String environment;
-    private Boolean firstBind;
+    private final JobExecuteConfig executeConfig;
+    private final List<JobDependence> dependenceList;
+    private final Optional<JobOutput> outputOptional;
 
-    public Boolean getFirstBind() {
-        return firstBind;
+    public JobConfigCombination(JobExecuteConfig executeConfig, List<JobDependence> dependenceList, Optional<JobOutput> outputOptional) {
+        this.executeConfig = executeConfig;
+        this.dependenceList = dependenceList;
+        this.outputOptional = outputOptional;
     }
 
-    public void setFirstBind(Boolean firstBind) {
-        this.firstBind = firstBind;
+    public JobExecuteConfig getExecuteConfig() {
+        return executeConfig;
     }
 
-    public String getEnvironment() {
-        return environment;
+    public List<JobDependence> getDependenceList() {
+        return dependenceList;
     }
 
-    public void setEnvironment(String environment) {
-        this.environment = environment;
+    public Optional<JobOutput> getOutputOptional() {
+        return outputOptional;
     }
 }

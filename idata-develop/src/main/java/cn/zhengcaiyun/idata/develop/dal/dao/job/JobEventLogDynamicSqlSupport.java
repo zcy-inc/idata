@@ -61,6 +61,13 @@ public final class JobEventLogDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   环境
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.environment")
+    public static final SqlColumn<String> environment = JOB_EVENT_LOG.environment;
+
+    /**
+     * Database Column Remarks:
      *   事件，created, updated, deleted ...
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.job_event")
@@ -102,6 +109,8 @@ public final class JobEventLogDynamicSqlSupport {
         public final SqlColumn<Date> editTime = column("edit_time", JDBCType.TIMESTAMP);
 
         public final SqlColumn<Long> jobId = column("job_id", JDBCType.BIGINT);
+
+        public final SqlColumn<String> environment = column("environment", JDBCType.VARCHAR);
 
         public final SqlColumn<String> jobEvent = column("job_event", JDBCType.VARCHAR);
 

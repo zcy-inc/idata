@@ -60,6 +60,13 @@ public class JobEventLog {
 
     /**
      * Database Column Remarks:
+     *   环境
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.environment")
+    private String environment;
+
+    /**
+     * Database Column Remarks:
      *   事件，created, updated, deleted ...
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.job_event")
@@ -154,6 +161,16 @@ public class JobEventLog {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.job_id")
     public void setJobId(Long jobId) {
         this.jobId = jobId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.environment")
+    public String getEnvironment() {
+        return environment;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.environment")
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_event_log.job_event")
