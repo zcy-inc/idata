@@ -69,10 +69,18 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     setData([...data]);
   };
 
+  const renderInputPrefix = (_: any, i: number) => {
+    if (i === 0 && _.enableCompare && _.hiveDiff) {
+      return <IconFont type="icon-baocuo" />;
+    } else {
+      return null;
+    }
+  };
+
   // 渲染表结构的列
   const renderColumns = () =>
     checkedList
-      .map((labelCode) => {
+      .map((labelCode, i) => {
         const _ = columnsMap?.get(labelCode);
         const column: ProColumns = {
           title: [
@@ -91,6 +99,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
                   placeholder="请输入"
                   onChange={({ target: { value } }) => setValue(schema, value)}
                   required
+                  prefix={renderInputPrefix(_, i)}
                 />
               ),
             });
