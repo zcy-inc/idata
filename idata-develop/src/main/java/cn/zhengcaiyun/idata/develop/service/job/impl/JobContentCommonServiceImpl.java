@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
@@ -70,13 +71,19 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     public DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkArgument(Objects.nonNull(version), "作业版本号为空");
+        // todo 支持不同作业
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
-        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), remark, operator);
+        JobPublishContent publishContent = assemblePublishContent(jobContentOptional.get());
+        jobPublishManager.submit(publishContent, envEnumOptional.get(), remark, operator);
         return DIJobContentDto.from(jobContentOptional.get());
+    }
+
+    private JobPublishContent assemblePublishContent(DIJobContent diJobContent) {
+        return new JobPublishContent(diJobContent.getId(), diJobContent.getJobId(), diJobContent.getVersion());
     }
 
     @Override
@@ -84,6 +91,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
 
         List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(jobId);
+        // todo 支持不同类型作业
         List<DIJobContent> contentList = diJobContentRepo.queryList(jobId);
         return assembleContentVersion(publishRecordList, contentList);
     }

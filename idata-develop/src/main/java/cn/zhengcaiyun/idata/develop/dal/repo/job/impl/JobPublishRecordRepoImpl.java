@@ -21,9 +21,11 @@ import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +48,13 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
 
     private final JobPublishRecordDao jobPublishRecordDao;
+    private final DIJobContentRepo diJobContentRepo;
 
     @Autowired
-    public JobPublishRecordRepoImpl(JobPublishRecordDao jobPublishRecordDao) {
+    public JobPublishRecordRepoImpl(JobPublishRecordDao jobPublishRecordDao,
+                                    DIJobContentRepo diJobContentRepo) {
         this.jobPublishRecordDao = jobPublishRecordDao;
+        this.diJobContentRepo = diJobContentRepo;
     }
 
     @Override
@@ -130,6 +135,27 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                         and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(jobPublishRecord.jobContentVersion.descending(),
                         jobPublishRecord.id.descending()));
+    }
+
+    @Override
+    @Transactional
+    public Boolean submit(JobPublishRecord record, String operator) {
+        if (record.getId() == null) {
+            // 第一次提交
+            // todo 需要更新不同作业的可编辑状态，判断依据 record.getJobTypeCode()
+            diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
+            save(record);
+        } else {
+            // 归档后再次提交
+            JobPublishRecord submitStatus = new JobPublishRecord();
+            submitStatus.setId(record.getId());
+            submitStatus.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
+            submitStatus.setEditor(operator);
+            submitStatus.setSubmitRemark(record.getSubmitRemark());
+            update(submitStatus);
+        }
+        return Boolean.TRUE;
     }
 
     @Override

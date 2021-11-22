@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
@@ -57,6 +58,14 @@ public class JobExecuteConfigRepoImpl implements JobExecuteConfigRepo {
     @Override
     public Boolean update(JobExecuteConfig config) {
         jobExecuteConfigDao.updateByPrimaryKeySelective(config);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean switchRunningState(Long id, RunningStateEnum runningState, String operator) {
+        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.runningState).equalTo(runningState.val)
+                .set(jobExecuteConfig.editor).equalTo(operator)
+                .where(jobExecuteConfig.id, isEqualTo(id)));
         return Boolean.TRUE;
     }
 

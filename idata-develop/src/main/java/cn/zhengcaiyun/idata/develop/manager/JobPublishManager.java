@@ -20,24 +20,19 @@ package cn.zhengcaiyun.idata.develop.manager;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
-import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
-import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
-import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
-import org.apache.commons.lang3.ObjectUtils;
+import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -55,29 +50,30 @@ public class JobPublishManager {
     @Value("${dev.job.publish.whitelist}")
     public String publishWhitelist;
 
-    private final DIJobContentRepo diJobContentRepo;
     private final JobInfoRepo jobInfoRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final DAGRepo dagRepo;
-    private final DataSourceApi dataSourceApi;
+    private final JobManager jobManager;
+    private final JobEventPublisher jobEventPublisher;
 
     @Autowired
-    public JobPublishManager(DIJobContentRepo diJobContentRepo,
-                             JobInfoRepo jobInfoRepo,
+    public JobPublishManager(JobInfoRepo jobInfoRepo,
                              JobPublishRecordRepo jobPublishRecordRepo,
                              JobExecuteConfigRepo jobExecuteConfigRepo,
                              DAGRepo dagRepo,
-                             DataSourceApi dataSourceApi) {
-        this.diJobContentRepo = diJobContentRepo;
+                             JobManager jobManager,
+                             JobEventPublisher jobEventPublisher) {
+        this.jobManager = jobManager;
+        this.jobEventPublisher = jobEventPublisher;
         this.jobInfoRepo = jobInfoRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.dagRepo = dagRepo;
-        this.dataSourceApi = dataSourceApi;
     }
 
-    public boolean submit(DIJobContent content, EnvEnum envEnum, String remark, Operator operator) {
+    @Transactional
+    public boolean submit(JobPublishContent content, EnvEnum envEnum, String remark, Operator operator) {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(content.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
 
@@ -99,46 +95,13 @@ public class JobPublishManager {
         } else {
             publishRecord.setSubmitRemark(remark);
         }
-        diJobContentRepo.submit(content, publishRecord, operator.getNickname());
+        jobPublishRecordRepo.submit(publishRecord, operator.getNickname());
 
         postSubmit(publishRecord, operator);
         return true;
     }
 
-    private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, DIJobContent content, EnvEnum envEnum, String remark, Operator operator) {
-        JobPublishRecord record = new JobPublishRecord();
-        record.setJobId(content.getJobId());
-        record.setJobContentId(content.getId());
-        record.setJobContentVersion(content.getVersion());
-        record.setJobTypeCode(jobInfo.getJobType());
-        record.setDwLayerCode(jobInfo.getDwLayerCode());
-        record.setEnvironment(envEnum.name());
-        record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
-        record.setCreator(operator.getNickname());
-        record.setEditor(operator.getNickname());
-        record.setSubmitRemark(remark);
-        return record;
-    }
-
-    private void preSubmit(DIJobContent content, EnvEnum envEnum) {
-        checkDataSource(content, envEnum);
-        checkExecuteConfig(content, envEnum);
-    }
-
-    private void postSubmit(JobPublishRecord publishRecord, Operator operator) {
-        // 预发环境直接发布
-        if (EnvEnum.stag.name().equals(publishRecord.getEnvironment())) {
-            //更新状态为发布
-            toPublish(publishRecord, operator);
-        }
-
-        // todo 同步ds
-    }
-
-    private void toPublish(JobPublishRecord publishRecord, Operator operator) {
-        jobPublishRecordRepo.publish(publishRecord, operator.getNickname());
-    }
-
+    @Transactional
     public boolean publish(JobPublishRecord publishRecord, Operator operator) {
         //更新状态为发布
         toPublish(publishRecord, operator);
@@ -146,25 +109,29 @@ public class JobPublishManager {
         return true;
     }
 
+    private void preSubmit(JobPublishContent content, EnvEnum envEnum) {
+        checkExecuteConfig(content, envEnum);
+    }
+
+    private void postSubmit(JobPublishRecord publishRecord, Operator operator) {
+        // 预发环境直接发布
+        if (EnvEnum.stag.name().equals(publishRecord.getEnvironment())) {
+            //更新状态为发布
+            publish(publishRecord, operator);
+        }
+    }
+
+    private void toPublish(JobPublishRecord publishRecord, Operator operator) {
+        jobPublishRecordRepo.publish(publishRecord, operator.getNickname());
+    }
+
     private void postPublish(JobPublishRecord publishRecord, Operator operator) {
-        // todo 同步ds
+        // 保存后发布job更新事件
+        JobEventLog eventLog = jobManager.logEvent(publishRecord.getJobId(), EventTypeEnum.JOB_PUBLISH, operator);
+        jobEventPublisher.whenPublished(eventLog);
     }
 
-    private void checkDataSource(DIJobContent content, EnvEnum envEnum) {
-        DataSourceDto dataSourceDto = dataSourceApi.getDataSource(content.getSrcDataSourceId());
-        if (ObjectUtils.isEmpty(dataSourceDto.getEnvList())
-                || !dataSourceDto.getEnvList().contains(envEnum)) {
-            throw new BizProcessException("来源数据源未配置" + envEnum.name() + "数据源");
-        }
-
-        dataSourceDto = dataSourceApi.getDataSource(content.getDestDataSourceId());
-        if (ObjectUtils.isEmpty(dataSourceDto.getEnvList())
-                || !dataSourceDto.getEnvList().contains(envEnum)) {
-            throw new BizProcessException("目标数据源未配置" + envEnum.name() + "数据源");
-        }
-    }
-
-    private void checkExecuteConfig(DIJobContent content, EnvEnum envEnum) {
+    private void checkExecuteConfig(JobPublishContent content, EnvEnum envEnum) {
         Optional<JobExecuteConfig> optional = jobExecuteConfigRepo.query(content.getJobId(), envEnum.name());
         checkArgument(optional.isPresent(), envEnum.name() + "环境未配置作业运行配置");
 
@@ -174,7 +141,22 @@ public class JobPublishManager {
     }
 
     public boolean hasPublishPermission(Operator operator) {
-        // 暂用白名单实现
+        // todo  用权限系统实现
         return Objects.nonNull(publishWhitelist) && publishWhitelist.indexOf(operator.getNickname()) >= 0;
+    }
+
+    private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, JobPublishContent content, EnvEnum envEnum, String remark, Operator operator) {
+        JobPublishRecord record = new JobPublishRecord();
+        record.setJobId(content.getJobId());
+        record.setJobContentId(content.getContentId());
+        record.setJobContentVersion(content.getVersion());
+        record.setJobTypeCode(jobInfo.getJobType());
+        record.setDwLayerCode(jobInfo.getDwLayerCode());
+        record.setEnvironment(envEnum.name());
+        record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
+        record.setCreator(operator.getNickname());
+        record.setEditor(operator.getNickname());
+        record.setSubmitRemark(remark);
+        return record;
     }
 }

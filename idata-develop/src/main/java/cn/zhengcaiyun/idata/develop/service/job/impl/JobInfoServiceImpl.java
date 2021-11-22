@@ -20,12 +20,16 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
@@ -36,12 +40,14 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @description:
@@ -53,6 +59,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     private final JobInfoRepo jobInfoRepo;
     private final JobDependenceRepo jobDependenceRepo;
+    private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobManager jobManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
@@ -60,10 +67,12 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
                               JobDependenceRepo jobDependenceRepo,
+                              JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobManager jobManager,
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
+        this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
         this.jobEventPublisher = jobEventPublisher;
@@ -71,18 +80,16 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public Long addJobInfo(JobInfoDto dto, Operator operator) {
+    public Long addJob(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameRecords), "作业名称已存在");
-
-        // 作业默认下线
-        dto.setStatus(UsingStatusEnum.OFFLINE.val);
+        dto.setStatus(UsingStatusEnum.ONLINE.val);
         dto.setOperator(operator);
 
         JobInfo info = dto.toModel();
         Long jobId = jobInfoRepo.saveJobInfo(info);
-        // 保存后发布job创建事件
+        // 发布job创建事件
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.CREATED, operator);
         jobEventPublisher.whenCreated(eventLog);
 
@@ -94,8 +101,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     public Boolean editJobInfo(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         JobInfo oldJobInfo = tryFetchJobInfo(dto.getId());
-        // 检查是否已停用，只有停用后才能更改
-        checkArgument(Objects.equals(oldJobInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "作业未停用，不能修改");
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         if (ObjectUtils.isNotEmpty(dupNameRecords)) {
@@ -124,13 +129,14 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public Boolean removeJobInfo(Long id, Operator operator) {
+    public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
+        List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
         // 检查是否已停用，只有停用后才能更改
-        checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "作业未停用，不能删除");
+        checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再删除作业");
 
         List<JobDependence> postJobs = jobDependenceRepo.queryPostJob(id);
-        checkArgument(ObjectUtils.isEmpty(postJobs), "作业被其他作业依赖，不能删除");
+        checkArgument(ObjectUtils.isEmpty(postJobs), "先删除所有环境下的作业依赖关系，再删除作业");
 
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
         if (BooleanUtils.isTrue(ret)) {
@@ -143,52 +149,49 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public Boolean enableJobInfo(Long id, Operator operator) {
-        JobInfo jobInfo = tryFetchJobInfo(id);
-        // 检查是否已停用，只有停用后才能更改
-        checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "作业已启用，请勿重复操作");
+    public Boolean resumeJob(Long id, String environment, Operator operator) {
+        checkArgument(Objects.nonNull(id), "作业编号参数为空");
+        checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
+        Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
+        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能恢复运行", environment);
+        JobExecuteConfig executeConfig = configOptional.get();
+        checkState(Objects.equals(RunningStateEnum.pause.val, executeConfig.getRunningState()), "作业在s%环境已运行，勿重复操作", environment);
 
-        JobInfo updateJobInfo = new JobInfo();
-        updateJobInfo.setId(id);
-        updateJobInfo.setStatus(UsingStatusEnum.ONLINE.val);
-        updateJobInfo.setEditor(operator.getNickname());
-        Boolean ret = jobInfoRepo.updateJobInfo(updateJobInfo);
-        if (BooleanUtils.isTrue(ret)) {
-            // 发布job启用事件
-            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_ENABLE, operator);
-//            jobEventPublisher.whenEnabled(eventLog);
-        }
-        return ret;
+        jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.resume, operator.getNickname());
+        // 发布job恢复事件
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RESUME, operator);
+        jobEventPublisher.whenResumed(eventLog);
+        return Boolean.TRUE;
     }
 
     @Override
-    public Boolean disableJobInfo(Long id, Operator operator) {
-        JobInfo jobInfo = tryFetchJobInfo(id);
-        // 检查是否已停用，只有停用后才能更改
-        checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.ONLINE.val), "作业已停用，请勿重复操作");
+    public Boolean pauseJob(Long id, String environment, Operator operator) {
+        checkArgument(Objects.nonNull(id), "作业编号参数为空");
+        checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
+        Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
+        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能恢复运行", environment);
+        JobExecuteConfig executeConfig = configOptional.get();
+        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，勿重复操作", environment);
 
-        JobInfo updateJobInfo = new JobInfo();
-        updateJobInfo.setId(id);
-        updateJobInfo.setStatus(UsingStatusEnum.OFFLINE.val);
-        updateJobInfo.setEditor(operator.getNickname());
-        Boolean ret = jobInfoRepo.updateJobInfo(updateJobInfo);
-        if (BooleanUtils.isTrue(ret)) {
-            // 发布job停用事件
-            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_DISABLE, operator);
-//            jobEventPublisher.whenDisabled(eventLog);
-        }
-        return ret;
+        jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.pause, operator.getNickname());
+        // 发布job暂停事件
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_PAUSE, operator);
+        jobEventPublisher.whenPaused(eventLog);
+        return Boolean.TRUE;
     }
 
     @Override
-    public Boolean runJob(Long id, Operator operator) {
-        JobInfo jobInfo = tryFetchJobInfo(id);
-        // 检查是否已停用，只有停用后才能更改
-        checkArgument(Objects.equals(jobInfo.getStatus(), UsingStatusEnum.ONLINE.val), "作业已停用，先启用再运行");
+    public Boolean runJob(Long id, String environment, Operator operator) {
+        checkArgument(Objects.nonNull(id), "作业编号参数为空");
+        checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
+        Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
+        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能运行", environment);
+        JobExecuteConfig executeConfig = configOptional.get();
+        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，不能运行", environment);
 
-        // 发布job 运行事件
+        // 发布job暂停事件
         JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, operator);
-//        jobEventPublisher.whenToRun(eventLog);
+        jobEventPublisher.whenToRun(eventLog);
         return Boolean.TRUE;
     }
 
@@ -208,5 +211,18 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     private boolean checkJobInfoUpdated(JobInfo newJobInfo, JobInfo oldJobInfo) {
         return !Objects.equals(newJobInfo.getName(), oldJobInfo.getName());
+    }
+
+    private boolean isRunning(JobExecuteConfig config) {
+        return Objects.equals(RunningStateEnum.resume.val, config.getRunningState());
+    }
+
+    private boolean isRunning(List<JobExecuteConfig> executeConfigs) {
+        if (CollectionUtils.isEmpty(executeConfigs)) return false;
+
+        for (JobExecuteConfig config : executeConfigs) {
+            if (isRunning(config)) return true;
+        }
+        return false;
     }
 }

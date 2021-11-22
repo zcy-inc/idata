@@ -88,7 +88,7 @@ public class JobInfoController {
      */
     @PostMapping
     public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
-        Long id = jobInfoService.addJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
+        Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
 
         return getJobInfo(id);
@@ -126,8 +126,8 @@ public class JobInfoController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public RestResult<Boolean> removeJobInfo(@PathVariable Long id) {
-        return RestResult.success(jobInfoService.removeJobInfo(id, OperatorContext.getCurrentOperator()));
+    public RestResult<Boolean> removeJob(@PathVariable Long id) {
+        return RestResult.success(jobInfoService.removeJob(id, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -147,10 +147,10 @@ public class JobInfoController {
      * @param id 作业id
      * @return
      */
-    @PutMapping("/{id}/environments/{environment}/enable")
-    public RestResult<Boolean> enableJobInfo(@PathVariable Long id,
-                                             @PathVariable("environment") String environment) {
-        return RestResult.success(jobInfoService.enableJobInfo(id, OperatorContext.getCurrentOperator()));
+    @PutMapping("/{id}/environments/{environment}/resume")
+    public RestResult<Boolean> resumeJob(@PathVariable Long id,
+                                         @PathVariable("environment") String environment) {
+        return RestResult.success(jobInfoService.resumeJob(id, environment, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -159,10 +159,10 @@ public class JobInfoController {
      * @param id 作业id
      * @return
      */
-    @PutMapping("/{id}/environments/{environment}/disable")
-    public RestResult<Boolean> disableJobInfo(@PathVariable Long id,
-                                              @PathVariable("environment") String environment) {
-        return RestResult.success(jobInfoService.disableJobInfo(id, OperatorContext.getCurrentOperator()));
+    @PutMapping("/{id}/environments/{environment}/pause")
+    public RestResult<Boolean> pauseJob(@PathVariable Long id,
+                                        @PathVariable("environment") String environment) {
+        return RestResult.success(jobInfoService.pauseJob(id, environment, OperatorContext.getCurrentOperator()));
     }
 
     /**
@@ -174,7 +174,7 @@ public class JobInfoController {
     @PostMapping("/{id}/environments/{environment}/run")
     public RestResult<Boolean> runJob(@PathVariable Long id,
                                       @PathVariable("environment") String environment) {
-        return RestResult.success(jobInfoService.runJob(id, OperatorContext.getCurrentOperator()));
+        return RestResult.success(jobInfoService.runJob(id, environment, OperatorContext.getCurrentOperator()));
     }
 
 }

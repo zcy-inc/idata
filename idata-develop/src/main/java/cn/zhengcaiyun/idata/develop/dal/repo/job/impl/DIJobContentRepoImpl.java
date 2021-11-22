@@ -44,13 +44,10 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class DIJobContentRepoImpl implements DIJobContentRepo {
 
     private final DIJobContentDao diJobContentDao;
-    private final JobPublishRecordRepo jobPublishRecordRepo;
 
     @Autowired
-    public DIJobContentRepoImpl(DIJobContentDao diJobContentDao,
-                                JobPublishRecordRepo jobPublishRecordRepo) {
+    public DIJobContentRepoImpl(DIJobContentDao diJobContentDao) {
         this.diJobContentDao = diJobContentDao;
-        this.jobPublishRecordRepo = jobPublishRecordRepo;
     }
 
     @Override
@@ -87,26 +84,6 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
         return diJobContentDao.selectOne(dsl -> dsl.where(DI_JOB_CONTENT.jobId, isEqualTo(jobId),
                 and(DI_JOB_CONTENT.version, isEqualTo(version)),
                 and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val))));
-    }
-
-    @Override
-    @Transactional
-    public Boolean submit(DIJobContent content, JobPublishRecord publishRecord, String operator) {
-        if (publishRecord.getId() == null) {
-            // 第一次提交
-            updateEditable(content.getId(), EditableEnum.NO, operator);
-            publishRecord.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
-            jobPublishRecordRepo.save(publishRecord);
-        } else {
-            // 归档后再次提交
-            JobPublishRecord submitStatus = new JobPublishRecord();
-            submitStatus.setId(publishRecord.getId());
-            submitStatus.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
-            submitStatus.setEditor(operator);
-            submitStatus.setSubmitRemark(publishRecord.getSubmitRemark());
-            jobPublishRecordRepo.update(submitStatus);
-        }
-        return Boolean.TRUE;
     }
 
     @Override

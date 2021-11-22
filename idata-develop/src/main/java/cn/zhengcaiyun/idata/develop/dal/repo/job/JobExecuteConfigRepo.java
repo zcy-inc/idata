@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 
 import java.util.List;
@@ -33,6 +34,8 @@ public interface JobExecuteConfigRepo {
     Long save(JobExecuteConfig config);
 
     Boolean update(JobExecuteConfig config);
+
+    Boolean switchRunningState(Long id, RunningStateEnum runningState, String operator);
 
     Optional<JobExecuteConfig> query(Long jobId, String environment);
 

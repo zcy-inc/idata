@@ -15,30 +15,33 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+package cn.zhengcaiyun.idata.develop.dal.model.job;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-26 17:06
+ * @create: 2021-11-22 15:19
  **/
-public interface JobInfoService {
+public class JobPublishContent {
+    private final Long contentId;
+    private final Long jobId;
+    private final Integer version;
 
-    Long addJob(JobInfoDto dto, Operator operator);
+    public JobPublishContent(Long contentId, Long jobId, Integer version) {
+        this.contentId = contentId;
+        this.jobId = jobId;
+        this.version = version;
+    }
 
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
+    public Long getContentId() {
+        return contentId;
+    }
 
-    JobInfoDto getJobInfo(Long id);
+    public Long getJobId() {
+        return jobId;
+    }
 
-    Boolean removeJob(Long id, Operator operator);
-
-    Boolean resumeJob(Long id, String environment, Operator operator);
-
-    Boolean pauseJob(Long id, String environment, Operator operator);
-
-    Boolean runJob(Long id, String environment, Operator operator);
-
+    public Integer getVersion() {
+        return version;
+    }
 }
