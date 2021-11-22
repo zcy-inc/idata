@@ -14,34 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlQueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlResultDto;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-26 17:06
- **/
-public interface JobInfoService {
+ * @author caizhedong
+ * @date 2021-11-22 上午10:14
+ */
 
-    Long addJobInfo(JobInfoDto dto, Operator operator);
-
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
-
-    JobInfoDto getJobInfo(Long id);
-
-    Boolean removeJobInfo(Long id, Operator operator);
-
-    Boolean enableJobInfo(Long id, Operator operator);
-
-    Boolean disableJobInfo(Long id, Operator operator);
-
-    Boolean runJob(Long id, Operator operator);
-
-    JobDryRunDto dryRunJob(Long jobId, Integer version);
-
+public interface SqlJobService {
+    SqlJobDto save(SqlJobDto sqlJobDto, String operator);
+    SqlJobDto find(Long jobId, Integer version);
+    SqlResultDto runQuerySql(SqlQueryDto sqlQueryDto);
 }

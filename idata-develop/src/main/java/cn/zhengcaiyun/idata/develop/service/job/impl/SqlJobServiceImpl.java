@@ -14,34 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlQueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlResultDto;
+import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
+import org.springframework.stereotype.Service;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-26 17:06
- **/
-public interface JobInfoService {
+ * @author caizhedong
+ * @date 2021-11-22 上午10:38
+ */
 
-    Long addJobInfo(JobInfoDto dto, Operator operator);
+@Service
+public class SqlJobServiceImpl implements SqlJobService {
 
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
+    @Override
+    public SqlJobDto save(SqlJobDto sqlJobDto, String operator) {
+        return null;
+    }
 
-    JobInfoDto getJobInfo(Long id);
+    @Override
+    public SqlJobDto find(Long jobId, Integer version) {
+        return null;
+    }
 
-    Boolean removeJobInfo(Long id, Operator operator);
-
-    Boolean enableJobInfo(Long id, Operator operator);
-
-    Boolean disableJobInfo(Long id, Operator operator);
-
-    Boolean runJob(Long id, Operator operator);
-
-    JobDryRunDto dryRunJob(Long jobId, Integer version);
-
+    @Override
+    public SqlResultDto runQuerySql(SqlQueryDto sqlQueryDto) {
+        return null;
+    }
 }

@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobAndDagDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
@@ -175,6 +176,12 @@ public class JobInfoController {
     public RestResult<Boolean> runJob(@PathVariable Long id,
                                       @PathVariable("environment") String environment) {
         return RestResult.success(jobInfoService.runJob(id, OperatorContext.getCurrentOperator()));
+    }
+
+    @PostMapping("/{jobId}/dryRun/{version}")
+    public RestResult<JobDryRunDto> dryRun(@PathVariable Long jobId,
+                                           @PathVariable Integer version) {
+        return RestResult.success(jobInfoService.dryRunJob(jobId, version));
     }
 
 }

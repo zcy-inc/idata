@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
@@ -190,6 +191,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, operator);
 //        jobEventPublisher.whenToRun(eventLog);
         return Boolean.TRUE;
+    }
+
+    @Override
+    public JobDryRunDto dryRunJob(Long jobId, Integer version) {
+        return null;
     }
 
     private JobInfo tryFetchJobInfo(Long id) {
