@@ -19,10 +19,14 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
@@ -33,11 +37,13 @@ import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -51,17 +57,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JobContentCommonServiceImpl implements JobContentCommonService {
 
     private final DIJobContentRepo diJobContentRepo;
-    private final JobInfoRepo jobInfoRepo;
+    private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobPublishManager jobPublishManager;
 
     @Autowired
     public JobContentCommonServiceImpl(DIJobContentRepo diJobContentRepo,
-                                       JobInfoRepo jobInfoRepo,
+                                       JobExecuteConfigRepo jobExecuteConfigRepo,
                                        JobPublishRecordRepo jobPublishRecordRepo,
                                        JobPublishManager jobPublishManager) {
         this.diJobContentRepo = diJobContentRepo;
-        this.jobInfoRepo = jobInfoRepo;
+        this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobPublishManager = jobPublishManager;
     }
@@ -70,13 +76,19 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     public DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkArgument(Objects.nonNull(version), "作业版本号为空");
+        // todo 支持不同作业
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
-        jobPublishManager.submit(jobContentOptional.get(), envEnumOptional.get(), remark, operator);
+        JobPublishContent publishContent = assemblePublishContent(jobContentOptional.get());
+        jobPublishManager.submit(publishContent, envEnumOptional.get(), remark, operator);
         return DIJobContentDto.from(jobContentOptional.get());
+    }
+
+    private JobPublishContent assemblePublishContent(DIJobContent diJobContent) {
+        return new JobPublishContent(diJobContent.getId(), diJobContent.getJobId(), diJobContent.getVersion());
     }
 
     @Override
@@ -84,8 +96,25 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
 
         List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(jobId);
+        // todo 支持不同类型作业
         List<DIJobContent> contentList = diJobContentRepo.queryList(jobId);
-        return assembleContentVersion(publishRecordList, contentList);
+        List<JobContentVersionDto> contentVersionDtoList = assembleContentVersion(publishRecordList, contentList);
+
+        List<JobExecuteConfig> executeConfigList = jobExecuteConfigRepo.queryList(jobId, new JobExecuteConfigCondition());
+        fillRunningState(contentVersionDtoList, executeConfigList);
+        return contentVersionDtoList;
+    }
+
+    private void fillRunningState(List<JobContentVersionDto> contentVersionDtoList, List<JobExecuteConfig> executeConfigList) {
+        if (CollectionUtils.isEmpty(executeConfigList)) return;
+
+        Map<String, JobExecuteConfig> envMap = executeConfigList.stream().collect(Collectors.toMap(JobExecuteConfig::getEnvironment, Function.identity()));
+        for (JobContentVersionDto versionDto : contentVersionDtoList) {
+            if (versionDto.getVersionStatus().equals(PublishStatusEnum.PUBLISHED.val)) {
+                JobExecuteConfig config = envMap.get(versionDto.getEnvironment());
+                versionDto.setEnvRunningState(config == null ? null : config.getRunningState());
+            }
+        }
     }
 
     private List<JobContentVersionDto> assembleContentVersion(List<JobPublishRecord> publishRecordList,

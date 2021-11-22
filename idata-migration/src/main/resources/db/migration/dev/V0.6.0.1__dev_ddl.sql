@@ -5,6 +5,7 @@ alter table dev_job_execute_config add column sch_time_out_strategy varchar(20) 
 alter table dev_job_execute_config add column sch_priority int(11) not null comment '调度配置-优先级，1：低，2：中，3：高';
 alter table dev_job_execute_config add column exec_driver_mem int(11) unsigned not null default 0 comment '运行配置-驱动器内存';
 alter table dev_job_execute_config add column exec_worker_mem int(11) unsigned not null default 0 comment '运行配置-执行器内存';
+alter table dev_job_execute_config add column running_state int(11) unsigned not null default 0 comment '作业运行状态（环境级），0：暂停运行；1：恢复运行';
 
 create table if not exists dev_dag_dependence
 (

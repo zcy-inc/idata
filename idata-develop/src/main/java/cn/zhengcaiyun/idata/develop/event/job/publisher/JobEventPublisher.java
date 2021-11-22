@@ -86,8 +86,8 @@ public class JobEventPublisher {
         processResult(event);
     }
 
-    public void whenEnabled(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_ENABLE.name().equals(eventLog.getJobEvent()))
+    public void whenResumed(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_RESUME.name().equals(eventLog.getJobEvent()))
             return;
 
         JobEnabledEvent event = new JobEnabledEvent();
@@ -100,8 +100,8 @@ public class JobEventPublisher {
         processResult(event);
     }
 
-    public void whenDisabled(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_DISABLE.name().equals(eventLog.getJobEvent()))
+    public void whenPaused(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_PAUSE.name().equals(eventLog.getJobEvent()))
             return;
 
         JobDisabledEvent event = new JobDisabledEvent();

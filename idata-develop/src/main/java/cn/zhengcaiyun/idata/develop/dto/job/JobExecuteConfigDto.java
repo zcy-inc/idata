@@ -80,6 +80,11 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     private Integer execWorkerMem;
 
+    /**
+     * 作业运行状态（环境级），0：暂停运行；1：恢复运行
+     */
+    private Integer runningState;
+
     public Long getId() {
         return id;
     }
@@ -190,6 +195,14 @@ public class JobExecuteConfigDto extends BaseDto {
 
     public void setExecWorkerMem(Integer execWorkerMem) {
         this.execWorkerMem = execWorkerMem;
+    }
+
+    public Integer getRunningState() {
+        return runningState;
+    }
+
+    public void setRunningState(Integer runningState) {
+        this.runningState = runningState;
     }
 
     public static JobExecuteConfigDto from(JobExecuteConfig config) {

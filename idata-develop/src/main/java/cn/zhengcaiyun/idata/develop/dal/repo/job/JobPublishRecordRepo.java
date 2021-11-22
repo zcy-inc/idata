@@ -48,5 +48,7 @@ public interface JobPublishRecordRepo {
 
     List<JobPublishRecord> queryList(Long jobId);
 
+    Boolean submit(JobPublishRecord record, String operator);
+
     Boolean publish(JobPublishRecord record, String operator);
 }
