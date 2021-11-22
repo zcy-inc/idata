@@ -49,6 +49,11 @@ public class JobContentVersionDto implements Comparable<JobContentVersionDto> {
      */
     private String environment;
 
+    /**
+     * 环境下的运行状态，0：暂停，1：恢复，当版本状态为发布，运行状态为暂停时，需要和版本一起显示
+     */
+    private Integer envRunningState;
+
     public Long getJobId() {
         return jobId;
     }
@@ -87,6 +92,14 @@ public class JobContentVersionDto implements Comparable<JobContentVersionDto> {
 
     public void setVersionDisplay(String versionDisplay) {
         this.versionDisplay = versionDisplay;
+    }
+
+    public Integer getEnvRunningState() {
+        return envRunningState;
+    }
+
+    public void setEnvRunningState(Integer envRunningState) {
+        this.envRunningState = envRunningState;
     }
 
     public static JobContentVersionDto from(DIJobContent content) {
