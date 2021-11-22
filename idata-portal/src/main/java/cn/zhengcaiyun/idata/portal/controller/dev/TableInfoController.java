@@ -150,8 +150,9 @@ public class TableInfoController {
      * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
      */
     @PostMapping("/syncHiveInfo/{tableId}")
-    public RestResult<SyncHiveDTO> syncHiveInfo(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(tableInfoService.syncHiveInfo(tableId));
+    public RestResult<SyncHiveDTO> syncHiveInfo(HttpServletRequest request, @PathVariable("tableId") Long tableId) {
+        String nickname = tokenService.getNickname(request);
+        return RestResult.success(tableInfoService.syncHiveInfo(tableId, nickname));
     }
 
     /**

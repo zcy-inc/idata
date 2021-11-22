@@ -59,9 +59,10 @@ public interface TableInfoService {
     /**
      * 将本地表元数据信息通过Livy同步至HIVE
      * @param tableId 表id
+     * @param operator 操作人名称
      * @return
      */
-    SyncHiveDTO syncHiveInfo(Long tableId);
+    SyncHiveDTO syncHiveInfo(Long tableId, String operator);
 
     CompareInfoDTO compareHiveInfo(Long tableId);
 }

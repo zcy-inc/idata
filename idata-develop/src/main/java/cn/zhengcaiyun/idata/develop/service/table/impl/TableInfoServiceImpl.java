@@ -483,7 +483,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
-    public SyncHiveDTO syncHiveInfo(Long tableId) {
+    public SyncHiveDTO syncHiveInfo(Long tableId, String operator) {
+
         TableInfoDto tableInfoDto = getTableInfoById(tableId);
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
@@ -491,27 +492,35 @@ public class TableInfoServiceImpl implements TableInfoService {
 
         checkDatabase(hiveTableName, dbName);
 
+        // 判断当前表名是否在hive中存在
         boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
+        // 进一步判断数据库记录的同步hive表是否存在，如果不存在（存在特殊场景：在创建过程中失败导致没创建成功，但是数据库记录了），则走新建流程
+        boolean everExist = StringUtils.isNoneBlank(hiveTableName) & metadataQueryApi.existHiveTable(dbName, hiveTableName);
 
         // 情况1：远端hive表不存在 && 该表未曾同步过hive  ---> 新建hive表
-        if (!exist && StringUtils.isBlank(hiveTableName)) {
-            String createTableDDL = getTableDDL(tableId);
-            LivySqlQuery query = new LivySqlQuery();
-            query.setSql(createTableDDL);
-            return new SyncHiveDTO();
+        if (!exist && !everExist) {
+            SyncHiveDTO syncHiveDTO = createHive(tableId);
+            devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(dbName + "." + tableName).set(devTableInfo.editor).equalTo(operator)
+                    .where(devTableInfo.id, isEqualTo(tableId)));
+            return syncHiveDTO;
         }
 
         // 情况2：远端hive表存在 && 该表未曾同步过hive  ---> 不可新建，远端hive表已存在
-        if (exist && StringUtils.isBlank(hiveTableName)) {
+        if (exist && !everExist) {
             throw new IllegalArgumentException("远端hive表'" + dbName + "'." + tableName + "已存在不可新建");
         }
 
         // 情况3：远端hive表不存在 && 该表已同步过hive  ---> 需要额外rename表，并同时维护表的其他元数据信息（即情况4）
-        if (!exist && StringUtils.isNoneBlank(hiveTableName)) {
-            String renameTableDDL = getTableRenameDDL(hiveTableName, tableName, dbName);
-            LivySqlQuery query = new LivySqlQuery();
-            query.setSql(renameTableDDL);
-            livyService.createStatement(query);
+        if (!exist && everExist) {
+            renameHive(hiveTableName, tableName, dbName);
+            devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(dbName + "." + tableName).set(devTableInfo.editor).equalTo(operator)
+                    .where(devTableInfo.id, isEqualTo(tableId)));
+            try {
+                // 此处延迟3s的原因是提交到livy是无序的，rename和alter必须要保证同步关系，但目前没有依赖关系
+                Thread.sleep(3000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         // 情况4：远端hive表存在 && 该表已同步过hive  ---> 说明表名没有表，做字段相关元数据信息的比对同步
@@ -571,6 +580,31 @@ public class TableInfoServiceImpl implements TableInfoService {
         SyncHiveDTO syncHiveDTO = new SyncHiveDTO();
         syncHiveDTO.setWarningList(warningList);
         return syncHiveDTO;
+    }
+
+    /**
+     * rename DDL
+     * @param hiveTableName
+     * @param tableName
+     * @param dbName
+     */
+    private void renameHive(String hiveTableName, String tableName, String dbName) {
+        String renameTableDDL = getTableRenameDDL(hiveTableName, tableName, dbName);
+        LivySqlQuery query = new LivySqlQuery();
+        query.setSql(renameTableDDL);
+        livyService.createStatement(query);
+    }
+
+    /**
+     * 创建ddl
+     * @param tableId
+     * @return
+     */
+    private SyncHiveDTO createHive(Long tableId) {
+        String createTableDDL = getTableDDL(tableId);
+        LivySqlQuery query = new LivySqlQuery();
+        query.setSql(createTableDDL);
+        return new SyncHiveDTO();
     }
 
     /**

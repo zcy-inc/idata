@@ -61,6 +61,13 @@ public final class DevTableInfoDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   表名称
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.hive_table_name")
+    public static final SqlColumn<String> hiveTableName = devTableInfo.hiveTableName;
+
+    /**
+     * Database Column Remarks:
      *   文件夹ID,null表示最外层文件夹
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.folder_id")
@@ -81,6 +88,8 @@ public final class DevTableInfoDynamicSqlSupport {
         public final SqlColumn<Date> editTime = column("edit_time", JDBCType.TIMESTAMP);
 
         public final SqlColumn<String> tableName = column("table_name", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> hiveTableName = column("hive_table_name", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> folderId = column("folder_id", JDBCType.BIGINT);
 
