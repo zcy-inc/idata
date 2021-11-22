@@ -61,7 +61,7 @@ public final class DevTableInfoDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   表名称
+     *   同步至hive的表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.hive_table_name")
     public static final SqlColumn<String> hiveTableName = devTableInfo.hiveTableName;

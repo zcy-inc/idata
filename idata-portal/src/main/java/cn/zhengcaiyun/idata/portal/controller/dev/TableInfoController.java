@@ -82,7 +82,9 @@ public class TableInfoController {
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(tableInfoService.getTableInfo(tableId));
+        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+        columnInfoService.compareColumns(tableInfo);
+        return RestResult.success(tableInfo);
     }
 
     @GetMapping("referTables")

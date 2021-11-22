@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.table;
 
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
 
@@ -28,6 +29,21 @@ import java.util.List;
 
 public interface ColumnInfoService {
     List<ColumnInfoDto> getColumns(Long tableId);
+
+    /**
+     * 获取列
+     * @param tableId 表id
+     * @param checkCompare 是否校验（远端hive表）字段一致性
+     * @return
+     */
+    List<ColumnInfoDto> getColumns(Long tableId, boolean checkCompare);
+
+    /**
+     * 和远端（hive）表进行列比较，差异信息封装在tableInfo字段中
+     * @param tableInfo
+     */
+    void compareColumns(TableInfoDto tableInfo);
+
     List<ColumnDetailsDto> getColumnDetails(Long tableId);
     List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);

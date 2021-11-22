@@ -54,8 +54,10 @@ public interface MetadataQueryApi {
 
     /**
      * 根据sys_config表的连接信息判断表是否在hive中存在
+     * 标记过期的原因是此用法不推荐，需要加载所有的表信息，当库中表过多的话，效率很低
      * @param dbName
      * @param tableName
      */
+    @Deprecated
     boolean existHiveTable(String dbName, String tableName);
 }

@@ -12,8 +12,8 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java"/>
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java"/>
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao" targetProject="src/main/java"/>
 
 <!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->

@@ -495,7 +495,11 @@ public class TableInfoServiceImpl implements TableInfoService {
         // 判断当前表名是否在hive中存在
         boolean exist = metadataQueryApi.existHiveTable(dbName, tableName);
         // 进一步判断数据库记录的同步hive表是否存在，如果不存在（存在特殊场景：在创建过程中失败导致没创建成功，但是数据库记录了），则走新建流程
-        boolean everExist = StringUtils.isNoneBlank(hiveTableName) & metadataQueryApi.existHiveTable(dbName, hiveTableName);
+        boolean everExist = exist;
+        if (!StringUtils.equals(tableName, hiveTableName.split("\\.")[1])) {
+            // 如果两边表不一致，再查询，减少一次远端连接
+            everExist = StringUtils.isNoneBlank(hiveTableName) & metadataQueryApi.existHiveTable(dbName, hiveTableName.split("\\.")[1]);
+        }
 
         // 情况1：远端hive表不存在 && 该表未曾同步过hive  ---> 新建hive表
         if (!exist && !everExist) {
@@ -564,7 +568,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             String localColumnComment = localColumn.getColumnComment();
             String localColumnType = localColumn.getColumnType();
             String hiveColumnType = hiveColumn.getColumnType();
-            if (!StringUtils.equalsIgnoreCase(localColumnComment, hiveColumn.getColumnComment())
+            if (!commentEquals(localColumnComment, hiveColumn.getColumnComment())
                     || !StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
                 String changeTableDDL = assembleHiveChangeColumnSQL(dbName, tableName, columnName, localColumnType, localColumnComment);
                 query = new LivySqlQuery();
@@ -580,6 +584,25 @@ public class TableInfoServiceImpl implements TableInfoService {
         SyncHiveDTO syncHiveDTO = new SyncHiveDTO();
         syncHiveDTO.setWarningList(warningList);
         return syncHiveDTO;
+    }
+
+    /**
+     * 判断注释相等，主要是为了兼容 'null'和''
+     * @param localColumnComment
+     * @param hiveColumnComment
+     * @return
+     */
+    private boolean commentEquals(String localColumnComment, String hiveColumnComment) {
+        if (StringUtils.isBlank(localColumnComment) && StringUtils.isBlank(hiveColumnComment)) {
+            return true;
+        }
+        if (StringUtils.equals("null", localColumnComment)) {
+            localColumnComment = null;
+        }
+        if (StringUtils.equals("null", hiveColumnComment)) {
+            hiveColumnComment = null;
+        }
+        return StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment);
     }
 
     /**
@@ -604,6 +627,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         String createTableDDL = getTableDDL(tableId);
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(createTableDDL);
+        livyService.createStatement(query);
         return new SyncHiveDTO();
     }
 
@@ -617,7 +641,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             return;
         }
 
-        String[] tableMetaInfo = hiveTableName.split(".");
+        String[] tableMetaInfo = hiveTableName.split("\\.");
         if (!StringUtils.equalsIgnoreCase(dbName, tableMetaInfo[0])) {
             throw new IllegalArgumentException("已同步过到hive的表不能更改database");
         }
@@ -632,7 +656,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             return new CompareInfoDTO(false);
         }
 
-        String[] tableMetaInfo = hiveTableName.split(".");
+        String[] tableMetaInfo = hiveTableName.split("\\.");
         List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(tableMetaInfo[0], tableMetaInfo[1]);
 
         return doCompare(tableInfoDto, hiveTableColumns);
@@ -707,12 +731,12 @@ public class TableInfoServiceImpl implements TableInfoService {
         CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
         basicColumnInfo.setColumnName(columnName);
         boolean added = false;
-        if (StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
+        if (!StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
             added = true;
             basicColumnInfo.setColumnType(localColumnType + "/" + hiveColumnType);
         }
 
-        if (StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment)) {
+        if (!StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment)) {
             added = true;
             basicColumnInfo.setColumnType(localColumnComment + "/" + hiveColumnComment);
         }
@@ -756,7 +780,7 @@ public class TableInfoServiceImpl implements TableInfoService {
      * @return
      */
     private String getTableRenameDDL(String hiveTableName, String tableName, String dbName) {
-        return "alter table `" + hiveTableName + " rename to " + dbName + "`." + tableName ;
+        return "alter table " + hiveTableName + " rename to " + dbName + "." + tableName ;
     }
 
     /**
@@ -978,4 +1002,5 @@ public class TableInfoServiceImpl implements TableInfoService {
 //        }
 //        return assetCatalogues;
 //    }
+
 }
