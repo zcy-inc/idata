@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
@@ -25,10 +26,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +71,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private DevEnumValueDao devEnumValueDao;
     @Autowired
     private LabelService labelService;
+    @Autowired
+    private TableInfoService tableInfoService;
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
@@ -102,6 +107,22 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             echoList = indexColumnList.stream().peek(columnInfoDto ->
                     columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
             ).collect(Collectors.toList());
+
+            //增加维护比较字段信息
+            TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+            if (tableInfo.getHiveTableName() != null) {
+                // 同步过hive的表才进行比较
+                // 将多的字段、少的字段、不同的字段都获取到
+                Set<String> diffColumnNameList = new HashSet<>();
+                CompareInfoDTO compareInfoDTO = tableInfoService.compareHiveInfo(tableId);
+                diffColumnNameList.addAll(compareInfoDTO.getLessList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+                diffColumnNameList.addAll(compareInfoDTO.getMoreList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+                diffColumnNameList.addAll(compareInfoDTO.getDifferentList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+                echoList.stream().forEach(e -> {
+                    e.setEnableCompare(true);
+                    e.setHiveDiff(diffColumnNameList.contains(e.getColumnName()));
+                });
+            }
         }
 
         return echoList;
