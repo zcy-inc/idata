@@ -135,24 +135,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
-        String jdbcUrl = getConnectionCfg();
-        List<ColumnInfoDto> tableColumns = Lists.newArrayList();
-        try (Connection conn = DriverManager.getConnection(jdbcUrl);
-             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
-            while (rs.next()) {
-                String columnName = rs.getString("COLUMN_NAME");  //列名
-                String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
-                String remarks = rs.getString("REMARKS");  //列描述
-                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
-                columnInfoDto.setColumnName(columnName);
-                columnInfoDto.setColumnComment(remarks);
-                columnInfoDto.setColumnType(dataTypeName);
-                tableColumns.add(columnInfoDto);
-            }
-        } catch (SQLException ex) {
-            logger.warn("getTableColumns failed. ex: {}", ex);
-        }
-        return tableColumns;
+        return hiveService.getHiveTableColumns(dbName, tableName);
     }
 
     @Override
