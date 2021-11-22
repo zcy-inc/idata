@@ -15,9 +15,8 @@ public class DAGInfoCondition {
      * 环境
      */
     private String environment;
-
     /**
-     * 状态，1启用，0停用
+     * 状态，1:上线，0:下线
      */
     private Integer status;
 

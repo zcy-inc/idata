@@ -32,6 +32,14 @@ public class DAGDto {
      * dag 调度配置
      */
     private DAGScheduleDto dagScheduleDto;
+    /**
+     * 是否可编辑
+     */
+    private Boolean editable;
+    /**
+     * 是否可删除
+     */
+    private Boolean deletable;
 
     public DAGInfoDto getDagInfoDto() {
         return dagInfoDto;
@@ -47,5 +55,21 @@ public class DAGDto {
 
     public void setDagScheduleDto(DAGScheduleDto dagScheduleDto) {
         this.dagScheduleDto = dagScheduleDto;
+    }
+
+    public Boolean getEditable() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable = editable;
+    }
+
+    public Boolean getDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(Boolean deletable) {
+        this.deletable = deletable;
     }
 }

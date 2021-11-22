@@ -158,10 +158,13 @@ public class DAGServiceImpl implements DAGService {
         DAGDto dto = new DAGDto();
         dto.setDagInfoDto(DAGInfoDto.from(dagInfo));
         dto.setDagScheduleDto(DAGScheduleDto.from(optionalDAGSchedule.get()));
+        dto.setEditable(Objects.equals(dagInfo.getStatus(), UsingStatusEnum.OFFLINE.val));
+        dto.setDeletable(Objects.equals(dagInfo.getStatus(), UsingStatusEnum.OFFLINE.val));
         return dto;
     }
 
     @Override
+    @Transactional
     public Boolean removeDag(Long id, Operator operator) {
         DAGInfo dagInfo = tryFetchDAGInfo(id);
         // 检查是否已下线，只有下线后才能更改

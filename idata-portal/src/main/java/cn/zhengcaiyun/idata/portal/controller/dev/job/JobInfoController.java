@@ -20,8 +20,10 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAndDagDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.BooleanUtils;
@@ -45,10 +47,13 @@ import java.util.stream.Collectors;
 public class JobInfoController {
 
     private final JobInfoService jobInfoService;
+    private final JobExecuteConfigService jobExecuteConfigService;
 
     @Autowired
-    public JobInfoController(JobInfoService jobInfoService) {
+    public JobInfoController(JobInfoService jobInfoService,
+                             JobExecuteConfigService jobExecuteConfigService) {
         this.jobInfoService = jobInfoService;
+        this.jobExecuteConfigService = jobExecuteConfigService;
     }
 
     /**
@@ -126,13 +131,25 @@ public class JobInfoController {
     }
 
     /**
+     * 获取已配置的作业列表
+     *
+     * @param environment
+     * @return
+     */
+    @GetMapping("/environments/{environment}/jobs")
+    public RestResult<List<JobAndDagDto>> getConfiguredJobList(@PathVariable("environment") String environment) {
+        return RestResult.success(jobExecuteConfigService.getConfiguredJobList(environment));
+    }
+
+    /**
      * 恢复作业
      *
      * @param id 作业id
      * @return
      */
-    @PutMapping("/{id}/enable")
-    public RestResult<Boolean> enableJobInfo(@PathVariable Long id) {
+    @PutMapping("/{id}/environments/{environment}/enable")
+    public RestResult<Boolean> enableJobInfo(@PathVariable Long id,
+                                             @PathVariable("environment") String environment) {
         return RestResult.success(jobInfoService.enableJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
@@ -142,8 +159,9 @@ public class JobInfoController {
      * @param id 作业id
      * @return
      */
-    @PutMapping("/{id}/disable")
-    public RestResult<Boolean> disableJobInfo(@PathVariable Long id) {
+    @PutMapping("/{id}/environments/{environment}/disable")
+    public RestResult<Boolean> disableJobInfo(@PathVariable Long id,
+                                              @PathVariable("environment") String environment) {
         return RestResult.success(jobInfoService.disableJobInfo(id, OperatorContext.getCurrentOperator()));
     }
 
@@ -153,8 +171,9 @@ public class JobInfoController {
      * @param id 作业id
      * @return
      */
-    @PostMapping("/{id}/run")
-    public RestResult<Boolean> runJob(@PathVariable Long id) {
+    @PostMapping("/{id}/environments/{environment}/run")
+    public RestResult<Boolean> runJob(@PathVariable Long id,
+                                      @PathVariable("environment") String environment) {
         return RestResult.success(jobInfoService.runJob(id, OperatorContext.getCurrentOperator()));
     }
 

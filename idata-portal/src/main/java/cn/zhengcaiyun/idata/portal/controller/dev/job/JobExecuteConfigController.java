@@ -50,7 +50,7 @@ public class JobExecuteConfigController {
      * @param dto         配置
      * @return
      */
-    @PostMapping("environments/{environment}/configs")
+    @PostMapping("/environments/{environment}/configs")
     public RestResult<JobConfigCombinationDto> saveJobConfig(@PathVariable("jobId") Long jobId,
                                                              @PathVariable("environment") String environment,
                                                              @RequestBody JobConfigCombinationDto dto) {
@@ -64,9 +64,10 @@ public class JobExecuteConfigController {
      * @param environment 环境
      * @return
      */
-    @GetMapping("environments/{environment}/configs")
+    @GetMapping("/environments/{environment}/configs")
     public RestResult<JobConfigCombinationDto> getJobConfig(@PathVariable("jobId") Long jobId,
                                                             @PathVariable("environment") String environment) {
         return RestResult.success(jobExecuteConfigService.getCombineConfig(jobId, environment));
     }
+
 }

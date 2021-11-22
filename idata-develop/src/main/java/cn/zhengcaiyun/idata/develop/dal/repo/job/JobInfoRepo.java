@@ -49,4 +49,6 @@ public interface JobInfoRepo {
     List<JobInfo> queryJobInfo(List<Long> ids);
 
     long count(JobInfoCondition condition);
+
+    List<JobInfo> queryList(JobInfoCondition condition, long limit, long offset);
 }

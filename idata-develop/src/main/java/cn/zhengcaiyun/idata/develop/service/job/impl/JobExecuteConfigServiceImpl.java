@@ -19,6 +19,9 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
+import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
+import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
@@ -26,11 +29,9 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobOutputRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDependenceDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobExecuteConfigDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobOutputDto;
+import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobConfigCombinationManager;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -59,6 +61,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Service
 public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
+    private final JobInfoRepo jobInfoRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobOutputRepo jobOutputRepo;
     private final JobDependenceRepo jobDependenceRepo;
@@ -68,13 +71,15 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     private final JobEventPublisher jobEventPublisher;
 
     @Autowired
-    public JobExecuteConfigServiceImpl(JobExecuteConfigRepo jobExecuteConfigRepo,
+    public JobExecuteConfigServiceImpl(JobInfoRepo jobInfoRepo,
+                                       JobExecuteConfigRepo jobExecuteConfigRepo,
                                        JobOutputRepo jobOutputRepo,
                                        JobDependenceRepo jobDependenceRepo,
                                        DAGRepo dagRepo,
                                        JobManager jobManager,
                                        JobConfigCombinationManager jobConfigCombinationManager,
                                        JobEventPublisher jobEventPublisher) {
+        this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobOutputRepo = jobOutputRepo;
         this.jobDependenceRepo = jobDependenceRepo;
@@ -119,6 +124,18 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(configCombinationOptional.isPresent(), "配置不存在");
 
         return JobConfigCombinationDto.from(configCombinationOptional.get());
+    }
+
+    @Override
+    public List<JobAndDagDto> getConfiguredJobList(String environment) {
+        JobExecuteConfigCondition condition = new JobExecuteConfigCondition();
+        condition.setEnvironment(environment);
+        List<JobExecuteConfig> configList = jobExecuteConfigRepo.queryList(condition);
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(new JobInfoCondition());
+        DAGInfoCondition dagCondition = new DAGInfoCondition();
+        dagCondition.setEnvironment(environment);
+        List<DAGInfo> dagInfoList = dagRepo.queryDAGInfo(dagCondition);
+        return buildJobAndDag(configList, jobInfoList, dagInfoList);
     }
 
     private void updateConfig(Long jobId, String environment,
@@ -341,6 +358,24 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         output.setJobId(jobId);
         output.setEnvironment(environment);
         return output;
+    }
+
+    private List<JobAndDagDto> buildJobAndDag(List<JobExecuteConfig> configList, List<JobInfo> jobInfoList, List<DAGInfo> dagInfoList) {
+        Map<Long, JobInfo> jobMap = jobInfoList.stream()
+                .collect(Collectors.toMap(JobInfo::getId, Function.identity()));
+        Map<Long, DAGInfo> dagMap = dagInfoList.stream()
+                .collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
+        return configList.stream().map(config -> {
+            JobAndDagDto jobAndDagDto = new JobAndDagDto();
+            jobAndDagDto.setJobId(config.getJobId());
+            JobInfo jobInfo = jobMap.get(config.getJobId());
+            jobAndDagDto.setJobName(jobInfo == null ? "" : jobInfo.getName());
+            jobAndDagDto.setDwLayerCode(jobInfo == null ? "" : jobInfo.getDwLayerCode());
+            jobAndDagDto.setDagId(config.getSchDagId());
+            DAGInfo dagInfo = dagMap.get(config.getSchDagId());
+            jobAndDagDto.setDagName(dagInfo == null ? "" : dagInfo.getName());
+            return jobAndDagDto;
+        }).collect(Collectors.toList());
     }
 
     private void checkExecuteConfig(JobExecuteConfigDto dto) {

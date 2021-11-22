@@ -26,7 +26,6 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobEventLogRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;

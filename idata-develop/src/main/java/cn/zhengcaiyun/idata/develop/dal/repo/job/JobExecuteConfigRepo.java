@@ -41,4 +41,6 @@ public interface JobExecuteConfigRepo {
     Long countDagJob(Long dagId);
 
     List<JobExecuteConfig> queryDagJobList(Long dagId, JobExecuteConfigCondition condition);
+
+    List<JobExecuteConfig> queryList(JobExecuteConfigCondition condition);
 }

@@ -171,4 +171,18 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 and(jobInfo.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
+
+    @Override
+    public List<JobInfo> queryList(JobInfoCondition condition, long limit, long offset) {
+        String jobType = Objects.isNull(condition.getJobType()) ? null : condition.getJobType().getCode();
+        return jobInfoDao.select(dsl -> dsl.where(jobInfo.folderId, isEqualToWhenPresent(condition.getFolderId()),
+                        and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
+                        and(jobInfo.jobType, isInWhenPresent(condition.getJobTypeCodes())),
+                        and(jobInfo.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                        and(jobInfo.status, isEqualToWhenPresent(condition.getStatus())),
+                        and(jobInfo.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
+                        and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(jobInfo.id.descending())
+                .limit(limit).offset(offset));
+    }
 }
