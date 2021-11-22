@@ -31,15 +31,7 @@ public interface ColumnInfoService {
     List<ColumnInfoDto> getColumns(Long tableId);
 
     /**
-     * 获取列
-     * @param tableId 表id
-     * @param checkCompare 是否校验（远端hive表）字段一致性
-     * @return
-     */
-    List<ColumnInfoDto> getColumns(Long tableId, boolean checkCompare);
-
-    /**
-     * 和远端（hive）表进行列比较，差异信息封装在tableInfo字段中
+     * 和远端（hive）表进x行列比较，差异信息封装在tableInfo字段中
      * @param tableInfo
      */
     void compareColumns(TableInfoDto tableInfo);
