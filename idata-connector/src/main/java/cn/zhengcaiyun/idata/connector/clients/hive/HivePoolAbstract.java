@@ -1,6 +1,6 @@
 package cn.zhengcaiyun.idata.connector.clients.hive;
 
-import cn.zhengcaiyun.idata.connector.clients.hive.util.Pool;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.Pool;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 

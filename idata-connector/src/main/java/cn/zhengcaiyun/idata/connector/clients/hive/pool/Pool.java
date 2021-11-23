@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.connector.clients.hive.util;
+package cn.zhengcaiyun.idata.connector.clients.hive.pool;
 
 import cn.zhengcaiyun.idata.connector.clients.hive.exception.JiveConnectionException;
 import cn.zhengcaiyun.idata.connector.clients.hive.exception.JiveException;

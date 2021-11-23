@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.connector.clients.hive;
 
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.sql.SQLException;

@@ -2,6 +2,8 @@ package cn.zhengcaiyun.idata.connector.clients.hive;
 
 
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
+import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.ResultSet;
@@ -21,37 +23,15 @@ public class Jive extends BinaryJive {
         this.dataSource = hivePool;
     }
 
-    public void test() throws SQLException {
-
-        ResultSet res = getClient().createStatement().executeQuery("show create table dws.tmp_sync_hive");
-        List<ColumnInfoDto> tableColumns = extraColumnsInfo(res);
-//        System.out.println(tableColumns.size());
-    }
-
-    private List<ColumnInfoDto> extraColumnsInfo(ResultSet res) throws SQLException {
-        List<ColumnInfoDto> tableColumns = new ArrayList<>();
-        // 去掉第一行"CREATE ..." 直接拿字段
-        res.next();
-        String sql;
-        // 列循环停止标志
-        boolean stop = false;
-        // 不以")"结尾则一直是列
-        while (res.next() && !stop) {
-            stop = StringUtils.endsWith(sql = res.getString(1).trim(), ")");
-
-            String[] metas = sql.split(" ");
-            ColumnInfoDto columnInfoDto = new ColumnInfoDto();
-            String columnName = metas[0].replace("`", "");
-            columnInfoDto.setColumnName(columnName);
-            String columnType = metas[1].replace(")", "");
-            columnInfoDto.setColumnType(columnType);
-            if (metas.length >= 4) {
-                String comment = metas[3].replace(")", "");
-                columnInfoDto.setColumnComment(comment);
-            }
-            tableColumns.add(columnInfoDto);
-        }
-        return tableColumns;
+    /**
+     * 获取列的元数据信息
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    public List<ColumnInfoDto> getColumnMetaInfo(String dbName, String tableName) throws SQLException {
+        ResultSet res = this.getClient().createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
+        return JiveUtil.extraColumnsInfo(res);
     }
 
     @Override
@@ -64,4 +44,12 @@ public class Jive extends BinaryJive {
             super.close();
         }
     }
+
+    @Deprecated
+    @SuppressWarnings("just for test")
+    public void test() throws SQLException {
+        ResultSet res = getClient().createStatement().executeQuery("show create table dws.tmp_sync_hive");
+        List<ColumnInfoDto> tableColumns = JiveUtil.extraColumnsInfo(res);
+    }
+
 }

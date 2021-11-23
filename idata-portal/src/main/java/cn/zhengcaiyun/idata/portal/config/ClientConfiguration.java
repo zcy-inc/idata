@@ -1,7 +1,7 @@
 package cn.zhengcaiyun.idata.portal.config;
 
 import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
-import cn.zhengcaiyun.idata.connector.clients.hive.HivePool;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import org.springframework.beans.factory.annotation.Autowired;
