@@ -23,4 +23,13 @@ package cn.zhengcaiyun.idata.develop.event.dag;
  * @create: 2021-11-04 15:21
  **/
 public class DagDeletedEvent extends DagBaseEvent {
+    private String environment;
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
 }

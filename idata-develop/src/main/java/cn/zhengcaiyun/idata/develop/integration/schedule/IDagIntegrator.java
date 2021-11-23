@@ -34,7 +34,7 @@ public interface IDagIntegrator {
 
     void update(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
 
-    void delete(DAGInfo dagInfo) throws ExternalIntegrationException;
+    void delete(Long dagId, String environment) throws ExternalIntegrationException;
 
     void online(DAGInfo dagInfo) throws ExternalIntegrationException;
 

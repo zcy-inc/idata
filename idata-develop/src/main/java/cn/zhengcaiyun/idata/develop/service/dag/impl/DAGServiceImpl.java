@@ -39,6 +39,7 @@ import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,15 +135,15 @@ public class DAGServiceImpl implements DAGService {
         Boolean ret = dagRepo.updateDAG(info, schedule);
         if (ret) {
             // 是否更改基本信息
-            if (checkBaseInfoUpdated(info, oldDagInfo)) {
+            if (checkBaseInfoUpdated(info, oldDagInfo) || checkScheduleUpdated(schedule, oldSchedule)) {
                 DAGEventLog eventLog = logDagEvent(info.getId(), EventTypeEnum.UPDATED, operator);
                 dagEventPublisher.whenUpdated(eventLog);
             }
             // 是够更改定时配置
-            if (checkScheduleUpdated(schedule, oldSchedule)) {
-                DAGEventLog eventLog = logDagEvent(info.getId(), EventTypeEnum.DAG_SCHEDULE_UPDATED, operator);
-                dagEventPublisher.whenScheduleUpdated(eventLog);
-            }
+//            if (checkScheduleUpdated(schedule, oldSchedule)) {
+//                DAGEventLog eventLog = logDagEvent(info.getId(), EventTypeEnum.DAG_SCHEDULE_UPDATED, operator);
+//                dagEventPublisher.whenScheduleUpdated(eventLog);
+//            }
         }
 
         devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
@@ -175,8 +176,10 @@ public class DAGServiceImpl implements DAGService {
         checkState(jobCount > 0, "该DAG存在作业依赖，不能删除");
         Boolean ret = dagRepo.deleteDAG(id, operator.getNickname());
         // 发布dag创建事件
-        DAGEventLog eventLog = logDagEvent(id, EventTypeEnum.DELETED, operator);
-        dagEventPublisher.whenToOnline(eventLog);
+        JsonObject dagJson = new JsonObject();
+        dagJson.addProperty("environment", dagInfo.getEnvironment());
+        DAGEventLog eventLog = logDagEvent(id, EventTypeEnum.DELETED, dagJson.toString(), operator);
+        dagEventPublisher.whenDeleted(eventLog);
 
         devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
         return ret;

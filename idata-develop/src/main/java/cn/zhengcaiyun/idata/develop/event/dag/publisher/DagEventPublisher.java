@@ -25,6 +25,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGEventLogRepo;
 import cn.zhengcaiyun.idata.develop.event.dag.*;
 import cn.zhengcaiyun.idata.develop.event.dag.bus.DagEventBus;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,6 +81,8 @@ public class DagEventPublisher {
         DagDeletedEvent event = new DagDeletedEvent();
         event.setDagId(event.getDagId());
         event.setEventId(eventLog.getId());
+        JsonObject dagJson = new Gson().fromJson(eventLog.getEventInfo(), JsonObject.class);
+        event.setEnvironment(dagJson.get("environment").toString());
         // 发布事件
         DagEventBus.getInstance().post(event);
         // 检查事件处理结果

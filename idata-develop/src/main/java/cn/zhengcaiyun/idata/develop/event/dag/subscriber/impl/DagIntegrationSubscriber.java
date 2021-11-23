@@ -80,10 +80,10 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             dagIntegrator.create(dagInfo, dagSchedule);
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onCreated failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onCreated failed. ex: {}.", ex);
         }
     }
 
@@ -102,10 +102,10 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             dagIntegrator.update(dagInfo, dagSchedule);
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onUpdated failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onUpdated failed. ex: {}.", ex);
         }
     }
 
@@ -113,19 +113,13 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
     @Subscribe
     public void onDeleted(DagDeletedEvent event) {
         try {
-            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
-            if (dagInfoOptional.isEmpty()) {
-                event.processFailed("DAG不存在");
-                return;
-            }
-            DAGInfo dagInfo = dagInfoOptional.get();
-            dagIntegrator.delete(dagInfo);
+            dagIntegrator.delete(event.getDagId(), event.getEnvironment());
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onDeleted failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onDeleted failed. ex: {}.", ex);
         }
     }
 
@@ -142,10 +136,10 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             dagIntegrator.online(dagInfo);
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onOnline failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onOnline failed. ex: {}.", ex);
         }
     }
 
@@ -162,10 +156,10 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             dagIntegrator.offline(dagInfo);
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onOffline failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onOffline failed. ex: {}.", ex);
         }
     }
 
@@ -184,10 +178,10 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             dagIntegrator.updateSchedule(dagInfo, dagSchedule);
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onScheduleUpdated failed. ex: {}.", iex);
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
+            LOGGER.warn("DagIntegrationSubscriber.onScheduleUpdated failed. ex: {}.", ex);
         }
     }
 
