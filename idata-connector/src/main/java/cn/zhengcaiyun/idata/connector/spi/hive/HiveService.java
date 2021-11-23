@@ -3,6 +3,9 @@ package cn.zhengcaiyun.idata.connector.spi.hive;
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.impl.MetadataQueryApiImpl;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.HivePool;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.util.HiveSqlUtil;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
@@ -26,7 +29,6 @@ import java.util.stream.Collectors;
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
 import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.hadoop.yarn.webapp.hamlet.HamletSpec.Scope.col;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 @Service
@@ -41,7 +43,11 @@ public class HiveService implements BeanPostProcessor {
     /**
      * 连接不关闭，复用
      */
-    private Connection conn;
+    private Connection conn; // 351 41 1560ms
+
+    private Connection jive2;//500
+
+    private HivePool hivePool;//590 38 1794ms
 
     @Autowired
     private SysConfigDao sysConfigDao;
@@ -60,16 +66,28 @@ public class HiveService implements BeanPostProcessor {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
+        hivePool = new HivePool(connectInfo);
+//        jive2 = hivePool.getResource().getClient();
     }
 
     public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
+        Jive jive = null;
         try {
             long s1 = System.currentTimeMillis();
-            ResultSet res = stmt.executeQuery("show create table `" + dbName + "." + tableName + "`");
+            jive = hivePool.getResource();
+//            ResultSet res = conn.createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
+//            ResultSet res = stmt.executeQuery("show create table `" + dbName + "." + tableName + "`");
+//            ResultSet res = jive2.createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
+            ResultSet res = jive.getClient().createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
             long s2 = System.currentTimeMillis();
             System.out.println(s2 - s1);
             List<ColumnInfoDto> tableColumns = extraColumnsInfo(res);
 
+            long s3 = System.currentTimeMillis();
+            System.out.println(s3 - s2);
+            System.out.println(jive);
             return tableColumns;
         } catch (SQLException e) {
             if (e.getMessage() != null && e.getMessage().contains("Table not found")) {
@@ -77,6 +95,11 @@ public class HiveService implements BeanPostProcessor {
             } else {
                 throw new ExecuteSqlException("查询失败", e);
             }
+        } finally {
+            long s1 = System.currentTimeMillis();
+            jive.close();
+            long s2 = System.currentTimeMillis();
+            System.out.println("close:" + (s2 - s1));
         }
 
     }
