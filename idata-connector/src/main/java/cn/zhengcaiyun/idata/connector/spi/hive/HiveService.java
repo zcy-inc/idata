@@ -8,86 +8,35 @@ import cn.zhengcaiyun.idata.connector.clients.hive.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.util.HiveSqlUtil;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
-import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
-import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 @Service
 public class HiveService implements BeanPostProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HiveService.class);
 
-    /**
-     * HiveService初始化后赋值
-     */
-    private Statement stmt;
-    /**
-     * 连接不关闭，复用
-     */
-    private Connection conn; // 351 41 1560ms
-
-    private Connection jive2;//500
-
-    private HivePool hivePool;//590 38 1794ms
-
     @Autowired
-    private SysConfigDao sysConfigDao;
-
-    @PostConstruct
-    public void init() {
-        SysConfig hiveConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("hive-info"))).orElse(null);
-        checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
-        String jdbcUrl = hiveConfig.getValueOne();
-        try {
-            long s1 = System.currentTimeMillis();
-            conn = DriverManager.getConnection(jdbcUrl);
-            stmt = conn.createStatement();
-            long s2 = System.currentTimeMillis();
-            System.out.println("init:" + (s2 - s1));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
-        hivePool = new HivePool(connectInfo);
-//        jive2 = hivePool.getResource().getClient();
-    }
+    private HivePool hivePool;
 
     public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
         Jive jive = null;
         try {
-            long s1 = System.currentTimeMillis();
             jive = hivePool.getResource();
-//            ResultSet res = conn.createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
-//            ResultSet res = stmt.executeQuery("show create table `" + dbName + "." + tableName + "`");
-//            ResultSet res = jive2.createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
             ResultSet res = jive.getClient().createStatement().executeQuery("show create table `" + dbName + "." + tableName + "`");
-            long s2 = System.currentTimeMillis();
-            System.out.println(s2 - s1);
             List<ColumnInfoDto> tableColumns = extraColumnsInfo(res);
-
-            long s3 = System.currentTimeMillis();
-            System.out.println(s3 - s2);
-            System.out.println(jive);
             return tableColumns;
         } catch (SQLException e) {
             if (e.getMessage() != null && e.getMessage().contains("Table not found")) {
@@ -96,10 +45,7 @@ public class HiveService implements BeanPostProcessor {
                 throw new ExecuteSqlException("查询失败", e);
             }
         } finally {
-            long s1 = System.currentTimeMillis();
             jive.close();
-            long s2 = System.currentTimeMillis();
-            System.out.println("close:" + (s2 - s1));
         }
 
     }

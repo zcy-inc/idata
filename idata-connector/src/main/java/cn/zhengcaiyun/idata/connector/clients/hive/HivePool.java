@@ -3,6 +3,8 @@ package cn.zhengcaiyun.idata.connector.clients.hive;
 import cn.zhengcaiyun.idata.connector.clients.hive.exception.JiveException;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import javax.annotation.PreDestroy;
+
 public class HivePool extends HivePoolAbstract {
 
     public static final int DEFAULT_TIMEOUT = 2000;
@@ -13,6 +15,11 @@ public class HivePool extends HivePoolAbstract {
 
     public HivePool(final GenericObjectPoolConfig poolConfig, ConnectInfo connectInfo) {
         super(poolConfig, new HiveFactory(connectInfo));
+    }
+
+    @PreDestroy
+    public void cleanAllConnection() {
+        System.out.println("clean all valid hive connection");
     }
 
     @Override
