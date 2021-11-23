@@ -20,6 +20,7 @@ public class HivePool extends HivePoolAbstract {
     @PreDestroy
     public void cleanAllConnection() {
         System.out.println("clean all valid hive connection");
+        super.closeInternalPool();
     }
 
     @Override
