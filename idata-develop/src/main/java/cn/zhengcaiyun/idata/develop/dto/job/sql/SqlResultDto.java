@@ -14,34 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.develop.dto.job.sql;
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlResultDto;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-26 17:06
- **/
-public interface JobInfoService {
+ * @author caizhedong
+ * @date 2021-11-22 上午10:58
+ */
 
-    Long addJob(JobInfoDto dto, Operator operator);
-
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
-
-    JobInfoDto getJobInfo(Long id);
-
-    Boolean removeJob(Long id, Operator operator);
-
-    Boolean resumeJob(Long id, String environment, Operator operator);
-
-    Boolean pauseJob(Long id, String environment, Operator operator);
-
-    Boolean runJob(Long id, String environment, Operator operator);
-
-    JobDryRunDto dryRunJob(Long jobId, Integer version);
-
+public class SqlResultDto extends LivySqlResultDto {
 }

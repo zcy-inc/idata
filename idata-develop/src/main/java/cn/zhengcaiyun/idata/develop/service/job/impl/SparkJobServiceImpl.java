@@ -14,34 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
+import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-26 17:06
- **/
-public interface JobInfoService {
+ * @author caizhedong
+ * @date 2021-11-19 下午4:12
+ */
 
-    Long addJob(JobInfoDto dto, Operator operator);
+@Service
+public class SparkJobServiceImpl implements SparkJobService {
 
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
+    @Override
+    public SparkJobDto save(SparkJobDto sparkJobDto, String operator) {
+        return null;
+    }
 
-    JobInfoDto getJobInfo(Long id);
+    @Override
+    public SparkJobDto find(Long jobId, Integer version) {
+        return null;
+    }
 
-    Boolean removeJob(Long id, Operator operator);
-
-    Boolean resumeJob(Long id, String environment, Operator operator);
-
-    Boolean pauseJob(Long id, String environment, Operator operator);
-
-    Boolean runJob(Long id, String environment, Operator operator);
-
-    JobDryRunDto dryRunJob(Long jobId, Integer version);
-
+    @Override
+    public String uploadFile(MultipartFile file) {
+        return null;
+    }
 }
