@@ -16,10 +16,13 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
+import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
@@ -47,6 +50,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -104,7 +108,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Autowired
     private EnumService enumService;
     @Autowired
-    LivyService livyService;
+    private HiveService hiveService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "hiveTableName", "folderId"};
@@ -503,10 +507,10 @@ public class TableInfoServiceImpl implements TableInfoService {
 
         // 情况1：远端hive表不存在 && 该表未曾同步过hive  ---> 新建hive表
         if (!exist && !everExist) {
-            SyncHiveDTO syncHiveDTO = createHive(tableId);
+            hiveService.create(getTableDDL(tableId));
             devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(dbName + "." + tableName).set(devTableInfo.editor).equalTo(operator)
                     .where(devTableInfo.id, isEqualTo(tableId)));
-            return syncHiveDTO;
+            return new SyncHiveDTO();
         }
 
         // 情况2：远端hive表存在 && 该表未曾同步过hive  ---> 不可新建，远端hive表已存在
@@ -516,15 +520,12 @@ public class TableInfoServiceImpl implements TableInfoService {
 
         // 情况3：远端hive表不存在 && 该表已同步过hive  ---> 需要额外rename表，并同时维护表的其他元数据信息（即情况4）
         if (!exist && everExist) {
-            renameHive(hiveTableName, tableName, dbName);
+            boolean success = hiveService.rename(dbName, tableName, hiveTableName.split("\\.")[1]);
+            if (!success) {
+                throw new GeneralException("rename hive table fail");
+            }
             devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(dbName + "." + tableName).set(devTableInfo.editor).equalTo(operator)
                     .where(devTableInfo.id, isEqualTo(tableId)));
-            try {
-                // 此处延迟3s的原因是提交到livy是无序的，rename和alter必须要保证同步关系，但目前没有依赖关系
-                Thread.sleep(3000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         // 情况4：远端hive表存在 && 该表已同步过hive  ---> 说明表名没有表，做字段相关元数据信息的比对同步
@@ -533,18 +534,14 @@ public class TableInfoServiceImpl implements TableInfoService {
         MetadataInfo hiveMetadataInfo = metadataQueryApi.getHiveMetadataInfo(dbName, tableName);
         List<ColumnInfoDto> hiveTableColumns = hiveMetadataInfo.getColumnList().stream().map(e -> {
             ColumnInfoDto dto = new ColumnDetailsDto();
-            dto.setColumnName(e.getColumnName());
-            dto.setColumnType(e.getColumnType());
-            dto.setColumnComment(e.getColumnComment());
+            BeanUtils.copyProperties(e, dto);
             dto.setPartitionedColumn("false");
             return dto;
         }).collect(Collectors.toList());
         hiveTableColumns.addAll(hiveMetadataInfo.getPartitionColumnList().stream()
                 .map(e -> {
                     ColumnInfoDto dto = new ColumnDetailsDto();
-                    dto.setColumnName(e.getColumnName());
-                    dto.setColumnType(e.getColumnType());
-                    dto.setColumnComment(e.getColumnComment());
+                    BeanUtils.copyProperties(e, dto);
                     dto.setPartitionedColumn("true");
                     return dto;
                 }).collect(Collectors.toList())
@@ -560,11 +557,13 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .stream()
                 .filter(e -> !hiveTableColumnNameList.contains(e.getColumnName()))
                 .collect(Collectors.toSet());
+
         // 进行alter table的DDL SQL封装
-        String alterTableDDL = assembleHiveAddColumnSQL(exceptColumnSet, dbName, tableName);
-        LivySqlQuery query = new LivySqlQuery();
-        query.setSql(alterTableDDL);
-        LivyStatementDto statement = livyService.createStatement(query);
+        hiveService.addColumns(dbName, tableName, exceptColumnSet.stream().map(e -> {
+            cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto elem = new cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto();
+            BeanUtils.copyProperties(e, elem);
+            return elem;
+        }).collect(Collectors.toSet()));
         // 4.2远端hive表修改列（类型和注释和分区）
         // 对比相同字段，取出类型和注释不相同的进行更新
         Set<String> sameColumnNameSet = localTableColumns
@@ -587,12 +586,9 @@ public class TableInfoServiceImpl implements TableInfoService {
             String localColumnComment = localColumn.getColumnComment();
             String localColumnType = localColumn.getColumnType();
             String hiveColumnType = hiveColumn.getColumnType();
-            if (!commentEquals(localColumnComment, hiveColumn.getColumnComment())
+            if (!JiveUtil.commentEquals(localColumnComment, hiveColumn.getColumnComment())
                     || !StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
-                String changeTableDDL = assembleHiveChangeColumnSQL(dbName, tableName, columnName, localColumnType, localColumnComment);
-                query = new LivySqlQuery();
-                query.setSql(changeTableDDL);
-                livyService.createStatement(query);
+                hiveService.changeColumn(dbName, tableName, columnName, columnName, localColumnType, localColumnComment);
 
                 if (!StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
                     warningList.add(String.format("修改了`%s`.%s表%s列类型（HIVE中类型：%s，本地类型：%s）\n", dbName, tableName, columnName, hiveColumnType, localColumnType));
@@ -600,7 +596,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             }
             String localColumnPartition = localColumn.getPartitionedColumn();
             String hiveColumnPartition = hiveColumn.getPartitionedColumn();
-            if (!StringUtils.equals(localColumnPartition, hiveColumnPartition)) {
+            if (!StringUtils.equalsIgnoreCase(localColumnPartition, hiveColumnPartition)) {
                 warningList.add(String.format("修改了`%s`.%s表%s列类型分区属性（HIVE中是否为分区字段：%s，本地是否为分区字段：%s）\n", dbName, tableName, columnName, hiveColumnPartition, localColumnPartition));
             }
         }
@@ -610,50 +606,6 @@ public class TableInfoServiceImpl implements TableInfoService {
         return syncHiveDTO;
     }
 
-    /**
-     * 判断注释相等，主要是为了兼容 'null'和''
-     * @param localColumnComment
-     * @param hiveColumnComment
-     * @return
-     */
-    private boolean commentEquals(String localColumnComment, String hiveColumnComment) {
-        if (StringUtils.isBlank(localColumnComment) && StringUtils.isBlank(hiveColumnComment)) {
-            return true;
-        }
-        if (StringUtils.equals("null", localColumnComment)) {
-            localColumnComment = null;
-        }
-        if (StringUtils.equals("null", hiveColumnComment)) {
-            hiveColumnComment = null;
-        }
-        return StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment);
-    }
-
-    /**
-     * rename DDL
-     * @param hiveTableName
-     * @param tableName
-     * @param dbName
-     */
-    private void renameHive(String hiveTableName, String tableName, String dbName) {
-        String renameTableDDL = getTableRenameDDL(hiveTableName, tableName, dbName);
-        LivySqlQuery query = new LivySqlQuery();
-        query.setSql(renameTableDDL);
-        livyService.createStatement(query);
-    }
-
-    /**
-     * 创建ddl
-     * @param tableId
-     * @return
-     */
-    private SyncHiveDTO createHive(Long tableId) {
-        String createTableDDL = getTableDDL(tableId);
-        LivySqlQuery query = new LivySqlQuery();
-        query.setSql(createTableDDL);
-        livyService.createStatement(query);
-        return new SyncHiveDTO();
-    }
 
     /**
      * 校验databse是否被修改
@@ -797,17 +749,6 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     /**
-     * 封装hive rename语句 例子 ALTER TABLE table_name RENAME TO new_table_name
-     * @param hiveTableName 上次同步的hive表名称，包括database前缀，格式：database.tableName
-     * @param tableName 当前表名
-     * @param dbName 当前数据库名
-     * @return
-     */
-    private String getTableRenameDDL(String hiveTableName, String tableName, String dbName) {
-        return "alter table " + hiveTableName + " rename to " + dbName + "." + tableName ;
-    }
-
-    /**
      * 封装hive alter DDL语句 例子 alter table `dws`.tmp_sync_hive change address address string COMMENT '新的地址'
      * @param dbName        库名
      * @param tableName     表名
@@ -821,34 +762,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 + columnType + " comment '" + columnComment + "'";
     }
 
-    /**
-     * 封装hive alter DDL语句 例子"alter table `dws`.t_user add columns (sex string comment '性别', address string comment '地址')" 注意不能带;
-     * @param addColumns
-     * @param dbName
-     * @param tableName
-     * @return
-     */
-    private String assembleHiveAddColumnSQL(Set<ColumnInfoDto> addColumns, String dbName, String tableName) {
-        StringBuilder builder = new StringBuilder("alter table ")
-                .append("`")
-                .append(dbName)
-                .append("`.")
-                .append(tableName)
-                .append(" add columns (");
 
-        // 拼接每一个新增列的语法，如：sex string comment '性别'
-        List<String> columnsInfoList = addColumns
-                .stream()
-                .map(e -> e.getColumnName()
-                        + " " + e.getColumnType()
-                        + " comment '"
-                        + StringUtils.getIfEmpty(e.getColumnComment(), () -> "")
-                        + "'")
-                .collect(Collectors.toList());
-        builder.append(StringUtils.join(columnsInfoList, ","));
-        builder.append(")");
-        return builder.toString();
-    }
 
     private TableInfoDto getTableInfoById(Long tableId) {
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),

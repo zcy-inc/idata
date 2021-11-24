@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.connector.clients.hive;
 
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
@@ -13,10 +14,15 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.util.BeanUtil;
+import org.springframework.beans.BeanUtils;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -47,8 +53,47 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new GeneralException("exist fail!");
         }
         return exist;
+    }
+
+    /**
+     * 重命名
+     * @param dbName 库名
+     * @param sourceName 原表名
+     * @param targetName 目标表名
+     * @return
+     */
+    public boolean rename(String dbName, String sourceName, String targetName) {
+        boolean success;
+        try (Statement statement = this.getClient().createStatement()) {
+            statement.execute(String.format("alter table `%s`.%s rename to `%s`.%s", dbName, sourceName, dbName, targetName));
+            success = exist(dbName, targetName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            success = false;
+            throw new GeneralException("rename fail!");
+        }
+        return success;
+    }
+
+    /**
+     * 新建表
+     * @param ddl
+     * @return
+     */
+    public boolean create(String ddl) {
+        boolean success;
+        try (Statement statement = this.getClient().createStatement()) {
+            statement.execute(ddl);
+            success = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            success = false;
+            throw new GeneralException("create fail!");
+        }
+        return success;
     }
 
     /**
@@ -58,7 +103,8 @@ public class Jive extends BinaryJive {
      * @return
      */
     public String getCreateTableSql(String dbName, String tableName) {
-        try (ResultSet res = this.getClient().createStatement().executeQuery(String.format("show create table `%s`.%s", dbName, tableName))) {
+        try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+             ResultSet res = statement.executeQuery(String.format("show create table `%s`.%s", dbName, tableName))) {
             StringBuilder createSql = new StringBuilder();
             while (res.next()) {
                 createSql.append(res.getString(1)).append("\n");
@@ -66,8 +112,51 @@ public class Jive extends BinaryJive {
             return createSql.toString();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new GeneralException("getCreateTableSql fail!");
         }
-        return null;
+    }
+
+    /**
+     * 新增列
+     * @param dbName
+     * @param tableName
+     * @param addColumns
+     * @return
+     */
+    public boolean addColumns(String dbName, String tableName, Set<ColumnInfoDto> addColumns) {
+        String sql = JiveUtil.assembleHiveAddColumnSQL(addColumns, dbName, tableName);
+        boolean success;
+        try (Statement statement = this.getClient().createStatement()) {
+            statement.execute(sql);
+            success = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            success = false;
+            throw new GeneralException("addColumns fail!");
+        }
+        return success;
+    }
+
+    /**
+     * 修改列属性
+     * @param dbName
+     * @param tableName
+     * @param sourceColumnName 原列名
+     * @param targetColumnName 修改后列名
+     * @param columnType 列类型
+     * @param columnComment 列描述
+     * @return
+     */
+    public boolean changeColumn(String dbName, String tableName, String sourceColumnName, String targetColumnName, String columnType, String columnComment) {
+        boolean success;
+        try (Statement statement = this.getClient().createStatement()) {
+            statement.execute(String.format("alter table `%s`.%s change %s %s %s comment '%s'", dbName, tableName, sourceColumnName, targetColumnName, columnType, columnComment));
+            success = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new GeneralException("changeColumn fail!");
+        }
+        return success;
     }
 
     /**
@@ -118,7 +207,8 @@ public class Jive extends BinaryJive {
         boolean isPartitionTable = metadataInfo.isPartitionTable();
         String sql = isPartitionTable ? String.format("DESCRIBE FORMATTED %s.%s", dbName, tableName) : String.format("show tblproperties %s.%s(\"totalSize\")", dbName, tableName);
 
-        try (ResultSet res = this.getClient().createStatement().executeQuery(sql)) {
+        try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+             ResultSet res = statement.executeQuery(sql)) {
             long bytes = -1;
             if (isPartitionTable) {
                 while (res.next()) {

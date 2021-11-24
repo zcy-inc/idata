@@ -20,9 +20,25 @@ public class Test {
     //      - 缺点：其他bean也要这么做，很麻烦，并且jivePool不共用
 
     public static void main(String[] args) throws SQLException {
+//        testRename();
         testExist();
-
     }
+
+    public static void testRename() {
+        Jive jive = null;
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            System.out.println("testRename：" + jive.rename("dws", "tmp_sync_hive222", "tmp_sync_hive"));
+        } finally {
+            jive.close(); // ！重要，使用完后归还
+        }
+    }
+
 
     public static void testExist() {
         Jive jive = null;
@@ -33,7 +49,7 @@ public class Test {
             config.setTestOnBorrow(true);
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
-            System.out.println("======" + jive.exist("dws", "tmp_sync_hive222"));
+            System.out.println("======" + jive.exist("dws", "tmp_sync_hive"));
         } finally {
             jive.close(); // ！重要，使用完后归还
         }

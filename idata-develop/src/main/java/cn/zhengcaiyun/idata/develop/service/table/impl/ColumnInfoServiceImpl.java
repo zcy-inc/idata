@@ -85,6 +85,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private final String COLUMN_SECURITY_LABEL = "colSecurityLevel:LABEL";
     private final String COLUMN_SECURITY_ENUM = "securityLevelEnum:ENUM";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
+    private final String COLUMN_PARTITION_LABEL = "partitionedCol:LABEL";
     private final String[] columnLabelTags = {LabelTagEnum.STRING_LABEL.name(), LabelTagEnum.BOOLEAN_LABEL.name(),
     LabelTagEnum.USER_LABEL.name(), LabelTagEnum.ENUM_LABEL.name(), LabelTagEnum.ENUM_VALUE_LABEL.name()};
 
@@ -175,6 +176,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                     }
                     else if (columnLabel.getLabelCode().equals(COLUMN_DESCRIPTION_LABEL)) {
                         echo.setColumnDescription(columnLabel.getLabelParamValue());
+                    }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_PARTITION_LABEL)) {
+                        echo.setPartitionedColumn(columnLabel.getLabelParamValue());
                     }
                 });
                 return echo;

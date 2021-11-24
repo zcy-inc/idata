@@ -17,6 +17,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -41,6 +42,12 @@ public class HiveService implements BeanPostProcessor {
         }
     }
 
+    public boolean create(String ddl) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.create(ddl);
+        }
+    }
+
     public String getTableSize(String dbName, String tableName) {
         try (Jive jive = hivePool.getResource()) {
             return jive.getTableSize(dbName, tableName);
@@ -59,9 +66,39 @@ public class HiveService implements BeanPostProcessor {
         }
     }
 
+    /**
+     * 重命名
+     * @param dbName
+     * @param sourceName
+     * @param targetName
+     */
+    public boolean rename(String dbName, String sourceName, String targetName) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.rename(dbName, sourceName, targetName);
+        }
+    }
+
     public String getCreateTableSql(String dbName, String tableName) {
         try (Jive jive = hivePool.getResource()) {
             return jive.getCreateTableSql(dbName, tableName);
+        }
+    }
+
+    public boolean changeColumn(String dbName, String tableName, String sourceColumnName, String targetColumnName, String columnType, String columnComment) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.changeColumn(dbName, tableName, sourceColumnName, targetColumnName, columnType, columnComment);
+        }
+    }
+
+    /**
+     * 新增列
+     * @param dbName
+     * @param tableName
+     * @param columns
+     */
+    public boolean addColumns(String dbName, String tableName, Set<ColumnInfoDto> columns) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.addColumns(dbName, tableName, columns);
         }
     }
 
