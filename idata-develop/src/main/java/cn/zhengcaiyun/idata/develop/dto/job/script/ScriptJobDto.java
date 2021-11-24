@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author caizhedong
@@ -91,5 +92,21 @@ public class ScriptJobDto extends BaseDto {
 
     public void setScriptArguments(List<JobArgumentDto> scriptArguments) {
         this.scriptArguments = scriptArguments;
+    }
+
+    // TODO
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ScriptJobDto that = (ScriptJobDto) o;
+        if (scriptArguments.size() != that.scriptArguments.size()) return false;
+        return Objects.equals(sourceResource, that.sourceResource) && Objects.equals(scriptArguments, that.scriptArguments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sourceResource, scriptArguments);
     }
 }

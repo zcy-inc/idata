@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.dto.job.kylin;
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author caizhedong
@@ -98,5 +99,19 @@ public class KylinJobDto extends BaseDto {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KylinJobDto kylinJobDto = (KylinJobDto) o;
+        return Objects.equals(cubeName, kylinJobDto.cubeName) && Objects.equals(buildType, kylinJobDto.buildType)
+                && Objects.equals(startTime, kylinJobDto.startTime) && Objects.equals(endTime, kylinJobDto.endTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cubeName, buildType, startTime, endTime);
     }
 }

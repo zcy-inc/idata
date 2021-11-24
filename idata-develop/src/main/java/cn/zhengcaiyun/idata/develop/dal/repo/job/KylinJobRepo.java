@@ -14,14 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.dto.job.sql;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlQuery;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 
 /**
  * @author caizhedong
- * @date 2021-11-22 下午3:20
+ * @date 2021-11-22 下午5:36
  */
 
-public class SqlQueryDto extends LivySqlQuery {
+public interface KylinJobRepo {
+    DevJobContentKylin query(Long jobId, Integer version);
+    boolean add(DevJobContentKylin jobContentKylin);
+    boolean update(DevJobContentKylin jobContentKylin);
+    Integer newVersion(Long jobId);
 }

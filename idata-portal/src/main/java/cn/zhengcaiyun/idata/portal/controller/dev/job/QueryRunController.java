@@ -14,36 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.controller.dev.job.sql;
+package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
-import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
-import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryRunResultDto;
+import cn.zhengcaiyun.idata.develop.service.job.QueryRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @author caizhedong
- * @date 2021-11-22 下午3:12
+ * @date 2021-11-23 下午8:15
  */
 
 @RestController
-@RequestMapping(path = "/p1/dev/jobs/{jobId}/sql")
-public class SqlJobController {
+@RequestMapping(path = "/p1/dev/jobs")
+public class QueryRunController {
 
     @Autowired
-    private SqlJobService sqlJobService;
+    QueryRunService queryRunService;
 
-    @GetMapping("/contents/{version}")
-    public RestResult<SqlJobDto> find(@PathVariable Long jobId,
-                                      @PathVariable Integer version) {
-        return RestResult.success(sqlJobService.find(jobId, version));
+    @GetMapping("/runQueryResult")
+    public RestResult<QueryRunResultDto> runQueryResult(@RequestParam("sessionId") Integer sessionId,
+                                                        @RequestParam("statementId") Integer statementId) {
+        return RestResult.success(queryRunService.runQueryResult(sessionId, statementId));
     }
 
-    @PostMapping("/contents")
-    public RestResult<SqlJobDto> save(@PathVariable Long jobId,
-                                        @RequestBody SqlJobDto sqlJobDto) {
-        return RestResult.success(sqlJobService.save(sqlJobDto, OperatorContext.getCurrentOperator().getNickname()));
+    @PostMapping("/runQuery")
+    public RestResult<LivyStatementDto> runQueryPython(@RequestBody QueryDto queryDto) {
+        return RestResult.success(queryRunService.runQuery(queryDto));
     }
 }

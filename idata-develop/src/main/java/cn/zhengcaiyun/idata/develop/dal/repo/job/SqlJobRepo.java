@@ -14,20 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 
 /**
  * @author caizhedong
- * @date 2021-11-19 下午3:27
+ * @date 2021-11-25 上午9:18
  */
 
-public interface SparkJobService {
-    SparkJobDto save(SparkJobDto sparkJobDto, String operator) throws IOException;
-    SparkJobDto find(Long jobId, Integer version);
-    String uploadFile(MultipartFile file) throws IOException;
+public interface SqlJobRepo {
+    DevJobContentSql query(Long jobId, Integer version);
+    boolean add(DevJobContentSql jobContentSql);
+    boolean update(DevJobContentSql jobContentSql);
+    Integer newVersion(Long jobId);
 }

@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.connector.spi.livy.dto;
 
+import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
+
 import java.util.List;
 
 /**
@@ -24,11 +26,12 @@ import java.util.List;
  * @author: yangjianhua
  * @create: 2021-10-13 15:08
  **/
-public class LivySqlQuery {
+public class LivyQueryDto {
     private Integer sessionId;
-    private String sql;
+    private String sourceQuery;
     private List<Long> udfIds;
     private String externalTables;
+    private LivySessionKindEnum sessionKind;
 
     public Integer getSessionId() {
         return sessionId;
@@ -38,12 +41,12 @@ public class LivySqlQuery {
         this.sessionId = sessionId;
     }
 
-    public String getSql() {
-        return sql;
+    public String getSourceQuery() {
+        return sourceQuery;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
+    public void setSourceQuery(String sourceQuery) {
+        this.sourceQuery = sourceQuery;
     }
 
     public List<Long> getUdfIds() {
@@ -60,5 +63,13 @@ public class LivySqlQuery {
 
     public void setExternalTables(String externalTables) {
         this.externalTables = externalTables;
+    }
+
+    public LivySessionKindEnum getSessionKind() {
+        return sessionKind;
+    }
+
+    public void setSessionKind(LivySessionKindEnum sessionKind) {
+        this.sessionKind = sessionKind;
     }
 }

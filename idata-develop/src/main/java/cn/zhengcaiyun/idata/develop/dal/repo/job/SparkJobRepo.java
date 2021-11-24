@@ -14,14 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.dto.job.sql;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlResultDto;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 
 /**
  * @author caizhedong
- * @date 2021-11-22 上午10:58
+ * @date 2021-11-24 下午7:07
  */
 
-public class SqlResultDto extends LivySqlResultDto {
+public interface SparkJobRepo {
+    DevJobContentSpark query(Long jobId, Integer version);
+    boolean add(DevJobContentSpark jobContentSpark);
+    boolean update(DevJobContentSpark jobContentSpark);
+    Integer newVersion(Long jobId);
 }

@@ -17,8 +17,6 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlQueryDto;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlResultDto;
 
 /**
  * @author caizhedong
@@ -28,5 +26,4 @@ import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlResultDto;
 public interface SqlJobService {
     SqlJobDto save(SqlJobDto sqlJobDto, String operator);
     SqlJobDto find(Long jobId, Integer version);
-    SqlResultDto runQuerySql(SqlQueryDto sqlQueryDto);
 }

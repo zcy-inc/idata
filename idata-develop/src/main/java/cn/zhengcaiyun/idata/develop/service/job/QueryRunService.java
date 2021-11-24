@@ -16,18 +16,16 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryRunResultDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
 
 /**
  * @author caizhedong
- * @date 2021-11-19 下午3:27
+ * @date 2021-11-23 下午7:55
  */
 
-public interface SparkJobService {
-    SparkJobDto save(SparkJobDto sparkJobDto, String operator) throws IOException;
-    SparkJobDto find(Long jobId, Integer version);
-    String uploadFile(MultipartFile file) throws IOException;
+public interface QueryRunService {
+    LivyStatementDto runQuery(QueryDto queryDto);
+    QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId);
 }

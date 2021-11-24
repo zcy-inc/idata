@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
 import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.*;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyOutputStatusEnum;
+import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionStateEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyStatementStateEnum;
 import com.alibaba.fastjson.JSON;
@@ -30,6 +31,7 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -55,7 +57,7 @@ public class LivyService {
     private Integer LIVY_SESSION_MAX;
 
     // TODO 暂时不考虑多进程
-    public synchronized LivySessionDto getOrCreateSession() {
+    public synchronized LivySessionDto getOrCreateSession(LivySessionKindEnum sessionKind) {
         LivySessionDto sessionDto = new LivySessionDto();
         Map<String, Object> sessions = sendToLivy(new HttpInput().setMethod("GET"),
                 new TypeReference<Map<String, Object>>() {
@@ -74,7 +76,7 @@ public class LivyService {
             return sessionDto;
         }
         Map<String, Object> body = new HashMap<>();
-        body.put("kind", "spark");
+        body.put("kind", sessionKind.name());
         body.put("driverMemory", DEFAULT_DRIVER_MEMORY);
         body.put("executorMemory", DEFAULT_EXECUTOR_MEMORY);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
@@ -94,23 +96,27 @@ public class LivyService {
                 "/sessions/%d", sessionId);
     }
 
-    public LivyStatementDto createStatement(LivySqlQuery sql) {
-        if (sql.getSessionId() == null) {
-            sql.setSessionId(getOrCreateSession().getSessionId());
+    public LivyStatementDto createStatement(LivyQueryDto query) {
+        if (query.getSessionId() == null) {
+            query.setSessionId(getOrCreateSession(query.getSessionKind()).getSessionId());
         }
-        waitSessionAvailable(sql.getSessionId());
+        waitSessionAvailable(query.getSessionId());
+
         Map<String, Object> body = new HashMap<>();
-        body.put("kind", "spark");
+        String querySql = LivySessionKindEnum.spark.equals(query.getSessionKind())
+                ? String.format("spark.sql(\"\"\"%s\"\"\")", query.getSourceQuery())
+                : query.getSourceQuery();
+        body.put("kind", query.getSessionKind().name());
         // TODO 这里也可以执行ddl和dml，后续需要增加日志记录和权限控制
         body.put("code",
-                String.format("println(spark.sql(\"\"\"%s\"\"\").limit(500).toJSON.collect.mkString(\"[\", \",\", \"]\"))", sql.getSql()));
+                String.format("println(%s.limit(500).toJSON.collect.mkString(\"[\", \",\", \"]\"))", querySql));
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
                 },
-                "/sessions/%d/statements", sql.getSessionId());
+                "/sessions/%d/statements", query.getSessionId());
         Integer statementId = (Integer) response.get("id");
         LivyStatementDto statementDto = new LivyStatementDto();
-        statementDto.setSessionId(sql.getSessionId());
+        statementDto.setSessionId(query.getSessionId());
         statementDto.setStatementId(statementId);
         return statementDto;
     }
@@ -173,13 +179,13 @@ public class LivyService {
         return sessionLog;
     }
 
-    public void submitSparkCode(String code) {
+    public void submitSparkCode(String code, LivySessionKindEnum sessionKind) {
         Integer sessionId = null;
         try {
-            sessionId = getOrCreateSession().getSessionId();
+            sessionId = getOrCreateSession(sessionKind).getSessionId();
             waitSessionAvailable(sessionId);
             Map<String, Object> body = new HashMap<>();
-            body.put("kind", "spark");
+            body.put("kind", sessionKind.name());
             body.put("code", code);
             Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                     new TypeReference<Map<String, Object>>() {

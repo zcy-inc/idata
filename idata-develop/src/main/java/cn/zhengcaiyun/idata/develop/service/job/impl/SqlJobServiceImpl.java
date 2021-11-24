@@ -16,11 +16,25 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.ScriptJobRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlQueryDto;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlResultDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author caizhedong
@@ -30,18 +44,57 @@ import org.springframework.stereotype.Service;
 @Service
 public class SqlJobServiceImpl implements SqlJobService {
 
+    @Autowired
+    private JobInfoRepo jobInfoRepo;
+    @Autowired
+    private SqlJobRepo sqlJobRepo;
+
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public SqlJobDto save(SqlJobDto sqlJobDto, String operator) {
-        return null;
+        checkArgument(sqlJobDto.getJobId() != null, "作业Id不能为空");
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(sqlJobDto.getJobId());
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+
+        Integer version = sqlJobDto.getVersion();
+        boolean startNewVersion = false;
+        if (Objects.nonNull(version)) {
+            DevJobContentSql existJobContentSql = sqlJobRepo.query(sqlJobDto.getJobId(), version);
+            checkArgument(existJobContentSql != null, "作业不存在或已删除");
+            SqlJobDto existSqlJob = PojoUtil.copyOne(existJobContentSql, SqlJobDto.class);
+
+            // 不可修改且跟当前版本不一致才新生成版本
+            if (existSqlJob.getEditable().equals(EditableEnum.NO.val) && !sqlJobDto.equals(existSqlJob)) {
+                startNewVersion = true;
+            }
+            else {
+                if (existJobContentSql.getEditable().equals(EditableEnum.YES.val)) {
+                    DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class);
+                    jobContentSql.setId(existJobContentSql.getId());
+                    jobContentSql.setEditor(operator);
+                    sqlJobRepo.update(jobContentSql);
+                }
+            }
+        }
+
+        if (startNewVersion) {
+            DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class,
+                    "jobId", "sourceSql", "udfIds", "externalTables");
+            version = sqlJobRepo.newVersion(sqlJobDto.getJobId());
+            jobContentSql.setVersion(version);
+            jobContentSql.setEditable(EditableEnum.YES.val);
+            jobContentSql.setCreator(operator);
+            sqlJobRepo.add(jobContentSql);
+        }
+
+        return find(sqlJobDto.getJobId(), version);
     }
 
     @Override
     public SqlJobDto find(Long jobId, Integer version) {
-        return null;
+        DevJobContentSql jobContentSql = sqlJobRepo.query(jobId, version);
+        checkArgument(jobContentSql != null, "作业不存在");
+        return PojoUtil.copyOne(jobContentSql, SqlJobDto.class);
     }
 
-    @Override
-    public SqlResultDto runQuerySql(SqlQueryDto sqlQueryDto) {
-        return null;
-    }
 }

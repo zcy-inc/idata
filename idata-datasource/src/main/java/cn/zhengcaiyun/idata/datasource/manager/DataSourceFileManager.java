@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.datasource.manager;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class DataSourceFileManager {
             String code = String.format("spark.read.option(\"header\", true).option(\"inferSchema\", true)"
                             + ".csv(\"%s\").write.mode(\"overwrite\").saveAsTable(\"%s\")",
                     hdfsFilePath, tableName);
-            livyService.submitSparkCode(code);
+            livyService.submitSparkCode(code, LivySessionKindEnum.spark);
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException ex) {

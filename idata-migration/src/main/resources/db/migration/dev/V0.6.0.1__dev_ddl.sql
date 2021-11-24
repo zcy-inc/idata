@@ -84,7 +84,8 @@ create table if not exists dev_job_output
     dest_data_source_type  varchar(20)         not null comment '数据去向-数据源类型',
     dest_data_source_id    bigint(20) unsigned not null comment '数据去向-数据源id',
     dest_table             varchar(100)        not null comment '数据去向-目标表',
-    dest_write_mode        varchar(20)         not null comment '数据去向-写入模式，override，upsert',
+    dest_write_mode        varchar(20)         not null comment '数据去向-写入模式，overwrite，upsert',
+    job_source_table_pk    varchar(10)         comment '数据来源表主键(写入模式为upsert时必填)',
     key idx_job_env (job_id, environment),
     key idx_table (dest_table(40))
 ) engine = innodb

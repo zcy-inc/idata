@@ -16,10 +16,31 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.SparkJobRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
 import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author caizhedong
@@ -29,18 +50,84 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class SparkJobServiceImpl implements SparkJobService {
 
+    @Autowired
+    private JobInfoRepo jobInfoRepo;
+    @Autowired
+    private SparkJobRepo sparkJobRepo;
+    @Autowired
+    private HdfsService hdfsService;
+
     @Override
-    public SparkJobDto save(SparkJobDto sparkJobDto, String operator) {
-        return null;
+    @Transactional(rollbackFor = Throwable.class)
+    public SparkJobDto save(SparkJobDto sparkJobDto, String operator) throws IOException {
+        checkArgument(sparkJobDto.getJobId() != null, "作业Id不能为空");
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(sparkJobDto.getJobId());
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+
+        Integer version = sparkJobDto.getVersion();
+        boolean startNewVersion = false;
+        if (Objects.nonNull(version)) {
+            DevJobContentSpark existJobContentSpark = sparkJobRepo.query(sparkJobDto.getJobId(), version);
+            checkArgument(existJobContentSpark != null, "作业不存在或已删除");
+            SparkJobDto existSparkJob = find(sparkJobDto.getJobId(), version);
+
+            // TODO 测试一致性
+            // 不可修改且跟当前版本不一致才新生成版本
+            if (existSparkJob.getEditable().equals(EditableEnum.NO.val) || !sparkJobDto.equals(existSparkJob)) {
+                startNewVersion = true;
+                if (JobTypeEnum.SPARK_PYTHON.equals(sparkJobDto.getJobType())
+                        && !sparkJobDto.getPythonResource().equals(existSparkJob.getPythonResource())) {
+                    sparkJobDto.setResourceHdfsPath(hdfsService.uploadFileToResource(
+                            new ByteArrayInputStream(sparkJobDto.getPythonResource().getBytes()), jobInfoOptional.get().getName() + ".py"));
+                }
+            }
+            else {
+                if (existJobContentSpark.getEditable().equals(EditableEnum.YES.val)) {
+                    hdfsService.modifyFile(existSparkJob.getResourceHdfsPath(), sparkJobDto.getPythonResource());
+                    DevJobContentSpark jobContentSpark = PojoUtil.copyOne(sparkJobDto, DevJobContentSpark.class);
+                    jobContentSpark.setId(existJobContentSpark.getId());
+                    jobContentSpark.setEditor(operator);
+                    sparkJobRepo.update(jobContentSpark);
+                }
+            }
+        }
+
+        if (startNewVersion) {
+            DevJobContentSpark jobContentSpark = PojoUtil.copyOne(sparkJobDto, DevJobContentSpark.class,
+                    "jobId", "resourceHdfsPath", "appArguments", "mainClass");
+            version = sparkJobRepo.newVersion(sparkJobDto.getJobId());
+            jobContentSpark.setVersion(version);
+            jobContentSpark.setEditable(EditableEnum.YES.val);
+            jobContentSpark.setCreator(operator);
+            sparkJobRepo.add(jobContentSpark);
+        }
+
+        return find(sparkJobDto.getJobId(), version);
     }
 
     @Override
     public SparkJobDto find(Long jobId, Integer version) {
-        return null;
+        DevJobContentSpark jobContentSpark = sparkJobRepo.query(jobId, version);
+        checkArgument(jobContentSpark != null, "作业不存在");
+        SparkJobDto echoSparkJob = PojoUtil.copyOne(jobContentSpark, SparkJobDto.class);
+        if (JobTypeEnum.SPARK_PYTHON.equals(echoSparkJob.getJobType())) {
+            String output;
+            try {
+                ByteArrayOutputStream sos = new ByteArrayOutputStream();
+                hdfsService.readFile(echoSparkJob.getResourceHdfsPath(), sos);
+                output = sos.toString();
+                sos.close();
+            } catch (IOException e) {
+                int end = (e.getMessage() + "").indexOf("\n");
+                throw new RuntimeException((e.getMessage() + "").substring(0, end > 0 ? end : Integer.MAX_VALUE));
+            }
+            echoSparkJob.setPythonResource(output);
+        }
+        return echoSparkJob;
     }
 
     @Override
-    public String uploadFile(MultipartFile file) {
-        return null;
+    public String uploadFile(MultipartFile file) throws IOException {
+        return hdfsService.uploadFileToResource(file.getInputStream(), file.getOriginalFilename());
     }
 }

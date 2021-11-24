@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.dto.job.sql;
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 
+import java.util.Objects;
+
 /**
  * @author caizhedong
  * @date 2021-11-22 上午10:15
@@ -97,5 +99,21 @@ public class SqlJobDto extends BaseDto {
 
     public void setExternalTables(String externalTables) {
         this.externalTables = externalTables;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SqlJobDto sqlJobDto = (SqlJobDto) o;
+        return Objects.equals(sourceSql, sqlJobDto.sourceSql) &&
+                Objects.equals(udfIds, sqlJobDto.udfIds) &&
+                Objects.equals(externalTables, sqlJobDto.externalTables);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), sourceSql, udfIds, externalTables);
     }
 }

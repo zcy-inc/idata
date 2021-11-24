@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author caizhedong
@@ -109,5 +110,22 @@ public class SparkJobDto extends BaseDto {
 
     public void setPythonResource(String pythonResource) {
         this.pythonResource = pythonResource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SparkJobDto that = (SparkJobDto) o;
+        return Objects.equals(resourceHdfsPath, that.resourceHdfsPath) &&
+                Objects.equals(appArguments, that.appArguments) &&
+                Objects.equals(mainClass, that.mainClass)
+                && Objects.equals(pythonResource, that.pythonResource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), resourceHdfsPath, appArguments, mainClass, pythonResource);
     }
 }
