@@ -170,11 +170,15 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             if (hasPrevOrPostRelation(jobId, environment, dependenceList, existDependenceList)) {
                 throw new BizProcessException("作业存在上下游依赖关系，不能修改DAG");
             }
-            updateDag(jobId, environment, operator);
+            changeDag(jobId, executeConfig, existExecuteConfig, environment, operator);
         } else {
             // dag不变，只变更作业依赖
             updatePrevJobDependency(jobId, environment, dependenceList, existDependenceList, operator);
+        }
 
+        // 修改调度配置
+        if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
+            changeSchedule(jobId, environment, operator);
         }
     }
 
@@ -197,25 +201,32 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             jobOutputRepo.save(output);
         }
 
-        bindDag(jobId, environment, true, operator);
+        bindDag(jobId, executeConfig.getSchDagId(), environment, true, operator);
         addPrevJobDependency(jobId, environment, dependenceList, operator);
     }
 
-    private void updateDag(Long jobId, String environment, Operator operator) {
-        unbindDag(jobId, environment, operator);
-        bindDag(jobId, environment, false, operator);
+    private void changeDag(Long jobId, JobExecuteConfig executeConfig, JobExecuteConfig existExecuteConfig, String environment, Operator operator) {
+        unbindDag(jobId, existExecuteConfig.getSchDagId(), environment, operator);
+        bindDag(jobId, executeConfig.getSchDagId(), environment, false, operator);
     }
 
-    private void bindDag(Long jobId, String environment, Boolean isFirstBind, Operator operator) {
+    private void bindDag(Long jobId, Long bindDagId, String environment, Boolean isFirstBind, Operator operator) {
         // 发布job绑定DAG事件
-        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_BIND_DAG, environment, isFirstBind ? "{\"firstBind\":true}" : "", operator);
-        jobEventPublisher.whenBindDag(eventLog, isFirstBind);
+        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_BIND_DAG, environment,
+                isFirstBind ? "{\"firstBind\":true, \"bindDagId\":" + bindDagId + "}" : "{\"bindDagId\":" + bindDagId + "}", operator);
+        jobEventPublisher.whenBindDag(eventLog, bindDagId, isFirstBind);
     }
 
-    private void unbindDag(Long jobId, String environment, Operator operator) {
-        // 发布job绑定DAG事件
-        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_UNBIND_DAG, environment, operator);
-        jobEventPublisher.whenUnBindDag(eventLog);
+    private void unbindDag(Long jobId, Long unbindDagId, String environment, Operator operator) {
+        // 发布job解绑DAG事件
+        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_UNBIND_DAG, environment, "{\"unbindDagId\":" + unbindDagId + "}", operator);
+        jobEventPublisher.whenUnBindDag(eventLog, unbindDagId);
+    }
+
+    private void changeSchedule(Long jobId, String environment, Operator operator) {
+        // 发布job调度配置变更事件
+        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_SCHEDULE_UPDATED, environment, operator);
+        jobEventPublisher.whenScheduleUpdated(eventLog);
     }
 
     private void updatePrevJobDependency(Long jobId, String environment,
@@ -271,6 +282,20 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private boolean isDagChanged(JobExecuteConfig newConfig, JobExecuteConfig oldConfig) {
         return !Objects.equals(newConfig.getSchDagId(), oldConfig.getSchDagId());
+    }
+
+    private boolean isScheduleConfigChanged(JobExecuteConfig newConfig, JobExecuteConfig oldConfig) {
+        // 判断作业优先级、超时和超时策略是否变更，如变更需要同步调度系统
+        if (!Objects.equals(newConfig.getSchPriority(), oldConfig.getSchPriority()))
+            return true;
+
+        if (!Objects.equals(newConfig.getSchTimeOut(), oldConfig.getSchTimeOut()))
+            return true;
+
+        if (!Objects.equals(newConfig.getSchTimeOutStrategy(), oldConfig.getSchTimeOutStrategy()))
+            return true;
+
+        return false;
     }
 
     private boolean hasPrevOrPostRelation(Long jobId, String environment, List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList) {

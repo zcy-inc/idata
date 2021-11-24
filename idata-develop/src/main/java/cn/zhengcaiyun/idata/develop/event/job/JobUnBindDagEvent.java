@@ -24,6 +24,7 @@ package cn.zhengcaiyun.idata.develop.event.job;
  **/
 public class JobUnBindDagEvent extends JobBaseEvent {
     private String environment;
+    private Long unbindDagId;
 
     public String getEnvironment() {
         return environment;
@@ -31,5 +32,13 @@ public class JobUnBindDagEvent extends JobBaseEvent {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public Long getUnbindDagId() {
+        return unbindDagId;
+    }
+
+    public void setUnbindDagId(Long unbindDagId) {
+        this.unbindDagId = unbindDagId;
     }
 }

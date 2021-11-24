@@ -32,6 +32,7 @@ public enum EventTypeEnum {
     DAG_RUN,
     DAG_ADD_DEPENDENCE,
     DAG_DEL_DEPENDENCE,
+    JOB_SCHEDULE_UPDATED,
     JOB_PAUSE,
     JOB_RESUME,
     JOB_PUBLISH,

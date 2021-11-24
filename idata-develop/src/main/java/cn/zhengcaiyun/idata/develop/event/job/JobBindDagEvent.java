@@ -26,6 +26,7 @@ public class JobBindDagEvent extends JobBaseEvent {
 
     private String environment;
     private Boolean firstBind;
+    private Long bindDagId;
 
     public Boolean getFirstBind() {
         return firstBind;
@@ -41,5 +42,13 @@ public class JobBindDagEvent extends JobBaseEvent {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public Long getBindDagId() {
+        return bindDagId;
+    }
+
+    public void setBindDagId(Long bindDagId) {
+        this.bindDagId = bindDagId;
     }
 }

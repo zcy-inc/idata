@@ -15,12 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.integration.schedule;
+package cn.zhengcaiyun.idata.develop.event.job;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-04 10:11
+ * @create: 2021-11-04 17:53
  **/
-public class ScheduleHub {
+public class JobScheduleUpdatedEvent extends JobBaseEvent {
+
+    private String environment;
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
 }

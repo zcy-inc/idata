@@ -17,6 +17,10 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule;
 
+import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -24,21 +28,21 @@ package cn.zhengcaiyun.idata.develop.integration.schedule;
  **/
 public interface IJobIntegrator {
 
-    void create();
+    void create(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
 
-    void update();
+    void update(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
 
-    void delete();
+    void delete(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
 
-    void enable();
+    void enableRunning(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
 
-    void disable();
+    void disableRunning(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
 
-    void publish();
+    void publish(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
 
-    void bindDag();
+    void bindDag(JobInfo jobInfo, Long dagId, String environment) throws ExternalIntegrationException;
 
-    void UnBindDag();
+    void unBindDag(JobInfo jobInfo, Long dagId, String environment) throws ExternalIntegrationException;
 
-    void run();
+    void run(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
 }

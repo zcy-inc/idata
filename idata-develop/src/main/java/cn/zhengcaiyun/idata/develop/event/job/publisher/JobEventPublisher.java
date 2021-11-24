@@ -73,6 +73,20 @@ public class JobEventPublisher {
         processResult(event);
     }
 
+    public void whenScheduleUpdated(JobEventLog eventLog) {
+        if (!EventTypeEnum.JOB_SCHEDULE_UPDATED.name().equals(eventLog.getJobEvent()))
+            return;
+
+        JobScheduleUpdatedEvent event = new JobScheduleUpdatedEvent();
+        event.setJobId(event.getJobId());
+        event.setEventId(eventLog.getId());
+        event.setEnvironment(eventLog.getEnvironment());
+        // 发布事件
+        JobEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        processResult(event);
+    }
+
     public void whenDeleted(JobEventLog eventLog) {
         if (!EventTypeEnum.DELETED.name().equals(eventLog.getJobEvent()))
             return;
@@ -128,7 +142,7 @@ public class JobEventPublisher {
         processResult(event);
     }
 
-    public void whenBindDag(JobEventLog eventLog, Boolean isFirst) {
+    public void whenBindDag(JobEventLog eventLog, Long bindDagId, Boolean isFirst) {
         if (!EventTypeEnum.JOB_BIND_DAG.name().equals(eventLog.getJobEvent()))
             return;
 
@@ -137,13 +151,14 @@ public class JobEventPublisher {
         event.setEventId(eventLog.getId());
         event.setFirstBind(isFirst);
         event.setEnvironment(eventLog.getEnvironment());
+        event.setBindDagId(bindDagId);
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果
         processResult(event);
     }
 
-    public void whenUnBindDag(JobEventLog eventLog) {
+    public void whenUnBindDag(JobEventLog eventLog, Long unbindDagId) {
         if (!EventTypeEnum.JOB_UNBIND_DAG.name().equals(eventLog.getJobEvent()))
             return;
 
@@ -151,6 +166,7 @@ public class JobEventPublisher {
         event.setJobId(event.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
+        event.setUnbindDagId(unbindDagId);
         // 发布事件
         JobEventBus.getInstance().post(event);
         // 检查事件处理结果

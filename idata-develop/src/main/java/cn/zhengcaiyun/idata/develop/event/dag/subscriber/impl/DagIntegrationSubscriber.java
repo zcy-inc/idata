@@ -195,46 +195,14 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
     @Subscribe
     @Deprecated
     public void addDependence(DagAddDependenceEvent event) {
-        try {
-            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
-            if (dagInfoOptional.isEmpty()) {
-                event.processFailed("DAG不存在");
-                return;
-            }
-            DAGInfo dagInfo = dagInfoOptional.get();
-            // 获取dag下的作业信息
-            List<Long> dagJobs = getDagJobs(dagInfo);
-            dagIntegrator.addDependence(dagInfo, dagJobs, event.getDependDagIds());
-        } catch (ExternalIntegrationException iex) {
-            event.processFailed(iex.getMessage());
-            LOGGER.warn("");
-        } catch (Exception ex) {
-            event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
-        }
+
     }
 
     @Override
     @Subscribe
     @Deprecated
     public void removeDependence(DagRemoveDependenceEvent event) {
-        try {
-            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
-            if (dagInfoOptional.isEmpty()) {
-                event.processFailed("DAG不存在");
-                return;
-            }
-            DAGInfo dagInfo = dagInfoOptional.get();
-            // 获取dag下的作业信息
-            List<Long> dagJobs = getDagJobs(dagInfo);
-            dagIntegrator.removeDependence(dagInfo, dagJobs, event.getDependDagIds());
-        } catch (ExternalIntegrationException iex) {
-            event.processFailed(iex.getMessage());
-            LOGGER.warn("");
-        } catch (Exception ex) {
-            event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("");
-        }
+
     }
 
     private List<Long> getDagJobs(DAGInfo dagInfo) {

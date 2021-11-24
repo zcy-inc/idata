@@ -30,6 +30,8 @@ public interface IJobEventSubscriber {
 
     void onUpdated(JobUpdatedEvent event);
 
+    void onScheduleUpdated(JobScheduleUpdatedEvent event);
+
     void onDeleted(JobDeletedEvent event);
 
     void onEnabled(JobEnabledEvent event);
@@ -42,5 +44,8 @@ public interface IJobEventSubscriber {
 
     void onBindDag(JobBindDagEvent event);
 
+    void buildJobRelation(JobBuildPrevRelationEvent event);
+
     void onRun(JobRunEvent event);
+
 }

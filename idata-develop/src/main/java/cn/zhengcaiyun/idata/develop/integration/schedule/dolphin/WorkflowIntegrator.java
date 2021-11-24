@@ -20,7 +20,6 @@ package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
-import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.model.integration.DSEntityMapping;
@@ -28,7 +27,6 @@ import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -40,7 +38,6 @@ import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @description:
@@ -48,50 +45,18 @@ import java.util.Optional;
  * @create: 2021-11-03 17:40
  **/
 @Component
-public class WorkflowIntegrator implements IDagIntegrator {
-
-    public static final String ENTITY_TYPE = "workflow";
-    public static final String DAG_NAME_DELIMITER = "__";
-
+public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDagIntegrator {
 
     public static final String PARAM_DEFAULT_WARNING_TYPE = "NONE";
     public static final Integer PARAM_DEFAULT_NOTIFY_GROUP_ID = 1;
     public static final String PARAM_DEFAULT_FAILURE_POLICY = "CONTINUE";
     public static final String PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY = "MEDIUM";
 
-
     public static final int RESULT_PROCESS_DEFINITION_NAME_EXIST = 10168;
-
-
-    private final DSEntityMappingRepo dsEntityMappingRepo;
 
     @Autowired
     public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo) {
-        this.dsEntityMappingRepo = dsEntityMappingRepo;
-    }
-
-    private String getDSToken(String environment) {
-        return "33333";
-    }
-
-    private String getDSProjectCode(String environment) {
-        return "123";
-    }
-
-    private String getDSBaseUrl(String environment) {
-        return "123";
-    }
-
-    private String getDSTenantCode(String environment) {
-        return "default";
-    }
-
-    private Integer getDagTimeout(String environment) {
-        return 120;
-    }
-
-    private String buildWorkflowName(DAGInfo dagInfo) {
-        return dagInfo.getName() + DAG_NAME_DELIMITER + Strings.padStart(dagInfo.getId().toString(), 6, '0');
+        super(dsEntityMappingRepo);
     }
 
     @Override
@@ -120,77 +85,9 @@ public class WorkflowIntegrator implements IDagIntegrator {
         DSEntityMapping mapping = new DSEntityMapping();
         mapping.setEntityId(dagInfo.getId());
         mapping.setEnvironment(dagInfo.getEnvironment());
-        mapping.setDsEntityType(ENTITY_TYPE);
+        mapping.setDsEntityType(ENTITY_TYPE_WORKFLOW);
         mapping.setDsEntityCode(workflowCode);
         dsEntityMappingRepo.create(new DSEntityMapping());
-    }
-
-    private ResultDto<JSONObject> sendReq(HttpInput req_input) {
-        ResultDto<JSONObject> resultDto = HttpUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
-        });
-        return resultDto;
-    }
-
-    private Map<String, String> buildDagReqParam(DAGInfo dagInfo, DAGSchedule dagSchedule) {
-        String name = buildWorkflowName(dagInfo);
-        Integer timeout = getDagTimeout(dagInfo.getEnvironment());
-        String tenantCode = getDSTenantCode(dagInfo.getEnvironment());
-        List<String> globalParams = Lists.newArrayList();
-        String description = "";
-        String scheduleJson = buildScheduleJson(dagSchedule);
-
-        Map<String, String> paramMap = Maps.newHashMap();
-        paramMap.put("name", name);
-        paramMap.put("timeout", timeout.toString());
-        paramMap.put("tenantCode", tenantCode);
-        paramMap.put("globalParams", new Gson().toJson(globalParams));
-        paramMap.put("description", description);
-        paramMap.put("scheduleJson", scheduleJson);
-        return paramMap;
-    }
-
-    private HttpInput buildHttpReq(Map<String, String> req_param, String req_url, String req_method, String token) {
-        HttpInput input = new HttpInput();
-        input.setServerName("[Dolphin Scheduler]");
-        input.setUri(req_url);
-        input.setMethod(req_method);
-        input.setQueryParamMap(req_param);
-        Map<String, String> headMap = Maps.newHashMap();
-        headMap.put("token", token);
-        return input;
-    }
-
-    private String buildScheduleJson(DAGSchedule dagSchedule) {
-        //cron json: {"startTime":"2021-11-22 00:00:00","endTime":"2021-12-31 00:00:00","crontab":"0 0 3/5 ? * 2/2 *","timezoneId":"Asia/Shanghai"}
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        JsonObject cronJson = new JsonObject();
-        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
-        cronJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
-        cronJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
-        cronJson.addProperty("timezoneId", "Asia/Shanghai");
-
-        JsonObject scheduleJson = new JsonObject();
-        scheduleJson.addProperty("warningType", PARAM_DEFAULT_WARNING_TYPE);
-        scheduleJson.addProperty("warningGroupId", PARAM_DEFAULT_NOTIFY_GROUP_ID);
-        scheduleJson.addProperty("failureStrategy", PARAM_DEFAULT_FAILURE_POLICY);
-        scheduleJson.addProperty("workerGroup", "default");
-        scheduleJson.addProperty("environmentCode", -1L);
-        scheduleJson.addProperty("processInstancePriority", PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY);
-        scheduleJson.add("cronJson", cronJson);
-        return scheduleJson.toString();
-    }
-
-    private Long getWorkflowCode(Long dagId, String environment) throws ExternalIntegrationException {
-        Optional<Long> optional = dsEntityMappingRepo.queryDsEntityCode(dagId, ENTITY_TYPE, environment);
-        if (optional.isEmpty())
-            throw new ExternalIntegrationException("工作流code不存在");
-        return optional.get();
-    }
-
-    private Map<String, String> buildDagStatusChangedParam(Integer status) {
-        Map<String, String> paramMap = Maps.newHashMap();
-        paramMap.put("releaseState", UsingStatusEnum.ONLINE.val == status ? "ONLINE" : "OFFLINE");
-        return paramMap;
     }
 
     @Override
@@ -292,6 +189,54 @@ public class WorkflowIntegrator implements IDagIntegrator {
     @Override
     @Deprecated
     public void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException {
+    }
+
+    private Map<String, String> buildDagReqParam(DAGInfo dagInfo, DAGSchedule dagSchedule) {
+        String name = buildWorkflowName(dagInfo);
+        Integer timeout = getDagTimeout(dagInfo.getEnvironment());
+        String tenantCode = getDSTenantCode(dagInfo.getEnvironment());
+        List<String> globalParams = Lists.newArrayList();
+        String description = "";
+        String scheduleJson = buildScheduleJson(dagSchedule);
+
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("name", name);
+        paramMap.put("timeout", timeout.toString());
+        paramMap.put("tenantCode", tenantCode);
+        paramMap.put("globalParams", new Gson().toJson(globalParams));
+        paramMap.put("description", description);
+        paramMap.put("scheduleJson", scheduleJson);
+        return paramMap;
+    }
+
+    private String buildScheduleJson(DAGSchedule dagSchedule) {
+        //cron json: {"startTime":"2021-11-22 00:00:00","endTime":"2021-12-31 00:00:00","crontab":"0 0 3/5 ? * 2/2 *","timezoneId":"Asia/Shanghai"}
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        JsonObject cronJson = new JsonObject();
+        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
+        cronJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
+        cronJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
+        cronJson.addProperty("timezoneId", "Asia/Shanghai");
+
+        JsonObject scheduleJson = new JsonObject();
+        scheduleJson.addProperty("warningType", PARAM_DEFAULT_WARNING_TYPE);
+        scheduleJson.addProperty("warningGroupId", PARAM_DEFAULT_NOTIFY_GROUP_ID);
+        scheduleJson.addProperty("failureStrategy", PARAM_DEFAULT_FAILURE_POLICY);
+        scheduleJson.addProperty("workerGroup", "default");
+        scheduleJson.addProperty("environmentCode", -1L);
+        scheduleJson.addProperty("processInstancePriority", PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY);
+        scheduleJson.add("schedule", cronJson);
+        return scheduleJson.toString();
+    }
+
+    private Map<String, String> buildDagStatusChangedParam(Integer status) {
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("releaseState", UsingStatusEnum.ONLINE.val == status ? "ONLINE" : "OFFLINE");
+        return paramMap;
+    }
+
+    private String buildWorkflowName(DAGInfo dagInfo) {
+        return dagInfo.getName() + NAME_DELIMITER + Strings.padStart(dagInfo.getId().toString(), 6, '0');
     }
 
 }
