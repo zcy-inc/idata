@@ -103,7 +103,7 @@ public class Jive extends BinaryJive {
      * @return
      */
     public String getCreateTableSql(String dbName, String tableName) {
-        try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+        try (Statement statement = this.getClient().createStatement();
              ResultSet res = statement.executeQuery(String.format("show create table `%s`.%s", dbName, tableName))) {
             StringBuilder createSql = new StringBuilder();
             while (res.next()) {
@@ -207,7 +207,7 @@ public class Jive extends BinaryJive {
         boolean isPartitionTable = metadataInfo.isPartitionTable();
         String sql = isPartitionTable ? String.format("DESCRIBE FORMATTED %s.%s", dbName, tableName) : String.format("show tblproperties %s.%s(\"totalSize\")", dbName, tableName);
 
-        try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+        try (Statement statement = this.getClient().createStatement();
              ResultSet res = statement.executeQuery(sql)) {
             long bytes = -1;
             if (isPartitionTable) {
