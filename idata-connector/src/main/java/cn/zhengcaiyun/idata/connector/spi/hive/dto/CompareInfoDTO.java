@@ -80,7 +80,7 @@ public class CompareInfoDTO {
 
         private String columnType;
 
-        private String columnDesc;
+        private String columnComment;
 
         public String getColumnName() {
             return columnName;
@@ -98,12 +98,12 @@ public class CompareInfoDTO {
             this.columnType = columnType;
         }
 
-        public String getColumnDesc() {
-            return columnDesc;
+        public String getColumnComment() {
+            return columnComment;
         }
 
-        public void setColumnDesc(String columnDesc) {
-            this.columnDesc = columnDesc;
+        public void setColumnComment(String columnComment) {
+            this.columnComment = columnComment;
         }
     }
 }

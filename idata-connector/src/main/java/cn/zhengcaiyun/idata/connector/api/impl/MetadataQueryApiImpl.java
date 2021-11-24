@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
@@ -58,13 +59,11 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
-        String jdbcUrl = getConnectionCfg();
-        String tableSize = hiveService.getTableSize(jdbcUrl, db, table);
+        String tableSize = hiveService.getTableSize(db, table);
         TableTechInfoDto techInfoDto = new TableTechInfoDto();
         techInfoDto.setTableSize(tableSize);
         return techInfoDto;
     }
-
 
     @Override
     public Boolean testConnection(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema) {
@@ -139,6 +138,11 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     }
 
     @Override
+    public MetadataInfo getHiveMetadataInfo(String dbName, String tableName) {
+        return hiveService.getMetadataInfo(dbName, tableName);
+    }
+
+    @Override
     public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
@@ -168,19 +172,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public boolean existHiveTable(String dbName, String tableName) {
-        String jdbcUrl = getConnectionCfg();
-        try (Connection conn = DriverManager.getConnection(jdbcUrl);
-             ResultSet rs = conn.getMetaData().getTables(dbName, "%", "%", new String[]{"TABLE"})) {
-            while (rs.next()) {
-                String hiveTableName = rs.getString("TABLE_NAME");  //表名
-                if (StringUtils.equalsIgnoreCase(hiveTableName, tableName)) {
-                    return true;
-                }
-            }
-        } catch (SQLException ex) {
-            logger.warn("getTableNames failed. ex: {}", ex);
-        }
-        return false;
+        return hiveService.existHiveTable(dbName, tableName);
     }
 
     private String getConnectionCfg() {

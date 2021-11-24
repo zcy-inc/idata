@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.table.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
@@ -484,7 +485,6 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     public SyncHiveDTO syncHiveInfo(Long tableId, String operator) {
-
         TableInfoDto tableInfoDto = getTableInfoById(tableId);
         String tableName = tableInfoDto.getTableName();
         String dbName = tableInfoDto.getDbName();
@@ -530,7 +530,26 @@ public class TableInfoServiceImpl implements TableInfoService {
         // 情况4：远端hive表存在 && 该表已同步过hive  ---> 说明表名没有表，做字段相关元数据信息的比对同步
         // 4.1:远端hive表新增列
         // 根据tableName获取远端Hive表元数据信息
-        List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveTableColumns = metadataQueryApi.getHiveTableColumns(dbName, tableName);
+        MetadataInfo hiveMetadataInfo = metadataQueryApi.getHiveMetadataInfo(dbName, tableName);
+        List<ColumnInfoDto> hiveTableColumns = hiveMetadataInfo.getColumnList().stream().map(e -> {
+            ColumnInfoDto dto = new ColumnDetailsDto();
+            dto.setColumnName(e.getColumnName());
+            dto.setColumnType(e.getColumnType());
+            dto.setColumnComment(e.getColumnComment());
+            dto.setPartitionedColumn("false");
+            return dto;
+        }).collect(Collectors.toList());
+        hiveTableColumns.addAll(hiveMetadataInfo.getPartitionColumnList().stream()
+                .map(e -> {
+                    ColumnInfoDto dto = new ColumnDetailsDto();
+                    dto.setColumnName(e.getColumnName());
+                    dto.setColumnType(e.getColumnType());
+                    dto.setColumnComment(e.getColumnComment());
+                    dto.setPartitionedColumn("true");
+                    return dto;
+                }).collect(Collectors.toList())
+        );
+
         List<String> hiveTableColumnNameList = hiveTableColumns
                 .stream()
                 .map(e -> e.getColumnName())
@@ -546,7 +565,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         LivySqlQuery query = new LivySqlQuery();
         query.setSql(alterTableDDL);
         LivyStatementDto statement = livyService.createStatement(query);
-        // 4.2远端hive表修改列（类型和注释）
+        // 4.2远端hive表修改列（类型和注释和分区）
         // 对比相同字段，取出类型和注释不相同的进行更新
         Set<String> sameColumnNameSet = localTableColumns
                 .stream()
@@ -556,13 +575,13 @@ public class TableInfoServiceImpl implements TableInfoService {
         Map<String, ColumnInfoDto> localColumnMap = localTableColumns
                 .stream()
                 .collect(Collectors.toMap(ColumnInfoDto::getColumnName, e -> e));
-        Map<String, cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> hiveColumnMap = hiveTableColumns
+        Map<String, ColumnInfoDto> hiveColumnMap = hiveTableColumns
                 .stream()
-                .collect(Collectors.toMap(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto::getColumnName, e -> e));
+                .collect(Collectors.toMap(ColumnInfoDto::getColumnName, e -> e));
         // 依次对比相同字段是否注释不同，不同则更新
         List<String> warningList = Lists.newArrayList();
         for (String columnName : sameColumnNameSet) {
-            cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto hiveColumn = hiveColumnMap.get(columnName);
+            ColumnInfoDto hiveColumn = hiveColumnMap.get(columnName);
             ColumnInfoDto localColumn = localColumnMap.get(columnName);
             // 注释或者类型不一致即更新
             String localColumnComment = localColumn.getColumnComment();
@@ -576,8 +595,13 @@ public class TableInfoServiceImpl implements TableInfoService {
                 livyService.createStatement(query);
 
                 if (!StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)) {
-                    warningList.add(String.format("修改了`%s`.%s表%s列类型（HIVE中原类型：%s，修改目标类型：%s）", dbName, tableName, columnName, hiveColumnType, localColumnType));
+                    warningList.add(String.format("修改了`%s`.%s表%s列类型（HIVE中类型：%s，本地类型：%s）\n", dbName, tableName, columnName, hiveColumnType, localColumnType));
                 }
+            }
+            String localColumnPartition = localColumn.getPartitionedColumn();
+            String hiveColumnPartition = hiveColumn.getPartitionedColumn();
+            if (!StringUtils.equals(localColumnPartition, hiveColumnPartition)) {
+                warningList.add(String.format("修改了`%s`.%s表%s列类型分区属性（HIVE中是否为分区字段：%s，本地是否为分区字段：%s）\n", dbName, tableName, columnName, hiveColumnPartition, localColumnPartition));
             }
         }
 
@@ -753,7 +777,7 @@ public class TableInfoServiceImpl implements TableInfoService {
      */
     private CompareInfoDTO.BasicColumnInfo assembleBasicColumnInfo(cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto columnInfoDto) {
         CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
-        basicColumnInfo.setColumnDesc(columnInfoDto.getColumnComment());
+        basicColumnInfo.setColumnComment(columnInfoDto.getColumnComment());
         basicColumnInfo.setColumnName(columnInfoDto.getColumnName());
         basicColumnInfo.setColumnType(columnInfoDto.getColumnType());
         return basicColumnInfo;
@@ -766,7 +790,7 @@ public class TableInfoServiceImpl implements TableInfoService {
      */
     private CompareInfoDTO.BasicColumnInfo assembleBasicColumnInfo(ColumnDetailsDto columnDetailsDto) {
         CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo();
-        basicColumnInfo.setColumnDesc(columnDetailsDto.getColumnComment());
+        basicColumnInfo.setColumnComment(columnDetailsDto.getColumnComment());
         basicColumnInfo.setColumnName(columnDetailsDto.getColumnName());
         basicColumnInfo.setColumnType(columnDetailsDto.getColumnType());
         return basicColumnInfo;

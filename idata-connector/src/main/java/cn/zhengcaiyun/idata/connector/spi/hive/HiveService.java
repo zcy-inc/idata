@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.connector.spi.hive;
 
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.util.HiveSqlUtil;
@@ -29,21 +30,42 @@ public class HiveService implements BeanPostProcessor {
     private HivePool hivePool;
 
     public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
-        Jive jive = null;
-        try {
-            jive = hivePool.getResource();
+        try (Jive jive = hivePool.getResource()) {
             return jive.getColumnMetaInfo(dbName, tableName);
-        } catch (SQLException e) {
-            if (e.getMessage() != null && e.getMessage().contains("Table not found")) {
-                throw new IllegalArgumentException(e.getMessage().substring(e.getMessage().indexOf("Table not found")));
-            } else {
-                throw new ExecuteSqlException("查询失败", e);
-            }
-        } finally {
-            jive.close();
         }
     }
 
+    public MetadataInfo getMetadataInfo(String dbName, String tableName) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.getMetadataInfo(dbName, tableName);
+        }
+    }
+
+    public String getTableSize(String dbName, String tableName) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.getTableSize(dbName, tableName);
+        }
+    }
+
+    /**
+     * 判断表是否存在
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    public boolean existHiveTable(String dbName, String tableName) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.exist(dbName, tableName);
+        }
+    }
+
+    public String getCreateTableSql(String dbName, String tableName) {
+        try (Jive jive = hivePool.getResource()) {
+            return jive.getCreateTableSql(dbName, tableName);
+        }
+    }
+
+    @Deprecated(since = "2021/11/24", forRemoval = true)
     public String getCreateTableSql(String jdbcUrl, String dbName, String tableName) {
         try (Connection conn = DriverManager.getConnection(jdbcUrl);
              Statement stmt = conn.createStatement();
@@ -62,6 +84,7 @@ public class HiveService implements BeanPostProcessor {
         }
     }
 
+    @Deprecated(since = "2021/11/24", forRemoval = true)
     public String getTableSize(String jdbcUrl, String dbName, String tblName) {
         String ddl = getCreateTableSql(jdbcUrl, dbName, tblName);
         Map<String, Object> metadataMap = HiveSqlUtil.getCreateTableInfo(ddl);

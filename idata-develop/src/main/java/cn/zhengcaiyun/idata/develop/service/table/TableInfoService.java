@@ -64,5 +64,10 @@ public interface TableInfoService {
      */
     SyncHiveDTO syncHiveInfo(Long tableId, String operator);
 
+    /**
+     * 本地表和hive对比
+     * @param tableId
+     * @return
+     */
     CompareInfoDTO compareHiveInfo(Long tableId);
 }
