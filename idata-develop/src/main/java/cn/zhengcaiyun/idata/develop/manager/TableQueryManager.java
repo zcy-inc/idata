@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
@@ -33,6 +34,7 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -146,7 +148,24 @@ public class TableQueryManager {
                 .orElse(null);
         ConnectionCfg cfg = null;
         if (trinoConfig != null) {
-            cfg = JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+            // 修改valueOne类型
+//            cfg = JSON.parseObject(trinoConfig.getValueOne(), ConnectionCfg.class);
+            cfg = new ConnectionCfg();
+            ConnectionCfg finalCfg = cfg;
+            PojoUtil.copyOne(trinoConfig, ConfigDto.class).getValueOne().forEach((key, configValue) -> {
+                if ("port".equals(key)) {
+                    finalCfg.setPort(Integer.valueOf(configValue.getConfigValue()));
+                }
+                else if ("host".equals(key)) {
+                    finalCfg.setHost(configValue.getConfigValue());
+                }
+                else if ("dbCatalog".equals(key)) {
+                    finalCfg.setDbCatalog(configValue.getConfigValue());
+                }
+                else if ("username".equals(key)) {
+                    finalCfg.setUsername(configValue.getConfigValue());
+                }
+            });
             cfg.setDataSourceEnum(DataSourceEnum.PRESTO);
         }
         return cfg;

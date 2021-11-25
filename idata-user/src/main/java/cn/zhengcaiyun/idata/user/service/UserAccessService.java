@@ -31,4 +31,6 @@ public interface UserAccessService {
     List<String> getAccessKeys(Long userId, String accessType);
     boolean checkAccess(Long userId, String accessCode);
     boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
+    boolean checkFeatureAccess(Long userId, String controllerPath);
+//    boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey);
 }

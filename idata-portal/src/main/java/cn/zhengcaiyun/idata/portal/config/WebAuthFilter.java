@@ -18,10 +18,15 @@ package cn.zhengcaiyun.idata.portal.config;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.*;
@@ -32,6 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
+
 /**
  * @author shiyin
  * @date 2021-03-14 21:55
@@ -39,8 +47,16 @@ import java.util.*;
 @Component
 public class WebAuthFilter implements Filter {
 
+    @Value("${access.mode:#{null}}")
+    private String ACCESS_MODE;
+
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private UacUserDao uacUserDao;
+    @Autowired
+    private UserAccessService userAccessService;
+
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
@@ -70,6 +86,36 @@ public class WebAuthFilter implements Filter {
                     RestResult.error(RestResult.UNAUTHORIZED_ERROR_CODE, "未登录", null)));
             servletResponse.getWriter().flush();
             return;
+        }
+        // TODO 缺资源权限校验
+        // check feature
+        else {
+            // accessMode选择使用哪个模式的权限
+            if ("idata-pro".equals(ACCESS_MODE)) {
+                // 兼容旧版权限
+                if (path.contains("/p1/uac/currentUser")
+                        || path.contains("/p1/uac/currentFeatureTree")
+                        // 旧版鉴权调用
+                        || path.contains("/p1/uac/currentAccessKeys")
+                        || path.contains("/p1/uac/checkCurrentAccess")
+                        || path.contains("/p1/uac/resourceAccess")) {
+                    filterChain.doFilter(mutableRequest, servletResponse);
+                    return;
+                }
+                // 新版权限
+                Long userId = tokenService.getUserId(mutableRequest);
+                UacUser user = uacUserDao.selectOne(c ->
+                        c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
+                if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
+                    String requestMethod = ((HttpServletRequest) servletRequest).getMethod();
+                    if (RequestMethod.GET.name().equals(requestMethod) && !userAccessService.checkFeatureAccess(userId, path)) {
+                        servletResponse.getWriter().write(JSON.toJSONString(
+                                RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
+                        servletResponse.getWriter().flush();
+                        return;
+                    }
+                }
+            }
         }
 
         try {

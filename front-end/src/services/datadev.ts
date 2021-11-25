@@ -1,7 +1,7 @@
 import type { Key } from 'react';
 import { request } from 'umi';
-import { Table } from '@/types/datapi';
-import {
+import type { Table } from '@/types/datapi';
+import type {
   DAG,
   DAGListItem,
   Folder,
@@ -14,9 +14,9 @@ import {
   TaskVersion,
   TreeNode,
 } from '@/types/datadev';
-import { PeriodRange, TaskCategory, TaskTypes } from '@/constants/datadev';
-import { DefaultResponse } from './global';
-import { DataSourceTypes, Environments } from '@/constants/datasource';
+import type { PeriodRange, TaskCategory, TaskTypes } from '@/constants/datadev';
+import type { DefaultResponse } from './global';
+import type { DataSourceTypes, Environments } from '@/constants/datasource';
 
 // 标签 创建
 export async function createTag(data: {}) {

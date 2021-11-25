@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.system.dal.model;
 
 import java.util.Date;
+import java.util.Map;
 import javax.annotation.Generated;
 
 /**
@@ -25,10 +26,24 @@ public class SysConfig {
 
     /**
      * Database Column Remarks:
+     *   创建者
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.creator")
+    private String creator;
+
+    /**
+     * Database Column Remarks:
      *   创建时间
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.create_time")
     private Date createTime;
+
+    /**
+     * Database Column Remarks:
+     *   修改者
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.editor")
+    private String editor;
 
     /**
      * Database Column Remarks:
@@ -49,7 +64,14 @@ public class SysConfig {
      *   系统配置值1
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.value_one")
-    private String valueOne;
+    private Map valueOne;
+
+    /**
+     * Database Column Remarks:
+     *   配置类型
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.type")
+    private String type;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.id")
     public Long getId() {
@@ -71,6 +93,16 @@ public class SysConfig {
         this.del = del;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.creator")
+    public String getCreator() {
+        return creator;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.creator")
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.create_time")
     public Date getCreateTime() {
         return createTime;
@@ -79,6 +111,16 @@ public class SysConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.create_time")
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.editor")
+    public String getEditor() {
+        return editor;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.editor")
+    public void setEditor(String editor) {
+        this.editor = editor;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.edit_time")
@@ -102,12 +144,22 @@ public class SysConfig {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.value_one")
-    public String getValueOne() {
+    public Map getValueOne() {
         return valueOne;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.value_one")
-    public void setValueOne(String valueOne) {
+    public void setValueOne(Map valueOne) {
         this.valueOne = valueOne;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.type")
+    public String getType() {
+        return type;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_config.type")
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -1,75 +1,94 @@
-﻿export default [
+export default [
   {
     path: '/login',
     layout: false,
     component: './Login',
   },
-  { path: '/', redirect: '/datapi' },
-  // { name: '组件', path: '/components', component: './Components' },
   {
-    path: '/datapi',
-    name: '数据研发',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
-    routes: [
-      { path: '/datapi', redirect: '/datapi/datadev' },
-      { path: '/datapi/datadev', name: '数据开发', component: './datapi/DataDev' },
-      { path: '/datapi/measure', name: '指标库', component: './datapi/Measures' },
-      { path: '/datapi/datasource', name: '数据源管理', component: './datapi/DataSource' },
-      { path: '/datapi/tasks', name: '任务列表', component: './datapi/Tasks' },
-    ],
+    path: '/',
+    redirect: '/configuration',
   },
   {
-    path: '/objectLabel',
-    name: '数据标签',
-    component: './ObjectLabel',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
-  },
-  {
-    path: '/authority',
-    name: '权限管理',
+    path: '/configuration',
+    name: '系统配置',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/c6ab0611-57cd-4e14-a68a-4384c198ed65.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/ccfa9e9b-0fa7-4f19-8e2b-e81b207b53b9.svg',
     routes: [
-      { path: '/authority', redirect: '/authority/role' },
       {
-        path: '/authority/role',
-        name: '角色管理',
+        path: '/configuration',
+        redirect: '/configuration/authority',
+      },
+      {
+        path: '/configuration/authority',
+        name: '权限管理',
+        component: './authority',
         routes: [
-          { path: '/authority/role', redirect: '/authority/role/list' },
           {
-            path: '/authority/role/list',
-            name: '角色列表',
-            hideInMenu: true,
-            component: './authority/role/List',
+            path: '/configuration/authority',
+            redirect: '/configuration/authority/role',
           },
           {
-            path: '/authority/role/create',
-            name: '新增角色',
+            path: '/configuration/authority/role',
+            //name: '角色管理',
             hideInMenu: true,
-            component: './authority/role/Create',
+            routes: [
+              {
+                path: '/configuration/authority/role',
+                redirect: '/configuration/authority/role/list',
+              },
+              {
+                name: '角色管理',
+                hideInMenu: true,
+                path: '/configuration/authority/role/list',
+                component: './authority/role/List',
+              },
+              {
+                path: '/configuration/authority/role/create',
+                name: '角色新增',
+                hideInMenu: true,
+                component: './authority/role/Create',
+              },
+              {
+                path: '/configuration/authority/role/edit/:id/:name',
+                name: '角色编辑',
+                hideInMenu: true,
+                component: './authority/role/Edit',
+              },
+            ],
           },
           {
-            path: '/authority/role/edit/:id/:name',
-            name: '编辑角色',
+            path: '/configuration/authority/user',
+            //name: '用户管理',
             hideInMenu: true,
-            component: './authority/role/Edit',
+            routes: [
+              {
+                path: '/configuration/authority/user',
+                redirect: '/configuration/authority/user/list',
+              },
+              {
+                path: '/configuration/authority/user/list',
+                name: '用户管理',
+                hideInMenu: true,
+                component: './authority/user/List',
+              },
+            ],
           },
         ],
       },
       {
-        path: '/authority/user',
-        name: '用户管理',
-        routes: [
-          { path: '/authority/user', redirect: '/authority/user/list' },
-          {
-            path: '/authority/user/list',
-            name: '用户列表',
-            hideInMenu: true,
-            component: './authority/user/List',
-          },
-        ],
+        path: '/configuration/integrated',
+        name: '集成配置',
+        component: './Integrated',
+      },
+      {
+        path: '/configuration/LDAP',
+        name: 'LDAP',
+        component: './LDAP',
+      },
+      {
+        path: '/configuration/labelController',
+        name: '元数据属性配置',
+        component: './LabelController',
       },
     ],
   },

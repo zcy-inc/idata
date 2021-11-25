@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface SysFeatureDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_feature")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, createTime, editTime, featureCode, featureName, featureType, parentCode);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, createTime, editTime, featureCode, featureName, featureType, parentCode, featureUrlPath);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_feature")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -64,7 +64,8 @@ public interface SysFeatureDao {
         @Result(column="feature_code", property="featureCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="feature_name", property="featureName", jdbcType=JdbcType.VARCHAR),
         @Result(column="feature_type", property="featureType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="parent_code", property="parentCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="parent_code", property="parentCode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="feature_url_path", property="featureUrlPath", jdbcType=JdbcType.VARCHAR)
     })
     List<SysFeature> selectMany(SelectStatementProvider selectStatement);
 
@@ -99,6 +100,7 @@ public interface SysFeatureDao {
             .map(featureName).toProperty("featureName")
             .map(featureType).toProperty("featureType")
             .map(parentCode).toProperty("parentCode")
+            .map(featureUrlPath).toProperty("featureUrlPath")
         );
     }
 
@@ -112,6 +114,7 @@ public interface SysFeatureDao {
             .map(featureName).toPropertyWhenPresent("featureName", record::getFeatureName)
             .map(featureType).toPropertyWhenPresent("featureType", record::getFeatureType)
             .map(parentCode).toPropertyWhenPresent("parentCode", record::getParentCode)
+            .map(featureUrlPath).toPropertyWhenPresent("featureUrlPath", record::getFeatureUrlPath)
         );
     }
 
@@ -150,7 +153,8 @@ public interface SysFeatureDao {
                 .set(featureCode).equalTo(record::getFeatureCode)
                 .set(featureName).equalTo(record::getFeatureName)
                 .set(featureType).equalTo(record::getFeatureType)
-                .set(parentCode).equalTo(record::getParentCode);
+                .set(parentCode).equalTo(record::getParentCode)
+                .set(featureUrlPath).equalTo(record::getFeatureUrlPath);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_feature")
@@ -161,7 +165,8 @@ public interface SysFeatureDao {
                 .set(featureCode).equalToWhenPresent(record::getFeatureCode)
                 .set(featureName).equalToWhenPresent(record::getFeatureName)
                 .set(featureType).equalToWhenPresent(record::getFeatureType)
-                .set(parentCode).equalToWhenPresent(record::getParentCode);
+                .set(parentCode).equalToWhenPresent(record::getParentCode)
+                .set(featureUrlPath).equalToWhenPresent(record::getFeatureUrlPath);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_feature")
@@ -174,6 +179,7 @@ public interface SysFeatureDao {
             .set(featureName).equalTo(record::getFeatureName)
             .set(featureType).equalTo(record::getFeatureType)
             .set(parentCode).equalTo(record::getParentCode)
+            .set(featureUrlPath).equalTo(record::getFeatureUrlPath)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -188,6 +194,7 @@ public interface SysFeatureDao {
             .set(featureName).equalToWhenPresent(record::getFeatureName)
             .set(featureType).equalToWhenPresent(record::getFeatureType)
             .set(parentCode).equalToWhenPresent(record::getParentCode)
+            .set(featureUrlPath).equalToWhenPresent(record::getFeatureUrlPath)
             .where(id, isEqualTo(record::getId))
         );
     }

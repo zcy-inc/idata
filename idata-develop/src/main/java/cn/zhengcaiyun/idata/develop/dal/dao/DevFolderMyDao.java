@@ -39,6 +39,9 @@ public interface DevFolderMyDao {
                 "<if test = 'treeNodeName != null'>" +
                     "AND dev_folder.folder_name like '%${treeNodeName}%' " +
                 "</if>" +
+                "<if test = 'folderIds != null'>" +
+                    "AND dev_folder.id in (${folderIds}) " +
+                "</if>" +
                 "<if test = 'devTreeType != null'>" +
                     "AND dev_folder.folder_type like '${devTreeType}' " +
                 "</if>" +
@@ -51,6 +54,9 @@ public interface DevFolderMyDao {
                         "WHERE del = 0 " +
                         "<if test = 'treeNodeName != null'>" +
                             "AND dev_table_info.table_name like '%${treeNodeName}%' " +
+                        "</if>" +
+                        "<if test = 'folderIds != null'>" +
+                            "AND dev_table_info.folder_id in (${folderIds}) " +
                         "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"LABEL\") != -1'>" +
@@ -86,6 +92,9 @@ public interface DevFolderMyDao {
                         "<if test = 'treeNodeName != null'>" +
                             "AND dev_label_define.label_name like '%${treeNodeName}%' " +
                         "</if>" +
+                        "<if test = 'folderIds != null'>" +
+                            "AND dev_label_define.folder_id in (${folderIds}) " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"MODIFIER\") != -1'>" +
                     "UNION ALL " +
@@ -97,6 +106,9 @@ public interface DevFolderMyDao {
                         "<if test = 'treeNodeName != null'>" +
                             "AND dev_label_define.label_name like '%${treeNodeName}%' " +
                         "</if>" +
+                        "<if test = 'folderIds != null'>" +
+                            "AND dev_label_define.folder_id in (${folderIds}) " +
+                        "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType != null and devTreeType.indexOf(\"METRIC\") != -1'>" +
                     "UNION ALL " +
@@ -107,6 +119,9 @@ public interface DevFolderMyDao {
                         "WHERE del = 0 AND label_tag LIKE '%_METRIC_LABEL%' " +
                         "<if test = 'treeNodeName != null'>" +
                             "AND dev_label_define.label_name like '%${treeNodeName}%' " +
+                        "</if>" +
+                        "<if test = 'folderIds != null'>" +
+                            "AND dev_label_define.folder_id in (${folderIds}) " +
                         "</if>" +
                 "</if>" +
                 "<if test = 'devTreeType == null or \"\" == devTreeType'>" +
@@ -140,5 +155,5 @@ public interface DevFolderMyDao {
                 "</if>" +
                 "ORDER BY folderId desc" +
             "</script>")
-    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType, String treeNodeName);
+    List<DevelopFolderTreeNodeDto> getDevelopFolders(String devTreeType, String folderIds, String treeNodeName);
 }

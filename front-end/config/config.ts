@@ -59,7 +59,7 @@ export default defineConfig({
     basePath: '/',
   },
   // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector'],
+  plugins: ['react-dev-inspector/plugins/umi/react-inspector','@zcy-data/plugin-proxy'],
   inspectorConfig: {
     // loader options type and docs see below
     exclude: [],
@@ -69,6 +69,7 @@ export default defineConfig({
   resolve: {
     includes: ['src/components'],
   },
+  mfsu:{},
   chainWebpack(memo, { env, webpack, createCSSRule }) {
     // 设置 alias
     memo.resolve.alias.set('foo', '/tmp/a/b/foo');
