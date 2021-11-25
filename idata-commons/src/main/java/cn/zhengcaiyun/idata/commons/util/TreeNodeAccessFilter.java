@@ -57,7 +57,7 @@ public class TreeNodeAccessFilter<N extends TreeNodeDto> {
         }
 
         public boolean match(T node) {
-            if (TreeNodeTypeEnum.FOLDER.name().equals(node.getType()) && Objects.nonNull(folderIds)) {
+            if (!TreeNodeTypeEnum.RECORD.name().equals(node.getType()) && Objects.nonNull(folderIds)) {
                 return folderIds.contains(String.valueOf(node.getId()));
             }
 
