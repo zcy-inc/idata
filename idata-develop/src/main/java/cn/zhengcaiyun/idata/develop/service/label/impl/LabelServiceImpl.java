@@ -176,11 +176,25 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public LabelDefineDto defineLabelAndEnum(LabelDefineDto labelDefineDto, String operator) {
+        if (labelDefineDto.getEnumValues() != null && labelDefineDto.getEnumValues().size() > 0) {
+            EnumDto enumDto = new EnumDto();
+            enumDto.setEnumName(labelDefineDto.getLabelName());
+            enumDto.setEnumValues(labelDefineDto.getEnumValues());
+            if (StringUtils.isNotEmpty(labelDefineDto.getLabelParamType())) {
+                enumDto.setEnumCode(labelDefineDto.getLabelParamType());
+            }
+            EnumDto echoEnum = enumService.createOrEdit(enumDto, operator);
+            labelDefineDto.setLabelParamType(echoEnum.getEnumCode());
+            labelDefineDto.setEnumValues(enumService.getEnumValues(echoEnum.getEnumCode()));
+        }
+
         if (labelDefineDto.getLabelCode() == null) {
             if (labelDefineDto.getLabelIndex() == null || labelDefineDto.getLabelIndex() < 0) {
-                int existBiggestLabelIndex = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                List<DevLabelDefine> labelDefineList = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                         and(devLabelDefine.subjectType, isEqualTo(labelDefineDto.getSubjectType())))
-                        .orderBy(devLabelDefine.labelIndex.descending())).get(0).getLabelIndex();
+                        .orderBy(devLabelDefine.labelIndex.descending()));
+                int existBiggestLabelIndex = labelDefineList.get(0).getLabelIndex() != null
+                        ? labelDefineList.get(0).getLabelIndex() : 0;
                 labelDefineDto.setLabelIndex(existBiggestLabelIndex + 1);
             }
             else {
@@ -229,13 +243,8 @@ public class LabelServiceImpl implements LabelService {
         LabelDefineDto echoLabelDefine = PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
                         c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
                 LabelDefineDto.class);
-        if (labelDefineDto.getEnumValues() != null && labelDefineDto.getEnumValues().size() > 0) {
-            EnumDto enumDto = new EnumDto();
-            enumDto.setEnumName(labelDefineDto.getLabelName());
-            enumDto.setEnumValues(labelDefineDto.getEnumValues());
-            EnumDto echoEnum = enumService.createOrEdit(enumDto, operator);
-            echoLabelDefine.setEnumValues(enumService.getEnumValues(echoEnum.getEnumCode()));
-        }
+        echoLabelDefine.setEnumValues(enumService.getEnumValues(echoLabelDefine.getLabelParamType()));
+
 
         return echoLabelDefine;
     }
@@ -284,6 +293,9 @@ public class LabelServiceImpl implements LabelService {
                     attributeDto.setEnumName(enumService.getEnumName(attributeDto.getAttributeValue()));
                 }
             });
+        }
+        if (labelDefineDto.getLabelTag().equals(LabelTagEnum.ENUM_VALUE_LABEL.name())) {
+            labelDefineDto.setEnumValues(enumService.getEnumValues(labelDefineDto.getLabelParamType()));
         }
         return labelDefineDto;
     }

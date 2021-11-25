@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.pojo.TreeNodeDto;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MultimapBuilder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -71,7 +72,11 @@ public class TreeNodeGenerator<N extends TreeNodeDto> {
         if (CollectionUtils.isEmpty(expandedNodes)) return Lists.newArrayList();
 
         ListMultimap<String, N> treeListMultimap = MultimapBuilder.hashKeys().arrayListValues().build();
-        expandedNodes.stream().forEach(nodeDto -> treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto));
+        expandedNodes.stream().forEach(nodeDto -> {
+            if (ObjectUtils.isNotEmpty(nodeDto.getParentId())) {
+                treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto);
+            }
+        });
 
         int curLevel = 1;
         List<N> treeList = makeTree(parentIdProvider.get(), null, treeListMultimap, curLevel, maxLevel);

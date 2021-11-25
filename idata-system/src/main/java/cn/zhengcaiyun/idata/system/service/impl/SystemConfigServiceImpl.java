@@ -161,14 +161,15 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private boolean checkHttpConnection(ConnectionDto connection) {
         boolean isConnected = false;
         ConfigTypeEnum configTypeEnum = ConfigTypeEnum.valueOf(connection.getConnectionType());
-        HttpInput httpInput = new HttpInput().setUri(connection.getConnectionUri());
+        HttpInput httpInput = new HttpInput();
         if (ConfigTypeEnum.DS == configTypeEnum) {
+            httpInput.setUri(connection.getConnectionUri() + "/users/get-user-info");
             Map<String, String> headerMap = new HashMap<>();
             headerMap.put("token", connection.getToken());
-            httpInput = httpInput.setMethod(RequestMethod.POST.name()).setHeaderMap(headerMap);
+            httpInput = httpInput.setMethod(RequestMethod.GET.name()).setHeaderMap(headerMap);
         }
         else if (ConfigTypeEnum.LIVY == configTypeEnum) {
-            httpInput = httpInput.setMethod(RequestMethod.GET.name());
+            httpInput.setUri(connection.getConnectionUri()).setMethod(RequestMethod.GET.name());
         }
         try (Response response = HttpUtil.executeHttpRequest(httpInput)) {
             isConnected = response.code() == 200 || response.code() == 201;
