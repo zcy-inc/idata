@@ -64,3 +64,8 @@ dev:
   job:
     publish:
       whitelist: 熠然,大时
+
+hive:
+  url: jdbc:hive2://172.29.108.184:10000/default
+  driver-class-name: org.apache.hive.jdbc.HiveDriver
+  type: com.alibaba.druid.pool.DruidDataSource

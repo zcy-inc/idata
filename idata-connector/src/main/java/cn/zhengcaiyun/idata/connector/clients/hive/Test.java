@@ -22,6 +22,22 @@ public class Test {
     public static void main(String[] args) throws SQLException {
 //        testRename();
         testExist();
+//        testCreate();
+    }
+
+    private static void testCreate() {
+        Jive jive = null;
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            System.out.println("======" + jive.create("create table `dwd`.`tmp3_sync_hive`(\n  `back_category_id` bigint comment '后台类目id',\n  `back_category_name` STRING comment '后台类目名称',\n  `year` BIGINT comment '年份',\n  `district_code` STRING comment '区划编码',\n  `district_name` STRING comment '区划名称',\n  `district_city_code` STRING comment '市级区划编码',\n  `district_city_name` STRING comment '市级区划名称',\n  `district_province_code` STRING comment '省级区划编码',\n  `district_province_name` STRING comment '省级区划名称',\n  `limit_price` BIGINT comment '限价额度',\n  `limit_level` STRING comment '限价等级',\n  `is_enegry` BIGINT comment '是否节能',\n  `is_enegry_control` BIGINT comment '是否节能强控',\n  `is_water` BIGINT comment '是否节水',\n  `is_water_control` BIGINT comment '是否节水强控',\n  `is_environ` BIGINT comment '是否环保',\n  `is_environ_control` BIGINT comment '是否环保强控',\n  `gmt_created_time` TIMESTAMP comment '创建时间',\n  `gmt_updated_time` TIMESTAMP comment '更新时间') \ncomment '类目区划配置信息表' \nstored as orc \nlocation 'hdfs://nameservice1/hive/dwd.db/dwd_category_district_detail' \n"));
+        } finally {
+            jive.close(); // ！重要，使用完后归还
+        }
     }
 
     public static void testRename() {
@@ -33,7 +49,7 @@ public class Test {
             config.setTestOnBorrow(true);
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
-            System.out.println("testRename：" + jive.rename("dws", "tmp_sync_hive222", "tmp_sync_hive"));
+            System.out.println("testRename：" + jive.rename("dwd", "tmp3_sync_hive", "tmp_sync_hive"));
         } finally {
             jive.close(); // ！重要，使用完后归还
         }

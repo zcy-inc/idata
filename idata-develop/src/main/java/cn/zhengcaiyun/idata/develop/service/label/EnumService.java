@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author caizhedong
@@ -37,4 +38,12 @@ public interface EnumService {
     String getEnumValue(String valueCode);
     List<DevEnumValue> getEnumValues(List<String> valueCodes);
     boolean delete(String enumCode, String operator);
+
+    /**
+     * 根据enumCode获取valuecode和enumvalue映射
+     * @param enumCode
+     * @return
+     */
+    Map<String, String> getEnumValueMapByCode(String enumCode);
+
 }

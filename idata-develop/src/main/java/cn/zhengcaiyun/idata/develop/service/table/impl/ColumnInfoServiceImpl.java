@@ -114,24 +114,25 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         return echoList;
     }
 
-    @Override
-    public void compareColumns(TableInfoDto tableInfo) {
-        Long tableId = tableInfo.getId();
-        if (tableInfo.getHiveTableName() != null) {
-            // 同步过hive的表才进行比较
-            // 将多的字段、少的字段、不同的字段都获取到
-            List<ColumnInfoDto> localColumnInfos = tableInfo.getColumnInfos();
-            Set<String> diffColumnNameList = new HashSet<>();
-            CompareInfoDTO compareInfoDTO = tableInfoService.compareHiveInfo(tableId);
-            diffColumnNameList.addAll(compareInfoDTO.getLessList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
-            diffColumnNameList.addAll(compareInfoDTO.getMoreList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
-            diffColumnNameList.addAll(compareInfoDTO.getDifferentList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
-            localColumnInfos.stream().forEach(e -> {
-                e.setEnableCompare(true);
-                e.setHiveDiff(diffColumnNameList.contains(e.getColumnName()));
-            });
-        }
-    }
+//    @Override
+//    @Deprecated
+//    public void compareColumns(TableInfoDto tableInfo) {
+//        Long tableId = tableInfo.getId();
+//        if (tableInfo.getHiveTableName() != null) {
+//            // 同步过hive的表才进行比较
+//            // 将多的字段、少的字段、不同的字段都获取到
+//            List<ColumnInfoDto> localColumnInfos = tableInfo.getColumnInfos();
+//            Set<String> diffColumnNameList = new HashSet<>();
+//            CompareInfoDTO compareInfoDTO = tableInfoService.compareHiveInfo(tableId);
+//            diffColumnNameList.addAll(compareInfoDTO.getLessList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            diffColumnNameList.addAll(compareInfoDTO.getMoreList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            diffColumnNameList.addAll(compareInfoDTO.getDifferentList().stream().map(CompareInfoDTO.ChangeColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            localColumnInfos.stream().forEach(e -> {
+//                e.setEnableCompare(true);
+//                e.setHiveDiff(diffColumnNameList.contains(e.getColumnName()));
+//            });
+//        }
+//    }
 
     @Override
     public List<ColumnDetailsDto> getColumnDetails(Long tableId) {
@@ -338,6 +339,18 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
         return columnInfoList.stream().map(DevColumnInfo::getColumnName).collect(Collectors.toList()).contains(columnName);
+    }
+
+    @Override
+    public List<String> getColumnNames(Long tableId) {
+        return devColumnInfoDao.selectMany(
+                select(devColumnInfo.columnName)
+                .from(devColumnInfo)
+                .where(devColumnInfo.tableId, isEqualTo(tableId))
+                        .build().render(RenderingStrategies.MYBATIS3))
+                .stream()
+                .map(DevColumnInfo::getColumnName)
+                .collect(Collectors.toList());
     }
 
     private boolean deleteColumnInfo(Long columnId, String operator) {

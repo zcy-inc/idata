@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
@@ -80,10 +81,14 @@ public class TableInfoController {
     @Autowired
     private ColumnInfoService columnInfoService;
 
+    @Autowired
+    private MetadataFacade metadataFacade;
+
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
         TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
-        columnInfoService.compareColumns(tableInfo);
+//        columnInfoService.compareColumns(tableInfo);
+        metadataFacade.markDiff(tableInfo);
         return RestResult.success(tableInfo);
     }
 
@@ -154,7 +159,7 @@ public class TableInfoController {
     @PostMapping("/syncHiveInfo/{tableId}")
     public RestResult<SyncHiveDTO> syncHiveInfo(HttpServletRequest request, @PathVariable("tableId") Long tableId) {
         String nickname = tokenService.getNickname(request);
-        return RestResult.success(tableInfoService.syncHiveInfo(tableId, nickname));
+        return RestResult.success(metadataFacade.syncMetadataToHive(tableId, nickname));
     }
 
     /**
@@ -164,7 +169,7 @@ public class TableInfoController {
      */
     @PostMapping("/compareHiveInfo/{tableId}")
     public RestResult<CompareInfoDTO> compareHiveInfo(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(tableInfoService.compareHiveInfo(tableId));
+        return RestResult.success(metadataFacade.compareHive(tableId));
     }
 
 

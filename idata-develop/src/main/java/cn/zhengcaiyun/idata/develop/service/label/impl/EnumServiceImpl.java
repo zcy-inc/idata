@@ -280,4 +280,12 @@ public class EnumServiceImpl implements EnumService {
 
         return true;
     }
+
+    @Override
+    public Map<String, String> getEnumValueMapByCode(String enumCode) {
+        return devEnumValueDao.select(c ->
+                c.where(devEnumValue.enumCode, isEqualTo(enumCode), and(devEnumValue.del, isNotEqualTo(1))))
+                .stream()
+                .collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+    }
 }

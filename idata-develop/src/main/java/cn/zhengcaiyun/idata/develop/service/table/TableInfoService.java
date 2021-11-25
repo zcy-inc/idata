@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.table;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -62,12 +62,27 @@ public interface TableInfoService {
      * @param operator 操作人名称
      * @return
      */
-    SyncHiveDTO syncHiveInfo(Long tableId, String operator);
+//    SyncHiveDTO syncHiveInfo(Long tableId, String operator);
 
     /**
      * 本地表和hive对比
      * @param tableId
      * @return
      */
-    CompareInfoDTO compareHiveInfo(Long tableId);
+//    CompareInfoDTO compareHiveInfo(Long tableId);
+
+    /**
+     * 更新hive表名字
+     * @param tableId
+     * @param hiveTableName
+     * @param operator
+     */
+    void updateHiveTableName(Long tableId, String hiveTableName, String operator);
+
+    /**
+     * 获取简单的表数据信息（非连表）
+     * @param tableId
+     * @return
+     */
+    DevTableInfo getSimpleById(Long tableId);
 }

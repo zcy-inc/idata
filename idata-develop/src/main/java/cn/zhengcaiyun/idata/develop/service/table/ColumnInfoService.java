@@ -34,11 +34,18 @@ public interface ColumnInfoService {
      * 和远端（hive）表进x行列比较，差异信息封装在tableInfo字段中
      * @param tableInfo
      */
-    void compareColumns(TableInfoDto tableInfo);
+//    void compareColumns(TableInfoDto tableInfo);
 
     List<ColumnDetailsDto> getColumnDetails(Long tableId);
     List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
     boolean delete(Long columnId, String operator);
     boolean checkColumn(String columnName, Long tableId);
+
+    /**
+     * 根据tableId获取列name
+     * @param tableId
+     * @return
+     */
+    List<String> getColumnNames(Long tableId);
 }

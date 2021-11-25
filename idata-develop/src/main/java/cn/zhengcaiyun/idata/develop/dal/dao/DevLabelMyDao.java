@@ -16,7 +16,9 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.dao;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -62,4 +64,14 @@ public interface DevLabelMyDao {
             ") " +
             "</script>")
     List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
+
+    @Insert("<script>" +
+            "insert into dev_label(del, creator, create_time, editor, edit_time, label_code, table_id, column_name, label_param_value) " +
+            "values " +
+            "<foreach collection='list' item='item' index='index' separator=','> " +
+            "(#{item.del}, #{item.creator}, #{item.createTime}, #{item.editor}, #{item.editTime}, #{item.labelCode}, #{item.tableId}, #{item.columnName}, #{item.labelParamValue})" +
+            "</foreach> " +
+            "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
+            "</script>")
+    void batchUpsert(List<DevLabel> labelList);
 }

@@ -6,13 +6,6 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
-import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
-import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
-import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
-import cn.zhengcaiyun.idata.connector.util.CreateTableListener;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -69,16 +62,13 @@ public class Jive extends BinaryJive {
      * @return
      */
     public boolean rename(String dbName, String sourceName, String targetName) {
-        boolean success;
         try (Statement statement = this.getClient().createStatement()) {
             statement.execute(String.format("alter table `%s`.%s rename to `%s`.%s", dbName, sourceName, dbName, targetName));
-            success = exist(dbName, targetName);
         } catch (SQLException e) {
             e.printStackTrace();
-            success = false;
             throw new GeneralException("rename fail!");
         }
-        return success;
+        return exist(dbName, targetName);
     }
 
     /**
@@ -87,16 +77,14 @@ public class Jive extends BinaryJive {
      * @return
      */
     public boolean create(String ddl) {
-        boolean success;
         try (Statement statement = this.getClient().createStatement()) {
             statement.execute(ddl);
-            success = true;
         } catch (SQLException e) {
             e.printStackTrace();
-            success = false;
             throw new GeneralException("create fail!");
         }
-        return success;
+        MetadataInfo metadataInfo = JiveUtil.parseMetadataInfo(ddl);
+        return exist(metadataInfo.getDbName(), metadataInfo.getTableName());
     }
 
     /**
@@ -174,13 +162,7 @@ public class Jive extends BinaryJive {
      */
     public MetadataInfo getMetadataInfo(String dbName, String tableName) {
         String ddl = getCreateTableSql(dbName, tableName);
-        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(ddl), true));
-        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        SparkSqlParser parser = new SparkSqlParser(tokenStream);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        CreateTableListener listener = new CreateTableListener();
-        walker.walk(listener, parser.statement());
-        return listener.metadataInfo;
+        return JiveUtil.parseMetadataInfo(ddl);
     }
 
     /**

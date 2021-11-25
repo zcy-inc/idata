@@ -1,6 +1,14 @@
 package cn.zhengcaiyun.idata.connector.clients.hive.util;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
+import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
+import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
+import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
+import cn.zhengcaiyun.idata.connector.util.CreateTableListener;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -72,5 +80,15 @@ public class JiveUtil {
             hiveColumnComment = null;
         }
         return StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment);
+    }
+
+    public static MetadataInfo parseMetadataInfo(String createDDL) {
+        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(createDDL), true));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SparkSqlParser parser = new SparkSqlParser(tokenStream);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        CreateTableListener listener = new CreateTableListener();
+        walker.walk(listener, parser.statement());
+        return listener.metadataInfo;
     }
 }

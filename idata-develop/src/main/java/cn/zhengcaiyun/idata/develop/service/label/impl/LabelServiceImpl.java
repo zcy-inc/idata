@@ -464,4 +464,26 @@ public class LabelServiceImpl implements LabelService {
                         and(devLabel.del, isNotEqualTo(1))));
         return true;
     }
+
+    @Override
+    public List<DevLabel> findByTableId(Long tableId) {
+        List<DevLabel> labelList = devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(tableId)))
+                .build().render(RenderingStrategies.MYBATIS3));
+        return labelList;
+    }
+
+    @Override
+    public String getDBName(Long tableId) {
+        String dbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                        and(devLabel.tableId, isEqualTo(tableId)), and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .get().getLabelParamValue();
+        return dbName;
+    }
+
+    @Override
+    public void batchUpsert(List<DevLabel> labelList) {
+        devLabelMyDao.batchUpsert(labelList);
+    }
 }
