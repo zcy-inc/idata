@@ -52,6 +52,7 @@ const Modal: FC<IModalProps> = (props) => {
       autoFocusFirstInput
       modalProps={{
         onCancel: onCancel,
+        destroyOnClose: true
       }}
       onFinish={async (values) => {
         const { success } = await defineLabel({
