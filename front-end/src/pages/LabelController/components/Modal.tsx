@@ -74,6 +74,7 @@ const Modal: FC<IModalProps> = (props) => {
         placeholder="请输入名称"
       />
       <ProFormSelect
+      disabled={!!labelCode}
         options={[
           {
             value: 'STRING_LABEL',
