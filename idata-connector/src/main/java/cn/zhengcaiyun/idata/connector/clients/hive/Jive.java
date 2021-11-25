@@ -14,10 +14,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.util.BeanUtil;
-import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,7 +23,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+/**
+ * Jive是模仿Jedis写的，在维护此类时；
+ * 1. 在管理可close类资源的时候，请注意不要写以下方式：此方式会释放connection（调用connection的close()），导致connection不可复用
+ *      try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+ *          ResultSet res = statement.executeQuery(String.format("show create table `%s`.%s", dbName, tableName)))
+ */
 public class Jive extends BinaryJive {
 
     public Jive(final String jdbcUrl, final String username, final String password) throws SQLException {
@@ -124,6 +127,10 @@ public class Jive extends BinaryJive {
      * @return
      */
     public boolean addColumns(String dbName, String tableName, Set<ColumnInfoDto> addColumns) {
+        if (CollectionUtils.isEmpty(addColumns)) {
+            return false;
+        }
+
         String sql = JiveUtil.assembleHiveAddColumnSQL(addColumns, dbName, tableName);
         boolean success;
         try (Statement statement = this.getClient().createStatement()) {

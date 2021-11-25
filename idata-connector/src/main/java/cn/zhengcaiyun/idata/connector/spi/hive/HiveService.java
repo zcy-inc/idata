@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -97,6 +98,9 @@ public class HiveService implements BeanPostProcessor {
      * @param columns
      */
     public boolean addColumns(String dbName, String tableName, Set<ColumnInfoDto> columns) {
+        if (CollectionUtils.isEmpty(columns)) {
+            return false;
+        }
         try (Jive jive = hivePool.getResource()) {
             return jive.addColumns(dbName, tableName, columns);
         }

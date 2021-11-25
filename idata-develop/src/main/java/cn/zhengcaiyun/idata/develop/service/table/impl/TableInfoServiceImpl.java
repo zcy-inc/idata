@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -559,11 +560,14 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .collect(Collectors.toSet());
 
         // 进行alter table的DDL SQL封装
-        hiveService.addColumns(dbName, tableName, exceptColumnSet.stream().map(e -> {
-            cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto elem = new cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto();
-            BeanUtils.copyProperties(e, elem);
-            return elem;
-        }).collect(Collectors.toSet()));
+        if (!CollectionUtils.isEmpty(exceptColumnSet)) {
+            hiveService.addColumns(dbName, tableName, exceptColumnSet.stream().map(e -> {
+                cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto elem = new cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto();
+                BeanUtils.copyProperties(e, elem);
+                return elem;
+            }).collect(Collectors.toSet()));
+        }
+
         // 4.2远端hive表修改列（类型和注释和分区）
         // 对比相同字段，取出类型和注释不相同的进行更新
         Set<String> sameColumnNameSet = localTableColumns
