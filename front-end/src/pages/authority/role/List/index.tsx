@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { history } from 'umi';
 import { Button, Modal } from 'antd';
-import { TiledTable, Operation, PageContainer } from '@/components';
+import { TiledTable, Operation } from '@/components';
 import { usePaginated } from '@/hooks';
 import { getRoleList, deleteRole } from '@/services/role';
 import { getDeleteFn } from '@/utils/utils';
@@ -40,7 +40,7 @@ const List: React.FC = () => {
     },
   ];
   return (
-    <PageContainer>
+    <>
       <TiledTable
         rowKey="id"
         leftBtns={<Button onClick={skip2Add}>新增角色</Button>}
@@ -56,7 +56,7 @@ const List: React.FC = () => {
       >
         <AuthSetting readonly={true} {...authSettingProps} />
       </Modal>
-    </PageContainer>
+    </>
   );
 };
 

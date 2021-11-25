@@ -9,7 +9,7 @@ const Settings: LayoutSettings & {
   primaryColor: '#304FFE',
   layout: 'mix',
   contentWidth: 'Fluid',
-  fixedHeader: false,
+  fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
   title: '',

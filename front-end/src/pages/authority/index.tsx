@@ -57,7 +57,9 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
       tabActiveKey={getTabKey()}
       onTabChange={handleTabChange}
     >
-      {props.children}
+      <div className="zcy-content"  >
+        {props.children}
+      </div>
     </PageContainer>
   );
 };

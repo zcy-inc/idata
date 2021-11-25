@@ -20,7 +20,8 @@ export default () => (
       },
     }}
   >
-    <div className="zcy-content"  />
+    <div className="zcy-content"  >
     <Scheduling type="LDAP"/>
+    </div>
   </PageContainer>
 );
