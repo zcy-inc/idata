@@ -214,11 +214,11 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     private String buildScheduleJson(DAGSchedule dagSchedule) {
         //cron json: {"startTime":"2021-11-22 00:00:00","endTime":"2021-12-31 00:00:00","crontab":"0 0 3/5 ? * 2/2 *","timezoneId":"Asia/Shanghai"}
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        JsonObject cronJson = new JsonObject();
-        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
-        cronJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
-        cronJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
-        cronJson.addProperty("timezoneId", "Asia/Shanghai");
+//        JsonObject cronJson = new JsonObject();
+//        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
+//        cronJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
+//        cronJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
+//        cronJson.addProperty("timezoneId", "Asia/Shanghai");
 
         JsonObject scheduleJson = new JsonObject();
         scheduleJson.addProperty("warningType", PARAM_DEFAULT_WARNING_TYPE);
@@ -227,7 +227,11 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         scheduleJson.addProperty("workerGroup", "default");
         scheduleJson.addProperty("environmentCode", -1L);
         scheduleJson.addProperty("processInstancePriority", PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY);
-        scheduleJson.add("schedule", cronJson);
+        scheduleJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
+        scheduleJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
+        scheduleJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
+        scheduleJson.addProperty("timezoneId", "Asia/Shanghai");
+//        scheduleJson.add("schedule", cronJson);
         return scheduleJson.toString();
     }
 
