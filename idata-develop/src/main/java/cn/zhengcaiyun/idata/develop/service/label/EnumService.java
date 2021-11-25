@@ -46,4 +46,10 @@ public interface EnumService {
      */
     Map<String, String> getEnumValueMapByCode(String enumCode);
 
+    /**
+     * 根据enumCode获取enumvalue和valuecode映射
+     * @param enumCode
+     * @return
+     */
+    Map<String, String> getCodeMapByEnumValue(String enumCode);
 }
