@@ -21,16 +21,21 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
@@ -61,6 +66,8 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobInfoRepo jobInfoRepo;
     private final JobDependenceRepo jobDependenceRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
+    private final JobPublishRecordRepo jobPublishRecordRepo;
+    private final DAGRepo dagRepo;
     private final JobManager jobManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
@@ -69,11 +76,15 @@ public class JobInfoServiceImpl implements JobInfoService {
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
                               JobDependenceRepo jobDependenceRepo,
                               JobExecuteConfigRepo jobExecuteConfigRepo,
+                              JobPublishRecordRepo jobPublishRecordRepo,
+                              DAGRepo dagRepo,
                               JobManager jobManager,
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
+        this.jobPublishRecordRepo = jobPublishRecordRepo;
+        this.dagRepo = dagRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
         this.jobEventPublisher = jobEventPublisher;
@@ -157,6 +168,8 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能恢复运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
         checkState(Objects.equals(RunningStateEnum.pause.val, executeConfig.getRunningState()), "作业在s%环境已运行，勿重复操作", environment);
+        //作业未发布，不能恢复运行
+        checkState(isJobPublished(id, environment), "作业未发布，不能恢复");
 
         jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.resume, operator.getNickname());
         // 发布job恢复事件
@@ -188,10 +201,15 @@ public class JobInfoServiceImpl implements JobInfoService {
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
         checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
-        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，不能运行", environment);
+        checkState(Objects.nonNull(executeConfig.getSchDagId()), "作业在s%环境未关联DAG，请先关联DAG", environment);
+        //作业未发布，不能恢复运行
+        checkState(isJobPublished(id, environment), "作业未发布，不能运行");
+        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，请先恢复", environment);
+        // dag 必须上线
+        checkState(isDAGOnline(executeConfig.getSchDagId()), "作业关联DAG未上线，请先上线DAG");
 
         // 发布job暂停事件
-        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, operator);
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, environment, operator);
         jobEventPublisher.whenToRun(eventLog);
         return Boolean.TRUE;
     }
@@ -213,6 +231,20 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(dto.getJobType()), "作业类型为空");
         checkArgument(StringUtils.isNotBlank(dto.getDwLayerCode()), "作业分层为空");
         checkArgument(Objects.nonNull(dto.getFolderId()), "作业所属文件夹为空");
+    }
+
+    private boolean isJobPublished(Long jobId, String environment) {
+        JobPublishRecordCondition condition = new JobPublishRecordCondition();
+        condition.setJobId(jobId);
+        condition.setEnvironment(environment);
+        condition.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+        return jobPublishRecordRepo.count(condition) > 0;
+    }
+
+    private boolean isDAGOnline(Long dagId) {
+        Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(dagId);
+        if (dagInfoOptional.isEmpty()) return false;
+        return Objects.equals(dagInfoOptional.get().getStatus(), UsingStatusEnum.ONLINE.val);
     }
 
     private boolean checkJobInfoUpdated(JobInfo newJobInfo, JobInfo oldJobInfo) {

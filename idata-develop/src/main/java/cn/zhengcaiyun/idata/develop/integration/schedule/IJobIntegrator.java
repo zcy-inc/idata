@@ -20,6 +20,9 @@ package cn.zhengcaiyun.idata.develop.integration.schedule;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.util.DagJobPair;
+
+import java.util.List;
 
 /**
  * @description:
@@ -44,5 +47,8 @@ public interface IJobIntegrator {
 
     void unBindDag(JobInfo jobInfo, Long dagId, String environment) throws ExternalIntegrationException;
 
-    void run(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
+    void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
+
+    void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                          List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) throws ExternalIntegrationException;
 }

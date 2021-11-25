@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
 import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
+import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import com.alibaba.fastjson.JSONObject;
@@ -41,9 +42,12 @@ public abstract class DolphinIntegrationAdapter {
     public static final String NAME_DELIMITER = "__";
 
     protected final DSEntityMappingRepo dsEntityMappingRepo;
+    protected final DSDependenceNodeRepo dsDependenceNodeRepo;
 
-    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo) {
+    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo,
+                                     DSDependenceNodeRepo dsDependenceNodeRepo) {
         this.dsEntityMappingRepo = dsEntityMappingRepo;
+        this.dsDependenceNodeRepo = dsDependenceNodeRepo;
     }
 
     protected Long getWorkflowCode(Long dagId, String environment) throws ExternalIntegrationException {

@@ -12,7 +12,7 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.integration" targetProject="src/main/java">
 
         </javaModelGenerator>
 
@@ -20,7 +20,7 @@
 <!--            <property name="enableSubPackages" value="false"/>-->
 <!--        </sqlMapGenerator>-->
 
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java" type="XMLMAPPER">
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.integration" targetProject="src/main/java" type="XMLMAPPER">
 
         </javaClientGenerator>
 
@@ -84,7 +84,7 @@
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
 
-<!--        <table tableName="ite_ds_depend_relation" domainObjectName="DSDependRelation" mapperName="DSDependRelationDao">-->
+<!--        <table tableName="ite_ds_dependence_node" domainObjectName="DSDependenceNode" mapperName="DSDependenceNodeDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->

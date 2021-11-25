@@ -17,10 +17,30 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.integration;
 
+import cn.zhengcaiyun.idata.develop.dal.model.integration.DSDependenceNode;
+
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-11-15 14:17
  **/
-public interface DSDependRelationRepo {
+public interface DSDependenceNodeRepo {
+
+    Long create(DSDependenceNode dependenceNode);
+
+    Boolean delete(Long id);
+
+    Boolean delete(List<Long> ids);
+
+    Boolean deleteByDependenceNode(Long dependenceNodeCode);
+
+    Boolean deleteByTaskRelation(Long taskCode, Long prevTaskCode);
+
+    List<DSDependenceNode> queryDependenceNodeInWorkflow(Long workflowCode, Long prevTaskCode);
+
+    List<DSDependenceNode> queryDependenceNodeInWorkflow(Long taskCode, Long workflowCode, Long prevTaskCode);
+
+    List<DSDependenceNode> queryByDependenceNode(Long dependenceNodeCode);
 }

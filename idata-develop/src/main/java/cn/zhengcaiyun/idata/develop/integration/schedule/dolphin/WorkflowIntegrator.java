@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.model.integration.DSEntityMapping;
+import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
@@ -55,8 +56,9 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     public static final int RESULT_PROCESS_DEFINITION_NAME_EXIST = 10168;
 
     @Autowired
-    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo) {
-        super(dsEntityMappingRepo);
+    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo,
+                              DSDependenceNodeRepo dsDependenceNodeRepo) {
+        super(dsEntityMappingRepo, dsDependenceNodeRepo);
     }
 
     @Override
