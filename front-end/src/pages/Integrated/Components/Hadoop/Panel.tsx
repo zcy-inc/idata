@@ -1,14 +1,15 @@
-import type { FC} from 'react';
-import React  from 'react';
+import { useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import type { ProColumns } from '@ant-design/pro-table';
 import { EditableProTable } from '@ant-design/pro-table';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Button, Upload, message } from 'antd';
-import {dataToList} from '../../utils'
+import { dataToList } from '../../utils'
 import { v4 as uuidv4 } from 'uuid';
 
-interface HadoopPanelProps{
+interface HadoopPanelProps {
   id: string
   headerTitle: string
   dataSource?: IDataSourceType[]
@@ -18,8 +19,15 @@ interface HadoopPanelProps{
 }
 import type { IDataSourceType } from '@/types/system-controller'
 
-const HadoopPanel: FC<HadoopPanelProps>= (props) => {
-  const {headerTitle,dataSource,setDataSource,editableKeys} =props;
+const HadoopPanel: FC<HadoopPanelProps> = (props) => {
+  const { headerTitle, dataSource = [], setDataSource } = props;
+  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>();
+  const [dataSourceState, setDataSourceState] = useState<IDataSourceType[]>(dataSource);
+  useEffect(() => {
+    const keys = dataSource.map(({ id }) => id || uuidv4());
+    setDataSourceState(dataSource)
+    setEditableRowKeys(keys);
+  }, [])
   const columns: ProColumns<IDataSourceType>[] = [
     {
       title: '参数名称',
@@ -64,8 +72,15 @@ const HadoopPanel: FC<HadoopPanelProps>= (props) => {
     action: '/api/p1/sys/xmlConfigValue',
     onChange(info) {
       if (info.file.status !== 'uploading') {
-          const data =info?.file?.response?.data;
-          setDataSource(dataToList(data))
+        const data = info?.file?.response?.data;
+        const loadData = dataToList(data);
+        setDataSource?.(loadData)
+        setDataSourceState(loadData)
+        setEditableRowKeys(
+          loadData.map(({ id }) => {
+            return id;
+          })
+        );
       }
       if (info.file.status === 'done') {
         message.success("上传成功");
@@ -73,7 +88,7 @@ const HadoopPanel: FC<HadoopPanelProps>= (props) => {
         message.error("上传失败");
       }
     },
-    showUploadList:false
+    showUploadList: false
   };
   return (
     <>
@@ -81,7 +96,7 @@ const HadoopPanel: FC<HadoopPanelProps>= (props) => {
         headerTitle={headerTitle}
         columns={columns}
         rowKey="id"
-        value={dataSource}
+        value={dataSourceState}
         recordCreatorProps={{
           newRecordType: 'dataSource',
           record: () => ({
@@ -100,13 +115,15 @@ const HadoopPanel: FC<HadoopPanelProps>= (props) => {
           editableKeys,
           onValuesChange: (record, recordList) => {
             setDataSource?.(recordList);
+            setDataSourceState(recordList)
           },
           actionRender: (row, config, defaultDoms) => {
             return [defaultDoms.delete];
           },
+          onChange: setEditableRowKeys,
         }}
       />
     </>
   );
 };
-export  default HadoopPanel
+export default HadoopPanel

@@ -1,8 +1,8 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs } from 'antd';
-import Scheduling from './components/Scheduling';
-import Hadoop from './components/Hadoop';
+import Scheduling from './Components/Scheduling';
+import Hadoop from './Components/Hadoop';
 const { TabPane } = Tabs;
 export default () => (
   <PageContainer

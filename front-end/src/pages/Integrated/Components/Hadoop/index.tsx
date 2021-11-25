@@ -13,13 +13,15 @@ const { Panel } = Collapse;
 
 const Hadoop: FC = () => {
   const [configs, setConfigs] = useState<IConfigs[]>([]);
+  const [temConfig,setTemConfig]= useState<IConfigs[]>([]);
   const { loading: fetchLoading } = useRequest(() => getConfigByType("HADOOP"), {
     onSuccess: (data) => {
       setConfigs(data)
+      setTemConfig(data)
     }
   });
   const { loading: saveLoading, run: save } = useRequest(async () => {
-      return editSystemConfig(configs)
+      return editSystemConfig(temConfig)
   }, {
     manual: true,
     onSuccess: () => {
@@ -50,8 +52,8 @@ const Hadoop: FC = () => {
                   dataSource={dataSource}
                   setDataSource={(list)=>{
                       const data = listToData(list)
-                      configs[index].valueOne=data;
-                      setConfigs(_cloneDeep(configs));
+                      temConfig[index].valueOne=data;
+                      setTemConfig(_cloneDeep(temConfig))
                   }}
                   editableKeys={keys}
                   />
