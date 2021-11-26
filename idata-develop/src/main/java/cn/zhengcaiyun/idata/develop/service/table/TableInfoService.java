@@ -34,7 +34,6 @@ import java.util.List;
 public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
     List<TableInfoDto> getTablesByDataBase(String database);
-//    List<TableInfoDto> getTablesByEnumValue(String enumValue);
     List<LabelDto> getDbNames();
 
     /**
@@ -55,21 +54,6 @@ public interface TableInfoService {
      * @return
      */
     TableTechInfoDto getTableTechInfo(Long tableId);
-
-    /**
-     * 将本地表元数据信息通过Livy同步至HIVE
-     * @param tableId 表id
-     * @param operator 操作人名称
-     * @return
-     */
-//    SyncHiveDTO syncHiveInfo(Long tableId, String operator);
-
-    /**
-     * 本地表和hive对比
-     * @param tableId
-     * @return
-     */
-//    CompareInfoDTO compareHiveInfo(Long tableId);
 
     /**
      * 更新hive表名字

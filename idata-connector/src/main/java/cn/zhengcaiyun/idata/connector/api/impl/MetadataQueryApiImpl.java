@@ -54,8 +54,6 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Autowired
     private HiveService hiveService;
-    @Autowired
-    private SysConfigDao sysConfigDao;
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
@@ -173,13 +171,6 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     @Override
     public boolean existHiveTable(String dbName, String tableName) {
         return hiveService.existHiveTable(dbName, tableName);
-    }
-
-    private String getConnectionCfg() {
-        SysConfig hiveConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("hive-info")))
-                .orElse(null);
-        checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
-        return hiveConfig.getValueOne();
     }
 
     private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
