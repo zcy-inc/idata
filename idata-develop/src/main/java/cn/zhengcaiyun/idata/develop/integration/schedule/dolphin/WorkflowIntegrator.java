@@ -212,7 +212,6 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     private String buildScheduleJson(DAGSchedule dagSchedule) {
-        //cron json: {"startTime":"2021-11-22 00:00:00","endTime":"2021-12-31 00:00:00","crontab":"0 0 3/5 ? * 2/2 *","timezoneId":"Asia/Shanghai"}
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        JsonObject cronJson = new JsonObject();
 //        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
