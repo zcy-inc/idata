@@ -173,7 +173,7 @@ public class DAGServiceImpl implements DAGService {
 
         // 删除时确定是否有作业依赖，有则不能删除
         long jobCount = jobExecuteConfigRepo.countDagJob(id);
-        checkState(jobCount > 0, "该DAG存在作业依赖，不能删除");
+        checkState(jobCount == 0, "该DAG存在作业依赖，不能删除");
         Boolean ret = dagRepo.deleteDAG(id, operator.getNickname());
         // 发布dag创建事件
         JsonObject dagJson = new JsonObject();
@@ -194,7 +194,7 @@ public class DAGServiceImpl implements DAGService {
 
         // 上线时确定是否有作业存在，空dag不能上线
         long jobCount = jobExecuteConfigRepo.countDagJob(id);
-        checkState(jobCount == 0, "DAG不存在作业，不能上线");
+        checkState(jobCount > 0, "DAG不存在作业，不能上线");
 
         DAGInfo info = new DAGInfo();
         info.setId(id);
