@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 
 /**
  * @author caizhedong
@@ -24,6 +24,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
  */
 
 public interface ScriptJobService {
-    ScriptJobDto save(ScriptJobDto scriptJobDto, String operator);
-    ScriptJobDto find(Long jobId, Integer version);
+    ScriptJobContentDto save(ScriptJobContentDto scriptJobDto, String operator);
+    ScriptJobContentDto find(Long jobId, Integer version);
 }

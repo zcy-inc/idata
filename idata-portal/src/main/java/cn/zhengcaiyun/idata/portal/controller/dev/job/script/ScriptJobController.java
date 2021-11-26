@@ -18,7 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.script;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.ScriptJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +36,14 @@ public class ScriptJobController {
     private ScriptJobService scriptJobService;
 
     @GetMapping("/contents/{version}")
-    public RestResult<ScriptJobDto> find(@PathVariable Long jobId,
-                                         @PathVariable Integer version) {
+    public RestResult<ScriptJobContentDto> find(@PathVariable Long jobId,
+                                                @PathVariable Integer version) {
         return RestResult.success(scriptJobService.find(jobId, version));
     }
 
     @PostMapping("/contents")
-    public RestResult<ScriptJobDto> save(@PathVariable Long jobId,
-                                        @RequestBody ScriptJobDto scriptJobDto) {
+    public RestResult<ScriptJobContentDto> save(@PathVariable Long jobId,
+                                                @RequestBody ScriptJobContentDto scriptJobDto) {
         return RestResult.success(scriptJobService.save(scriptJobDto, OperatorContext.getCurrentOperator().getNickname()));
     }
 }

@@ -18,7 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 
 /**
  * @description:
@@ -27,7 +27,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
  **/
 public interface DIJobContentService {
 
-    DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator);
+    DIJobContentContentDto save(Long jobId, DIJobContentContentDto contentDto, Operator operator);
 
-    DIJobContentDto get(Long jobId, Integer version);
+    DIJobContentContentDto get(Long jobId, Integer version);
 }

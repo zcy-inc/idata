@@ -20,13 +20,11 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SparkJobRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -59,7 +56,7 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public SparkJobDto save(SparkJobDto sparkJobDto, String operator) throws IOException {
+    public SparkJobContentDto save(SparkJobContentDto sparkJobDto, String operator) throws IOException {
         checkArgument(sparkJobDto.getJobId() != null, "作业Id不能为空");
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(sparkJobDto.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
@@ -69,7 +66,7 @@ public class SparkJobServiceImpl implements SparkJobService {
         if (Objects.nonNull(version)) {
             DevJobContentSpark existJobContentSpark = sparkJobRepo.query(sparkJobDto.getJobId(), version);
             checkArgument(existJobContentSpark != null, "作业不存在或已删除");
-            SparkJobDto existSparkJob = find(sparkJobDto.getJobId(), version);
+            SparkJobContentDto existSparkJob = find(sparkJobDto.getJobId(), version);
 
             // TODO 测试一致性
             // 不可修改且跟当前版本不一致才新生成版本
@@ -106,10 +103,10 @@ public class SparkJobServiceImpl implements SparkJobService {
     }
 
     @Override
-    public SparkJobDto find(Long jobId, Integer version) {
+    public SparkJobContentDto find(Long jobId, Integer version) {
         DevJobContentSpark jobContentSpark = sparkJobRepo.query(jobId, version);
         checkArgument(jobContentSpark != null, "作业不存在");
-        SparkJobDto echoSparkJob = PojoUtil.copyOne(jobContentSpark, SparkJobDto.class);
+        SparkJobContentDto echoSparkJob = PojoUtil.copyOne(jobContentSpark, SparkJobContentDto.class);
         if (JobTypeEnum.SPARK_PYTHON.equals(echoSparkJob.getJobType())) {
             String output;
             try {

@@ -1,7 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job.di;
 
-import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,22 +15,7 @@ import java.util.List;
  * @author: yangjianhua
  * @create: 2021-09-23 11:20
  **/
-public class DIJobContentDto extends BaseDto {
-    /**
-     * 主键
-     */
-    private Long id;
-
-    /**
-     * 作业id
-     */
-    private Long jobId;
-
-    /**
-     * 作业版本号
-     */
-    private Integer version;
-
+public class DIJobContentContentDto extends JobContentBaseDto {
     /**
      * 作业版本号描述
      */
@@ -105,30 +90,6 @@ public class DIJobContentDto extends BaseDto {
      * 作业内容hash，查询作业内容时返回，保存新的作业内容时需将该值一起提交，用于判断作业内容是否有变更
      */
     private String contentHash;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;
@@ -258,8 +219,8 @@ public class DIJobContentDto extends BaseDto {
         this.versionDisplay = versionDisplay;
     }
 
-    public static DIJobContentDto from(DIJobContent content) {
-        DIJobContentDto dto = new DIJobContentDto();
+    public static DIJobContentContentDto from(DIJobContent content) {
+        DIJobContentContentDto dto = new DIJobContentContentDto();
         BeanUtils.copyProperties(content, dto);
 
         if (StringUtils.isNotBlank(content.getSrcColumns())) {

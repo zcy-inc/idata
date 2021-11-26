@@ -17,7 +17,6 @@
 
 package cn.zhengcaiyun.idata.develop.dto.job;
 
-import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -102,7 +101,7 @@ public class JobContentVersionDto implements Comparable<JobContentVersionDto> {
         this.envRunningState = envRunningState;
     }
 
-    public static JobContentVersionDto from(DIJobContent content) {
+    public static JobContentVersionDto from(JobContentBaseDto content) {
         JobContentVersionDto versionDto = new JobContentVersionDto();
         versionDto.setJobId(content.getJobId());
         versionDto.setVersion(content.getVersion());

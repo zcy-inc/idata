@@ -16,8 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job.sql;
 
-import cn.zhengcaiyun.idata.commons.dto.BaseDto;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 
 import java.util.Objects;
 
@@ -26,57 +25,12 @@ import java.util.Objects;
  * @date 2021-11-22 上午10:15
  */
 
-public class SqlJobDto extends BaseDto {
-    private Long id;
-    private Long jobId;
-    private Integer editable;
-    private Integer version;
-    private JobTypeEnum jobType;
+public class SqlJobContentDto extends JobContentBaseDto {
     private String sourceSql;
     private String udfIds;
     private String externalTables;
 
     // GaS
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
-    }
-
-    public Integer getEditable() {
-        return editable;
-    }
-
-    public void setEditable(Integer editable) {
-        this.editable = editable;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
-    public JobTypeEnum getJobType() {
-        return jobType;
-    }
-
-    public void setJobType(JobTypeEnum jobType) {
-        this.jobType = jobType;
-    }
-
     public String getSourceSql() {
         return sourceSql;
     }
@@ -106,7 +60,7 @@ public class SqlJobDto extends BaseDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        SqlJobDto sqlJobDto = (SqlJobDto) o;
+        SqlJobContentDto sqlJobDto = (SqlJobContentDto) o;
         return Objects.equals(sourceSql, sqlJobDto.sourceSql) &&
                 Objects.equals(udfIds, sqlJobDto.udfIds) &&
                 Objects.equals(externalTables, sqlJobDto.externalTables);

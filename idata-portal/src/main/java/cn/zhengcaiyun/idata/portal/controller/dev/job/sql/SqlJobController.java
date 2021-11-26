@@ -18,7 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.sql;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +36,14 @@ public class SqlJobController {
     private SqlJobService sqlJobService;
 
     @GetMapping("/contents/{version}")
-    public RestResult<SqlJobDto> find(@PathVariable Long jobId,
-                                      @PathVariable Integer version) {
+    public RestResult<SqlJobContentDto> find(@PathVariable Long jobId,
+                                             @PathVariable Integer version) {
         return RestResult.success(sqlJobService.find(jobId, version));
     }
 
     @PostMapping("/contents")
-    public RestResult<SqlJobDto> save(@PathVariable Long jobId,
-                                        @RequestBody SqlJobDto sqlJobDto) {
+    public RestResult<SqlJobContentDto> save(@PathVariable Long jobId,
+                                             @RequestBody SqlJobContentDto sqlJobDto) {
         return RestResult.success(sqlJobService.save(sqlJobDto, OperatorContext.getCurrentOperator().getNickname()));
     }
 }

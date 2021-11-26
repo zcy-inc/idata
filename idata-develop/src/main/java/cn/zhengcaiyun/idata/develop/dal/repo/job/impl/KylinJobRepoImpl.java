@@ -28,6 +28,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
@@ -52,6 +53,13 @@ public class KylinJobRepoImpl implements KylinJobRepo {
                         and(devJobContentKylin.jobId, isEqualTo(jobId)),
                         and(devJobContentKylin.version, isEqualTo(version))))
                 .orElse(null);
+    }
+
+    @Override
+    public List<DevJobContentKylin> queryList(Long jobId) {
+        return devJobContentKylinDao.select(c ->
+                c.where(devJobContentKylin.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentKylin.jobId, isEqualTo(jobId))));
     }
 
     @Override

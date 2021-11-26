@@ -18,11 +18,13 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.spark;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author caizhedong
@@ -37,20 +39,20 @@ public class SparkJobController {
     private SparkJobService sparkJobService;
 
     @GetMapping("/contents/{version}")
-    public RestResult<SparkJobDto> find(@PathVariable Long jobId,
-                                        @PathVariable Integer version) {
+    public RestResult<SparkJobContentDto> find(@PathVariable Long jobId,
+                                               @PathVariable Integer version) {
         return RestResult.success(sparkJobService.find(jobId, version));
     }
 
     @PostMapping("/contents")
-    public RestResult<SparkJobDto> save(@PathVariable Long jobId,
-                                         @RequestBody SparkJobDto sparkJobDto) {
+    public RestResult<SparkJobContentDto> save(@PathVariable Long jobId,
+                                               @RequestBody SparkJobContentDto sparkJobDto) throws IOException {
         return RestResult.success(sparkJobService.save(sparkJobDto, OperatorContext.getCurrentOperator().getNickname()));
     }
 
     @PostMapping("/uploadFile")
     public RestResult<String> uploadFile(@PathVariable Long jobId,
-                                          @RequestParam("file") MultipartFile file) {
+                                          @RequestParam("file") MultipartFile file) throws IOException {
         return RestResult.success(sparkJobService.uploadFile(file));
     }
 }

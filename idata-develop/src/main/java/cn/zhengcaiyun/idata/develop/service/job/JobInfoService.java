@@ -18,8 +18,12 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+
+import java.util.List;
 
 /**
  * @description:
@@ -33,6 +37,10 @@ public interface JobInfoService {
     Boolean editJobInfo(JobInfoDto dto, Operator operator);
 
     JobInfoDto getJobInfo(Long id);
+
+    JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType);
+
+    List<JobContentBaseDto> getJobContents(Long jobId, String jobType);
 
     Boolean removeJob(Long id, Operator operator);
 

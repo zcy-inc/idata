@@ -14,28 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.dto.job.script;
+package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author caizhedong
- * @date 2021-11-19 下午3:19
+ * @date 2021-11-26 上午10:13
  */
 
-public class ScriptJobDto extends BaseDto {
+public class JobContentBaseDto extends BaseDto {
     private Long id;
     private Long jobId;
     private Integer editable;
     private Integer version;
+    private String versionDisplay;
     private JobTypeEnum jobType;
-    private String sourceResource;
-    private List<JobArgumentDto> scriptArguments;
 
     // GaS
     public Long getId() {
@@ -70,43 +65,19 @@ public class ScriptJobDto extends BaseDto {
         this.version = version;
     }
 
+    public String getVersionDisplay() {
+        return versionDisplay;
+    }
+
+    public void setVersionDisplay(String versionDisplay) {
+        this.versionDisplay = versionDisplay;
+    }
+
     public JobTypeEnum getJobType() {
         return jobType;
     }
 
     public void setJobType(JobTypeEnum jobType) {
         this.jobType = jobType;
-    }
-
-    public String getSourceResource() {
-        return sourceResource;
-    }
-
-    public void setSourceResource(String sourceResource) {
-        this.sourceResource = sourceResource;
-    }
-
-    public List<JobArgumentDto> getScriptArguments() {
-        return scriptArguments;
-    }
-
-    public void setScriptArguments(List<JobArgumentDto> scriptArguments) {
-        this.scriptArguments = scriptArguments;
-    }
-
-    // TODO
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        ScriptJobDto that = (ScriptJobDto) o;
-        if (scriptArguments.size() != that.scriptArguments.size()) return false;
-        return Objects.equals(sourceResource, that.sourceResource) && Objects.equals(scriptArguments, that.scriptArguments);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(sourceResource, scriptArguments);
     }
 }

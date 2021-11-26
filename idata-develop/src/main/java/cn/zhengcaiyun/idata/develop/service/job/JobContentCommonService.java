@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ import java.util.List;
  **/
 public interface JobContentCommonService {
 
-    DIJobContentDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+    SubmitJobDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
 
     List<JobContentVersionDto> getVersions(Long jobId);
 }

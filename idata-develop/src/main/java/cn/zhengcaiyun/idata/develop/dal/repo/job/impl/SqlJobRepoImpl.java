@@ -23,17 +23,19 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
  * @date 2021-11-25 上午9:18
  */
-
+@Service
 public class SqlJobRepoImpl implements SqlJobRepo {
 
     @Autowired
@@ -46,6 +48,13 @@ public class SqlJobRepoImpl implements SqlJobRepo {
                         and(devJobContentSql.jobId, isEqualTo(jobId)),
                         and(devJobContentSql.version, isEqualTo(version))))
                 .orElse(null);
+    }
+
+    @Override
+    public List<DevJobContentSql> queryList(Long jobId) {
+        return devJobContentSqlDao.select(c ->
+                c.where(devJobContentSql.del, isNotEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentSql.jobId, isEqualTo(jobId))));
     }
 
     @Override

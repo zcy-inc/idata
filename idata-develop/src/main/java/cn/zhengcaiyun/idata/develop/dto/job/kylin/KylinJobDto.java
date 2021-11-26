@@ -27,7 +27,6 @@ import java.util.Objects;
  */
 
 public class KylinJobDto extends BaseDto {
-    private Long id;
     private Long jobId;
     private Integer editable;
     private Integer version;
@@ -37,14 +36,6 @@ public class KylinJobDto extends BaseDto {
     private Date endTime;
 
     // GaS
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getJobId() {
         return jobId;
     }

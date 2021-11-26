@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 
+import java.util.List;
+
 /**
  * @author caizhedong
  * @date 2021-11-24 下午7:07
@@ -25,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 
 public interface ScriptJobRepo {
     DevJobContentScript query(Long jobId, Integer version);
+    List<DevJobContentScript> queryList(Long jobId);
     boolean add(DevJobContentScript jobContentScript);
     boolean update(DevJobContentScript jobContentScript);
     Integer newVersion(Long jobId);

@@ -16,7 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 
 public interface SparkJobService {
-    SparkJobDto save(SparkJobDto sparkJobDto, String operator) throws IOException;
-    SparkJobDto find(Long jobId, Integer version);
+    SparkJobContentDto save(SparkJobContentDto sparkJobDto, String operator) throws IOException;
+    SparkJobContentDto find(Long jobId, Integer version);
     String uploadFile(MultipartFile file) throws IOException;
 }

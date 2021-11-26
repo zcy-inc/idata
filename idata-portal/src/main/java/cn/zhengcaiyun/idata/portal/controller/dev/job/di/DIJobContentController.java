@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +50,8 @@ public class DIJobContentController {
      * @return
      */
     @PostMapping("/contents")
-    public RestResult<DIJobContentDto> saveContent(@PathVariable("jobId") Long jobId,
-                                                   @RequestBody DIJobContentDto contentDto) {
+    public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
+                                                          @RequestBody DIJobContentContentDto contentDto) {
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
     }
 
@@ -63,8 +63,8 @@ public class DIJobContentController {
      * @return
      */
     @GetMapping("/contents/{version}")
-    public RestResult<DIJobContentDto> getContent(@PathVariable("jobId") Long jobId,
-                                                  @PathVariable("version") Integer version) {
+    public RestResult<DIJobContentContentDto> getContent(@PathVariable("jobId") Long jobId,
+                                                         @PathVariable("version") Integer version) {
         return RestResult.success(diJobContentService.get(jobId, version));
     }
 

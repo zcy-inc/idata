@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 
+import java.util.List;
+
 /**
  * @author caizhedong
  * @date 2021-11-24 下午7:07
@@ -25,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 
 public interface SparkJobRepo {
     DevJobContentSpark query(Long jobId, Integer version);
+    List<DevJobContentSpark> queryList(Long jobId);
     boolean add(DevJobContentSpark jobContentSpark);
     boolean update(DevJobContentSpark jobContentSpark);
     Integer newVersion(Long jobId);

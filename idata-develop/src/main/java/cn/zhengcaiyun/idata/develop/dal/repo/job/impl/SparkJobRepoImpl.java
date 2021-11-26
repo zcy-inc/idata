@@ -24,6 +24,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.SparkJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
 import static org.mybatis.dynamic.sql.SqlBuilder.and;
@@ -46,6 +48,13 @@ public class SparkJobRepoImpl implements SparkJobRepo {
                         and(devJobContentSpark.jobId, isEqualTo(jobId)),
                         and(devJobContentSpark.version, isEqualTo(version))))
                 .orElse(null);
+    }
+
+    @Override
+    public List<DevJobContentSpark> queryList(Long jobId) {
+        return devJobContentSparkDao.select(c ->
+                c.where(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentSpark.jobId, isEqualTo(jobId))));
     }
 
     @Override

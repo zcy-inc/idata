@@ -21,7 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -66,11 +66,12 @@ public class JobContentCommonController {
      * @return
      */
     @PostMapping("/versions/{version}/submit/{env}")
-    public RestResult<DIJobContentDto> submitJob(@PathVariable("jobId") Long jobId,
-                                                 @PathVariable("version") Integer version,
-                                                 @PathVariable("env") String env,
-                                                 @RequestBody SubmitJobDto submitJobDto) {
-        return RestResult.success(jobContentCommonService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
+    public RestResult<DIJobContentContentDto> submitJob(@PathVariable("jobId") Long jobId,
+                                                        @PathVariable("version") Integer version,
+                                                        @PathVariable("env") String env,
+                                                        @RequestBody SubmitJobDto submitJobDto) {
+        return RestResult.success();
+//        return RestResult.success(jobContentCommonService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
 }

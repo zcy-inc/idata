@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 
+import java.util.List;
+
 /**
  * @author caizhedong
  * @date 2021-11-25 上午9:18
@@ -25,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 
 public interface SqlJobRepo {
     DevJobContentSql query(Long jobId, Integer version);
+    List<DevJobContentSql> queryList(Long jobId);
     boolean add(DevJobContentSql jobContentSql);
     boolean update(DevJobContentSql jobContentSql);
     Integer newVersion(Long jobId);

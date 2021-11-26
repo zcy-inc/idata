@@ -23,7 +23,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.apache.commons.lang3.ObjectUtils;
@@ -58,7 +58,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public DIJobContentDto save(Long jobId, DIJobContentDto contentDto, Operator operator) {
+    public DIJobContentContentDto save(Long jobId, DIJobContentContentDto contentDto, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkJobContent(contentDto);
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
@@ -100,16 +100,16 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public DIJobContentDto get(Long jobId, Integer version) {
+    public DIJobContentContentDto get(Long jobId, Integer version) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkArgument(Objects.nonNull(version), "作业版本号为空");
 
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
-        return DIJobContentDto.from(jobContentOptional.get());
+        return DIJobContentContentDto.from(jobContentOptional.get());
     }
 
-    private void checkJobContent(DIJobContentDto contentDto) {
+    private void checkJobContent(DIJobContentContentDto contentDto) {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");
         checkArgument(Objects.nonNull(contentDto.getSrcDataSourceId()), "来源数据源编号为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");

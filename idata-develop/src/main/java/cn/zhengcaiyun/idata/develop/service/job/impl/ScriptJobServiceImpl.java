@@ -22,7 +22,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.ScriptJobRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.ScriptJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class ScriptJobServiceImpl implements ScriptJobService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public ScriptJobDto save(ScriptJobDto scriptJobDto, String operator) {
+    public ScriptJobContentDto save(ScriptJobContentDto scriptJobDto, String operator) {
         checkArgument(scriptJobDto.getJobId() != null, "作业Id不能为空");
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(scriptJobDto.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
@@ -58,7 +58,7 @@ public class ScriptJobServiceImpl implements ScriptJobService {
         if (Objects.nonNull(version)) {
             DevJobContentScript existJobContentScript = scriptJobRepo.query(scriptJobDto.getJobId(), version);
             checkArgument(existJobContentScript != null, "作业不存在或已删除");
-            ScriptJobDto existScriptJob = PojoUtil.copyOne(existJobContentScript, ScriptJobDto.class);
+            ScriptJobContentDto existScriptJob = PojoUtil.copyOne(existJobContentScript, ScriptJobContentDto.class);
 
             // TODO 测试一致性
             // 不可修改且跟当前版本不一致才新生成版本
@@ -89,9 +89,9 @@ public class ScriptJobServiceImpl implements ScriptJobService {
     }
 
     @Override
-    public ScriptJobDto find(Long jobId, Integer version) {
+    public ScriptJobContentDto find(Long jobId, Integer version) {
         DevJobContentScript jobContentScript = scriptJobRepo.query(jobId, version);
         checkArgument(jobContentScript != null, "作业不存在");
-        return PojoUtil.copyOne(jobContentScript, ScriptJobDto.class);
+        return PojoUtil.copyOne(jobContentScript, ScriptJobContentDto.class);
     }
 }

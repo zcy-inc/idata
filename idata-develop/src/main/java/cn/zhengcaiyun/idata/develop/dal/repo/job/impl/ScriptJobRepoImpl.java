@@ -23,6 +23,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.ScriptJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
@@ -45,6 +47,13 @@ public class ScriptJobRepoImpl implements ScriptJobRepo {
                         and(devJobContentScript.jobId, isEqualTo(jobId)),
                         and(devJobContentScript.version, isEqualTo(version))))
                 .orElse(null);
+    }
+
+    @Override
+    public List<DevJobContentScript> queryList(Long jobId) {
+        return devJobContentScriptDao.select(c ->
+                c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentScript.jobId, isEqualTo(jobId))));
     }
 
     @Override

@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 
+import java.util.List;
+
 /**
  * @author caizhedong
  * @date 2021-11-22 下午5:36
@@ -25,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 
 public interface KylinJobRepo {
     DevJobContentKylin query(Long jobId, Integer version);
+    List<DevJobContentKylin> queryList(Long jobId);
     boolean add(DevJobContentKylin jobContentKylin);
     boolean update(DevJobContentKylin jobContentKylin);
     Integer newVersion(Long jobId);
