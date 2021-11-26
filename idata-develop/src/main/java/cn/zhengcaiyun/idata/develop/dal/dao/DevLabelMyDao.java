@@ -73,5 +73,5 @@ public interface DevLabelMyDao {
             "</foreach> " +
             "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
             "</script>")
-    void batchUpsert(List<DevLabel> labelList);
+    void batchUpsert(List<DevLabel> list);
 }

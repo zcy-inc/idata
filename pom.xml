@@ -66,6 +66,7 @@
         <postgresql.version>42.2.10</postgresql.version>
         <caffeine.version>2.9.1</caffeine.version>
         <commons-pool2.version>2.10.0</commons-pool2.version>
+        <hutool-all.version>5.3.5</hutool-all.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -143,6 +144,11 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool-all.version}</version>
             </dependency>
 
         </dependencies>

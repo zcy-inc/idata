@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.develop.facade;
 
+import cn.hutool.core.util.StrUtil;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
@@ -58,6 +60,9 @@ public class MetadataFacade {
         checkDatabase(hiveTableName, dbName);
 
         String tableName = tableInfo.getTableName();
+
+        Map<String, String> typeMapping = enumService.getCodeMapByEnumValue(COLUMN_TYPE_ENUM);
+        Map<String, String> lowerCaseMapping = columnInfoService.getColumnNames(tableId).stream().collect(Collectors.toMap(e -> e.toLowerCase(), e -> e));
         // 1. 没有同步hive记录直接新建
         if (StringUtils.isBlank(hiveTableName)) {
             boolean existHiveTable = hiveService.existHiveTable(dbName, tableName);
@@ -66,43 +71,60 @@ public class MetadataFacade {
             }
             boolean success = hiveService.create(tableInfoService.getTableDDL(tableId));
             if (success) {
-                tableInfoService.updateHiveTableName(tableId, dbName + "." + tableName, operator);
                 MetadataInfo metadataInfo = hiveService.getMetadataInfo(dbName, tableName);
-                List<DevLabel> labelList = assembleDevLabelList(operator, tableId, metadataInfo);
+                List<DevLabel> labelList = Lists.newArrayList();
+                metadataInfo.getColumnList().forEach(e -> {
+                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                    columnInfoDto.setPartition(false);
+                    List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
+                    labelList.addAll(subList);
+                });
+                metadataInfo.getPartitionColumnList().forEach(e -> {
+                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                    columnInfoDto.setPartition(true);
+                    List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
+                    labelList.addAll(subList);
+                });
                 labelService.batchUpsert(labelList);
+                tableInfoService.updateHiveTableName(tableId, dbName + "." + tableName, operator);
             }
             return new SyncHiveDTO(true);
         }
 
+        hiveTableName = hiveTableName.split("\\.")[1];
         SyncHiveDTO syncHiveDTO = new SyncHiveDTO(false);
         // 2. 重命名
         if (!StringUtils.equals(tableName, hiveTableName)) {
-            boolean existHiveTable = hiveService.existHiveTable(dbName, hiveTableName);
-            if (!existHiveTable) {
+
+            boolean existSource = hiveService.existHiveTable(dbName, hiveTableName);
+            if (!existSource) {
                 throw new GeneralException(String.format("该表已存在同步至hive记录（表名：%s），但该表不存在，无法重命名", hiveTableName));
             }
-            existHiveTable = hiveService.existHiveTable(dbName, tableName);
-            if (existHiveTable) {
+            boolean existTarget = hiveService.existHiveTable(dbName, tableName);
+            if (existTarget) {
                 throw new GeneralException(String.format("修改的目标表名远端hive库中已存在（表名：%s），无法重命名", tableName));
             }
             boolean success = hiveService.rename(dbName, hiveTableName, tableName);
             if (!success) {
                 throw new GeneralException(String.format("重命名失败（%s --> %s）", hiveTableName, tableName));
             }
-            tableInfoService.updateHiveTableName(tableId, tableName, operator);
+            tableInfoService.updateHiveTableName(tableId, dbName + "." + tableName, operator);
             syncHiveDTO.getWarningList().add(String.format("重命名表：`%s`.%s ---> `%s`.%s", dbName, hiveTableName, dbName, tableName));
         }
 
         CompareInfoDTO compareInfoDTO = compareHive(tableId);
         // 3. 单向同步列信息（local --> hive库）
         // 3.1 新增列
-        Map<String, String> typeMapping = enumService.getCodeMapByEnumValue(COLUMN_TYPE_ENUM);
         List<CompareInfoDTO.BasicColumnInfo> moreList = compareInfoDTO.getMoreList();
         if (CollectionUtils.isNotEmpty(moreList)) {
             Set<ColumnInfoDto> columns = moreList.stream().map(e -> PojoUtil.copyOne(e, ColumnInfoDto.class)).collect(Collectors.toSet());
             boolean success = hiveService.addColumns(dbName, tableName, columns);
             if (success) {
-                List<DevLabel> labelList = assembleDevLabelList(typeMapping, operator, tableId, columns);
+                List<DevLabel> labelList = Lists.newArrayList();
+                columns.forEach(e -> {
+                    List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, e);
+                    labelList.addAll(subList);
+                });
                 labelService.batchUpsert(labelList);
             }
         }
@@ -116,7 +138,8 @@ public class MetadataFacade {
                 boolean success = hiveService.changeColumn(dbName, tableName, columnInfo.getHiveColumnName(),
                         columnName, columnType, columnComment);
                 if (success) {
-                    List<DevLabel> labelList = assembleDevLabelList(typeMapping, operator, tableId, columnName, columnType, columnComment);
+                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class);
+                    List<DevLabel> labelList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelService.batchUpsert(labelList);
                 }
             }
@@ -126,76 +149,28 @@ public class MetadataFacade {
         return syncHiveDTO;
     }
 
-
-    private List<DevLabel> assembleDevLabelList(String operator, Long tableId, MetadataInfo metadataInfo) {
-        Date now = new Date();
-        List<DevLabel> list = new ArrayList<>();
-        List<MetadataInfo.ColumnInfo> columnList = metadataInfo.getColumnList();
-        columnList.addAll(metadataInfo.getPartitionColumnList());
-
-        Map<String, String> typeMapping = enumService.getCodeMapByEnumValue(COLUMN_TYPE_ENUM);
-        for (MetadataInfo.ColumnInfo elem : columnList) {
-            String columnName = elem.getColumnName();
-            String columnType = elem.getColumnType();
-            String columnComment = elem.getColumnComment();
-
-            DevLabel devLabelName = new DevLabel();
-            devLabelName.setDel(DEL_NO.val);
-            devLabelName.setEditor(operator);
-            devLabelName.setCreator(operator);
-            devLabelName.setCreator(operator);
-            devLabelName.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelName.setColumnName(columnName);
-            devLabelName.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
-            devLabelName.setLabelParamValue(columnName);
-            list.add(devLabelName);
-
-            DevLabel devLabelType = new DevLabel();
-            devLabelType.setDel(DEL_NO.val);
-            devLabelType.setEditor(operator);
-            devLabelType.setCreator(operator);
-            devLabelType.setCreator(operator);
-            devLabelType.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelType.setColumnName(columnName);
-            devLabelType.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
-            devLabelType.setLabelParamValue(typeMapping.getOrDefault(StringUtils.upperCase(columnType), columnType));
-            list.add(devLabelType);
-
-            DevLabel devLabelComment = new DevLabel();
-            devLabelComment.setDel(DEL_NO.val);
-            devLabelComment.setEditor(operator);
-            devLabelComment.setCreator(operator);
-            devLabelComment.setCreator(operator);
-            devLabelComment.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelComment.setColumnName(columnName);
-            devLabelComment.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
-            devLabelComment.setLabelParamValue(columnComment);
-            list.add(devLabelComment);
-        }
-
-        return list;
-    }
-
-
     /**
      * 封装label
+     * @param lowerCaseMapping
      * @param operator
      * @param tableId
-     * @param columnName
-     * @param columnType
-     * @param columnComment
+     * @param columnInfoDto
      */
-    private List<DevLabel> assembleDevLabelList(Map<String, String> typeMapping, String operator, Long tableId, String columnName, String columnType, String columnComment) {
+    private List<DevLabel> assembleDevLabelList(Map<String, String> lowerCaseMapping, Map<String, String> typeMapping,
+                                                String operator, Long tableId, ColumnInfoDto columnInfoDto) {
+        // 由于hive大小写不敏感，取出的建标DDL都是小写，此处做了映射
+        String columnName = lowerCaseMapping.getOrDefault(columnInfoDto.getColumnName().toLowerCase(), columnInfoDto.getColumnName());
+        String columnType = columnInfoDto.getColumnType();
+        String columnComment = columnInfoDto.getColumnComment();
+        Boolean partition = columnInfoDto.getPartition();
+
         Date now = new Date();
         List<DevLabel> list = new ArrayList<>();
         DevLabel devLabelName = new DevLabel();
         devLabelName.setDel(DEL_NO.val);
         devLabelName.setEditor(operator);
         devLabelName.setCreator(operator);
-        devLabelName.setCreator(operator);
+        devLabelName.setEditTime(now);
         devLabelName.setCreateTime(now);
         devLabelName.setTableId(tableId);
         devLabelName.setColumnName(columnName);
@@ -207,9 +182,9 @@ public class MetadataFacade {
         devLabelType.setDel(DEL_NO.val);
         devLabelType.setEditor(operator);
         devLabelType.setCreator(operator);
-        devLabelType.setCreator(operator);
+        devLabelType.setEditTime(now);
         devLabelType.setCreateTime(now);
-        devLabelName.setTableId(tableId);
+        devLabelType.setTableId(tableId);
         devLabelType.setColumnName(columnName);
         devLabelType.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
         devLabelType.setLabelParamValue(typeMapping.getOrDefault(StringUtils.upperCase(columnType), columnType));
@@ -219,65 +194,25 @@ public class MetadataFacade {
         devLabelComment.setDel(DEL_NO.val);
         devLabelComment.setEditor(operator);
         devLabelComment.setCreator(operator);
-        devLabelComment.setCreator(operator);
+        devLabelComment.setEditTime(now);
         devLabelComment.setCreateTime(now);
-        devLabelName.setTableId(tableId);
+        devLabelComment.setTableId(tableId);
         devLabelComment.setColumnName(columnName);
         devLabelComment.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
-        devLabelComment.setLabelParamValue(columnComment);
+        devLabelComment.setLabelParamValue(StrUtil.nullToEmpty(columnComment));
         list.add(devLabelComment);
-        return list;
-    }
 
-    /**
-     * 封装label
-     * @param operator
-     * @param tableId
-     * @param columns
-     * @return
-     */
-    private List<DevLabel> assembleDevLabelList(Map<String, String> typeMapping, String operator, Long tableId, Set<ColumnInfoDto> columns) {
-        Date now = new Date();
-        List<DevLabel> list = new ArrayList<>();
-        for (ColumnInfoDto elem : columns) {
-            String columnName = elem.getColumnName();
-            String columnType = elem.getColumnType();
-            DevLabel devLabelName = new DevLabel();
-            devLabelName.setDel(DEL_NO.val);
-            devLabelName.setEditor(operator);
-            devLabelName.setCreator(operator);
-            devLabelName.setCreator(operator);
-            devLabelName.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelName.setColumnName(columnName);
-            devLabelName.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
-            devLabelName.setLabelParamValue(columnName);
-            list.add(devLabelName);
-
-            DevLabel devLabelType = new DevLabel();
-            devLabelType.setDel(DEL_NO.val);
-            devLabelType.setEditor(operator);
-            devLabelType.setCreator(operator);
-            devLabelType.setCreator(operator);
-            devLabelType.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelType.setColumnName(columnName);
-            devLabelType.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
-            devLabelType.setLabelParamValue(typeMapping.getOrDefault(StringUtils.upperCase(columnType), columnType));
-            list.add(devLabelType);
-
-            DevLabel devLabelComment = new DevLabel();
-            devLabelComment.setDel(DEL_NO.val);
-            devLabelComment.setEditor(operator);
-            devLabelComment.setCreator(operator);
-            devLabelComment.setCreator(operator);
-            devLabelComment.setCreateTime(now);
-            devLabelName.setTableId(tableId);
-            devLabelComment.setColumnName(columnName);
-            devLabelComment.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
-            devLabelComment.setLabelParamValue(elem.getColumnComment());
-            list.add(devLabelComment);
-        }
+        DevLabel devLabelPartition = new DevLabel();
+        devLabelPartition.setDel(DEL_NO.val);
+        devLabelPartition.setEditor(operator);
+        devLabelPartition.setCreator(operator);
+        devLabelPartition.setEditTime(now);
+        devLabelPartition.setCreateTime(now);
+        devLabelPartition.setTableId(tableId);
+        devLabelPartition.setColumnName(columnName);
+        devLabelPartition.setLabelCode(SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
+        devLabelPartition.setLabelParamValue(partition + "");
+        list.add(devLabelPartition);
         return list;
     }
 
@@ -294,7 +229,8 @@ public class MetadataFacade {
                 SysLabelCodeEnum.COLUMN_TYPE_LABEL.labelCode,
                 SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode,
                 SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode,
-                SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
+                SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode,
+                SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
 
         //<column, code, value> 结构
         Table<String, String, String> columnCodeValueTable = HashBasedTable.create();
@@ -311,13 +247,16 @@ public class MetadataFacade {
             String hiveColumnType = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
             String columnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode);
             String hiveColumnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
+            String columnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
+            String hiveColumnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
 
             if (StringUtils.isEmpty(hiveColumnName)) {
                 // local比hive多的列
-                compareInfoDTO.getMoreList().add(new CompareInfoDTO.BasicColumnInfo(columnName, columnType, columnComment));
+                compareInfoDTO.getMoreList().add(new CompareInfoDTO.BasicColumnInfo(columnName, typeMapping.get(columnType), columnComment));
             } else if (!StringUtils.equals(columnName, hiveColumnName)
                     || !StringUtils.equals(columnType, hiveColumnType)
-                    || !JiveUtil.commentEquals(columnComment, hiveColumnComment)) {
+                    || !JiveUtil.commentEquals(columnComment, hiveColumnComment)
+                    || !StringUtils.equals(columnPartition, hiveColumnPartition)) {
                 CompareInfoDTO.ChangeColumnInfo columnInfo = new CompareInfoDTO.ChangeColumnInfo();
                 columnInfo.setColumnName(columnName);
                 columnInfo.setHiveColumnName(hiveColumnName);
@@ -325,6 +264,9 @@ public class MetadataFacade {
                 columnInfo.setHiveColumnType(typeMapping.get(hiveColumnType));
                 columnInfo.setColumnComment(columnComment);
                 columnInfo.setHiveColumnComment(hiveColumnComment);
+                columnInfo.setPartition(StringUtils.equals(columnPartition, "true"));
+                columnInfo.setHivePartition(StringUtils.equals(hiveColumnPartition, "true"));
+
                 compareInfoDTO.getDifferentList().add(columnInfo);
             }
         }
@@ -349,9 +291,13 @@ public class MetadataFacade {
         }
 
         String[] tableMetaInfo = hiveTableName.split("\\.");
+        if (tableMetaInfo.length < 2) {
+            throw new IllegalArgumentException(String.format("同步的hive table信息未带库名%s", hiveTableName));
+        }
         if (!StringUtils.equalsIgnoreCase(dbName, tableMetaInfo[0])) {
             throw new IllegalArgumentException("已同步过到hive的表不能更改database");
         }
+
     }
 
     public void markDiff(TableInfoDto tableInfo) {

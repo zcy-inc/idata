@@ -94,6 +94,8 @@ public class CompareInfoDTO {
 
         private String columnComment;
 
+        private boolean isPartition;
+
         public String getColumnName() {
             return columnName;
         }
@@ -117,6 +119,14 @@ public class CompareInfoDTO {
         public void setColumnComment(String columnComment) {
             this.columnComment = columnComment;
         }
+
+        public boolean isPartition() {
+            return isPartition;
+        }
+
+        public void setPartition(boolean partition) {
+            isPartition = partition;
+        }
     }
 
     public static class ChangeColumnInfo {
@@ -127,11 +137,15 @@ public class CompareInfoDTO {
 
         private String columnComment;
 
+        private boolean isPartition;
+
         private String hiveColumnName;
 
         private String hiveColumnType;
 
         private String hiveColumnComment;
+
+        private boolean isHivePartition;
 
         public String getColumnName() {
             return columnName;
@@ -179,6 +193,22 @@ public class CompareInfoDTO {
 
         public void setHiveColumnComment(String hiveColumnComment) {
             this.hiveColumnComment = hiveColumnComment;
+        }
+
+        public boolean isPartition() {
+            return isPartition;
+        }
+
+        public void setPartition(boolean partition) {
+            isPartition = partition;
+        }
+
+        public boolean isHivePartition() {
+            return isHivePartition;
+        }
+
+        public void setHivePartition(boolean hivePartition) {
+            isHivePartition = hivePartition;
         }
     }
 }

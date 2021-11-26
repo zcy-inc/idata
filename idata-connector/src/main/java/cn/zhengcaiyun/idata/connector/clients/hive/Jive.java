@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -145,6 +146,7 @@ public class Jive extends BinaryJive {
     public boolean changeColumn(String dbName, String tableName, String sourceColumnName, String targetColumnName, String columnType, String columnComment) {
         boolean success;
         try (Statement statement = this.getClient().createStatement()) {
+            System.out.println(String.format("alter table `%s`.%s change %s %s %s comment '%s'", dbName, tableName, sourceColumnName, targetColumnName, columnType, columnComment));
             statement.execute(String.format("alter table `%s`.%s change %s %s %s comment '%s'", dbName, tableName, sourceColumnName, targetColumnName, columnType, columnComment));
             success = true;
         } catch (SQLException e) {

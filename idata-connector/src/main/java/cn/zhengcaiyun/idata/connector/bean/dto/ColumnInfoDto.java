@@ -43,6 +43,8 @@ public class ColumnInfoDto {
      */
     private WideDataTypeEnum dataType;
 
+    private Boolean isPartition;
+
     public String getColumnName() {
         return columnName;
     }
@@ -81,5 +83,13 @@ public class ColumnInfoDto {
 
     public void setDataType(WideDataTypeEnum dataType) {
         this.dataType = dataType;
+    }
+
+    public Boolean getPartition() {
+        return isPartition;
+    }
+
+    public void setPartition(Boolean partition) {
+        isPartition = partition;
     }
 }
