@@ -87,7 +87,6 @@ public class TableInfoController {
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
         TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
-//        columnInfoService.compareColumns(tableInfo);
         metadataFacade.markDiff(tableInfo);
         return RestResult.success(tableInfo);
     }

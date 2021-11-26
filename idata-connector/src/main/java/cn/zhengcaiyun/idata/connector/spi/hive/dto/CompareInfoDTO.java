@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.connector.spi.hive.dto;
 
+import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -209,6 +212,19 @@ public class CompareInfoDTO {
 
         public void setHivePartition(boolean hivePartition) {
             isHivePartition = hivePartition;
+        }
+
+        /**
+         * 是否仅分区字段不同
+         * @return
+         */
+        public boolean onlyPartitionDiff() {
+            if (isHivePartition == isPartition) {
+                return false;
+            }
+            return !StringUtils.equals(columnName, hiveColumnName)
+                    || !StringUtils.equals(columnType, hiveColumnType)
+                    || !JiveUtil.commentEquals(columnComment, hiveColumnComment);
         }
     }
 }

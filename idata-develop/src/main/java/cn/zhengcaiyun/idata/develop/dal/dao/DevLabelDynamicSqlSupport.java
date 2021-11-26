@@ -80,6 +80,13 @@ public final class DevLabelDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.label_param_value")
     public static final SqlColumn<String> labelParamValue = devLabel.labelParamValue;
 
+    /**
+     * Database Column Remarks:
+     *   是否隐藏不展示
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    public static final SqlColumn<Integer> hidden = devLabel.hidden;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label")
     public static final class DevLabel extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -101,6 +108,8 @@ public final class DevLabelDynamicSqlSupport {
         public final SqlColumn<String> columnName = column("column_name", JDBCType.VARCHAR);
 
         public final SqlColumn<String> labelParamValue = column("label_param_value", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> hidden = column("hidden", JDBCType.TINYINT);
 
         public DevLabel() {
             super("dev_label");

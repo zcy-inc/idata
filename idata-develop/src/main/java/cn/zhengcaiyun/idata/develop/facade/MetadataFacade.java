@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.develop.facade;
 
 import cn.hutool.core.util.StrUtil;
+import cn.zhengcaiyun.idata.commons.enums.WhetherEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
@@ -129,7 +130,10 @@ public class MetadataFacade {
             }
         }
         // 3.2 修改列
-        List<CompareInfoDTO.ChangeColumnInfo> differentList = compareInfoDTO.getDifferentList();
+        List<CompareInfoDTO.ChangeColumnInfo> differentList = compareInfoDTO.getDifferentList()
+                .stream()
+                .filter(e -> e.onlyPartitionDiff())
+                .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(differentList)) {
             for (CompareInfoDTO.ChangeColumnInfo columnInfo : differentList) {
                 String columnName = columnInfo.getColumnName();
@@ -176,6 +180,7 @@ public class MetadataFacade {
         devLabelName.setColumnName(columnName);
         devLabelName.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
         devLabelName.setLabelParamValue(columnName);
+        devLabelName.setHidden(WhetherEnum.YES.val);
         list.add(devLabelName);
 
         DevLabel devLabelType = new DevLabel();
@@ -188,6 +193,7 @@ public class MetadataFacade {
         devLabelType.setColumnName(columnName);
         devLabelType.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
         devLabelType.setLabelParamValue(typeMapping.getOrDefault(StringUtils.upperCase(columnType), columnType));
+        devLabelType.setHidden(WhetherEnum.YES.val);
         list.add(devLabelType);
 
         DevLabel devLabelComment = new DevLabel();
@@ -200,6 +206,7 @@ public class MetadataFacade {
         devLabelComment.setColumnName(columnName);
         devLabelComment.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
         devLabelComment.setLabelParamValue(StrUtil.nullToEmpty(columnComment));
+        devLabelComment.setHidden(WhetherEnum.YES.val);
         list.add(devLabelComment);
 
         DevLabel devLabelPartition = new DevLabel();
@@ -212,6 +219,7 @@ public class MetadataFacade {
         devLabelPartition.setColumnName(columnName);
         devLabelPartition.setLabelCode(SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
         devLabelPartition.setLabelParamValue(partition + "");
+        devLabelPartition.setHidden(WhetherEnum.YES.val);
         list.add(devLabelPartition);
         return list;
     }
@@ -225,14 +233,16 @@ public class MetadataFacade {
         List<String> columnList = columnInfoService.getColumnNames(tableId);
         List<DevLabel> labelList = labelService.findByTableId(tableId);
 
-        List<String> filterList = Lists.newArrayList(SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode,
+        List<String> filterList = Lists.newArrayList(
+                SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode,
                 SysLabelCodeEnum.COLUMN_TYPE_LABEL.labelCode,
                 SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode,
                 SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode,
                 SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode,
-                SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
+                SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode,
+                SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
 
-        //<column, code, value> 结构
+        //<column, code, value> 结构COLUMN_COMMENT_LABEL
         Table<String, String, String> columnCodeValueTable = HashBasedTable.create();
         labelList.stream()
                 .filter(e -> filterList.contains(e.getLabelCode()))
@@ -248,7 +258,7 @@ public class MetadataFacade {
             String columnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode);
             String hiveColumnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
             String columnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
-            String hiveColumnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
+            String hiveColumnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
 
             if (StringUtils.isEmpty(hiveColumnName)) {
                 // local比hive多的列

@@ -330,6 +330,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (tableLabelDtoList != null) {
             List<LabelDto> existTableLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                     .from(devLabel).where(devLabel.del, isNotEqualTo(1),
+                            and(devLabel.hidden, isEqualTo(0)),
                             and(devLabel.tableId, isEqualTo(tableInfo.getId())),
                             and(devLabel.columnName, isNull(), or(devLabel.columnName, isEqualTo(""))))
                             .build().render(RenderingStrategies.MYBATIS3)),

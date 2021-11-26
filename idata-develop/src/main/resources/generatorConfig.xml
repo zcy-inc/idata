@@ -39,9 +39,10 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
-        <table tableName="dev_table_info" domainObjectName="DevTableInfo" mapperName="DevTableInfoDao">
+        <table tableName="dev_label" domainObjectName="DevLabel" mapperName="DevLabelDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
+            <columnOverride column="hidden" javaType="java.lang.Integer"/>
         </table>
 
     </context>

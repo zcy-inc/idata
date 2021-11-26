@@ -79,6 +79,13 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.label_param_value")
     private String labelParamValue;
 
+    /**
+     * Database Column Remarks:
+     *   是否隐藏不展示
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    private Integer hidden;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.id")
     public Long getId() {
         return id;
@@ -177,5 +184,15 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.label_param_value")
     public void setLabelParamValue(String labelParamValue) {
         this.labelParamValue = labelParamValue;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    public Integer getHidden() {
+        return hidden;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    public void setHidden(Integer hidden) {
+        this.hidden = hidden;
     }
 }
