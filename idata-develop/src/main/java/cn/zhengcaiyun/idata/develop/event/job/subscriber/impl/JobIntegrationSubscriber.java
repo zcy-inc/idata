@@ -23,7 +23,9 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.event.core.Subscriber;
 import cn.zhengcaiyun.idata.develop.event.job.*;
+import cn.zhengcaiyun.idata.develop.event.job.bus.JobEventBus;
 import cn.zhengcaiyun.idata.develop.event.job.subscriber.IJobEventSubscriber;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import com.google.common.eventbus.Subscribe;
@@ -43,6 +45,7 @@ import java.util.Optional;
  * @create: 2021-11-03 17:57
  **/
 @Component
+@Subscriber(JobEventBus.EVENT_BUS_EXPRESSION)
 public class JobIntegrationSubscriber implements IJobEventSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobIntegrationSubscriber.class);
