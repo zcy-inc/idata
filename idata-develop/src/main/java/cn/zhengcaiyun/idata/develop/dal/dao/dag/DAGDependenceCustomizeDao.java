@@ -28,7 +28,6 @@ public interface DAGDependenceCustomizeDao {
     default int insertMultiple(Collection<DAGDependence> records) {
         return MyBatis3Utils.insertMultiple(this::insertMultiple, records, DAG_DEPENDENCE, c ->
                 c.map(creator).toProperty("creator")
-                        .map(createTime).toProperty("createTime")
                         .map(dagId).toProperty("dagId")
                         .map(prevDagId).toProperty("prevDagId")
         );

@@ -51,7 +51,7 @@ public class JobEventPublisher {
             return;
 
         JobCreatedEvent event = new JobCreatedEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         // 发布事件
         JobEventBus.getInstance().post(event);
@@ -65,7 +65,7 @@ public class JobEventPublisher {
             return;
 
         JobUpdatedEvent event = new JobUpdatedEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         // 发布事件
         JobEventBus.getInstance().post(event);
@@ -78,7 +78,7 @@ public class JobEventPublisher {
             return;
 
         JobScheduleUpdatedEvent event = new JobScheduleUpdatedEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
@@ -92,7 +92,7 @@ public class JobEventPublisher {
             return;
 
         JobDeletedEvent event = new JobDeletedEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         // 发布事件
         JobEventBus.getInstance().post(event);
@@ -105,7 +105,7 @@ public class JobEventPublisher {
             return;
 
         JobEnabledEvent event = new JobEnabledEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
@@ -119,7 +119,7 @@ public class JobEventPublisher {
             return;
 
         JobDisabledEvent event = new JobDisabledEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
@@ -133,7 +133,7 @@ public class JobEventPublisher {
             return;
 
         JobPublishedEvent event = new JobPublishedEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
@@ -147,7 +147,7 @@ public class JobEventPublisher {
             return;
 
         JobBindDagEvent event = new JobBindDagEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setFirstBind(isFirst);
         event.setEnvironment(eventLog.getEnvironment());
@@ -163,7 +163,7 @@ public class JobEventPublisher {
             return;
 
         JobUnBindDagEvent event = new JobUnBindDagEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         event.setUnbindDagId(unbindDagId);
@@ -178,7 +178,7 @@ public class JobEventPublisher {
             return;
 
         JobRunEvent event = new JobRunEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         // 发布事件
@@ -188,11 +188,11 @@ public class JobEventPublisher {
     }
 
     public void whenBuildPrevRelation(JobEventLog eventLog, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) {
-        if (!EventTypeEnum.JOB_RUN.name().equals(eventLog.getJobEvent()))
+        if (!EventTypeEnum.JOB_BUILD_PREV.name().equals(eventLog.getJobEvent()))
             return;
 
         JobBuildPrevRelationEvent event = new JobBuildPrevRelationEvent();
-        event.setJobId(event.getJobId());
+        event.setJobId(eventLog.getJobId());
         event.setEventId(eventLog.getId());
         event.setEnvironment(eventLog.getEnvironment());
         event.setAddingPrevRelations(addingPrevRelations);

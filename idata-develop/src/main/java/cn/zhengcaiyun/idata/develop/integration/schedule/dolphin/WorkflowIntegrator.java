@@ -65,7 +65,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     public void create(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
-        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/s%/process-definition/empty", projectCode);
+        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/%s/process-definition/empty", projectCode);
         String req_method = "POST";
         String token = getDSToken(dagInfo.getEnvironment());
         // 创建空工作流和定时器，状态为下线
@@ -75,9 +75,9 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         if (!resultDto.isSuccess()) {
             if (resultDto.isStatus(RESULT_PROCESS_DEFINITION_NAME_EXIST)) {
                 // 存在同名工作流，两种方案：1、手动删除DS同名工作流；2、将同名工作流和DAG关联，可能会将无关工作流关联，本期暂用第一种方案实现
-                throw new ExternalIntegrationException(String.format("DS存在同名工作流：s%", req_param.get("name")));
+                throw new ExternalIntegrationException(String.format("DS存在同名工作流：%s", req_param.get("name")));
             } else {
-                throw new ExternalIntegrationException(String.format("创建DS工作流失败：s%", resultDto.getMsg()));
+                throw new ExternalIntegrationException(String.format("创建DS工作流失败：%s", resultDto.getMsg()));
             }
         }
 
@@ -98,7 +98,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
         Long workflowCode = getWorkflowCode(dagInfo.getId(), dagInfo.getEnvironment());
-        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/s%/process-definition/s%/basic-info", projectCode, workflowCode);
+        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/%s/process-definition/%s/basic-info", projectCode, workflowCode);
         String req_method = "PUT";
         String token = getDSToken(dagInfo.getEnvironment());
 
@@ -106,7 +106,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("更新DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("更新DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -116,14 +116,14 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String projectCode = getDSProjectCode(environment);
         // 获取工作流code
         Long workflowCode = getWorkflowCode(dagId, environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-definition/s%/delete-workflow", projectCode, workflowCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-definition/%s/delete-workflow", projectCode, workflowCode);
         String req_method = "DELETE";
         String token = getDSToken(environment);
 
         HttpInput req_input = buildHttpReq(null, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("删除DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("删除DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -133,7 +133,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
         Long workflowCode = getWorkflowCode(dagInfo.getId(), dagInfo.getEnvironment());
-        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/s%/process-definition/s%/release-workflow", projectCode, workflowCode);
+        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/%s/process-definition/%s/release-workflow", projectCode, workflowCode);
         String req_method = "POST";
         String token = getDSToken(dagInfo.getEnvironment());
 
@@ -141,7 +141,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("上线DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("上线DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -151,7 +151,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
         Long workflowCode = getWorkflowCode(dagInfo.getId(), dagInfo.getEnvironment());
-        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/s%/process-definition/s%/release-workflow", projectCode, workflowCode);
+        String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/%s/process-definition/%s/release-workflow", projectCode, workflowCode);
         String req_method = "POST";
         String token = getDSToken(dagInfo.getEnvironment());
 
@@ -159,7 +159,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("下线DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("下线DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 

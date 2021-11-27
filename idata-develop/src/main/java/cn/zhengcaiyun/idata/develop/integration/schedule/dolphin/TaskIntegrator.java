@@ -65,7 +65,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     public void create(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition", projectCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -73,7 +73,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("创建DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("创建DS任务失败：%s", resultDto.getMsg()));
         }
 
         JSONObject result = resultDto.getData();
@@ -93,7 +93,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition/s%", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s", projectCode, taskCode);
         String req_method = "PUT";
         String token = getDSToken(environment);
 
@@ -101,7 +101,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("更新DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("更新DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -111,14 +111,14 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition/s%", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s", projectCode, taskCode);
         String req_method = "DELETE";
         String token = getDSToken(environment);
 
         HttpInput req_input = buildHttpReq(null, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("删除DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("删除DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -128,7 +128,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition/s%/release", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -136,7 +136,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("上线DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("上线DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -146,7 +146,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition/s%/release", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -154,7 +154,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("下线DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("下线DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -164,7 +164,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition/s%/release", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -172,7 +172,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("发布DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("发布DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -184,7 +184,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         Long workflowCode = getWorkflowCode(dagId, environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -192,7 +192,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("关联DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("关联DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -204,7 +204,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         Long workflowCode = getWorkflowCode(dagId, environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation/s%", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation/%s", projectCode, taskCode);
         String req_method = "DELETE";
         String token = getDSToken(environment);
 
@@ -212,7 +212,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("解除关联DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("解除关联DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -224,7 +224,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         Long workflowCode = getWorkflowCode(executeConfig.getSchDagId(), environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/executors/start-process-instance", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/executors/start-process-instance", projectCode);
         String req_method = "POST";
         String token = getDSToken(environment);
 
@@ -232,7 +232,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("运行DS任务失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("运行DS任务失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -261,7 +261,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode,
                                     JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
                                     List<DagJobPair> removingPrevRelations) throws ExternalIntegrationException {
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation/s%/upstream", projectCode, taskCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation/%s/upstream", projectCode, taskCode);
         String req_method = "DELETE";
 
         List<Long> prevTaskCodes = Lists.newArrayList();
@@ -289,7 +289,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("删除DS任务依赖关系失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("删除DS任务依赖关系失败：%s", resultDto.getMsg()));
         }
 
         if (!CollectionUtils.isEmpty(deleteDepNodes)) {
@@ -310,14 +310,14 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private void unBindAndDeleteDepNode(String token, String projectCode, Long workflowCode, Long depNodeCode, String environment) throws ExternalIntegrationException {
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation/s%", projectCode, depNodeCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation/%s", projectCode, depNodeCode);
         String req_method = "DELETE";
 
         Map<String, String> req_param = buildUnBindDagParam(workflowCode);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("解除依赖节点关联DS工作流失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("解除依赖节点关联DS工作流失败：%s", resultDto.getMsg()));
         }
     }
 
@@ -344,7 +344,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     private void addPrevRelationInSameDAG(String token, String projectCode, Long workflowCode, Long taskCode,
                                           JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
                                           DagJobPair dagJobPair) throws ExternalIntegrationException {
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
         List<Long> prevJobIds = dagJobPair.getJobIds();
@@ -354,7 +354,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
             ResultDto<JSONObject> resultDto = sendReq(req_input);
             if (!resultDto.isSuccess()) {
-                throw new ExternalIntegrationException(String.format("创建DS任务依赖关系失败：s%", resultDto.getMsg()));
+                throw new ExternalIntegrationException(String.format("创建DS任务依赖关系失败：%s", resultDto.getMsg()));
             }
         }
     }
@@ -362,7 +362,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     private void addPrevRelationInDifferentDAG(String token, String projectCode, Long workflowCode, Long taskCode,
                                                JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
                                                DagJobPair dagJobPair) throws ExternalIntegrationException {
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/process-task-relation", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
         Long prevDagId = dagJobPair.getDagId();
@@ -393,14 +393,14 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
             ResultDto<JSONObject> resultDto = sendReq(req_input);
             if (!resultDto.isSuccess()) {
-                throw new ExternalIntegrationException(String.format("创建DS任务跨工作流依赖关系失败：s%", resultDto.getMsg()));
+                throw new ExternalIntegrationException(String.format("创建DS任务跨工作流依赖关系失败：%s", resultDto.getMsg()));
             }
         }
     }
 
     private Long createDependenceNode(String token, String projectCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
                                       Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId) throws ExternalIntegrationException {
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/s%/task-definition", projectCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition", projectCode);
         String req_method = "POST";
 
         Map<String, String> req_param = buildDependenceNodeParam(projectCode, prevWorkflowCode,
@@ -408,7 +408,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
-            throw new ExternalIntegrationException(String.format("创建DS依赖节点失败：s%", resultDto.getMsg()));
+            throw new ExternalIntegrationException(String.format("创建DS依赖节点失败：%s", resultDto.getMsg()));
         }
 
         JSONObject result = resultDto.getData();

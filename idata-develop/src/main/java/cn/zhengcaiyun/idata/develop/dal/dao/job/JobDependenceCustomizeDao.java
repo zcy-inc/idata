@@ -50,7 +50,6 @@ public interface JobDependenceCustomizeDao {
         return MyBatis3Utils.insertMultiple(this::insertMultiple, records, JOB_DEPENDENCE, c ->
                 c.map(del).toProperty("del")
                         .map(creator).toProperty("creator")
-                        .map(createTime).toProperty("createTime")
                         .map(jobId).toProperty("jobId")
                         .map(environment).toProperty("environment")
                         .map(prevJobId).toProperty("prevJobId")

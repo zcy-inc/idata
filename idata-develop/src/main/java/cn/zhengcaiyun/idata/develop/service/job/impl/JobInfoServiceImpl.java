@@ -165,20 +165,16 @@ public class JobInfoServiceImpl implements JobInfoService {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
             content.setId(jobContentOptional.get().getId());
-        }
-        else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
             checkArgument(sqlJobRepo.query(jobId, version) != null, "作业版本不存在");
             content.setId(sqlJobRepo.query(jobId, version).getId());
-        }
-        else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
             checkArgument(sparkJobRepo.query(jobId, version) != null, "作业版本不存在");
             content.setId(sparkJobRepo.query(jobId, version).getId());
-        }
-        else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
             checkArgument(scriptJobRepo.query(jobId, version) != null, "作业版本不存在");
             content.setId(scriptJobRepo.query(jobId, version).getId());
-        }
-        else {
+        } else {
             checkArgument(kylinJobRepo.query(jobId, version) != null, "作业版本不存在");
             content.setId(kylinJobRepo.query(jobId, version).getId());
         }
@@ -196,20 +192,16 @@ public class JobInfoServiceImpl implements JobInfoService {
         if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        }
-        else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        }
-        else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sparkJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        }
-        else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        }
-        else {
+        } else {
             contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         }
@@ -226,12 +218,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         List<JobDependence> postJobs = jobDependenceRepo.queryPostJob(id);
         checkArgument(ObjectUtils.isEmpty(postJobs), "先删除所有环境下的作业依赖关系，再删除作业");
 
+        // 发布job删除事件
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.DELETED, operator);
+        jobEventPublisher.whenDeleted(eventLog);
+
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
-        if (BooleanUtils.isTrue(ret)) {
-            // 发布job删除事件
-            JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.DELETED, operator);
-            jobEventPublisher.whenDeleted(eventLog);
-        }
         JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
         return ret;
     }
@@ -241,15 +232,15 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
-        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能恢复运行", environment);
+        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能恢复运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
-        checkState(Objects.equals(RunningStateEnum.pause.val, executeConfig.getRunningState()), "作业在s%环境已运行，勿重复操作", environment);
+        checkState(Objects.equals(RunningStateEnum.pause.val, executeConfig.getRunningState()), "作业在%s环境已运行，勿重复操作", environment);
         //作业未发布，不能恢复运行
         checkState(isJobPublished(id, environment), "作业未发布，不能恢复");
 
         jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.resume, operator.getNickname());
         // 发布job恢复事件
-        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RESUME, operator);
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RESUME, environment, operator);
         jobEventPublisher.whenResumed(eventLog);
         return Boolean.TRUE;
     }
@@ -259,13 +250,13 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
-        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能恢复运行", environment);
+        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能恢复运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
-        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，勿重复操作", environment);
+        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在%s环境已暂停，勿重复操作", environment);
 
         jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.pause, operator.getNickname());
         // 发布job暂停事件
-        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_PAUSE, operator);
+        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_PAUSE, environment, operator);
         jobEventPublisher.whenPaused(eventLog);
         return Boolean.TRUE;
     }
@@ -275,12 +266,12 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
-        checkArgument(configOptional.isPresent(), "s%环境未配置调度配置，不能运行", environment);
+        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
-        checkState(Objects.nonNull(executeConfig.getSchDagId()), "作业在s%环境未关联DAG，请先关联DAG", environment);
+        checkState(Objects.nonNull(executeConfig.getSchDagId()), "作业在%s环境未关联DAG，请先关联DAG", environment);
         //作业未发布，不能恢复运行
         checkState(isJobPublished(id, environment), "作业未发布，不能运行");
-        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在s%环境已暂停，请先恢复", environment);
+        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在%s环境已暂停，请先恢复", environment);
         // dag 必须上线
         checkState(isDAGOnline(executeConfig.getSchDagId()), "作业关联DAG未上线，请先上线DAG");
 

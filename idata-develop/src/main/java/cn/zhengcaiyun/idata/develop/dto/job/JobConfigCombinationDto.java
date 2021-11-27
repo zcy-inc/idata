@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobConfigCombination;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
@@ -24,6 +25,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobOutput;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,11 @@ public class JobConfigCombinationDto {
      * 作业输出配置
      */
     private JobOutputDto output;
+
+    /**
+     * 是否可编辑
+     */
+    private Boolean editable;
 
     public JobExecuteConfigDto getExecuteConfig() {
         return executeConfig;
@@ -71,6 +78,14 @@ public class JobConfigCombinationDto {
         this.output = output;
     }
 
+    public Boolean getEditable() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable = editable;
+    }
+
     public static JobConfigCombinationDto from(JobConfigCombination model) {
         JobExecuteConfig executeConfigModel = model.getExecuteConfig();
         List<JobDependence> dependenceList = model.getDependenceList();
@@ -86,6 +101,7 @@ public class JobConfigCombinationDto {
         if (outputOptional.isPresent()) {
             dto.setOutput(JobOutputDto.from(outputOptional.get()));
         }
+        dto.setEditable(Objects.equals(RunningStateEnum.pause.val, executeConfigModel.getRunningState()));
         return dto;
     }
 }

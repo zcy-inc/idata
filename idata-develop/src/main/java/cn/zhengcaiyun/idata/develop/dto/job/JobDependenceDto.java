@@ -50,7 +50,7 @@ public class JobDependenceDto extends BaseDto {
     /**
      * 上游作业所属dag id
      */
-    private String prevJobDagId;
+    private Long prevJobDagId;
 
     public Long getId() {
         return id;
@@ -84,11 +84,11 @@ public class JobDependenceDto extends BaseDto {
         this.prevJobId = prevJobId;
     }
 
-    public String getPrevJobDagId() {
+    public Long getPrevJobDagId() {
         return prevJobDagId;
     }
 
-    public void setPrevJobDagId(String prevJobDagId) {
+    public void setPrevJobDagId(Long prevJobDagId) {
         this.prevJobDagId = prevJobDagId;
     }
 

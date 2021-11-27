@@ -76,7 +76,7 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
 
     @Override
     public Boolean deleteDependence(Long jobId, String environment) {
-        return jobDependenceDao.delete(dsl -> dsl.where(JOB_DEPENDENCE.prevJobId, isEqualTo(jobId),
+        return jobDependenceDao.delete(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isEqualTo(jobId),
                 and(JOB_DEPENDENCE.environment, isEqualTo(environment)))) > 0;
     }
 }

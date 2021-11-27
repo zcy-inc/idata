@@ -108,7 +108,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
         checkArgument(Objects.nonNull(id), "记录编号为空");
         Optional<JobPublishRecord> optional = jobPublishRecordRepo.query(id);
-        checkArgument(optional.isPresent(), "编号s%记录不存在或已删除", id);
+        checkArgument(optional.isPresent(), "编号%s记录不存在或已删除", id);
         JobPublishRecord record = optional.get();
         checkState(record.getPublishStatus().equals(PublishStatusEnum.SUBMITTED.val), "作业" + record.getJobId() + "为非待发布状态");
 

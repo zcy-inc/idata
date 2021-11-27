@@ -18,12 +18,14 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -52,6 +54,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @description:
@@ -108,6 +111,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             addConfig(jobId, environment, executeConfigDto, dependenceDtoList, outputDto, operator);
         } else {
             JobConfigCombination configCombination = configCombinationOptional.get();
+            checkState(Objects.equals(RunningStateEnum.pause.val, configCombination.getExecuteConfig().getRunningState()), "作业在%s环境未暂停，不能修改配置", environment);
             updateConfig(jobId, environment, configCombination,
                     executeConfigDto, dependenceDtoList, outputDto, operator);
         }
@@ -369,6 +373,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
                     dependence.setId(null);
                     dependence.setJobId(jobId);
                     dependence.setEnvironment(environment);
+                    dependence.setDel(DeleteEnum.DEL_NO.val);
                     return dependence;
                 }).collect(Collectors.toList());
         return jobDependenceList;
@@ -441,5 +446,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 2));
         config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 2));
         config.setSchPriority(MoreObjects.firstNonNull(config.getSchPriority(), JobPriorityEnum.middle.val));
+        config.setSchFailStrategy("");
     }
 }
