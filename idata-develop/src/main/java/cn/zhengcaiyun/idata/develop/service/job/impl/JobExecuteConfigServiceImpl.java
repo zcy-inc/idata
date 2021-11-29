@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
@@ -383,6 +384,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
                                         JobOutputDto dto,
                                         Operator operator) {
         dto.setOperator(operator);
+        if (JobWriteModeEnum.UPSERT.name().equals(dto.getDestWriteMode())) {
+            checkArgument(StringUtils.isNotEmpty(dto.getJobTargetTablePk()), "写入模式为UPSERT时目标表主键不能为空");
+        }
         JobOutput output = dto.toModel();
         output.setId(null);
         output.setJobId(jobId);
