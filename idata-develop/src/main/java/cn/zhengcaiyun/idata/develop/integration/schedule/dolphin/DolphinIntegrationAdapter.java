@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
 import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
@@ -65,23 +66,27 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSToken(String environment) {
-        return "33333";
+        return "eee73991b02bbe05e29499ad6871206d";
     }
 
     protected String getDSProjectCode(String environment) {
-        return "123";
+        if (EnvEnum.prod.name().equals(environment)) {
+            return "3678830244416";
+        } else {
+            return "3678829258432";
+        }
     }
 
     protected String getDSBaseUrl(String environment) {
-        return "123";
+        return "http://172.29.108.238:8688/dolphinscheduler";
     }
 
     protected String getDSTenantCode(String environment) {
-        return "default";
+        return "root";
     }
 
     protected String getDSWorkGroup(String environment) {
-        return "default";
+        return "stage";
     }
 
     protected Integer getDagTimeout(String environment) {
@@ -102,6 +107,7 @@ public abstract class DolphinIntegrationAdapter {
         input.setQueryParamMap(req_param);
         Map<String, String> headMap = Maps.newHashMap();
         headMap.put("token", token);
+        input.setHeaderMap(headMap);
         return input;
     }
 

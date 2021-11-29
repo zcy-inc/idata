@@ -52,7 +52,7 @@ public class DagEventPublisher {
             return;
 
         DagCreatedEvent event = new DagCreatedEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -65,7 +65,7 @@ public class DagEventPublisher {
             return;
 
         DagUpdatedEvent event = new DagUpdatedEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -79,7 +79,7 @@ public class DagEventPublisher {
             return;
 
         DagDeletedEvent event = new DagDeletedEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         JsonObject dagJson = new Gson().fromJson(eventLog.getEventInfo(), JsonObject.class);
         event.setEnvironment(dagJson.get("environment").toString());
@@ -95,7 +95,7 @@ public class DagEventPublisher {
             return;
 
         DagOfflineEvent event = new DagOfflineEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -109,7 +109,7 @@ public class DagEventPublisher {
             return;
 
         DagOnlineEvent event = new DagOnlineEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -122,7 +122,7 @@ public class DagEventPublisher {
         if (!EventTypeEnum.DAG_RUN.name().equals(eventLog.getDagEvent()))
             return;
         DagRunEvent event = new DagRunEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -136,7 +136,7 @@ public class DagEventPublisher {
             return;
 
         DagScheduleUpdatedEvent event = new DagScheduleUpdatedEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         // 发布事件
         DagEventBus.getInstance().post(event);
@@ -151,7 +151,7 @@ public class DagEventPublisher {
             return;
 
         DagAddDependenceEvent event = new DagAddDependenceEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         event.setDependDagIds(dependenceIds);
         // 发布事件
@@ -166,7 +166,7 @@ public class DagEventPublisher {
             return;
 
         DagRemoveDependenceEvent event = new DagRemoveDependenceEvent();
-        event.setDagId(event.getDagId());
+        event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         event.setDependDagIds(dependenceIds);
         // 发布事件

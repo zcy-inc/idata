@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @create: 2021-11-03 17:56
  **/
 @Component
-//@Subscriber(DagEventBus.EVENT_BUS_EXPRESSION)
+@Subscriber(DagEventBus.EVENT_BUS_EXPRESSION)
 public class DagIntegrationSubscriber implements IDagEventSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DagIntegrationSubscriber.class);
@@ -89,7 +89,7 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
 
     @Override
     @Subscribe
-    public void onUpdated(DagCreatedEvent event) {
+    public void onUpdated(DagUpdatedEvent event) {
         try {
             Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
             Optional<DAGSchedule> scheduleOptional = dagRepo.queryDAGSchedule(event.getDagId());
