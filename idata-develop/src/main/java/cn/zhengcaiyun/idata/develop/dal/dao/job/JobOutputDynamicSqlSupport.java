@@ -75,10 +75,17 @@ public final class JobOutputDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   数据去向-写入模式，init: 新建表，override: 覆盖表
+     *   数据去向-写入模式，overwrite，upsert
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.dest_write_mode")
     public static final SqlColumn<String> destWriteMode = JOB_OUTPUT.destWriteMode;
+
+    /**
+     * Database Column Remarks:
+     *   数据来源表主键(写入模式为upsert时必填)
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.job_target_table_pk")
+    public static final SqlColumn<String> jobTargetTablePk = JOB_OUTPUT.jobTargetTablePk;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_output")
     public static final class JobOutput extends SqlTable {
@@ -101,6 +108,8 @@ public final class JobOutputDynamicSqlSupport {
         public final SqlColumn<String> destTable = column("dest_table", JDBCType.VARCHAR);
 
         public final SqlColumn<String> destWriteMode = column("dest_write_mode", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> jobTargetTablePk = column("job_target_table_pk", JDBCType.VARCHAR);
 
         public JobOutput() {
             super("dev_job_output");

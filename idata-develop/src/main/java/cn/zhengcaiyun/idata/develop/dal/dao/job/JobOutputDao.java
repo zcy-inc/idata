@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobOutputDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_output")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, jobId, environment, destDataSourceType, destDataSourceId, destTable, destWriteMode);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, jobId, environment, destDataSourceType, destDataSourceId, destTable, destWriteMode, jobTargetTablePk);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_output")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -66,7 +66,8 @@ public interface JobOutputDao {
         @Result(column="dest_data_source_type", property="destDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_id", property="destDataSourceId", jdbcType=JdbcType.BIGINT),
         @Result(column="dest_table", property="destTable", jdbcType=JdbcType.VARCHAR),
-        @Result(column="dest_write_mode", property="destWriteMode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="dest_write_mode", property="destWriteMode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="job_target_table_pk", property="jobTargetTablePk", jdbcType=JdbcType.VARCHAR)
     })
     List<JobOutput> selectMany(SelectStatementProvider selectStatement);
 
@@ -103,6 +104,7 @@ public interface JobOutputDao {
             .map(destDataSourceId).toProperty("destDataSourceId")
             .map(destTable).toProperty("destTable")
             .map(destWriteMode).toProperty("destWriteMode")
+            .map(jobTargetTablePk).toProperty("jobTargetTablePk")
         );
     }
 
@@ -118,6 +120,7 @@ public interface JobOutputDao {
             .map(destDataSourceId).toPropertyWhenPresent("destDataSourceId", record::getDestDataSourceId)
             .map(destTable).toPropertyWhenPresent("destTable", record::getDestTable)
             .map(destWriteMode).toPropertyWhenPresent("destWriteMode", record::getDestWriteMode)
+            .map(jobTargetTablePk).toPropertyWhenPresent("jobTargetTablePk", record::getJobTargetTablePk)
         );
     }
 
@@ -158,7 +161,8 @@ public interface JobOutputDao {
                 .set(destDataSourceType).equalTo(record::getDestDataSourceType)
                 .set(destDataSourceId).equalTo(record::getDestDataSourceId)
                 .set(destTable).equalTo(record::getDestTable)
-                .set(destWriteMode).equalTo(record::getDestWriteMode);
+                .set(destWriteMode).equalTo(record::getDestWriteMode)
+                .set(jobTargetTablePk).equalTo(record::getJobTargetTablePk);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_output")
@@ -171,7 +175,8 @@ public interface JobOutputDao {
                 .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
                 .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
                 .set(destTable).equalToWhenPresent(record::getDestTable)
-                .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode);
+                .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
+                .set(jobTargetTablePk).equalToWhenPresent(record::getJobTargetTablePk);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_output")
@@ -186,6 +191,7 @@ public interface JobOutputDao {
             .set(destDataSourceId).equalTo(record::getDestDataSourceId)
             .set(destTable).equalTo(record::getDestTable)
             .set(destWriteMode).equalTo(record::getDestWriteMode)
+            .set(jobTargetTablePk).equalTo(record::getJobTargetTablePk)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -202,6 +208,7 @@ public interface JobOutputDao {
             .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
             .set(destTable).equalToWhenPresent(record::getDestTable)
             .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
+            .set(jobTargetTablePk).equalToWhenPresent(record::getJobTargetTablePk)
             .where(id, isEqualTo(record::getId))
         );
     }
