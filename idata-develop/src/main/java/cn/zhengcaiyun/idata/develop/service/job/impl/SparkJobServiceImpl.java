@@ -68,9 +68,8 @@ public class SparkJobServiceImpl implements SparkJobService {
             checkArgument(existJobContentSpark != null, "作业不存在或已删除");
             SparkJobContentDto existSparkJob = find(sparkJobDto.getJobId(), version);
 
-            // TODO 测试一致性
             // 不可修改且跟当前版本不一致才新生成版本
-            if (existSparkJob.getEditable().equals(EditableEnum.NO.val) || !sparkJobDto.equals(existSparkJob)) {
+            if (existSparkJob.getEditable().equals(EditableEnum.NO.val) && !sparkJobDto.equals(existSparkJob)) {
                 startNewVersion = true;
                 if (JobTypeEnum.SPARK_PYTHON.equals(sparkJobDto.getJobType())
                         && !sparkJobDto.getPythonResource().equals(existSparkJob.getPythonResource())) {
@@ -87,6 +86,9 @@ public class SparkJobServiceImpl implements SparkJobService {
                     sparkJobRepo.update(jobContentSpark);
                 }
             }
+        }
+        else {
+            startNewVersion = true;
         }
 
         if (startNewVersion) {

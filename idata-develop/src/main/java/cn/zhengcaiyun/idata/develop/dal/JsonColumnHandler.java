@@ -64,7 +64,7 @@ public class JsonColumnHandler implements TypeHandler {
         LabelAttributes("label_attributes", new TypeReference<List<AttributeDto>>(){}),
         SpecialAttribute("special_attribute", new TypeReference<SpecialAttributeDto>(){}),
         AppArguments("app_arguments", new TypeReference<List<JobArgumentDto>>(){}),
-        ScriptArguments("script_arguments", new TypeReference<JobArgumentDto>(){});
+        ScriptArguments("script_arguments", new TypeReference<List<JobArgumentDto>>(){});
         private String columnName;
         private TypeReference<?> type;
 

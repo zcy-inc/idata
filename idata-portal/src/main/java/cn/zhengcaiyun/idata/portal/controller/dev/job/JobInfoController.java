@@ -178,6 +178,14 @@ public class JobInfoController {
         return RestResult.success(jobInfoService.runJob(id, environment, OperatorContext.getCurrentOperator()));
     }
 
+    /**
+     * 测试作业
+     *
+     * @param jobId 作业id
+     * @param version 作业版本
+     * @return
+     */
+
     @PostMapping("/{jobId}/dryRun/{version}")
     public RestResult<JobDryRunDto> dryRun(@PathVariable Long jobId,
                                            @PathVariable Integer version) {

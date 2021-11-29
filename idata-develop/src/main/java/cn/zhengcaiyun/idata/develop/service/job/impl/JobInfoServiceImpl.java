@@ -32,6 +32,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
@@ -209,6 +210,11 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    public JobDetailsDto getJobDetails(Long jobId, Integer version, Boolean isDryRun) {
+        return null;
+    }
+
+    @Override
     public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
@@ -281,8 +287,10 @@ public class JobInfoServiceImpl implements JobInfoService {
         return Boolean.TRUE;
     }
 
+    // TODO 进勇脚本支持
     @Override
     public JobDryRunDto dryRunJob(Long jobId, Integer version) {
+
         return null;
     }
 
@@ -295,9 +303,10 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     private void checkJobInfo(JobInfoDto dto) {
         checkArgument(StringUtils.isNotBlank(dto.getName()), "作业名为空");
-        checkArgument(Objects.nonNull(dto.getJobType()), "作业类型为空");
         checkArgument(StringUtils.isNotBlank(dto.getDwLayerCode()), "作业分层为空");
         checkArgument(Objects.nonNull(dto.getFolderId()), "作业所属文件夹为空");
+        checkArgument(Objects.nonNull(dto.getJobType()), "作业类型为空");
+        checkArgument(JobTypeEnum.getEnum(dto.getJobType().toString()).isPresent(), "作业类型有误");
     }
 
     private boolean isJobPublished(Long jobId, String environment) {

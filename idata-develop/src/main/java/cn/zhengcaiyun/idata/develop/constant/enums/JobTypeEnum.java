@@ -78,7 +78,7 @@ public enum JobTypeEnum {
 
     public FunctionModuleEnum belong() {
         if (this.catalog.equals("DI")) return FunctionModuleEnum.DI;
-        return null;
+        return FunctionModuleEnum.DEV_JOB;
     }
 
     private static final Map<String, JobTypeEnum> codeMap = Maps.newHashMap();

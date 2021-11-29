@@ -74,6 +74,9 @@ public class ScriptJobServiceImpl implements ScriptJobService {
                 }
             }
         }
+        else {
+            startNewVersion = true;
+        }
 
         if (startNewVersion) {
             DevJobContentScript jobContentScript = PojoUtil.copyOne(scriptJobDto, DevJobContentScript.class,

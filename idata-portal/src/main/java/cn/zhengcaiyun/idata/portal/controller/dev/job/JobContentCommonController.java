@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
+package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -66,12 +66,11 @@ public class JobContentCommonController {
      * @return
      */
     @PostMapping("/versions/{version}/submit/{env}")
-    public RestResult<DIJobContentContentDto> submitJob(@PathVariable("jobId") Long jobId,
+    public RestResult<SubmitJobDto> submitJob(@PathVariable("jobId") Long jobId,
                                                         @PathVariable("version") Integer version,
                                                         @PathVariable("env") String env,
                                                         @RequestBody SubmitJobDto submitJobDto) {
-        return RestResult.success();
-//        return RestResult.success(jobContentCommonService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
+        return RestResult.success(jobContentCommonService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
 }
