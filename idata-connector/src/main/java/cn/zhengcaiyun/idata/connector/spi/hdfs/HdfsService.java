@@ -1,7 +1,9 @@
 package cn.zhengcaiyun.idata.connector.spi.hdfs;
 
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
@@ -33,6 +35,7 @@ public class HdfsService implements InitializingBean, DisposableBean {
     private FileSystem fs;
     private String HDFS_CSV_PATH;
     private String HDFS_RESOURCE_PATH;
+    private String HDFS_UDF_PATH;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -56,6 +59,10 @@ public class HdfsService implements InitializingBean, DisposableBean {
             if (!fs.exists(new Path(HDFS_RESOURCE_PATH))) {
                 fs.mkdirs(new Path(HDFS_RESOURCE_PATH));
             }
+            HDFS_UDF_PATH = HDFS_BASE_PATH + "udf/";
+            if (!fs.exists(new Path(HDFS_UDF_PATH))) {
+                fs.mkdirs(new Path(HDFS_UDF_PATH));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,6 +74,10 @@ public class HdfsService implements InitializingBean, DisposableBean {
             fs.close();
             fs = null;
         }
+    }
+
+    public String getHdfsPrefix() {
+        return "hdfs://" + HDFS_NAMESERVICES;
     }
 
     public void readFile(String pathString, OutputStream out) throws IOException {
@@ -86,6 +97,10 @@ public class HdfsService implements InitializingBean, DisposableBean {
 
     public String uploadFileToResource(InputStream inputStream, String originalName) {
         return uploadFile(inputStream, HDFS_RESOURCE_PATH, originalName);
+    }
+
+    public String uploadFileToUDF(InputStream inputStream, String originalName) {
+        return uploadFile(inputStream, HDFS_UDF_PATH, originalName);
     }
 
     public String uploadTempFileToResource(String pathString, String source) throws IOException {
@@ -116,5 +131,24 @@ public class HdfsService implements InitializingBean, DisposableBean {
         } catch (IOException e) {
             throw new BizProcessException("", e);
         }
+    }
+
+    /**
+     * 校验hdfs的udf路径是否正确（用于鉴权，防止下载其他路径敏感信息，此处留作权限扩展）
+     * @param path
+     * @return
+     */
+    public boolean checkUdfPath(String path) {
+        return StringUtils.contains(path, HDFS_UDF_PATH);
+    }
+
+    /**
+     * 下载资源
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    public FSDataInputStream open(String path) throws IOException {
+        return fs.open(new Path(path));
     }
 }
