@@ -32,8 +32,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +81,13 @@ public class JobInfoController {
                     .collect(Collectors.toList());
         }
         return RestResult.success(dtoList);
+    }
+
+    @GetMapping("/catalogs")
+    public RestResult<Set<String>> getJobCatalogs() {
+        return RestResult.success(Arrays.stream(JobTypeEnum.values())
+                .filter(jobType -> !"DI".equals(jobType.getCatalog())).collect(Collectors.toList())
+                .stream().map(JobTypeEnum::getCatalog).collect(Collectors.toSet()));
     }
 
     /**
