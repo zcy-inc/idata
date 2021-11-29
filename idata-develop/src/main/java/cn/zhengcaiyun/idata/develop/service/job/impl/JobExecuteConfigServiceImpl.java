@@ -125,7 +125,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(StringUtils.isNotBlank(environment), "环境参数为空");
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
-        checkArgument(configCombinationOptional.isPresent(), "配置不存在");
+        if (configCombinationOptional.isEmpty()) return null;
 
         return JobConfigCombinationDto.from(configCombinationOptional.get());
     }
