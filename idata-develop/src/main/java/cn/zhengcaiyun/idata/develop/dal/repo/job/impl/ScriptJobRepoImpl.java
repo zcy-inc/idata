@@ -42,11 +42,12 @@ public class ScriptJobRepoImpl implements ScriptJobRepo {
 
     @Override
     public DevJobContentScript query(Long jobId, Integer version) {
-        return devJobContentScriptDao.selectOne(c ->
+        DevJobContentScript echo = devJobContentScriptDao.selectOne(c ->
                 c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
                         and(devJobContentScript.jobId, isEqualTo(jobId)),
                         and(devJobContentScript.version, isEqualTo(version))))
                 .orElse(null);
+        return echo;
     }
 
     @Override

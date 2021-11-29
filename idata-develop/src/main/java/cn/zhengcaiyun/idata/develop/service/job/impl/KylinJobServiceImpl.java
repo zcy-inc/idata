@@ -75,6 +75,9 @@ public class KylinJobServiceImpl implements KylinJobService {
                 }
             }
         }
+        else {
+            startNewVersion = true;
+        }
 
         if (startNewVersion) {
             DevJobContentKylin jobContentKylin = PojoUtil.copyOne(kylinJobDto, DevJobContentKylin.class,

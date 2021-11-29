@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job.kylin;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 
 import java.util.Date;
 import java.util.Objects;
@@ -26,40 +27,13 @@ import java.util.Objects;
  * @date 2021-11-18 下午8:05
  */
 
-public class KylinJobDto extends BaseDto {
-    private Long jobId;
-    private Integer editable;
-    private Integer version;
+public class KylinJobDto extends JobContentBaseDto {
     private String cubeName;
     private String buildType;
     private Date startTime;
     private Date endTime;
 
     // GaS
-    public Long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
-    }
-
-    public Integer getEditable() {
-        return editable;
-    }
-
-    public void setEditable(Integer editable) {
-        this.editable = editable;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     public String getCubeName() {
         return cubeName;
     }
