@@ -27,7 +27,7 @@ create table if not exists idata.dev_job_content_spark (
   job_id                bigint unsigned     not null comment '作业ID',
   editable              tinyint(4)          not null comment '是否可编辑，0否，1是',
   version               int(11) unsigned    not null comment '作业版本号',
-  resource_hdfs_path    varchar(50)         not null comment '执行文件HDFS地址',
+  resource_hdfs_path    varchar(200)        not null comment '执行文件HDFS地址',
   app_arguments         varchar(200)        not null default '{}' comment '执行参数',
   main_class            varchar(100)        comment '执行类(JAR类型)',
   unique key idx_job_id_version(job_id, version)

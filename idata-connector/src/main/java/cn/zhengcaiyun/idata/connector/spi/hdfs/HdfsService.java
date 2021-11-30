@@ -33,6 +33,8 @@ public class HdfsService implements InitializingBean, DisposableBean {
     private FileSystem fs;
     private String HDFS_CSV_PATH;
     private String HDFS_RESOURCE_PATH;
+    private String HDFS_PYTHON_PATH;
+    private String HDFS_TMP_PYTHON_PATH;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -55,6 +57,14 @@ public class HdfsService implements InitializingBean, DisposableBean {
             HDFS_RESOURCE_PATH = HDFS_BASE_PATH + "resource/";
             if (!fs.exists(new Path(HDFS_RESOURCE_PATH))) {
                 fs.mkdirs(new Path(HDFS_RESOURCE_PATH));
+            }
+            HDFS_TMP_PYTHON_PATH = HDFS_BASE_PATH + "python/tmp/";
+            if (!fs.exists(new Path(HDFS_TMP_PYTHON_PATH))) {
+                fs.mkdirs(new Path(HDFS_TMP_PYTHON_PATH));
+            }
+            HDFS_PYTHON_PATH = HDFS_BASE_PATH + "python/";
+            if (!fs.exists(new Path(HDFS_PYTHON_PATH))) {
+                fs.mkdirs(new Path(HDFS_PYTHON_PATH));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,8 +98,8 @@ public class HdfsService implements InitializingBean, DisposableBean {
         return uploadFile(inputStream, HDFS_RESOURCE_PATH, originalName);
     }
 
-    public String uploadTempFileToResource(String pathString, String source) throws IOException {
-        String tempPathString = pathString.split("\\.")[0] + "_temp." + pathString.split("\\.")[1];
+    public String uploadTempPythonFile(String fileName, String source) throws IOException {
+        String tempPathString = HDFS_TMP_PYTHON_PATH + fileName + "_temp." + ".py";
         Path hdfsTempFilePath = new Path(tempPathString);
         if (fs.exists(hdfsTempFilePath)) {
             fs.delete(hdfsTempFilePath, true);

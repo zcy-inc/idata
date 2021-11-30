@@ -28,7 +28,7 @@ import java.util.List;
  **/
 public class LivyQueryDto {
     private Integer sessionId;
-    private String sourceQuery;
+    private String querySql;
     private List<Long> udfIds;
     private String externalTables;
     private LivySessionKindEnum sessionKind;
@@ -41,12 +41,12 @@ public class LivyQueryDto {
         this.sessionId = sessionId;
     }
 
-    public String getSourceQuery() {
-        return sourceQuery;
+    public String getQuerySql() {
+        return querySql;
     }
 
-    public void setSourceQuery(String sourceQuery) {
-        this.sourceQuery = sourceQuery;
+    public void setQuerySql(String querySql) {
+        this.querySql = querySql;
     }
 
     public List<Long> getUdfIds() {

@@ -26,6 +26,9 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SparkJobRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -88,14 +92,20 @@ public class SparkJobServiceImpl implements SparkJobService {
             }
         }
         else {
+            if (JobTypeEnum.SPARK_PYTHON.equals(sparkJobDto.getJobType())) {
+                sparkJobDto.setResourceHdfsPath(hdfsService.uploadFileToResource(
+                        new ByteArrayInputStream(sparkJobDto.getPythonResource().getBytes()), jobInfoOptional.get().getName() + ".py"));
+            }
             startNewVersion = true;
         }
 
         if (startNewVersion) {
             DevJobContentSpark jobContentSpark = PojoUtil.copyOne(sparkJobDto, DevJobContentSpark.class,
-                    "jobId", "resourceHdfsPath", "appArguments", "mainClass");
+                    "jobId", "resourceHdfsPath", "mainClass");
             version = sparkJobRepo.newVersion(sparkJobDto.getJobId());
             jobContentSpark.setVersion(version);
+            jobContentSpark.setAppArguments(ObjectUtils.isNotEmpty(sparkJobDto.getAppArguments())
+                    ? sparkJobDto.getAppArguments() : Lists.newArrayList());
             jobContentSpark.setEditable(EditableEnum.YES.val);
             jobContentSpark.setCreator(operator);
             sparkJobRepo.add(jobContentSpark);

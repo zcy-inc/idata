@@ -103,13 +103,13 @@ public class LivyService {
         waitSessionAvailable(query.getSessionId());
 
         Map<String, Object> body = new HashMap<>();
-        String querySql = LivySessionKindEnum.spark.equals(query.getSessionKind())
-                ? String.format("spark.sql(\"\"\"%s\"\"\")", query.getSourceQuery())
-                : query.getSourceQuery();
+        String code = LivySessionKindEnum.spark.equals(query.getSessionKind())
+                ? String.format("println(spark.sql(\"\"\"%s\"\"\").toJSON.collect.mkString(\"[\", \",\", \"]\"))",
+                query.getQuerySql())
+                : query.getQuerySql();
         body.put("kind", query.getSessionKind().name());
         // TODO 这里也可以执行ddl和dml，后续需要增加日志记录和权限控制
-        body.put("code",
-                String.format("println(%s.limit(500).toJSON.collect.mkString(\"[\", \",\", \"]\"))", querySql));
+        body.put("code", code);
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
                 },
@@ -198,8 +198,7 @@ public class LivyService {
         }
     }
 
-    public LivySessionDto createBatches(String file, List<String> args, String driverMemory, String executorMemory,
-                                        List<String> jars, List<String> pyFiles) {
+    public LivySessionDto createBatches(String file, List<String> args, String driverMemory, String executorMemory) {
         Map<String, Object> body = new HashMap<>();
         driverMemory = isNotEmpty(driverMemory) ? driverMemory : DEFAULT_DRIVER_MEMORY;
         executorMemory = isNotEmpty(executorMemory) ? executorMemory : DEFAULT_EXECUTOR_MEMORY;
@@ -208,12 +207,6 @@ public class LivyService {
         body.put("driverMemory", driverMemory);
         body.put("executorMemory", executorMemory);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
-        if (jars != null) {
-            body.put("jars", jars);
-        }
-        if (pyFiles != null) {
-            body.put("pyFiles", pyFiles);
-        }
 
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {

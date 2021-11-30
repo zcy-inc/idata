@@ -14,22 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
-import cn.zhengcaiyun.idata.develop.dto.job.*;
-
-import java.io.IOException;
 
 /**
  * @author caizhedong
- * @date 2021-11-23 下午7:55
+ * @date 2021-11-30 下午9:53
  */
 
-public interface QueryRunService {
-    SqlQueryStatementDto runSqlQuery(SqlQueryDto sqlQueryDto);
-    QueryRunResultDto runSqlQueryResult(Integer sessionId, Integer statementId, Integer from, Integer size);
-    PythonQuerySessionDto runPythonQuery(PythonQueryDto pythonQueryDto) throws IOException;
-    PythonQueryRunLogDto runPythonQueryLog(Integer sessionId, Integer from, Integer size);
+public class PythonQuerySessionDto extends LivySessionDto {
 }

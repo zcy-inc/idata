@@ -177,7 +177,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
             contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else {
-            contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
+            contentList = PojoUtil.copyList(kylinJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         }
         return contentList;

@@ -14,22 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
-import cn.zhengcaiyun.idata.develop.dto.job.*;
-
-import java.io.IOException;
+package cn.zhengcaiyun.idata.develop.dto.job.kylin;
 
 /**
  * @author caizhedong
- * @date 2021-11-23 下午7:55
+ * @date 2021-11-30 下午6:17
  */
 
-public interface QueryRunService {
-    SqlQueryStatementDto runSqlQuery(SqlQueryDto sqlQueryDto);
-    QueryRunResultDto runSqlQueryResult(Integer sessionId, Integer statementId, Integer from, Integer size);
-    PythonQuerySessionDto runPythonQuery(PythonQueryDto pythonQueryDto) throws IOException;
-    PythonQueryRunLogDto runPythonQueryLog(Integer sessionId, Integer from, Integer size);
+public enum  KylinBuildTypeEnum {
+    BUILD,
+    MERGE,
+    REFRESH;
 }

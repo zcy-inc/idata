@@ -26,7 +26,6 @@ import java.util.Objects;
  * @author caizhedong
  * @date 2021-11-18 下午8:05
  */
-
 public class KylinJobDto extends JobContentBaseDto {
     private String cubeName;
     private String buildType;
