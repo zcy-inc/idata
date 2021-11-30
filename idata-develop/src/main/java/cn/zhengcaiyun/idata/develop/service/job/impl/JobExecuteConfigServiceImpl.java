@@ -128,6 +128,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
         if (configCombinationOptional.isEmpty()) return null;
 
+        // todo 输出名称
         return JobConfigCombinationDto.from(configCombinationOptional.get());
     }
 
