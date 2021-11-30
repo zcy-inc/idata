@@ -25,11 +25,21 @@ import java.util.List;
  * @date 2021-03-03 00:23
  */
 public class Page<T> {
+
     public static final Integer PAGE_SIZE_LIMIT = 1000;
+
     @ApiModelProperty(required = true)
     private List<T> content;
+
     @ApiModelProperty(required = true)
     private long total;
+
+    @ApiModelProperty(required = false, notes = "页码")
+    private Integer pageNum;
+
+    @ApiModelProperty(required = false, notes = "每页条数")
+    private Integer pageSize;
+
 
     public static <T> Page<T> newOne(List<T> content, long total) {
         Page<T> p = new Page<>();
@@ -69,5 +79,21 @@ public class Page<T> {
 
     public void setTotal(long total) {
         this.total = total;
+    }
+
+    public Integer getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(Integer pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 }

@@ -68,6 +68,13 @@ dev:
     publish:
       whitelist: 熠然,大时
 
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
 
 access:
   mode : idata
