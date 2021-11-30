@@ -114,6 +114,8 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
                   placeholder="请选择"
                   options={_.enums}
                   onChange={(value) => setValue(schema, value)}
+                  showSearch
+                  filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
                 />
               ),
             });

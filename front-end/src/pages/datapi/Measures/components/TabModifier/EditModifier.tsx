@@ -200,6 +200,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
           placeholder="请选择"
           options={DWDTables}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -213,6 +215,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
           placeholder="请选择"
           options={DWDStrings[schema.index as number]}
           onChange={(value) => setValue(schema, value)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -252,7 +256,11 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
             rules={require}
             tooltip="若为空，请在数仓设计-新建枚举类型处新建。"
             options={enumOps}
-            fieldProps={{ onChange: onEnumChange }}
+            fieldProps={{
+              onChange: onEnumChange,
+              showSearch: true,
+              filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+            }}
           />
           <ProForm.Item>
             <Popover

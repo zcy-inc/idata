@@ -40,6 +40,7 @@ const FolderTree: FC = () => {
     showLabel,
     onCreateDAG,
     setVisibleTask,
+    setVisibleDev,
     setCurLabel,
     folderList,
   } = useModel('datadev', (_) => ({
@@ -58,6 +59,7 @@ const FolderTree: FC = () => {
     showLabel: _.showLabel,
     onCreateDAG: _.onCreateDAG,
     setVisibleTask: _.setVisibleTask,
+    setVisibleDev: _.setVisibleDev,
     setCurLabel: _.setCurLabel,
     folderList: _.folderList,
   }));
@@ -87,9 +89,13 @@ const FolderTree: FC = () => {
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianDAG" />
         新建DAG
       </Menu.Item>
-      <Menu.Item key="CreateJob">
+      <Menu.Item key="CreateDI">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
-        新建任务
+        新建DI
+      </Menu.Item>
+      <Menu.Item key="CreateDev">
+        <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
+        新建数据开发
       </Menu.Item>
     </Menu>
   );
@@ -98,39 +104,36 @@ const FolderTree: FC = () => {
   const onAction = (key: Key, node?: Treenode) => {
     switch (key) {
       case 'CreateFolder':
-        setCurNode(node);
         setFolderMode('create');
         setVisible(true);
         break;
       case 'EditFolder':
-        setCurNode(node);
         setFolderMode('edit');
         setVisible(true);
         break;
       case 'DeleteFolder':
-        setCurNode(node);
         onDeleteFolder();
         break;
       case 'CreateTable':
-        setCurNode(node);
         onCreateTable();
         break;
       case 'CreateLabel':
-        setCurNode(node);
         setCurLabel(-1);
         showLabel();
         break;
       case 'CreateEnum':
-        setCurNode(node);
         onCreateEnum();
         break;
       case 'CreateDAG':
-        setCurNode(node);
         onCreateDAG();
         break;
-      case 'CreateJob':
+      case 'CreateDI':
         setCurNode(node);
         setVisibleTask(true);
+        break;
+      case 'CreateDev':
+        setCurNode(node);
+        setVisibleDev(true);
         break;
 
       default:

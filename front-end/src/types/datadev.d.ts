@@ -9,12 +9,14 @@ import {
   TaskTypes,
   TriggerMode,
   VersionStatus,
+  SchTimeOutStrategy,
+  SchPriority,
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
 // 树的节点类型
 export interface TreeNode {
-  cid: string; // type + belong + id
+  cid: string; // type_belong_id
   id: number; // 可能存在重复，用作树的唯一标识符时请使用cid
   name: string;
   type: FolderTypes;
@@ -22,7 +24,7 @@ export interface TreeNode {
   parentCid?: string;
   parentId?: number;
   children?: TreeNode[];
-  // 以下是树组件需要的属性
+  // 以下是Antd树组件需要的属性
   className?: string;
   title?: any;
   key?: string;
@@ -41,6 +43,7 @@ export interface DAG {
   dagInfoDto: {
     id: number;
     name: string;
+    environment: Environments;
     dwLayerCode: string;
     status: 0 | 1; // 0 停用，1 启用
     remark: string;
@@ -61,6 +64,7 @@ export interface TaskType {
   code: TaskTypes;
   catalog: TaskCategory;
   name: string;
+  language?: string;
 }
 
 export interface Task {
@@ -80,6 +84,7 @@ export interface TaskVersion {
   versionDisplay: string;
   versionStatus: VersionStatus;
   environment: string;
+  envRunningState: 0 | 1; // 0 暂停；1 恢复
 }
 
 export interface TaskContent {
@@ -135,4 +140,99 @@ export interface DAGListItem {
   status: 0 | 1;
   remark: string;
   folderId: string;
+}
+
+/* ========== 数据开发 ========== */
+export interface DataDevContent {
+  executeConfig: {
+    id?: number;
+    jobId: number;
+    environment: Environments;
+    schDagId: number; // 调度配置-dag编号
+    schRerunMode: SchRerunMode; // 调度配置-重跑配置
+    schTimeOut: number; // 调度配置-超时时间
+    schDryRun: number; // 调度配置-是否空跑
+    execQueue: string; // 运行配置-队列
+    execMaxParallelism: number; // 运行配置-作业最大并发数，配置为0时表示使用默认并发数
+    execWarnLevel: string; // 运行配置-告警等级 时光的接口获取
+    schTimeOutStrategy: SchTimeOutStrategy; // 调度配置-超时策略
+    schPriority: SchPriority; // 调度配置-优先级
+    execDriverMem: number; // 运行配置-驱动器内存
+    execWorkerMem: number; // 运行配置-执行器内存
+    runningState: 0 | 1; // 作业运行状态（环境级），0：暂停运行；1：恢复运行
+  };
+  dependencies: {
+    id?: number;
+    jobId: number;
+    environment: Environments;
+    prevJobId: number; // 上游作业id
+    prevJobDagId: string; // 上游作业所属dag id
+  }[];
+  output: {
+    id?: number;
+    jobId: number;
+    environment: Environments;
+    destDataSourceType: string; // 数据去向-数据源类型
+    destDataSourceId: number; // 数据去向-数据源id
+    destTable: string; // 数据去向-目标表
+    destWriteMode: DestWriteMode; // 数据去向-写入模式，override，upsert
+  };
+}
+
+export interface ConfiguredTaskListItem {
+  jobId: number;
+  jobName: string;
+  dwLayerCode: string;
+  dagId: number;
+  dagName: string;
+}
+
+export interface SqlSparkContent {
+  jobId: number;
+  jobType: TaskTypes;
+  sourceSql: string;
+  externalTables: string;
+  id?: number;
+  editable?: number;
+  version?: number;
+  udfIds?: string;
+}
+
+export interface SparkContent {
+  jobId: number;
+  jobType: TaskTypes;
+  appArguments: {
+    argumentValue: string;
+    argumentRemark: string;
+  }[]; // 动态表单列表参数
+  id?: number;
+  version?: number;
+  editable?: number;
+  mainClass?: string; // 执行类
+  pythonResource?: string; // python代码
+  resourceHdfsPath?: string; // 上传文件返回的路径
+}
+
+export interface ScriptContent {
+  jobId: number;
+  jobType: TaskTypes;
+  sourceResource: string; // 代码
+  id?: number;
+  editable?: number;
+  version?: number;
+  scriptArguments?: {
+    argumentValue: string;
+    argumentRemark: string;
+  }[]; // 参数
+}
+
+export interface KylinContent {
+  jobId: number;
+  cubeName: string; // cube名称
+  buildType: string; // 构建类型
+  startTime?: number; // 生效时间
+  endTime?: number; // 失效时间
+  id?: number;
+  editable?: number;
+  version?: number;
 }

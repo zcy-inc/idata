@@ -9,6 +9,20 @@ export default [
     redirect: '/configuration',
   },
   {
+    path: '/datapi',
+    name: '数据研发',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    routes: [
+      { path: '/datapi', redirect: '/datapi/datadev' },
+      { path: '/datapi/datadev', name: '数据开发', component: './datapi/DataDev' },
+      { path: '/datapi/measure', name: '指标库', component: './datapi/Measures' },
+      { path: '/datapi/datasource', name: '数据源管理', component: './datapi/DataSource' },
+      { path: '/datapi/tasks', name: '任务列表', component: './datapi/Tasks' },
+    ],
+  },
+
+  {
     path: '/configuration',
     name: '系统配置',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/c6ab0611-57cd-4e14-a68a-4384c198ed65.svg',

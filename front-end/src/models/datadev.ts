@@ -22,6 +22,7 @@ export default () => {
   const [activeKey, setActiveKey] = useState(''); // 右侧tabs的activeKey
   const [visibleLabel, setVisibleLabel] = useState<boolean>(false);
   const [visibleTask, setVisibleTask] = useState<boolean>(false);
+  const [visibleDev, setVisibleDev] = useState<boolean>(false);
   const [curLabel, setCurLabel] = useState(-1); // 存储label的id，用来判断新建和编辑
   const folderList = useRef<FolderListItem[]>([]);
 
@@ -190,5 +191,7 @@ export default () => {
     onCreateDAG,
     visibleTask,
     setVisibleTask,
+    visibleDev,
+    setVisibleDev,
   };
 };

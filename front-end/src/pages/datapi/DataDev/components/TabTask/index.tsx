@@ -26,7 +26,13 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
-import { SrcReadMode, DestWriteMode, VersionStatusDisplayMap } from '@/constants/datadev';
+import {
+  SrcReadMode,
+  DestWriteMode,
+  VersionStatusDisplayMap,
+  VersionStatus,
+  EnvRunningState,
+} from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { DataSourceItem } from '@/types/datasource';
@@ -59,14 +65,15 @@ const RefreshSelect: FC<{
         mode="multiple"
         style={{ maxWidth, minWidth }}
         placeholder="请选择"
+        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
+        value={value}
+        onChange={onChange}
         optionFilterProp="label"
+        showSearch
         filterOption={(input, option) => {
           const label = get(option, 'label', '') as string;
           return label.indexOf(input) >= 0;
         }}
-        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
-        value={value}
-        onChange={onChange}
       />
       <a className={styles.refresh} onClick={getTaskTableColumnsWrapped}></a>
     </>
@@ -85,8 +92,10 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
   const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
   const [visible, setVisible] = useState(false);
-  const [publishEnv, setPublishEnv] = useState<Environments>(Environments.STAG);
   const [loading, setLoading] = useState(false);
+  const [actionType, setActionType] = useState('');
+  const [visibleAction, setVisibleAction] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
 
   const [srcForm] = Form.useForm();
   const [destForm] = Form.useForm();
@@ -248,32 +257,16 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    * 暂停任务
    */
   const onPause = () => {
-    disableTask({ id: pane.id })
-      .then((res) => {
-        if (res.success) {
-          message.success('暂停成功');
-          getTaskWrapped();
-        } else {
-          message.error(`暂停失败：${res.msg}`);
-        }
-      })
-      .catch((err) => {});
+    setActionType('pause');
+    setVisibleAction(true);
   };
 
   /**
    * 启用任务
    */
   const onRun = () => {
-    enableTask({ id: pane.id })
-      .then((res) => {
-        if (res.success) {
-          message.success('启用成功');
-          getTaskWrapped();
-        } else {
-          message.error(`启用失败：${res.msg}`);
-        }
-      })
-      .catch((err) => {});
+    setActionType('run');
+    setVisibleAction(true);
   };
 
   /**
@@ -354,33 +347,48 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     setSrcColumns([...destColumns]);
   };
 
+  const renderVersionLabel = (_: TaskVersion) => {
+    const env = _.environment ? `-${_.environment}` : '';
+    const verState = VersionStatusDisplayMap[_.versionStatus];
+    let runState = '';
+    if (
+      _.versionStatus === VersionStatus.PUBLISHED &&
+      _.envRunningState === EnvRunningState.PAUSED
+    ) {
+      runState = '(暂停)';
+    }
+    return `${_.versionDisplay}${env}${verState}${runState}`;
+  };
+
   return (
     <>
       <div className={styles.task}>
         <div className={styles.toolbar}>
-          <div className={styles.version}>{`当前版本：${data?.versionDisplay || '-'}`}</div>
+          <div className={styles.version}>
+            <span>当前版本：</span>
+            {versions.length === 0 ? (
+              '-'
+            ) : (
+              <Select
+                size="large"
+                style={{ width: 'auto', color: '#304ffe', fontSize: 16 }}
+                placeholder="请选择"
+                bordered={false}
+                disabled={versions.length <= 0}
+                options={versions.map((_) => ({ label: renderVersionLabel(_), value: _.version }))}
+                value={version}
+                onChange={(v) => setVersion(v as number)}
+              />
+            )}
+          </div>
           <Space size={16}>
+            <a onClick={() => {}}>单次运行</a>
             <a onClick={() => setVisibleBasic(true)}>基本信息</a>
             <a onClick={() => setVisibleConfig(true)}>配置</a>
             <a onClick={() => setVisibleVersion(true)}>版本</a>
             <a onClick={() => setVisibleHistory(true)}>历史</a>
           </Space>
         </div>
-        <Title style={{ marginTop: 16 }}>版本切换</Title>
-        <Select
-          size="large"
-          style={{ width: maxWidth }}
-          placeholder="请选择"
-          disabled={versions.length <= 0}
-          options={versions.map((_) => ({
-            label: `${_.versionDisplay}${_.environment ? '-' + _.environment : ''}-${
-              VersionStatusDisplayMap[_.versionStatus]
-            }`,
-            value: _.version,
-          }))}
-          value={version}
-          onChange={(v) => setVersion(v as number)}
-        />
         <div className={styles['form-box']}>
           <div className={styles['form-box-item']}>
             <Title>数据来源</Title>
@@ -406,6 +414,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   placeholder="请选择"
                   options={DSSrcList.map((_) => ({ label: _.name, value: _.id }))}
                   onChange={(v) => getTaskTablesWrapped(v as number)}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
@@ -453,6 +463,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   placeholder="请选择"
                   options={DSTypes.map((_) => ({ label: _, value: _ }))}
                   onChange={(v) => getDataSourceListWrapped(v as DataSourceTypes, 'dest')}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct}>
@@ -461,6 +473,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   style={{ maxWidth, minWidth }}
                   placeholder="请选择"
                   options={DSDestList.map((_) => ({ label: _.name, value: _.id }))}
+                  showSearch
+                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
                 />
               </Item>
               <Item name="destTable" label="表" rules={ruleText}>
@@ -527,39 +541,20 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </div>
       <div className="workbench-submit">
         <Space>
-          {task?.status === 0 && <IconRun onClick={onRun} />}
-          {task?.status === 1 && <IconPause onClick={onPause} />}
+          <IconRun onClick={onRun} />
+          <IconPause onClick={onPause} />
           <Button key="delete" size="large" className="normal" onClick={onDelete}>
             删除
           </Button>
           <Button key="save" size="large" onClick={onSave}>
             保存
           </Button>
-          <Button
-            key="stag"
-            size="large"
-            type="primary"
-            onClick={() => {
-              setVisible(true);
-              setPublishEnv(Environments.STAG);
-            }}
-          >
-            提交预发
-          </Button>
-          <Button
-            key="prod"
-            size="large"
-            type="primary"
-            onClick={() => {
-              setVisible(true);
-              setPublishEnv(Environments.PROD);
-            }}
-          >
-            提交真线
+          <Button key="stag" size="large" type="primary" onClick={() => setVisible(true)}>
+            提交
           </Button>
         </Space>
         <ModalForm
-          title={`提交${publishEnv === Environments.STAG ? '预发' : '真线'}`}
+          title="提交"
           layout="horizontal"
           width={536}
           labelCol={{ span: 6 }}
@@ -577,7 +572,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               {
                 jobId: pane.id,
                 version: data?.version as number,
-                env: publishEnv,
+                env: values.env,
               },
               {
                 remark: values.remark,
@@ -597,8 +592,74 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               .finally(() => setLoading(false));
           }}
         >
+          <Item name="env" label="提交环境" rules={ruleSlct}>
+            <Select
+              placeholder="请选择"
+              options={[
+                { label: '预发', value: Environments.STAG },
+                { label: '真线', value: Environments.PROD },
+              ]}
+            />
+          </Item>
           <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
             <TextArea placeholder="请输入" />
+          </Item>
+        </ModalForm>
+        <ModalForm
+          title="选择环境"
+          layout="horizontal"
+          width={536}
+          labelCol={{ span: 6 }}
+          colon={false}
+          preserve={false}
+          modalProps={{ destroyOnClose: true, onCancel: () => setVisibleAction(false) }}
+          visible={visibleAction}
+          submitter={{
+            submitButtonProps: { size: 'large', loading: loadingAction },
+            resetButtonProps: { size: 'large' },
+          }}
+          onFinish={async (values) => {
+            setLoadingAction(true);
+            const params = {
+              id: pane.id,
+              environment: values.env,
+            };
+            if (actionType === 'pause') {
+              disableTask(params)
+                .then((res) => {
+                  if (res.success) {
+                    message.success('暂停成功');
+                    getTaskWrapped();
+                  } else {
+                    message.error(`暂停失败：${res.msg}`);
+                  }
+                })
+                .catch((err) => {})
+                .finally(() => setLoadingAction(false));
+            }
+            if (actionType === 'run') {
+              enableTask(params)
+                .then((res) => {
+                  if (res.success) {
+                    message.success('启用成功');
+                    getTaskWrapped();
+                  } else {
+                    message.error(`启用失败：${res.msg}`);
+                  }
+                })
+                .catch((err) => {})
+                .finally(() => setLoadingAction(false));
+            }
+          }}
+        >
+          <Item name="env" label="提交环境" rules={ruleSlct}>
+            <Select
+              placeholder="请选择"
+              options={[
+                { label: '预发', value: Environments.STAG },
+                { label: '真线', value: Environments.PROD },
+              ]}
+            />
           </Item>
         </ModalForm>
       </div>

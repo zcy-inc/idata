@@ -31,11 +31,21 @@ export enum TriggerMode {
 
 export enum TaskCategory {
   DI = 'DI', // DI：数据集成作业（获取数据集成分类下的作业类型：离线作业、实时作业）
+  SCRIPT = 'SCRIPT',
+  KYLIN = 'KYLIN',
+  SPARK = 'SPARK',
+  SQL = 'SQL',
 }
 
 export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步
+  SQL_SPARK = 'SQL_SPARK',
+  SPARK_PYTHON = 'SPARK_PYTHON',
+  SPARK_JAR = 'SPARK_JAR',
+  SCRIPT_PYTHON = 'SCRIPT_PYTHON',
+  SCRIPT_SHELL = 'SCRIPT_SHELL',
+  KYLIN = 'KYLIN',
 }
 
 export enum SrcReadMode {
@@ -46,6 +56,7 @@ export enum SrcReadMode {
 export enum DestWriteMode {
   INIT = 'init', // 新建表
   OVERRIDE = 'override', // 覆盖表
+  UPSERT = 'upsert', // TODO 这是什么？
 }
 
 export enum VersionStatus {
@@ -64,8 +75,33 @@ export const VersionStatusDisplayMap = {
   [VersionStatus.ARCHIVED]: '已归档',
 };
 
+export enum EnvRunningState {
+  PAUSED = 0,
+  NORMAL = 1,
+}
+
 export enum SchRerunMode {
   ALWAYS = 'always', // 皆可重跑
   FAILED = 'failed', // 失败后可重跑
   NEVER = 'never', // 皆不可重跑
+}
+
+export enum SchTimeOutStrategy {
+  ALARM = 'alarm',
+  FAIL = 'fail',
+}
+
+export enum SchPriority {
+  LOW = 1,
+  MIDDLE = 2,
+  HIGH = 3,
+}
+
+export enum StatementState {
+  WAITING = 'waiting',
+  RUNNING = 'running',
+  AVAILABLE = 'available',
+  ERROR = 'error',
+  CANCELLING = 'cancelling',
+  CANCELED = 'cancelled',
 }
