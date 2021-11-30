@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author shiyin
@@ -30,6 +31,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(scanBasePackages={"cn.zhengcaiyun.idata"})
 @MapperScan("cn.zhengcaiyun.idata.*.dal.dao")
+@EnableScheduling
 public class PortalApplication implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(PortalApplication.class);

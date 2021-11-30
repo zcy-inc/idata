@@ -60,10 +60,14 @@ hdfs:
   basePath: /tmp/shiyin/
   user: hdfs
 
+yarn:
+  resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
+
 dev:
   job:
     publish:
       whitelist: 熠然,大时
+
 
 access:
   mode : idata

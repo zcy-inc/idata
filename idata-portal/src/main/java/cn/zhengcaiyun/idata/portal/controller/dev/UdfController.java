@@ -7,7 +7,6 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.develop.dal.model.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.service.udf.UdfService;
-import cn.zhengcaiyun.idata.portal.controller.HdfsController;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
 import io.swagger.annotations.ApiOperation;

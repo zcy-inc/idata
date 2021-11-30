@@ -12,7 +12,7 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java">
 
         </javaModelGenerator>
 
@@ -20,7 +20,7 @@
 <!--            <property name="enableSubPackages" value="false"/>-->
 <!--        </sqlMapGenerator>-->
 
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao" targetProject="src/main/java" type="XMLMAPPER">
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java" type="XMLMAPPER">
 
         </javaClientGenerator>
 
@@ -116,9 +116,12 @@
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
-            <table tableName="dev_job_udf" mapperName="DevJobUdfDao">
-                <generatedKey column="id" sqlStatement="MySql" identity="true" />
-                <columnOverride column="del" javaType="java.lang.Integer"/>
-            </table>
+<!--        <table tableName="dev_job_udf" mapperName="DevJobUdfDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+        <table tableName="dev_job_history" mapperName="DevJobHistoryDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
     </context>
 </generatorConfiguration>
