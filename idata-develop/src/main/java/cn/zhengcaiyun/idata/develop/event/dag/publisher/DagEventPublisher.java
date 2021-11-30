@@ -82,7 +82,7 @@ public class DagEventPublisher {
         event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
         JsonObject dagJson = new Gson().fromJson(eventLog.getEventInfo(), JsonObject.class);
-        event.setEnvironment(dagJson.get("environment").toString());
+        event.setEnvironment(dagJson.get("environment").getAsString());
         // 发布事件
         DagEventBus.getInstance().post(event);
         // 检查事件处理结果

@@ -89,7 +89,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         mapping.setEnvironment(dagInfo.getEnvironment());
         mapping.setDsEntityType(ENTITY_TYPE_WORKFLOW);
         mapping.setDsEntityCode(workflowCode);
-        dsEntityMappingRepo.create(new DSEntityMapping());
+        dsEntityMappingRepo.create(mapping);
     }
 
     @Override

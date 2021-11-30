@@ -84,7 +84,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         mapping.setEnvironment(environment);
         mapping.setDsEntityType(ENTITY_TYPE_TASK);
         mapping.setDsEntityCode(taskCode);
-        dsEntityMappingRepo.create(new DSEntityMapping());
+        dsEntityMappingRepo.create(mapping);
     }
 
     @Override
