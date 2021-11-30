@@ -58,6 +58,10 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     private final JobPublishManager jobPublishManager;
     private final JobInfoRepo jobInfoRepo;
     private final JobInfoService jobInfoService;
+    private final SqlJobRepo sqlJobRepo;
+    private final SparkJobRepo sparkJobRepo;
+    private final ScriptJobRepo scriptJobRepo;
+    private final KylinJobRepo kylinJobRepo;
 
     @Autowired
     public JobContentCommonServiceImpl(DIJobContentRepo diJobContentRepo,
@@ -65,13 +69,21 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                                        JobPublishRecordRepo jobPublishRecordRepo,
                                        JobPublishManager jobPublishManager,
                                        JobInfoRepo jobInfoRepo,
-                                       JobInfoService jobInfoService) {
+                                       JobInfoService jobInfoService,
+                                       SqlJobRepo sqlJobRepo,
+                                       SparkJobRepo sparkJobRepo,
+                                       ScriptJobRepo scriptJobRepo,
+                                       KylinJobRepo kylinJobRepo) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobPublishManager = jobPublishManager;
         this.jobInfoRepo = jobInfoRepo;
         this.jobInfoService = jobInfoService;
+        this.sqlJobRepo = sqlJobRepo;
+        this.sparkJobRepo = sparkJobRepo;
+        this.scriptJobRepo = scriptJobRepo;
+        this.kylinJobRepo = kylinJobRepo;
     }
 
     @Override
@@ -81,7 +93,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         Optional<JobInfo> jobInfoDto = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoDto.isPresent(), "作业不存在");
         // todo 支持不同作业
-        JobContentBaseDto content = jobInfoService.getJobContent(jobId, version, jobInfoDto.get().getJobType());
+        JobContentBaseDto content = getJobContent(jobId, version, jobInfoDto.get().getJobType());
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
@@ -104,14 +116,71 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         checkArgument(jobInfoDto.isPresent(), "作业不存在");
 
         List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(jobId);
-        // todo 支持不同类型作业
-        List<JobContentBaseDto> contentList = jobInfoService.getJobContents(jobId, jobInfoDto.get().getJobType());
+
+        List<JobContentBaseDto> contentList = getJobContents(jobId, jobInfoDto.get().getJobType());
 
         List<JobContentVersionDto> contentVersionDtoList = assembleContentVersion(publishRecordList, contentList);
 
         List<JobExecuteConfig> executeConfigList = jobExecuteConfigRepo.queryList(jobId, new JobExecuteConfigCondition());
         fillRunningState(contentVersionDtoList, executeConfigList);
         return contentVersionDtoList;
+    }
+
+    @Override
+    public JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType) {
+        try {
+            JobTypeEnum.valueOf(jobType);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("作业类型有误");
+        }
+        JobContentBaseDto content = new JobContentBaseDto();
+        content.setJobId(jobId);
+        content.setVersion(version);
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+            Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
+            checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
+            content.setId(jobContentOptional.get().getId());
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+            checkArgument(sqlJobRepo.query(jobId, version) != null, "作业版本不存在");
+            content.setId(sqlJobRepo.query(jobId, version).getId());
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+            checkArgument(sparkJobRepo.query(jobId, version) != null, "作业版本不存在");
+            content.setId(sparkJobRepo.query(jobId, version).getId());
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+            checkArgument(scriptJobRepo.query(jobId, version) != null, "作业版本不存在");
+            content.setId(scriptJobRepo.query(jobId, version).getId());
+        } else {
+            checkArgument(kylinJobRepo.query(jobId, version) != null, "作业版本不存在");
+            content.setId(kylinJobRepo.query(jobId, version).getId());
+        }
+        return content;
+    }
+
+    @Override
+    public List<JobContentBaseDto> getJobContents(Long jobId, String jobType) {
+        List<JobContentBaseDto> contentList;
+        try {
+            JobTypeEnum.valueOf(jobType);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("作业类型有误");
+        }
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+            contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+            contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+            contentList = PojoUtil.copyList(sparkJobRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+            contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        } else {
+            contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        }
+        return contentList;
     }
 
     private void fillRunningState(List<JobContentVersionDto> contentVersionDtoList, List<JobExecuteConfig> executeConfigList) {

@@ -33,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
+import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
@@ -62,22 +63,19 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobPublishManager jobPublishManager;
     private final EnumService enumService;
-    private final DIJobContentRepo diJobContentRepo;
-    private final JobInfoService jobInfoService;
+    private final JobContentCommonService jobContentCommonService;
 
     @Autowired
     public JobPublishRecordServiceImpl(JobInfoRepo jobInfoRepo,
                                        JobPublishRecordRepo jobPublishRecordRepo,
                                        JobPublishManager jobPublishManager,
                                        EnumService enumService,
-                                       DIJobContentRepo diJobContentRepo,
-                                       JobInfoService jobInfoService) {
+                                       JobContentCommonService jobContentCommonService) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobPublishManager = jobPublishManager;
         this.enumService = enumService;
-        this.diJobContentRepo = diJobContentRepo;
-        this.jobInfoService = jobInfoService;
+        this.jobContentCommonService = jobContentCommonService;
     }
 
     @Override
@@ -105,7 +103,6 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
     @Override
     public Boolean approve(Long id, String remark, Operator operator) {
-        checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
         checkArgument(Objects.nonNull(id), "记录编号为空");
         Optional<JobPublishRecord> optional = jobPublishRecordRepo.query(id);
         checkArgument(optional.isPresent(), "编号%s记录不存在或已删除", id);
@@ -122,7 +119,6 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
     @Override
     public Boolean approve(List<Long> ids, String remark, Operator operator) {
-        checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
         checkArgument(ObjectUtils.isNotEmpty(ids), "记录编号为空");
         ids.stream().forEach(id -> approve(id, remark, operator));
         return Boolean.TRUE;
@@ -130,7 +126,6 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
     @Override
     public Boolean reject(Long id, String remark, Operator operator) {
-        checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
         checkArgument(Objects.nonNull(id), "记录编号为空");
         Optional<JobPublishRecord> optional = jobPublishRecordRepo.query(id);
         checkArgument(optional.isPresent(), "编号" + id + "记录不存在或已删除");
@@ -149,7 +144,6 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
 
     @Override
     public Boolean reject(List<Long> ids, String remark, Operator operator) {
-        checkArgument(jobPublishManager.hasPublishPermission(operator), "没有审批权限");
         checkArgument(ObjectUtils.isNotEmpty(ids), "记录编号为空");
         ids.stream().forEach(id -> reject(id, remark, operator));
         return Boolean.TRUE;
@@ -175,13 +169,12 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     }
 
     private Map<Integer, String> getJobVersionDisplay(List<JobPublishRecord> recordList) {
-        //todo 不同作业类型时，获取方式不同
         List<Long> jobIdList = recordList.stream().map(JobPublishRecord::getJobId).distinct().collect(Collectors.toList());
         Map<Long, String> jobIdAndTypeMap = jobInfoRepo.queryJobInfo(jobIdList)
                 .stream().collect(Collectors.toMap(JobInfo::getId, JobInfo::getJobType));
         Map<Integer, String> map = Maps.newHashMap();
         jobIdList.forEach(jobId -> {
-                    List<JobContentBaseDto> contentList = jobInfoService.getJobContents(jobId, jobIdAndTypeMap.get(jobId));
+                    List<JobContentBaseDto> contentList = jobContentCommonService.getJobContents(jobId, jobIdAndTypeMap.get(jobId));
                     if (ObjectUtils.isNotEmpty(contentList)) {
                         for (JobContentBaseDto content : contentList) {
                             map.put(content.getVersion(), JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));

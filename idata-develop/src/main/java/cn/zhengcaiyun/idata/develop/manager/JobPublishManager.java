@@ -140,11 +140,6 @@ public class JobPublishManager {
         checkArgument(Objects.equals(UsingStatusEnum.ONLINE.val, dagInfoOptional.get().getStatus()), "DAG已停用");
     }
 
-    public boolean hasPublishPermission(Operator operator) {
-        // todo  用权限系统实现
-        return Objects.nonNull(publishWhitelist) && publishWhitelist.indexOf(operator.getNickname()) >= 0;
-    }
-
     private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, JobPublishContent content, EnvEnum envEnum, String remark, Operator operator) {
         JobPublishRecord record = new JobPublishRecord();
         record.setJobId(content.getJobId());

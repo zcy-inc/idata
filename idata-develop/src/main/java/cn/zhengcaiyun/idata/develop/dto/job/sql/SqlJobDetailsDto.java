@@ -14,28 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.develop.dto.job.sql;
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-28 14:07
- **/
-public interface JobContentCommonService {
+ * @author caizhedong
+ * @date 2021-11-29 下午9:40
+ */
 
-    SubmitJobDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+public class SqlJobDetailsDto extends SqlJobContentDto {
 
-    List<JobContentVersionDto> getVersions(Long jobId);
-
-    JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType);
-
-    List<JobContentBaseDto> getJobContents(Long jobId, String jobType);
 }
