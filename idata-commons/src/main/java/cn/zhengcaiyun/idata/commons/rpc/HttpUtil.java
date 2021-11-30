@@ -39,7 +39,7 @@ public class HttpUtil {
     private final static OkHttpClient client = new OkHttpClient().newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(30,TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build();
 
     static {
@@ -51,7 +51,7 @@ public class HttpUtil {
         checkArgument(httpInput.getUri() != null, "http request uri is null");
         HttpUrl.Builder urlBuilder = HttpUrl.parse(httpInput.getUri()).newBuilder();
         if (httpInput.getQueryParamMap() != null) {
-            for (Map.Entry<String, String> entry: httpInput.getQueryParamMap().entrySet()) {
+            for (Map.Entry<String, String> entry : httpInput.getQueryParamMap().entrySet()) {
                 urlBuilder.addQueryParameter(entry.getKey(), entry.getValue());
             }
         }
@@ -62,12 +62,12 @@ public class HttpUtil {
         String body;
         if (httpInput.getObjectBody() instanceof String) {
             body = (String) httpInput.getObjectBody();
-        }
-        else {
+        } else {
             body = httpInput.getObjectBody() != null ? JSON.toJSONString(httpInput.getObjectBody()) : "";
         }
         switch (httpInput.getMethod()) {
-            case "GET": break;
+            case "GET":
+                break;
             case "POST":
                 requestBuilder = requestBuilder.post(RequestBody.create(body, JSON_MEDIA_TYPE));
                 break;
@@ -90,21 +90,18 @@ public class HttpUtil {
         String body = null;
         try (Response response = HttpUtil.executeHttpRequest(httpInput)) {
             body = Objects.requireNonNull(response.body()).string();
-            if (response.code() == 200) {
+            if (response.code() == 200 || response.code() == 201) {
                 if (String.class.equals(typeReference.getType())) {
                     return (T) body;
                 }
                 return JSON.parseObject(body, typeReference);
-            }
-            else {
+            } else {
                 throw new RuntimeException(serverName + " sever return error, http status code: "
                         + response.code() + ", body: " + body);
             }
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new RuntimeException(serverName + " sever network error, msg: " + ioe.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(serverName + " error, msg: " + e.getMessage() + ", body: " + body);
         }
     }

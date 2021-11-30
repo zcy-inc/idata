@@ -78,6 +78,7 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSBaseUrl(String environment) {
+//        return "http://10.200.3.49:12345/dolphinscheduler";
         return "http://172.29.108.238:8688/dolphinscheduler";
     }
 
@@ -95,6 +96,12 @@ public abstract class DolphinIntegrationAdapter {
 
     protected ResultDto<JSONObject> sendReq(HttpInput req_input) {
         ResultDto<JSONObject> resultDto = HttpUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
+        });
+        return resultDto;
+    }
+
+    protected ResultDto<Object> simpleSendReq(HttpInput req_input) {
+        ResultDto<Object> resultDto = HttpUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<Object>>() {
         });
         return resultDto;
     }

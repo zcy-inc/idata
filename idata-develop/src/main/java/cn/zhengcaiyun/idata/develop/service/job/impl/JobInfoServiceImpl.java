@@ -32,7 +32,10 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
@@ -44,6 +47,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -90,6 +94,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Long addJob(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
@@ -108,6 +113,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean editJobInfo(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         JobInfo oldJobInfo = tryFetchJobInfo(dto.getId());
@@ -144,6 +150,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
@@ -163,6 +170,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean resumeJob(Long id, String environment, Operator operator) {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
@@ -181,11 +189,12 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean pauseJob(Long id, String environment, Operator operator) {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
-        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能恢复运行", environment);
+        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能暂停运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
         checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在%s环境已暂停，勿重复操作", environment);
 
