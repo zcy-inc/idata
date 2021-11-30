@@ -31,6 +31,11 @@ public class JobOutputDto extends BaseDto {
     private Long destDataSourceId;
 
     /**
+     * 数据去向-数据源名称
+     */
+    private String destDataSourceName;
+
+    /**
      * 数据去向-目标表
      */
     private String destTable;
@@ -107,6 +112,14 @@ public class JobOutputDto extends BaseDto {
 
     public void setJobTargetTablePk(String jobTargetTablePk) {
         this.jobTargetTablePk = jobTargetTablePk;
+    }
+
+    public String getDestDataSourceName() {
+        return destDataSourceName;
+    }
+
+    public void setDestDataSourceName(String destDataSourceName) {
+        this.destDataSourceName = destDataSourceName;
     }
 
     public static JobOutputDto from(JobOutput model) {
