@@ -66,10 +66,10 @@ public class JobContentCommonController {
      * @return
      */
     @PostMapping("/versions/{version}/submit/{env}")
-    public RestResult<SubmitJobDto> submitJob(@PathVariable("jobId") Long jobId,
-                                                        @PathVariable("version") Integer version,
-                                                        @PathVariable("env") String env,
-                                                        @RequestBody SubmitJobDto submitJobDto) {
+    public RestResult<Boolean> submitJob(@PathVariable("jobId") Long jobId,
+                                         @PathVariable("version") Integer version,
+                                         @PathVariable("env") String env,
+                                         @RequestBody SubmitJobDto submitJobDto) {
         return RestResult.success(jobContentCommonService.submit(jobId, version, env, submitJobDto.getRemark(), OperatorContext.getCurrentOperator()));
     }
 

@@ -34,6 +34,7 @@ public class LivySqlResultDto {
     private LivyStatementStateEnum statementState;
     private LivyOutputStatusEnum outputStatus;
     private List<Map<String, Object>> resultSet;
+    private String pythonResults;
 
     public Integer getSessionId() {
         return sessionId;
@@ -73,5 +74,13 @@ public class LivySqlResultDto {
 
     public void setResultSet(List<Map<String, Object>> resultSet) {
         this.resultSet = resultSet;
+    }
+
+    public String getPythonResults() {
+        return pythonResults;
+    }
+
+    public void setPythonResults(String pythonResults) {
+        this.pythonResults = pythonResults;
     }
 }

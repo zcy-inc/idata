@@ -16,12 +16,12 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job;
 
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyQueryDto;
 
 /**
  * @author caizhedong
- * @date 2021-11-30 下午9:53
+ * @date 2021-11-22 下午3:20
  */
 
-public class PythonQuerySessionDto extends LivySessionDto {
+public class QueryDto extends LivyQueryDto {
 }
