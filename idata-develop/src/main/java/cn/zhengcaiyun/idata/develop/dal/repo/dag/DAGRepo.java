@@ -50,6 +50,8 @@ public interface DAGRepo {
 
     List<DAGInfo> queryDAGInfo();
 
+    List<DAGInfo> queryDAGInfo(List<Long> ids);
+
     List<DAGInfo> queryDAGInfo(String name);
 
     Boolean deleteDAG(Long dagId, String operator);

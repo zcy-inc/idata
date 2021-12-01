@@ -6,20 +6,22 @@ import type { FC } from 'react';
 
 import CreateLabel from './components/CreateLabel';
 import CreateTask from './components/CreateTask';
+import CreateDev from './components/CreateDev';
 import FolderTree from './components/FolderTree';
 import Workbench from './components/Workbench';
 
 const TableManage: FC = () => {
-  const { visibleLabel, visibleTask } = useModel('datadev', (_) => ({
+  const { visibleLabel, visibleTask, visibleDev } = useModel('datadev', (_) => ({
     visibleLabel: _.visibleLabel,
     visibleTask: _.visibleTask,
+    visibleDev: _.visibleDev,
   }));
 
   return (
     <PageContainer contentClassName="split-panel">
       <SplitPane
         className="board"
-        defaultSize={300}
+        defaultSize={240}
         style={{ position: 'relative' }}
         pane2Style={{ width: 0 }}
       >
@@ -28,6 +30,7 @@ const TableManage: FC = () => {
       </SplitPane>
       {visibleLabel && <CreateLabel />}
       {visibleTask && <CreateTask />}
+      {visibleDev && <CreateDev />}
     </PageContainer>
   );
 };

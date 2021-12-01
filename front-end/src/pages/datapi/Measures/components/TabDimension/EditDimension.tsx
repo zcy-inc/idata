@@ -200,6 +200,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           placeholder="请选择"
           options={DIMTables}
           onChange={(value) => setValue(schema, value, 'DIM')}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -213,6 +215,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           placeholder="请选择"
           options={DIMStrings}
           onChange={(value) => setValue(schema, value, 'DIM')}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -240,6 +244,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           placeholder="请选择"
           options={DWDTables}
           onChange={(value) => setValue(schema, value, 'DWD')}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -253,6 +259,8 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           placeholder="请选择"
           options={DWDStrings[schema.index as number]}
           onChange={(value) => setValue(schema, value, 'DWD')}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -306,6 +314,10 @@ const EditDimension: ForwardRefRenderFunction<unknown, EditDimensionProps> = ({ 
           width="md"
           placeholder="根目录"
           options={folderOps}
+          fieldProps={{
+            showSearch: true,
+            filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+          }}
         />
       </ProForm>
       <Title>关联信息</Title>

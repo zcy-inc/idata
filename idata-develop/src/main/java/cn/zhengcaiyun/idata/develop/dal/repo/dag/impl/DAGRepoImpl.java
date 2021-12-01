@@ -128,6 +128,12 @@ public class DAGRepoImpl implements DAGRepo {
     }
 
     @Override
+    public List<DAGInfo> queryDAGInfo(List<Long> ids) {
+        return dagInfoDao.select(dsl -> dsl.where(dag_info.id, isIn(ids),
+                and(dag_info.del, isEqualTo(DEL_NO.val))));
+    }
+
+    @Override
     public List<DAGInfo> queryDAGInfo(String name) {
         return dagInfoDao.select(dsl -> dsl.where(dag_info.del, isEqualTo(DEL_NO.val),
                 and(dag_info.name, isEqualTo(name))));

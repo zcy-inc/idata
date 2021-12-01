@@ -20,11 +20,14 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
+import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
@@ -41,6 +44,8 @@ import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +77,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     private final JobManager jobManager;
     private final JobConfigCombinationManager jobConfigCombinationManager;
     private final JobEventPublisher jobEventPublisher;
+    private final DataSourceApi dataSourceApi;
 
     @Autowired
     public JobExecuteConfigServiceImpl(JobInfoRepo jobInfoRepo,
@@ -81,7 +87,8 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
                                        DAGRepo dagRepo,
                                        JobManager jobManager,
                                        JobConfigCombinationManager jobConfigCombinationManager,
-                                       JobEventPublisher jobEventPublisher) {
+                                       JobEventPublisher jobEventPublisher,
+                                       DataSourceApi dataSourceApi) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobOutputRepo = jobOutputRepo;
@@ -90,6 +97,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         this.jobManager = jobManager;
         this.jobConfigCombinationManager = jobConfigCombinationManager;
         this.jobEventPublisher = jobEventPublisher;
+        this.dataSourceApi = dataSourceApi;
     }
 
     @Override
@@ -125,9 +133,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(StringUtils.isNotBlank(environment), "环境参数为空");
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
-        checkArgument(configCombinationOptional.isPresent(), "配置不存在");
+        if (configCombinationOptional.isEmpty()) return null;
 
-        return JobConfigCombinationDto.from(configCombinationOptional.get());
+        JobConfigCombinationDto combinationDto = JobConfigCombinationDto.from(configCombinationOptional.get());
+        combinationDto.setDependencies(fillDependenceInfo(combinationDto.getDependencies()));
+        combinationDto.setOutput(fillJobOutputInfo(combinationDto.getOutput()));
+        return combinationDto;
     }
 
     @Override
@@ -383,6 +394,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
                                         JobOutputDto dto,
                                         Operator operator) {
         dto.setOperator(operator);
+        if (JobWriteModeEnum.UPSERT.name().equals(dto.getDestWriteMode())) {
+            checkArgument(StringUtils.isNotEmpty(dto.getJobTargetTablePk()), "写入模式为UPSERT时目标表主键不能为空");
+        }
         JobOutput output = dto.toModel();
         output.setId(null);
         output.setJobId(jobId);
@@ -406,6 +420,53 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             jobAndDagDto.setDagName(dagInfo == null ? "" : dagInfo.getName());
             return jobAndDagDto;
         }).collect(Collectors.toList());
+    }
+
+    private JobOutputDto fillJobOutputInfo(JobOutputDto output) {
+        if (Objects.isNull(output)) return null;
+
+        DataSourceDto dto = dataSourceApi.getDataSource(output.getDestDataSourceId());
+        if (Objects.isNull(dto)) return output;
+
+        output.setDestDataSourceName(dto.getName());
+        return output;
+    }
+
+    private List<JobDependenceDto> fillDependenceInfo(List<JobDependenceDto> dependencies) {
+        if (CollectionUtils.isEmpty(dependencies)) return dependencies;
+
+        List<Long> jobIds = Lists.newArrayList();
+        List<Long> dagIds = Lists.newArrayList();
+        for (JobDependenceDto dto : dependencies) {
+            jobIds.add(dto.getJobId());
+            jobIds.add(dto.getPrevJobId());
+            dagIds.add(dto.getPrevJobDagId());
+        }
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(jobIds);
+        Map<Long, JobInfo> jobInfoMap = Maps.newHashMap();
+        if (!CollectionUtils.isEmpty(jobInfoList)) {
+            jobInfoMap = jobInfoList.stream()
+                    .collect(Collectors.toMap(JobInfo::getId, Function.identity()));
+        }
+
+        List<DAGInfo> dagInfoList = dagRepo.queryDAGInfo(dagIds);
+        Map<Long, DAGInfo> dagInfoMap = Maps.newHashMap();
+        if (!CollectionUtils.isEmpty(dagInfoList)) {
+            dagInfoMap = dagInfoList.stream()
+                    .collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
+        }
+
+        for (JobDependenceDto dto : dependencies) {
+            JobInfo jobInfo = jobInfoMap.get(dto.getJobId());
+            dto.setJobName(jobInfo == null ? "" : jobInfo.getName());
+
+            JobInfo prevJobInfo = jobInfoMap.get(dto.getPrevJobId());
+            dto.setPrevJobName(prevJobInfo == null ? "" : prevJobInfo.getName());
+
+            DAGInfo dagInfo = dagInfoMap.get(dto.getPrevJobDagId());
+            dto.setPrevJobDagName(dagInfo == null ? "" : dagInfo.getName());
+        }
+        return dependencies;
     }
 
     private void checkExecuteConfig(JobExecuteConfigDto dto) {

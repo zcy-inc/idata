@@ -161,6 +161,8 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
           placeholder="请选择"
           options={modifierOptions}
           onChange={(value) => setValue(schema, value as string)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },
@@ -175,6 +177,8 @@ const EditDerive: ForwardRefRenderFunction<unknown, EditDeriveProps> = ({ initia
           placeholder="请选择"
           options={enumOptions[schema.index as number]}
           onChange={(value) => setValue(schema, value as string)}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       ),
     },

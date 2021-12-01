@@ -28,6 +28,8 @@ public class JobTypeDto {
     private String code;
     private String catalog;
     private String name;
+    private String language;
+    private String engine;
 
     public String getCode() {
         return code;
@@ -53,11 +55,29 @@ public class JobTypeDto {
         this.name = name;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getEngine() {
+        return engine;
+    }
+
+    public void setEngine(String engine) {
+        this.engine = engine;
+    }
+
     public static JobTypeDto from(JobTypeEnum typeEnum) {
         JobTypeDto dto = new JobTypeDto();
         dto.setCode(typeEnum.getCode());
         dto.setCatalog(typeEnum.getCatalog());
         dto.setName(typeEnum.getName());
+        dto.setLanguage(typeEnum.getLanguage());
+        dto.setEngine(typeEnum.getEngine());
         return dto;
     }
 }

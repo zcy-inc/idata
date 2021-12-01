@@ -4,7 +4,7 @@ import { useModel } from 'umi';
 import { get } from 'lodash';
 import type { FC } from 'react';
 
-import { createDAG, deleteDAG, disableDAG, editDAG, enableDAG, getDAG } from '@/services/datadev';
+import { createDAG, deleteDAG, offlineDAG, editDAG, onlineDAG, getDAG } from '@/services/datadev';
 import { PeriodRange, TriggerMode } from '@/constants/datadev';
 import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
@@ -174,32 +174,32 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
 
   const onEnable = () =>
     confirm({
-      title: '启用DAG',
-      content: '您确认要启用该DAG吗？',
+      title: '上线DAG',
+      content: '您确认要上线该DAG吗？',
       autoFocusButton: null,
       onOk: () =>
-        enableDAG({ id: pane.id }).then((res) => {
+        onlineDAG({ id: pane.id }).then((res) => {
           if (res.success) {
-            message.success('启用DAG成功');
+            message.success('上线DAG成功');
             getDAGWrapped();
           } else {
-            message.error(`启用DAG失败：${res.msg}`);
+            message.error(`上线DAG失败：${res.msg}`);
           }
         }),
     });
 
   const onDisable = () =>
     confirm({
-      title: '停用DAG',
-      content: '您确认要停用该DAG吗？',
+      title: '下线DAG',
+      content: '您确认要下线该DAG吗？',
       autoFocusButton: null,
       onOk: () =>
-        disableDAG({ id: pane.id }).then((res) => {
+        offlineDAG({ id: pane.id }).then((res) => {
           if (res.success) {
-            message.success('停用DAG成功');
+            message.success('下线DAG成功');
             getDAGWrapped();
           } else {
-            message.error(`停用DAG失败：${res.msg}`);
+            message.error(`下线DAG失败：${res.msg}`);
           }
         }),
     });
@@ -226,12 +226,12 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
             </Button>
             {data?.dagInfoDto.status === 0 && (
               <Button key="enable" size="large" onClick={onEnable}>
-                启用
+                上线
               </Button>
             )}
             {data?.dagInfoDto.status === 1 && (
               <Button key="disable" size="large" onClick={onDisable}>
-                停用
+                下线
               </Button>
             )}
             <Button key="del" size="large" onClick={onDelete}>

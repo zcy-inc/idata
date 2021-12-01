@@ -72,6 +72,8 @@ function SelectEnum<VT extends SelectValue = SelectValue>({
         onChange={onEnumChange}
         options={enumOptions}
         style={{ width: isEnumType(value) ? '50%' : '100%' }}
+        showSearch
+        filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
       />
       {isEnumType(value) && (
         <Select
@@ -81,6 +83,8 @@ function SelectEnum<VT extends SelectValue = SelectValue>({
           onChange={onEnumValueChange}
           options={enumOps}
           style={{ width: '50%', marginLeft: 4 }}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
         />
       )}
     </div>

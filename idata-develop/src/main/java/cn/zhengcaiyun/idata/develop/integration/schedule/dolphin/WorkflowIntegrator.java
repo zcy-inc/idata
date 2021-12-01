@@ -89,7 +89,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         mapping.setEnvironment(dagInfo.getEnvironment());
         mapping.setDsEntityType(ENTITY_TYPE_WORKFLOW);
         mapping.setDsEntityCode(workflowCode);
-        dsEntityMappingRepo.create(new DSEntityMapping());
+        dsEntityMappingRepo.create(mapping);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String projectCode = getDSProjectCode(environment);
         // 获取工作流code
         Long workflowCode = getWorkflowCode(dagId, environment);
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-definition/%s/delete-workflow", projectCode, workflowCode);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-definition/%s", projectCode, workflowCode);
         String req_method = "DELETE";
         String token = getDSToken(environment);
 
@@ -228,7 +228,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         scheduleJson.addProperty("processInstancePriority", PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY);
         scheduleJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
         scheduleJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
-        scheduleJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
+        scheduleJson.addProperty("crontab", dagSchedule.getCronExpression());
         scheduleJson.addProperty("timezoneId", "Asia/Shanghai");
 //        scheduleJson.add("schedule", cronJson);
         return scheduleJson.toString();

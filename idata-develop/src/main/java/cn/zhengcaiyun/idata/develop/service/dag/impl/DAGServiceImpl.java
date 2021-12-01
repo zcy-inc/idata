@@ -200,11 +200,11 @@ public class DAGServiceImpl implements DAGService {
         info.setId(id);
         info.setStatus(UsingStatusEnum.ONLINE.val);
         info.setEditor(operator.getNickname());
-
+        dagRepo.updateDAGInfo(info);
         // 发布dag创建事件
         DAGEventLog eventLog = logDagEvent(id, EventTypeEnum.DAG_ONLINE, operator);
         dagEventPublisher.whenToOnline(eventLog);
-        return dagRepo.updateDAGInfo(info);
+        return Boolean.TRUE;
     }
 
     /**

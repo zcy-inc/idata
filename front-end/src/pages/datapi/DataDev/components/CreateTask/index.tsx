@@ -97,6 +97,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           style={{ width }}
           placeholder="请选择"
           options={folders.map((_) => ({ label: _.name, value: _.id }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       <Item name="remark" label="备注说明">

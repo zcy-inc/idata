@@ -53,7 +53,7 @@ public class SqlJobRepoImpl implements SqlJobRepo {
     @Override
     public List<DevJobContentSql> queryList(Long jobId) {
         return devJobContentSqlDao.select(c ->
-                c.where(devJobContentSql.del, isNotEqualTo(DeleteEnum.DEL_NO.val),
+                c.where(devJobContentSql.del, isEqualTo(DeleteEnum.DEL_NO.val),
                         and(devJobContentSql.jobId, isEqualTo(jobId))));
     }
 

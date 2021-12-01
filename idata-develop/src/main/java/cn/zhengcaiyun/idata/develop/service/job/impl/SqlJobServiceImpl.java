@@ -73,6 +73,9 @@ public class SqlJobServiceImpl implements SqlJobService {
                 }
             }
         }
+        else {
+            startNewVersion = true;
+        }
 
         if (startNewVersion) {
             DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class,

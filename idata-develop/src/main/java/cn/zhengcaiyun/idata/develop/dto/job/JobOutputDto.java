@@ -31,14 +31,24 @@ public class JobOutputDto extends BaseDto {
     private Long destDataSourceId;
 
     /**
+     * 数据去向-数据源名称
+     */
+    private String destDataSourceName;
+
+    /**
      * 数据去向-目标表
      */
     private String destTable;
 
     /**
-     * 数据去向-写入模式，override，upsert
+     * 数据去向-写入模式，overwrite，upsert
      */
     private String destWriteMode;
+
+    /**
+     * 数据来源表主键(写入模式为upsert时必填)
+     */
+    private String jobTargetTablePk;
 
     public Long getId() {
         return id;
@@ -94,6 +104,22 @@ public class JobOutputDto extends BaseDto {
 
     public void setDestWriteMode(String destWriteMode) {
         this.destWriteMode = destWriteMode;
+    }
+
+    public String getJobTargetTablePk() {
+        return jobTargetTablePk;
+    }
+
+    public void setJobTargetTablePk(String jobTargetTablePk) {
+        this.jobTargetTablePk = jobTargetTablePk;
+    }
+
+    public String getDestDataSourceName() {
+        return destDataSourceName;
+    }
+
+    public void setDestDataSourceName(String destDataSourceName) {
+        this.destDataSourceName = destDataSourceName;
     }
 
     public static JobOutputDto from(JobOutput model) {

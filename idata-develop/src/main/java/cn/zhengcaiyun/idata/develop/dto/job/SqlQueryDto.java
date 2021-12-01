@@ -23,5 +23,5 @@ import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyQueryDto;
  * @date 2021-11-22 下午3:20
  */
 
-public class QueryDto extends LivyQueryDto {
+public class SqlQueryDto extends LivyQueryDto {
 }

@@ -74,10 +74,17 @@ public class JobOutput {
 
     /**
      * Database Column Remarks:
-     *   数据去向-写入模式，init: 新建表，override: 覆盖表
+     *   数据去向-写入模式，overwrite，upsert
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.dest_write_mode")
     private String destWriteMode;
+
+    /**
+     * Database Column Remarks:
+     *   数据来源表主键(写入模式为upsert时必填)
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.job_target_table_pk")
+    private String jobTargetTablePk;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.id")
     public Long getId() {
@@ -177,5 +184,15 @@ public class JobOutput {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.dest_write_mode")
     public void setDestWriteMode(String destWriteMode) {
         this.destWriteMode = destWriteMode;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.job_target_table_pk")
+    public String getJobTargetTablePk() {
+        return jobTargetTablePk;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_output.job_target_table_pk")
+    public void setJobTargetTablePk(String jobTargetTablePk) {
+        this.jobTargetTablePk = jobTargetTablePk;
     }
 }

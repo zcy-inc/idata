@@ -73,6 +73,8 @@ export default defineConfig({
   chainWebpack(memo, { env, webpack, createCSSRule }) {
     // 设置 alias
     memo.resolve.alias.set('foo', '/tmp/a/b/foo');
-    memo.plugin('monaco-editor').use(MonacoWebpackPlugin, [{ languages: ['sql'] }]);
+    memo
+      .plugin('monaco-editor')
+      .use(MonacoWebpackPlugin, [{ languages: ['sql', 'python', 'java', 'shell'] }]);
   },
 });

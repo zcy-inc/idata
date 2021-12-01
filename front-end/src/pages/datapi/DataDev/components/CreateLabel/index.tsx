@@ -156,6 +156,7 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
         .catch((err) => {});
     }
   };
+
   // 改变枚举值的时候修改预览表格
   const onChangeEnumTypeOps = (value: string) => {
     getEnumValues({ enumCode: value }).then((res) => {
@@ -343,6 +344,10 @@ const CreateTag: FC<CreateTagProps> = ({}) => {
             label="位置"
             rules={rules}
             options={folders.map((_) => ({ label: _.name, value: _.id }))}
+            fieldProps={{
+              showSearch: true,
+              filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+            }}
           />
         </Col>
       </Row>

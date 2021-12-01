@@ -127,7 +127,7 @@ public class JobPublishManager {
 
     private void postPublish(JobPublishRecord publishRecord, Operator operator) {
         // 保存后发布job更新事件（优化点：如果之前存在发布的版本，所属环境未暂停运行，则不用同步DS）
-        JobEventLog eventLog = jobManager.logEvent(publishRecord.getJobId(), EventTypeEnum.JOB_PUBLISH, operator);
+        JobEventLog eventLog = jobManager.logEvent(publishRecord.getJobId(), EventTypeEnum.JOB_PUBLISH, publishRecord.getEnvironment(), operator);
         jobEventPublisher.whenPublished(eventLog);
     }
 
@@ -138,11 +138,6 @@ public class JobPublishManager {
         Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(optional.get().getSchDagId());
         checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
         checkArgument(Objects.equals(UsingStatusEnum.ONLINE.val, dagInfoOptional.get().getStatus()), "DAG已停用");
-    }
-
-    public boolean hasPublishPermission(Operator operator) {
-        // todo  用权限系统实现
-        return Objects.nonNull(publishWhitelist) && publishWhitelist.indexOf(operator.getNickname()) >= 0;
     }
 
     private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, JobPublishContent content, EnvEnum envEnum, String remark, Operator operator) {

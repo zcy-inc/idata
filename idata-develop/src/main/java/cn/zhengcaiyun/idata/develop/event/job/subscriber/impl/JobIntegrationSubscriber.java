@@ -45,7 +45,7 @@ import java.util.Optional;
  * @create: 2021-11-03 17:57
  **/
 @Component
-//@Subscriber(JobEventBus.EVENT_BUS_EXPRESSION)
+@Subscriber(JobEventBus.EVENT_BUS_EXPRESSION)
 public class JobIntegrationSubscriber implements IJobEventSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobIntegrationSubscriber.class);
@@ -97,6 +97,7 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
     }
 
     @Override
+    @Subscribe
     public void onScheduleUpdated(JobScheduleUpdatedEvent event) {
         try {
             Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(event.getJobId());

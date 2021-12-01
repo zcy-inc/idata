@@ -42,10 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @description:
@@ -69,7 +66,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String req_method = "POST";
         String token = getDSToken(environment);
 
-        Map<String, String> req_param = buildJobReqParam(jobInfo, executeConfig);
+        Map<String, String> req_param = buildCreateJobReqParam(jobInfo, executeConfig);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
@@ -84,7 +81,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         mapping.setEnvironment(environment);
         mapping.setDsEntityType(ENTITY_TYPE_TASK);
         mapping.setDsEntityCode(taskCode);
-        dsEntityMappingRepo.create(new DSEntityMapping());
+        dsEntityMappingRepo.create(mapping);
     }
 
     @Override
@@ -97,9 +94,9 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String req_method = "PUT";
         String token = getDSToken(environment);
 
-        Map<String, String> req_param = buildJobReqParam(jobInfo, executeConfig);
+        Map<String, String> req_param = buildUpdateJobReqParam(jobInfo, executeConfig);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("更新DS任务失败：%s", resultDto.getMsg()));
         }
@@ -354,7 +351,10 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
             ResultDto<JSONObject> resultDto = sendReq(req_input);
             if (!resultDto.isSuccess()) {
-                throw new ExternalIntegrationException(String.format("创建DS任务依赖关系失败：%s", resultDto.getMsg()));
+                // 50034: process task relation is already exist
+                if (!Objects.equals(resultDto.getCode(), 50034)) {
+                    throw new ExternalIntegrationException(String.format("创建DS任务依赖关系失败：%s", resultDto.getMsg()));
+                }
             }
         }
     }
@@ -393,7 +393,10 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
             ResultDto<JSONObject> resultDto = sendReq(req_input);
             if (!resultDto.isSuccess()) {
-                throw new ExternalIntegrationException(String.format("创建DS任务跨工作流依赖关系失败：%s", resultDto.getMsg()));
+                // 50034: process task relation is already exist
+                if (!Objects.equals(resultDto.getCode(), 50034)) {
+                    throw new ExternalIntegrationException(String.format("创建DS任务跨工作流依赖关系失败：%s", resultDto.getMsg()));
+                }
             }
         }
     }
@@ -512,7 +515,15 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return paramMap;
     }
 
-    private Map<String, String> buildJobReqParam(JobInfo jobInfo, JobExecuteConfig executeConfig) {
+    private Map<String, String> buildUpdateJobReqParam(JobInfo jobInfo, JobExecuteConfig executeConfig) {
+        String taskJson = buildSingleTaskJson(jobInfo, executeConfig).toJSONString();
+
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("taskDefinitionJsonObj", taskJson);
+        return paramMap;
+    }
+
+    private Map<String, String> buildCreateJobReqParam(JobInfo jobInfo, JobExecuteConfig executeConfig) {
         String taskJson = buildTaskJson(jobInfo, executeConfig);
 
         Map<String, String> paramMap = Maps.newHashMap();
@@ -521,6 +532,13 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private String buildTaskJson(JobInfo jobInfo, JobExecuteConfig executeConfig) {
+        JSONObject taskJson = buildSingleTaskJson(jobInfo, executeConfig);
+        JSONArray taskJsonArray = new JSONArray();
+        taskJsonArray.add(taskJson);
+        return taskJsonArray.toJSONString();
+    }
+
+    private JSONObject buildSingleTaskJson(JobInfo jobInfo, JobExecuteConfig executeConfig) {
         JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\"," +
                 "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}}," +
                 "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"0\",\"failRetryInterval\":\"1\"," +
@@ -533,10 +551,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         taskJson.put("timeoutFlag", "OPEN");
         taskJson.put("timeout", executeConfig.getSchTimeOut());
         taskJson.put("timeoutNotifyStrategy", getJobTimeoutStrategy(executeConfig));
-
-        JSONArray taskJsonArray = new JSONArray();
-        taskJsonArray.add(taskJson);
-        return taskJsonArray.toJSONString();
+        return taskJson;
     }
 
     private String getJobTimeoutStrategy(JobExecuteConfig executeConfig) {

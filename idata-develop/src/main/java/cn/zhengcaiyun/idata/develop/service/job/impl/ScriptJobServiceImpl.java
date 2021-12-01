@@ -24,6 +24,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.ScriptJobRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.ScriptJobService;
+import io.prestosql.jdbc.$internal.guava.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +62,6 @@ public class ScriptJobServiceImpl implements ScriptJobService {
             checkArgument(existJobContentScript != null, "作业不存在或已删除");
             ScriptJobContentDto existScriptJob = PojoUtil.copyOne(existJobContentScript, ScriptJobContentDto.class);
 
-            // TODO 测试一致性
             // 不可修改且跟当前版本不一致才新生成版本
             if (existScriptJob.getEditable().equals(EditableEnum.NO.val) && !scriptJobDto.equals(existScriptJob)) {
                 startNewVersion = true;
@@ -80,9 +81,11 @@ public class ScriptJobServiceImpl implements ScriptJobService {
 
         if (startNewVersion) {
             DevJobContentScript jobContentScript = PojoUtil.copyOne(scriptJobDto, DevJobContentScript.class,
-                    "jobId", "sourceResource", "scriptArguments");
+                    "jobId", "sourceResource");
             version = scriptJobRepo.newVersion(scriptJobDto.getJobId());
             jobContentScript.setVersion(version);
+            jobContentScript.setScriptArguments(ObjectUtils.isNotEmpty(scriptJobDto.getScriptArguments())
+                    ? scriptJobDto.getScriptArguments() : Lists.newArrayList());
             jobContentScript.setEditable(EditableEnum.YES.val);
             jobContentScript.setCreator(operator);
             scriptJobRepo.add(jobContentScript);

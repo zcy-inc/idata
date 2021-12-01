@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import type { FC } from 'react';
-import type { FormInstance } from 'antd';
+import { FormInstance } from 'antd';
 import styles from './index.less';
 
 import { getFolders } from '@/services/datadev';
@@ -53,11 +53,14 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         initialValue={data?.enumName}
       />
       <ProForm.Item
-        label={<span style={{ fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.85)' }}>枚举值</span>}
+        // label={<span style={{ fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.85)' }}>枚举值</span>}
+        label="枚举值"
         name="enumValues"
         trigger="onChange"
         rules={require}
         labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }} // 不知道为什么出现的样式问题，所以加上的
+        style={{ display: 'flex', flexDirection: 'column' }} // 同上
       >
         {/* 这儿使用form提供的initialValue时只会在第一次的时候传递, 之后由自定义组件自身的value接管而失效 */}
         {/* 虽然确实卸载了这个组件, 但是不知道为什么value值仍然生效 */}
@@ -71,6 +74,10 @@ const EditEnum: FC<EditEnumProps> = ({ form, data }) => {
         width="md"
         rules={require}
         options={folders.map((_) => ({ label: _.name, value: _.id }))}
+        fieldProps={{
+          showSearch: true,
+          filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+        }}
       />
     </ProForm>
   );

@@ -106,6 +106,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
       <Title>DAG信息</Title>
       <Descriptions colon={false} column={1}>
         <Item label="DAG名称">{data?.dagInfoDto.name || '-'}</Item>
+        <Item label="环境">{data?.dagInfoDto.environment || '-'}</Item>
         <Item label="数仓分层">
           {layers.find((_) => _.valueCode === data?.dagInfoDto.dwLayerCode)?.enumValue || '-'}
         </Item>

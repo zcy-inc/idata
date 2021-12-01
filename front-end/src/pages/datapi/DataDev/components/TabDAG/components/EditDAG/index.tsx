@@ -17,6 +17,8 @@ import { IconFont } from '@/components';
 import { DAG, Folder } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
 import { getEnumValues, getFolders } from '@/services/datadev';
+import { getEnvironments } from '@/services/datasource';
+import { Environments } from '@/constants/datasource';
 
 interface EditDAGProps {
   data?: DAG;
@@ -33,19 +35,28 @@ const { Item } = Form;
 const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [envs, setEnvs] = useState<Environments[]>([]);
   const [periodRange, setPeriodRange] = useState<PeriodRange>(PeriodRange.YEAR);
   const [triggerMode, setTriggerMode] = useState(TriggerMode.INTERVAL);
   const [cronExpression, setCronExpression] = useState('');
 
   useEffect(() => {
-    getEnumValues({ enumCode: 'dwLayerEnum:ENUM' }).then((res) => setLayers(res.data));
-    getFolders({ belong: FolderBelong.DAG }).then((res) => setFolders(res.data));
+    getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
+      .then((res) => setLayers(res.data))
+      .catch((err) => {});
+    getFolders({ belong: FolderBelong.DAG })
+      .then((res) => setFolders(res.data))
+      .catch((err) => {});
+    getEnvironments()
+      .then((res) => setEnvs(res.data))
+      .catch((err) => {});
   }, []);
 
   useEffect(() => {
     if (data) {
       const initial = {
         name: data.dagInfoDto.name,
+        environment: data.dagInfoDto.environment,
         dwLayerCode: data.dagInfoDto.dwLayerCode,
         folderId: data.dagInfoDto.folderId,
         range: [data.dagScheduleDto.beginTime, data.dagScheduleDto.endTime],
@@ -294,6 +305,14 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           rules={ruleText}
         />
         <ProFormSelect
+          name="env"
+          label="环境"
+          placeholder="请选择"
+          options={envs.map((_) => ({ label: _, value: _ }))}
+          fieldProps={{ size: 'large', style: { width } }}
+          rules={ruleSlct}
+        />
+        <ProFormSelect
           name="dwLayerCode"
           label="数仓分层"
           placeholder="请选择"
@@ -306,7 +325,12 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           label="目标文件夹"
           placeholder="请选择"
           options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          fieldProps={{ size: 'large', style: { width } }}
+          fieldProps={{
+            size: 'large',
+            style: { width },
+            showSearch: true,
+            filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
+          }}
           rules={ruleSlct}
         />
         <ProFormDateTimeRangePicker
@@ -340,6 +364,14 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
         <Item label="CRON表达式">
           <span style={{ color: '#737b96' }}>{cronExpression || '-'}</span>
         </Item>
+        <ProFormSelect
+          name="dependence"
+          label="依赖DAG"
+          placeholder="请选择"
+          options={[]}
+          fieldProps={{ size: 'large', style: { width } }}
+          mode="multiple"
+        />
       </ProForm>
     </div>
   );

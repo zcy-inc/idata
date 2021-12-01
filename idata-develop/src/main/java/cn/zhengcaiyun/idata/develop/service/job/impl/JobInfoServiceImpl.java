@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
-import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
@@ -28,10 +27,15 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
@@ -43,6 +47,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -68,11 +73,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobManager jobManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
-    private final DIJobContentRepo diJobContentRepo;
-    private final SqlJobRepo sqlJobRepo;
-    private final SparkJobRepo sparkJobRepo;
-    private final ScriptJobRepo scriptJobRepo;
-    private final KylinJobRepo kylinJobRepo;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
@@ -82,12 +82,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                               DAGRepo dagRepo,
                               JobManager jobManager,
                               JobEventPublisher jobEventPublisher,
-                              DevTreeNodeLocalCache devTreeNodeLocalCache,
-                              DIJobContentRepo diJobContentRepo,
-                              SqlJobRepo sqlJobRepo,
-                              SparkJobRepo sparkJobRepo,
-                              ScriptJobRepo scriptJobRepo,
-                              KylinJobRepo kylinJobRepo) {
+                              DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -96,14 +91,10 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.jobDependenceRepo = jobDependenceRepo;
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
-        this.diJobContentRepo = diJobContentRepo;
-        this.sqlJobRepo = sqlJobRepo;
-        this.sparkJobRepo = sparkJobRepo;
-        this.scriptJobRepo = scriptJobRepo;
-        this.kylinJobRepo = kylinJobRepo;
     }
 
     @Override
+    @Transactional
     public Long addJob(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
@@ -122,6 +113,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean editJobInfo(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         JobInfo oldJobInfo = tryFetchJobInfo(dto.getId());
@@ -153,68 +145,12 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType) {
-        try {
-            JobTypeEnum.valueOf(jobType);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("作业类型有误");
-        }
-        JobContentBaseDto content = new JobContentBaseDto();
-        content.setJobId(jobId);
-        content.setVersion(version);
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
-            Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
-            checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
-            content.setId(jobContentOptional.get().getId());
-        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
-            checkArgument(sqlJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(sqlJobRepo.query(jobId, version).getId());
-        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
-            checkArgument(sparkJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(sparkJobRepo.query(jobId, version).getId());
-        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
-            checkArgument(scriptJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(scriptJobRepo.query(jobId, version).getId());
-        } else {
-            checkArgument(kylinJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(kylinJobRepo.query(jobId, version).getId());
-        }
-        return content;
-    }
-
-    @Override
-    public List<JobContentBaseDto> getJobContents(Long jobId, String jobType) {
-        List<JobContentBaseDto> contentList;
-        try {
-            JobTypeEnum.valueOf(jobType);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("作业类型有误");
-        }
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
-            contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
-                    "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
-            contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
-                    "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
-            contentList = PojoUtil.copyList(sparkJobRepo.queryList(jobId), JobContentBaseDto.class,
-                    "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
-            contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
-                    "jobId", "version", "createTime");
-        } else {
-            contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
-                    "jobId", "version", "createTime");
-        }
-        return contentList;
-    }
-
-    @Override
     public JobDetailsDto getJobDetails(Long jobId, Integer version, Boolean isDryRun) {
         return null;
     }
 
     @Override
+    @Transactional
     public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
@@ -234,6 +170,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean resumeJob(Long id, String environment, Operator operator) {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
@@ -252,11 +189,12 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean pauseJob(Long id, String environment, Operator operator) {
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
-        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能恢复运行", environment);
+        checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能暂停运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
         checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在%s环境已暂停，勿重复操作", environment);
 
@@ -290,7 +228,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     // TODO 进勇脚本支持
     @Override
     public JobDryRunDto dryRunJob(Long jobId, Integer version) {
-
         return null;
     }
 

@@ -28,7 +28,7 @@ public interface IDagEventSubscriber {
 
     void onCreated(DagCreatedEvent event);
 
-    void onUpdated(DagCreatedEvent event);
+    void onUpdated(DagUpdatedEvent event);
 
     void onDeleted(DagDeletedEvent event);
 

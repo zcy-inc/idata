@@ -2,10 +2,16 @@ import type { Key } from 'react';
 import { request } from 'umi';
 import type { Table } from '@/types/datapi';
 import type {
+  ConfiguredTaskListItem,
   DAG,
   DAGListItem,
+  DataDevContent,
   Folder,
+  KylinContent,
   MappedColumn,
+  ScriptContent,
+  SparkContent,
+  SqlSparkContent,
   Task,
   TaskConfig,
   TaskContent,
@@ -14,7 +20,7 @@ import type {
   TaskVersion,
   TreeNode,
 } from '@/types/datadev';
-import type { PeriodRange, TaskCategory, TaskTypes } from '@/constants/datadev';
+import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -231,20 +237,20 @@ export async function deleteDAG(params: { id: Key }) {
 }
 
 /**
- * 启用DAG
+ * 上线DAG
  */
-export async function enableDAG(params: { id: Key }) {
-  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/dags/${params.id}/enable`, {
+export async function onlineDAG(params: { id: Key }) {
+  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/dags/${params.id}/online`, {
     method: 'PUT',
     params,
   });
 }
 
 /**
- * 停用DAG
+ * 下线DAG
  */
-export async function disableDAG(params: { id: Key }) {
-  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/dags/${params.id}/disable`, {
+export async function offlineDAG(params: { id: Key }) {
+  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/dags/${params.id}/offline`, {
     method: 'PUT',
     params,
   });
@@ -301,7 +307,7 @@ export async function editTask(data: Task) {
  */
 export async function getTaskVersions(params: { jobId: number }) {
   return request<DefaultResponse & { data: TaskVersion[] }>(
-    `/api/p1/dev/jobs/${params.jobId}/di/versions`,
+    `/api/p1/dev/jobs/${params.jobId}/versions`,
     {
       method: 'GET',
       params,
@@ -352,19 +358,25 @@ export async function getTaskTableColumns(params: {
 /**
  * 暂停作业
  */
-export async function disableTask(params: { id: number }) {
-  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/jobs/${params.id}/disable`, {
-    method: 'PUT',
-  });
+export async function disableTask(params: { id: number; environment: Environments }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/${params.id}/environments/${params.environment}/pause`,
+    {
+      method: 'PUT',
+    },
+  );
 }
 
 /**
  * 启用作业
  */
-export async function enableTask(params: { id: number }) {
-  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/jobs/${params.id}/enable`, {
-    method: 'PUT',
-  });
+export async function enableTask(params: { id: number; environment: Environments }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/${params.id}/${params.environment}/run`,
+    {
+      method: 'PUT',
+    },
+  );
 }
 
 /**
@@ -457,4 +469,312 @@ export async function saveTaskConfig(data: { jobId: number; environment: Environ
       data,
     },
   );
+}
+
+/* ========== 数据开发 ========== */
+/**
+ * 获取数据开发的catalogs
+ */
+export async function getDataDevTypes() {
+  return request<DefaultResponse & { data: TaskCategory[] }>(`/api/p1/dev/jobs/catalogs`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * 获取已配置的作业列表（依赖的上游任务）
+ */
+export async function getConfiguredTaskList(params: { environment: Environments }) {
+  return request<DefaultResponse & { data: ConfiguredTaskListItem[] }>(
+    `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
+    {
+      method: 'GET',
+    },
+  );
+}
+
+/**
+ * 获取数据开发配置信息
+ */
+export async function getDataDevConfig(params: { jobId: number; environment: Environments }) {
+  return request<DefaultResponse & { data: DataDevContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
+    {
+      method: 'GET',
+    },
+  );
+}
+
+/**
+ * 保存数据开发配置信息
+ */
+export async function saveDataDevConfig(
+  params: { jobId: number; environment: Environments },
+  data: DataDevContent,
+) {
+  return request<DefaultResponse & { data: DataDevContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
+ * 暂停作业
+ */
+export async function pauseTask(params: { id: number; environment: Environments }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/${params.id}/environments/${params.environment}/pause`,
+    {
+      method: 'PUT',
+      params,
+    },
+  );
+}
+
+/**
+ * 恢复作业
+ */
+export async function resumeTask(params: { id: number; environment: Environments }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/${params.id}/environments/${params.environment}/resume`,
+    {
+      method: 'PUT',
+      params,
+    },
+  );
+}
+
+/**
+ * 单次运行作业
+ */
+export async function runTask(params: { id: number; environment: Environments }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/${params.id}/environments/${params.environment}/run`,
+    {
+      method: 'POST',
+      params,
+    },
+  );
+}
+
+/**
+ * 保存Sql作业内容(done)
+ */
+export async function saveSqlSpark(params: { jobId: number }, data: SqlSparkContent) {
+  return request<DefaultResponse & { data: SqlSparkContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/sql/contents`,
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
+ * 获取Sql作业内容(done)
+ */
+export async function getSqlSpark(params: { jobId: number; version: number }) {
+  return request<DefaultResponse & { data: SqlSparkContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/sql/contents/${params.version}`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 保存Spark作业内容
+ */
+export async function saveSpark(params: { jobId: number }, data: SparkContent) {
+  return request<DefaultResponse & { data: SparkContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/spark/contents`,
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
+ * 获取Spark作业内容
+ */
+export async function getSpark(params: { jobId: number; version: number }) {
+  return request<DefaultResponse & { data: SparkContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/spark/contents/${params.version}`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 获取Spark作业内容
+ */
+export async function uploadJar(params: { jobId: number }, data: FormData) {
+  return request<DefaultResponse & { data: string }>(
+    `/api/p1/dev/jobs/${params.jobId}/spark/uploadFile`,
+    {
+      method: 'POST',
+      params,
+      data,
+    },
+  );
+}
+
+/**
+ * 保存Script作业内容
+ */
+export async function saveScript(params: { jobId: number }, data: ScriptContent) {
+  return request<DefaultResponse & { data: ScriptContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/script/contents`,
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
+ * 获取Script作业内容
+ */
+export async function getScript(params: { jobId: number; version: number }) {
+  return request<DefaultResponse & { data: ScriptContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/script/contents/${params.version}`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 保存Kylin作业内容
+ */
+export async function saveKylin(params: { jobId: number }, data: KylinContent) {
+  return request<DefaultResponse & { data: KylinContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/kylin/contents`,
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
+ * 获取Kylin作业内容
+ */
+export async function getKylin(params: { jobId: number; version: number }) {
+  return request<DefaultResponse & { data: KylinContent }>(
+    `/api/p1/dev/jobs/${params.jobId}/kylin/contents/${params.version}`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * runQuerySql(done)
+ */
+export async function runQuerySql(data: {
+  querySql: string;
+  sessionKind: string;
+  udfIds?: number[];
+  externalTables?: string;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        sessionId: number;
+        statementId: number;
+      };
+    }
+  >('/api/p1/dev/jobs/runSqlQuery', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * runQueryPython(done)
+ */
+export async function runQueryPython(data: {
+  queryPython: string;
+  jobName: string;
+  udfIds?: number[];
+  externalTables?: string;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        sessionId: number;
+        statementId: number;
+      };
+    }
+  >('/api/p1/dev/jobs/runPythonQuery', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * runQueryResultSql(done)
+ */
+export async function runQueryResultSql(params: {
+  sessionId: number;
+  statementId: number;
+  from: number;
+  size: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        queryRunLog: {
+          sessionId: number;
+          state: string;
+          from: number;
+          total: number;
+          log: string[];
+        };
+        sessionId: number;
+        statementId: number;
+        statementState: StatementState;
+        outputStatus: string;
+        resultSet: { [key: string]: string }[];
+      };
+    }
+  >('/api/p1/dev/jobs/runSqlQueryResult', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * runQueryResultPython(done)
+ */
+export async function runQueryResultPython(params: {
+  sessionId: number;
+  statementId: number;
+  from: number;
+  size: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        log: string[];
+        total: number;
+        sessionId: number;
+        statementId: number;
+        state: string;
+      };
+    }
+  >('/api/p1/dev/jobs/runPythonQueryResult', {
+    method: 'GET',
+    params,
+  });
 }

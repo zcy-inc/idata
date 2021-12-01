@@ -38,6 +38,11 @@ public class JobDependenceDto extends BaseDto {
     private Long jobId;
 
     /**
+     * 作业名称
+     */
+    private String jobName;
+
+    /**
      * 环境
      */
     private String environment;
@@ -48,9 +53,20 @@ public class JobDependenceDto extends BaseDto {
     private Long prevJobId;
 
     /**
+     * 上游作业名称
+     */
+    private String prevJobName;
+
+    /**
      * 上游作业所属dag id
      */
     private Long prevJobDagId;
+
+    /**
+     * 上游作业所属dag 名称
+     */
+    private String prevJobDagName;
+
 
     public Long getId() {
         return id;
@@ -90,6 +106,30 @@ public class JobDependenceDto extends BaseDto {
 
     public void setPrevJobDagId(Long prevJobDagId) {
         this.prevJobDagId = prevJobDagId;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
+    }
+
+    public String getPrevJobName() {
+        return prevJobName;
+    }
+
+    public void setPrevJobName(String prevJobName) {
+        this.prevJobName = prevJobName;
+    }
+
+    public String getPrevJobDagName() {
+        return prevJobDagName;
+    }
+
+    public void setPrevJobDagName(String prevJobDagName) {
+        this.prevJobDagName = prevJobDagName;
     }
 
     public static JobDependenceDto from(JobDependence model) {

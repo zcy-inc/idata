@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.portal.config;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -37,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+import static cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDynamicSqlSupport.sysFeature;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -47,6 +50,8 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 @Component
 public class WebAuthFilter implements Filter {
 
+    private final String[] featureTypes = {"F_MENU", "F_ICON"};
+
     @Value("${access.mode:#{null}}")
     private String ACCESS_MODE;
 
@@ -56,6 +61,8 @@ public class WebAuthFilter implements Filter {
     private UacUserDao uacUserDao;
     @Autowired
     private UserAccessService userAccessService;
+    @Autowired
+    private SysFeatureDao sysFeatureDao;
 
 
     @Override
@@ -107,8 +114,12 @@ public class WebAuthFilter implements Filter {
                 UacUser user = uacUserDao.selectOne(c ->
                         c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
                 if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
-                    String requestMethod = ((HttpServletRequest) servletRequest).getMethod();
-                    if (RequestMethod.GET.name().equals(requestMethod) && !userAccessService.checkFeatureAccess(userId, path)) {
+                    SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                            and(sysFeature.featureUrlPath, isEqualTo(path))))
+                            .orElse(null);
+                    if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
+                            && !userAccessService.checkFeatureAccess(userId, path)) {
+                        servletResponse.setContentType("application/json; charset=UTF-8");
                         servletResponse.getWriter().write(JSON.toJSONString(
                                 RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
                         servletResponse.getWriter().flush();

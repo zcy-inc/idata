@@ -39,10 +39,6 @@ public interface JobInfoService {
 
     JobInfoDto getJobInfo(Long id);
 
-    JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType);
-
-    List<JobContentBaseDto> getJobContents(Long jobId, String jobType);
-
     JobDetailsDto getJobDetails(Long jobId, Integer version, Boolean isDryRun);
 
     Boolean removeJob(Long id, Operator operator);

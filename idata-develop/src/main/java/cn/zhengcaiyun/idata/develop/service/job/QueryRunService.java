@@ -16,9 +16,11 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
-import cn.zhengcaiyun.idata.develop.dto.job.QueryRunResultDto;
-import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.*;
+
+import java.io.IOException;
 
 /**
  * @author caizhedong
@@ -26,6 +28,8 @@ import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
  */
 
 public interface QueryRunService {
-    LivyStatementDto runQuery(QueryDto queryDto);
-    QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId);
+    SqlQueryStatementDto runSqlQuery(SqlQueryDto sqlQueryDto);
+    QueryRunResultDto runSqlQueryResult(Integer sessionId, Integer statementId, Integer from, Integer size);
+    PythonQuerySessionDto runPythonQuery(PythonQueryDto pythonQueryDto) throws IOException;
+    PythonQueryRunLogDto runPythonQueryLog(Integer sessionId, Integer from, Integer size);
 }
