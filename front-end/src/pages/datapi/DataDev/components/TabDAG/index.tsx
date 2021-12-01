@@ -100,6 +100,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
             name: values.name,
             dwLayerCode: values.dwLayerCode,
             folderId: values.folderId,
+            environment: values.environment,
           },
           dagScheduleDto: {
             beginTime: values.range[0].valueOf(),

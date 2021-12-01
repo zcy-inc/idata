@@ -305,7 +305,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           rules={ruleText}
         />
         <ProFormSelect
-          name="env"
+          name="environment"
           label="环境"
           placeholder="请选择"
           options={envs.map((_) => ({ label: _, value: _ }))}
@@ -364,14 +364,6 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
         <Item label="CRON表达式">
           <span style={{ color: '#737b96' }}>{cronExpression || '-'}</span>
         </Item>
-        <ProFormSelect
-          name="dependence"
-          label="依赖DAG"
-          placeholder="请选择"
-          options={[]}
-          fieldProps={{ size: 'large', style: { width } }}
-          mode="multiple"
-        />
       </ProForm>
     </div>
   );
