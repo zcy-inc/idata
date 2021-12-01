@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @create: 2021-11-03 17:56
  **/
 @Component
-@Subscriber(DagEventBus.EVENT_BUS_EXPRESSION)
+//@Subscriber(DagEventBus.EVENT_BUS_EXPRESSION)
 public class DagIntegrationSubscriber implements IDagEventSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DagIntegrationSubscriber.class);
