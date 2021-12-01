@@ -17,7 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.event.job.publisher;
 
-import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
@@ -47,8 +47,7 @@ public class JobEventPublisher {
     }
 
     public void whenCreated(JobEventLog eventLog) {
-        if (!EventTypeEnum.CREATED.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.CREATED.name().equals(eventLog.getJobEvent())) return;
 
         JobCreatedEvent event = new JobCreatedEvent();
         event.setJobId(eventLog.getJobId());
@@ -61,8 +60,7 @@ public class JobEventPublisher {
     }
 
     public void whenUpdated(JobEventLog eventLog) {
-        if (!EventTypeEnum.UPDATED.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.UPDATED.name().equals(eventLog.getJobEvent())) return;
 
         JobUpdatedEvent event = new JobUpdatedEvent();
         event.setJobId(eventLog.getJobId());
@@ -74,8 +72,7 @@ public class JobEventPublisher {
     }
 
     public void whenScheduleUpdated(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_SCHEDULE_UPDATED.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_SCHEDULE_UPDATED.name().equals(eventLog.getJobEvent())) return;
 
         JobScheduleUpdatedEvent event = new JobScheduleUpdatedEvent();
         event.setJobId(eventLog.getJobId());
@@ -88,8 +85,7 @@ public class JobEventPublisher {
     }
 
     public void whenDeleted(JobEventLog eventLog) {
-        if (!EventTypeEnum.DELETED.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.DELETED.name().equals(eventLog.getJobEvent())) return;
 
         JobDeletedEvent event = new JobDeletedEvent();
         event.setJobId(eventLog.getJobId());
@@ -101,8 +97,7 @@ public class JobEventPublisher {
     }
 
     public void whenResumed(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_RESUME.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_RESUME.name().equals(eventLog.getJobEvent())) return;
 
         JobEnabledEvent event = new JobEnabledEvent();
         event.setJobId(eventLog.getJobId());
@@ -115,8 +110,7 @@ public class JobEventPublisher {
     }
 
     public void whenPaused(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_PAUSE.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_PAUSE.name().equals(eventLog.getJobEvent())) return;
 
         JobDisabledEvent event = new JobDisabledEvent();
         event.setJobId(eventLog.getJobId());
@@ -129,8 +123,7 @@ public class JobEventPublisher {
     }
 
     public void whenPublished(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_PUBLISH.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_PUBLISH.name().equals(eventLog.getJobEvent())) return;
 
         JobPublishedEvent event = new JobPublishedEvent();
         event.setJobId(eventLog.getJobId());
@@ -143,8 +136,7 @@ public class JobEventPublisher {
     }
 
     public void whenBindDag(JobEventLog eventLog, Long bindDagId, Boolean isFirst) {
-        if (!EventTypeEnum.JOB_BIND_DAG.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_BIND_DAG.name().equals(eventLog.getJobEvent())) return;
 
         JobBindDagEvent event = new JobBindDagEvent();
         event.setJobId(eventLog.getJobId());
@@ -159,8 +151,7 @@ public class JobEventPublisher {
     }
 
     public void whenUnBindDag(JobEventLog eventLog, Long unbindDagId) {
-        if (!EventTypeEnum.JOB_UNBIND_DAG.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_UNBIND_DAG.name().equals(eventLog.getJobEvent())) return;
 
         JobUnBindDagEvent event = new JobUnBindDagEvent();
         event.setJobId(eventLog.getJobId());
@@ -174,8 +165,7 @@ public class JobEventPublisher {
     }
 
     public void whenToRun(JobEventLog eventLog) {
-        if (!EventTypeEnum.JOB_RUN.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_RUN.name().equals(eventLog.getJobEvent())) return;
 
         JobRunEvent event = new JobRunEvent();
         event.setJobId(eventLog.getJobId());
@@ -188,8 +178,7 @@ public class JobEventPublisher {
     }
 
     public void whenBuildPrevRelation(JobEventLog eventLog, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) {
-        if (!EventTypeEnum.JOB_BUILD_PREV.name().equals(eventLog.getJobEvent()))
-            return;
+        if (!EventTypeEnum.JOB_BUILD_PREV.name().equals(eventLog.getJobEvent())) return;
 
         JobBuildPrevRelationEvent event = new JobBuildPrevRelationEvent();
         event.setJobId(eventLog.getJobId());
@@ -210,7 +199,7 @@ public class JobEventPublisher {
             // 处理失败
             updateEventLog.setHandleStatus(EventStatusEnum.FAIL.val);
             updateEventLog.setHandleMsg(Strings.nullToEmpty(event.fetchFailedMessage()));
-            throw new GeneralException(event.fetchFailedMessage());
+            throw new ExternalIntegrationException(event.fetchFailedMessage());
         } else {
             // 处理成功，标记事件已处理
             updateEventLog.setHandleStatus(EventStatusEnum.SUCCESS.val);

@@ -17,7 +17,6 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule;
 
-import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
@@ -31,24 +30,23 @@ import java.util.List;
  **/
 public interface IJobIntegrator {
 
-    void create(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
+    void create(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment);
 
-    void update(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
+    void update(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment);
 
-    void delete(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
+    void delete(JobInfo jobInfo, String environment);
 
-    void enableRunning(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
+    void enableRunning(JobInfo jobInfo, String environment);
 
-    void disableRunning(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
+    void disableRunning(JobInfo jobInfo, String environment);
 
-    void publish(JobInfo jobInfo, String environment) throws ExternalIntegrationException;
+    void publish(JobInfo jobInfo, String environment);
 
-    void bindDag(JobInfo jobInfo, Long dagId, String environment) throws ExternalIntegrationException;
+    void bindDag(JobInfo jobInfo, Long dagId, String environment);
 
-    void unBindDag(JobInfo jobInfo, Long dagId, String environment) throws ExternalIntegrationException;
+    void unBindDag(JobInfo jobInfo, Long dagId, String environment);
 
-    void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) throws ExternalIntegrationException;
+    void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment);
 
-    void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
-                          List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) throws ExternalIntegrationException;
+    void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations);
 }

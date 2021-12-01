@@ -5,7 +5,7 @@ package cn.zhengcaiyun.idata.commons.exception;
  * @author: yangjianhua
  * @create: 2021-07-01 09:57
  **/
-public class ExternalIntegrationException extends Exception {
+public class ExternalIntegrationException extends RuntimeException {
 
     public ExternalIntegrationException(String message) {
         super(message);

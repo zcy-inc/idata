@@ -17,7 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.event.dag.publisher;
 
-import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGEventLog;
@@ -48,8 +48,7 @@ public class DagEventPublisher {
     }
 
     public void whenCreated(DAGEventLog eventLog) {
-        if (!EventTypeEnum.CREATED.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.CREATED.name().equals(eventLog.getDagEvent())) return;
 
         DagCreatedEvent event = new DagCreatedEvent();
         event.setDagId(eventLog.getDagId());
@@ -61,8 +60,7 @@ public class DagEventPublisher {
     }
 
     public void whenUpdated(DAGEventLog eventLog) {
-        if (!EventTypeEnum.UPDATED.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.UPDATED.name().equals(eventLog.getDagEvent())) return;
 
         DagUpdatedEvent event = new DagUpdatedEvent();
         event.setDagId(eventLog.getDagId());
@@ -75,8 +73,7 @@ public class DagEventPublisher {
     }
 
     public void whenDeleted(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DELETED.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DELETED.name().equals(eventLog.getDagEvent())) return;
 
         DagDeletedEvent event = new DagDeletedEvent();
         event.setDagId(eventLog.getDagId());
@@ -91,8 +88,7 @@ public class DagEventPublisher {
     }
 
     public void whenToOffline(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DAG_OFFLINE.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_OFFLINE.name().equals(eventLog.getDagEvent())) return;
 
         DagOfflineEvent event = new DagOfflineEvent();
         event.setDagId(eventLog.getDagId());
@@ -105,8 +101,7 @@ public class DagEventPublisher {
     }
 
     public void whenToOnline(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DAG_ONLINE.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_ONLINE.name().equals(eventLog.getDagEvent())) return;
 
         DagOnlineEvent event = new DagOnlineEvent();
         event.setDagId(eventLog.getDagId());
@@ -119,8 +114,7 @@ public class DagEventPublisher {
     }
 
     public void whenToRun(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DAG_RUN.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_RUN.name().equals(eventLog.getDagEvent())) return;
         DagRunEvent event = new DagRunEvent();
         event.setDagId(eventLog.getDagId());
         event.setEventId(eventLog.getId());
@@ -132,8 +126,7 @@ public class DagEventPublisher {
     }
 
     public void whenScheduleUpdated(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DAG_SCHEDULE_UPDATED.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_SCHEDULE_UPDATED.name().equals(eventLog.getDagEvent())) return;
 
         DagScheduleUpdatedEvent event = new DagScheduleUpdatedEvent();
         event.setDagId(eventLog.getDagId());
@@ -147,8 +140,7 @@ public class DagEventPublisher {
 
     @Deprecated
     public void whenAddDependence(DAGEventLog eventLog, List<Long> dependenceIds) {
-        if (!EventTypeEnum.DAG_ADD_DEPENDENCE.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_ADD_DEPENDENCE.name().equals(eventLog.getDagEvent())) return;
 
         DagAddDependenceEvent event = new DagAddDependenceEvent();
         event.setDagId(eventLog.getDagId());
@@ -162,8 +154,7 @@ public class DagEventPublisher {
 
     @Deprecated
     public void whenRemoveDependence(DAGEventLog eventLog, List<Long> dependenceIds) {
-        if (!EventTypeEnum.DAG_DEL_DEPENDENCE.name().equals(eventLog.getDagEvent()))
-            return;
+        if (!EventTypeEnum.DAG_DEL_DEPENDENCE.name().equals(eventLog.getDagEvent())) return;
 
         DagRemoveDependenceEvent event = new DagRemoveDependenceEvent();
         event.setDagId(eventLog.getDagId());
@@ -182,7 +173,7 @@ public class DagEventPublisher {
             // 处理失败
             updateEventLog.setHandleStatus(EventStatusEnum.FAIL.val);
             updateEventLog.setHandleMsg(Strings.nullToEmpty(event.fetchFailedMessage()));
-            throw new GeneralException(event.fetchFailedMessage());
+            throw new ExternalIntegrationException(event.fetchFailedMessage());
         } else {
             // 处理成功，标记事件已处理
             updateEventLog.setHandleStatus(EventStatusEnum.SUCCESS.val);

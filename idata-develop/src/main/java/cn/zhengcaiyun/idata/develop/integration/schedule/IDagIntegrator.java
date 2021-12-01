@@ -17,7 +17,6 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule;
 
-import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 
@@ -30,29 +29,29 @@ import java.util.List;
  **/
 public interface IDagIntegrator {
 
-    void create(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
+    void create(DAGInfo dagInfo, DAGSchedule dagSchedule);
 
-    void update(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
+    void update(DAGInfo dagInfo, DAGSchedule dagSchedule);
 
-    void delete(Long dagId, String environment) throws ExternalIntegrationException;
+    void delete(Long dagId, String environment);
 
-    void online(DAGInfo dagInfo) throws ExternalIntegrationException;
+    void online(DAGInfo dagInfo);
 
-    void offline(DAGInfo dagInfo) throws ExternalIntegrationException;
+    void offline(DAGInfo dagInfo);
 
-    void updateSchedule(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException;
+    void updateSchedule(DAGInfo dagInfo, DAGSchedule dagSchedule);
 
-    void run(DAGInfo dagInfo) throws ExternalIntegrationException;
-
-    @Deprecated
-    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException;
+    void run(DAGInfo dagInfo);
 
     @Deprecated
-    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException;
+    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds);
 
     @Deprecated
-    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException;
+    void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId);
 
     @Deprecated
-    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException;
+    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds);
+
+    @Deprecated
+    void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId);
 }
