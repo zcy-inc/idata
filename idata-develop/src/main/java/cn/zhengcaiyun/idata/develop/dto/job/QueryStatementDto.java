@@ -16,12 +16,12 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job;
 
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyQueryDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 
 /**
  * @author caizhedong
- * @date 2021-11-22 下午3:20
+ * @date 2021-11-30 下午9:53
  */
 
-public class SqlQueryDto extends LivyQueryDto {
+public class QueryStatementDto extends LivyStatementDto {
 }

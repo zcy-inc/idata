@@ -26,4 +26,13 @@ public enum LivySessionKindEnum {
     pyspark,
     sparkr,
     sql;
+
+    public static boolean checkSessionKind(String checkKind) {
+        boolean isSessionKind = false;
+        try {
+            LivySessionKindEnum.valueOf(checkKind);
+            isSessionKind = true;
+        } catch (Exception ignored){}
+        return isSessionKind;
+    }
 }
