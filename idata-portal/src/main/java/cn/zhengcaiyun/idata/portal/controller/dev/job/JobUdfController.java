@@ -27,6 +27,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 @Api("")
 @RestController
@@ -40,12 +41,19 @@ public class JobUdfController {
     @Autowired
     private JobUdfService udfService;
 
-    @ApiOperation("")
+    @ApiOperation("加载某个UDF详情")
     @GetMapping("udf/{id}")
     public RestResult<DevJobUdf> findById(@PathVariable("id") Long id) {
         return RestResult.success(udfService.findById(id));
     }
 
+    @ApiOperation("加载UDF列表")
+    @GetMapping("udfs")
+    public RestResult<List<DevJobUdf>> load() {
+        return RestResult.success(udfService.load());
+    }
+
+    @ApiOperation("新增UDF")
     @PostMapping("/udf")
     public RestResult<Long> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
         DevJobUdf udf = new DevJobUdf();
@@ -58,6 +66,7 @@ public class JobUdfController {
         return RestResult.success(udfService.add(udf));
     }
 
+    @ApiOperation("更新UDF")
     @PutMapping("/udf")
     public RestResult<Boolean> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
         DevJobUdf udf = new DevJobUdf();
@@ -68,6 +77,7 @@ public class JobUdfController {
         return RestResult.success(udfService.update(udf));
     }
 
+    @ApiOperation("删除UDF")
     @DeleteMapping("/udf/{id}")
     public RestResult<Boolean> deleteFolder(@PathVariable("id") Long id) {
         return RestResult.success(udfService.delete(id));

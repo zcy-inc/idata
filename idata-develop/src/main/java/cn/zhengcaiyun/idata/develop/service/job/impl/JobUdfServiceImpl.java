@@ -9,12 +9,18 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
+import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDynamicSqlSupport.devJobUdf;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 @Service
 public class JobUdfServiceImpl implements JobUdfService {
@@ -75,5 +81,13 @@ public class JobUdfServiceImpl implements JobUdfService {
     @Override
     public DevJobUdf findById(Long id) {
         return devUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new GeneralException(id + "不存在"));
+    }
+
+    @Override
+    public List<DevJobUdf> load() {
+        return devUdfDao.selectMany(select(devJobUdf.allColumns())
+                .from(devJobUdf)
+                .where(devJobUdf.del, isNotEqualTo(1))
+                .build().render(RenderingStrategies.MYBATIS3));
     }
 }

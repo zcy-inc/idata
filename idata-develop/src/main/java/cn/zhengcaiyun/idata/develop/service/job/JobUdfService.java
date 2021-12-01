@@ -2,6 +2,8 @@ package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 
+import java.util.List;
+
 public interface JobUdfService {
 
     /**
@@ -31,4 +33,10 @@ public interface JobUdfService {
      * @return
      */
     DevJobUdf findById(Long id);
+
+    /**
+     * 加载下来列表
+     * @return
+     */
+    List<DevJobUdf> load();
 }
