@@ -138,7 +138,7 @@ public class HdfsService implements InitializingBean, DisposableBean {
             IOUtils.copyBytes(inputStream, fs.create(new Path(hdfsFilePath)), 4096, true);
             return hdfsFilePath;
         } catch (IOException e) {
-            throw new BizProcessException("", e);
+            throw new BizProcessException(e.getMessage(), e);
         }
     }
 
@@ -148,7 +148,7 @@ public class HdfsService implements InitializingBean, DisposableBean {
             IOUtils.copyBytes(in, fs.create(new Path(pathString)), 4096, true);
             in.close();
         } catch (IOException e) {
-            throw new BizProcessException("", e);
+            throw new BizProcessException(e.getMessage(), e);
         }
     }
 

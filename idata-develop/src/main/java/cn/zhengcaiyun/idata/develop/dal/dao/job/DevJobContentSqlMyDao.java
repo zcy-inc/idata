@@ -14,35 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-28 14:07
- **/
-public interface JobContentCommonService {
+ * @author caizhedong
+ * @date 2021-07-26 17:23
+ */
 
-    SubmitJobDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+@Mapper
+public interface DevJobContentSqlMyDao {
 
-    List<JobContentVersionDto> getVersions(Long jobId);
-
-    JobContentBaseDto getJobContent(Long jobId, Integer version, String jobType);
-
-    List<JobContentBaseDto> getJobContents(Long jobId, String jobType);
-
-    /**
-     * 是否绑定了UDF
-     * @param id
-     * @return
-     */
-    Boolean ifBindUDF(Long id);
+    @Select("<script>" +
+                "SELECT count(*) " +
+                "FROM dev_job_content_sql " +
+                "WHERE del != 1 AND CONCAT(',', udf_ids, ',') LIKE CONCAT('%', #{udfId}, '%')  limit 1" +
+            "</script>")
+    Integer existOne(Long udfId);
 }

@@ -132,7 +132,7 @@ public class WebAuthFilter implements Filter {
         try {
             setCurrentOperator(token);
             filterChain.doFilter(mutableRequest, servletResponse);
-        }finally {
+        } finally {
             // 清理操作人数据
             clearCurrentOperator();
         }

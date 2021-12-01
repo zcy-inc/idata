@@ -3,6 +3,9 @@ package cn.zhengcaiyun.idata.portal.model.request.udf;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 @ApiModel("udf新增请求")
 public class UdfAddRequest {
     /**
@@ -10,6 +13,7 @@ public class UdfAddRequest {
      *   '函数名称'
      */
     @ApiModelProperty("函数名称")
+    @NotEmpty(message = "udfName 不能为空")
     private String udfName;
 
     /**
@@ -17,6 +21,7 @@ public class UdfAddRequest {
      *   函数类型
      */
     @ApiModelProperty("函数类型")
+    @NotEmpty(message = "udfType 不能为空")
     private String udfType;
 
     /**
@@ -24,6 +29,7 @@ public class UdfAddRequest {
      *   文件名称
      */
     @ApiModelProperty("文件名称")
+    @NotEmpty(message = "fileName 不能为空")
     private String fileName;
 
     /**
@@ -31,6 +37,7 @@ public class UdfAddRequest {
      *   hdfs文件路径
      */
     @ApiModelProperty("hdfs文件路径")
+    @NotEmpty(message = "hdfsPath 不能为空")
     private String hdfsPath;
 
     /**
@@ -38,6 +45,7 @@ public class UdfAddRequest {
      *   返回类型
      */
     @ApiModelProperty("返回类型")
+    @NotEmpty(message = "returnType 不能为空")
     private String returnType;
 
     /**
@@ -52,6 +60,7 @@ public class UdfAddRequest {
      *   目标文件夹
      */
     @ApiModelProperty("目标文件夹")
+    @NotNull(message = "folderId 不能为空")
     private Long folderId;
 
     /**

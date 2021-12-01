@@ -1,14 +1,15 @@
-package cn.zhengcaiyun.idata.portal.controller.dev;
+package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
-import cn.zhengcaiyun.idata.develop.dal.model.DevJobUdf;
-import cn.zhengcaiyun.idata.develop.service.udf.UdfService;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
+import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -22,37 +23,38 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+@Api("")
 @RestController
 @RequestMapping(path = "/p1/dev")
-public class UdfController {
+public class JobUdfController {
 
-    private static Logger logger = LoggerFactory.getLogger(UdfController.class);
+    private static Logger logger = LoggerFactory.getLogger(JobUdfController.class);
 
     @Autowired
     private HdfsService hdfsService;
     @Autowired
-    private UdfService udfService;
+    private JobUdfService udfService;
 
+    @ApiOperation("")
     @GetMapping("udf/{id}")
     public RestResult<DevJobUdf> findById(@PathVariable("id") Long id) {
         return RestResult.success(udfService.findById(id));
     }
 
     @PostMapping("/udf")
-    public RestResult<Long> add(@RequestBody UdfAddRequest udfAddRequest) {
+    public RestResult<Long> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
         DevJobUdf udf = new DevJobUdf();
         BeanUtils.copyProperties(udfAddRequest, udf);
         udf.setCreator(OperatorContext.getCurrentOperator().getNickname());
         udf.setDel(DeleteEnum.DEL_NO.val);
         udf.setCreateTime(new Date());
         String hdfsPath = udfAddRequest.getHdfsPath();
-        if (StringUtils.isNotEmpty(hdfsPath)) {
-            udf.setHdfsPath(hdfsService.getHdfsPrefix() + hdfsPath);
-        }
+        udf.setHdfsPath(hdfsService.getHdfsPrefix() + hdfsPath);
         return RestResult.success(udfService.add(udf));
     }
 

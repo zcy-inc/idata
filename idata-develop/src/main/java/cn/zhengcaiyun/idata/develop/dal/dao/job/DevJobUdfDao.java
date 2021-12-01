@@ -1,9 +1,9 @@
-package cn.zhengcaiyun.idata.develop.dal.dao;
+package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevJobUdfDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
-import cn.zhengcaiyun.idata.develop.dal.model.DevJobUdf;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;

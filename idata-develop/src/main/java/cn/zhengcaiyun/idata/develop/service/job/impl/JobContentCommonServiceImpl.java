@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
@@ -42,7 +43,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
+import static cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceFileDynamicSqlSupport.dataSourceFile;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -62,6 +66,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     private final SparkJobRepo sparkJobRepo;
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
+    private final JobContentSqlRepo jobContentSqlRepo;
 
     @Autowired
     public JobContentCommonServiceImpl(DIJobContentRepo diJobContentRepo,
@@ -73,7 +78,8 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                                        SqlJobRepo sqlJobRepo,
                                        SparkJobRepo sparkJobRepo,
                                        ScriptJobRepo scriptJobRepo,
-                                       KylinJobRepo kylinJobRepo) {
+                                       KylinJobRepo kylinJobRepo,
+                                       JobContentSqlRepo jobContentSqlRepo) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -84,6 +90,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         this.sparkJobRepo = sparkJobRepo;
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
+        this.jobContentSqlRepo = jobContentSqlRepo;
     }
 
     @Override
@@ -181,6 +188,11 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                     "jobId", "version", "createTime");
         }
         return contentList;
+    }
+
+    @Override
+    public Boolean ifBindUDF(Long id) {
+        return jobContentSqlRepo.ifBindUDF(id);
     }
 
     private void fillRunningState(List<JobContentVersionDto> contentVersionDtoList, List<JobExecuteConfig> executeConfigList) {

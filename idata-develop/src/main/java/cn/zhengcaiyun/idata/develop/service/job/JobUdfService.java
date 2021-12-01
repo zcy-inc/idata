@@ -1,8 +1,8 @@
-package cn.zhengcaiyun.idata.develop.service.udf;
+package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.develop.dal.model.DevJobUdf;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 
-public interface UdfService {
+public interface JobUdfService {
 
     /**
      * 根据id删除udf

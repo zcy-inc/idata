@@ -17,8 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.devJobHistory;
-import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
-import static org.mybatis.dynamic.sql.SqlBuilder.select;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 @Service
 public class JobHistoryServiceImpl implements JobHistoryService {
@@ -37,10 +36,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Override
     public PageInfo<DevJobHistory> pagingJobHistory(Long id, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isNotEqualTo(id));
+        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isEqualTo(id));
         List<DevJobHistory> list = devJobHistoryDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
         PageInfo<DevJobHistory> pageInfo = new PageInfo<>(list);
-        
         return pageInfo;
     }
 

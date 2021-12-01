@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.develop.dal.dao;
+package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
 import java.sql.JDBCType;
 import java.util.Date;

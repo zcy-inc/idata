@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.develop.dal.model;
+package cn.zhengcaiyun.idata.develop.dal.model.job;
 
 import java.util.Date;
 import javax.annotation.Generated;

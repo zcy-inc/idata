@@ -20,6 +20,7 @@ public class PageUtil {
         page.setTotal(pageInfo.getTotal());
         page.setPageNum(pageInfo.getPageNum());
         page.setPageSize(pageInfo.getSize());
+        page.setPages(pageInfo.getPages());
         return page;
     }
 }

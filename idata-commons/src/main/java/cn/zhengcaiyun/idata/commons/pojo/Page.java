@@ -31,7 +31,7 @@ public class Page<T> {
     @ApiModelProperty(required = true)
     private List<T> content;
 
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = true, notes = "总记录条数")
     private long total;
 
     @ApiModelProperty(required = false, notes = "页码")
@@ -39,6 +39,9 @@ public class Page<T> {
 
     @ApiModelProperty(required = false, notes = "每页条数")
     private Integer pageSize;
+
+    @ApiModelProperty("共几页")
+    private Integer pages;
 
 
     public static <T> Page<T> newOne(List<T> content, long total) {
@@ -95,5 +98,13 @@ public class Page<T> {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getPages() {
+        return pages;
+    }
+
+    public void setPages(Integer pages) {
+        this.pages = pages;
     }
 }
