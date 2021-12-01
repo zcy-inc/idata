@@ -31,7 +31,7 @@ import java.util.List;
  **/
 public interface JobContentCommonService {
 
-    SubmitJobDto submit(Long jobId, Integer version, String env, String remark, Operator operator);
+    Boolean submit(Long jobId, Integer version, String env, String remark, Operator operator);
 
     List<JobContentVersionDto> getVersions(Long jobId);
 

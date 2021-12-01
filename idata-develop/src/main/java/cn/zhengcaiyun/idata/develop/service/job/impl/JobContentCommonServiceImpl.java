@@ -87,7 +87,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     }
 
     @Override
-    public SubmitJobDto submit(Long jobId, Integer version, String env, String remark, Operator operator) {
+    public Boolean submit(Long jobId, Integer version, String env, String remark, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
         checkArgument(Objects.nonNull(version), "作业版本号为空");
         Optional<JobInfo> jobInfoDto = jobInfoRepo.queryJobInfo(jobId);
@@ -97,12 +97,8 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
-        SubmitJobDto echoSubmitJob = new SubmitJobDto();
         JobPublishContent publishContent = assemblePublishContent(content);
-        jobPublishManager.submit(publishContent, envEnumOptional.get(), remark, operator);
-        echoSubmitJob.setJobId(jobId);
-        echoSubmitJob.setVersion(version);
-        return echoSubmitJob;
+        return jobPublishManager.submit(publishContent, envEnumOptional.get(), remark, operator);
     }
 
     private JobPublishContent assemblePublishContent(JobContentBaseDto content) {
