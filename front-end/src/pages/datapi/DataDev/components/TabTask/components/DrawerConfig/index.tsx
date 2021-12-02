@@ -15,6 +15,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
+import { SchPriority } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -89,6 +90,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     }
     if (!values.schDryRun) {
       values.schDryRun = 0;
+    }
+    // 处理超时策略
+    if (values.schTimeOutStrategy && Array.isArray(values.schTimeOutStrategy)) {
+      values.schTimeOutStrategy = values.schTimeOutStrategy.join(',');
     }
     if (values.schDryRun && Array.isArray(values.schDryRun)) {
       values.schDryRun = values.schDryRun.length > 0 ? 1 : 0;
@@ -209,7 +214,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   size="large"
                   style={{ width }}
                   placeholder="请选择"
-                  options={concurrentOptions}
+                  options={[
+                    { label: '低', value: SchPriority.LOW },
+                    { label: '中', value: SchPriority.MIDDLE },
+                    { label: '高', value: SchPriority.HIGH },
+                  ]}
                 />
               </Item>
             </Form>

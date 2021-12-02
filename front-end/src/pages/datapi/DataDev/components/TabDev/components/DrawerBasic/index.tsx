@@ -6,9 +6,9 @@ import styles from './index.less';
 
 import Title from '@/components/Title';
 import { Task, TaskType } from '@/types/datadev';
-import { editTask, getEnumValues, getTaskTypes } from '@/services/datadev';
-import { TaskCategory } from '@/constants/datadev';
+import { editTask, getDataDevTypes, getEnumValues, getTaskTypes } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
+import { TaskCategory, TaskTypes } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -25,6 +25,8 @@ const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
 
 const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, getTaskWrapped }) => {
+  const [taskTypes, setTaskTypes] = useState<TaskCategory[]>([]);
+  const [languages, setLanguages] = useState<TaskType[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [form] = Form.useForm();
 
@@ -34,6 +36,9 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
   }));
 
   useEffect(() => {
+    getDataDevTypes()
+      .then((res) => setTaskTypes(res.data))
+      .catch((err) => {});
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
       .catch((err) => {});
@@ -41,20 +46,35 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
 
   useEffect(() => {
     if (visible && data) {
+      const jobType = data.jobType?.split('_')[0];
       const values = {
         name: data.name,
         dwLayerCode: data.dwLayerCode,
         jobType: data.jobType?.split('_')[0],
-        language: data.jobType?.split('_')[1],
+        language: data.jobType,
         creator: data.creator,
         remark: data.remark,
       };
       form.setFieldsValue(values);
+      if (
+        (jobType as TaskCategory) === TaskCategory.SPARK ||
+        (jobType as TaskCategory) === TaskCategory.SCRIPT
+      ) {
+        getTaskTypes({ catalog: jobType as TaskCategory })
+          .then((res) => setLanguages(res.data))
+          .catch((err) => {});
+      }
     }
   }, [visible, data]);
 
   const onSave = () => {
     const values = form.getFieldsValue();
+    if (values.jobType === TaskCategory.SQL) {
+      values.jobType = TaskTypes.SQL_SPARK;
+    }
+    if (values.language) {
+      values.jobType = values.language;
+    }
     const params = {
       ...data,
       ...values,
@@ -109,7 +129,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
             size="large"
             style={{ width: widthL }}
             placeholder="请选择"
-            options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+            options={taskTypes.map((_) => ({ label: _, value: _ }))}
             disabled
           />
         </Item>
@@ -118,7 +138,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
             size="large"
             style={{ width: widthL }}
             placeholder="请选择"
-            options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+            options={languages.map((_) => ({ label: _.language, value: _.code }))}
             disabled
           />
         </Item>

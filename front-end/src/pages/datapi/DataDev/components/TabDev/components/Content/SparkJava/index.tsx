@@ -7,12 +7,13 @@ import { uploadJar } from '@/services/datadev';
 
 interface SparkJavaProps {
   data: any;
+  jobId: number;
 }
 
 const { Item } = Form;
 const width = 200;
 
-const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data }, ref) => {
+const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jobId }, ref) => {
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -41,7 +42,7 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data }, 
             customRequest={({ file, onSuccess, onError }) => {
               const formData = new FormData();
               formData.append('file', file);
-              uploadJar({ jobId: data.jobId }, formData)
+              uploadJar({ jobId }, formData)
                 .then((res) => {
                   if (res.success) {
                     onSuccess?.(res, file as unknown as XMLHttpRequest);

@@ -235,6 +235,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.STAG) {
       if (outDataStag.length > 0) {
         message.info('输出表只能存在一张');
+        return;
       }
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
       const destTable = stagForm.getFieldValue('destTable');
@@ -254,6 +255,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.PROD) {
       if (outDataProd.length > 0) {
         message.info('输出表只能存在一张');
+        return;
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
       const destTable = prodForm.getFieldValue('destTable');
@@ -316,7 +318,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         schPriority: values.schPriority,
         execDriverMem: values.execDriverMem,
         execWorkerMem: values.execWorkerMem,
-        runningState: data?.status,
       },
       dependencies: depData.map((_) => ({
         jobId: data?.id as number,

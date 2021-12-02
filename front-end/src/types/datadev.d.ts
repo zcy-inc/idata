@@ -76,6 +76,7 @@ export interface Task {
   remark: string;
   folderId: number;
   creator: string;
+  language?: TaskTypes;
 }
 
 export interface TaskVersion {
@@ -136,7 +137,7 @@ export interface TaskConfig {
     schPriority: SchPriority; // 调度配置-优先级
     execDriverMem: number; // 运行配置-驱动器内存
     execWorkerMem: number; // 运行配置-执行器内存
-    runningState: 0 | 1; // 作业运行状态（环境级），0：暂停运行；1：恢复运行
+    runningState?: 0 | 1; // 作业运行状态（环境级），0：暂停运行；1：恢复运行
   };
   dependencies?: {
     id?: number;

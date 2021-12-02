@@ -44,7 +44,7 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
       case FolderBelong.DI:
         return <Menu.Item key="CreateDI">新建DI</Menu.Item>;
       case FolderBelong.DEVJOB:
-        return <Menu.Item key="CreateJob">新建任务</Menu.Item>;
+        return <Menu.Item key="CreateDev">新建作业</Menu.Item>;
       default:
         return null;
     }

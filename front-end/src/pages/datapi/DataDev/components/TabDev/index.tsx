@@ -31,7 +31,6 @@ import {
   saveSqlSpark,
   submitTask,
 } from '@/services/datadev';
-import { publishTask } from '@/services/task';
 
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
@@ -60,7 +59,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
   const [versions, setVersions] = useState<TaskVersion[]>([]);
   const [version, setVersion] = useState<number | undefined>(-1);
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<any>();
 
   const [visibleBasic, setVisibleBasic] = useState(false);
   const [visibleConfig, setVisibleConfig] = useState(false);
@@ -115,7 +114,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         removeResult={removeResult}
       />
     ),
-    [TaskTypes.SPARK_JAR]: <SparkJava ref={formRef} data={content} />,
+    [TaskTypes.SPARK_JAR]: (
+      <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />
+    ),
     [TaskTypes.SPARK_PYTHON]: <SparkPython ref={formRef} monaco={monaco} data={{ content, log }} />,
     [TaskTypes.SCRIPT_SHELL]: <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />,
     [TaskTypes.SCRIPT_PYTHON]: (
@@ -432,21 +433,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    * 测试任务
    */
   const onTest = () => {};
-
-  /**
-   * 发布任务
-   */
-  const onPublish = () => {
-    publishTask({ recordIds: [pane.id] })
-      .then((res) => {
-        if (res.data) {
-          message.success('发布成功');
-        } else {
-          message.error('发布失败');
-        }
-      })
-      .catch((err) => {});
-  };
 
   return (
     <>
