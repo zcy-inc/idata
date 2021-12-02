@@ -10,7 +10,13 @@ import styles from './index.less';
 
 import { IPane } from '@/models/datadev';
 import { Task, TaskVersion } from '@/types/datadev';
-import { StatementState, TaskTypes, VersionStatusDisplayMap } from '@/constants/datadev';
+import {
+  EnvRunningState,
+  StatementState,
+  TaskTypes,
+  VersionStatus,
+  VersionStatusDisplayMap,
+} from '@/constants/datadev';
 import { Environments } from '@/constants/datasource';
 import {
   deleteTask,
@@ -434,6 +440,19 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    */
   const onTest = () => {};
 
+  const renderVersionLabel = (_: TaskVersion) => {
+    const env = _.environment || '';
+    const verState = VersionStatusDisplayMap[_.versionStatus];
+    let runState = '';
+    if (
+      _.versionStatus === VersionStatus.PUBLISHED &&
+      _.envRunningState === EnvRunningState.PAUSED
+    ) {
+      runState = '(暂停)';
+    }
+    return `${_.versionDisplay}-${env}-${verState}${runState}`;
+  };
+
   return (
     <>
       <div className={styles.task}>
@@ -450,9 +469,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 bordered={false}
                 disabled={versions.length <= 0}
                 options={versions.map((_) => ({
-                  label: `${_.versionDisplay}${_.environment ? '-' + _.environment : ''}-${
-                    VersionStatusDisplayMap[_.versionStatus]
-                  }`,
+                  label: renderVersionLabel(_),
                   value: _.version,
                 }))}
                 value={version}

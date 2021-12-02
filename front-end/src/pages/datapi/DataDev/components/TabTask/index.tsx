@@ -341,7 +341,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   };
 
   const renderVersionLabel = (_: TaskVersion) => {
-    const env = _.environment ? `-${_.environment}` : '';
+    const env = _.environment || '';
     const verState = VersionStatusDisplayMap[_.versionStatus];
     let runState = '';
     if (
@@ -350,7 +350,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ) {
       runState = '(暂停)';
     }
-    return `${_.versionDisplay}${env}${verState}${runState}`;
+    return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
   return (
@@ -368,7 +368,10 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 placeholder="请选择"
                 bordered={false}
                 disabled={versions.length <= 0}
-                options={versions.map((_) => ({ label: renderVersionLabel(_), value: _.version }))}
+                options={versions.map((_) => ({
+                  label: renderVersionLabel(_),
+                  value: _.version,
+                }))}
                 value={version}
                 onChange={(v) => setVersion(v as number)}
               />
