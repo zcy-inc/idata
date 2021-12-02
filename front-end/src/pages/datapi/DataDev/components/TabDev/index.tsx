@@ -59,7 +59,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
   const [versions, setVersions] = useState<TaskVersion[]>([]);
   const [version, setVersion] = useState<number | undefined>(-1);
-  const [content, setContent] = useState<any>();
+  const [content, setContent] = useState<any>({});
 
   const [visibleBasic, setVisibleBasic] = useState(false);
   const [visibleConfig, setVisibleConfig] = useState(false);
@@ -627,9 +627,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 调试
               </Button>
             )}
-            <Button key="test" size="large" type="primary" onClick={onTest}>
-              测试
-            </Button>
+            {task?.jobType === TaskTypes.SQL_SPARK && (
+              <Button key="test" size="large" type="primary" onClick={onTest}>
+                测试
+              </Button>
+            )}
             <Button
               key="publish"
               size="large"

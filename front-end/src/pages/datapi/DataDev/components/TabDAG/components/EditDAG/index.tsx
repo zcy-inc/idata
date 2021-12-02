@@ -284,7 +284,9 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   };
 
   const renderCronExpressionWrapped = () => {
-    const cron = renderCronExpression(form.getFieldsValue());
+    const values = form.getFieldsValue();
+    console.log(values);
+    const cron = renderCronExpression(values);
     setCronExpression(cron);
   };
 
