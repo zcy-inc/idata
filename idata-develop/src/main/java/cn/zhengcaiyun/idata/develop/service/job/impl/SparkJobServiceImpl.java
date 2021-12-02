@@ -64,6 +64,9 @@ public class SparkJobServiceImpl implements SparkJobService {
         checkArgument(sparkJobDto.getJobId() != null, "作业Id不能为空");
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(sparkJobDto.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+        if (JobTypeEnum.SPARK_JAR.getCode().equals(jobInfoOptional.get().getJobType())) {
+            checkArgument(StringUtils.isNotEmpty(sparkJobDto.getMainClass()), "SparkJar类型作业执行类不能为空");
+        }
 
         Integer version = sparkJobDto.getVersion();
         boolean startNewVersion = false;
@@ -116,9 +119,12 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     @Override
     public SparkJobContentDto find(Long jobId, Integer version) {
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
         DevJobContentSpark jobContentSpark = sparkJobRepo.query(jobId, version);
-        checkArgument(jobContentSpark != null, "作业不存在");
+        checkArgument(jobContentSpark != null, "SPARK作业不存在");
         SparkJobContentDto echoSparkJob = PojoUtil.copyOne(jobContentSpark, SparkJobContentDto.class);
+        echoSparkJob.setJobType(JobTypeEnum.valueOf(jobInfoOptional.get().getJobType()));
         if (JobTypeEnum.SPARK_PYTHON.equals(echoSparkJob.getJobType())) {
             String output;
             try {
