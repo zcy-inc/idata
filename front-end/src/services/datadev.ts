@@ -5,7 +5,7 @@ import type {
   ConfiguredTaskListItem,
   DAG,
   DAGListItem,
-  DataDevContent,
+  TaskConfig,
   Folder,
   KylinContent,
   MappedColumn,
@@ -13,7 +13,6 @@ import type {
   SparkContent,
   SqlSparkContent,
   Task,
-  TaskConfig,
   TaskContent,
   TaskTable,
   TaskType,
@@ -356,30 +355,6 @@ export async function getTaskTableColumns(params: {
 }
 
 /**
- * 暂停作业
- */
-export async function disableTask(params: { id: number; environment: Environments }) {
-  return request<DefaultResponse & { data: boolean }>(
-    `/api/p1/dev/jobs/${params.id}/environments/${params.environment}/pause`,
-    {
-      method: 'PUT',
-    },
-  );
-}
-
-/**
- * 启用作业
- */
-export async function enableTask(params: { id: number; environment: Environments }) {
-  return request<DefaultResponse & { data: boolean }>(
-    `/api/p1/dev/jobs/${params.id}/${params.environment}/run`,
-    {
-      method: 'PUT',
-    },
-  );
-}
-
-/**
  * 删除作业
  */
 export async function deleteTask(params: { id: number }) {
@@ -415,7 +390,7 @@ export async function submitTask(
   },
 ) {
   return request<DefaultResponse & { data: TaskContent }>(
-    `/api/p1/dev/jobs/${params.jobId}/di/contents/${params.version}/submit/${params.env}`,
+    `/api/p1/dev/jobs/${params.jobId}/versions/${params.version}/submit/${params.env}`,
     {
       method: 'POST',
       data,
@@ -424,22 +399,9 @@ export async function submitTask(
 }
 
 /**
- * 获取作业配置列表
- */
-export async function getTaskConfigs(params: { jobId: number; environment?: Environments }) {
-  return request<DefaultResponse & { data: TaskConfig[] }>(
-    `/api/p1/dev/jobs/${params.jobId}/execConfigs`,
-    {
-      method: 'GET',
-      params,
-    },
-  );
-}
-
-/**
  * 获取DAG列表
  */
-export async function getDAGList(params: { dwLayerCode: string }) {
+export async function getDAGList(params: { dwLayerCode: string; environment: Environments }) {
   return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
     method: 'GET',
     params,
@@ -454,19 +416,6 @@ export async function getExecuteQueues() {
     '/api/p1/dev/executeQueues',
     {
       method: 'GET',
-    },
-  );
-}
-
-/**
- * 保存作业配置列表
- */
-export async function saveTaskConfig(data: { jobId: number; environment: Environments }) {
-  return request<DefaultResponse & { data: TaskConfig[] }>(
-    `/api/p1/dev/jobs/${data.jobId}/execConfigs`,
-    {
-      method: 'POST',
-      data,
     },
   );
 }
@@ -497,7 +446,7 @@ export async function getConfiguredTaskList(params: { environment: Environments 
  * 获取数据开发配置信息
  */
 export async function getDataDevConfig(params: { jobId: number; environment: Environments }) {
-  return request<DefaultResponse & { data: DataDevContent }>(
+  return request<DefaultResponse & { data: TaskConfig }>(
     `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
     {
       method: 'GET',
@@ -508,11 +457,11 @@ export async function getDataDevConfig(params: { jobId: number; environment: Env
 /**
  * 保存数据开发配置信息
  */
-export async function saveDataDevConfig(
+export async function saveTaskConfig(
   params: { jobId: number; environment: Environments },
-  data: DataDevContent,
+  data: TaskConfig,
 ) {
-  return request<DefaultResponse & { data: DataDevContent }>(
+  return request<DefaultResponse & { data: TaskConfig }>(
     `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
     {
       method: 'POST',
@@ -681,8 +630,8 @@ export async function getKylin(params: { jobId: number; version: number }) {
 /**
  * runQuerySql(done)
  */
-export async function runQuerySql(data: {
-  querySql: string;
+export async function runQuery(data: {
+  querySource: string;
   sessionKind: string;
   udfIds?: number[];
   externalTables?: string;
@@ -694,42 +643,21 @@ export async function runQuerySql(data: {
         statementId: number;
       };
     }
-  >('/api/p1/dev/jobs/runSqlQuery', {
+  >('/api/p1/dev/jobs/runQuery', {
     method: 'POST',
     data,
   });
 }
 
 /**
- * runQueryPython(done)
+ * runQueryResult(done)
  */
-export async function runQueryPython(data: {
-  queryPython: string;
-  jobName: string;
-  udfIds?: number[];
-  externalTables?: string;
-}) {
-  return request<
-    DefaultResponse & {
-      data: {
-        sessionId: number;
-        statementId: number;
-      };
-    }
-  >('/api/p1/dev/jobs/runPythonQuery', {
-    method: 'POST',
-    data,
-  });
-}
-
-/**
- * runQueryResultSql(done)
- */
-export async function runQueryResultSql(params: {
+export async function runQueryResult(params: {
   sessionId: number;
+  sessionKind: string;
   statementId: number;
-  from: number;
-  size: number;
+  from?: number;
+  size?: number;
 }) {
   return request<
     DefaultResponse & {
@@ -746,34 +674,10 @@ export async function runQueryResultSql(params: {
         statementState: StatementState;
         outputStatus: string;
         resultSet: { [key: string]: string }[];
+        pythonResults?: string;
       };
     }
-  >('/api/p1/dev/jobs/runSqlQueryResult', {
-    method: 'GET',
-    params,
-  });
-}
-
-/**
- * runQueryResultPython(done)
- */
-export async function runQueryResultPython(params: {
-  sessionId: number;
-  statementId: number;
-  from: number;
-  size: number;
-}) {
-  return request<
-    DefaultResponse & {
-      data: {
-        log: string[];
-        total: number;
-        sessionId: number;
-        statementId: number;
-        state: string;
-      };
-    }
-  >('/api/p1/dev/jobs/runPythonQueryResult', {
+  >('/api/p1/dev/jobs/runQueryResult', {
     method: 'GET',
     params,
   });

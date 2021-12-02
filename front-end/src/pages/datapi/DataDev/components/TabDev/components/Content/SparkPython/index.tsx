@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Form, Table, Tabs } from 'antd';
+import { Form, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
 import ParamList from '../../ParamList';
@@ -10,7 +10,6 @@ interface SparkPythonProps {
   data: {
     content: any;
     log: any;
-    res: any[];
   };
 }
 
@@ -18,7 +17,7 @@ const { TabPane } = Tabs;
 const { Item } = Form;
 
 const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
-  { monaco, data: { content, log, res } },
+  { monaco, data: { content, log } },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -34,7 +33,7 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
           <MonacoEditor
             ref={monaco}
             height="400"
-            language="sql"
+            language="python"
             theme="vs-dark"
             value={content.pythonResource}
             options={{ automaticLayout: true }}
@@ -48,20 +47,11 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
           </Form>
         </TabPane>
       </Tabs>
-      <Tabs
-        className={styles.tabs}
-        type="editable-card"
-        hideAdd
-        onEdit={(key, action) => {
-          if (action === 'remove') {
-            console.log(key);
-          }
-        }}
-      >
-        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }} closable={false}>
+      <Tabs className={styles.tabs}>
+        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }}>
           <MonacoEditor
             height="400"
-            language="sql"
+            language="json"
             theme="vs-dark"
             value={log.join('\n')}
             options={{ readOnly: true, automaticLayout: true }}

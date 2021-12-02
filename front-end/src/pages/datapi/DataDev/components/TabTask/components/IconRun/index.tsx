@@ -17,7 +17,7 @@ const IconRun: FC<IconCreateProps> = ({ onClick }) => {
       style={{ cursor: 'pointer', marginRight: 12, lineHeight: 1 }}
     >
       {isHover ? <IconFont type="icon-yunhang-copy" /> : <IconFont type="icon-yunhang" />}
-      <span style={{ color: isHover ? '#304ffe' : '#a4a6ad', marginLeft: 8 }}>运行</span>
+      <span style={{ color: isHover ? '#304ffe' : '#a4a6ad', marginLeft: 8 }}>恢复</span>
     </div>
   );
 };

@@ -11,6 +11,7 @@ interface SparkSqlProps {
     log: any;
     res: any[];
   };
+  removeResult: (i: number) => void;
 }
 
 const { TabPane } = Tabs;
@@ -18,7 +19,7 @@ const { Item } = Form;
 const width = 200;
 
 const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
-  { monaco, data: { content, log, res } },
+  { monaco, data: { content, log, res }, removeResult },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -63,14 +64,17 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
         hideAdd
         onEdit={(key, action) => {
           if (action === 'remove') {
-            console.log(key);
+            const index = Number(key);
+            if (Number.isInteger(index)) {
+              removeResult(index);
+            }
           }
         }}
       >
         <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }} closable={false}>
           <MonacoEditor
             height="400"
-            language="sql"
+            language="json"
             theme="vs-dark"
             value={log.join('\n')}
             options={{ readOnly: true, automaticLayout: true }}

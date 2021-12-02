@@ -9,9 +9,9 @@ import { concurrentOptions, restartOptions } from './constants';
 import { DAGListItem, Task } from '@/types/datadev';
 import {
   getDAGList,
+  getDataDevConfig,
   getEnumValues,
   getExecuteQueues,
-  getTaskConfigs,
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
@@ -40,9 +40,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   useEffect(() => {
     if (visible) {
       getTaskConfigsWrapped(Environments.STAG);
-      getDAGList({ dwLayerCode: data?.dwLayerCode as string })
-        .then((res) => setDAGList(res.data))
-        .catch((err) => {});
+      getDAGListWrapped(Environments.STAG);
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
         .then((res) => setSecurity(res.data))
         .catch((err) => {});
@@ -53,7 +51,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   }, [visible]);
 
   const getTaskConfigsWrapped = (environment: Environments) =>
-    getTaskConfigs({ jobId: data?.id as number, environment })
+    getDataDevConfig({ jobId: data?.id as number, environment })
       .then((res) => {
         const config = get(res, 'data.[0]', {});
         if (config.schTimeOut) {
@@ -76,6 +74,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       })
       .catch((err) => {});
 
+  const getDAGListWrapped = (environment: Environments) =>
+    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+      .then((res) => setDAGList(res.data))
+      .catch((err) => {});
+
   const onSave = (environment: Environments) => {
     let values: any = {};
     if (activeKey === Environments.STAG) {
@@ -93,7 +96,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
-    saveTaskConfig({ jobId: data?.id as number, environment, ...values })
+    saveTaskConfig({ jobId: data?.id as number, environment }, { executeConfig: values })
       .then((res) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
@@ -130,6 +133,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         onChange={(k) => {
           setActiveKey(k as Environments);
           getTaskConfigsWrapped(k as Environments);
+          getDAGListWrapped(k as Environments);
         }}
       >
         {env.map((_) => (

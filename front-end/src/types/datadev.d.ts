@@ -121,29 +121,6 @@ export interface TaskTable {
 }
 
 export interface TaskConfig {
-  id: number;
-  jobId: number;
-  environment: Environments;
-  schDagId: number; // 调度配置-dag编号
-  schRerunMode: SchRerunMode; // 调度配置-重跑配置
-  schTimeOut: number; // 调度配置-超时时间
-  schDryRun: number; // 调度配置-是否空跑
-  execQueue: string; // 运行配置-队列
-  execMaxParallelism: number; // 运行配置-作业最大并发数，配置为0时表示使用默认并发数
-  execWarnLevel: string; // 运行配置-告警等级 时光的接口获取
-}
-
-export interface DAGListItem {
-  id: number;
-  name: string;
-  dwLayerCode: string;
-  status: 0 | 1;
-  remark: string;
-  folderId: string;
-}
-
-/* ========== 数据开发 ========== */
-export interface DataDevContent {
   executeConfig: {
     id?: number;
     jobId: number;
@@ -161,14 +138,14 @@ export interface DataDevContent {
     execWorkerMem: number; // 运行配置-执行器内存
     runningState: 0 | 1; // 作业运行状态（环境级），0：暂停运行；1：恢复运行
   };
-  dependencies: {
+  dependencies?: {
     id?: number;
     jobId: number;
     environment: Environments;
     prevJobId: number; // 上游作业id
     prevJobDagId: string; // 上游作业所属dag id
   }[];
-  output: {
+  output?: {
     id?: number;
     jobId: number;
     environment: Environments;
@@ -179,6 +156,16 @@ export interface DataDevContent {
   };
 }
 
+export interface DAGListItem {
+  id: number;
+  name: string;
+  dwLayerCode: string;
+  status: 0 | 1;
+  remark: string;
+  folderId: string;
+}
+
+/* ========== 数据开发 ========== */
 export interface ConfiguredTaskListItem {
   jobId: number;
   jobName: string;

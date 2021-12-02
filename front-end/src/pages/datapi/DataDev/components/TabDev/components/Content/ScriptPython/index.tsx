@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Form, Table, Tabs } from 'antd';
+import { Form, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
 import ParamList from '../../ParamList';
@@ -10,7 +10,6 @@ interface ScriptPythonProps {
   data: {
     content: any;
     log: any;
-    res: any[];
   };
 }
 
@@ -18,7 +17,7 @@ const { TabPane } = Tabs;
 const { Item } = Form;
 
 const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
-  { monaco, data: { content, log, res } },
+  { monaco, data: { content, log } },
   ref,
 ) => {
   const [form] = Form.useForm();
@@ -54,18 +53,8 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
           </Form>
         </TabPane>
       </Tabs>
-      <Tabs
-        className={styles.tabs}
-        type="editable-card"
-        hideAdd
-        style={{ marginTop: 16 }}
-        onEdit={(key, action) => {
-          if (action === 'remove') {
-            console.log(key);
-          }
-        }}
-      >
-        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }} closable={false}>
+      <Tabs className={styles.tabs} style={{ marginTop: 16 }}>
+        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }}>
           <MonacoEditor
             height="400"
             language="sql"

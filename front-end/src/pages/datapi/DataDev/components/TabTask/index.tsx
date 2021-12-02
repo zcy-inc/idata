@@ -10,13 +10,14 @@ import {
   getTaskContent,
   getTaskTables,
   getTaskVersions,
-  disableTask,
-  enableTask,
+  pauseTask,
   getTask,
   deleteTask,
   saveTask,
   submitTask,
   getTaskTableColumns,
+  runTask,
+  resumeTask,
 } from '@/services/datadev';
 import { MappedColumn, Task, TaskContent, TaskTable, TaskVersion } from '@/types/datadev';
 
@@ -254,18 +255,10 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   };
 
   /**
-   * 暂停任务
+   * 暂停、恢复、单次运行任务
    */
-  const onPause = () => {
-    setActionType('pause');
-    setVisibleAction(true);
-  };
-
-  /**
-   * 启用任务
-   */
-  const onRun = () => {
-    setActionType('run');
+  const onAction = (type: 'pause' | 'resume' | 'run') => {
+    setActionType(type);
     setVisibleAction(true);
   };
 
@@ -382,7 +375,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             )}
           </div>
           <Space size={16}>
-            <a onClick={() => {}}>单次运行</a>
+            <a onClick={() => onAction('run')}>单次运行</a>
             <a onClick={() => setVisibleBasic(true)}>基本信息</a>
             <a onClick={() => setVisibleConfig(true)}>配置</a>
             <a onClick={() => setVisibleVersion(true)}>版本</a>
@@ -541,8 +534,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </div>
       <div className="workbench-submit">
         <Space>
-          <IconRun onClick={onRun} />
-          <IconPause onClick={onPause} />
+          <IconRun onClick={() => onAction('resume')} />
+          <IconPause onClick={() => onAction('pause')} />
           <Button key="delete" size="large" className="normal" onClick={onDelete}>
             删除
           </Button>
@@ -625,7 +618,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               environment: values.env,
             };
             if (actionType === 'pause') {
-              disableTask(params)
+              pauseTask(params)
                 .then((res) => {
                   if (res.success) {
                     message.success('暂停成功');
@@ -637,14 +630,27 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 .catch((err) => {})
                 .finally(() => setLoadingAction(false));
             }
-            if (actionType === 'run') {
-              enableTask(params)
+            if (actionType === 'resume') {
+              resumeTask(params)
                 .then((res) => {
                   if (res.success) {
-                    message.success('启用成功');
+                    message.success('恢复成功');
                     getTaskWrapped();
                   } else {
-                    message.error(`启用失败：${res.msg}`);
+                    message.error(`恢复失败：${res.msg}`);
+                  }
+                })
+                .catch((err) => {})
+                .finally(() => setLoadingAction(false));
+            }
+            if (actionType === 'run') {
+              runTask(params)
+                .then((res) => {
+                  if (res.success) {
+                    message.success('恢复成功');
+                    getTaskWrapped();
+                  } else {
+                    message.error(`恢复失败：${res.msg}`);
                   }
                 })
                 .catch((err) => {})
