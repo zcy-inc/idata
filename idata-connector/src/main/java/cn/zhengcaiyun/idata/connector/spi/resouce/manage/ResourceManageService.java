@@ -12,6 +12,6 @@ public interface ResourceManageService {
      * @param finishTimeEnd 结束的任务结束时间（ms）
      * @return
      */
-    List<AppResourceDetail> loadAppResourceDetail(Long finishTimeBegin, Long finishTimeEnd);
+    List<AppResourceDetail> loadAppResourceDetailList(Long finishTimeBegin, Long finishTimeEnd);
 
 }

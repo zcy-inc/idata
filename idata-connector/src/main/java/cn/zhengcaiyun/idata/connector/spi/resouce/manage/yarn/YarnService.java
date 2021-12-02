@@ -21,7 +21,7 @@ public class YarnService implements ResourceManageService {
     private String YARN_RM_URI;
 
     @Override
-    public List<AppResourceDetail> loadAppResourceDetail(Long finishTimeBegin, Long finishTimeEnd) {
+    public List<AppResourceDetail> loadAppResourceDetailList(Long finishTimeBegin, Long finishTimeEnd) {
         if (finishTimeBegin == null) {
             finishTimeBegin = 0L;
         }
