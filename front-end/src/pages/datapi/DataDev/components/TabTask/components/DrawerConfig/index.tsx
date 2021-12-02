@@ -54,7 +54,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const getTaskConfigsWrapped = (environment: Environments) =>
     getDataDevConfig({ jobId: data?.id as number, environment })
       .then((res) => {
-        const config = get(res, 'data.[0]', {});
+        const config = get(res, 'data.executeConfig', {});
         if (config.schTimeOut) {
           config.schTimeOut = config.schTimeOut / 60;
         } else {
@@ -101,6 +101,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
+    console.log(values);
     saveTaskConfig({ jobId: data?.id as number, environment }, { executeConfig: values })
       .then((res) => {
         if (res.success) {
@@ -209,7 +210,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={concurrentOptions}
                 />
               </Item>
-              <Item name="priority" label="优先等级" rules={ruleSelc}>
+              <Item name="schPriority" label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
