@@ -514,8 +514,12 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         taskJson.put("flag", "NO");
         taskJson.put("taskPriority", getJobPriority(executeConfig));
         taskJson.put("workerGroup", getDSWorkGroup(executeConfig.getEnvironment()));
-        taskJson.put("timeoutFlag", "OPEN");
-        taskJson.put("timeout", executeConfig.getSchTimeOut());
+        if (executeConfig.getSchTimeOut() <= 0) {
+            taskJson.put("timeoutFlag", "CLOSE");
+        } else {
+            taskJson.put("timeoutFlag", "OPEN");
+            taskJson.put("timeout", executeConfig.getSchTimeOut() / 60);
+        }
         taskJson.put("timeoutNotifyStrategy", getJobTimeoutStrategy(executeConfig));
         return taskJson;
     }
