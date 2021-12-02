@@ -65,7 +65,7 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jo
         <Item label="参数">
           <ParamList formName={['appArguments', 'argumentValue', 'argumentRemark']} />
         </Item>
-        <Item name="mainClass" label="执行类">
+        <Item name="mainClass" label="执行类" rules={[{ required: true, message: '请输入' }]}>
           <Input placeholder="请输入" size="large" style={{ width }} />
         </Item>
       </Form>

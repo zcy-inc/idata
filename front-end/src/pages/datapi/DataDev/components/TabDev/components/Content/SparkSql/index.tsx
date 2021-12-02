@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { Form, Input, Select, Table, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
@@ -22,6 +22,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   { monaco, data: { content, log, res }, removeResult },
   ref,
 ) => {
+  const [monacoValue, setMonacoValue] = useState('');
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -30,6 +31,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
 
   useEffect(() => {
     if (content) {
+      setMonacoValue(content.sourceSql);
       form.setFieldsValue({ externalTables: content.externalTables });
     }
   }, [content]);
@@ -43,7 +45,8 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
             height="400"
             language="sql"
             theme="vs-dark"
-            value={content.sourceSql}
+            value={monacoValue}
+            onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true }}
           />
         </TabPane>

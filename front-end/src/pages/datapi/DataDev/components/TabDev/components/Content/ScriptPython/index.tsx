@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { Form, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
@@ -20,6 +20,7 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
   { monaco, data: { content, log } },
   ref,
 ) => {
+  const [monacoValue, setMonacoValue] = useState('');
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -28,6 +29,7 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
 
   useEffect(() => {
     if (content) {
+      setMonacoValue(content.sourceResource);
       form.setFieldsValue({ scriptArguments: content.scriptArguments });
     }
   }, [content]);
@@ -41,7 +43,8 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
             height="400"
             language="sql"
             theme="vs-dark"
-            value={content.sourceResource}
+            value={monacoValue}
+            onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true }}
           />
         </TabPane>

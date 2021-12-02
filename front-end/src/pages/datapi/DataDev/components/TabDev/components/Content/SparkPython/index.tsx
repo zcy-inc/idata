@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { Form, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
@@ -20,11 +20,16 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
   { monaco, data: { content, log } },
   ref,
 ) => {
+  const [monacoValue, setMonacoValue] = useState('');
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
     form: form,
   }));
+
+  useEffect(() => {
+    setMonacoValue(content.pythonResource);
+  }, [content]);
 
   return (
     <>
@@ -35,7 +40,8 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
             height="400"
             language="python"
             theme="vs-dark"
-            value={content.pythonResource}
+            value={monacoValue}
+            onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true }}
           />
         </TabPane>

@@ -21,13 +21,11 @@ const Kylin: ForwardRefRenderFunction<unknown, KylinProps> = ({ data }, ref) => 
 
   useEffect(() => {
     if (data) {
-      console.log(data);
-
       form.setFieldsValue({
         cubeName: data.cubeName,
         buildType: data.buildType,
-        startTime: moment(data.startTime),
-        endTime: moment(data.endTime),
+        startTime: data.startTime ? moment(data.startTime) : null,
+        endTime: data.endTime ? moment(data.endTime) : null,
       });
     }
   }, [data]);

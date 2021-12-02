@@ -84,8 +84,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   }, [visible]);
 
   const columnsDependence: ColumnsType<ConfiguredTaskListItem> = [
-    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName' },
-
+    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '45%' },
+    { title: '所属DAG', dataIndex: 'dagName', key: 'dagName', width: '45%' },
     {
       title: '操作',
       key: 'option',
@@ -154,26 +154,24 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         executeConfig.schTimeOutStrategy = executeConfig.schTimeOutStrategy?.split(',');
         // 处理上游依赖
         if (environment === Environments.STAG) {
-          dependencies.forEach((_: any) => {
-            depDataStag.push({
-              ..._,
-              jobName: _.prevJobName,
-              dagName: _.prevJobDagName,
-              dagId: _.prevJobDagId,
-            });
-            setDepDataStag([...depDataStag]);
-          });
+          const tmp = dependencies.map((_: any) => ({
+            ..._,
+            jobName: _.prevJobName,
+            dagName: _.prevJobDagName,
+            dagId: _.prevJobDagId,
+          }));
+          setDepDataStag(tmp);
         }
         if (environment === Environments.PROD) {
-          dependencies.forEach((_: any) => {
-            depDataProd.push({
-              ..._,
-              jobName: _.prevJobName,
-              dagName: _.prevJobDagName,
-              dagId: _.prevJobDagId,
-            });
-            setDepDataProd([...depDataProd]);
-          });
+          const tmp = dependencies.map((_: any) => ({
+            ..._,
+            jobName: _.prevJobName,
+            dagName: _.prevJobDagName,
+            dagId: _.prevJobDagId,
+          }));
+          console.log(tmp);
+
+          setDepDataProd(tmp);
         }
         // 处理输出
         executeConfig.destWriteMode = output?.destWriteMode;
@@ -216,7 +214,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataStag.push({ key, ...curConfiguredTask });
+      depDataStag.push({
+        key,
+        ...curConfiguredTask,
+        prevJobId: curConfiguredTask?.jobId,
+        prevJobDagId: curConfiguredTask?.dagId,
+      });
       setDepDataStag([...depDataStag]);
     }
     if (activeKey === Environments.PROD) {
@@ -226,7 +229,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataProd.push({ key, ...curConfiguredTask });
+      depDataProd.push({
+        key,
+        ...curConfiguredTask,
+        prevJobId: curConfiguredTask?.jobId,
+        prevJobDagId: curConfiguredTask?.dagId,
+      });
       setDepDataProd([...depDataProd]);
     }
   };
@@ -322,8 +330,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       dependencies: depData.map((_) => ({
         jobId: data?.id as number,
         environment: activeKey,
-        prevJobId: _.jobId,
-        prevJobDagId: _.dagId,
+        prevJobId: _.prevJobId,
+        prevJobDagId: _.prevJobDagId,
       })),
       output: {
         jobId: data?.id as number,
