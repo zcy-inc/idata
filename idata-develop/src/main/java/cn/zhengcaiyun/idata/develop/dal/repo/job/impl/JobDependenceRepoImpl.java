@@ -20,8 +20,10 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceCustomizeDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dto.JobDependencyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -41,6 +43,9 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
 
     private final JobDependenceDao jobDependenceDao;
     private final JobDependenceCustomizeDao jobDependenceCustomizeDao;
+
+    @Autowired
+    private JobDependenceMyDao jobDependenceMyDao;
 
     @Autowired
     public JobDependenceRepoImpl(JobDependenceDao jobDependenceDao,
@@ -78,5 +83,10 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
     public Boolean deleteDependence(Long jobId, String environment) {
         return jobDependenceDao.delete(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isEqualTo(jobId),
                 and(JOB_DEPENDENCE.environment, isEqualTo(environment)))) > 0;
+    }
+
+    @Override
+    public List<JobDependencyDTO> queryJobs(String env) {
+        return jobDependenceMyDao.queryJobs(env);
     }
 }

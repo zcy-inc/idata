@@ -58,16 +58,16 @@ public class JobSchedule {
         jobHistoryService.batchUpsert(devJobHistoryList);
     }
 
-    public static void main(String[] args) {
-        String s = "SparkSQL-q-1234";
-        System.out.println(StringUtils.startsWith(s, "SparkSQL-[]-"));
-
-        boolean isMatch = ReUtil.isMatch("SparkSQL-[p/s]-\\d*", s);
-        System.out.println(isMatch);
-
-        String resultDelFirst = ReUtil.get("SparkSQL-[p/s]-(\\d*)", s, 1);
-        System.out.println(resultDelFirst);
-    }
+//    public static void main(String[] args) {
+//        String s = "SparkSQL-q-1234";
+//        System.out.println(StringUtils.startsWith(s, "SparkSQL-[]-"));
+//
+//        boolean isMatch = ReUtil.isMatch("SparkSQL-[p/s]-\\d*", s);
+//        System.out.println(isMatch);
+//
+//        String resultDelFirst = ReUtil.get("SparkSQL-[p/s]-(\\d*)", s, 1);
+//        System.out.println(resultDelFirst);
+//    }
 
 
 }

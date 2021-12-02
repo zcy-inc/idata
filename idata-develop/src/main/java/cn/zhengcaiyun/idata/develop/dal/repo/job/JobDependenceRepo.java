@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
+import cn.zhengcaiyun.idata.develop.dto.JobDependencyDTO;
 
 import java.util.List;
 
@@ -38,4 +39,5 @@ public interface JobDependenceRepo {
 
     Boolean deleteDependence(Long jobId, String environment);
 
+    List<JobDependencyDTO> queryJobs(String env);
 }
