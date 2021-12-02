@@ -80,15 +80,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     private final DataSourceApi dataSourceApi;
 
     @Autowired
-    public JobExecuteConfigServiceImpl(JobInfoRepo jobInfoRepo,
-                                       JobExecuteConfigRepo jobExecuteConfigRepo,
-                                       JobOutputRepo jobOutputRepo,
-                                       JobDependenceRepo jobDependenceRepo,
-                                       DAGRepo dagRepo,
-                                       JobManager jobManager,
-                                       JobConfigCombinationManager jobConfigCombinationManager,
-                                       JobEventPublisher jobEventPublisher,
-                                       DataSourceApi dataSourceApi) {
+    public JobExecuteConfigServiceImpl(JobInfoRepo jobInfoRepo, JobExecuteConfigRepo jobExecuteConfigRepo, JobOutputRepo jobOutputRepo, JobDependenceRepo jobDependenceRepo, DAGRepo dagRepo, JobManager jobManager, JobConfigCombinationManager jobConfigCombinationManager, JobEventPublisher jobEventPublisher, DataSourceApi dataSourceApi) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobOutputRepo = jobOutputRepo;
@@ -110,7 +102,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         List<JobDependenceDto> dependenceDtoList = dto.getDependencies();
         JobOutputDto outputDto = dto.getOutput();
         checkExecuteConfig(executeConfigDto);
-        checkDependConfig(dependenceDtoList);
+        checkDependConfig(jobId, dependenceDtoList);
         checkOutputConfig(outputDto);
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
@@ -120,8 +112,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         } else {
             JobConfigCombination configCombination = configCombinationOptional.get();
             checkState(Objects.equals(RunningStateEnum.pause.val, configCombination.getExecuteConfig().getRunningState()), "作业在%s环境未暂停，不能修改配置", environment);
-            updateConfig(jobId, environment, configCombination,
-                    executeConfigDto, dependenceDtoList, outputDto, operator);
+            updateConfig(jobId, environment, configCombination, executeConfigDto, dependenceDtoList, outputDto, operator);
         }
 
         return getCombineConfig(jobId, environment);
@@ -153,12 +144,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         return buildJobAndDag(configList, jobInfoList, dagInfoList);
     }
 
-    private void updateConfig(Long jobId, String environment,
-                              JobConfigCombination existConfigCombination,
-                              JobExecuteConfigDto executeConfigDto,
-                              List<JobDependenceDto> dependenceDtoList,
-                              JobOutputDto outputDto,
-                              Operator operator) {
+    private void updateConfig(Long jobId, String environment, JobConfigCombination existConfigCombination, JobExecuteConfigDto executeConfigDto, List<JobDependenceDto> dependenceDtoList, JobOutputDto outputDto, Operator operator) {
         JobExecuteConfig existExecuteConfig = existConfigCombination.getExecuteConfig();
         List<JobDependence> existDependenceList = existConfigCombination.getDependenceList();
 
@@ -197,11 +183,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         }
     }
 
-    private void addConfig(Long jobId, String environment,
-                           JobExecuteConfigDto executeConfigDto,
-                           List<JobDependenceDto> dependenceDtoList,
-                           JobOutputDto outputDto,
-                           Operator operator) {
+    private void addConfig(Long jobId, String environment, JobExecuteConfigDto executeConfigDto, List<JobDependenceDto> dependenceDtoList, JobOutputDto outputDto, Operator operator) {
         // 保存配置
         JobExecuteConfig executeConfig = buildExecuteConfig(jobId, environment, executeConfigDto, operator);
         jobExecuteConfigRepo.save(executeConfig);
@@ -227,8 +209,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private void bindDag(Long jobId, Long bindDagId, String environment, Boolean isFirstBind, Operator operator) {
         // 发布job绑定DAG事件
-        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_BIND_DAG, environment,
-                isFirstBind ? "{\"firstBind\":true, \"bindDagId\":" + bindDagId + "}" : "{\"bindDagId\":" + bindDagId + "}", operator);
+        JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_BIND_DAG, environment, isFirstBind ? "{\"firstBind\":true, \"bindDagId\":" + bindDagId + "}" : "{\"bindDagId\":" + bindDagId + "}", operator);
         jobEventPublisher.whenBindDag(eventLog, bindDagId, isFirstBind);
     }
 
@@ -244,11 +225,8 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         jobEventPublisher.whenScheduleUpdated(eventLog);
     }
 
-    private void updatePrevJobDependency(Long jobId, String environment,
-                                         List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList,
-                                         Operator operator) {
-        if (!isChangePrevRelation(newDependenceList, oldDependenceList))
-            return;  // 依赖关系未变
+    private void updatePrevJobDependency(Long jobId, String environment, List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList, Operator operator) {
+        if (!isChangePrevRelation(newDependenceList, oldDependenceList)) return;  // 依赖关系未变
 
         List<DagJobPair> addingPrevJobs = null;
         List<DagJobPair> removingPrevJobs = null;
@@ -257,23 +235,15 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         } else if (isOnlyRemovingPrevRelation(newDependenceList, oldDependenceList)) {
             removingPrevJobs = groupJobDependence(oldDependenceList);
         } else {
-            Set<Long> newPrevJobIds = newDependenceList.stream()
-                    .map(JobDependence::getPrevJobId)
-                    .collect(Collectors.toSet());
-            Set<Long> oldPrevJobIds = oldDependenceList.stream()
-                    .map(JobDependence::getPrevJobId)
-                    .collect(Collectors.toSet());
+            Set<Long> newPrevJobIds = newDependenceList.stream().map(JobDependence::getPrevJobId).collect(Collectors.toSet());
+            Set<Long> oldPrevJobIds = oldDependenceList.stream().map(JobDependence::getPrevJobId).collect(Collectors.toSet());
 
-            List<JobDependence> addDependenceList = newDependenceList.stream()
-                    .filter(dep -> !oldPrevJobIds.contains(dep.getPrevJobId()))
-                    .collect(Collectors.toList());
+            List<JobDependence> addDependenceList = newDependenceList.stream().filter(dep -> !oldPrevJobIds.contains(dep.getPrevJobId())).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(addDependenceList)) {
                 addingPrevJobs = groupJobDependence(addDependenceList);
             }
 
-            List<JobDependence> removeDependenceList = oldDependenceList.stream()
-                    .filter(dep -> !newPrevJobIds.contains(dep.getPrevJobId()))
-                    .collect(Collectors.toList());
+            List<JobDependence> removeDependenceList = oldDependenceList.stream().filter(dep -> !newPrevJobIds.contains(dep.getPrevJobId())).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(removeDependenceList)) {
                 removingPrevJobs = groupJobDependence(removeDependenceList);
             }
@@ -301,23 +271,18 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private boolean isScheduleConfigChanged(JobExecuteConfig newConfig, JobExecuteConfig oldConfig) {
         // 判断作业优先级、超时和超时策略是否变更，如变更需要同步调度系统
-        if (!Objects.equals(newConfig.getSchPriority(), oldConfig.getSchPriority()))
-            return true;
+        if (!Objects.equals(newConfig.getSchPriority(), oldConfig.getSchPriority())) return true;
 
-        if (!Objects.equals(newConfig.getSchTimeOut(), oldConfig.getSchTimeOut()))
-            return true;
+        if (!Objects.equals(newConfig.getSchTimeOut(), oldConfig.getSchTimeOut())) return true;
 
-        if (!Objects.equals(newConfig.getSchTimeOutStrategy(), oldConfig.getSchTimeOutStrategy()))
-            return true;
+        if (!Objects.equals(newConfig.getSchTimeOutStrategy(), oldConfig.getSchTimeOutStrategy())) return true;
 
         return false;
     }
 
     private boolean hasPrevOrPostRelation(Long jobId, String environment, List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList) {
-        if (!CollectionUtils.isEmpty(oldDependenceList))
-            return true;
-        if (!CollectionUtils.isEmpty(newDependenceList))
-            return true;
+        if (!CollectionUtils.isEmpty(oldDependenceList)) return true;
+        if (!CollectionUtils.isEmpty(newDependenceList)) return true;
         return !CollectionUtils.isEmpty(jobDependenceRepo.queryPostJob(jobId, environment));
     }
 
@@ -333,15 +298,10 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (CollectionUtils.isEmpty(newDependenceList) && CollectionUtils.isEmpty(oldDependenceList)) {
             return false;
         } else if (!CollectionUtils.isEmpty(newDependenceList) && !CollectionUtils.isEmpty(oldDependenceList)) {
-            if (newDependenceList.size() != oldDependenceList.size())
-                return true;
+            if (newDependenceList.size() != oldDependenceList.size()) return true;
 
-            Set<Long> newPrevJobIds = newDependenceList.stream()
-                    .map(JobDependence::getPrevJobId)
-                    .collect(Collectors.toSet());
-            Set<Long> oldPrevJobIds = oldDependenceList.stream()
-                    .map(JobDependence::getPrevJobId)
-                    .collect(Collectors.toSet());
+            Set<Long> newPrevJobIds = newDependenceList.stream().map(JobDependence::getPrevJobId).collect(Collectors.toSet());
+            Set<Long> oldPrevJobIds = oldDependenceList.stream().map(JobDependence::getPrevJobId).collect(Collectors.toSet());
             Sets.SetView<Long> addJobs = Sets.difference(newPrevJobIds, oldPrevJobIds);
             if (!addJobs.isEmpty()) return true;
 
@@ -355,16 +315,11 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     private List<DagJobPair> groupJobDependence(List<JobDependence> dependenceList) {
-        Map<Long, List<Long>> dagJobMap = dependenceList.stream()
-                .collect(Collectors.groupingBy(JobDependence::getPrevJobDagId, Collectors.mapping(JobDependence::getPrevJobId, Collectors.toList())));
-        return dagJobMap.entrySet().stream()
-                .map(entry -> new DagJobPair(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+        Map<Long, List<Long>> dagJobMap = dependenceList.stream().collect(Collectors.groupingBy(JobDependence::getPrevJobDagId, Collectors.mapping(JobDependence::getPrevJobId, Collectors.toList())));
+        return dagJobMap.entrySet().stream().map(entry -> new DagJobPair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
     }
 
-    private JobExecuteConfig buildExecuteConfig(Long jobId, String environment,
-                                                JobExecuteConfigDto dto,
-                                                Operator operator) {
+    private JobExecuteConfig buildExecuteConfig(Long jobId, String environment, JobExecuteConfigDto dto, Operator operator) {
         dto.setOperator(operator);
         JobExecuteConfig config = dto.toModel();
         config.setId(null);
@@ -374,25 +329,20 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         return config;
     }
 
-    private List<JobDependence> buildDependenceConfig(Long jobId, String environment,
-                                                      List<JobDependenceDto> dependenceDtoList,
-                                                      Operator operator) {
-        List<JobDependence> jobDependenceList = dependenceDtoList.stream()
-                .map(dto -> {
-                    dto.setOperator(operator);
-                    JobDependence dependence = dto.toModel();
-                    dependence.setId(null);
-                    dependence.setJobId(jobId);
-                    dependence.setEnvironment(environment);
-                    dependence.setDel(DeleteEnum.DEL_NO.val);
-                    return dependence;
-                }).collect(Collectors.toList());
+    private List<JobDependence> buildDependenceConfig(Long jobId, String environment, List<JobDependenceDto> dependenceDtoList, Operator operator) {
+        List<JobDependence> jobDependenceList = dependenceDtoList.stream().map(dto -> {
+            dto.setOperator(operator);
+            JobDependence dependence = dto.toModel();
+            dependence.setId(null);
+            dependence.setJobId(jobId);
+            dependence.setEnvironment(environment);
+            dependence.setDel(DeleteEnum.DEL_NO.val);
+            return dependence;
+        }).collect(Collectors.toList());
         return jobDependenceList;
     }
 
-    private JobOutput buildOutputConfig(Long jobId, String environment,
-                                        JobOutputDto dto,
-                                        Operator operator) {
+    private JobOutput buildOutputConfig(Long jobId, String environment, JobOutputDto dto, Operator operator) {
         dto.setOperator(operator);
         if (JobWriteModeEnum.UPSERT.name().equals(dto.getDestWriteMode())) {
             checkArgument(StringUtils.isNotEmpty(dto.getJobTargetTablePk()), "写入模式为UPSERT时目标表主键不能为空");
@@ -405,10 +355,8 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     private List<JobAndDagDto> buildJobAndDag(List<JobExecuteConfig> configList, List<JobInfo> jobInfoList, List<DAGInfo> dagInfoList) {
-        Map<Long, JobInfo> jobMap = jobInfoList.stream()
-                .collect(Collectors.toMap(JobInfo::getId, Function.identity()));
-        Map<Long, DAGInfo> dagMap = dagInfoList.stream()
-                .collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
+        Map<Long, JobInfo> jobMap = jobInfoList.stream().collect(Collectors.toMap(JobInfo::getId, Function.identity()));
+        Map<Long, DAGInfo> dagMap = dagInfoList.stream().collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
         return configList.stream().map(config -> {
             JobAndDagDto jobAndDagDto = new JobAndDagDto();
             jobAndDagDto.setJobId(config.getJobId());
@@ -445,15 +393,13 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(jobIds);
         Map<Long, JobInfo> jobInfoMap = Maps.newHashMap();
         if (!CollectionUtils.isEmpty(jobInfoList)) {
-            jobInfoMap = jobInfoList.stream()
-                    .collect(Collectors.toMap(JobInfo::getId, Function.identity()));
+            jobInfoMap = jobInfoList.stream().collect(Collectors.toMap(JobInfo::getId, Function.identity()));
         }
 
         List<DAGInfo> dagInfoList = dagRepo.queryDAGInfo(dagIds);
         Map<Long, DAGInfo> dagInfoMap = Maps.newHashMap();
         if (!CollectionUtils.isEmpty(dagInfoList)) {
-            dagInfoMap = dagInfoList.stream()
-                    .collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
+            dagInfoMap = dagInfoList.stream().collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
         }
 
         for (JobDependenceDto dto : dependencies) {
@@ -478,13 +424,15 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
     }
 
-    private void checkDependConfig(List<JobDependenceDto> dependenceDtoList) {
-        if (ObjectUtils.isEmpty(dependenceDtoList))
-            return;
+    private void checkDependConfig(Long currentJobId, List<JobDependenceDto> dependenceDtoList) {
+        if (ObjectUtils.isEmpty(dependenceDtoList)) return;
 
+        Set<Long> prevJobSet = Sets.newHashSet();
         for (JobDependenceDto dto : dependenceDtoList) {
             checkArgument(Objects.nonNull(dto.getPrevJobId()), "上游作业为空");
             checkArgument(Objects.nonNull(dto.getPrevJobDagId()), "上游作业所属DAG为空");
+            checkArgument(prevJobSet.add(dto.getPrevJobId()), "上游依赖存在重复作业");
+            checkArgument(!Objects.equals(currentJobId, dto.getPrevJobId()), "上游依赖作业不能选择当前作业");
         }
     }
 

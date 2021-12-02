@@ -529,6 +529,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String timeOutStrategy = executeConfig.getSchTimeOutStrategy();
         if (StringUtils.isEmpty(timeOutStrategy)) return null;
 
+        // todo 超时策略同步
         timeOutStrategy = timeOutStrategy.replace("alarm", "WARN");
         timeOutStrategy = timeOutStrategy.replace("fail", "FAILED");
         return timeOutStrategy;

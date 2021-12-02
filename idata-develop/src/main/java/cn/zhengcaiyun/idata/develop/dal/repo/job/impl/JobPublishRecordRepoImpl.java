@@ -23,6 +23,8 @@ import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -48,12 +51,15 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
 
     private final JobPublishRecordDao jobPublishRecordDao;
+    private final JobExecuteConfigDao jobExecuteConfigDao;
     private final DIJobContentRepo diJobContentRepo;
 
     @Autowired
     public JobPublishRecordRepoImpl(JobPublishRecordDao jobPublishRecordDao,
+                                    JobExecuteConfigDao jobExecuteConfigDao,
                                     DIJobContentRepo diJobContentRepo) {
         this.jobPublishRecordDao = jobPublishRecordDao;
+        this.jobExecuteConfigDao = jobExecuteConfigDao;
         this.diJobContentRepo = diJobContentRepo;
     }
 
@@ -165,6 +171,12 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                 .where(jobPublishRecord.jobId, isEqualTo(record.getJobId()),
                         and(jobPublishRecord.environment, isEqualTo(record.getEnvironment())),
                         and(jobPublishRecord.publishStatus, isEqualTo(PublishStatusEnum.PUBLISHED.val))));
+
+        // 修改配置运行状态
+        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.runningState).equalTo(RunningStateEnum.resume.val)
+                .where(jobExecuteConfig.jobId, isEqualTo(jobPublishRecord.jobId),
+                        and(jobExecuteConfig.environment, isEqualTo(jobPublishRecord.environment))));
+
         //更新状态为发布
         JobPublishRecord publishedRecord = new JobPublishRecord();
         publishedRecord.setId(record.getId());
