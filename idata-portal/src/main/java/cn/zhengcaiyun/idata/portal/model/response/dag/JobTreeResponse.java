@@ -1,16 +1,24 @@
 package cn.zhengcaiyun.idata.portal.model.response.dag;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 import java.util.List;
 
+@ApiModel("任务依赖树")
 public class JobTreeResponse {
 
+    @ApiModelProperty("任务id")
     private Long jobId;
 
+    @ApiModelProperty("任务名称")
     private String jobName;
 
+    @ApiModelProperty("上游节点树")
     private List<JobNode> parents;
 
+    @ApiModelProperty("下游节点树")
     private List<JobNode> children;
 
     public Long getJobId() {
