@@ -46,7 +46,9 @@ public interface IJobIntegrator {
 
     void unBindDag(JobInfo jobInfo, Long dagId, String environment);
 
-    void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment);
+    void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, boolean runPost);
 
     void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations);
+
+    String queryLog(Long jobId, String environment, Integer jobInstanceId, Integer lineNum, Integer skipLineNum);
 }

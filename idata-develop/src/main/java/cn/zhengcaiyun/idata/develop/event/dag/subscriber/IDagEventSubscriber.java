@@ -38,8 +38,6 @@ public interface IDagEventSubscriber {
 
     void onScheduleUpdated(DagScheduleUpdatedEvent event);
 
-    void onRun(DagRunEvent event);
-
     @Deprecated
     void addDependence(DagAddDependenceEvent event);
 

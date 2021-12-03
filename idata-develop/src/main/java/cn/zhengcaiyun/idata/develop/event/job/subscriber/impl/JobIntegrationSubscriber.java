@@ -291,29 +291,4 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
         }
     }
 
-    @Override
-    @Subscribe
-    public void onRun(JobRunEvent event) {
-        try {
-            Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(event.getJobId());
-            Optional<JobExecuteConfig> executeConfigOptional = jobExecuteConfigRepo.query(event.getJobId(), event.getEnvironment());
-            if (jobInfoOptional.isEmpty()) {
-                event.processFailed("作业不存在");
-                return;
-            }
-            if (executeConfigOptional.isEmpty()) {
-                event.processFailed("作业调度配置不存在");
-                return;
-            }
-            JobInfo jobInfo = jobInfoOptional.get();
-            JobExecuteConfig executeConfig = executeConfigOptional.get();
-            jobIntegrator.run(jobInfo, executeConfig, event.getEnvironment());
-        } catch (ExternalIntegrationException iex) {
-            event.processFailed(iex.getMessage());
-            LOGGER.warn("JobIntegrationSubscriber.onRun failed. ex: {}.", iex);
-        } catch (Exception ex) {
-            event.processFailed("同步DS失败，请稍后重试");
-            LOGGER.warn("JobIntegrationSubscriber.onRun failed. ex: {}.", ex);
-        }
-    }
 }

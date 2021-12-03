@@ -41,6 +41,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
+import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -71,6 +72,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final DAGRepo dagRepo;
     private final JobManager jobManager;
+    private final JobScheduleManager jobScheduleManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
 
@@ -81,6 +83,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobPublishRecordRepo jobPublishRecordRepo,
                               DAGRepo dagRepo,
                               JobManager jobManager,
+                              JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
@@ -89,6 +92,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.dagRepo = dagRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
+        this.jobScheduleManager = jobScheduleManager;
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
     }
@@ -219,9 +223,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         // dag 必须上线
         checkState(isDAGOnline(executeConfig.getSchDagId()), "作业关联DAG未上线，请先上线DAG");
 
-        // 发布job暂停事件
-        JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.JOB_RUN, environment, operator);
-        jobEventPublisher.whenToRun(eventLog);
+        jobScheduleManager.runJob(id,environment,false);
         return Boolean.TRUE;
     }
 

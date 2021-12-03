@@ -213,7 +213,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     @Override
-    public void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment) {
+    public void run(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, boolean runPost) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(environment);
         // 获取工作流code
@@ -224,7 +224,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String req_method = "POST";
         String token = getDSToken(environment);
 
-        Map<String, String> req_param = buildRunningParam(workflowCode, taskCode, executeConfig);
+        Map<String, String> req_param = buildRunningParam(workflowCode, taskCode, executeConfig, runPost);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
@@ -249,6 +249,21 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             removePrevRelation(token, projectCode, workflowCode, taskCode, jobInfo, executeConfig, environment, removingPrevRelations);
         }
 
+    }
+
+    @Override
+    public String queryLog(Long jobId, String environment, Integer jobInstanceId, Integer lineNum, Integer skipLineNum) {
+        String req_url = getDSBaseUrl(environment) + "/log/detail";
+        String req_method = "GET";
+        String token = getDSToken(environment);
+
+        Map<String, String> req_param = buildQueryLogParam(jobInstanceId, lineNum, skipLineNum);
+        HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
+        if (!resultDto.isSuccess()) {
+            throw new ExternalIntegrationException(String.format("运行DS任务失败：%s", resultDto.getMsg()));
+        }
+        return resultDto.getData().toString();
     }
 
     private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> removingPrevRelations) {
@@ -435,7 +450,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return taskJsonArray.toJSONString();
     }
 
-    private Map<String, String> buildRunningParam(Long workflowCode, Long taskCode, JobExecuteConfig executeConfig) {
+    private Map<String, String> buildRunningParam(Long workflowCode, Long taskCode, JobExecuteConfig executeConfig, boolean runPost) {
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("processDefinitionCode", workflowCode.toString());
         paramMap.put("scheduleTime", null);
@@ -443,7 +458,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         paramMap.put("warningType", "NONE");
         paramMap.put("warningGroupId", null);
         paramMap.put("execType", null);
-        paramMap.put("taskDependType", "TASK_ONLY");
+        paramMap.put("taskDependType", runPost ? "TASK_POST" : "TASK_ONLY");
         paramMap.put("runMode", "RUN_MODE_SERIAL");
         paramMap.put("processInstancePriority", "HIGHEST");
         paramMap.put("workerGroup", getDSWorkGroup(executeConfig.getEnvironment()));
@@ -522,6 +537,14 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
         taskJson.put("timeoutNotifyStrategy", getJobTimeoutStrategy(executeConfig));
         return taskJson;
+    }
+
+    private Map<String, String> buildQueryLogParam(Integer jobInstanceId, Integer lineNum, Integer skipLineNum) {
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("taskInstanceId", jobInstanceId.toString());
+        paramMap.put("skipLineNum", skipLineNum.toString());
+        paramMap.put("limit", lineNum.toString());
+        return paramMap;
     }
 
     private String getJobTimeoutStrategy(JobExecuteConfig executeConfig) {

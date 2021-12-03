@@ -57,9 +57,7 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
     private final IDagIntegrator dagIntegrator;
 
     @Autowired
-    public DagIntegrationSubscriber(DAGRepo dagRepo,
-                                    JobExecuteConfigRepo jobExecuteConfigRepo,
-                                    IDagIntegrator dagIntegrator) {
+    public DagIntegrationSubscriber(DAGRepo dagRepo, JobExecuteConfigRepo jobExecuteConfigRepo, IDagIntegrator dagIntegrator) {
         this.dagRepo = dagRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.dagIntegrator = dagIntegrator;
@@ -183,12 +181,6 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             event.processFailed("同步DS失败，请稍后重试");
             LOGGER.warn("DagIntegrationSubscriber.onScheduleUpdated failed. ex: {}.", ex);
         }
-    }
-
-    @Override
-    @Subscribe
-    public void onRun(DagRunEvent event) {
-
     }
 
     @Override

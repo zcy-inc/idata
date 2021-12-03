@@ -46,6 +46,4 @@ public interface IJobEventSubscriber {
 
     void buildJobRelation(JobBuildPrevRelationEvent event);
 
-    void onRun(JobRunEvent event);
-
 }

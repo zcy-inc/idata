@@ -113,18 +113,6 @@ public class DagEventPublisher {
         return;
     }
 
-    public void whenToRun(DAGEventLog eventLog) {
-        if (!EventTypeEnum.DAG_RUN.name().equals(eventLog.getDagEvent())) return;
-        DagRunEvent event = new DagRunEvent();
-        event.setDagId(eventLog.getDagId());
-        event.setEventId(eventLog.getId());
-        // 发布事件
-        DagEventBus.getInstance().post(event);
-        // 检查事件处理结果
-        processResult(event);
-        return;
-    }
-
     public void whenScheduleUpdated(DAGEventLog eventLog) {
         if (!EventTypeEnum.DAG_SCHEDULE_UPDATED.name().equals(eventLog.getDagEvent())) return;
 

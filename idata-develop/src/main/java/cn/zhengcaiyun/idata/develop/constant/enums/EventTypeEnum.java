@@ -29,7 +29,6 @@ public enum EventTypeEnum {
     DAG_SCHEDULE_UPDATED,
     DAG_OFFLINE,
     DAG_ONLINE,
-    DAG_RUN,
     DAG_ADD_DEPENDENCE,
     DAG_DEL_DEPENDENCE,
     JOB_SCHEDULE_UPDATED,
@@ -38,7 +37,6 @@ public enum EventTypeEnum {
     JOB_PUBLISH,
     JOB_BIND_DAG,
     JOB_UNBIND_DAG,
-    JOB_RUN,
     JOB_BUILD_PREV,
     ;
 }
