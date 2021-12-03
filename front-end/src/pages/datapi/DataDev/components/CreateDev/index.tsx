@@ -55,7 +55,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   return (
     <ModalForm
       className={styles.form}
-      title="新建数据开发"
+      title="新建作业"
       layout="horizontal"
       width={536}
       labelCol={{ span: 6 }}
@@ -82,11 +82,11 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
         createTask(params)
           .then((res) => {
             if (res.success) {
-              message.success('创建任务成功');
+              message.success('创建作业成功');
               setVisibleDev(false);
               getTreeWrapped();
             } else {
-              message.success(`创建任务失败：${res.msg}`);
+              message.success(`创建作业失败：${res.msg}`);
             }
           })
           .catch((err) => {});

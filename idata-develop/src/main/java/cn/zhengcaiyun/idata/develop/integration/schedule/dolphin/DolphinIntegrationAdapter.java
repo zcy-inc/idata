@@ -45,23 +45,20 @@ public abstract class DolphinIntegrationAdapter {
     protected final DSEntityMappingRepo dsEntityMappingRepo;
     protected final DSDependenceNodeRepo dsDependenceNodeRepo;
 
-    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo,
-                                     DSDependenceNodeRepo dsDependenceNodeRepo) {
+    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo) {
         this.dsEntityMappingRepo = dsEntityMappingRepo;
         this.dsDependenceNodeRepo = dsDependenceNodeRepo;
     }
 
-    protected Long getWorkflowCode(Long dagId, String environment) throws ExternalIntegrationException {
+    protected Long getWorkflowCode(Long dagId, String environment) {
         Optional<Long> optional = dsEntityMappingRepo.queryDsEntityCode(dagId, ENTITY_TYPE_WORKFLOW, environment);
-        if (optional.isEmpty())
-            throw new ExternalIntegrationException("DS工作流code不存在");
+        if (optional.isEmpty()) throw new ExternalIntegrationException("DS工作流code不存在");
         return optional.get();
     }
 
-    protected Long getTaskCode(Long jobId, String environment) throws ExternalIntegrationException {
+    protected Long getTaskCode(Long jobId, String environment) {
         Optional<Long> optional = dsEntityMappingRepo.queryDsEntityCode(jobId, ENTITY_TYPE_TASK, environment);
-        if (optional.isEmpty())
-            throw new ExternalIntegrationException("DS任务code不存在");
+        if (optional.isEmpty()) throw new ExternalIntegrationException("DS任务code不存在");
         return optional.get();
     }
 

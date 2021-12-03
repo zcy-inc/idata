@@ -19,8 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
@@ -61,58 +60,23 @@ public class QueryRunServiceImpl implements QueryRunService {
     private HdfsService hdfsService;
 
     @Override
-    public SqlQueryStatementDto runSqlQuery(SqlQueryDto sqlQueryDto) {
-        if (StringUtils.isBlank(sqlQueryDto.getQuerySql())) return null;
-        checkArgument(!sqlQueryDto.getQuerySql().toUpperCase().contains(DROP_QUERY), "不能执行DROP操作");
-        checkArgument(sqlQueryDto.getSessionKind() != null, "执行类型不能为空");
-        return PojoUtil.copyOne(livyService.createStatement(sqlQueryDto), SqlQueryStatementDto.class);
+    public QueryStatementDto runQuery(QueryDto queryDto) {
+        if (StringUtils.isBlank(queryDto.getQuerySource())) return null;
+        checkArgument(!queryDto.getQuerySource().toUpperCase().contains(DROP_QUERY), "不能执行DROP操作");
+        checkArgument(queryDto.getSessionKind() != null, "执行类型不能为空");
+        return PojoUtil.copyOne(livyService.createStatement(queryDto), QueryStatementDto.class);
     }
 
     @Override
-    public QueryRunResultDto runSqlQueryResult(Integer sessionId, Integer statementId, Integer from, Integer size) {
-        QueryRunResultDto queryRunResult = PojoUtil.copyOne(livyService.queryResult(sessionId, statementId), QueryRunResultDto.class);
-        queryRunResult.setQueryRunLog(livyService.queryLog(sessionId, from, size));
+    public QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind,
+                                               Integer from, Integer size) {
+        checkArgument(LivySessionKindEnum.checkSessionKind(sessionKind), "Spark执行代码类型有误");
+        QueryRunResultDto queryRunResult = PojoUtil.copyOne(livyService.queryResult(sessionId, statementId,
+                LivySessionKindEnum.valueOf(sessionKind)), QueryRunResultDto.class);
+        if (LivySessionKindEnum.spark.name().equals(sessionKind)) {
+            queryRunResult.setQueryRunLog(livyService.queryLog(sessionId, from, size));
+        }
         return queryRunResult;
     }
 
-    @Override
-    public PythonQuerySessionDto runPythonQuery(PythonQueryDto pythonQueryDto) throws IOException {
-        if (StringUtils.isEmpty(pythonQueryDto.getQueryPython())) return null;
-        List<String> args = new ArrayList<>();
-        String driverMemory = null;
-        String executorMemory = null;
-        if(pythonQueryDto.getJobId() != null && pythonQueryDto.getVersion() != null) {
-            // 暂时默认查询prod环境的运行配置
-            JobExecuteConfigDto jobExecuteConfig = jobExecuteConfigService.getCombineConfig(pythonQueryDto.getJobId()
-                    , JOB_ENVIRONMENT).getExecuteConfig();
-            if (jobExecuteConfig.getExecDriverMem() > 0) {
-                driverMemory = jobExecuteConfig.getExecDriverMem() + "G";
-            }
-            if (jobExecuteConfig.getExecWorkerMem() > 0) {
-                executorMemory = jobExecuteConfig.getExecWorkerMem() + "G";
-            }
-            if (JobTypeEnum.SPARK_PYTHON.equals(pythonQueryDto.getJobType())) {
-                SparkJobContentDto sparkJobContent = sparkJobService.find(pythonQueryDto.getJobId(), pythonQueryDto.getVersion());
-                if (ObjectUtils.isNotEmpty(sparkJobContent.getAppArguments())) {
-                    args = sparkJobContent.getAppArguments().stream().map(JobArgumentDto::getArgumentValue).collect(Collectors.toList());
-                }
-            }
-            else if (JobTypeEnum.SCRIPT_PYTHON.equals(pythonQueryDto.getJobType())) {
-                ScriptJobContentDto scriptJobContent = scriptJobService.find(pythonQueryDto.getJobId(), pythonQueryDto.getVersion());
-                if (ObjectUtils.isNotEmpty(scriptJobContent.getScriptArguments())) {
-                    args = scriptJobContent.getScriptArguments().stream().map(JobArgumentDto::getArgumentValue).collect(Collectors.toList());
-                }
-            }
-        }
-
-        return PojoUtil.copyOne(livyService.createBatches(hdfsService.uploadTempPythonFile(pythonQueryDto.getJobName(),
-                pythonQueryDto.getQueryPython()), args, driverMemory, executorMemory), PythonQuerySessionDto.class);
-    }
-
-    @Override
-    public PythonQueryRunLogDto runPythonQueryLog(Integer sessionId, Integer from, Integer size) {
-        PythonQueryRunLogDto pythonQueryRunLog = PojoUtil.copyOne(livyService.getBatchesLog(sessionId, from, size), PythonQueryRunLogDto.class);
-        pythonQueryRunLog.setState(livyService.getBatchesState(sessionId));
-        return pythonQueryRunLog;
-    }
 }

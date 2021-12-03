@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Button, Form, FormInstance, message, Modal, Select, Space } from 'antd';
+import { Button, Form, FormInstance, Input, message, Modal, Select, Space } from 'antd';
+import { ModalForm } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import { get } from 'lodash';
 import type { FC } from 'react';
@@ -9,20 +10,14 @@ import styles from './index.less';
 
 import { IPane } from '@/models/datadev';
 import { Task, TaskVersion } from '@/types/datadev';
-
-import DrawerBasic from './components/DrawerBasic';
-import DrawerConfig from './components/DrawerConfig';
-import DrawerVersion from './components/DrawerVersion';
-import DrawerHistory from './components/DrawerHistory';
-import { StatementState, TaskTypes, VersionStatusDisplayMap } from '@/constants/datadev';
-import IconRun from './components/IconRun';
-import IconPause from './components/IconPause';
-import SparkSql from './components/Content/SparkSql';
-import SparkJava from './components/Content/SparkJava';
-import SparkPython from './components/Content/SparkPython';
-import ScriptShell from './components/Content/ScriptShell';
-import ScriptPython from './components/Content/ScriptPython';
-import Kylin from './components/Content/Kylin';
+import {
+  EnvRunningState,
+  StatementState,
+  TaskTypes,
+  VersionStatus,
+  VersionStatusDisplayMap,
+} from '@/constants/datadev';
+import { Environments } from '@/constants/datasource';
 import {
   deleteTask,
   getKylin,
@@ -33,19 +28,28 @@ import {
   getTaskVersions,
   pauseTask,
   resumeTask,
-  runQueryPython,
-  runQueryResultPython,
-  runQueryResultSql,
-  runQuerySql,
+  runQueryResult,
+  runQuery,
   runTask,
   saveKylin,
   saveScript,
   saveSpark,
   saveSqlSpark,
+  submitTask,
 } from '@/services/datadev';
-import { ModalForm } from '@ant-design/pro-form';
-import { Environments } from '@/constants/datasource';
-import { publishTask } from '@/services/task';
+
+import DrawerBasic from './components/DrawerBasic';
+import DrawerConfig from './components/DrawerConfig';
+import DrawerVersion from './components/DrawerVersion';
+import DrawerHistory from './components/DrawerHistory';
+import IconRun from './components/IconRun';
+import IconPause from './components/IconPause';
+import SparkSql from './components/Content/SparkSql';
+import SparkJava from './components/Content/SparkJava';
+import SparkPython from './components/Content/SparkPython';
+import ScriptShell from './components/Content/ScriptShell';
+import ScriptPython from './components/Content/ScriptPython';
+import Kylin from './components/Content/Kylin';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -53,6 +57,8 @@ export interface TabTaskProps {
 
 const { Item } = Form;
 const { confirm } = Modal;
+const { TextArea } = Input;
+const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
@@ -69,6 +75,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  // 提交
+  const [visibleSubmit, setVisibleSubmit] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   // content相关
   const [log, setLog] = useState<string[]>([]);
   const [results, setResults] = useState<{ columns: any[]; dataSource: any[] }[]>([]);
@@ -94,19 +103,30 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
   }, [version]);
 
+  /**
+   * 移除结果
+   */
+  const removeResult = (i: number) => {
+    results.splice(i, 1);
+    setResults([...results]);
+  };
+
   const componentMap = {
     [TaskTypes.SQL_SPARK]: (
-      <SparkSql ref={formRef} monaco={monaco} data={{ content, log, res: results }} />
+      <SparkSql
+        ref={formRef}
+        monaco={monaco}
+        data={{ content, log, res: results }}
+        removeResult={removeResult}
+      />
     ),
-    [TaskTypes.SPARK_JAR]: <SparkJava ref={formRef} data={content} />,
-    [TaskTypes.SPARK_PYTHON]: (
-      <SparkPython ref={formRef} monaco={monaco} data={{ content, log, res: results }} />
+    [TaskTypes.SPARK_JAR]: (
+      <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />
     ),
-    [TaskTypes.SCRIPT_SHELL]: (
-      <ScriptShell ref={formRef} monaco={monaco} data={{ content, log, res: results }} />
-    ),
+    [TaskTypes.SPARK_PYTHON]: <SparkPython ref={formRef} monaco={monaco} data={{ content, log }} />,
+    [TaskTypes.SCRIPT_SHELL]: <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />,
     [TaskTypes.SCRIPT_PYTHON]: (
-      <ScriptPython ref={formRef} monaco={monaco} data={{ content, log, res: results }} />
+      <ScriptPython ref={formRef} monaco={monaco} data={{ content, log }} />
     ),
     [TaskTypes.KYLIN]: <Kylin ref={formRef} data={content} />,
   };
@@ -199,6 +219,138 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   };
 
   /**
+   * 保存任务
+   */
+  const onSave = () => {
+    const values = formRef.current?.form?.getFieldsValue() || {};
+    const monacoValue = monaco.current?.editor?.getValue() || '';
+
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK:
+        const dataSql = {
+          jobId: pane.id,
+          jobType: TaskTypes.SQL_SPARK,
+          sourceSql: monacoValue,
+          externalTables: values.externalTables,
+        };
+        saveSqlSpark({ jobId: pane.id }, dataSql)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      case TaskTypes.SPARK_JAR:
+        const dataSparkJar = {
+          jobId: pane.id,
+          jobType: TaskTypes.SPARK_JAR,
+          resourceHdfsPath: values.resourceHdfsPath,
+          appArguments: values.appArguments?.map((_: any) => ({
+            argumentValue: _.argumentValue,
+            argumentRemark: _.argumentRemark,
+          })),
+          mainClass: values.mainClass,
+        };
+        saveSpark({ jobId: pane.id }, dataSparkJar)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      case TaskTypes.SPARK_PYTHON:
+        const dataSparkPython = {
+          jobId: pane.id,
+          jobType: TaskTypes.SPARK_PYTHON,
+          pythonResource: monacoValue,
+          appArguments: values.appArguments?.map((_: any) => ({
+            argumentValue: _.argumentValue,
+            argumentRemark: _.argumentRemark,
+          })),
+        };
+        saveSpark({ jobId: pane.id }, dataSparkPython)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      case TaskTypes.SCRIPT_SHELL:
+        const dataScriptShell = {
+          jobId: pane.id,
+          jobType: TaskTypes.SCRIPT_SHELL,
+          sourceResource: monacoValue,
+        };
+        saveScript({ jobId: pane.id }, dataScriptShell)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      case TaskTypes.SCRIPT_PYTHON:
+        const dataScriptPython = {
+          jobId: pane.id,
+          jobType: TaskTypes.SCRIPT_SHELL,
+          sourceResource: monacoValue,
+          scriptArguments: values.scriptArguments?.map((_: any) => ({
+            argumentValue: _.argumentValue,
+            argumentRemark: _.argumentRemark,
+          })),
+        };
+        saveScript({ jobId: pane.id }, dataScriptPython)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      case TaskTypes.KYLIN:
+        const dataKylin = {
+          jobId: pane.id,
+          jobType: TaskTypes.KYLIN,
+          cubeName: values.cubeName,
+          buildType: values.buildType,
+          startTime: new Date(values.startTime).getTime(),
+          endTime: new Date(values.endTime).getTime(),
+        };
+        saveKylin({ jobId: pane.id }, dataKylin)
+          .then((res) => {
+            if (res.success) {
+              message.success('保存成功');
+              getTaskVersionsWrapped();
+            } else {
+              message.error(`保存失败：${res.msg}`);
+            }
+          })
+          .catch((err) => {});
+        break;
+      default:
+        break;
+    }
+  };
+
+  /**
    * 调试选中代码段
    */
   const onDebug = () => {
@@ -209,7 +361,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       value = editor?.getValue();
     }
     if (task?.jobType === TaskTypes.SQL_SPARK) {
-      runQuerySql({ querySql: value as string, sessionKind: 'spark' })
+      runQuery({ querySource: value as string, sessionKind: 'spark' })
         .then((res) => {
           if (!res.data) {
             message.error('请选择代码');
@@ -217,7 +369,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }
           const { sessionId, statementId } = res.data;
           const runQueryResultWrapped = () => {
-            runQueryResultSql({ sessionId, statementId, from: pollingFrom.current, size: 10 })
+            runQueryResult({
+              sessionId,
+              sessionKind: 'spark',
+              statementId,
+              from: pollingFrom.current,
+              size: 10,
+            })
               .then((res) => {
                 if (
                   res.data.statementState !== StatementState.AVAILABLE &&
@@ -247,7 +405,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         .catch((err) => {});
     }
     if (task?.jobType === TaskTypes.SPARK_PYTHON || task?.jobType === TaskTypes.SCRIPT_PYTHON) {
-      runQueryPython({ queryPython: value as string, jobName: task.name })
+      runQuery({ querySource: value as string, sessionKind: 'pyspark' })
         .then((res) => {
           if (!res.data) {
             message.error('请选择代码');
@@ -255,23 +413,18 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }
           const { sessionId, statementId } = res.data;
           const runQueryResultWrapped = () => {
-            runQueryResultPython({
-              sessionId,
-              statementId,
-              from: pollingFrom.current,
-              size: 10,
-            })
+            runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
               .then((res) => {
-                if (res.data.state !== 'dead') {
-                  pollingFrom.current =
-                    pollingFrom.current + 10 > res.data.total
-                      ? res.data.total
-                      : pollingFrom.current + 10;
-                  const logs = get(res, 'data.log', []);
-                  setLog((pre) => [...pre, ...logs]);
+                if (
+                  res.data.statementState !== StatementState.AVAILABLE &&
+                  res.data.statementState !== StatementState.CANCELED
+                ) {
                   setTimeout(() => {
                     runQueryResultWrapped();
                   }, 2000);
+                } else {
+                  const logs = get(res, 'data.pythonResults', '');
+                  setLog([logs]);
                 }
               })
               .catch((err) => {});
@@ -287,146 +440,17 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    */
   const onTest = () => {};
 
-  /**
-   * 发布任务
-   */
-  const onPublish = () => {
-    publishTask({ recordIds: [pane.id] })
-      .then((res) => {
-        if (res.data) {
-          message.success('发布成功');
-        } else {
-          message.error('发布失败');
-        }
-      })
-      .catch((err) => {});
-  };
-
-  /**
-   * 保存任务
-   */
-  const onSave = () => {
-    const values = formRef.current?.form?.getFieldsValue() || {};
-    console.log(values);
-    const monacoValue = monaco.current?.editor?.getValue() || '';
-
-    switch (task?.jobType) {
-      case TaskTypes.SQL_SPARK:
-        const dataSql = {
-          jobId: pane.id,
-          jobType: TaskTypes.SQL_SPARK,
-          sourceSql: monacoValue,
-          externalTables: values.externalTables,
-        };
-        saveSqlSpark({ jobId: pane.id }, dataSql)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SPARK_JAR:
-        const dataSparkJar = {
-          jobId: pane.id,
-          jobType: TaskTypes.SPARK_JAR,
-          resourceHdfsPath: values.resourceHdfsPath,
-          appArguments: values.appArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-          mainClass: values.mainClass,
-        };
-        saveSpark({ jobId: pane.id }, dataSparkJar)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SPARK_PYTHON:
-        const dataSparkPython = {
-          jobId: pane.id,
-          jobType: TaskTypes.SPARK_PYTHON,
-          pythonResource: monacoValue,
-          appArguments: values.appArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-        };
-        saveSpark({ jobId: pane.id }, dataSparkPython)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SCRIPT_SHELL:
-        const dataScriptShell = {
-          jobId: pane.id,
-          jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
-        };
-        saveScript({ jobId: pane.id }, dataScriptShell)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SCRIPT_PYTHON:
-        const dataScriptPython = {
-          jobId: pane.id,
-          jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
-          scriptArguments: values.scriptArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-        };
-        saveScript({ jobId: pane.id }, dataScriptPython)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.KYLIN:
-        const dataKylin = {
-          jobId: pane.id,
-          jobType: TaskTypes.KYLIN,
-          cubeName: values.cubeName,
-          buildType: values.buildType,
-          startTime: new Date(values.startTime).getTime(),
-          endTime: new Date(values.endTime).getTime(),
-        };
-        saveKylin({ jobId: pane.id }, dataKylin)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-            } else {
-              message.error(`保存失败：${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-        break;
-      default:
-        break;
+  const renderVersionLabel = (_: TaskVersion) => {
+    const env = _.environment || '';
+    const verState = VersionStatusDisplayMap[_.versionStatus];
+    let runState = '';
+    if (
+      _.versionStatus === VersionStatus.PUBLISHED &&
+      _.envRunningState === EnvRunningState.PAUSED
+    ) {
+      runState = '(暂停)';
     }
+    return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
   return (
@@ -445,9 +469,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 bordered={false}
                 disabled={versions.length <= 0}
                 options={versions.map((_) => ({
-                  label: `${_.versionDisplay}${_.environment ? '-' + _.environment : ''}-${
-                    VersionStatusDisplayMap[_.versionStatus]
-                  }`,
+                  label: renderVersionLabel(_),
                   value: _.version,
                 }))}
                 value={version}
@@ -552,6 +574,58 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             />
           </Item>
         </ModalForm>
+        <ModalForm
+          title="提交"
+          layout="horizontal"
+          width={536}
+          labelCol={{ span: 6 }}
+          colon={false}
+          preserve={false}
+          modalProps={{ destroyOnClose: true, onCancel: () => setVisibleSubmit(false) }}
+          visible={visibleSubmit}
+          submitter={{
+            submitButtonProps: { size: 'large', loading: loadingSubmit },
+            resetButtonProps: { size: 'large' },
+          }}
+          onFinish={async (values) => {
+            setLoadingSubmit(true);
+            submitTask(
+              {
+                jobId: pane.id,
+                version: content?.version as number,
+                env: values.env,
+              },
+              {
+                remark: values.remark,
+              },
+            )
+              .then((res) => {
+                if (res.success) {
+                  message.success('提交成功');
+                  setVisibleSubmit(false);
+                  return true;
+                } else {
+                  message.error(`提交失败：${res.msg}`);
+                  return false;
+                }
+              })
+              .catch((err) => {})
+              .finally(() => setLoadingSubmit(false));
+          }}
+        >
+          <Item name="env" label="提交环境" rules={ruleSlct}>
+            <Select
+              placeholder="请选择"
+              options={[
+                { label: '预发', value: Environments.STAG },
+                { label: '真线', value: Environments.PROD },
+              ]}
+            />
+          </Item>
+          <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
+            <TextArea placeholder="请输入" />
+          </Item>
+        </ModalForm>
         <div className="workbench-submit">
           <Space>
             <IconRun onClick={() => onAction('resume')} />
@@ -570,10 +644,17 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 调试
               </Button>
             )}
-            <Button key="test" size="large" type="primary" onClick={onTest}>
-              测试
-            </Button>
-            <Button key="publish" size="large" type="primary" onClick={onPublish}>
+            {task?.jobType === TaskTypes.SQL_SPARK && (
+              <Button key="test" size="large" type="primary" onClick={onTest}>
+                测试
+              </Button>
+            )}
+            <Button
+              key="publish"
+              size="large"
+              type="primary"
+              onClick={() => setVisibleSubmit(true)}
+            >
               申请发布
             </Button>
           </Space>

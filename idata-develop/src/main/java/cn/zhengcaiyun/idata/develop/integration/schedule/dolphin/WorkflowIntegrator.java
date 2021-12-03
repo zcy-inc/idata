@@ -56,13 +56,12 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     public static final int RESULT_PROCESS_DEFINITION_NAME_EXIST = 10168;
 
     @Autowired
-    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo,
-                              DSDependenceNodeRepo dsDependenceNodeRepo) {
+    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo) {
         super(dsEntityMappingRepo, dsDependenceNodeRepo);
     }
 
     @Override
-    public void create(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException {
+    public void create(DAGInfo dagInfo, DAGSchedule dagSchedule) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         String req_url = getDSBaseUrl(dagInfo.getEnvironment()) + String.format("/projects/%s/process-definition/empty", projectCode);
@@ -93,7 +92,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     @Override
-    public void update(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException {
+    public void update(DAGInfo dagInfo, DAGSchedule dagSchedule) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
@@ -111,7 +110,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     @Override
-    public void delete(Long dagId, String environment) throws ExternalIntegrationException {
+    public void delete(Long dagId, String environment) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(environment);
         // 获取工作流code
@@ -128,7 +127,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     @Override
-    public void online(DAGInfo dagInfo) throws ExternalIntegrationException {
+    public void online(DAGInfo dagInfo) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
@@ -146,7 +145,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     @Override
-    public void offline(DAGInfo dagInfo) throws ExternalIntegrationException {
+    public void offline(DAGInfo dagInfo) {
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(dagInfo.getEnvironment());
         // 获取工作流code
@@ -164,33 +163,33 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     @Override
-    public void updateSchedule(DAGInfo dagInfo, DAGSchedule dagSchedule) throws ExternalIntegrationException {
+    public void updateSchedule(DAGInfo dagInfo, DAGSchedule dagSchedule) {
         // 暂不单独实现schedule的更新，合并到update方法中
     }
 
     @Override
-    public void run(DAGInfo dagInfo) throws ExternalIntegrationException {
+    public void run(DAGInfo dagInfo) {
         // 暂不实现
     }
 
     @Override
     @Deprecated
-    public void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException {
+    public void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) {
     }
 
     @Override
     @Deprecated
-    public void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException {
+    public void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) {
     }
 
     @Override
     @Deprecated
-    public void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) throws ExternalIntegrationException {
+    public void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds) {
     }
 
     @Override
     @Deprecated
-    public void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) throws ExternalIntegrationException {
+    public void removeDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, Long dependenceDagId) {
     }
 
     private Map<String, String> buildDagReqParam(DAGInfo dagInfo, DAGSchedule dagSchedule) {
@@ -213,11 +212,6 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
 
     private String buildScheduleJson(DAGSchedule dagSchedule) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        JsonObject cronJson = new JsonObject();
-//        cronJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
-//        cronJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
-//        cronJson.addProperty("crontab", dateFormat.format(dagSchedule.getCronExpression()));
-//        cronJson.addProperty("timezoneId", "Asia/Shanghai");
 
         JsonObject scheduleJson = new JsonObject();
         scheduleJson.addProperty("warningType", PARAM_DEFAULT_WARNING_TYPE);
@@ -230,7 +224,6 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         scheduleJson.addProperty("endTime", dateFormat.format(dagSchedule.getEndTime()));
         scheduleJson.addProperty("crontab", dagSchedule.getCronExpression());
         scheduleJson.addProperty("timezoneId", "Asia/Shanghai");
-//        scheduleJson.add("schedule", cronJson);
         return scheduleJson.toString();
     }
 

@@ -66,7 +66,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
           const startHour = start?.split(':')[0] || '';
           const startMinute = start?.split(':')[1] || '';
           const interval: string = get(values, 'interval', 0);
-          const endHour = values.start?.format('HH') || '';
+          const endHour: string = values.end?.format('HH') || '';
           cronExpression = `0 ${startMinute} ${startHour}-${endHour}/${interval} * * ? *`;
         }
         if (triggerMode === TriggerMode.POINT) {
@@ -100,6 +100,7 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
             name: values.name,
             dwLayerCode: values.dwLayerCode,
             folderId: values.folderId,
+            environment: values.environment,
           },
           dagScheduleDto: {
             beginTime: values.range[0].valueOf(),

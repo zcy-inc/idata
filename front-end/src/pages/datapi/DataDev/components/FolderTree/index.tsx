@@ -95,7 +95,7 @@ const FolderTree: FC = () => {
       </Menu.Item>
       <Menu.Item key="CreateDev">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
-        新建数据开发
+        新建作业
       </Menu.Item>
     </Menu>
   );

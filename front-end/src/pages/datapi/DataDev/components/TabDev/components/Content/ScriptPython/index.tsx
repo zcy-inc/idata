@@ -1,6 +1,6 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Form, Table, Tabs } from 'antd';
+import { Form, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
 import ParamList from '../../ParamList';
@@ -10,7 +10,6 @@ interface ScriptPythonProps {
   data: {
     content: any;
     log: any;
-    res: any[];
   };
 }
 
@@ -18,9 +17,10 @@ const { TabPane } = Tabs;
 const { Item } = Form;
 
 const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
-  { monaco, data: { content, log, res } },
+  { monaco, data: { content, log } },
   ref,
 ) => {
+  const [monacoValue, setMonacoValue] = useState('');
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -29,6 +29,7 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
 
   useEffect(() => {
     if (content) {
+      setMonacoValue(content.sourceResource);
       form.setFieldsValue({ scriptArguments: content.scriptArguments });
     }
   }, [content]);
@@ -42,7 +43,8 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
             height="400"
             language="sql"
             theme="vs-dark"
-            value={content.sourceResource}
+            value={monacoValue}
+            onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true }}
           />
         </TabPane>
@@ -54,18 +56,8 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
           </Form>
         </TabPane>
       </Tabs>
-      <Tabs
-        className={styles.tabs}
-        type="editable-card"
-        hideAdd
-        style={{ marginTop: 16 }}
-        onEdit={(key, action) => {
-          if (action === 'remove') {
-            console.log(key);
-          }
-        }}
-      >
-        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }} closable={false}>
+      <Tabs className={styles.tabs} style={{ marginTop: 16 }}>
+        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }}>
           <MonacoEditor
             height="400"
             language="sql"

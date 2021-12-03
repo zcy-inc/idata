@@ -17,7 +17,6 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.QueryRunService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,29 +36,17 @@ public class QueryRunController {
     @Autowired
     QueryRunService queryRunService;
 
-    @PostMapping("/runSqlQuery")
-    public RestResult<SqlQueryStatementDto> runSqlQuery(@RequestBody SqlQueryDto sqlQueryDto) {
-        return RestResult.success(queryRunService.runSqlQuery(sqlQueryDto));
+    @PostMapping("/runQuery")
+    public RestResult<QueryStatementDto> runQuery(@RequestBody QueryDto queryDto) {
+        return RestResult.success(queryRunService.runQuery(queryDto));
     }
 
-    @GetMapping("/runSqlQueryResult")
-    public RestResult<QueryRunResultDto> runSqlQueryResult(@RequestParam("sessionId") Integer sessionId,
-                                                        @RequestParam("statementId") Integer statementId,
-                                                        @RequestParam(value = "from", required = false) Integer from,
-                                                        @RequestParam(value = "size", required = false) Integer size) {
-        return RestResult.success(queryRunService.runSqlQueryResult(sessionId, statementId, from, size));
+    @GetMapping("/runQueryResult")
+    public RestResult<QueryRunResultDto> runQueryResult(@RequestParam("sessionId") Integer sessionId,
+                                                           @RequestParam("statementId") Integer statementId,
+                                                           @RequestParam("sessionKind") String sessionKind,
+                                                           @RequestParam(value = "from", required = false) Integer from,
+                                                           @RequestParam(value = "size", required = false) Integer size) {
+        return RestResult.success(queryRunService.runQueryResult(sessionId, statementId, sessionKind, from, size));
     }
-
-    @PostMapping("/runPythonQuery")
-    public RestResult<PythonQuerySessionDto> runPythonQuery(@RequestBody PythonQueryDto pythonQueryDto) throws IOException {
-        return RestResult.success(queryRunService.runPythonQuery(pythonQueryDto));
-    }
-
-    @GetMapping("/runPythonQueryResult")
-    public RestResult<PythonQueryRunLogDto> runPythonQueryResult(@RequestParam("sessionId") Integer sessionId,
-                                                                 @RequestParam(value = "from", required = false) Integer from,
-                                                                 @RequestParam(value = "size", required = false) Integer size) {
-        return RestResult.success(queryRunService.runPythonQueryLog(sessionId, from, size));
-    }
-
 }

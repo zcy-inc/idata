@@ -104,9 +104,8 @@ public class LivyService {
 
         Map<String, Object> body = new HashMap<>();
         String code = LivySessionKindEnum.spark.equals(query.getSessionKind())
-                ? String.format("println(spark.sql(\"\"\"%s\"\"\").toJSON.collect.mkString(\"[\", \",\", \"]\"))",
-                query.getQuerySql())
-                : query.getQuerySql();
+                ? String.format("println(spark.sql(\"\"\"%s\"\"\").toJSON.collect.mkString(\"[\", \",\", \"]\"))", query.getQuerySource())
+                : query.getQuerySource();
         body.put("kind", query.getSessionKind().name());
         // TODO 这里也可以执行ddl和dml，后续需要增加日志记录和权限控制
         body.put("code", code);
@@ -128,7 +127,7 @@ public class LivyService {
                 "/sessions/%d/statements/%d/cancel", statement.getSessionId(), statement.getStatementId());
     }
 
-    public LivySqlResultDto queryResult(Integer sessionId, Integer statementId) {
+    public LivySqlResultDto queryResult(Integer sessionId, Integer statementId, LivySessionKindEnum sessionKind) {
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("GET"),
                 new TypeReference<Map<String, Object>>() {
                 },
@@ -143,17 +142,31 @@ public class LivyService {
             sqlResult.setOutputStatus(outputStatus);
             if (outputStatus.equals(LivyOutputStatusEnum.ok)) {
                 String data = (String) ((Map) output.get("data")).get("text/plain");
-                sqlResult.setResultSet(JSON.parseObject(data, new TypeReference<List<Map<String, Object>>>() {
-                }));
+                if (LivySessionKindEnum.spark.equals(sessionKind)) {
+                    sqlResult.setResultSet(JSON.parseObject(data, new TypeReference<List<Map<String, Object>>>() {
+                    }));
+                }
+                else if(LivySessionKindEnum.pyspark.equals(sessionKind)) {
+                    sqlResult.setPythonResults(data);
+                }
             } else if (outputStatus.equals(LivyOutputStatusEnum.error)) {
                 Map<String, Object> errorResult = new HashMap<>();
                 errorResult.put((String) output.get("ename"), output.get("evalue"));
                 if (output.get("traceback") != null) {
                     errorResult.put("traceback", String.join("", (List<String>) output.get("traceback")));
                 }
-                List<Map<String, Object>> list = new ArrayList<>();
-                list.add(errorResult);
-                sqlResult.setResultSet(list);
+                if (LivySessionKindEnum.spark.equals(sessionKind)) {
+                    List<Map<String, Object>> list = new ArrayList<>();
+                    list.add(errorResult);
+                    sqlResult.setResultSet(list);
+                }
+                else if(LivySessionKindEnum.pyspark.equals(sessionKind)) {
+                    StringBuilder errorMsg = new StringBuilder();
+                    for (Map.Entry<String, Object> mapEntry : errorResult.entrySet()) {
+                        errorMsg.append(mapEntry.getKey()).append(":").append((String) mapEntry.getValue()).append("\n");
+                    }
+                    sqlResult.setPythonResults(errorMsg.toString());
+                }
             }
         }
         return sqlResult;

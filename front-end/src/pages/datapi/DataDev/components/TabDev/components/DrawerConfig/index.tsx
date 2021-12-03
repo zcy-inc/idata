@@ -24,14 +24,14 @@ import {
   execDriverMemOptions,
   execWorkerMemOptions,
 } from './constants';
-import { ConfiguredTaskListItem, DAGListItem, DataDevContent, Task } from '@/types/datadev';
+import { ConfiguredTaskListItem, DAGListItem, TaskConfig, Task } from '@/types/datadev';
 import {
   getConfiguredTaskList,
   getDAGList,
   getDataDevConfig,
   getEnumValues,
   getExecuteQueues,
-  saveDataDevConfig,
+  saveTaskConfig,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import { SchPriority } from '@/constants/datadev';
@@ -63,17 +63,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [outDataStag, setOutDataStag] = useState<any[]>([]);
   const [depDataProd, setDepDataProd] = useState<any[]>([]);
   const [outDataProd, setOutDataProd] = useState<any[]>([]);
-  // const { initialState } = useModel('@@initialState');
-  // const currentUser = initialState?.currentUser || { nickname: '' };
   const [stagForm] = Form.useForm();
   const [prodForm] = Form.useForm();
 
   useEffect(() => {
     if (visible) {
       getTaskConfigsWrapped(Environments.STAG);
-      getDAGList({ dwLayerCode: data?.dwLayerCode as string })
-        .then((res) => setDAGList(res.data))
-        .catch((err) => {});
+      getDAGListWrapped(Environments.STAG);
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
         .then((res) => setSecurity(res.data))
         .catch((err) => {});
@@ -141,7 +137,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .then((res) => {
         const executeConfig = get(res, 'data.executeConfig', {});
         const dependencies = get(res, 'data.dependencies', []);
-        const output = get(res, 'data.output', {});
+        const output = get(res, 'data.output', null);
         // 处理超时
         if (executeConfig.schTimeOut) {
           executeConfig.schTimeOut = executeConfig.schTimeOut / 60;
@@ -154,25 +150,53 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           executeConfig.schDryRun = [];
         }
+        // 处理超时策略
+        executeConfig.schTimeOutStrategy = executeConfig.schTimeOutStrategy?.split(',');
         // 处理上游依赖
         if (environment === Environments.STAG) {
-          dependencies.forEach((_: any) => {
-            depDataStag.push({});
-          });
+          const tmp = dependencies.map((_: any) => ({
+            ..._,
+            jobName: _.prevJobName,
+            dagName: _.prevJobDagName,
+            dagId: _.prevJobDagId,
+          }));
+          setDepDataStag(tmp);
+        }
+        if (environment === Environments.PROD) {
+          const tmp = dependencies.map((_: any) => ({
+            ..._,
+            jobName: _.prevJobName,
+            dagName: _.prevJobDagName,
+            dagId: _.prevJobDagId,
+          }));
+          console.log(tmp);
+
+          setDepDataProd(tmp);
         }
         // 处理输出
-        executeConfig.schTimeOutStrategy = executeConfig.schTimeOutStrategy?.split(',');
-        executeConfig.destWriteMode = output.destWriteMode;
-        executeConfig.jobTargetTablePk = output.jobTargetTablePk;
-        executeConfig.destDataSourceId = output.destDataSourceId;
-        executeConfig.destTable = output.destTable;
+        executeConfig.destWriteMode = output?.destWriteMode;
+        executeConfig.jobTargetTablePk = output?.jobTargetTablePk;
+        executeConfig.destDataSourceId = output?.destDataSourceId;
+        executeConfig.destTable = output?.destTable;
+        // 赋值调度配置
         if (environment === Environments.STAG) {
           stagForm.setFieldsValue({ ...executeConfig });
+          if (output) {
+            setOutDataStag([{ ...output }]);
+          }
         }
         if (environment === Environments.PROD) {
           prodForm.setFieldsValue(executeConfig);
+          if (output) {
+            setOutDataProd([{ ...output }]);
+          }
         }
       })
+      .catch((err) => {});
+
+  const getDAGListWrapped = (environment: Environments) =>
+    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+      .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
   const getConfiguredTaskListWrapped = (environment: Environments) =>
@@ -190,7 +214,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataStag.push({ key, ...curConfiguredTask });
+      depDataStag.push({
+        key,
+        ...curConfiguredTask,
+        prevJobId: curConfiguredTask?.jobId,
+        prevJobDagId: curConfiguredTask?.dagId,
+      });
       setDepDataStag([...depDataStag]);
     }
     if (activeKey === Environments.PROD) {
@@ -200,7 +229,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataProd.push({ key, ...curConfiguredTask });
+      depDataProd.push({
+        key,
+        ...curConfiguredTask,
+        prevJobId: curConfiguredTask?.jobId,
+        prevJobDagId: curConfiguredTask?.dagId,
+      });
       setDepDataProd([...depDataProd]);
     }
   };
@@ -209,6 +243,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.STAG) {
       if (outDataStag.length > 0) {
         message.info('输出表只能存在一张');
+        return;
       }
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
       const destTable = stagForm.getFieldValue('destTable');
@@ -228,6 +263,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.PROD) {
       if (outDataProd.length > 0) {
         message.info('输出表只能存在一张');
+        return;
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
       const destTable = prodForm.getFieldValue('destTable');
@@ -290,13 +326,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         schPriority: values.schPriority,
         execDriverMem: values.execDriverMem,
         execWorkerMem: values.execWorkerMem,
-        runningState: data?.status,
       },
       dependencies: depData.map((_) => ({
         jobId: data?.id as number,
         environment: activeKey,
-        prevJobId: _.jobId,
-        prevJobDagId: _.dagId,
+        prevJobId: _.prevJobId,
+        prevJobDagId: _.prevJobDagId,
       })),
       output: {
         jobId: data?.id as number,
@@ -308,7 +343,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         jobTargetTablePk: outData.jobTargetTablePk,
       },
     };
-    saveDataDevConfig({ jobId: data?.id as number, environment }, params as DataDevContent)
+    saveTaskConfig({ jobId: data?.id as number, environment }, params as TaskConfig)
       .then((res) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
@@ -345,6 +380,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         onChange={(k) => {
           setActiveKey(k as Environments);
           getTaskConfigsWrapped(k as Environments);
+          getDAGListWrapped(k as Environments);
+          getConfiguredTaskListWrapped(k as Environments);
         }}
       >
         {env.map((_) => (
@@ -479,7 +516,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       style={{ width }}
                       placeholder="请选择"
                       options={[
-                        { label: 'OVERRIDE', value: 'OVERRIDE' },
+                        { label: 'OVERWRITE', value: 'OVERWRITE' },
                         { label: 'UPSERT', value: 'UPSERT' },
                       ]}
                       onChange={(_) => setDestWriteMode(_ as string)}
