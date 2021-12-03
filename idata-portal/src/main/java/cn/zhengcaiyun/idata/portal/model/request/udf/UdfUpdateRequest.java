@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.model.request.udf;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 @ApiModel("udf更新请求")
@@ -15,6 +16,7 @@ public class UdfUpdateRequest {
      *   '函数名称'
      */
     @ApiModelProperty("函数名称")
+    @NotEmpty(message = "udfName 不能为空")
     private String udfName;
 
     /**
@@ -22,6 +24,7 @@ public class UdfUpdateRequest {
      *   函数类型
      */
     @ApiModelProperty("函数类型")
+    @NotEmpty(message = "udfType 不能为空")
     private String udfType;
 
     /**
@@ -29,6 +32,7 @@ public class UdfUpdateRequest {
      *   文件名称
      */
     @ApiModelProperty("文件名称")
+    @NotEmpty(message = "fileName 不能为空")
     private String fileName;
 
     /**
@@ -36,6 +40,7 @@ public class UdfUpdateRequest {
      *   hdfs文件路径
      */
     @ApiModelProperty("hdfs文件路径")
+    @NotEmpty(message = "hdfsPath 不能为空")
     private String hdfsPath;
 
     /**
@@ -43,6 +48,7 @@ public class UdfUpdateRequest {
      *   返回类型
      */
     @ApiModelProperty("返回类型")
+    @NotEmpty(message = "returnType 不能为空")
     private String returnType;
 
     /**

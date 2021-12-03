@@ -46,4 +46,5 @@ public interface DAGService {
     Boolean saveDependence(Long id, List<Long> dependenceIds, Operator operator);
 
     List<DAGInfoDto> getDAGInfoList(DAGInfoCondition condition);
+
 }

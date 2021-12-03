@@ -10,6 +10,8 @@ import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -42,6 +44,9 @@ public class JobUdfController {
     private JobUdfService udfService;
 
     @ApiOperation("加载某个UDF详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "udf id", dataType = "Long", required = true)
+    })
     @GetMapping("udf/{id}")
     public RestResult<DevJobUdf> findById(@PathVariable("id") Long id) {
         return RestResult.success(udfService.findById(id));
@@ -78,6 +83,9 @@ public class JobUdfController {
     }
 
     @ApiOperation("删除UDF")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "udf id", dataType = "Long", required = true)
+    })
     @DeleteMapping("/udf/{id}")
     public RestResult<Boolean> deleteFolder(@PathVariable("id") Long id) {
         return RestResult.success(udfService.delete(id));
@@ -91,6 +99,9 @@ public class JobUdfController {
      * @throws IOException
      */
     @ApiOperation("文件下载")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "udf id", dataType = "Long", required = true)
+    })
     @GetMapping("/udf/download/{id}")
     public ResponseEntity<InputStreamResource> download(@PathVariable("id") Long id) throws IOException {
         DevJobUdf udf = udfService.findById(id);

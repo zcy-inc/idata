@@ -2,11 +2,12 @@ package cn.zhengcaiyun.idata.portal.schedule;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.ResourceManageService;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.AppResourceDetail;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
-import net.bytebuddy.asm.Advice;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,14 +32,18 @@ public class JobSchedule {
     private JobHistoryService jobHistoryService;
 
     @Scheduled(cron = JOB_HISTORY_CRON)
-    public void pullJobHistory() {
-        List<AppResourceDetail> appResourceDetailList = yarnService.loadAppResourceDetail(DateUtil.yesterday().getTime(), DateUtil.date().getTime());
+    public void pullSparkSqlJobHistory() {
+        List<AppResourceDetail> appResourceDetailList = yarnService.loadAppResourceDetailList(DateUtil.yesterday().getTime(), DateUtil.date().getTime());
         List<DevJobHistory> devJobHistoryList = appResourceDetailList
                 .stream()
+                .filter(e -> ReUtil.isMatch("SparkSQL-[p/s]-\\d*", e.getName()))
                 .map(e -> {
                     DevJobHistory devJobHistory = new DevJobHistory();
                     devJobHistory.setApplicationId(e.getId());
-                    devJobHistory.setJobId(Long.valueOf(e.getName().substring(11))); // 11为SparkETL-p-长度
+
+                    // 抽取出SparkSQL-[p/s]-xxxx  xxxx(jobId)
+                    String jobIdStr = ReUtil.get("SparkSQL-[p/s]-(\\d*)", e.getName(), 1);
+                    devJobHistory.setJobId(Long.valueOf(jobIdStr));
                     devJobHistory.setStartTime(new Timestamp(e.getStartedTime()));
                     devJobHistory.setFinishTime(new Timestamp(e.getFinishedTime()));
                     devJobHistory.setFinalStatus(e.getFinalStatus());
@@ -52,5 +57,17 @@ public class JobSchedule {
                 .collect(Collectors.toList());
         jobHistoryService.batchUpsert(devJobHistoryList);
     }
+
+//    public static void main(String[] args) {
+//        String s = "SparkSQL-q-1234";
+//        System.out.println(StringUtils.startsWith(s, "SparkSQL-[]-"));
+//
+//        boolean isMatch = ReUtil.isMatch("SparkSQL-[p/s]-\\d*", s);
+//        System.out.println(isMatch);
+//
+//        String resultDelFirst = ReUtil.get("SparkSQL-[p/s]-(\\d*)", s, 1);
+//        System.out.println(resultDelFirst);
+//    }
+
 
 }
