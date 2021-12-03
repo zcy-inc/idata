@@ -39,7 +39,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -235,7 +234,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     @Override
-    public void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) {
+    public void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                 List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations) {
         String token = getDSToken(environment);
         // 根据环境获取ds project code
         String projectCode = getDSProjectCode(environment);
@@ -352,7 +352,9 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return paramMap;
     }
 
-    private void addPrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> addingPrevRelations) {
+    private void addPrevRelation(String token, String projectCode, Long workflowCode, Long taskCode,
+                                 JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                 List<DagJobPair> addingPrevRelations) {
         for (DagJobPair dagJobPair : addingPrevRelations) {
             if (dagJobPair.getDagId().equals(executeConfig.getSchDagId())) {
                 addPrevRelationInSameDAG(token, projectCode, workflowCode, taskCode, jobInfo, executeConfig, environment, dagJobPair);
@@ -362,7 +364,9 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
     }
 
-    private void addPrevRelationInSameDAG(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, DagJobPair dagJobPair) {
+    private void addPrevRelationInSameDAG(String token, String projectCode, Long workflowCode, Long taskCode,
+                                          JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                          DagJobPair dagJobPair) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
@@ -381,7 +385,9 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
     }
 
-    private void addPrevRelationInDifferentDAG(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, DagJobPair dagJobPair) {
+    private void addPrevRelationInDifferentDAG(String token, String projectCode, Long workflowCode, Long taskCode,
+                                               JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                               DagJobPair dagJobPair) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
@@ -420,7 +426,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
     }
 
-    private Long createDependenceNode(String token, String projectCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId) {
+    private Long createDependenceNode(String token, String projectCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                      Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition", projectCode);
         String req_method = "POST";
 
@@ -436,7 +443,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return depCode;
     }
 
-    private Map<String, String> buildDependenceNodeParam(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId, JobInfo jobInfo, JobExecuteConfig executeConfig) {
+    private Map<String, String> buildDependenceNodeParam(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId,
+                                                         JobInfo jobInfo, JobExecuteConfig executeConfig) {
         String taskJson = buildDependenceNodeJson(projectCode, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, jobInfo, executeConfig);
 
         Map<String, String> paramMap = Maps.newHashMap();
@@ -444,10 +452,16 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return paramMap;
     }
 
-    private String buildDependenceNodeJson(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId, JobInfo jobInfo, JobExecuteConfig executeConfig) {
-        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"depend-node-template-1\",\"description\":\"It is a dependent node\",\"delayTime\":0," + "\"taskType\":\"DEPENDENT\",\"taskParams\":{\"dependence\":{\"relation\":\"AND\",\"dependTaskList\":[{\"relation\":\"AND\",\"dependItemList\":[{\"projectCode\":811464712822784,\"definitionCode\":3602075624352,\"depTaskCode\":3602064345376,\"cycle\":\"day\",\"dateValue\":\"today\"}]}]}," + "\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{\"strategy\":\"FAILED\",\"interval\":null,\"checkInterval\":null,\"enable\":false},\"switchResult\":{}}," + "\"flag\":\"YES\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":0,\"failRetryInterval\":1,\"timeoutFlag\":\"CLOSE\",\"timeoutNotifyStrategy\":\"\",\"timeout\":0,\"environmentCode\":-1}");
+    private String buildDependenceNodeJson(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId,
+                                           JobInfo jobInfo, JobExecuteConfig executeConfig) {
+        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"depend-node-template-1\",\"description\":\"It is a dependent node\",\"delayTime\":0,"
+                + "\"taskType\":\"DEPENDENT\",\"taskParams\":{\"dependence\":{\"relation\":\"AND\",\"dependTaskList\":[{\"relation\":\"AND\",\"dependItemList\":[{\"projectCode\":811464712822784,\"definitionCode\":3602075624352,\"depTaskCode\":3602064345376,\"cycle\":\"day\",\"dateValue\":\"today\"}]}]},"
+                + "\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{\"strategy\":\"FAILED\",\"interval\":null,\"checkInterval\":null,\"enable\":false},\"switchResult\":{}},"
+                + "\"flag\":\"YES\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":0,\"failRetryInterval\":1,\"timeoutFlag\":\"CLOSE\",\"timeoutNotifyStrategy\":\"\",\"timeout\":0,\"environmentCode\":-1}");
 
-        String name = "dep#to__t-" + Strings.padStart(prevJobId.toString(), 6, '0') + "__w-" + Strings.padStart(prevDagId.toString(), 6, '0') + "__f-" + Strings.padStart(jobInfo.getId().toString(), 6, '0');
+        String name = "dep#to__t-" + Strings.padStart(prevJobId.toString(), 6, '0')
+                + "__w-" + Strings.padStart(prevDagId.toString(), 6, '0')
+                + "__f-" + Strings.padStart(jobInfo.getId().toString(), 6, '0');
         taskJson.put("name", name);
         taskJson.put("taskType", "DEPENDENT");
         taskJson.put("flag", "YES");
@@ -457,7 +471,12 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         taskJson.put("timeout", "0");
         taskJson.put("timeoutNotifyStrategy", "");
 
-        JSONObject depItemJson = taskJson.getJSONObject("taskParams").getJSONObject("dependence").getJSONArray("dependTaskList").getJSONObject(0).getJSONArray("dependItemList").getJSONObject(0);
+        JSONObject depItemJson = taskJson.getJSONObject("taskParams")
+                .getJSONObject("dependence")
+                .getJSONArray("dependTaskList")
+                .getJSONObject(0)
+                .getJSONArray("dependItemList")
+                .getJSONObject(0);
         depItemJson.put("projectCode", projectCode);
         depItemJson.put("definitionCode", prevWorkflowCode.toString());
         depItemJson.put("depTaskCode", prevTaskCode.toString());
@@ -567,14 +586,15 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private String getJobTimeoutStrategy(JobExecuteConfig executeConfig) {
-        // 超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔
+        // 超时策略，alarm：超时告警，fail：超时失败
         String timeOutStrategy = executeConfig.getSchTimeOutStrategy();
-        if (StringUtils.isEmpty(timeOutStrategy)) return null;
-
-        // todo 超时策略同步
-        timeOutStrategy = timeOutStrategy.replace("alarm", "WARN");
-        timeOutStrategy = timeOutStrategy.replace("fail", "FAILED");
-        return timeOutStrategy;
+        if ("alarm".equals(timeOutStrategy)) {
+            return "WARN";
+        } else if ("fail".equals(timeOutStrategy)) {
+            return "FAILED";
+        } else {
+            return null;
+        }
     }
 
     private String getJobPriority(JobExecuteConfig executeConfig) {
