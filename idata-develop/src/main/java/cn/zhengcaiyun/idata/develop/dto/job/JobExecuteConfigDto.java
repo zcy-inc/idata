@@ -61,7 +61,7 @@ public class JobExecuteConfigDto extends BaseDto {
     private String execWarnLevel;
 
     /**
-     * 调度配置-超时策略，alarm：超时告警，fail：超时失败，都有时用,号分隔
+     * 调度配置-超时策略，alarm：超时告警，fail：超时失败
      */
     private String schTimeOutStrategy;
 
