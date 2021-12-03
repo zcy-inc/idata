@@ -9,8 +9,9 @@ public interface JobDependencyService {
      * 加载先继节点的树数据，只构建包含id的
      * @param jobId
      * @param env
-     * @param preLevel
+     * @param prevLevel
      * @param nextLevel
+     * @param searchJobId 搜索的任务id
      */
-    Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer preLevel, Integer nextLevel);
+    Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId);
 }
