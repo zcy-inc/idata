@@ -23,7 +23,6 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -73,33 +72,25 @@ public class ErrorHandler {
             // 处理 form data方式调用接口校验失败抛出的异常
             BindException bindException = (BindException) error;
             List<FieldError> fieldErrors = bindException.getBindingResult().getFieldErrors();
-            List<String> collect = fieldErrors.stream()
-                    .map(o -> o.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> collect = fieldErrors.stream().map(o -> o.getDefaultMessage()).collect(Collectors.toList());
             return RestResult.error(HttpStatus.BAD_REQUEST.value() + "", BAD_REQUEST_MSG, String.join("\n", collect));
         }
         if (error instanceof MethodArgumentNotValidException) {
             // 处理 form data方式调用接口校验失败抛出的异常
             MethodArgumentNotValidException methodArgumentNotValidException = (MethodArgumentNotValidException) error;
             List<FieldError> fieldErrors = methodArgumentNotValidException.getBindingResult().getFieldErrors();
-            List<String> collect = fieldErrors.stream()
-                    .map(o -> o.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> collect = fieldErrors.stream().map(o -> o.getDefaultMessage()).collect(Collectors.toList());
             return RestResult.error(HttpStatus.BAD_REQUEST.value() + "", BAD_REQUEST_MSG, String.join("\n", collect));
         }
         if (error instanceof ConstraintViolationException) {
             // 处理 form data方式调用接口校验失败抛出的异常
             ConstraintViolationException constraintViolationException = (ConstraintViolationException) error;
             Set<ConstraintViolation<?>> constraintViolations = constraintViolationException.getConstraintViolations();
-            List<String> collect = constraintViolations.stream()
-                    .map(o -> o.getMessage())
-                    .collect(Collectors.toList());
+            List<String> collect = constraintViolations.stream().map(o -> o.getMessage()).collect(Collectors.toList());
             return RestResult.error(HttpStatus.BAD_REQUEST.value() + "", BAD_REQUEST_MSG, String.join("\n", collect));
         }
 
-        if (error instanceof HttpMessageNotReadableException
-                || error instanceof HttpRequestMethodNotSupportedException
-                || error instanceof MissingServletRequestParameterException) {
+        if (error instanceof HttpMessageNotReadableException || error instanceof HttpRequestMethodNotSupportedException || error instanceof MissingServletRequestParameterException) {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, "接口输入错误", ExceptionUtils.getRootCauseMessage(error));
         }
 
