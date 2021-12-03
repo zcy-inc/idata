@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -231,6 +232,13 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Override
     public JobDryRunDto dryRunJob(Long jobId, Integer version) {
         return null;
+    }
+
+    @Override
+    public List<JobInfo> getJobListByName(String searchName) {
+        JobInfoCondition condition = new JobInfoCondition();
+        condition.setName(searchName);
+        return jobInfoRepo.queryJobInfo(condition);
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

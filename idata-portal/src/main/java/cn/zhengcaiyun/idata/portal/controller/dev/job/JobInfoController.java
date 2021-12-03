@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobAndDagDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
@@ -27,6 +28,9 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import com.google.common.collect.Lists;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +61,16 @@ public class JobInfoController {
                              JobExecuteConfigService jobExecuteConfigService) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
+    }
+
+    @ApiOperation(value = "查询job")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "searchName", value = "searchName", required = false, dataType = "String")
+    })
+    @GetMapping("")
+    public RestResult<List<JobInfo>> getJobInfo(@RequestParam(value = "searchName", required = false) String searchName) {
+        List<JobInfo> list = jobInfoService.getJobListByName(searchName);
+        return RestResult.success(list);
     }
 
     /**

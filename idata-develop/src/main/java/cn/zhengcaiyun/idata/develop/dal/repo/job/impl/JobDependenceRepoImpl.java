@@ -23,7 +23,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
-import cn.zhengcaiyun.idata.develop.dto.JobDependencyDTO;
+import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -86,7 +86,7 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
     }
 
     @Override
-    public List<JobDependencyDTO> queryJobs(String env) {
+    public List<JobDependencyDto> queryJobs(String env) {
         return jobDependenceMyDao.queryJobs(env);
     }
 }

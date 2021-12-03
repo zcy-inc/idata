@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
@@ -50,5 +51,12 @@ public interface JobInfoService {
     Boolean runJob(Long id, String environment, Operator operator);
 
     JobDryRunDto dryRunJob(Long jobId, Integer version);
+
+    /**
+     * jobName模糊匹配
+     * @param searchName
+     * @return
+     */
+    List<JobInfo> getJobListByName(String searchName);
 
 }

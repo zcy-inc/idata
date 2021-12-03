@@ -1,6 +1,6 @@
 package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-import cn.zhengcaiyun.idata.develop.dto.JobDependencyDTO;
+import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -15,5 +15,5 @@ public interface JobDependenceMyDao {
             ") t1 left join (select id, name from dev_job_info) t2" +
             "on t1.job_id = t2.id" +
             "</script>")
-    List<JobDependencyDTO> queryJobs(String env);
+    List<JobDependencyDto> queryJobs(String env);
 }

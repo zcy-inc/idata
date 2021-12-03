@@ -21,10 +21,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -58,7 +60,16 @@ public class JobScheduleManager {
         jobIntegrator.run(jobInfo, executeConfig, environment, runPost);
     }
 
-    private String queryJobRunningLog(Long jobId, String environment, Integer jobInstanceId, Integer lineNum, Integer skipLineNum) {
+    public String queryJobRunningLog(Long jobId, String environment, Integer jobInstanceId, Integer lineNum, Integer skipLineNum) {
         return jobIntegrator.queryLog(jobId, environment, jobInstanceId, lineNum, skipLineNum);
+    }
+
+    /**
+     * 取最近的实例运行记录
+     * @param limit 记录数
+     * @return
+     */
+    public List<JobRunOverviewDto> getJobLatestRecords(String environment, Integer limit) {
+        return jobIntegrator.getJobLatestRecords(environment, limit);
     }
 }

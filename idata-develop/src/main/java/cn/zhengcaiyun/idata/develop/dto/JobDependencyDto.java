@@ -1,6 +1,6 @@
 package cn.zhengcaiyun.idata.develop.dto;
 
-public class JobDependencyDTO {
+public class JobDependencyDto {
 
     private String name;
     /**

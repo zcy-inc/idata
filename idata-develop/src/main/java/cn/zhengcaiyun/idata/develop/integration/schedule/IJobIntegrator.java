@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.integration.schedule;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 
 import java.util.List;
@@ -51,4 +52,6 @@ public interface IJobIntegrator {
     void buildJobRelation(JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> addingPrevRelations, List<DagJobPair> removingPrevRelations);
 
     String queryLog(Long jobId, String environment, Integer jobInstanceId, Integer lineNum, Integer skipLineNum);
+
+    List<JobRunOverviewDto> getJobLatestRecords(String environment, Integer limit);
 }

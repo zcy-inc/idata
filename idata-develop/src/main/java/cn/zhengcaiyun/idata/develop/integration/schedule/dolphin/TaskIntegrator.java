@@ -27,11 +27,13 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -264,6 +266,23 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             throw new ExternalIntegrationException(String.format("运行DS任务失败：%s", resultDto.getMsg()));
         }
         return resultDto.getData().toString();
+    }
+
+    @Override
+    public List<JobRunOverviewDto> getJobLatestRecords(String environment, Integer limit) {
+        String projectCode = getDSProjectCode(environment);
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-instances?pageSize=%d&pageNo=%d", projectCode, limit, 1);
+        String req_method = "GET";
+        String token = getDSToken(environment);
+        HttpInput req_input = buildHttpReq(Maps.newHashMap(), req_url, req_method, token);
+        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        if (!resultDto.isSuccess()) {
+            throw new ExternalIntegrationException(String.format("获取DS任务实例信息失败：%s", resultDto.getMsg()));
+        }
+        JSONObject data = resultDto.getData();
+        JSONArray totalList = data.getJSONArray("totalList");
+        List<JobRunOverviewDto> list = JSONObject.parseObject(totalList.toJSONString(), new TypeReference<>() {});
+        return list;
     }
 
     private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> removingPrevRelations) {
