@@ -129,7 +129,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .set(jobPublishRecord.editor).equalTo(operator)
                 .where(jobPublishRecord.jobId, isEqualTo(jobId)));
 
-        // todo 不同类型作业删除
+        // 不同类型作业删除
         String jobType = job.getJobType();
         if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
                 || JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
@@ -160,7 +160,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                     .where(devJobContentKylin.jobId, isEqualTo(jobId)));
         }
 
-        // todo 删除作业输出
+        // 删除作业输出
         jobOutputDao.update(dsl -> dsl.set(JOB_OUTPUT.del).equalTo(DeleteEnum.DEL_YES.val)
                 .where(JOB_OUTPUT.jobId, isEqualTo(jobId)));
 

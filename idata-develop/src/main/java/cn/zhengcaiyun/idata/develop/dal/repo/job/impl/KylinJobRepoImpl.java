@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
@@ -33,6 +34,7 @@ import java.util.Objects;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamicSqlSupport.devJobContentKylin;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -81,5 +83,13 @@ public class KylinJobRepoImpl implements KylinJobRepo {
         DevJobContentKylin jobContentKylin = devJobContentKylinDao.selectOne(c -> c.where(devJobContentKylin.jobId, isEqualTo(jobId))
                 .orderBy(devJobContentKylin.version.descending()).limit(1)).orElse(null);
         return jobContentKylin != null ? jobContentKylin.getVersion() + 1 : 1;
+    }
+
+    @Override
+    public Boolean updateEditable(Long id, EditableEnum editable, String operator) {
+        devJobContentKylinDao.update(dsl -> dsl.set(devJobContentKylin.editable).equalTo(editable.val)
+                .set(devJobContentKylin.editor).equalTo(operator)
+                .where(devJobContentKylin.id, isEqualTo(id)));
+        return Boolean.TRUE;
     }
 }

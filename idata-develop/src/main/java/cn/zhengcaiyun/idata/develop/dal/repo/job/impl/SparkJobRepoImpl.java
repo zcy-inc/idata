@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
 import static org.mybatis.dynamic.sql.SqlBuilder.and;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
@@ -74,5 +76,13 @@ public class SparkJobRepoImpl implements SparkJobRepo {
         DevJobContentSpark jobContentSpark = devJobContentSparkDao.selectOne(c -> c.where(devJobContentSpark.jobId, isEqualTo(jobId))
                 .orderBy(devJobContentSpark.version.descending()).limit(1)).orElse(null);
         return jobContentSpark != null ? jobContentSpark.getVersion() + 1 : 1;
+    }
+
+    @Override
+    public Boolean updateEditable(Long id, EditableEnum editable, String operator) {
+        devJobContentSparkDao.update(dsl -> dsl.set(devJobContentSpark.editable).equalTo(editable.val)
+                .set(devJobContentSpark.editor).equalTo(operator)
+                .where(devJobContentSpark.id, isEqualTo(id)));
+        return Boolean.TRUE;
     }
 }
