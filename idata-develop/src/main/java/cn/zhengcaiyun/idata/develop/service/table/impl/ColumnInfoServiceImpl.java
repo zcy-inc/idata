@@ -208,8 +208,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .from(devColumnInfo)
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        Map<String, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
-                .collect(Collectors.toMap(DevColumnInfo::getColumnName, existColumnInfo -> existColumnInfo));
+        Map<Long, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
+                .collect(Collectors.toMap(DevColumnInfo::getId, existColumnInfo -> existColumnInfo));
         List<DevColumnInfo> deleteColumnInfoList = existColumnInfoList.stream()
                 .filter(devColumnInfoDto -> !columnIdList.contains(devColumnInfoDto.getId())).collect(Collectors.toList());
         // 与已存在字段比较，删除未传字段记录
@@ -230,9 +230,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                             and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                     .ifPresent(checkDevColumn -> columnInfoDto.setId(checkDevColumn.getId()));
             columnInfoDto.setTableId(tableId);
-            boolean isCreate = !existColumnInfoMap.containsKey(columnInfoDto.getColumnName());
+            boolean isCreate = !existColumnInfoMap.containsKey(columnInfoDto.getId());
             if (!isCreate) {
-                columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getColumnName()).getId());
+                columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getId()).getId());
             }
 
             return createOrUpdateColumn(columnInfoDto, columnLabelList, isCreate, operator);
