@@ -27,8 +27,8 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import com.alibaba.fastjson.JSONArray;
@@ -113,7 +113,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String token = getDSToken(environment);
 
         HttpInput req_input = buildHttpReq(null, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("删除DS任务失败：%s", resultDto.getMsg()));
         }
@@ -131,7 +131,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildJobRunningStatusChangedParam(RunningStateEnum.resume.val);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("上线DS任务失败：%s", resultDto.getMsg()));
         }
@@ -149,7 +149,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildJobRunningStatusChangedParam(RunningStateEnum.pause.val);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("下线DS任务失败：%s", resultDto.getMsg()));
         }
@@ -167,7 +167,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildJobRunningStatusChangedParam(RunningStateEnum.resume.val);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("发布DS任务失败：%s", resultDto.getMsg()));
         }
@@ -187,8 +187,12 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildBindDagParam(workflowCode, taskCode);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
+            if (Objects.equals(resultDto.getCode(), 50034)) {
+                // 50034: process task relation is already exist
+                return;
+            }
             throw new ExternalIntegrationException(String.format("关联DS工作流失败：%s", resultDto.getMsg()));
         }
     }
@@ -207,7 +211,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildUnBindDagParam(workflowCode);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("解除关联DS工作流失败：%s", resultDto.getMsg()));
         }
@@ -227,7 +231,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildRunningParam(workflowCode, taskCode, executeConfig, runPost);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("运行DS任务失败：%s", resultDto.getMsg()));
         }
@@ -281,11 +285,13 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
         JSONObject data = resultDto.getData();
         JSONArray totalList = data.getJSONArray("totalList");
-        List<JobRunOverviewDto> list = JSONObject.parseObject(totalList.toJSONString(), new TypeReference<>() {});
+        List<JobRunOverviewDto> list = JSONObject.parseObject(totalList.toJSONString(), new TypeReference<>() {
+        });
         return list;
     }
 
-    private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> removingPrevRelations) {
+    private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig,
+                                    String environment, List<DagJobPair> removingPrevRelations) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation/%s/upstream", projectCode, taskCode);
         String req_method = "DELETE";
 
@@ -340,7 +346,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
 
         Map<String, String> req_param = buildUnBindDagParam(workflowCode);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("解除依赖节点关联DS工作流失败：%s", resultDto.getMsg()));
         }
@@ -352,9 +358,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return paramMap;
     }
 
-    private void addPrevRelation(String token, String projectCode, Long workflowCode, Long taskCode,
-                                 JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
-                                 List<DagJobPair> addingPrevRelations) {
+    private void addPrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig,
+                                 String environment, List<DagJobPair> addingPrevRelations) {
         for (DagJobPair dagJobPair : addingPrevRelations) {
             if (dagJobPair.getDagId().equals(executeConfig.getSchDagId())) {
                 addPrevRelationInSameDAG(token, projectCode, workflowCode, taskCode, jobInfo, executeConfig, environment, dagJobPair);
@@ -365,8 +370,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private void addPrevRelationInSameDAG(String token, String projectCode, Long workflowCode, Long taskCode,
-                                          JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
-                                          DagJobPair dagJobPair) {
+                                          JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, DagJobPair dagJobPair) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
@@ -375,7 +379,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             Long prevTaskCode = getTaskCode(prevJobId, environment);
             Map<String, String> req_param = buildJobRelationParam(workflowCode, taskCode, prevTaskCode);
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-            ResultDto<JSONObject> resultDto = sendReq(req_input);
+            ResultDto<Object> resultDto = simpleSendReq(req_input);
             if (!resultDto.isSuccess()) {
                 // 50034: process task relation is already exist
                 if (!Objects.equals(resultDto.getCode(), 50034)) {
@@ -386,8 +390,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private void addPrevRelationInDifferentDAG(String token, String projectCode, Long workflowCode, Long taskCode,
-                                               JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
-                                               DagJobPair dagJobPair) {
+                                               JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, DagJobPair dagJobPair) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-task-relation", projectCode);
         String req_method = "POST";
 
@@ -416,7 +419,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             // 建立当前任务和依赖节点关系
             Map<String, String> req_param = buildJobRelationParam(workflowCode, taskCode, dependenceNodeCode);
             HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-            ResultDto<JSONObject> resultDto = sendReq(req_input);
+            ResultDto<Object> resultDto = simpleSendReq(req_input);
             if (!resultDto.isSuccess()) {
                 // 50034: process task relation is already exist
                 if (!Objects.equals(resultDto.getCode(), 50034)) {
@@ -459,9 +462,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
                 + "\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{\"strategy\":\"FAILED\",\"interval\":null,\"checkInterval\":null,\"enable\":false},\"switchResult\":{}},"
                 + "\"flag\":\"YES\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":0,\"failRetryInterval\":1,\"timeoutFlag\":\"CLOSE\",\"timeoutNotifyStrategy\":\"\",\"timeout\":0,\"environmentCode\":-1}");
 
-        String name = "dep#to__t-" + Strings.padStart(prevJobId.toString(), 6, '0')
-                + "__w-" + Strings.padStart(prevDagId.toString(), 6, '0')
-                + "__f-" + Strings.padStart(jobInfo.getId().toString(), 6, '0');
+        String name = "dep#to__t-" + Strings.padStart(prevJobId.toString(), 6, '0') + "__w-" + Strings.padStart(prevDagId.toString(), 6, '0') + "__f-" + Strings.padStart(jobInfo.getId().toString(), 6, '0');
         taskJson.put("name", name);
         taskJson.put("taskType", "DEPENDENT");
         taskJson.put("flag", "YES");
@@ -561,7 +562,10 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private JSONObject buildSingleTaskJson(JobInfo jobInfo, JobExecuteConfig executeConfig) {
-        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\"," + "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}}," + "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"0\",\"failRetryInterval\":\"1\"," + "\"timeoutFlag\":\"OPEN\",\"timeoutNotifyStrategy\":\"WARN,FAILED\",\"timeout\":30,\"delayTime\":\"0\",\"environmentCode\":-1}");
+        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\","
+                + "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}},"
+                + "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"0\",\"failRetryInterval\":\"1\","
+                + "\"timeoutFlag\":\"OPEN\",\"timeoutNotifyStrategy\":\"WARN,FAILED\",\"timeout\":30,\"delayTime\":\"0\",\"environmentCode\":-1}");
         taskJson.put("name", buildJobName(jobInfo));
         taskJson.getJSONObject("taskParams").put("rawScript", String.format("run_etl jobId=%d env=%s", jobInfo.getId(), executeConfig.getEnvironment()));
         taskJson.put("flag", "NO");

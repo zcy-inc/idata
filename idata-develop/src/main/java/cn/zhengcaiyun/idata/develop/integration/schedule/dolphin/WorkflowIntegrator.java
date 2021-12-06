@@ -103,7 +103,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
 
         Map<String, String> req_param = buildDagReqParam(dagInfo, dagSchedule);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("更新DS工作流失败：%s", resultDto.getMsg()));
         }
@@ -120,7 +120,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String token = getDSToken(environment);
 
         HttpInput req_input = buildHttpReq(null, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("删除DS工作流失败：%s", resultDto.getMsg()));
         }
@@ -138,7 +138,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
 
         Map<String, String> req_param = buildDagStatusChangedParam(dagInfo.getStatus());
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("上线DS工作流失败：%s", resultDto.getMsg()));
         }
@@ -156,7 +156,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
 
         Map<String, String> req_param = buildDagStatusChangedParam(dagInfo.getStatus());
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
-        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("下线DS工作流失败：%s", resultDto.getMsg()));
         }
