@@ -62,7 +62,11 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
           render: (_: any) => _ || '-',
         }));
         const dt = columnInfos.map((columnInfo: ColumnLabel) => {
-          const tmp = { columnName: columnInfo.columnName };
+          const tmp = {
+            columnName: columnInfo.columnName,
+            enableCompare: columnInfo.enableCompare,
+            hiveDiff: columnInfo.hiveDiff,
+          };
           columnInfo.columnLabels?.forEach(
             (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
           );

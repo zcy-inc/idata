@@ -37,6 +37,8 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         const tmp = {
           key: column.columnName || tmpKey,
           columnName: column.columnName,
+          enableCompare: column.enableCompare,
+          hiveDiff: column.hiveDiff,
         };
         column.columnLabels?.forEach((label: TableLable) => {
           let v: string | boolean = label.labelParamValue;
@@ -46,6 +48,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         tmpKeys.push(tmp.key);
         return tmp;
       });
+      console.log(tmpData);
 
       setData(tmpData);
       setKeys(tmpKeys);
@@ -70,7 +73,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
   };
 
   const renderInputPrefix = (_: any, i: number) => {
-    if (i === 0 && _.enableCompare && _.hiveDiff) {
+    if (i === 0 && _?.enableCompare && _?.hiveDiff) {
       return <IconFont type="icon-baocuo" />;
     } else {
       return null;
@@ -99,7 +102,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
                   placeholder="请输入"
                   onChange={({ target: { value } }) => setValue(schema, value)}
                   required
-                  prefix={renderInputPrefix(_, i)}
+                  prefix={renderInputPrefix(schema.entity, i)}
                 />
               ),
             });

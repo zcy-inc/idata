@@ -68,6 +68,8 @@ export interface ColumnLabel extends TableLable {
   columnComment: string;
   columnLabels: TableLable[];
   pk: boolean;
+  enableCompare?: boolean;
+  hiveDiff?: boolean;
 }
 export interface ForeignKey {
   id: number;
