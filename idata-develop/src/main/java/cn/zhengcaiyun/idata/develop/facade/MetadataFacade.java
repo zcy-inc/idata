@@ -10,6 +10,7 @@ import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
+import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.SysLabelCodeEnum;
@@ -172,6 +173,7 @@ public class MetadataFacade {
         String columnType = columnInfoDto.getColumnType();
         String columnComment = columnInfoDto.getColumnComment();
         Boolean partition = columnInfoDto.getPartition();
+        Long columnId = columnInfoDto.getColumnId();
 
         Date now = new Date();
         List<DevLabel> list = new ArrayList<>();
@@ -182,6 +184,7 @@ public class MetadataFacade {
         devLabelName.setEditTime(now);
         devLabelName.setCreateTime(now);
         devLabelName.setTableId(tableId);
+        devLabelName.setColumnId(columnId);
         devLabelName.setColumnName(columnName);
         devLabelName.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
         devLabelName.setLabelParamValue(columnName);
@@ -195,6 +198,7 @@ public class MetadataFacade {
         devLabelType.setEditTime(now);
         devLabelType.setCreateTime(now);
         devLabelType.setTableId(tableId);
+        devLabelType.setColumnId(columnId);
         devLabelType.setColumnName(columnName);
         devLabelType.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
         devLabelType.setLabelParamValue(typeMapping.getOrDefault(StringUtils.upperCase(columnType), columnType));
@@ -208,6 +212,7 @@ public class MetadataFacade {
         devLabelComment.setEditTime(now);
         devLabelComment.setCreateTime(now);
         devLabelComment.setTableId(tableId);
+        devLabelComment.setColumnId(columnId);
         devLabelComment.setColumnName(columnName);
         devLabelComment.setLabelCode(SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
         devLabelComment.setLabelParamValue(StrUtil.nullToEmpty(columnComment));
@@ -221,6 +226,7 @@ public class MetadataFacade {
         devLabelPartition.setEditTime(now);
         devLabelPartition.setCreateTime(now);
         devLabelPartition.setTableId(tableId);
+        devLabelPartition.setColumnId(columnId);
         devLabelPartition.setColumnName(columnName);
         devLabelPartition.setLabelCode(SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
         devLabelPartition.setLabelParamValue(partition + "");
@@ -235,7 +241,15 @@ public class MetadataFacade {
      * @return
      */
     public CompareInfoDTO compareHive(Long tableId) {
-        List<String> columnList = columnInfoService.getColumnNames(tableId);
+//        List<String> columnList = columnInfoService.getColumnNames(tableId);
+        List<DevColumnInfo> columnInfoList = columnInfoService.getColumnInfo(tableId);
+        List<Long> columnIdList = new ArrayList<>();
+        Map<Long, String> nameOfId = new HashMap<>();
+        columnInfoList.forEach(e -> {
+            columnIdList.add(e.getId());
+            nameOfId.put(e.getId(), e.getColumnName());
+        });
+
         List<DevLabel> labelList = labelService.findByTableId(tableId);
 
         List<String> filterList = Lists.newArrayList(
@@ -248,33 +262,37 @@ public class MetadataFacade {
                 SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
 
         //<column, code, value> 结构COLUMN_COMMENT_LABEL
-        Table<String, String, String> columnCodeValueTable = HashBasedTable.create();
+        Table<Long, String, String> columnCodeValueTable = HashBasedTable.create();
         labelList.stream()
+                .filter(e -> e.getColumnId() != null && StringUtils.isNotEmpty(e.getColumnName()))
                 .filter(e -> filterList.contains(e.getLabelCode()))
-                .forEach(e -> columnCodeValueTable.put(e.getColumnName(), e.getLabelCode(), e.getLabelParamValue()));
+                .forEach(e -> columnCodeValueTable.put(e.getColumnId(), e.getLabelCode(), e.getLabelParamValue()));
 
         Map<String, String> typeMapping = enumService.getEnumValueMapByCode(COLUMN_TYPE_ENUM);
 
         CompareInfoDTO compareInfoDTO = new CompareInfoDTO();
-        for (String columnName : columnList) {
-            String hiveColumnName = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
-            String columnType = columnCodeValueTable.get(columnName, SysLabelCodeEnum.COLUMN_TYPE_LABEL.labelCode);
-            String hiveColumnType = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
-            String columnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode);
-            String hiveColumnComment = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
-            String columnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
-            String hiveColumnPartition = columnCodeValueTable.get(columnName, SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
+        for (Long columnId : columnIdList) {
+            String columnName = nameOfId.get(columnId);
+            String hiveColumnName = columnCodeValueTable.get(columnId, SysLabelCodeEnum.HIVE_COLUMN_NAME_LABEL.labelCode);
+            String columnType = columnCodeValueTable.get(columnId, SysLabelCodeEnum.COLUMN_TYPE_LABEL.labelCode);
+            String hiveColumnType = columnCodeValueTable.get(columnId, SysLabelCodeEnum.HIVE_COLUMN_TYPE_LABEL.labelCode);
+            String columnComment = columnCodeValueTable.get(columnId, SysLabelCodeEnum.COLUMN_COMMENT_LABEL.labelCode);
+            String hiveColumnComment = columnCodeValueTable.get(columnId, SysLabelCodeEnum.HIVE_COLUMN_COMMENT_LABEL.labelCode);
+            String columnPartition = columnCodeValueTable.get(columnId, SysLabelCodeEnum.PARTITION_COL_LABEL.labelCode);
+            String hiveColumnPartition = columnCodeValueTable.get(columnId, SysLabelCodeEnum.HIVE_PARTITION_COL_LABEL.labelCode);
 
             if (StringUtils.isEmpty(hiveColumnName)) {
                 // local比hive多的列
                 CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo(columnName, typeMapping.get(columnType), columnComment);
                 basicColumnInfo.setPartition(StringUtils.equals(columnPartition, "true"));
+                basicColumnInfo.setColumnId(columnId);
                 compareInfoDTO.getMoreList().add(basicColumnInfo);
             } else if (!StringUtils.equals(columnName, hiveColumnName)
                     || !StringUtils.equals(columnType, hiveColumnType)
                     || !JiveUtil.commentEquals(columnComment, hiveColumnComment)
                     || !StringUtils.equals(columnPartition, hiveColumnPartition)) {
                 CompareInfoDTO.ChangeColumnInfo columnInfo = new CompareInfoDTO.ChangeColumnInfo();
+                columnInfo.setColumnId(columnId);
                 columnInfo.setColumnName(columnName);
                 columnInfo.setHiveColumnName(hiveColumnName);
                 columnInfo.setColumnType(typeMapping.get(columnType));

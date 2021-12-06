@@ -4,5 +4,8 @@
 --
 -- alter table dev_label
 --     add hidden tinyint default 0 null comment '是否隐藏不展示';
-
-
+--
+--
+-- alter table dev_label
+--     add column_id bigint null after table_id;
+--

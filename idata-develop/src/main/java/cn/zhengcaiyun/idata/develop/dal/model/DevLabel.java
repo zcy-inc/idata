@@ -65,6 +65,9 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.table_id")
     private Long tableId;
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    private Long columnId;
+
     /**
      * Database Column Remarks:
      *   打标主体字段名
@@ -164,6 +167,16 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.table_id")
     public void setTableId(Long tableId) {
         this.tableId = tableId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_name")

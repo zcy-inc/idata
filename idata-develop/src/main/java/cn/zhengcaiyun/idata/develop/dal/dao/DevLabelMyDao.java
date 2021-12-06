@@ -66,10 +66,10 @@ public interface DevLabelMyDao {
     List<Long> getSearchTableIds(String searchType, List<String> searchTexts);
 
     @Insert("<script>" +
-            "insert into dev_label(del, creator, create_time, editor, edit_time, label_code, table_id, column_name, label_param_value, hidden) " +
+            "insert into dev_label(del, creator, create_time, editor, edit_time, label_code, table_id, column_id, column_name, label_param_value, hidden) " +
             "values " +
             "<foreach collection='list' item='item' index='index' separator=','> " +
-            "(#{item.del}, #{item.creator}, #{item.createTime}, #{item.editor}, #{item.editTime}, #{item.labelCode}, #{item.tableId}, #{item.columnName}, #{item.labelParamValue}, #{item.hidden})" +
+            "(#{item.del}, #{item.creator}, #{item.createTime}, #{item.editor}, #{item.editTime}, #{item.labelCode}, #{item.tableId}, #{item.columnId}, #{item.columnName}, #{item.labelParamValue}, #{item.hidden})" +
             "</foreach> " +
             "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
             "</script>")

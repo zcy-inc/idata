@@ -22,6 +22,8 @@ import cn.zhengcaiyun.idata.connector.constant.enums.WideDataTypeEnum;
  * 字段信息
  */
 public class ColumnInfoDto {
+
+    private Long columnId;
     /**
      * 字段名称
      */
@@ -44,6 +46,14 @@ public class ColumnInfoDto {
     private WideDataTypeEnum dataType;
 
     private Boolean isPartition;
+
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
+    }
 
     public String getColumnName() {
         return columnName;

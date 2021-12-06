@@ -356,6 +356,18 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .collect(Collectors.toList());
     }
 
+
+    @Override
+    public List<DevColumnInfo> getColumnInfo(Long tableId) {
+        return devColumnInfoDao.selectMany(
+                        select(devColumnInfo.allColumns())
+                                .from(devColumnInfo)
+                                .where(devColumnInfo.tableId, isEqualTo(tableId), and(devColumnInfo.del, isEqualTo(DEL_NO.val)))
+                                .build().render(RenderingStrategies.MYBATIS3))
+                .stream()
+                .collect(Collectors.toList());
+    }
+
     private boolean deleteColumnInfo(Long columnId, String operator) {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(columnId != null, "字段ID不能为空");

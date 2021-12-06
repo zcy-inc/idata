@@ -91,6 +91,8 @@ public class CompareInfoDTO {
             this.columnComment = columnComment;
         }
 
+        private Long columnId;
+
         private String columnName;
 
         private String columnType;
@@ -98,6 +100,14 @@ public class CompareInfoDTO {
         private String columnComment;
 
         private boolean isPartition;
+
+        public Long getColumnId() {
+            return columnId;
+        }
+
+        public void setColumnId(Long columnId) {
+            this.columnId = columnId;
+        }
 
         public String getColumnName() {
             return columnName;
@@ -134,6 +144,8 @@ public class CompareInfoDTO {
 
     public static class ChangeColumnInfo {
 
+        private Long columnId;
+
         private String columnName;
 
         private String columnType;
@@ -149,6 +161,14 @@ public class CompareInfoDTO {
         private String hiveColumnComment;
 
         private boolean isHivePartition;
+
+        public Long getColumnId() {
+            return columnId;
+        }
+
+        public void setColumnId(Long columnId) {
+            this.columnId = columnId;
+        }
 
         public String getColumnName() {
             return columnName;

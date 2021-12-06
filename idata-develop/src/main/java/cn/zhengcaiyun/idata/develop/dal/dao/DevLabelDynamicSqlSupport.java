@@ -66,6 +66,9 @@ public final class DevLabelDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.table_id")
     public static final SqlColumn<Long> tableId = devLabel.tableId;
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    public static final SqlColumn<Long> columnId = devLabel.columnId;
+
     /**
      * Database Column Remarks:
      *   打标主体字段名
@@ -104,6 +107,8 @@ public final class DevLabelDynamicSqlSupport {
         public final SqlColumn<String> labelCode = column("label_code", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> tableId = column("table_id", JDBCType.BIGINT);
+
+        public final SqlColumn<Long> columnId = column("column_id", JDBCType.BIGINT);
 
         public final SqlColumn<String> columnName = column("column_name", JDBCType.VARCHAR);
 

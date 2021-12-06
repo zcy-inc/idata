@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -48,4 +49,11 @@ public interface ColumnInfoService {
      * @return
      */
     List<String> getColumnNames(Long tableId);
+
+    /**
+     * 根据表id获取列名
+     * @param tableId
+     * @return
+     */
+    List<DevColumnInfo> getColumnInfo(Long tableId);
 }
