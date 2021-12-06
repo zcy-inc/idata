@@ -68,9 +68,9 @@ public abstract class DolphinIntegrationAdapter {
 
     protected String getDSProjectCode(String environment) {
         if (EnvEnum.prod.name().equals(environment)) {
-            return "3678830244416";
+            return "3753902310976";
         } else {
-            return "3678829258432";
+            return "3753901496256";
         }
     }
 
@@ -84,7 +84,7 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSWorkGroup(String environment) {
-        return "stage";
+        return "default";
     }
 
     protected Integer getDagTimeout(String environment) {
