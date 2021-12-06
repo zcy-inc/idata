@@ -41,7 +41,7 @@ public interface DevJobHistoryMyDao {
             "(#{item.createTime}, #{item.jobId}, #{item.startTime}, #{item.finishTime}, #{item.duration}, #{item.finalStatus}, " +
             "#{item.avgVcores}, #{item.avgMemory}, #{item.applicationId})" +
             "</foreach> " +
-            "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
+            "ON DUPLICATE KEY UPDATE final_status = VALUES(final_status)" +
             "</script>")
     void batchUpsert(List<DevJobHistory> list);
 }

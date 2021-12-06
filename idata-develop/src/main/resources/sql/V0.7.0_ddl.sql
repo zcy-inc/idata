@@ -28,7 +28,7 @@ create table dev_job_udf
     editor         varchar(20) default ''                null,
     create_time    timestamp   default CURRENT_TIMESTAMP not null,
     edit_time      timestamp   default CURRENT_TIMESTAMP not null,
-    udf_name       varchar(20)                           not null comment '''函数名称''',
+    udf_name       varchar(64)                           not null comment '''函数名称''',
     udf_type       varchar(20)                           not null comment '函数类型',
     file_name      varchar(64)                           null comment '文件名称',
     hdfs_path      varchar(256)                          not null comment 'hdfs文件路径',
@@ -41,4 +41,5 @@ create table dev_job_udf
     constraint dev_job_udf_udf_name_uindex
         unique (udf_name)
 );
+
 
