@@ -100,7 +100,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           const item = { columnIndex: i, columnName: _.columnName };
           const columnLabels = [];
           for (let [key, value] of Object.entries(_)) {
-            if (key === 'key' || key === 'id') {
+            if (key === 'key' || key === 'id' || key === 'enableCompare' || key === 'hiveDiff') {
               continue;
             }
             // 检查表结构的必填项
