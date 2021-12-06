@@ -1,22 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import MonacoEditor from 'react-monaco-editor';
-import { Drawer, Modal, Table } from 'antd';
+import { Drawer, Table } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
+import { Task, TaskHistoryItem } from '@/types/datadev';
+import { getTaskHistory } from '@/services/datadev';
 
-interface DrawerConfigProps {
+interface DrawerHistoryProps {
   visible: boolean;
   onClose: () => void;
+  data?: Task;
 }
 
-const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose }) => {
+const columns = [
+  { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
+  { title: '执行时长', dataIndex: 'duration', key: 'duration' },
+  { title: '平均内存(GB)', dataIndex: 'avgMemory', key: 'avgMemory' },
+  { title: '平均CPU核数', dataIndex: 'avgVcores', key: 'avgVcores' },
+  { title: '最终状态', dataIndex: 'finalStatus', key: 'finalStatus' },
+];
+
+const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
   const [loading, setLoading] = useState(false);
-  const [visibleLog, setVisibleLog] = useState(false);
-  const [log, setLog] = useState('');
+  const [history, setHistory] = useState<TaskHistoryItem[]>([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
+    if (visible && data) {
+      getTaskHistoryWrapped(0);
+    }
+  }, [visible, data]);
+
+  const getTaskHistoryWrapped = (pageNum: number) => {
     setLoading(false);
-  }, [visible]);
+    getTaskHistory({
+      condition: { id: data?.id as number },
+      pageNum,
+      pageSize: 10,
+    })
+      .then((res) => {
+        setTotal(res.data.total);
+        setHistory(res.data.content);
+      })
+      .catch((err) => {})
+      .finally(() => setLoading(false));
+  };
 
   return (
     <Drawer
@@ -36,42 +63,16 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose }) => {
       <Table
         rowKey="id"
         loading={loading}
-        pagination={false}
-        columns={[
-          { title: '开始时间', dataIndex: 'start', key: 'start' },
-          { title: '执行时长', dataIndex: 'duration', key: 'duration' },
-          { title: '输出结果行数', dataIndex: 'line', key: 'line' },
-          { title: '平均内存(GB)', dataIndex: 'memory', key: 'memory' },
-          { title: '平均CPU核数', dataIndex: 'cpu', key: 'cpu' },
-          { title: '最终状态', dataIndex: 'state', key: 'state' },
-          {
-            title: '操作',
-            key: 'options',
-            render: (_) => (
-              <a
-                onClick={() => {
-                  setVisibleLog(true);
-                  setLog('_.log');
-                }}
-              >
-                查看
-              </a>
-            ),
-          },
-        ]}
-        dataSource={[{}]}
+        columns={columns}
+        dataSource={history}
+        pagination={{
+          total,
+          showTotal: (t) => `共${t}条`,
+          onChange: (page) => getTaskHistoryWrapped(page),
+        }}
       />
-      <Modal title="日志" visible={visibleLog} onCancel={() => setVisibleLog(false)}>
-        <MonacoEditor
-          height="400"
-          language="sql"
-          theme="vs-dark"
-          value={log}
-          options={{ readOnly: true }}
-        />
-      </Modal>
     </Drawer>
   );
 };
 
-export default DrawerVersion;
+export default DrawerHistory;

@@ -42,6 +42,7 @@ import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
+import DrawerDependence from './components/DrawerDependence';
 import IconRun from './components/IconRun';
 import IconPause from './components/IconPause';
 import SparkSql from './components/Content/SparkSql';
@@ -71,6 +72,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [visibleConfig, setVisibleConfig] = useState(false);
   const [visibleVersion, setVisibleVersion] = useState(false);
   const [visibleHistory, setVisibleHistory] = useState(false);
+  const [visibleDependence, setVisibleDependence] = useState(false);
   // 启用 / 暂停
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
@@ -480,6 +482,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 }))}
                 value={version}
                 onChange={(v) => setVersion(v as number)}
+                showSearch
+                filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
               />
             )}
           </div>
@@ -487,7 +491,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             <a onClick={() => onAction('run')}>单次运行</a>
             <a onClick={() => setVisibleBasic(true)}>基本信息</a>
             <a onClick={() => setVisibleConfig(true)}>配置</a>
-            <a onClick={() => setVisibleConfig(true)}>血缘</a>
+            <a onClick={() => setVisibleDependence(true)}>依赖</a>
             <a onClick={() => setVisibleVersion(true)}>版本</a>
             <a onClick={() => setVisibleHistory(true)}>历史</a>
           </Space>
@@ -506,7 +510,16 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           onClose={() => setVisibleVersion(false)}
           data={task}
         />
-        <DrawerHistory visible={visibleHistory} onClose={() => setVisibleHistory(false)} />
+        <DrawerHistory
+          visible={visibleHistory}
+          onClose={() => setVisibleHistory(false)}
+          data={task}
+        />
+        <DrawerDependence
+          visible={visibleDependence}
+          onClose={() => setVisibleDependence(false)}
+          data={task}
+        />
         <ModalForm
           title="选择环境"
           layout="horizontal"

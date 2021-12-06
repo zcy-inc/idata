@@ -23,6 +23,7 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jo
   useEffect(() => {
     if (data) {
       form.setFieldsValue({
+        // upload: data.resourceHdfsPath,
         resourceHdfsPath: data.resourceHdfsPath,
         appArguments: data.appArguments,
         mainClass: data.mainClass,

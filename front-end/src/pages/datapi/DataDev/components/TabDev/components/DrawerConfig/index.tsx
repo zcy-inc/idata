@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   message,
+  Radio,
   Row,
   Select,
   Table,
@@ -150,8 +151,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           executeConfig.schDryRun = [];
         }
-        // 处理超时策略
-        executeConfig.schTimeOutStrategy = executeConfig.schTimeOutStrategy?.split(',');
         // 处理上游依赖
         if (environment === Environments.STAG) {
           const tmp = dependencies.map((_: any) => ({
@@ -169,8 +168,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
             dagName: _.prevJobDagName,
             dagId: _.prevJobDagId,
           }));
-          console.log(tmp);
-
           setDepDataProd(tmp);
         }
         // 处理输出
@@ -303,10 +300,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (values.schDryRun && Array.isArray(values.schDryRun)) {
       values.schDryRun = values.schDryRun.length > 0 ? 1 : 0;
     }
-    // 处理超时策略
-    if (values.schTimeOutStrategy && Array.isArray(values.schTimeOutStrategy)) {
-      values.schTimeOutStrategy = values.schTimeOutStrategy.join(',');
-    }
     // 处理超时时间
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
@@ -405,6 +398,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       style={{ width }}
                       placeholder="请选择"
                       options={DAGList.map((_) => ({ label: _.name, value: _.id }))}
+                      showSearch
+                      filterOption={(input: string, option: any) =>
+                        option.label.indexOf(input) >= 0
+                      }
                     />
                   </Item>
                 </Col>
@@ -415,6 +412,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       style={{ width }}
                       placeholder="请选择"
                       options={executeQueues.map((_) => ({ label: _.name, value: _.code }))}
+                      showSearch
+                      filterOption={(input: string, option: any) =>
+                        option.label.indexOf(input) >= 0
+                      }
                     />
                   </Item>
                 </Col>
@@ -423,10 +424,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 <Input size="large" style={{ width }} placeholder="请输入" suffix="分" />
               </Item>
               <Item name="schTimeOutStrategy" label="超时策略">
-                <Checkbox.Group>
-                  <Checkbox value="alarm">超时告警</Checkbox>
-                  <Checkbox value="fail">超时失败</Checkbox>
-                </Checkbox.Group>
+                <Radio.Group>
+                  <Radio value="alarm">超时告警</Radio>
+                  <Radio value="fail">超时失败</Radio>
+                </Radio.Group>
               </Item>
               <Item name="schRerunMode" label="重跑属性" rules={ruleSelc}>
                 <Select
@@ -491,6 +492,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                     style={{ width }}
                     placeholder="请选择"
                     options={configuredTaskList.map((_) => ({ label: _.jobName, value: _.jobId }))}
+                    showSearch
+                    filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
                   />
                 </Item>
                 <a style={{ marginLeft: 16, marginTop: 5 }} onClick={addDepRecord}>
@@ -547,6 +550,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       style={{ width }}
                       placeholder="选择数据源"
                       options={dataSource.map((_) => ({ label: _.name, value: _.id }))}
+                      showSearch
+                      filterOption={(input: string, option: any) =>
+                        option.label.indexOf(input) >= 0
+                      }
                     />
                   </Item>
                 </Col>

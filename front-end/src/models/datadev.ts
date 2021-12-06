@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getTree } from '@/services/datadev';
 import { TreeNode } from '@/types/datadev';
-import { newEnum, newTable, newDAG, mockTree } from './constants';
+import { newEnum, newTable, newDAG, mockTree, newFun } from './constants';
 import { FolderBelong } from '@/constants/datadev';
 
 export interface IPane extends TreeNode {
@@ -98,6 +98,14 @@ export default () => {
   }, [panes]);
 
   /**
+   * 增加一个新建函数的Tab
+   */
+  const onCreateFun = useCallback(() => {
+    !panes.some((_) => _.key === 'newFun') && setPanes([...panes, newFun]);
+    setActiveKey('newFun');
+  }, [panes]);
+
+  /**
    * 关闭Tab
    */
   const onRemovePane = useCallback(
@@ -189,6 +197,7 @@ export default () => {
     setCurLabel,
     replaceTab,
     onCreateDAG,
+    onCreateFun,
     visibleTask,
     setVisibleTask,
     visibleDev,

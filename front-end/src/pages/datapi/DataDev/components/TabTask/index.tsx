@@ -374,6 +374,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 }))}
                 value={version}
                 onChange={(v) => setVersion(v as number)}
+                showSearch
+                filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
               />
             )}
           </div>
@@ -401,6 +403,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   placeholder="请选择"
                   options={DSTypes.map((_) => ({ label: _, value: _ }))}
                   onChange={(v) => getDataSourceListWrapped(v as DataSourceTypes, 'src')}
+                  showSearch
+                  filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
                 />
               </Item>
               <Item name="srcDataSourceId" label="数据源名称" rules={ruleSlct}>
@@ -533,7 +537,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           onClose={() => setVisibleVersion(false)}
           data={task}
         />
-        <DrawerHistory visible={visibleHistory} onClose={() => setVisibleHistory(false)} />
+        <DrawerHistory
+          visible={visibleHistory}
+          onClose={() => setVisibleHistory(false)}
+          data={task}
+        />
       </div>
       <div className="workbench-submit">
         <Space>
@@ -626,6 +634,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   if (res.success) {
                     message.success('暂停成功');
                     getTaskWrapped();
+                    setVisibleAction(false);
                   } else {
                     message.error(`暂停失败：${res.msg}`);
                   }
@@ -639,6 +648,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   if (res.success) {
                     message.success('恢复成功');
                     getTaskWrapped();
+                    setVisibleAction(false);
                   } else {
                     message.error(`恢复失败：${res.msg}`);
                   }
@@ -652,6 +662,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   if (res.success) {
                     message.success('恢复成功');
                     getTaskWrapped();
+                    setVisibleAction(false);
                   } else {
                     message.error(`恢复失败：${res.msg}`);
                   }

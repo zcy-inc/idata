@@ -104,6 +104,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
               getDataDevTypesWrapped(v);
             }
           }}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       {(taskType === TaskCategory.SPARK || taskType === TaskCategory.SCRIPT) && (
@@ -113,6 +115,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
             style={{ width }}
             placeholder="请选择"
             options={languages.map((_) => ({ label: _.language, value: _.code }))}
+            showSearch
+            filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
           />
         </Item>
       )}
@@ -125,6 +129,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           style={{ width }}
           placeholder="请选择"
           options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       <Item name="folderId" label="目标文件夹" rules={rules}>
@@ -133,6 +139,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           style={{ width }}
           placeholder="请选择"
           options={folders.map((_) => ({ label: _.name, value: _.id }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       <Item name="remark" label="备注说明">
