@@ -63,7 +63,7 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSToken(String environment) {
-        return "eee73991b02bbe05e29499ad6871206d";
+        return "ba33abe5da62f976c46a0343fe6efe77";
     }
 
     protected String getDSProjectCode(String environment) {
