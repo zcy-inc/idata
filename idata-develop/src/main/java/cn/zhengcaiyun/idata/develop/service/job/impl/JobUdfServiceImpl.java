@@ -50,7 +50,7 @@ public class JobUdfServiceImpl implements JobUdfService {
         DevJobUdf udf = new DevJobUdf();
         udf.setEditTime(new Date());
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
-        udf.setDel(DeleteEnum.DEL_NO.val);
+        udf.setDel(DeleteEnum.DEL_YES.val);
         // 此处修改name是为了防止唯一键冲突
         udf.setUdfName(String.format("%s[delete_%s]", udfName, id));
         udf.setId(id);

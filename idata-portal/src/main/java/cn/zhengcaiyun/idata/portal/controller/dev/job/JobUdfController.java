@@ -5,6 +5,7 @@ import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
@@ -42,6 +43,8 @@ public class JobUdfController {
     private HdfsService hdfsService;
     @Autowired
     private JobUdfService udfService;
+    @Autowired
+    private DevJobUdfDao devJobUdfDao;
 
     @ApiOperation("加载某个UDF详情")
     @ApiImplicitParams({
@@ -74,7 +77,9 @@ public class JobUdfController {
     @ApiOperation("更新UDF")
     @PutMapping("/udf")
     public RestResult<Boolean> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
-        DevJobUdf udf = new DevJobUdf();
+        Long id = udfUpdateRequest.getId();
+        DevJobUdf udf = devJobUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
+
         BeanUtils.copyProperties(udfUpdateRequest, udf);
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
