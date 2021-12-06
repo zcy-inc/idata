@@ -71,7 +71,7 @@ public class TreeNodeGenerator<N extends TreeNodeDto> {
         if (CollectionUtils.isEmpty(expandedNodes)) return Lists.newArrayList();
 
         ListMultimap<String, N> treeListMultimap = MultimapBuilder.hashKeys().arrayListValues().build();
-        expandedNodes.stream().forEach(nodeDto -> treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto));
+        expandedNodes.stream().filter(e -> e.getParentId() != null).forEach(nodeDto -> treeListMultimap.put(nodeDto.getParentId().toString(), nodeDto));
 
         int curLevel = 1;
         List<N> treeList = makeTree(parentIdProvider.get(), null, treeListMultimap, curLevel, maxLevel);
