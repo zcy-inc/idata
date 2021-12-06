@@ -38,7 +38,8 @@ public interface ColumnInfoService {
 //    void compareColumns(TableInfoDto tableInfo);
 
     List<ColumnDetailsDto> getColumnDetails(Long tableId);
-    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
+    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<Long> columnIdList,
+                                     String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
     boolean delete(Long columnId, String operator);
     boolean checkColumn(String columnName, Long tableId);

@@ -37,6 +37,7 @@ public class LabelDto {
     private String labelName;
     private Long tableId;
     private String columnName;
+    private Long columnId;
     private String columnComment;
     private String labelParamType;
     private String labelParamValue;
@@ -136,6 +137,14 @@ public class LabelDto {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
     }
 
     public String getLabelParamType() {

@@ -280,9 +280,10 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;
         if (columnInfoDtoList != null) {
+            List<Long> columnIdList = columnInfoDtoList.stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
             List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
-                    tableInfo.getId(), columnNameList, operator);
+                    tableInfo.getId(), columnIdList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
             // 外键表操作
             List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
@@ -348,9 +349,10 @@ public class TableInfoServiceImpl implements TableInfoService {
             existColumnIdList.forEach(columnId -> columnInfoService.delete(columnId, operator));
         }
         else {
+            List<Long> columnIdList = columnInfoDtoList.stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
             List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
-                    tableInfo.getId(), columnNameList, operator);
+                    tableInfo.getId(), columnIdList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
             // 外键表操作
             List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0

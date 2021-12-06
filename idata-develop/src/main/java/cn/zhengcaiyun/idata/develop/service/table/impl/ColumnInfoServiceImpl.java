@@ -192,7 +192,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList,
+    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<Long> columnIdList,
                                             String operator) {
         checkArgument(isNotEmpty(operator), "操作者不能为空");
         checkArgument(tableId != null, "字段所属表ID不能为空");
@@ -211,7 +211,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         Map<String, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
                 .collect(Collectors.toMap(DevColumnInfo::getColumnName, existColumnInfo -> existColumnInfo));
         List<DevColumnInfo> deleteColumnInfoList = existColumnInfoList.stream()
-                .filter(devColumnInfoDto -> !columnNameList.contains(devColumnInfoDto.getColumnName())).collect(Collectors.toList());
+                .filter(devColumnInfoDto -> !columnIdList.contains(devColumnInfoDto.getId())).collect(Collectors.toList());
         // 与已存在字段比较，删除未传字段记录
         deleteColumnInfoList.forEach(deleteColumnInfo -> deleteColumnInfo(deleteColumnInfo.getId(), operator));
 
@@ -287,6 +287,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             // 插入label表
             echoColumnLabelList = columnLabelList.stream()
                     .map(columnLabel ->  {
+                        columnLabel.setColumnId(echoColumnInfoDto.getId());
                         columnLabel.setTableId(columnInfoDto.getTableId());
                         return labelService.label(columnLabel, operator);})
                     .collect(Collectors.toList());
@@ -319,6 +320,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 deleteColumnLabelList.forEach(deleteColumnLabel -> labelService.removeLabel(deleteColumnLabel, operator));
                 echoColumnLabelList = columnLabelList.stream()
                         .map(columnLabel -> {
+                            columnLabel.setColumnId(columnInfoDto.getId());
                             columnLabel.setTableId(columnInfoDto.getTableId());
                             return labelService.label(columnLabel, operator);
                         })
