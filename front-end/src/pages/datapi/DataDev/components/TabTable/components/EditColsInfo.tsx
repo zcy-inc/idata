@@ -35,6 +35,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
       const tmpData = initial.columnInfos?.map((column: ColumnLabel) => {
         const tmpKey = new Date().getTime();
         const tmp = {
+          id: column.id,
           key: column.columnName || tmpKey,
           columnName: column.columnName,
           enableCompare: column.enableCompare,
@@ -48,8 +49,6 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         tmpKeys.push(tmp.key);
         return tmp;
       });
-      console.log(tmpData);
-
       setData(tmpData);
       setKeys(tmpKeys);
     }

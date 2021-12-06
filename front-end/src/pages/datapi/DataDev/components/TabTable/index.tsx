@@ -97,7 +97,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         }
         // 处理columnInfos的入参格式
         for (let [i, _] of stData.entries()) {
-          const item = { columnIndex: i, columnName: _.columnName };
+          const item = { columnIndex: i, columnName: _.columnName, id: _.id };
           const columnLabels = [];
           for (let [key, value] of Object.entries(_)) {
             if (key === 'key' || key === 'id' || key === 'enableCompare' || key === 'hiveDiff') {
