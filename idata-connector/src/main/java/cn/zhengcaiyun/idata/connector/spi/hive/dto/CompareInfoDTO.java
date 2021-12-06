@@ -215,10 +215,10 @@ public class CompareInfoDTO {
         }
 
         /**
-         * 是否仅分区字段不同
+         * 排除分区属性的字段不同
          * @return
          */
-        public boolean onlyPartitionDiff() {
+        public boolean excludePartitionDiff() {
             if (isHivePartition == isPartition) {
                 return false;
             }

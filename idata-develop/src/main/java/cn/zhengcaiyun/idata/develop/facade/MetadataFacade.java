@@ -25,6 +25,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -53,6 +54,7 @@ public class MetadataFacade {
     @Autowired
     private EnumService enumService;
 
+    @Transactional(rollbackFor = Throwable.class)
     public SyncHiveDTO syncMetadataToHive(Long tableId, String operator) {
         DevTableInfo tableInfo = tableInfoService.getSimpleById(tableId);
         String hiveTableName = tableInfo.getHiveTableName();
@@ -118,7 +120,10 @@ public class MetadataFacade {
         // 3.1 新增列
         List<CompareInfoDTO.BasicColumnInfo> moreList = compareInfoDTO.getMoreList();
         if (CollectionUtils.isNotEmpty(moreList)) {
-            Set<ColumnInfoDto> columns = moreList.stream().map(e -> PojoUtil.copyOne(e, ColumnInfoDto.class)).collect(Collectors.toSet());
+            Set<ColumnInfoDto> columns = moreList.stream()
+                    .filter(e -> !e.isPartition())
+                    .map(e -> PojoUtil.copyOne(e, ColumnInfoDto.class))
+                    .collect(Collectors.toSet());
             boolean success = hiveService.addColumns(dbName, tableName, columns);
             if (success) {
                 List<DevLabel> labelList = Lists.newArrayList();
@@ -132,7 +137,7 @@ public class MetadataFacade {
         // 3.2 修改列
         List<CompareInfoDTO.ChangeColumnInfo> differentList = compareInfoDTO.getDifferentList()
                 .stream()
-                .filter(e -> e.onlyPartitionDiff())
+                .filter(e -> !e.isHivePartition())
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(differentList)) {
             for (CompareInfoDTO.ChangeColumnInfo columnInfo : differentList) {
@@ -262,7 +267,9 @@ public class MetadataFacade {
 
             if (StringUtils.isEmpty(hiveColumnName)) {
                 // local比hive多的列
-                compareInfoDTO.getMoreList().add(new CompareInfoDTO.BasicColumnInfo(columnName, typeMapping.get(columnType), columnComment));
+                CompareInfoDTO.BasicColumnInfo basicColumnInfo = new CompareInfoDTO.BasicColumnInfo(columnName, typeMapping.get(columnType), columnComment);
+                basicColumnInfo.setPartition(StringUtils.equals(columnPartition, "true"));
+                compareInfoDTO.getMoreList().add(basicColumnInfo);
             } else if (!StringUtils.equals(columnName, hiveColumnName)
                     || !StringUtils.equals(columnType, hiveColumnType)
                     || !JiveUtil.commentEquals(columnComment, hiveColumnComment)

@@ -39,6 +39,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
@@ -348,7 +349,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         return devColumnInfoDao.selectMany(
                 select(devColumnInfo.columnName)
                 .from(devColumnInfo)
-                .where(devColumnInfo.tableId, isEqualTo(tableId))
+                .where(devColumnInfo.tableId, isEqualTo(tableId), and(devColumnInfo.del, isEqualTo(DEL_NO.val)))
                         .build().render(RenderingStrategies.MYBATIS3))
                 .stream()
                 .map(DevColumnInfo::getColumnName)
