@@ -13,7 +13,7 @@ public interface JobDependenceMyDao {
             "(" +
             "  select job_id, prev_job_id from dev_job_dependence where del = 0 and environment = #{env}" +
             ") t1 left join (select id, name from dev_job_info) t2" +
-            "on t1.job_id = t2.id" +
+            " on t1.job_id = t2.id" +
             "</script>")
     List<JobDependencyDto> queryJobs(String env);
 }

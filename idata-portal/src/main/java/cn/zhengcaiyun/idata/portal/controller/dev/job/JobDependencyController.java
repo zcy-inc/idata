@@ -39,7 +39,7 @@ public class JobDependencyController {
                                             @RequestParam("env") String env,
                                             @RequestParam("preLevel") Integer preLevel,
                                             @RequestParam("nextLevel") Integer nextLevel,
-                                            @RequestParam("searchJobId") Long searchJobId) {
+                                            @RequestParam(value = "searchJobId", required = false) Long searchJobId) {
         Tuple2<JobTreeNodeDto, JobTreeNodeDto> tuple2 = jobDependencyService.loadTree(jobId, env, preLevel, nextLevel, searchJobId);
         JobTreeResponse response = new JobTreeResponse();
         JobTreeNodeDto prev = tuple2.e1;
