@@ -60,4 +60,11 @@ public interface LabelService {
      * @param labelList
      */
     void batchUpsert(List<DevLabel> labelList);
+
+    /**
+     * 删除hive相关列的过期记录
+     * @param columnId
+     * @param hiveColumnName
+     */
+    void deleteDeprecatedHiveColumn(Long columnId, String hiveColumnName);
 }

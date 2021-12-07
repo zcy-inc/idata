@@ -486,4 +486,9 @@ public class LabelServiceImpl implements LabelService {
     public void batchUpsert(List<DevLabel> labelList) {
         devLabelMyDao.batchUpsert(labelList);
     }
+
+    @Override
+    public void deleteDeprecatedHiveColumn(Long columnId, String hiveColumnName) {
+        devLabelMyDao.deleteDeprecatedHiveColumn(columnId, hiveColumnName);
+    }
 }

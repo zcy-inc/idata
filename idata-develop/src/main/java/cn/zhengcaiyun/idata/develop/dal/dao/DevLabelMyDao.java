@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -74,4 +75,9 @@ public interface DevLabelMyDao {
             "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
             "</script>")
     void batchUpsert(List<DevLabel> list);
+
+    @Update("<script>" +
+            "update dev_label set del = 1 where column_id = #{columnId} and column_name = #{columnName} and label_code like 'hive%' " +
+            "</script>")
+    void deleteDeprecatedHiveColumn(Long columnId, String columnName);
 }

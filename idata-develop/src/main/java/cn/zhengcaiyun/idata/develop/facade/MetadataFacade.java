@@ -77,15 +77,18 @@ public class MetadataFacade {
             if (success) {
                 MetadataInfo metadataInfo = hiveService.getMetadataInfo(dbName, tableName);
                 List<DevLabel> labelList = Lists.newArrayList();
+                Map<String, Long> nameOfIdMap = columnInfoService.getColumnInfo(tableId).stream().collect(Collectors.toMap(DevColumnInfo::getColumnName, DevColumnInfo::getId));
                 metadataInfo.getColumnList().forEach(e -> {
                     ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
                     columnInfoDto.setPartition(false);
+                    columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                     List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelList.addAll(subList);
                 });
                 metadataInfo.getPartitionColumnList().forEach(e -> {
                     ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
                     columnInfoDto.setPartition(true);
+                    columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                     List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelList.addAll(subList);
                 });
@@ -145,9 +148,12 @@ public class MetadataFacade {
                 String columnName = columnInfo.getColumnName();
                 String columnType = columnInfo.getColumnType();
                 String columnComment = columnInfo.getColumnComment();
-                boolean success = hiveService.changeColumn(dbName, tableName, columnInfo.getHiveColumnName(),
+                String hiveColumnName = columnInfo.getHiveColumnName();
+                boolean success = hiveService.changeColumn(dbName, tableName, hiveColumnName,
                         columnName, columnType, columnComment);
                 if (success) {
+                    //删除被改名的列相关信息 column_id+历史column_name
+                    labelService.deleteDeprecatedHiveColumn(columnInfo.getColumnId(), hiveColumnName);
                     ColumnInfoDto columnInfoDto = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class);
                     List<DevLabel> labelList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelService.batchUpsert(labelList);
