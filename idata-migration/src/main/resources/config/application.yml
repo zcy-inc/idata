@@ -1,4 +1,4 @@
 spring:
   flyway:
-    enabled: false
-    clean-disabled: false
+    enabled: true
+    clean-disabled: true
