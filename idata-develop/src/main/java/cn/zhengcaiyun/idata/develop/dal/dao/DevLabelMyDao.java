@@ -72,7 +72,7 @@ public interface DevLabelMyDao {
             "<foreach collection='list' item='item' index='index' separator=','> " +
             "(#{item.del}, #{item.creator}, #{item.createTime}, #{item.editor}, #{item.editTime}, #{item.labelCode}, #{item.tableId}, #{item.columnId}, #{item.columnName}, #{item.labelParamValue}, #{item.hidden})" +
             "</foreach> " +
-            "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value)" +
+            "ON DUPLICATE KEY UPDATE del = VALUES(del), label_param_value = VALUES(label_param_value), column_name = VALUES(column_name)" +
             "</script>")
     void batchUpsert(List<DevLabel> list);
 
