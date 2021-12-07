@@ -16,7 +16,3 @@ INSERT INTO idata.dev_label_define (del, creator, create_time, editor, edit_time
 VALUES (1, '系统管理员', '2021-08-18 22:30:35.267', '', '2021-11-26 13:55:13.555', 'hiveColumnName:LABEL',
         '同步至hive的名称', 'STRING_LABEL', 'STRING', '[]', '{}', 'COLUMN', null, 0, null, 0);
 
-
-update dev_label t1 , dev_column_info t2
-set t1.column_id = t2.id
-where t1.table_id = t2.table_id and t1.column_name = t2.column_name and t1.column_id is not null;

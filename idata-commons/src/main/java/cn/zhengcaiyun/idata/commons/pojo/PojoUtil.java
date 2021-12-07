@@ -63,26 +63,23 @@ public class PojoUtil {
                     .map(Field::getName).toArray(String[]::new);
         }
         T tPojo;
-        List<String> targetFieldNames = new ArrayList<>();
         try {
-            targetFieldNames = Arrays.stream(tClazz.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
             tPojo = tClazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new IllegalArgumentException(tClazz + "没有无参构造器");
         }
-        for (String fieldName : fieldNames) {
-            if (targetFieldNames.contains(fieldName)) {
-                try {
-                    Field sField = getFieldByName(sPojo.getClass(), fieldName);
-                    Field tField = getFieldByName(tClazz, fieldName);
-                    sField.setAccessible(true);
-                    tField.setAccessible(true);
-                    tField.set(tPojo, sField.get(sPojo));
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new IllegalArgumentException(fieldName + "属性不存在或无法访问");
-                }
+        Arrays.stream(fieldNames).forEach(fieldName -> {
+            try {
+                Field sField = getFieldByName(sPojo.getClass(), fieldName);
+                Field tField = getFieldByName(tClazz, fieldName);
+                sField.setAccessible(true);
+                tField.setAccessible(true);
+                tField.set(tPojo, sField.get(sPojo));
             }
-        }
+            catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new IllegalArgumentException(fieldName + "属性不存在或无法访问");
+            }
+        });
         return tPojo;
     }
 

@@ -49,6 +49,7 @@ public class LabelDto {
     private String dbName;
     private DataTypeEnum columnDataType;
     private String metabaseUrl;
+    private Integer hidden;
 
     // GaS
     public Long getId() {
@@ -225,5 +226,13 @@ public class LabelDto {
 
     public void setMetabaseUrl(String metabaseUrl) {
         this.metabaseUrl = metabaseUrl;
+    }
+
+    public Integer getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Integer hidden) {
+        this.hidden = hidden;
     }
 }
