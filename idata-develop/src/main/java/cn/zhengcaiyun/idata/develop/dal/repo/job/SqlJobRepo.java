@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 
 import java.util.List;
@@ -31,4 +32,5 @@ public interface SqlJobRepo {
     boolean add(DevJobContentSql jobContentSql);
     boolean update(DevJobContentSql jobContentSql);
     Integer newVersion(Long jobId);
+    Boolean updateEditable(Long id, EditableEnum editable, String operator);
 }

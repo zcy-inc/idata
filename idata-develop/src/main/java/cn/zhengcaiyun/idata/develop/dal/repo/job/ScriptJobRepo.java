@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 
 import java.util.List;
@@ -31,4 +32,5 @@ public interface ScriptJobRepo {
     boolean add(DevJobContentScript jobContentScript);
     boolean update(DevJobContentScript jobContentScript);
     Integer newVersion(Long jobId);
+    Boolean updateEditable(Long id, EditableEnum editable, String operator);
 }

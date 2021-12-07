@@ -22,13 +22,14 @@ import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -53,14 +54,29 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
     private final JobPublishRecordDao jobPublishRecordDao;
     private final JobExecuteConfigDao jobExecuteConfigDao;
     private final DIJobContentRepo diJobContentRepo;
+    private final JobInfoRepo jobInfoRepo;
+    private final SqlJobRepo sqlJobRepo;
+    private final SparkJobRepo sparkJobRepo;
+    private final ScriptJobRepo scriptJobRepo;
+    private final KylinJobRepo kylinJobRepo;
 
     @Autowired
     public JobPublishRecordRepoImpl(JobPublishRecordDao jobPublishRecordDao,
                                     JobExecuteConfigDao jobExecuteConfigDao,
-                                    DIJobContentRepo diJobContentRepo) {
+                                    DIJobContentRepo diJobContentRepo,
+                                    JobInfoRepo jobInfoRepo,
+                                    SqlJobRepo sqlJobRepo,
+                                    SparkJobRepo sparkJobRepo,
+                                    ScriptJobRepo scriptJobRepo,
+                                    KylinJobRepo kylinJobRepo) {
         this.jobPublishRecordDao = jobPublishRecordDao;
         this.jobExecuteConfigDao = jobExecuteConfigDao;
         this.diJobContentRepo = diJobContentRepo;
+        this.jobInfoRepo = jobInfoRepo;
+        this.sqlJobRepo = sqlJobRepo;
+        this.sparkJobRepo = sparkJobRepo;
+        this.scriptJobRepo = scriptJobRepo;
+        this.kylinJobRepo = kylinJobRepo;
     }
 
     @Override
@@ -147,9 +163,28 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
     @Transactional
     public Boolean submit(JobPublishRecord record, String operator) {
         if (record.getId() == null) {
+            String jobType = record.getJobTypeCode();
             // 第一次提交
-            // todo 需要更新不同作业的可编辑状态，判断依据 record.getJobTypeCode()
+            // 更新不同作业的可编辑状态
             diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
+                    || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+                diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            }
+            else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+                sqlJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            }
+            else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
+                    || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+                sparkJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            }
+            else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
+                    || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+                scriptJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            }
+            else {
+                kylinJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            }
             record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
             save(record);
         } else {

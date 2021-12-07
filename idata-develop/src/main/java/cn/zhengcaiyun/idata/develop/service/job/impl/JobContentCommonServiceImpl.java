@@ -99,7 +99,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         checkArgument(Objects.nonNull(version), "作业版本号为空");
         Optional<JobInfo> jobInfoDto = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoDto.isPresent(), "作业不存在");
-        // todo 支持不同作业
+        // 支持不同作业
         JobContentBaseDto content = getJobContent(jobId, version, jobInfoDto.get().getJobType());
         Optional<EnvEnum> envEnumOptional = EnvEnum.getEnum(env);
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");

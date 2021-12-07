@@ -48,7 +48,6 @@ public class ScriptJobContentDto extends JobContentBaseDto {
         this.scriptArguments = scriptArguments;
     }
 
-    // TODO
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

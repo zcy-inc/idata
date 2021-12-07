@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -74,5 +76,13 @@ public class SqlJobRepoImpl implements SqlJobRepo {
         DevJobContentSql jobContentSql = devJobContentSqlDao.selectOne(c -> c.where(devJobContentSql.jobId, isEqualTo(jobId))
                 .orderBy(devJobContentSql.version.descending()).limit(1)).orElse(null);
         return jobContentSql != null ? jobContentSql.getVersion() + 1 : 1;
+    }
+
+    @Override
+    public Boolean updateEditable(Long id, EditableEnum editable, String operator) {
+        devJobContentSqlDao.update(dsl -> dsl.set(devJobContentSql.editable).equalTo(editable.val)
+                .set(devJobContentSql.editor).equalTo(operator)
+                .where(devJobContentSql.id, isEqualTo(id)));
+        return Boolean.TRUE;
     }
 }
