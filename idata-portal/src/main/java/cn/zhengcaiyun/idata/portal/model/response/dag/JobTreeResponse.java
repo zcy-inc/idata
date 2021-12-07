@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.model.response.dag;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,11 +31,8 @@ public class JobTreeResponse {
     @ApiModelProperty("本次返回树下游层级")
     private Integer nextLevel;
 
-    @ApiModelProperty("上游节点树")
-    private List<JobNode> parents;
-
-    @ApiModelProperty("下游节点树")
-    private List<JobNode> children;
+    @ApiModelProperty("上下游关系节点树")
+    private List<JobNode> nodeList = new ArrayList<>();
 
     public Long getJobId() {
         return jobId;
@@ -52,20 +50,12 @@ public class JobTreeResponse {
         this.jobName = jobName;
     }
 
-    public List<JobNode> getParents() {
-        return parents;
+    public List<JobNode> getNodeList() {
+        return nodeList;
     }
 
-    public void setParents(List<JobNode> parents) {
-        this.parents = parents;
-    }
-
-    public List<JobNode> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<JobNode> children) {
-        this.children = children;
+    public void setNodeList(List<JobNode> nodeList) {
+        this.nodeList = nodeList;
     }
 
     public Long getTaskId() {
@@ -125,6 +115,9 @@ public class JobTreeResponse {
         @ApiModelProperty("任务id")
         private Long taskId;
 
+        @ApiModelProperty("prev/next 前继/后继节点关系")
+        private String relation;
+
         private List<JobNode> nextList;
 
         public Long getJobId() {
@@ -165,6 +158,14 @@ public class JobTreeResponse {
 
         public void setJobName(String jobName) {
             this.jobName = jobName;
+        }
+
+        public String getRelation() {
+            return relation;
+        }
+
+        public void setRelation(String relation) {
+            this.relation = relation;
         }
 
         public List<JobNode> getNextList() {

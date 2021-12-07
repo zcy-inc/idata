@@ -54,8 +54,10 @@ public class JobDependencyController {
         response.setPrevLevel(prev.getLevel());
         response.setNextLevel(next.getLevel());
 
-        response.setParents(rPrev.getNextList());
-        response.setChildren(rNext.getNextList());
+//        response.setParents(rPrev.getNextList());
+//        response.setChildren(rNext.getNextList());
+        response.getNodeList().addAll(rPrev.getNextList());
+        response.getNodeList().addAll(rNext.getNextList());
         response.setJobId(rPrev.getJobId());
         response.setJobName(rPrev.getJobName());
 

@@ -53,6 +53,11 @@ public class JobTreeNodeDto {
      */
     private Long taskId;
 
+    /**
+     * relation: prev/next  前继/后继节点关系
+     */
+    private String relation;
+
     public Long getJobId() {
         return jobId;
     }
@@ -115,6 +120,14 @@ public class JobTreeNodeDto {
 
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
+    }
+
+    public String getRelation() {
+        return relation;
+    }
+
+    public void setRelation(String relation) {
+        this.relation = relation;
     }
 
     public void addNextListElem(JobTreeNodeDto jobTreeNodeDto) {

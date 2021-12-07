@@ -64,8 +64,8 @@ public class JobDependencyServiceImpl implements JobDependencyService {
                 runInfoMap.put(Long.parseLong(jobIdStr), e);
             }
         });
-        assembleDSInfo(prevTree, runInfoMap);
-        assembleDSInfo(nextTree, runInfoMap);
+        assembleDSInfo(prevTree, runInfoMap, "prev");
+        assembleDSInfo(nextTree, runInfoMap, "next");
 
         return new Tuple2<>(prevTree, nextTree);
     }
@@ -74,7 +74,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
      * 递归-将DS信息封装在树节点中
      * @param tree
      */
-    private void assembleDSInfo(JobTreeNodeDto tree, Map<Long, JobRunOverviewDto> runInfoMap) {
+    private void assembleDSInfo(JobTreeNodeDto tree, Map<Long, JobRunOverviewDto> runInfoMap, String relation) {
         if (tree == null) {
             return;
         }
@@ -84,9 +84,10 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             tree.setJobStatus(dto.getState());
             tree.setLastRunTime(dto.getStartTime());
             tree.setTaskId(dto.getId());
+            tree.setRelation(relation);
         }
         if (CollectionUtils.isNotEmpty(tree.getNextList())) {
-            tree.getNextList().forEach(e -> assembleDSInfo(e, runInfoMap));
+            tree.getNextList().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
         }
     }
 
