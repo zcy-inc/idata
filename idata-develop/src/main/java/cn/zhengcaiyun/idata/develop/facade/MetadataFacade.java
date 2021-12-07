@@ -24,6 +24,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 
 @Service
 public class MetadataFacade {
+    private static final Logger logger = LoggerFactory.getLogger(MetadataFacade.class);
 
     private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
 
@@ -358,4 +361,53 @@ public class MetadataFacade {
             });
         }
     }
+
+    /**
+     * 同步hive远端表元数据信息到数据库
+     * @param tableIdList
+     */
+    public void pullHiveInfo(List<Long> tableIdList) {
+        Map<String, String> typeMapping = enumService.getCodeMapByEnumValue(COLUMN_TYPE_ENUM);
+        String operator = "系统管理员";
+        for (Long tableId : tableIdList) {
+            Map<String, String> lowerCaseMapping = columnInfoService.getColumnNames(tableId).stream().collect(Collectors.toMap(e -> e.toLowerCase(), e -> e));
+            DevTableInfo tableInfo = tableInfoService.getSimpleById(tableId);
+            String hiveTableName = tableInfo.getHiveTableName();
+            String dbName = labelService.getDBName(tableId);
+            String tableName = tableInfo.getTableName();
+
+            // 存在同步记录的表不做处理
+            if (StringUtils.isNotEmpty(hiveTableName)) {
+                continue;
+            }
+            boolean existHiveTable = hiveService.existHiveTable(dbName, tableName);
+            // 不存在hive表不做同步
+            if (!existHiveTable) {
+                continue;
+            }
+            MetadataInfo metadataInfo = hiveService.getMetadataInfo(dbName, tableName);
+            List<DevLabel> labelList = Lists.newArrayList();
+            Map<String, Long> nameOfIdMap = columnInfoService.getColumnInfo(tableId).stream().collect(Collectors.toMap(DevColumnInfo::getColumnName, DevColumnInfo::getId));
+            metadataInfo.getColumnList().forEach(e -> {
+                ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                columnInfoDto.setPartition(false);
+                columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
+                List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
+                labelList.addAll(subList);
+            });
+            metadataInfo.getPartitionColumnList().forEach(e -> {
+                ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                columnInfoDto.setPartition(true);
+                columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
+                List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
+                labelList.addAll(subList);
+            });
+            labelService.batchUpsert(labelList);
+            tableInfoService.updateHiveTableName(tableId, dbName + "." + tableName, operator);
+
+            logger.info("[script]:pull hive-info done " + tableId + ":" + tableName);
+        }
+
+    }
+
 }

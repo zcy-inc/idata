@@ -16,54 +16,21 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
-import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
-import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyStatementDto;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
-import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
-import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
-import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
-import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
-import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
-import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
-import cn.zhengcaiyun.idata.user.service.UserManagerService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONString;
-import org.mybatis.dynamic.sql.render.RenderingStrategies;
-import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static cn.zhengcaiyun.idata.commons.pojo.PojoUtil.castType;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
-import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
-import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 /**
  * @author caizhedong
@@ -170,7 +137,6 @@ public class TableInfoController {
     public RestResult<CompareInfoDTO> compareHiveInfo(@PathVariable("tableId") Long tableId) {
         return RestResult.success(metadataFacade.compareHive(tableId));
     }
-
 
 
 }

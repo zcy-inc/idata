@@ -1,4 +1,0 @@
-spring:
-  flyway:
-    enabled: true
-    clean-disabled: true

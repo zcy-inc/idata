@@ -482,7 +482,9 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     public void updateHiveTableName(Long tableId, String hiveTableName, String operator) {
-        devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(hiveTableName).set(devTableInfo.editor).equalTo(operator)
+        devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(hiveTableName)
+                .set(devTableInfo.editor).equalTo(operator)
+                .set(devTableInfo.editTime).equalTo(new Date())
                 .where(devTableInfo.id, isEqualTo(tableId)));
     }
 
