@@ -75,7 +75,6 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSBaseUrl(String environment) {
-//        return "http://10.200.3.49:12345/dolphinscheduler";
         return "http://172.29.108.238:8688/dolphinscheduler";
     }
 

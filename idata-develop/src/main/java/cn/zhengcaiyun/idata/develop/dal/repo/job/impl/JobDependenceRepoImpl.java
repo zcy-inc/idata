@@ -62,6 +62,12 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
     }
 
     @Override
+    public List<JobDependence> queryPrevJob(Long jobId) {
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
     public List<JobDependence> queryPostJob(Long jobId, String environment) {
         return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.prevJobId, isEqualTo(jobId),
                 and(JOB_DEPENDENCE.environment, isEqualTo(environment)),

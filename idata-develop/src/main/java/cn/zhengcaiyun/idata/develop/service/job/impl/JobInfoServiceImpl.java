@@ -163,7 +163,8 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再删除作业");
 
         List<JobDependence> postJobs = jobDependenceRepo.queryPostJob(id);
-        checkArgument(ObjectUtils.isEmpty(postJobs), "先删除所有环境下的作业依赖关系，再删除作业");
+        List<JobDependence> prevJobs = jobDependenceRepo.queryPrevJob(id);
+        checkArgument(ObjectUtils.isEmpty(postJobs) && ObjectUtils.isEmpty(prevJobs), "请删除所有环境作业上下游依赖，再删除作业");
 
         // 发布job删除事件
         JobEventLog eventLog = jobManager.logEvent(id, EventTypeEnum.DELETED, operator);
@@ -224,7 +225,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         // dag 必须上线
         checkState(isDAGOnline(executeConfig.getSchDagId()), "作业关联DAG未上线，请先上线DAG");
 
-        jobScheduleManager.runJob(id,environment,false);
+        jobScheduleManager.runJob(id, environment, false);
         return Boolean.TRUE;
     }
 

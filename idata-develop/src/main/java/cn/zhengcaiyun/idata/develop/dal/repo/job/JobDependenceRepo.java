@@ -31,6 +31,8 @@ public interface JobDependenceRepo {
 
     List<JobDependence> queryPrevJob(Long jobId, String environment);
 
+    List<JobDependence> queryPrevJob(Long jobId);
+
     List<JobDependence> queryPostJob(Long jobId, String environment);
 
     List<JobDependence> queryPostJob(Long jobId);
