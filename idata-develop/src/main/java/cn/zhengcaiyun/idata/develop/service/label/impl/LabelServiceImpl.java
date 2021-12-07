@@ -338,18 +338,18 @@ public class LabelServiceImpl implements LabelService {
         }
         List<DevLabel> labels = devLabelDao.select(c -> c.where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
                 and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
-                and(devLabel.columnName, isEqual(labelDto.getColumnName())),
+                and(devLabel.columnId, isEqualTo(labelDto.getColumnId()), or(devLabel.columnId, isNull())),
                 and(devLabel.del, isNotEqualTo(1))));
         if (labels.size() == 0) {
             labelDto.setCreator(operator);
             devLabelDao.insertSelective(PojoUtil.copyOne(labelDto, DevLabel.class,
-                    "creator", "labelCode", "tableId", "columnName", "labelParamValue"));
+                    "creator", "labelCode", "tableId", "columnName", "columnId", "labelParamValue"));
         }
         else if (labels.size() == 1) {
             labelDto.setId(labels.get(0).getId());
             labelDto.setEditor(operator);
             devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(labelDto, DevLabel.class,
-                    "id", "editor", "labelParamValue"));
+                    "id", "editor", "columnName", "labelParamValue"));
         }
         else {
             throw new IllegalArgumentException("元数据标签状态异常");
@@ -357,7 +357,8 @@ public class LabelServiceImpl implements LabelService {
         return PojoUtil.copyOne(devLabelDao.selectOne(c ->
                         c.where(devLabel.labelCode, isEqualTo(labelDto.getLabelCode()),
                                 and(devLabel.tableId, isEqualTo(labelDto.getTableId())),
-                                and(devLabel.columnName, isEqual(labelDto.getColumnName())),
+                                and(devLabel.columnId, isEqualTo(labelDto.getColumnId()),
+                                        or(devLabel.columnId, isNull())),
                                 and(devLabel.del, isNotEqualTo(1))))
                         .get(),
                 LabelDto.class);
