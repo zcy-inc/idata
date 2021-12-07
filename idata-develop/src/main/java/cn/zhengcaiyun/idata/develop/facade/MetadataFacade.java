@@ -26,6 +26,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,14 +83,16 @@ public class MetadataFacade {
                 List<DevLabel> labelList = Lists.newArrayList();
                 Map<String, Long> nameOfIdMap = columnInfoService.getColumnInfo(tableId).stream().collect(Collectors.toMap(DevColumnInfo::getColumnName, DevColumnInfo::getId));
                 metadataInfo.getColumnList().forEach(e -> {
-                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                    ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                    BeanUtils.copyProperties(e, columnInfoDto);
                     columnInfoDto.setPartition(false);
                     columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                     List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelList.addAll(subList);
                 });
                 metadataInfo.getPartitionColumnList().forEach(e -> {
-                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                    ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                    BeanUtils.copyProperties(e, columnInfoDto);
                     columnInfoDto.setPartition(true);
                     columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                     List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
@@ -129,7 +132,11 @@ public class MetadataFacade {
         if (CollectionUtils.isNotEmpty(moreList)) {
             Set<ColumnInfoDto> columns = moreList.stream()
                     .filter(e -> !e.isPartition())
-                    .map(e -> PojoUtil.copyOne(e, ColumnInfoDto.class))
+                    .map(e -> {
+                        ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                        BeanUtils.copyProperties(e, columnInfoDto);
+                        return columnInfoDto;
+                    })
                     .collect(Collectors.toSet());
             boolean success = hiveService.addColumns(dbName, tableName, columns);
             if (success) {
@@ -157,7 +164,8 @@ public class MetadataFacade {
                 if (success) {
                     //删除被改名的列相关信息 column_id+历史column_name
                     labelService.deleteDeprecatedHiveColumn(columnInfo.getColumnId(), hiveColumnName);
-                    ColumnInfoDto columnInfoDto = PojoUtil.copyOne(columnInfo, ColumnInfoDto.class);
+                    ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                    BeanUtils.copyProperties(columnInfo, columnInfoDto);
                     List<DevLabel> labelList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                     labelService.batchUpsert(labelList);
                 }
@@ -389,14 +397,16 @@ public class MetadataFacade {
             List<DevLabel> labelList = Lists.newArrayList();
             Map<String, Long> nameOfIdMap = columnInfoService.getColumnInfo(tableId).stream().collect(Collectors.toMap(DevColumnInfo::getColumnName, DevColumnInfo::getId));
             metadataInfo.getColumnList().forEach(e -> {
-                ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                BeanUtils.copyProperties(e, columnInfoDto);
                 columnInfoDto.setPartition(false);
                 columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                 List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
                 labelList.addAll(subList);
             });
             metadataInfo.getPartitionColumnList().forEach(e -> {
-                ColumnInfoDto columnInfoDto = PojoUtil.copyOne(e, ColumnInfoDto.class);
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                BeanUtils.copyProperties(e, columnInfoDto);
                 columnInfoDto.setPartition(true);
                 columnInfoDto.setColumnId(nameOfIdMap.get(columnInfoDto.getColumnName()));
                 List<DevLabel> subList = assembleDevLabelList(lowerCaseMapping, typeMapping, operator, tableId, columnInfoDto);
