@@ -4,9 +4,13 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.exception.NameDuplicateException;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
+import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
@@ -30,6 +34,9 @@ public class JobUdfServiceImpl implements JobUdfService {
 
     @Autowired
     private JobContentCommonService jobContentCommonService;
+
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Override
     public Boolean delete(Long id) {
@@ -55,6 +62,8 @@ public class JobUdfServiceImpl implements JobUdfService {
         udf.setUdfName(String.format("%s[delete_%s]", udfName, id));
         udf.setId(id);
         devUdfDao.updateByPrimaryKeySelective(udf);
+
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DEV_FUN);
         return true;
     }
 
