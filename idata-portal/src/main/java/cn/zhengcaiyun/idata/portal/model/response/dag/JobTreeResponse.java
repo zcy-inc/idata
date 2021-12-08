@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @ApiModel("任务依赖树")
@@ -32,7 +31,7 @@ public class JobTreeResponse {
     private Integer nextLevel;
 
     @ApiModelProperty("上下游关系节点树")
-    private List<JobNode> nodeList = new ArrayList<>();
+    private List<JobNode> children = new ArrayList<>();
 
     public Long getJobId() {
         return jobId;
@@ -50,12 +49,12 @@ public class JobTreeResponse {
         this.jobName = jobName;
     }
 
-    public List<JobNode> getNodeList() {
-        return nodeList;
+    public List<JobNode> getChildren() {
+        return children;
     }
 
-    public void setNodeList(List<JobNode> nodeList) {
-        this.nodeList = nodeList;
+    public void setChildren(List<JobNode> children) {
+        this.children = children;
     }
 
     public Long getTaskId() {
