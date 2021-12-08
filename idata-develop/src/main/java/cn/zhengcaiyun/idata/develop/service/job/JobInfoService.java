@@ -26,6 +26,8 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @description:
@@ -59,4 +61,10 @@ public interface JobInfoService {
      */
     List<JobInfo> getJobListByName(String searchName);
 
+    /**
+     * 根据ids获取键值对
+     * @param accessIdSet
+     * @return
+     */
+    Map<Long, String> getNameMapByIds(Set<Long> accessIdSet);
 }

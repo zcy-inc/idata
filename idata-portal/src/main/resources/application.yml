@@ -24,6 +24,9 @@ spring:
       FAIL_ON_UNKNOWN_PROPERTIES: false
     date-format: yyyy-MM-dd HH:mm:ss.SSS
     time-zone: Asia/Shanghai
+  flyway:
+    enabled: false
+    clean-disabled: false
 
 mybatis:
   configuration:

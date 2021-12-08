@@ -1,0 +1,2 @@
+INSERT INTO dev_composite_folder (id, del, creator, create_time, editor, edit_time, name, type, belong, parent_id)
+VALUES (10037, 0, '北笙', '2021-10-11 16:16:00', ' ', '2021-12-08 10:53:13', '函数', 'FUNCTION', 'DEV.JOB', 10004);

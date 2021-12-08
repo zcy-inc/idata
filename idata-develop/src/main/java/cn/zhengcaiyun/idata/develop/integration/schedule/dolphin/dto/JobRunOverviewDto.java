@@ -9,7 +9,6 @@ public class JobRunOverviewDto {
      */
     private String name;
 
-
     private String jobInstanceId;
 
     private String state;

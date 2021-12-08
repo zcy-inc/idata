@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamicSqlSupport.devJobContentKylin;
@@ -226,5 +227,10 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                         and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(jobInfo.id.descending())
                 .limit(limit).offset(offset));
+    }
+
+    @Override
+    public List<JobInfo> queryJobInfoByIds(Set<Long> accessIdSet) {
+        return jobInfoDao.select(dsl -> dsl.where(jobInfo.id, isIn(accessIdSet)));
     }
 }

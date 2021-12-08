@@ -52,9 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -240,6 +238,17 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobInfoCondition condition = new JobInfoCondition();
         condition.setName(searchName);
         return jobInfoRepo.queryJobInfo(condition);
+    }
+
+    @Override
+    public Map<Long, String> getNameMapByIds(Set<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return new HashMap<>();
+        }
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfoByIds(ids);
+        Map<Long, String> map = new HashMap<>();
+        jobInfoList.forEach(e -> map.put(e.getId(), e.getName()));
+        return map;
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

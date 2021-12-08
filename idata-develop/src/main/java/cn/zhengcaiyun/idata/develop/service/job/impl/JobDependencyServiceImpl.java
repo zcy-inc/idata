@@ -9,6 +9,7 @@ import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverv
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
+import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,17 +31,21 @@ public class JobDependencyServiceImpl implements JobDependencyService {
     @Resource
     private JobDependenceRepo jobDependenceRepo;
 
+    @Autowired
+    private JobInfoService jobInfoService;
+
 
     @Override
     public Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId) {
         // 获取jobId的可达性分析
-        List<JobDependencyDto> list = getAccessJobDependency(env, jobId);
+        Set<Long> accessIdSet = new HashSet<>();
+        List<JobDependencyDto> list = getAccessJobDependency(env, jobId, accessIdSet);
+        // 封装相关的nameMap
+        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(accessIdSet);
 
-        Map<Long, String> nameMap = new HashMap<>();
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();
         for (JobDependencyDto elem : list) {
-            nameMap.put(elem.getJobId(), elem.getName());
             nextMap.put(elem.getPrevJobId(), elem.getJobId());
             prevMap.put(elem.getJobId(), elem.getPrevJobId());
         }
@@ -84,8 +89,8 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             tree.setJobStatus(dto.getState());
             tree.setLastRunTime(dto.getStartTime());
             tree.setTaskId(dto.getId());
-            tree.setRelation(relation);
         }
+        tree.setRelation(relation);
         if (CollectionUtils.isNotEmpty(tree.getNextList())) {
             tree.getNextList().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
         }
@@ -95,9 +100,10 @@ public class JobDependencyServiceImpl implements JobDependencyService {
      * jobId可达性分析，筛选出集合
      * @param env 环境
      * @param jobId
+     * @param nameMap
      * @return
      */
-    private List<JobDependencyDto> getAccessJobDependency(String env, Long jobId) {
+    private List<JobDependencyDto> getAccessJobDependency(String env, Long jobId, Set<Long> accessIdSet) {
         List<JobDependencyDto> list = jobDependenceRepo.queryJobs(env);
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();
@@ -106,8 +112,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             prevMap.put(elem.getJobId(), elem.getPrevJobId());
         }
 
-        //获取所有可达ids
-        Set<Long> accessIdSet = new HashSet<>();
+        //获取所有前继可达ids
         Queue<Long> queue = Lists.newLinkedList();
         queue.add(jobId);
         while (!queue.isEmpty()) {
@@ -115,10 +120,23 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             for (int i = 0; i < size; i++) {
                 Long qJobId = queue.poll();
                 accessIdSet.add(qJobId);
-                queue.addAll(nextMap.get(qJobId));
                 queue.addAll(prevMap.get(qJobId));
             }
         }
+        //获取所有后继可达ids
+        queue = Lists.newLinkedList();
+        queue.add(jobId);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                Long qJobId = queue.poll();
+                accessIdSet.add(qJobId);
+                queue.addAll(nextMap.get(qJobId));
+            }
+        }
+
+
+
         return list.stream().filter(e -> accessIdSet.contains(e.getJobId())).collect(Collectors.toList());
     }
 
