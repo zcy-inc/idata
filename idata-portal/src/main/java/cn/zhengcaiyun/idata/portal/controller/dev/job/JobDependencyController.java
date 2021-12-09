@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
@@ -10,9 +11,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api("任务依赖")
 @RestController
@@ -26,6 +30,18 @@ public class JobDependencyController {
     private JobScheduleManager jobScheduleManager;
 
 
+    @ApiOperation(value = "查询job")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "searchName", value = "searchName", required = false, dataType = "String")
+    })
+    @GetMapping("list")
+    public RestResult<List<JobInfo>> getJobInfo(@RequestParam(value = "searchName", required = false) String searchName,
+                                                @RequestParam("env") String env,
+                                                @RequestParam(value = "jobId") Long jobId) {
+        List<JobInfo> list = jobDependencyService.getDependencyJob(searchName, jobId, env);
+        return RestResult.success(list);
+    }
+
     @ApiOperation("加载树")
     @GetMapping("/{id}/tree")
     @ApiImplicitParams({
@@ -33,7 +49,7 @@ public class JobDependencyController {
             @ApiImplicitParam(name = "env", value = "环境", dataType = "String", required = true),
             @ApiImplicitParam(name = "preLevel", value = "上游层数", dataType = "Integer", required = true),
             @ApiImplicitParam(name = "nextLevel", value = "下游层数", dataType = "Integer", required = true),
-            @ApiImplicitParam(name = "name", value = "搜索任务名", dataType = "String", required = true)
+            @ApiImplicitParam(name = "searchJobId", value = "搜索任务id", dataType = "Long", required = true)
     })
     public RestResult<JobTreeResponse> tree(@PathVariable("id") Long jobId,
                                             @RequestParam("env") String env,
@@ -54,10 +70,12 @@ public class JobDependencyController {
         response.setPrevLevel(prev.getLevel());
         response.setNextLevel(next.getLevel());
 
-//        response.setParents(rPrev.getNextList());
-//        response.setChildren(rNext.getNextList());
-        response.getChildren().addAll(rPrev.getNextList());
-        response.getChildren().addAll(rNext.getNextList());
+        if (CollectionUtils.isNotEmpty(rPrev.getNextList())) {
+            response.getChildren().addAll(rPrev.getNextList());
+        }
+        if (CollectionUtils.isNotEmpty(rNext.getNextList())) {
+            response.getChildren().addAll(rNext.getNextList());
+        }
         response.setJobId(rPrev.getJobId());
         response.setJobName(rPrev.getJobName());
 
@@ -71,7 +89,7 @@ public class JobDependencyController {
             @ApiImplicitParam(name = "env", value = "环境", dataType = "String", required = true),
             @ApiImplicitParam(name = "taskId", value = "任务id", dataType = "Long", required = true),
             @ApiImplicitParam(name = "lineNum", value = "查看行数", dataType = "Integer", required = true),
-            @ApiImplicitParam(name = "skipLineNum", value = "跳过行数", dataType = "String", required = true)
+            @ApiImplicitParam(name = "skipLineNum", value = "跳过行数", dataType = "String", required = false)
     })
     public RestResult<String> getRunningLog(@PathVariable(value = "id", required = true) Long jobId,
                                             @RequestParam(value = "env", required = true) String env,

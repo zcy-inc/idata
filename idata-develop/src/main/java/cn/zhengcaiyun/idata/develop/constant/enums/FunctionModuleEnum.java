@@ -41,6 +41,7 @@ public enum FunctionModuleEnum {
 
     DEV("DEV", "数据开发"),
     DEV_JOB("DEV.JOB", "作业"),
+    DEV_FUN("DEV.FUN", "函数"),
     ;
 
     public final String code;
