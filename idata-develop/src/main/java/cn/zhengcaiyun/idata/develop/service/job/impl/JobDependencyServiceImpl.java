@@ -195,7 +195,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
 
         int loop = 1;
         Set<Long> leafNodes = new HashSet<>();
-        while (!referenceQueue.isEmpty() && (!limited || loop < level)) {
+        while (!referenceQueue.isEmpty() && (!limited || loop <= level)) {
             int size = referenceQueue.size();
             for (int i = 0; i < size; i++) {
                 Long qJobId = referenceQueue.poll();
