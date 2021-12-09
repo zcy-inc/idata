@@ -19,7 +19,7 @@ package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
 import cn.zhengcaiyun.idata.develop.dal.model.integration.DSEntityMapping;

@@ -18,7 +18,7 @@
 package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.integration.DSDependenceNode;

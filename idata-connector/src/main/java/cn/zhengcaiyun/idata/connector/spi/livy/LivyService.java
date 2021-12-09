@@ -18,8 +18,8 @@
 package cn.zhengcaiyun.idata.connector.spi.livy;
 
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
-import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
+import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.*;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyOutputStatusEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
@@ -31,7 +31,6 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -337,7 +336,7 @@ public class LivyService {
     private <T> T sendToLivy(HttpInput httpInput, TypeReference<T> typeReference, String uri, Object... uriParams) {
         String body = null;
         httpInput.setUri(String.format(LIVY_BASE_URL + uri, uriParams));
-        try (Response response = HttpUtil.executeHttpRequest(httpInput)) {
+        try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
             body = response.body().string();
             if ((response.code() == 200 || response.code() == 201)
                     && body != null) {

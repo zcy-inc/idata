@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.commons.rpc;
+package cn.zhengcaiyun.idata.core.http;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  * @author shiyin
  * @date 2021-03-29 09:42
  */
-public class HttpUtil {
+public class HttpClientUtil {
 
     private final static MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
@@ -88,7 +88,7 @@ public class HttpUtil {
                 "[" + httpInput.getServerName() + "]" :
                 "[]";
         String body = null;
-        try (Response response = HttpUtil.executeHttpRequest(httpInput)) {
+        try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
             body = Objects.requireNonNull(response.body()).string();
             if (response.code() == 200 || response.code() == 201) {
                 if (String.class.equals(typeReference.getType())) {

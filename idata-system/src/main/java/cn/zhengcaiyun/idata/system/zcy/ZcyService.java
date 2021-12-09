@@ -17,8 +17,8 @@
 package cn.zhengcaiyun.idata.system.zcy;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
-import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
+import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import com.alibaba.fastjson.TypeReference;
@@ -43,7 +43,7 @@ public class ZcyService {
     public List<FolderTreeNodeDto> getFolders(ResourceTypeEnum resourceType) {
         Map<String, String> queryParamMap = new HashMap<>();
         queryParamMap.put("resourceType", resourceType.name());
-        return HttpUtil.executeHttpRequest(new HttpInput().setMethod("GET").setServerName("ZCY IData")
+        return HttpClientUtil.executeHttpRequest(new HttpInput().setMethod("GET").setServerName("ZCY IData")
                 .setQueryParamMap(queryParamMap)
                 .setUri(ZCY_IDATA_BASE_URI + "/outbound/folders"),
                 new TypeReference<RestResult<List<FolderTreeNodeDto>>>(){}).getData()

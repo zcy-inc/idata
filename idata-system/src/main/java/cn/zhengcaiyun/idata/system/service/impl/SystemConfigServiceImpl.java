@@ -17,9 +17,8 @@
 package cn.zhengcaiyun.idata.system.service.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
-import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
-import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
+import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
@@ -29,11 +28,6 @@ import cn.zhengcaiyun.idata.system.dto.ConfigTypeEnum;
 import cn.zhengcaiyun.idata.system.dto.ConfigValueDto;
 import cn.zhengcaiyun.idata.system.dto.ConnectionDto;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
-import cn.zhengcaiyun.idata.system.zcy.ZcyService;
-import com.alibaba.fastjson.JSON;
-import okhttp3.Headers;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -50,13 +44,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.*;
-import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
 import static cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDynamicSqlSupport.sysFeature;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.nonNull;
@@ -171,7 +162,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         else if (ConfigTypeEnum.LIVY == configTypeEnum) {
             httpInput.setUri(connection.getConnectionUri()).setMethod(RequestMethod.GET.name());
         }
-        try (Response response = HttpUtil.executeHttpRequest(httpInput)) {
+        try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
             isConnected = response.code() == 200 || response.code() == 201;
         } catch (IOException e) {
             e.printStackTrace();

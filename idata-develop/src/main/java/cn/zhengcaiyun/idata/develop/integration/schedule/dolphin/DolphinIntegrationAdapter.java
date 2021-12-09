@@ -19,8 +19,8 @@ package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
-import cn.zhengcaiyun.idata.commons.rpc.HttpInput;
-import cn.zhengcaiyun.idata.commons.rpc.HttpUtil;
+import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
@@ -91,13 +91,13 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected ResultDto<JSONObject> sendReq(HttpInput req_input) {
-        ResultDto<JSONObject> resultDto = HttpUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
+        ResultDto<JSONObject> resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
         });
         return resultDto;
     }
 
     protected ResultDto<Object> simpleSendReq(HttpInput req_input) {
-        ResultDto<Object> resultDto = HttpUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<Object>>() {
+        ResultDto<Object> resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<Object>>() {
         });
         return resultDto;
     }
