@@ -193,7 +193,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         // 是否受限于用于设定的层数
         boolean limited = Objects.isNull(searchJobId);
 
-        int loop = 0;
+        int loop = 1;
         Set<Long> leafNodes = new HashSet<>();
         while (!referenceQueue.isEmpty() && (!limited || loop < level)) {
             int size = referenceQueue.size();
