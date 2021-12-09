@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -54,10 +55,12 @@ public class JobDependencyController {
         response.setPrevLevel(prev.getLevel());
         response.setNextLevel(next.getLevel());
 
-//        response.setParents(rPrev.getNextList());
-//        response.setChildren(rNext.getNextList());
-        response.getChildren().addAll(rPrev.getNextList());
-        response.getChildren().addAll(rNext.getNextList());
+        if (CollectionUtils.isNotEmpty(rPrev.getNextList())) {
+            response.getChildren().addAll(rPrev.getNextList());
+        }
+        if (CollectionUtils.isNotEmpty(rNext.getNextList())) {
+            response.getChildren().addAll(rNext.getNextList());
+        }
         response.setJobId(rPrev.getJobId());
         response.setJobName(rPrev.getJobName());
 

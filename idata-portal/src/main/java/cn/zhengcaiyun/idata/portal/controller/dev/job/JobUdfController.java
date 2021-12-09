@@ -63,7 +63,7 @@ public class JobUdfController {
 
     @ApiOperation("新增UDF")
     @PostMapping("/udf")
-    public RestResult<Long> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
+    public RestResult<DevJobUdf> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
         DevJobUdf udf = new DevJobUdf();
         BeanUtils.copyProperties(udfAddRequest, udf);
         udf.setCreator(OperatorContext.getCurrentOperator().getNickname());
@@ -71,12 +71,13 @@ public class JobUdfController {
         udf.setCreateTime(new Date());
         String hdfsPath = udfAddRequest.getHdfsPath();
         udf.setHdfsPath(hdfsService.getHdfsPrefix() + hdfsPath);
-        return RestResult.success(udfService.add(udf));
+        Long id = udfService.add(udf);
+        return RestResult.success(udfService.findById(id));
     }
 
     @ApiOperation("更新UDF")
     @PutMapping("/udf")
-    public RestResult<Boolean> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
+    public RestResult<DevJobUdf> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
         Long id = udfUpdateRequest.getId();
         DevJobUdf udf = devJobUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
 
@@ -84,7 +85,7 @@ public class JobUdfController {
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
         udf.setDel(DeleteEnum.DEL_NO.val);
-        return RestResult.success(udfService.update(udf));
+        return RestResult.success(udfService.findById(id));
     }
 
     @ApiOperation("删除UDF")
