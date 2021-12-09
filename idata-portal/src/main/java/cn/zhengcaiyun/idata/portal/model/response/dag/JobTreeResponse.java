@@ -15,8 +15,12 @@ public class JobTreeResponse {
     @ApiModelProperty("任务名称")
     private String jobName;
 
+    /**
+     * 业务状态值
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum
+     */
     @ApiModelProperty("任务状态")
-    private String jobStatus;
+    private Integer jobStatus;
 
     @ApiModelProperty("最后运行时间")
     private String lastRunTime;
@@ -65,14 +69,6 @@ public class JobTreeResponse {
         this.taskId = taskId;
     }
 
-    public String getJobStatus() {
-        return jobStatus;
-    }
-
-    public void setJobStatus(String jobStatus) {
-        this.jobStatus = jobStatus;
-    }
-
     public String getLastRunTime() {
         return lastRunTime;
     }
@@ -97,6 +93,14 @@ public class JobTreeResponse {
         this.nextLevel = nextLevel;
     }
 
+    public Integer getJobStatus() {
+        return jobStatus;
+    }
+
+    public void setJobStatus(Integer jobStatus) {
+        this.jobStatus = jobStatus;
+    }
+
     public static class JobNode {
 
         @ApiModelProperty("任务id")
@@ -106,7 +110,7 @@ public class JobTreeResponse {
         private String jobName;
 
         @ApiModelProperty("任务状态")
-        private String jobStatus;
+        private Integer jobStatus;
 
         @ApiModelProperty("最后运行时间")
         private String lastRunTime;
@@ -125,14 +129,6 @@ public class JobTreeResponse {
 
         public void setJobId(Long jobId) {
             this.jobId = jobId;
-        }
-
-        public String getJobStatus() {
-            return jobStatus;
-        }
-
-        public void setJobStatus(String jobStatus) {
-            this.jobStatus = jobStatus;
         }
 
         public String getLastRunTime() {
@@ -173,6 +169,14 @@ public class JobTreeResponse {
 
         public void setNextList(List<JobNode> nextList) {
             this.nextList = nextList;
+        }
+
+        public Integer getJobStatus() {
+            return jobStatus;
+        }
+
+        public void setJobStatus(Integer jobStatus) {
+            this.jobStatus = jobStatus;
         }
     }
 }

@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
@@ -86,7 +87,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Long jobId = tree.getJobId();
         if (runInfoMap.containsKey(jobId)) {
             JobRunOverviewDto dto = runInfoMap.get(jobId);
-            tree.setJobStatus(dto.getState());
+            tree.setJobStatus(JobStatusEnum.getValueByDsCode(dto.getState()));
             tree.setLastRunTime(dto.getStartTime());
             tree.setTaskId(dto.getId());
         }

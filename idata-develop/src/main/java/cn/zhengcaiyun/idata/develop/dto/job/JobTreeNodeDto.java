@@ -40,8 +40,9 @@ public class JobTreeNodeDto {
 
     /**
      * 任务状态
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum
      */
-    private String jobStatus;
+    private Integer jobStatus;
 
     /**
      * 最后运行时间
@@ -98,11 +99,11 @@ public class JobTreeNodeDto {
         this.level = level;
     }
 
-    public String getJobStatus() {
+    public Integer getJobStatus() {
         return jobStatus;
     }
 
-    public void setJobStatus(String jobStatus) {
+    public void setJobStatus(Integer jobStatus) {
         this.jobStatus = jobStatus;
     }
 
