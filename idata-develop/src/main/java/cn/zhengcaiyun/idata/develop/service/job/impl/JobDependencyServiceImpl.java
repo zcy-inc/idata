@@ -4,6 +4,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
@@ -16,6 +17,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,24 @@ public class JobDependencyServiceImpl implements JobDependencyService {
     @Autowired
     private JobInfoService jobInfoService;
 
+    @Override
+    public List<JobInfo> getDependencyJob(String searchName, Long jobId, String env) {
+        Set<Long> accessIdSet = new HashSet<>();
+        // 获取相关id
+        getAccessJobDependency(env, jobId, accessIdSet);
+        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(accessIdSet);
+
+        List<JobInfo> list = Lists.newArrayList();
+        nameMap.forEach((k, v) -> {
+            if (StringUtils.isEmpty(searchName) || StringUtils.containsIgnoreCase(v, searchName)) {
+                JobInfo jobInfo = new JobInfo();
+                jobInfo.setId(k);
+                jobInfo.setName(v);
+                list.add(jobInfo);
+            }
+        });
+        return list;
+    }
 
     @Override
     public Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId) {
@@ -61,7 +81,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         nextLevel = next.e2;
         nextTree.setLevel(nextLevel);
 
-        List<JobRunOverviewDto> records = jobScheduleManager.getJobLatestRecords(env, 3000);
+        List<JobRunOverviewDto> records = jobScheduleManager.getJobLatestRecords(env, 5000);
         Map<Long, JobRunOverviewDto> runInfoMap = Maps.newHashMap();
         records.forEach(e -> {
             // 例如 di_test111__005096

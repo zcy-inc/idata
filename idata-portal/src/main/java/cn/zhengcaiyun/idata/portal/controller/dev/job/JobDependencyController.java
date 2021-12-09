@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
@@ -15,6 +16,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api("任务依赖")
 @RestController
 @RequestMapping("/p1/dev/jobs/dependency")
@@ -26,6 +29,18 @@ public class JobDependencyController {
     @Autowired
     private JobScheduleManager jobScheduleManager;
 
+
+    @ApiOperation(value = "查询job")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "searchName", value = "searchName", required = false, dataType = "String")
+    })
+    @GetMapping("list")
+    public RestResult<List<JobInfo>> getJobInfo(@RequestParam(value = "searchName", required = false) String searchName,
+                                                @RequestParam("env") String env,
+                                                @RequestParam(value = "jobId") Long jobId) {
+        List<JobInfo> list = jobDependencyService.getDependencyJob(searchName, jobId, env);
+        return RestResult.success(list);
+    }
 
     @ApiOperation("加载树")
     @GetMapping("/{id}/tree")
