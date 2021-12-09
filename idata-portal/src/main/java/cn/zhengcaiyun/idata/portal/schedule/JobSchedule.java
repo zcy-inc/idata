@@ -42,6 +42,7 @@ public class JobSchedule {
                     devJobHistory.setApplicationId(e.getId());
 
                     // 抽取出SparkSQL-[p/s]-xxxx  xxxx(jobId)
+                    // di 、 kylin 、 script 、 spark 、sql
                     String jobIdStr = ReUtil.get("SparkSQL-[p/s]-(\\d*)", e.getName(), 1);
                     devJobHistory.setJobId(Long.valueOf(jobIdStr));
                     devJobHistory.setStartTime(new Timestamp(e.getStartedTime()));

@@ -3,7 +3,11 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
@@ -15,12 +19,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
 
 @Service
 public class JobDependencyServiceImpl implements JobDependencyService {
@@ -34,6 +41,27 @@ public class JobDependencyServiceImpl implements JobDependencyService {
     @Autowired
     private JobInfoService jobInfoService;
 
+    @Autowired
+    private JobExecuteConfigRepo jobExecuteConfigRepo;
+
+    @Override
+    public List<JobInfo> getDependencyJob(String searchName, Long jobId, String env) {
+        Set<Long> accessIdSet = new HashSet<>();
+        // 获取相关id
+        getAccessJobDependency(env, jobId, accessIdSet);
+        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(accessIdSet);
+
+        List<JobInfo> list = Lists.newArrayList();
+        nameMap.forEach((k, v) -> {
+            if (StringUtils.isEmpty(searchName) || StringUtils.containsIgnoreCase(v, searchName)) {
+                JobInfo jobInfo = new JobInfo();
+                jobInfo.setId(k);
+                jobInfo.setName(v);
+                list.add(jobInfo);
+            }
+        });
+        return list;
+    }
 
     @Override
     public Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId) {
@@ -60,7 +88,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         nextLevel = next.e2;
         nextTree.setLevel(nextLevel);
 
-        List<JobRunOverviewDto> records = jobScheduleManager.getJobLatestRecords(env, 3000);
+        List<JobRunOverviewDto> records = jobScheduleManager.getJobLatestRecords(env, 5000);
         Map<Long, JobRunOverviewDto> runInfoMap = Maps.newHashMap();
         records.forEach(e -> {
             // 例如 di_test111__005096
@@ -86,7 +114,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Long jobId = tree.getJobId();
         if (runInfoMap.containsKey(jobId)) {
             JobRunOverviewDto dto = runInfoMap.get(jobId);
-            tree.setJobStatus(dto.getState());
+            tree.setJobStatus(JobStatusEnum.getValueByDsCode(dto.getState()));
             tree.setLastRunTime(dto.getStartTime());
             tree.setTaskId(dto.getId());
         }
@@ -104,6 +132,11 @@ public class JobDependencyServiceImpl implements JobDependencyService {
      * @return
      */
     private List<JobDependencyDto> getAccessJobDependency(String env, Long jobId, Set<Long> accessIdSet) {
+        Optional<JobExecuteConfig> optional = jobExecuteConfigRepo.query(jobId, env);
+        if (optional.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         List<JobDependencyDto> list = jobDependenceRepo.queryJobs(env);
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();

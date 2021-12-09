@@ -1,7 +1,10 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
+
+import java.util.List;
 
 public interface JobDependencyService {
 
@@ -14,4 +17,13 @@ public interface JobDependencyService {
      * @param searchJobId 搜索的任务id
      */
     Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId);
+
+    /**
+     * 获取jobId依赖相关的job列表，searchName作为过滤条件
+     * @param searchName
+     * @param jobId
+     * @param env
+     * @return
+     */
+    List<JobInfo> getDependencyJob(String searchName, Long jobId, String env);
 }

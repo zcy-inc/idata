@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
@@ -10,9 +11,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api("任务依赖")
 @RestController
@@ -25,6 +29,18 @@ public class JobDependencyController {
     @Autowired
     private JobScheduleManager jobScheduleManager;
 
+
+    @ApiOperation(value = "查询job")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "searchName", value = "searchName", required = false, dataType = "String")
+    })
+    @GetMapping("list")
+    public RestResult<List<JobInfo>> getJobInfo(@RequestParam(value = "searchName", required = false) String searchName,
+                                                @RequestParam("env") String env,
+                                                @RequestParam(value = "jobId") Long jobId) {
+        List<JobInfo> list = jobDependencyService.getDependencyJob(searchName, jobId, env);
+        return RestResult.success(list);
+    }
 
     @ApiOperation("加载树")
     @GetMapping("/{id}/tree")
@@ -54,10 +70,12 @@ public class JobDependencyController {
         response.setPrevLevel(prev.getLevel());
         response.setNextLevel(next.getLevel());
 
-//        response.setParents(rPrev.getNextList());
-//        response.setChildren(rNext.getNextList());
-        response.getChildren().addAll(rPrev.getNextList());
-        response.getChildren().addAll(rNext.getNextList());
+        if (CollectionUtils.isNotEmpty(rPrev.getNextList())) {
+            response.getChildren().addAll(rPrev.getNextList());
+        }
+        if (CollectionUtils.isNotEmpty(rNext.getNextList())) {
+            response.getChildren().addAll(rNext.getNextList());
+        }
         response.setJobId(rPrev.getJobId());
         response.setJobName(rPrev.getJobName());
 

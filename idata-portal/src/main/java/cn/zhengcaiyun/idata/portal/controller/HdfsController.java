@@ -37,8 +37,8 @@ public class HdfsController {
      * @return
      * @throws IOException
      */
-    @ApiOperation("文件上传至HDFS")
-    @PostMapping("/upload")
+    @ApiOperation("文件上传至HDFS-UDF路径下")
+    @PostMapping("/upload/udf")
     public RestResult<UploadResponse> upload(@RequestParam("uploadFile") MultipartFile uploadFile) throws IOException {
         if (null == uploadFile) {
             throw new IllegalArgumentException("上传失败，无法找到文件！");
