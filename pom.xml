@@ -42,6 +42,7 @@
         <module>idata-map</module>
         <module>idata-connector</module>
         <module>idata-datasource</module>
+        <module>idata-operation</module>
     </modules>
 
     <parent>
