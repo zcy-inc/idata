@@ -15,4 +15,38 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.connector.cluster;
+package cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.result;
+
+import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.bean.ClusterApp;
+
+import java.util.List;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-12-09 16:45
+ **/
+public class ClusterAppListResult {
+
+    private ClusterAppList apps;
+
+    public static class ClusterAppList {
+        private List<ClusterApp> app;
+
+        public List<ClusterApp> getApp() {
+            return app;
+        }
+
+        public void setApp(List<ClusterApp> app) {
+            this.app = app;
+        }
+    }
+
+    public ClusterAppList getApps() {
+        return apps;
+    }
+
+    public void setApps(ClusterAppList apps) {
+        this.apps = apps;
+    }
+}
