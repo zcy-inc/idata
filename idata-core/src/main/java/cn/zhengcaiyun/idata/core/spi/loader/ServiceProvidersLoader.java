@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.spi;
+package cn.zhengcaiyun.idata.core.spi.loader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

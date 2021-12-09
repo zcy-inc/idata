@@ -33,6 +33,7 @@
 
     <modules>
         <module>idata-commons</module>
+        <module>idata-core</module>
         <module>idata-portal</module>
         <module>idata-migration</module>
         <module>idata-system</module>

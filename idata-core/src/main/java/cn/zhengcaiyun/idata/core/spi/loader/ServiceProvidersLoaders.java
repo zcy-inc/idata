@@ -15,4 +15,28 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.operation;
+package cn.zhengcaiyun.idata.core.spi.loader;
+
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-11-08 17:22
+ **/
+public class ServiceProvidersLoaders {
+
+    public static <T> Optional<T> loadProvider(ServiceProvidersLoader loader, Class<T> type, String identity) {
+        return Optional.ofNullable((T) loader.load(type, identity));
+    }
+
+    public static <T> T loadProviderIfPresent(ServiceProvidersLoader loader, Class<T> type, String identity) {
+        T t = (T) loader.load(type, identity);
+        if (Objects.isNull(t)) {
+            throw new IllegalArgumentException("The service provider: " + type.getName() + " is not exist");
+        }
+        return t;
+    }
+
+}
