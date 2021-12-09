@@ -49,7 +49,7 @@ public class JobDependencyController {
             @ApiImplicitParam(name = "env", value = "环境", dataType = "String", required = true),
             @ApiImplicitParam(name = "preLevel", value = "上游层数", dataType = "Integer", required = true),
             @ApiImplicitParam(name = "nextLevel", value = "下游层数", dataType = "Integer", required = true),
-            @ApiImplicitParam(name = "name", value = "搜索任务名", dataType = "String", required = true)
+            @ApiImplicitParam(name = "searchJobId", value = "搜索任务id", dataType = "Long", required = true)
     })
     public RestResult<JobTreeResponse> tree(@PathVariable("id") Long jobId,
                                             @RequestParam("env") String env,
@@ -89,7 +89,7 @@ public class JobDependencyController {
             @ApiImplicitParam(name = "env", value = "环境", dataType = "String", required = true),
             @ApiImplicitParam(name = "taskId", value = "任务id", dataType = "Long", required = true),
             @ApiImplicitParam(name = "lineNum", value = "查看行数", dataType = "Integer", required = true),
-            @ApiImplicitParam(name = "skipLineNum", value = "跳过行数", dataType = "String", required = true)
+            @ApiImplicitParam(name = "skipLineNum", value = "跳过行数", dataType = "String", required = false)
     })
     public RestResult<String> getRunningLog(@PathVariable(value = "id", required = true) Long jobId,
                                             @RequestParam(value = "env", required = true) String env,

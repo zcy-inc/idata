@@ -17,7 +17,6 @@
 
 package cn.zhengcaiyun.idata.core.sql.dsl.dsl;
 
-import cn.zhengcaiyun.idata.connector.sql.clause.*;
 import cn.zhengcaiyun.idata.core.sql.dsl.expr.SelectExpr;
 import cn.zhengcaiyun.idata.core.sql.dsl.expr.table.TableModel;
 import cn.zhengcaiyun.idata.core.sql.dsl.statement.QueryStatement;

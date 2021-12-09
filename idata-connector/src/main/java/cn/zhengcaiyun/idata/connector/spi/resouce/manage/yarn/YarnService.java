@@ -1,19 +1,19 @@
 package cn.zhengcaiyun.idata.connector.spi.resouce.manage.yarn;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.ResourceManageService;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.AppResourceDetail;
+import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.ClusterMetricsResponse;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.response.YarnAppResourceResponse;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.response.YarnAppsResourceResponse;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
@@ -39,15 +39,19 @@ public class YarnService implements ResourceManageService {
         List<AppResourceDetail> appResourceDetails = Convert.toList(AppResourceDetail.class, app);
         return appResourceDetails;
     }
-//
-//    @Override
-//    public ClusterMetricsResponse clusterMetrics() {
-//        String url = String.format("%s/ws/v1/cluster/metrics", YARN_RM_URI);
-//        String jsonResponse = HttpUtil.get(url);
-//
-////        return clusterMetricsDto.getClusterMetrics();
-//        return null;
-//    }
+
+    @Override
+    public ClusterMetricsResponse clusterMetrics() {
+        String url = String.format("%s/ws/v1/cluster/metrics", YARN_RM_URI);
+        HttpResponse res = HttpRequest.get(url).execute();
+        int httpStatus = res.getStatus();
+        if (httpStatus < 200 || httpStatus >= 300) {
+            throw new GeneralException("http request fail:" + httpStatus + ". " + url);
+        }
+        JSONObject jsonObject = JSON.parseObject(res.body());
+        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
+        return response;
+    }
 
     public static void main(String[] args) {
 
@@ -67,11 +71,14 @@ public class YarnService implements ResourceManageService {
 //        List<AppResourceDetail> appResourceDetails = Convert.toList(AppResourceDetail.class, app);
 //        System.out.println(appResourceDetails.size());
 
-//        String url = String.format("%s/ws/v1/cluster/metrics", "http://bigdata-master3.cai-inc.com:8088");
+        String url = String.format("%s/ws/v1/cluster/metrics", "http://bigdata-master3.cai-inc.com:8088");
 //        String jsonResponse = HttpUtil.get(url);
-//        System.out.println(jsonResponse);
-//        JSONObject jsonObject = JSON.parseObject(jsonResponse);
-//        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
-//        System.out.println(JSON.toJSONString(response));
+        HttpResponse res = HttpRequest.get(url).execute();
+        System.out.println(res.getStatus());
+        String jsonResponse = res.body();
+        System.out.println(jsonResponse);
+        JSONObject jsonObject = JSON.parseObject(jsonResponse);
+        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
+        System.out.println(JSON.toJSONString(response));
     }
 }

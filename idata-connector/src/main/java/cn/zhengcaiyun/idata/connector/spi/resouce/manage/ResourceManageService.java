@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.connector.spi.resouce.manage;
 
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.AppResourceDetail;
+import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.ClusterMetricsResponse;
 
 import java.util.List;
 
@@ -14,4 +15,9 @@ public interface ResourceManageService {
      */
     List<AppResourceDetail> loadAppResourceDetailList(Long finishTimeBegin, Long finishTimeEnd);
 
+    /**
+     * 查看资源管理器集群情况
+     * @return
+     */
+    ClusterMetricsResponse clusterMetrics();
 }
