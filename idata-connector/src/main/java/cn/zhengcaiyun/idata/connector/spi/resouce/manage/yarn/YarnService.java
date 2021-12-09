@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.ResourceManageService;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.AppResourceDetail;
-import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.ClusterMetricsResponse;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.response.YarnAppResourceResponse;
 import cn.zhengcaiyun.idata.connector.spi.resouce.manage.model.response.YarnAppsResourceResponse;
 import com.alibaba.fastjson.JSON;
@@ -40,15 +39,15 @@ public class YarnService implements ResourceManageService {
         List<AppResourceDetail> appResourceDetails = Convert.toList(AppResourceDetail.class, app);
         return appResourceDetails;
     }
-
-    @Override
-    public ClusterMetricsResponse clusterMetrics() {
-        String url = String.format("%s/ws/v1/cluster/metrics", YARN_RM_URI);
-        String jsonResponse = HttpUtil.get(url);
-
-//        return clusterMetricsDto.getClusterMetrics();
-        return null;
-    }
+//
+//    @Override
+//    public ClusterMetricsResponse clusterMetrics() {
+//        String url = String.format("%s/ws/v1/cluster/metrics", YARN_RM_URI);
+//        String jsonResponse = HttpUtil.get(url);
+//
+////        return clusterMetricsDto.getClusterMetrics();
+//        return null;
+//    }
 
     public static void main(String[] args) {
 
@@ -68,11 +67,11 @@ public class YarnService implements ResourceManageService {
 //        List<AppResourceDetail> appResourceDetails = Convert.toList(AppResourceDetail.class, app);
 //        System.out.println(appResourceDetails.size());
 
-        String url = String.format("%s/ws/v1/cluster/metrics", "http://bigdata-master3.cai-inc.com:8088");
-        String jsonResponse = HttpUtil.get(url);
-        System.out.println(jsonResponse);
-        JSONObject jsonObject = JSON.parseObject(jsonResponse);
-        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
-        System.out.println(JSON.toJSONString(response));
+//        String url = String.format("%s/ws/v1/cluster/metrics", "http://bigdata-master3.cai-inc.com:8088");
+//        String jsonResponse = HttpUtil.get(url);
+//        System.out.println(jsonResponse);
+//        JSONObject jsonObject = JSON.parseObject(jsonResponse);
+//        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
+//        System.out.println(JSON.toJSONString(response));
     }
 }

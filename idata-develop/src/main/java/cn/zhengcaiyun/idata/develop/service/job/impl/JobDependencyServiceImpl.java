@@ -4,8 +4,10 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
@@ -25,6 +27,8 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+
 @Service
 public class JobDependencyServiceImpl implements JobDependencyService {
 
@@ -36,6 +40,9 @@ public class JobDependencyServiceImpl implements JobDependencyService {
 
     @Autowired
     private JobInfoService jobInfoService;
+
+    @Autowired
+    private JobExecuteConfigRepo jobExecuteConfigRepo;
 
     @Override
     public List<JobInfo> getDependencyJob(String searchName, Long jobId, String env) {
@@ -125,6 +132,11 @@ public class JobDependencyServiceImpl implements JobDependencyService {
      * @return
      */
     private List<JobDependencyDto> getAccessJobDependency(String env, Long jobId, Set<Long> accessIdSet) {
+        Optional<JobExecuteConfig> optional = jobExecuteConfigRepo.query(jobId, env);
+        if (optional.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         List<JobDependencyDto> list = jobDependenceRepo.queryJobs(env);
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();
