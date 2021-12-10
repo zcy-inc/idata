@@ -18,13 +18,12 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobAndDagDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobTypeDto;
+import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import com.google.common.collect.Lists;
@@ -204,7 +203,7 @@ public class JobInfoController {
     /**
      * 测试作业
      *
-     * @param jobId 作业id
+     * @param jobId   作业id
      * @param version 作业版本
      * @return
      */
@@ -213,6 +212,21 @@ public class JobInfoController {
     public RestResult<JobDryRunDto> dryRun(@PathVariable Long jobId,
                                            @PathVariable Integer version) {
         return RestResult.success(jobInfoService.dryRunJob(jobId, version));
+    }
+
+    /**
+     * 查询悬垂作业
+     *
+     * @param condition
+     * @param limit
+     * @param offset
+     * @return
+     */
+    @GetMapping("/overhangPage")
+    public RestResult<OverhangJobWrapperDto> pagingOverhangJob(JobInfoCondition condition,
+                                                               @RequestParam(value = "limit") Long limit,
+                                                               @RequestParam(value = "offset") Long offset) {
+        return RestResult.success(jobInfoService.pagingOverhangJob(condition, PageParam.of(limit, offset)));
     }
 
 }

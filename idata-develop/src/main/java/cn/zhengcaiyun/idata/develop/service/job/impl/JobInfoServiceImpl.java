@@ -19,7 +19,13 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
+import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
+import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
@@ -37,9 +43,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
@@ -52,7 +56,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -74,6 +80,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobScheduleManager jobScheduleManager;
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
+    private final OverhangJobLocalCache overhangJobLocalCache;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
@@ -84,7 +91,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobManager jobManager,
                               JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
-                              DevTreeNodeLocalCache devTreeNodeLocalCache) {
+                              DevTreeNodeLocalCache devTreeNodeLocalCache,
+                              OverhangJobLocalCache overhangJobLocalCache) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -94,6 +102,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.jobScheduleManager = jobScheduleManager;
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
+        this.overhangJobLocalCache = overhangJobLocalCache;
     }
 
     @Override
@@ -249,6 +258,25 @@ public class JobInfoServiceImpl implements JobInfoService {
         Map<Long, String> map = new HashMap<>();
         jobInfoList.forEach(e -> map.put(e.getId(), e.getName()));
         return map;
+    }
+
+    @Override
+    public OverhangJobWrapperDto pagingOverhangJob(JobInfoCondition condition, PageParam pageParam) {
+        Optional<OverhangJobCacheValue> cacheValueOptional = overhangJobLocalCache.getOverhangJobs();
+        if (cacheValueOptional.isEmpty())
+            return new OverhangJobWrapperDto(LocalDateTime.now(), Page.empty());
+
+        JobTypeEnum jobType = condition.getJobType();
+        String name = condition.getName();
+        KeywordFilter nameFilter = StringUtils.isNotBlank(name) ? new KeywordFilter(name.trim()) : null;
+
+        List<OverhangJobDto> overhangJobDtoList = cacheValueOptional.get().getOverhangJobDtoList().stream()
+                .filter(dto -> jobType == null || jobType == dto.getJobType())
+                .filter(dto -> nameFilter == null || nameFilter.match(dto.getName()))
+                .collect(Collectors.toList());
+
+        return new OverhangJobWrapperDto(cacheValueOptional.get().getFetchTime(),
+                PaginationInMemory.of(overhangJobDtoList).paging(pageParam));
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

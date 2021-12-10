@@ -15,33 +15,31 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
+package cn.zhengcaiyun.idata.develop.dto.job;
 
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
-import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-16 14:36
+ * @create: 2021-12-10 14:34
  **/
-public interface JobDependenceRepo {
+public class OverhangJobWrapperDto {
+    private final LocalDateTime fetchTime;
+    private final Page<OverhangJobDto> overhangJobDtoPage;
 
-    List<JobDependence> queryPrevJob(Long jobId, String environment);
+    public OverhangJobWrapperDto(LocalDateTime fetchTime, Page<OverhangJobDto> overhangJobDtoPage) {
+        this.fetchTime = fetchTime;
+        this.overhangJobDtoPage = overhangJobDtoPage;
+    }
 
-    List<JobDependence> queryPrevJob(Long jobId);
+    public LocalDateTime getFetchTime() {
+        return fetchTime;
+    }
 
-    List<JobDependence> queryPostJob(Long jobId, String environment);
-
-    List<JobDependence> queryPostJob(Long jobId);
-
-    Boolean addDependence(List<JobDependence> dependenceList);
-
-    Boolean deleteDependence(Long jobId, String environment);
-
-    List<JobDependencyDto> queryJobs(String env);
-
-    List<JobDependence> queryJobs();
+    public Page<OverhangJobDto> getOverhangJobDtoPage() {
+        return overhangJobDtoPage;
+    }
 }

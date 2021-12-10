@@ -18,12 +18,13 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.job.OverhangJobWrapperDto;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ public interface JobInfoService {
 
     /**
      * jobName模糊匹配
+     *
      * @param searchName
      * @return
      */
@@ -63,8 +65,11 @@ public interface JobInfoService {
 
     /**
      * 根据ids获取键值对
+     *
      * @param accessIdSet
      * @return
      */
     Map<Long, String> getNameMapByIds(Set<Long> accessIdSet);
+
+    OverhangJobWrapperDto pagingOverhangJob(JobInfoCondition condition, PageParam pageParam);
 }

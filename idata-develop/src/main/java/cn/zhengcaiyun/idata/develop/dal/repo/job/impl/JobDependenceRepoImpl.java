@@ -95,4 +95,9 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
     public List<JobDependencyDto> queryJobs(String env) {
         return jobDependenceMyDao.queryJobs(env);
     }
+
+    @Override
+    public List<JobDependence> queryJobs() {
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val)));
+    }
 }
