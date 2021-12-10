@@ -16,3 +16,20 @@
  */
 
 package cn.zhengcaiyun.idata.operation.service;
+
+import cn.zhengcaiyun.idata.operation.bean.dto.ClusterAppMonitorDto;
+
+import java.util.List;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-12-10 13:56
+ **/
+public interface ClusterService {
+
+    List<ClusterAppMonitorDto> fetchClusterApp(String state);
+
+    Boolean stopClusterApp(String appId);
+
+}
