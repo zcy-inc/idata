@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
@@ -15,6 +16,7 @@ import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 import cn.zhengcaiyun.idata.operation.service.DashboardService;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +65,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public SfStackedLineDto getDsJobSfStackedLine(String environment, DateTime startDate, Date endDate) {
+    public SfStackedLineDto getJobSfStackedLine(String environment, DateTime startDate, Date endDate, String scope) {
         long betweenDay = DateUtil.between(startDate, endDate, DateUnit.DAY);
         // x轴
         List<String> xAxis = new ArrayList<>();
@@ -74,7 +76,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         for (int i = 0; i <= betweenDay; i++) {
             DateTime dateTime = DateUtil.offsetDay(startDate, i);
-            JobStatisticDto dsOverviewDto = getDsJobOverview(environment, DateUtil.beginOfDay(dateTime), DateUtil.endOfDay(dateTime));
+            JobStatisticDto dsOverviewDto = getStatisticByScope(scope, environment, DateUtil.beginOfDay(dateTime).toJdkDate(), DateUtil.endOfDay(dateTime).toJdkDate());
 
             xAxis.add(dateTime.toDateStr());
 
@@ -89,6 +91,19 @@ public class DashboardServiceImpl implements DashboardService {
         dto.setyAxisFailList(failSubList);
         dto.setyAxisSuccessList(successSubList);
         return dto;
+    }
+
+    /**
+     * 根据scope获取统计数据
+     */
+    private JobStatisticDto getStatisticByScope(String scope, String environment, Date startTime, Date endTime) {
+        if (StringUtils.equalsIgnoreCase(scope, "ds")) {
+            return getDsJobOverview(environment, startTime, endTime);
+        }
+        if (StringUtils.equalsIgnoreCase(scope, "yarn")) {
+            return getYarnJobOverview(startTime, endTime);
+        }
+        throw new GeneralException("error scope :" + scope);
     }
 
     @Override

@@ -36,8 +36,9 @@ public interface DashboardService {
      * @param environment
      * @param startDate
      * @param endDate
+     * @param scope
      */
-    SfStackedLineDto getDsJobSfStackedLine(String environment, DateTime startDate, Date endDate);
+    SfStackedLineDto getJobSfStackedLine(String environment, DateTime startDate, Date endDate, String scope);
 
     /**
      * 获取Yarn总任务数

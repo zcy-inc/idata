@@ -79,15 +79,16 @@ public class DashboardController {
 
     /**
      * ds调度情况堆叠折线图
+     * @param scope : 作用域 yarn/ds
      * @return
      */
-    @GetMapping("/dsJob/stackLine")
-    public RestResult<StackedLineChartResponse> dsJobScheduleLine() {
+    @GetMapping("/job/stackLine")
+    public RestResult<StackedLineChartResponse> dsJobScheduleLine(@RequestParam("scope") String scope) {
         Date today = DateUtil.beginOfDay(new Date());
 
         //近7天
         DateTime startDate = DateUtil.offsetDay(today, -6);
-        SfStackedLineDto dsJobLine = dashboardService.getDsJobSfStackedLine(EnvEnum.prod.name(), startDate, today);
+        SfStackedLineDto dsJobLine = dashboardService.getJobSfStackedLine(EnvEnum.prod.name(), startDate, today, scope);
 
         // 封装x轴
         StackedLineChartResponse response = new StackedLineChartResponse();
@@ -127,35 +128,6 @@ public class DashboardController {
         response.getNameValueResponseList().add(new NameValueResponse<>("success", response.getSuccess()));
         response.getNameValueResponseList().add(new NameValueResponse<>("other", response.getOther()));
         response.getNameValueResponseList().add(new NameValueResponse<>("ready", response.getReady()));
-
-        return RestResult.success(response);
-    }
-
-    /**
-     * 调度情况堆叠折线图
-     * @return
-     */
-    @GetMapping("/yarnJob/stackLine")
-    public RestResult<StackedLineChartResponse> yarnJobScheduleLine(@RequestParam("scope") String scope) {
-        Date today = DateUtil.beginOfDay(new Date());
-
-        //近7天
-        DateTime startDate = DateUtil.offsetDay(today, -6);
-        SfStackedLineDto dsJobLine = dashboardService.getDsJobSfStackedLine(EnvEnum.prod.name(), startDate, today);
-
-        // 封装x轴
-        StackedLineChartResponse response = new StackedLineChartResponse();
-        response.setxAxis(dsJobLine.getxAxis());
-
-        // 封装成功率和失败率两条y轴
-        StackedLineChartResponse.YAxis yAxis = new StackedLineChartResponse.YAxis();
-        yAxis.setName("成功率");
-        yAxis.setyAxis(dsJobLine.getyAxisSuccessList());
-        response.getyAxisList().add(yAxis);
-        StackedLineChartResponse.YAxis yAxis2 = new StackedLineChartResponse.YAxis();
-        yAxis2.setName("失败");
-        yAxis2.setyAxis(dsJobLine.getyAxisFailList());
-        response.getyAxisList().add(yAxis2);
 
         return RestResult.success(response);
     }
