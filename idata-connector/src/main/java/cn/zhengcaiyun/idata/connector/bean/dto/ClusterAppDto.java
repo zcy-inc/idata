@@ -32,6 +32,11 @@ public class ClusterAppDto {
     private String appId;
 
     /**
+     * 集群应用 name
+     */
+    private String appName;
+
+    /**
      * 作业id
      */
     private Long jobId;
@@ -40,11 +45,6 @@ public class ClusterAppDto {
      * 集群应用 user
      */
     private String user;
-
-    /**
-     * 集群应用 name
-     */
-    private String name;
 
     /**
      * 集群应用队列
@@ -125,12 +125,12 @@ public class ClusterAppDto {
         this.user = user;
     }
 
-    public String getName() {
-        return name;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public String getQueue() {
