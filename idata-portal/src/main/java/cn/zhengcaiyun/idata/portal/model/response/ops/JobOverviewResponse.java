@@ -1,9 +1,14 @@
-package cn.zhengcaiyun.idata.portal.model.response.opr;
+package cn.zhengcaiyun.idata.portal.model.response.ops;
+
+import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DS调度任务情况概览
  */
-public class JobDsOverviewResponse {
+public class JobOverviewResponse {
 
     /**
      *作业总数
@@ -13,7 +18,7 @@ public class JobDsOverviewResponse {
     /**
      * 等待运行
      */
-    private Integer waiting;
+    private Integer ready;
 
     /**
      * 运行中
@@ -35,6 +40,11 @@ public class JobDsOverviewResponse {
      */
     private Integer other;
 
+    /**
+     * 饼图
+     */
+    private List<NameValueResponse> nameValueResponseList = new ArrayList<>();
+
     public Integer getTotal() {
         return total;
     }
@@ -43,12 +53,12 @@ public class JobDsOverviewResponse {
         this.total = total;
     }
 
-    public Integer getWaiting() {
-        return waiting;
+    public Integer getReady() {
+        return ready;
     }
 
-    public void setWaiting(Integer waiting) {
-        this.waiting = waiting;
+    public void setReady(Integer ready) {
+        this.ready = ready;
     }
 
     public Integer getRunning() {
@@ -81,5 +91,13 @@ public class JobDsOverviewResponse {
 
     public void setSuccess(Integer success) {
         this.success = success;
+    }
+
+    public List<NameValueResponse> getNameValueResponseList() {
+        return nameValueResponseList;
+    }
+
+    public void setNameValueResponseList(List<NameValueResponse> nameValueResponseList) {
+        this.nameValueResponseList = nameValueResponseList;
     }
 }

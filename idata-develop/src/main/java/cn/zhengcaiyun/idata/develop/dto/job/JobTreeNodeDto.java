@@ -1,9 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
-import io.swagger.annotations.ApiModelProperty;
+import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class JobTreeNodeDto {
@@ -40,7 +39,7 @@ public class JobTreeNodeDto {
 
     /**
      * 任务状态
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum
+     * @see DsJobStatusEnum
      */
     private Integer jobStatus;
 

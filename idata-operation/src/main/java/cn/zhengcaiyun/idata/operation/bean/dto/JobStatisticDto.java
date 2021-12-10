@@ -1,11 +1,11 @@
 package cn.zhengcaiyun.idata.operation.bean.dto;
 
-public class JobDsOverviewDto {
+public class JobStatisticDto {
 
     /**
-     * 等待运行
+     * 等待运行/队列中
      */
-    private Integer waiting = 0;
+    private Integer ready = 0;
 
     /**
      * 运行中
@@ -27,12 +27,12 @@ public class JobDsOverviewDto {
      */
     private Integer other = 0;
 
-    public Integer getWaiting() {
-        return waiting;
+    public Integer getReady() {
+        return ready;
     }
 
-    public void setWaiting(Integer waiting) {
-        this.waiting = waiting;
+    public void setReady(Integer ready) {
+        this.ready = ready;
     }
 
     public Integer getRunning() {
@@ -66,4 +66,9 @@ public class JobDsOverviewDto {
     public void setOther(Integer other) {
         this.other = other;
     }
+
+    public Integer getSum() {
+        return other + ready + success + failure + running;
+    }
+
 }

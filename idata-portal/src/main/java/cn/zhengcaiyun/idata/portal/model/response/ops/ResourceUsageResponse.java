@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.portal.model.response.opr;
+package cn.zhengcaiyun.idata.portal.model.response.ops;
 
 /**
  * 资源使用情况

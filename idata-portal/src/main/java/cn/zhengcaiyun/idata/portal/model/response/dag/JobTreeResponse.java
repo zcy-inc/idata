@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.portal.model.response.dag;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -17,7 +18,7 @@ public class JobTreeResponse {
 
     /**
      * 业务状态值
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum
+     * @see DsJobStatusEnum
      */
     @ApiModelProperty("任务状态")
     private Integer jobStatus;

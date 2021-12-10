@@ -3,7 +3,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
@@ -26,8 +26,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
 
 @Service
 public class JobDependencyServiceImpl implements JobDependencyService {
@@ -114,7 +112,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Long jobId = tree.getJobId();
         if (runInfoMap.containsKey(jobId)) {
             JobRunOverviewDto dto = runInfoMap.get(jobId);
-            tree.setJobStatus(JobStatusEnum.getValueByDsCode(dto.getState()));
+            tree.setJobStatus(DsJobStatusEnum.getValueByDsDescription(dto.getState()));
             tree.setLastRunTime(dto.getStartTime());
             tree.setTaskId(dto.getId());
         }
