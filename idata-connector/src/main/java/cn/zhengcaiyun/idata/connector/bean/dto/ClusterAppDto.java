@@ -29,7 +29,12 @@ public class ClusterAppDto {
     /**
      * 集群应用 id
      */
-    private String id;
+    private String appId;
+
+    /**
+     * 作业id
+     */
+    private Long jobId;
 
     /**
      * 集群应用 user
@@ -89,19 +94,27 @@ public class ClusterAppDto {
     /**
      * 集群应用总分配内存，单位：MB
      */
-    private Integer allocatedMB;
+    private Integer allocatedMem;
 
     /**
      * 集群应用总分配核数
      */
     private Integer allocatedVCores;
 
-    public String getId() {
-        return id;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
     }
 
     public String getUser() {
@@ -192,12 +205,12 @@ public class ClusterAppDto {
         this.finishedTime = finishedTime;
     }
 
-    public Integer getAllocatedMB() {
-        return allocatedMB;
+    public Integer getAllocatedMem() {
+        return allocatedMem;
     }
 
-    public void setAllocatedMB(Integer allocatedMB) {
-        this.allocatedMB = allocatedMB;
+    public void setAllocatedMem(Integer allocatedMem) {
+        this.allocatedMem = allocatedMem;
     }
 
     public Integer getAllocatedVCores() {
