@@ -136,7 +136,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         dto.setAppId(app.getId());
         dto.setJobId(getJobId(app.getName()));
         dto.setUser(app.getUser());
-        dto.setName(app.getName());
+        dto.setAppName(app.getName());
         dto.setQueue(app.getQueue());
         dto.setState(app.getState());
         dto.setFinalStatus(app.getFinalStatus());
