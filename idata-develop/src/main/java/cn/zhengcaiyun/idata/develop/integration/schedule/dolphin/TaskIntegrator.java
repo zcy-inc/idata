@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
+import cn.hutool.core.date.DateUtil;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
@@ -30,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -285,6 +287,30 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         JSONObject data = resultDto.getData();
         JSONArray totalList = data.getJSONArray("totalList");
         List<JobRunOverviewDto> list = JSONObject.parseObject(totalList.toJSONString(), new TypeReference<>() {
+        });
+        return list;
+    }
+
+    @Override
+    public List<TaskCountDto> getTaskCountGroupState(String environment, Date startTime, Date endTime) {
+        String projectCode = getDSProjectCode(environment);
+        String startStr = "";
+        String endStr = "";
+        if (startTime != null) {
+            startStr = DateUtil.format(startTime, "YYYY-MM-dd HH:mm:ss");
+        }
+        if (endTime != null) {
+            endStr = DateUtil.format(endTime, "YYYY-MM-dd HH:mm:ss");
+        }
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/analysis/task-state-count?projectCode=%s&startDate=%s&endDate=%s", projectCode, startStr, endStr);
+
+        HttpInput req_input = buildHttpReq(Maps.newHashMap(), req_url, "GET", getDSToken(environment));
+        ResultDto<JSONObject> resultDto = sendReq(req_input); if (!resultDto.isSuccess()) {
+            throw new ExternalIntegrationException(String.format("获取DS任务实例信息失败：%s", resultDto.getMsg()));
+        }
+        JSONObject data = resultDto.getData();
+        JSONArray taskCountDtos = data.getJSONArray("taskCountDtos");
+        List<TaskCountDto> list = JSONObject.parseObject(taskCountDtos.toJSONString(), new TypeReference<>() {
         });
         return list;
     }
