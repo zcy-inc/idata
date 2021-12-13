@@ -2,8 +2,12 @@ package cn.zhengcaiyun.idata.operation.service.impl;
 
 import cn.hutool.core.date.*;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
@@ -11,7 +15,9 @@ import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.TaskIntegrator;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
+import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
@@ -35,6 +41,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private TaskIntegrator taskIntegrator;
+
+    @Autowired
+    private JobScheduleManager jobScheduleManager;
 
     @Autowired
     private ResourceManagerService resourceManagerService;
@@ -265,6 +274,43 @@ public class DashboardServiceImpl implements DashboardService {
                 .collect(Collectors.toList());
 
         return rankTimeConsumeDtos;
+    }
+
+    @Override
+    public Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize) {
+        LocalDateTime startTime = DateUtil.beginOfDay(new Date()).toLocalDateTime();
+        LocalDateTime endTime = DateUtil.endOfDay(new Date()).toLocalDateTime();
+        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
+        List<String> codeList = YarnJobStatusEnum.getCodesByValue(state);
+        List<JobHistoryDto> dtoList = clusterAppDtoList
+                .stream()
+                .filter(e -> codeList.contains(StringUtils.upperCase(e.getState())))
+                .map(e -> {
+                    JobHistoryDto dto = new JobHistoryDto();
+                    dto.setJobId(e.getJobId());
+                    dto.setAmContainerLogsUrl(e.getAmContainerLogs());
+                    return dto;
+                }).collect(Collectors.toList());
+        Page<JobHistoryDto> page = PaginationInMemory.of(dtoList).paging(PageParam.of(pageNum, pageSize));
+        return page;
+    }
+
+    @Override
+    public Page<JobHistoryDto> pageJobSchedule(Integer state, Integer pageNum, Integer pageSize) {
+        List<JobRunOverviewDto> jobLatestRecordList = jobScheduleManager.getJobLatestRecords(EnvEnum.prod.name(), 5000);
+        List<String> stringList = DsJobStatusEnum.getDsDescriptionsByValue(state);
+        List<JobHistoryDto> dtoList = jobLatestRecordList
+                .stream()
+                .filter(e -> stringList.contains(e.getState()))
+                .map(e -> {
+                    JobHistoryDto dto = new JobHistoryDto();
+                    dto.setJobId(e.getJobId());
+                    dto.setJobInstanceId(e.getJobInstanceId());
+                    dto.setFinalStatus(e.getState());
+                    return dto;
+                }).collect(Collectors.toList());
+        Page<JobHistoryDto> page = PaginationInMemory.of(dtoList).paging(PageParam.of(pageNum, pageSize));
+        return page;
     }
 
     private JobStatisticDto getYarnJobOverview(Date startTime, Date endTime) {

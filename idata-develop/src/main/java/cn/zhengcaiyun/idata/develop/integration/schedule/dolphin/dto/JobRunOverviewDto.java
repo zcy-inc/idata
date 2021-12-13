@@ -9,6 +9,8 @@ public class JobRunOverviewDto {
      */
     private String name;
 
+    private Long jobId;
+
     private String jobInstanceId;
 
     private String state;
@@ -53,5 +55,13 @@ public class JobRunOverviewDto {
 
     public void setStartTime(String startTime) {
         this.startTime = startTime;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
     }
 }

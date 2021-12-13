@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.operation.service;
 
 import cn.hutool.core.date.DateTime;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
@@ -69,4 +71,22 @@ public interface DashboardService {
      * @param top TOP N
      */
     List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top);
+
+    /**
+     * yarn作业分页
+     * @param state
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize);
+
+    /**
+     * ds作业分页　
+     * @param state
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    Page<JobHistoryDto> pageJobSchedule(Integer state, Integer pageNum, Integer pageSize);
 }

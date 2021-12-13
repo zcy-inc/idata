@@ -2,6 +2,10 @@ package cn.zhengcaiyun.idata.develop.constant.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public enum DsJobStatusEnum {
 
     READY(1, new String[]{"submit success"}, new String[]{"SUBMITTED_SUCCESS"}, "等待运行"),
@@ -59,5 +63,14 @@ public enum DsJobStatusEnum {
             }
         }
         return null;
+    }
+
+    public static List<String> getDsDescriptionsByValue(Integer value) {
+        for (DsJobStatusEnum dsJobStatusEnum : DsJobStatusEnum.values()) {
+            if (dsJobStatusEnum.value == value) {
+                return Arrays.asList(dsJobStatusEnum.dsDescriptions);
+            }
+        }
+        return new ArrayList<>();
     }
 }

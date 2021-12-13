@@ -38,11 +38,19 @@ public class PageUtil {
      * @param <E>
      * @return
      */
-    public static <T, E> PageInfo<JobHistoryResponse> convertType(PageInfo<T> s, Function<T, E> fun) {
+    public static <T, E> PageInfo<E> convertType(PageInfo<T> s, Function<T, E> fun) {
         PageInfo pageInfo = new PageInfo();
         BeanUtils.copyProperties(s, pageInfo);
         List<E> responseList = s.getList().stream().map(e -> fun.apply(e)).collect(Collectors.toList());
         pageInfo.setList(responseList);
+        return pageInfo;
+    }
+
+    public static <T, E> Page<E> convertType(Page<T> s, Function<T, E> fun) {
+        Page pageInfo = new Page();
+        BeanUtils.copyProperties(s, pageInfo);
+        List<E> responseList = s.getContent().stream().map(e -> fun.apply(e)).collect(Collectors.toList());
+        pageInfo.setContent(responseList);
         return pageInfo;
     }
 

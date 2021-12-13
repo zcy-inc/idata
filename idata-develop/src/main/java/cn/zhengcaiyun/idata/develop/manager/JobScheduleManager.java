@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.develop.manager;
 
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
@@ -70,6 +72,14 @@ public class JobScheduleManager {
      * @return
      */
     public List<JobRunOverviewDto> getJobLatestRecords(String environment, Integer limit) {
-        return jobIntegrator.getJobLatestRecords(environment, limit);
+        List<JobRunOverviewDto> jobLatestRecords = jobIntegrator.getJobLatestRecords(environment, limit);
+        jobLatestRecords.forEach(e -> {
+            String jobIdStr = ReUtil.get(".*__(\\d*)", e.getName(), 1);
+            if (NumberUtil.isNumber(jobIdStr)) {
+                e.setJobId(Long.parseLong(jobIdStr));
+            }
+        });
+
+        return jobLatestRecords;
     }
 }

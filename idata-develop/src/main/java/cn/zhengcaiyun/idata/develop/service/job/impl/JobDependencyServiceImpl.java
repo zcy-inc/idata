@@ -90,10 +90,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Map<Long, JobRunOverviewDto> runInfoMap = Maps.newHashMap();
         records.forEach(e -> {
             // 例如 di_test111__005096
-            String jobIdStr = ReUtil.get(".*__(\\d*)", e.getName(), 1);
-            if (NumberUtil.isNumber(jobIdStr)) {
-                runInfoMap.put(Long.parseLong(jobIdStr), e);
-            }
+            runInfoMap.put(e.getJobId(), e);
         });
         assembleDSInfo(prevTree, runInfoMap, "prev");
         assembleDSInfo(nextTree, runInfoMap, "next");

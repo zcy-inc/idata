@@ -18,6 +18,7 @@ import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 import cn.zhengcaiyun.idata.operation.service.DashboardService;
 import cn.zhengcaiyun.idata.portal.model.request.PageWrapper;
 import cn.zhengcaiyun.idata.portal.model.request.ops.JobHistoryRequest;
+import cn.zhengcaiyun.idata.portal.model.request.ops.JobStateRequest;
 import cn.zhengcaiyun.idata.portal.model.response.StackedLineChartResponse;
 import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.*;
@@ -91,6 +92,24 @@ public class DashboardController {
     }
 
     /**
+     * ds作业分页
+     * state 1：队列 2：运行中 6：失败  7：成功  -1：其他
+     * @return
+     */
+    @GetMapping("/page/jobSchedule")
+    public RestResult<Page<DsJobSummaryResponse>> pageJobSchedule(@RequestBody PageWrapper<JobStateRequest> pageWrapper) {
+        Page<JobHistoryDto> pageJobSchedule = dashboardService.pageJobSchedule(pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        Page<DsJobSummaryResponse> responsePage = PageUtil.convertType(pageJobSchedule, s -> {
+            DsJobSummaryResponse response = new DsJobSummaryResponse();
+            response.setJobId(s.getJobId());
+            response.setJobStatus(s.getFinalStatus());
+            response.setJobName(s.getJobName());
+            return response;
+        });
+        return RestResult.success(responsePage);
+    }
+
+    /**
      * ds调度情况堆叠折线图
      * @param scope : 作用域 yarn/ds
      * @return
@@ -142,6 +161,24 @@ public class DashboardController {
         response.getNameValueResponseList().add(new NameValueResponse<>("ready", response.getReady()));
 
         return RestResult.success(response);
+    }
+
+    /**
+     * yarn作业分页
+     * @param
+     * @return
+     */
+    @GetMapping("/page/yarn")
+    public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper) {
+        Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        Page<YarnJobSummaryResponse> responsePage = PageUtil.convertType(pageYarnJob, s -> {
+            YarnJobSummaryResponse response = new YarnJobSummaryResponse();
+            response.setJobId(s.getJobId());
+            response.setJobStatus(s.getFinalStatus());
+            response.setJobName(s.getJobName());
+            return response;
+        });
+        return RestResult.success(responsePage);
     }
 
     /**
@@ -206,6 +243,7 @@ public class DashboardController {
 
         return RestResult.success(PageUtil.covertMine(responsePageInfo));
     }
+
 
 
 }
