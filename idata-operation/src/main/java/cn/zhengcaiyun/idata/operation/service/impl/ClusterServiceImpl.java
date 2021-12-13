@@ -45,7 +45,7 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Override
     public List<ClusterAppMonitorDto> fetchClusterApp(String state) {
-        List<ClusterAppDto> appDtoList = resourceManagerService.fetchRunningClusterApps();
+        List<ClusterAppDto> appDtoList = resourceManagerService.fetchRunningClusterApps(null);
         return appDtoList.stream().map(appDto -> {
             ClusterAppMonitorDto monitorDto = new ClusterAppMonitorDto();
             BeanUtils.copyProperties(appDto, monitorDto);

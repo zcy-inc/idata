@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.connector.resourcemanager;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 
@@ -40,27 +41,30 @@ public interface ResourceManagerService {
     /**
      * 获取正在运行的集群应用
      *
+     * @param envEnum
      * @return
      */
-    List<ClusterAppDto> fetchRunningClusterApps();
+    List<ClusterAppDto> fetchRunningClusterApps(EnvEnum envEnum);
 
     /**
      * 根据开始时间，获取集群应用
      *
+     * @param envEnum
      * @param startedTimeBegin
      * @param startedTimeEnd
      * @return
      */
-    List<ClusterAppDto> fetchClusterApps(LocalDateTime startedTimeBegin, LocalDateTime startedTimeEnd);
+    List<ClusterAppDto> fetchClusterApps(LocalDateTime startedTimeBegin, LocalDateTime startedTimeEnd, EnvEnum envEnum);
 
     /**
      * 根据结束时间，获取已结束的集群应用
      *
+     * @param envEnum
      * @param finishedTimeBegin
      * @param finishedTimeEnd
      * @return
      */
-    List<ClusterAppDto> fetchFinishedClusterApps(LocalDateTime finishedTimeBegin, LocalDateTime finishedTimeEnd);
+    List<ClusterAppDto> fetchFinishedClusterApps(LocalDateTime finishedTimeBegin, LocalDateTime finishedTimeEnd, EnvEnum envEnum);
 
     /**
      * kill集群应用

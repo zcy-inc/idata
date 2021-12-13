@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.connector.bean.dto;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+
 import java.time.LocalDateTime;
 
 /**
@@ -40,6 +42,11 @@ public class ClusterAppDto {
      * 作业id
      */
     private Long jobId;
+
+    /**
+     * 作业运行环境
+     */
+    private EnvEnum env;
 
     /**
      * 集群应用 user
@@ -115,6 +122,14 @@ public class ClusterAppDto {
 
     public void setJobId(Long jobId) {
         this.jobId = jobId;
+    }
+
+    public EnvEnum getEnv() {
+        return env;
+    }
+
+    public void setEnv(EnvEnum env) {
+        this.env = env;
     }
 
     public String getUser() {

@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.connector.resourcemanager.impl;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
@@ -60,15 +61,15 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
-    public List<ClusterAppDto> fetchRunningClusterApps() {
+    public List<ClusterAppDto> fetchRunningClusterApps(EnvEnum envEnum) {
         QueryClusterAppParam param = new QueryClusterAppParam();
         param.setStates("RUNNING");
         List<ClusterApp> clusterApps = yarnApiAgent.fetchClusterApps(getYarnServiceUrl(), param);
-        return filterAndConvertToDto(clusterApps);
+        return filterAndConvertToDto(clusterApps, envEnum);
     }
 
     @Override
-    public List<ClusterAppDto> fetchClusterApps(LocalDateTime startedTimeBegin, LocalDateTime startedTimeEnd) {
+    public List<ClusterAppDto> fetchClusterApps(LocalDateTime startedTimeBegin, LocalDateTime startedTimeEnd, EnvEnum envEnum) {
         QueryClusterAppParam param = new QueryClusterAppParam();
         if (Objects.nonNull(startedTimeBegin)) {
             param.setStartedTimeBegin(startedTimeBegin.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "");
@@ -77,11 +78,11 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
             param.setStartedTimeEnd(startedTimeEnd.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "");
         }
         List<ClusterApp> clusterApps = yarnApiAgent.fetchClusterApps(getYarnServiceUrl(), param);
-        return filterAndConvertToDto(clusterApps);
+        return filterAndConvertToDto(clusterApps, envEnum);
     }
 
     @Override
-    public List<ClusterAppDto> fetchFinishedClusterApps(LocalDateTime finishedTimeBegin, LocalDateTime finishedTimeEnd) {
+    public List<ClusterAppDto> fetchFinishedClusterApps(LocalDateTime finishedTimeBegin, LocalDateTime finishedTimeEnd, EnvEnum envEnum) {
         QueryClusterAppParam param = new QueryClusterAppParam();
         if (Objects.nonNull(finishedTimeBegin)) {
             param.setFinishedTimeBegin(finishedTimeBegin.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "");
@@ -91,15 +92,16 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         }
         param.setStates("FINISHED,FAILED,KILLED");
         List<ClusterApp> clusterApps = yarnApiAgent.fetchClusterApps(getYarnServiceUrl(), param);
-        return filterAndConvertToDto(clusterApps);
+        return filterAndConvertToDto(clusterApps, envEnum);
     }
 
-    private List<ClusterAppDto> filterAndConvertToDto(List<ClusterApp> clusterApps) {
+    private List<ClusterAppDto> filterAndConvertToDto(List<ClusterApp> clusterApps, EnvEnum envEnum) {
         if (CollectionUtils.isEmpty(clusterApps)) return Lists.newArrayList();
 
         return clusterApps.stream()
                 .filter(this::isNormalJob)
-                .map(this::toAppDto)
+                .map(app -> toAppDto(app, getJobId(app.getName()), getNormalJobEvn(app.getName())))
+                .filter(appDto -> Objects.isNull(envEnum) || envEnum == appDto.getEnv())
                 .collect(Collectors.toList());
     }
 
@@ -131,10 +133,11 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         return dto;
     }
 
-    private ClusterAppDto toAppDto(ClusterApp app) {
+    private ClusterAppDto toAppDto(ClusterApp app, Long jobId, EnvEnum envEnum) {
         ClusterAppDto dto = new ClusterAppDto();
         dto.setAppId(app.getId());
-        dto.setJobId(getJobId(app.getName()));
+        dto.setJobId(jobId);
+        dto.setEnv(envEnum);
         dto.setUser(app.getUser());
         dto.setAppName(app.getName());
         dto.setQueue(app.getQueue());
@@ -174,5 +177,12 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         if (StringUtils.isEmpty(appName)) return false;
 
         return appName.indexOf("-s-") > 0 || appName.indexOf("-p-") > 0;
+    }
+
+    private EnvEnum getNormalJobEvn(String appName) {
+        if (StringUtils.isEmpty(appName)) return null;
+        if (appName.indexOf("-s-") > 0) return EnvEnum.stag;
+        if (appName.indexOf("-p-") > 0) return EnvEnum.prod;
+        return null;
     }
 }
