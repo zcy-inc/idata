@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.system.dal.repo;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
@@ -27,6 +28,10 @@ import java.util.List;
 
 public interface SystemConfigRepo {
     List<SysConfig> getConfigsByType(String configType);
+
     SysConfig getConfigById(Long configId);
+
     boolean updateById(SysConfig config);
+
+    Optional<SysConfig> queryByKey(String configKey);
 }

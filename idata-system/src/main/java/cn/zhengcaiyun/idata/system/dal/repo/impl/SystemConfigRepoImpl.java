@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.system.dal.repo.impl;
 
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dal.repo.SystemConfigRepo;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -61,5 +63,11 @@ public class SystemConfigRepoImpl implements SystemConfigRepo {
                 .set(type).equalToWhenPresent(config::getType)
                 .where(id, isEqualTo(config::getId))
         ) > 0;
+    }
+
+    @Override
+    public Optional<SysConfig> queryByKey(String configKey) {
+        return sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo(configKey),
+                and(sysConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 }

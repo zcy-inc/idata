@@ -24,12 +24,20 @@ import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import cn.zhengcaiyun.idata.system.dto.ConfigValueDto;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @description:
@@ -44,10 +52,12 @@ public abstract class DolphinIntegrationAdapter {
 
     protected final DSEntityMappingRepo dsEntityMappingRepo;
     protected final DSDependenceNodeRepo dsDependenceNodeRepo;
+    protected final SystemConfigService systemConfigService;
 
-    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo) {
+    public DolphinIntegrationAdapter(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo, SystemConfigService systemConfigService) {
         this.dsEntityMappingRepo = dsEntityMappingRepo;
         this.dsDependenceNodeRepo = dsDependenceNodeRepo;
+        this.systemConfigService = systemConfigService;
     }
 
     protected Long getWorkflowCode(Long dagId, String environment) {
@@ -63,31 +73,52 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected String getDSToken(String environment) {
-        return "ba33abe5da62f976c46a0343fe6efe77";
+        Optional<ConfigValueDto> valueDtoOptional = getSystemConfig("ds-config", "token");
+        checkState(valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()), "调度系统token未配置，请在系统配置中配置");
+        return valueDtoOptional.get().getConfigValue();
     }
 
     protected String getDSProjectCode(String environment) {
+        Optional<ConfigValueDto> valueDtoOptional;
         if (EnvEnum.prod.name().equals(environment)) {
-            return "3753902310976";
+            valueDtoOptional = getSystemConfig("ds-config", "prodDSProjectCode");
         } else {
-            return "3753901496256";
+            valueDtoOptional = getSystemConfig("ds-config", "stagDSProjectCode");
         }
+        checkState(valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()), "调度系统%s环境对应DS项目code未配置，请在系统配置中配置", environment);
+        return valueDtoOptional.get().getConfigValue();
     }
 
     protected String getDSBaseUrl(String environment) {
-        return "http://172.29.108.238:8688/dolphinscheduler";
+        Optional<ConfigValueDto> valueDtoOptional = getSystemConfig("ds-config", "url");
+        checkState(valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()), "调度系统地址未配置，请在系统配置中配置");
+        return valueDtoOptional.get().getConfigValue();
     }
 
     protected String getDSTenantCode(String environment) {
-        return "root";
+        Optional<ConfigValueDto> valueDtoOptional = getSystemConfig("ds-config", "DStenantCode");
+        checkState(valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()), "调度系统租户未配置，请在系统配置中配置");
+        return valueDtoOptional.get().getConfigValue();
     }
 
     protected String getDSWorkGroup(String environment) {
-        return "default";
+        Optional<ConfigValueDto> valueDtoOptional = getSystemConfig("ds-config", "DSWorkGroup");
+        checkState(valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()), "调度系统工作组未配置，请在系统配置中配置");
+        return valueDtoOptional.get().getConfigValue();
     }
 
     protected Integer getDagTimeout(String environment) {
-        return 120;
+        Optional<ConfigValueDto> valueDtoOptional = getSystemConfig("ds-config", "dagTimeout");
+        if (valueDtoOptional.isPresent() && StringUtils.isNotBlank(valueDtoOptional.get().getConfigValue()))
+            return Integer.parseInt(valueDtoOptional.get().getConfigValue());
+        else return 120;
+    }
+
+    protected Optional<ConfigValueDto> getSystemConfig(String configKey, String subKey) {
+        ConfigDto configDto = systemConfigService.getSystemConfigByKey(configKey);
+        if (Objects.isNull(configDto) || CollectionUtils.isEmpty(configDto.getValueOne())) return Optional.empty();
+
+        return Optional.ofNullable(configDto.getValueOne().get(subKey));
     }
 
     protected ResultDto<JSONObject> sendReq(HttpInput req_input) {

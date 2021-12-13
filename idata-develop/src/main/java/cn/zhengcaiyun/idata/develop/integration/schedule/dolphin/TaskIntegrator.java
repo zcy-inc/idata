@@ -33,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverv
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -56,8 +57,8 @@ import java.util.*;
 public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobIntegrator {
 
     @Autowired
-    public TaskIntegrator(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo) {
-        super(dsEntityMappingRepo, dsDependenceNodeRepo);
+    public TaskIntegrator(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo, SystemConfigService systemConfigService) {
+        super(dsEntityMappingRepo, dsDependenceNodeRepo, systemConfigService);
     }
 
     @Override

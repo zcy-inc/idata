@@ -274,6 +274,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .filter(dto -> jobType == null || jobType == dto.getJobType())
                 .filter(dto -> nameFilter == null || nameFilter.match(dto.getName()))
                 .collect(Collectors.toList());
+        if (overhangJobDtoList.isEmpty())
+            return new OverhangJobWrapperDto(cacheValueOptional.get().getFetchTime(), Page.empty());
 
         return new OverhangJobWrapperDto(cacheValueOptional.get().getFetchTime(),
                 PaginationInMemory.of(overhangJobDtoList).paging(pageParam));

@@ -17,8 +17,8 @@
 package cn.zhengcaiyun.idata.system.service.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
+import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
@@ -50,9 +50,9 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDynamicSqlSupport.sysFeature;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.nonNull;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @author caizhedong
@@ -85,6 +85,14 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         else {
             return null;
         }
+    }
+
+    @Override
+    public ConfigDto getSystemConfigByKey(String configKey) {
+        checkArgument(StringUtils.isNotBlank(configKey), "配置键不能为空");
+        Optional<SysConfig> configOptional = systemConfigRepo.queryByKey(configKey);
+        checkState(configOptional.isPresent(), "配置键%s没有相应的配置", configKey);
+        return PojoUtil.copyOne(configOptional.get(), ConfigDto.class);
     }
 
     @Override
