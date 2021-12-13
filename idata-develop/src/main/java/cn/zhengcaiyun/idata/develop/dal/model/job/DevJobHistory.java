@@ -78,6 +78,13 @@ public class DevJobHistory {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
     private String user;
 
+    /**
+     * Database Column Remarks:
+     *   application master container url地址
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.am_container_logs_url")
+    private String amContainerLogsUrl;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.id")
     public Long getId() {
         return id;
@@ -186,5 +193,15 @@ public class DevJobHistory {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
     public void setUser(String user) {
         this.user = user;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.am_container_logs_url")
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.am_container_logs_url")
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
     }
 }

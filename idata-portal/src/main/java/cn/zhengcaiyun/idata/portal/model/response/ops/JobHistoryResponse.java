@@ -74,6 +74,11 @@ public class JobHistoryResponse {
      */
     private String user;
 
+    /**
+     *   application master container url地址
+     */
+    private String amContainerLogsUrl;
+
     public Long getId() {
         return id;
     }
@@ -168,5 +173,13 @@ public class JobHistoryResponse {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
     }
 }

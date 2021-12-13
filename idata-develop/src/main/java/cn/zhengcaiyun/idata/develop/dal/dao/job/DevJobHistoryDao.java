@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevJobHistoryDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
-    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, finalStatus, avgVcores, avgMemory, applicationId, user);
+    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, finalStatus, avgVcores, avgMemory, applicationId, user, amContainerLogsUrl);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -67,7 +67,8 @@ public interface DevJobHistoryDao {
         @Result(column="avg_vcores", property="avgVcores", jdbcType=JdbcType.DOUBLE),
         @Result(column="avg_memory", property="avgMemory", jdbcType=JdbcType.BIGINT),
         @Result(column="application_id", property="applicationId", jdbcType=JdbcType.VARCHAR),
-        @Result(column="user", property="user", jdbcType=JdbcType.VARCHAR)
+        @Result(column="user", property="user", jdbcType=JdbcType.VARCHAR),
+        @Result(column="am_container_logs_url", property="amContainerLogsUrl", jdbcType=JdbcType.VARCHAR)
     })
     List<DevJobHistory> selectMany(SelectStatementProvider selectStatement);
 
@@ -105,6 +106,7 @@ public interface DevJobHistoryDao {
             .map(avgMemory).toProperty("avgMemory")
             .map(applicationId).toProperty("applicationId")
             .map(user).toProperty("user")
+            .map(amContainerLogsUrl).toProperty("amContainerLogsUrl")
         );
     }
 
@@ -121,6 +123,7 @@ public interface DevJobHistoryDao {
             .map(avgMemory).toPropertyWhenPresent("avgMemory", record::getAvgMemory)
             .map(applicationId).toPropertyWhenPresent("applicationId", record::getApplicationId)
             .map(user).toPropertyWhenPresent("user", record::getUser)
+            .map(amContainerLogsUrl).toPropertyWhenPresent("amContainerLogsUrl", record::getAmContainerLogsUrl)
         );
     }
 
@@ -162,7 +165,8 @@ public interface DevJobHistoryDao {
                 .set(avgVcores).equalTo(record::getAvgVcores)
                 .set(avgMemory).equalTo(record::getAvgMemory)
                 .set(applicationId).equalTo(record::getApplicationId)
-                .set(user).equalTo(record::getUser);
+                .set(user).equalTo(record::getUser)
+                .set(amContainerLogsUrl).equalTo(record::getAmContainerLogsUrl);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
@@ -176,7 +180,8 @@ public interface DevJobHistoryDao {
                 .set(avgVcores).equalToWhenPresent(record::getAvgVcores)
                 .set(avgMemory).equalToWhenPresent(record::getAvgMemory)
                 .set(applicationId).equalToWhenPresent(record::getApplicationId)
-                .set(user).equalToWhenPresent(record::getUser);
+                .set(user).equalToWhenPresent(record::getUser)
+                .set(amContainerLogsUrl).equalToWhenPresent(record::getAmContainerLogsUrl);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
@@ -192,6 +197,7 @@ public interface DevJobHistoryDao {
             .set(avgMemory).equalTo(record::getAvgMemory)
             .set(applicationId).equalTo(record::getApplicationId)
             .set(user).equalTo(record::getUser)
+            .set(amContainerLogsUrl).equalTo(record::getAmContainerLogsUrl)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -209,6 +215,7 @@ public interface DevJobHistoryDao {
             .set(avgMemory).equalToWhenPresent(record::getAvgMemory)
             .set(applicationId).equalToWhenPresent(record::getApplicationId)
             .set(user).equalToWhenPresent(record::getUser)
+            .set(amContainerLogsUrl).equalToWhenPresent(record::getAmContainerLogsUrl)
             .where(id, isEqualTo(record::getId))
         );
     }

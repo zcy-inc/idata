@@ -58,6 +58,11 @@ public class JobHistoryDto {
 
     private Long avgDuration;
 
+    /**
+     *   application master container url地址
+     */
+    private String amContainerLogsUrl;
+
     public Long getId() {
         return id;
     }
@@ -152,5 +157,13 @@ public class JobHistoryDto {
 
     public void setJobName(Long jobName) {
         this.jobName = jobName;
+    }
+
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
     }
 }

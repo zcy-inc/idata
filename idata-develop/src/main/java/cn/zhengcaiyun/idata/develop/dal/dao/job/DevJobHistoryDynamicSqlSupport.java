@@ -79,6 +79,13 @@ public final class DevJobHistoryDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
     public static final SqlColumn<String> user = devJobHistory.user;
 
+    /**
+     * Database Column Remarks:
+     *   application master container url地址
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.am_container_logs_url")
+    public static final SqlColumn<String> amContainerLogsUrl = devJobHistory.amContainerLogsUrl;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
     public static final class DevJobHistory extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -102,6 +109,8 @@ public final class DevJobHistoryDynamicSqlSupport {
         public final SqlColumn<String> applicationId = column("application_id", JDBCType.VARCHAR);
 
         public final SqlColumn<String> user = column("user", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> amContainerLogsUrl = column("am_container_logs_url", JDBCType.VARCHAR);
 
         public DevJobHistory() {
             super("dev_job_history");
