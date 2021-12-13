@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -56,8 +57,8 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     public static final int RESULT_PROCESS_DEFINITION_NAME_EXIST = 10168;
 
     @Autowired
-    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo) {
-        super(dsEntityMappingRepo, dsDependenceNodeRepo);
+    public WorkflowIntegrator(DSEntityMappingRepo dsEntityMappingRepo, DSDependenceNodeRepo dsDependenceNodeRepo, SystemConfigService systemConfigService) {
+        super(dsEntityMappingRepo, dsDependenceNodeRepo, systemConfigService);
     }
 
     @Override

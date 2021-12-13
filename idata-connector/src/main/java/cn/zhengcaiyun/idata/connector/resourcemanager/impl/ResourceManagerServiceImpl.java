@@ -25,6 +25,9 @@ import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.YarnApiAgent;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.param.QueryClusterAppParam;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.bean.ClusterApp;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.bean.ClusterMetrics;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import cn.zhengcaiyun.idata.system.dto.ConfigValueDto;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -47,10 +52,13 @@ import java.util.stream.Collectors;
 public class ResourceManagerServiceImpl implements ResourceManagerService {
 
     private final YarnApiAgent yarnApiAgent;
+    private final SystemConfigService systemConfigService;
 
     @Autowired
-    public ResourceManagerServiceImpl(YarnApiAgent yarnApiAgent) {
+    public ResourceManagerServiceImpl(YarnApiAgent yarnApiAgent,
+                                      SystemConfigService systemConfigService) {
         this.yarnApiAgent = yarnApiAgent;
+        this.systemConfigService = systemConfigService;
     }
 
 
@@ -111,7 +119,11 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     private String getYarnServiceUrl() {
-        return "";
+        ConfigDto configDto = systemConfigService.getSystemConfigByKey("htool-config");
+        checkState(Objects.nonNull(configDto) && !CollectionUtils.isEmpty(configDto.getValueOne()), "Yarn地址配置未配置，请在系统配置中配置");
+        ConfigValueDto valueDto = configDto.getValueOne().get("yarn.addr");
+        checkState(Objects.nonNull(valueDto) && StringUtils.isNotBlank(valueDto.getConfigValue()), "Yarn地址配置未配置，请在系统配置中配置");
+        return valueDto.getConfigValue();
     }
 
     private ClusterMetricsDto toMetricsDto(ClusterMetrics clusterMetrics) {

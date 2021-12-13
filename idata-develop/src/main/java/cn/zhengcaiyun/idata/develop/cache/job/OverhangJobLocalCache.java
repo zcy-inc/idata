@@ -72,7 +72,7 @@ public class OverhangJobLocalCache {
 
         List<JobDependence> jobDependenceList = jobDependenceRepo.queryJobs();
         Set<Long> dependedJobIdSet;
-        if (!CollectionUtils.isEmpty(jobDependenceList)) {
+        if (CollectionUtils.isEmpty(jobDependenceList)) {
             dependedJobIdSet = Sets.newHashSet();
         } else {
             dependedJobIdSet = jobDependenceList.stream()

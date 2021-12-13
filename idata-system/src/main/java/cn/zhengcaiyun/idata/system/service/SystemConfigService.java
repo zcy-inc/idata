@@ -33,9 +33,16 @@ import java.util.Map;
 
 public interface SystemConfigService {
     List<String> getConfigTypes();
+
     List<ConfigDto> getSystemConfigs(String configType);
+
+    ConfigDto getSystemConfigByKey(String configKey);
+
     SysFeature getFeature(String urlPath);
+
     boolean checkConnection(ConnectionDto connection);
+
     Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile xmlFile) throws IOException;
+
     List<ConfigDto> editSystemConfigs(List<ConfigDto> configs, String editor);
 }
