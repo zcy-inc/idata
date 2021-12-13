@@ -47,18 +47,19 @@ public interface DevJobHistoryMyDao {
             "</script>")
     void batchUpsert(List<DevJobHistory> list);
 
+    //"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
     @Select("<script>" +
             "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
             "select *, AVG(duration) as avg_duration " +
-            "from (select * from dev_job_history where start_time >= #{startDate} and finish_time <= #{endDate} order by duration desc limit #{top}) as t " +
+            "from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by duration desc limit #{top}) as t " +
             "group by t.job_id" +
             "</script>")
     List<JobHistoryDto> topDuration(String startDate, String endDate, int top);
 
     @Select("<script>" +
             "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
-            "select *, AVG(duration) as avg_duration " +
-            "from (select * from dev_job_history where start_time >= #{startDate} and finish_time <= #{endDate} order by avg_memory/4096, avg_vcores desc limit #{top}) as t " +
+            "select * " +
+            "from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by avg_memory/4096, avg_vcores desc limit #{top}) as t " +
             "group by t.job_id" +
             "</script>")
     List<JobHistoryDto> topResource(String startDate, String endDate, int top);
