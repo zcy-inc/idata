@@ -8,10 +8,14 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
+import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
+import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 import cn.zhengcaiyun.idata.operation.service.DashboardService;
 import cn.zhengcaiyun.idata.portal.model.response.StackedLineChartResponse;
 import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
+import cn.zhengcaiyun.idata.portal.model.response.ops.RankResourceConsumeResponse;
+import cn.zhengcaiyun.idata.portal.model.response.ops.RankTimeConsumeResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.JobOverviewResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.ResourceUsageResponse;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +26,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/p1/ops/dashboard")
@@ -107,7 +113,6 @@ public class DashboardController {
         return RestResult.success(response);
     }
 
-
     /**
      * YARN调度情况 看板
      * @return
@@ -130,6 +135,48 @@ public class DashboardController {
         response.getNameValueResponseList().add(new NameValueResponse<>("ready", response.getReady()));
 
         return RestResult.success(response);
+    }
+
+    /**
+     * 作业耗时TOP10
+     * @param recentDays 1：当日 7：近7天 30；近30天
+     * @return
+     */
+    @GetMapping("/rank/timeConsume")
+    public RestResult<List<RankTimeConsumeResponse>> timeConsumeRank(@RequestParam("recentDays") Integer recentDays) {
+        DateTime today = DateUtil.date();
+        DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
+        List<RankTimeConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeTime(startDate, today, 10);
+
+        List<RankTimeConsumeResponse> responseList = new ArrayList<>();
+        for (RankTimeConsumeDto dto : rankTimeConsumeDtos) {
+            RankTimeConsumeResponse response = new RankTimeConsumeResponse();
+            BeanUtils.copyProperties(dto, response);
+            responseList.add(response);
+        }
+
+        return RestResult.success(responseList);
+    }
+
+    /**
+     * 作业耗资源TOP10
+     * @param recentDays 1：当日 7：近7天 30；近30天
+     * @return
+     */
+    @GetMapping("/rank/resourceConsume")
+    public RestResult<List<RankResourceConsumeResponse>> resourceConsumeRank(@RequestParam("recentDays") Integer recentDays) {
+        DateTime today = DateUtil.date();
+        DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
+        List<RankResourceConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeResource(startDate, today, 10);
+
+        List<RankResourceConsumeResponse> responseList = new ArrayList<>();
+        for (RankResourceConsumeDto dto : rankTimeConsumeDtos) {
+            RankResourceConsumeResponse response = new RankResourceConsumeResponse();
+            BeanUtils.copyProperties(dto, response);
+            responseList.add(response);
+        }
+
+        return RestResult.success(responseList);
     }
 
 

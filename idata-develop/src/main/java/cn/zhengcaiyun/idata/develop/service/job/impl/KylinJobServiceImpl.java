@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.KylinJobBuildTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
@@ -51,10 +52,16 @@ public class KylinJobServiceImpl implements KylinJobService {
     public KylinJobDto save(KylinJobDto kylinJobDto, String operator) {
         checkArgument(kylinJobDto.getJobId() != null, "作业Id不能为空");
         checkArgument(StringUtils.isNotEmpty(kylinJobDto.getCubeName()), "cube名称不能为空");
-        // TODO 修改为查枚举并校验枚举
         checkArgument(StringUtils.isNotEmpty(kylinJobDto.getBuildType()), "构建类型不能为空");
+        checkArgument(KylinJobBuildTypeEnum.checkBuildTypeEnum(kylinJobDto.getBuildType()), "构建类型有误");
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(kylinJobDto.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+        if (kylinJobDto.getStartTime().getTime() <= 0) {
+            kylinJobDto.setStartTime(null);
+        }
+        if (kylinJobDto.getEndTime().getTime() <= 0) {
+            kylinJobDto.setEndTime(null);
+        }
 
         Integer version = kylinJobDto.getVersion();
         boolean startNewVersion = false;

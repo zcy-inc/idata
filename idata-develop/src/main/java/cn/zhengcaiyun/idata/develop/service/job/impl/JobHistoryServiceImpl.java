@@ -1,12 +1,15 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.PageUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -40,6 +43,18 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         List<DevJobHistory> list = devJobHistoryDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
         PageInfo<DevJobHistory> pageInfo = new PageInfo<>(list);
         return pageInfo;
+    }
+
+    @Override
+    public List<JobHistoryDto> topDuration(DateTime startDate, DateTime endDate, int top) {
+        List<JobHistoryDto> list = devJobHistoryMyDao.topDuration(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
+        return list;
+    }
+
+    @Override
+    public List<JobHistoryDto> topResource(DateTime startDate, DateTime endDate, int top) {
+        List<JobHistoryDto> list = devJobHistoryMyDao.topResource(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
+        return list;
     }
 
 }

@@ -159,6 +159,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         dto.setClusterId(app.getClusterId());
         dto.setApplicationType(app.getApplicationType());
         dto.setApplicationTags(app.getApplicationTags());
+        dto.setElapsedTime(app.getElapsedTime());
+        dto.setMemorySeconds(app.getMemorySeconds());
+        dto.setVcoreSeconds(app.getVcoreSeconds());
 
         Long startedTime = app.getStartedTime();
         if (Objects.nonNull(startedTime)) {
