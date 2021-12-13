@@ -297,10 +297,10 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String startStr = "";
         String endStr = "";
         if (startTime != null) {
-            startStr = DateUtil.format(startTime, "YYYY-MM-dd HH:mm:ss");
+            startStr = DateUtil.format(startTime, "yyyy-MM-dd HH:mm:ss");
         }
         if (endTime != null) {
-            endStr = DateUtil.format(endTime, "YYYY-MM-dd HH:mm:ss");
+            endStr = DateUtil.format(endTime, "yyyy-MM-dd HH:mm:ss");
         }
         String req_url = getDSBaseUrl(environment) + String.format("/projects/analysis/task-state-count?projectCode=%s&startDate=%s&endDate=%s", projectCode, startStr, endStr);
 

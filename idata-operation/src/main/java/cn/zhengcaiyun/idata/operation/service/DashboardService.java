@@ -2,9 +2,12 @@ package cn.zhengcaiyun.idata.operation.service;
 
 import cn.hutool.core.date.DateTime;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
+import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
+import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 
 import java.util.Date;
+import java.util.List;
 
 public interface DashboardService {
 
@@ -50,4 +53,20 @@ public interface DashboardService {
      * @return
      */
     JobStatisticDto getYarnTodayJobOverview();
+
+    /**
+     * 作业耗时TOP N
+     * @param startDate 开始时间
+     * @param endDate 结束时间
+     * @param top TOP N
+     */
+    List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top);
+
+    /**
+     * 作业耗资源 TOP N
+     * @param startDate 开始时间
+     * @param endDate 结束时间
+     * @param top TOP N
+     */
+    List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top);
 }

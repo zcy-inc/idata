@@ -99,6 +99,11 @@ public class ClusterAppDto {
     private LocalDateTime finishedTime;
 
     /**
+     * The elapsed time since the application started (in ms)
+     */
+    private Long elapsedTime;
+
+    /**
      * 集群应用总分配内存，单位：MB
      */
     private Integer allocatedMem;
@@ -107,6 +112,16 @@ public class ClusterAppDto {
      * 集群应用总分配核数
      */
     private Integer allocatedVCores;
+
+    /**
+     * The amount of memory the application has allocated (megabyte-seconds)
+     */
+    private Long memorySeconds;
+
+    /**
+     * The amount of CPU resources the application has allocated (virtual core-seconds)
+     */
+    private Long vcoreSeconds;
 
     public String getAppId() {
         return appId;
@@ -234,5 +249,29 @@ public class ClusterAppDto {
 
     public void setAllocatedVCores(Integer allocatedVCores) {
         this.allocatedVCores = allocatedVCores;
+    }
+
+    public Long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(Long elapsedTime) {
+        this.elapsedTime = elapsedTime;
+    }
+
+    public Long getMemorySeconds() {
+        return memorySeconds;
+    }
+
+    public void setMemorySeconds(Long memorySeconds) {
+        this.memorySeconds = memorySeconds;
+    }
+
+    public Long getVcoreSeconds() {
+        return vcoreSeconds;
+    }
+
+    public void setVcoreSeconds(Long vcoreSeconds) {
+        this.vcoreSeconds = vcoreSeconds;
     }
 }
