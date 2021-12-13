@@ -123,6 +123,11 @@ public class ClusterAppDto {
      */
     private Long vcoreSeconds;
 
+    /**
+     * The URL of the application master container logs
+     */
+    private String amContainerLogs;
+
     public String getAppId() {
         return appId;
     }
@@ -273,5 +278,13 @@ public class ClusterAppDto {
 
     public void setVcoreSeconds(Long vcoreSeconds) {
         this.vcoreSeconds = vcoreSeconds;
+    }
+
+    public String getAmContainerLogs() {
+        return amContainerLogs;
+    }
+
+    public void setAmContainerLogs(String amContainerLogs) {
+        this.amContainerLogs = amContainerLogs;
     }
 }

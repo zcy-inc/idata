@@ -162,6 +162,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         dto.setElapsedTime(app.getElapsedTime());
         dto.setMemorySeconds(app.getMemorySeconds());
         dto.setVcoreSeconds(app.getVcoreSeconds());
+        dto.setAmContainerLogs(app.getAmContainerLogs());
 
         Long startedTime = app.getStartedTime();
         if (Objects.nonNull(startedTime)) {
