@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
@@ -124,7 +125,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private JobStatisticDto getYarnJobOverview(Date startTime, Date endTime) {
-        List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(DateUtil.toLocalDateTime(startTime), DateUtil.toLocalDateTime(endTime));
+        List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(DateUtil.toLocalDateTime(startTime), DateUtil.toLocalDateTime(endTime), EnvEnum.prod);
         HashMap<YarnJobStatusEnum, Integer> map = Maps.newHashMap();
         list.forEach(e -> {
             YarnJobStatusEnum dsJobStatusEnum = YarnJobStatusEnum.getByYarnEnumCode(e.getState());
