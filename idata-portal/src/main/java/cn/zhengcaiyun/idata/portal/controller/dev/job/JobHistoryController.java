@@ -28,7 +28,7 @@ public class JobHistoryController {
     @ApiOperation("查看任务历史")
     @PostMapping("/page")
     public RestResult<Page<DevJobHistory>> pagingJobHistory(@RequestBody PageWrapper<IdRequest> pageWrapper) {
-        PageInfo<DevJobHistory> pageInfo = jobHistoryService.pagingJobHistory(pageWrapper.getCondition().getId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        PageInfo<DevJobHistory> pageInfo = jobHistoryService.pagingJobHistoryByJobId(pageWrapper.getCondition().getId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
         return RestResult.success(PageUtil.covertMine(pageInfo));
     }
 

@@ -72,6 +72,13 @@ public final class DevJobHistoryDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.application_id")
     public static final SqlColumn<String> applicationId = devJobHistory.applicationId;
 
+    /**
+     * Database Column Remarks:
+     *   启动应用的user
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
+    public static final SqlColumn<String> user = devJobHistory.user;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
     public static final class DevJobHistory extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -93,6 +100,8 @@ public final class DevJobHistoryDynamicSqlSupport {
         public final SqlColumn<Long> avgMemory = column("avg_memory", JDBCType.BIGINT);
 
         public final SqlColumn<String> applicationId = column("application_id", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> user = column("user", JDBCType.VARCHAR);
 
         public DevJobHistory() {
             super("dev_job_history");

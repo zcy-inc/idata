@@ -54,7 +54,7 @@ public interface DevJobHistoryMyDao {
             "from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by duration desc limit #{top}) as t " +
             "group by t.job_id" +
             "</script>")
-    List<JobHistoryDto> topDuration(String startDate, String endDate, int top);
+    List<JobHistoryDto> topDurationGroupByJobId(String startDate, String endDate, int top);
 
     @Select("<script>" +
             "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
@@ -62,7 +62,36 @@ public interface DevJobHistoryMyDao {
             "from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by avg_memory/4096, avg_vcores desc limit #{top}) as t " +
             "group by t.job_id" +
             "</script>")
-    List<JobHistoryDto> topResource(String startDate, String endDate, int top);
+    List<JobHistoryDto> topResourceGroupByJobId(String startDate, String endDate, int top);
+
+    @Select("<script>" +
+            "select t1.*, t2.name as jobName " +
+            "from ( " +
+            "      select * from dev_job_history where del = 0 and" +
+            "       <if test = 'startDateBegin != null'>" +
+            "           AND start_time <!CDATA[ >= ]]> #{startDateBegin} " +
+            "       </if>" +
+            "       <if test = 'startDateEnd != null'>" +
+            "           AND start_time <!CDATA[ <= ]]> #{startDateEnd} " +
+            "       </if>" +
+            "       <if test = 'finishDateBegin != null'>" +
+            "           AND finish_time <!CDATA[ >= ]]> #{finishDateBegin} " +
+            "       </if>" +
+            "       <if test = 'finishDateEnd != null'>" +
+            "           AND finish_time <!CDATA[ <= ]]> #{finishDateEnd} " +
+            "       </if>" +
+            "       <if test = 'jobStatus != null'>" +
+            "           AND final_status = #{jobStatus} " +
+            "       </if>" +
+            ") as t1 " +
+            "join (select * from dev_job_info where 1 = 1 " +
+            "       <if test = 'jobName != null'>" +
+            "           AND name like concat('%', #{jobName}, '%') " +
+            "       </if>" +
+            ") as t2 " +
+            "on t1.job_id = t2.id " +
+            "</script>")
+    List<JobHistoryDto> selectList(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus);
 }
 
 

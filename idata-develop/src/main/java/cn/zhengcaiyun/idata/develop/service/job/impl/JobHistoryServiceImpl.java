@@ -1,11 +1,7 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.TypeReference;
-import cn.hutool.core.util.PageUtil;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
@@ -37,9 +33,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public PageInfo<DevJobHistory> pagingJobHistory(Long id, Integer pageNum, Integer pageSize) {
+    public PageInfo<DevJobHistory> pagingJobHistoryByJobId(Long jobId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isEqualTo(id));
+        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isEqualTo(jobId));
         List<DevJobHistory> list = devJobHistoryDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
         PageInfo<DevJobHistory> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -47,14 +43,22 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
     @Override
     public List<JobHistoryDto> topDuration(DateTime startDate, DateTime endDate, int top) {
-        List<JobHistoryDto> list = devJobHistoryMyDao.topDuration(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
+        List<JobHistoryDto> list = devJobHistoryMyDao.topDurationGroupByJobId(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
         return list;
     }
 
     @Override
     public List<JobHistoryDto> topResource(DateTime startDate, DateTime endDate, int top) {
-        List<JobHistoryDto> list = devJobHistoryMyDao.topResource(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
+        List<JobHistoryDto> list = devJobHistoryMyDao.topResourceGroupByJobId(DateUtil.format(startDate, "yyyy-MM-dd"), DateUtil.format(endDate, "yyyy-MM-dd"), top);
         return list;
+    }
+
+    @Override
+    public PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<JobHistoryDto> list = devJobHistoryMyDao.selectList(startDateBegin, startDateEnd, finishDateBegin, finishDateEnd, jobName, jobStatus);
+        PageInfo<JobHistoryDto> pageInfo = new PageInfo<>(list);
+        return pageInfo;
     }
 
 }

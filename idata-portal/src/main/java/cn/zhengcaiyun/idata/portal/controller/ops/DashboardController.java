@@ -4,31 +4,35 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
+import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 import cn.zhengcaiyun.idata.operation.service.DashboardService;
+import cn.zhengcaiyun.idata.portal.model.request.PageWrapper;
+import cn.zhengcaiyun.idata.portal.model.request.ops.JobHistoryRequest;
 import cn.zhengcaiyun.idata.portal.model.response.StackedLineChartResponse;
 import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
-import cn.zhengcaiyun.idata.portal.model.response.ops.RankResourceConsumeResponse;
-import cn.zhengcaiyun.idata.portal.model.response.ops.RankTimeConsumeResponse;
-import cn.zhengcaiyun.idata.portal.model.response.ops.JobOverviewResponse;
-import cn.zhengcaiyun.idata.portal.model.response.ops.ResourceUsageResponse;
+import cn.zhengcaiyun.idata.portal.model.response.ops.*;
+import cn.zhengcaiyun.idata.portal.util.PageUtil;
+import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/p1/ops/dashboard")
@@ -39,6 +43,9 @@ public class DashboardController {
 
     @Autowired
     private DashboardService dashboardService;
+
+    @Autowired
+    private JobHistoryService jobHistoryService;
 
     /**
      * 当前cpu的使用情况
@@ -177,6 +184,27 @@ public class DashboardController {
         }
 
         return RestResult.success(responseList);
+    }
+
+    /**
+     * 作业历史查询
+     * @param pageWrapper
+     * @return
+     */
+    @PostMapping("/page/jobHistory")
+    public RestResult<Page<JobHistoryResponse>> jobHistory(@RequestBody PageWrapper<JobHistoryRequest> pageWrapper) {
+        JobHistoryRequest condition = pageWrapper.getCondition();
+        PageInfo<JobHistoryDto> pageInfo = jobHistoryService.pagingJobHistory(condition.getStartDateBegin(), condition.getStartDateEnd(),
+                condition.getFinishDateBegin(), condition.getFinishDateEnd(), condition.getJobName(), condition.getJobStatus(),
+                pageWrapper.getPageNum(), pageWrapper.getPageSize());
+
+        PageInfo<JobHistoryResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {
+            JobHistoryResponse response = new JobHistoryResponse();
+            BeanUtils.copyProperties(s, response);
+            return response;
+        });
+
+        return RestResult.success(PageUtil.covertMine(responsePageInfo));
     }
 
 

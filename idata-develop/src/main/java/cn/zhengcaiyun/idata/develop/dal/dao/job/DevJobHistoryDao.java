@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevJobHistoryDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
-    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, finalStatus, avgVcores, avgMemory, applicationId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, finalStatus, avgVcores, avgMemory, applicationId, user);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -66,7 +66,8 @@ public interface DevJobHistoryDao {
         @Result(column="final_status", property="finalStatus", jdbcType=JdbcType.VARCHAR),
         @Result(column="avg_vcores", property="avgVcores", jdbcType=JdbcType.DOUBLE),
         @Result(column="avg_memory", property="avgMemory", jdbcType=JdbcType.BIGINT),
-        @Result(column="application_id", property="applicationId", jdbcType=JdbcType.VARCHAR)
+        @Result(column="application_id", property="applicationId", jdbcType=JdbcType.VARCHAR),
+        @Result(column="user", property="user", jdbcType=JdbcType.VARCHAR)
     })
     List<DevJobHistory> selectMany(SelectStatementProvider selectStatement);
 
@@ -103,6 +104,7 @@ public interface DevJobHistoryDao {
             .map(avgVcores).toProperty("avgVcores")
             .map(avgMemory).toProperty("avgMemory")
             .map(applicationId).toProperty("applicationId")
+            .map(user).toProperty("user")
         );
     }
 
@@ -118,6 +120,7 @@ public interface DevJobHistoryDao {
             .map(avgVcores).toPropertyWhenPresent("avgVcores", record::getAvgVcores)
             .map(avgMemory).toPropertyWhenPresent("avgMemory", record::getAvgMemory)
             .map(applicationId).toPropertyWhenPresent("applicationId", record::getApplicationId)
+            .map(user).toPropertyWhenPresent("user", record::getUser)
         );
     }
 
@@ -158,7 +161,8 @@ public interface DevJobHistoryDao {
                 .set(finalStatus).equalTo(record::getFinalStatus)
                 .set(avgVcores).equalTo(record::getAvgVcores)
                 .set(avgMemory).equalTo(record::getAvgMemory)
-                .set(applicationId).equalTo(record::getApplicationId);
+                .set(applicationId).equalTo(record::getApplicationId)
+                .set(user).equalTo(record::getUser);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
@@ -171,7 +175,8 @@ public interface DevJobHistoryDao {
                 .set(finalStatus).equalToWhenPresent(record::getFinalStatus)
                 .set(avgVcores).equalToWhenPresent(record::getAvgVcores)
                 .set(avgMemory).equalToWhenPresent(record::getAvgMemory)
-                .set(applicationId).equalToWhenPresent(record::getApplicationId);
+                .set(applicationId).equalToWhenPresent(record::getApplicationId)
+                .set(user).equalToWhenPresent(record::getUser);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
@@ -186,6 +191,7 @@ public interface DevJobHistoryDao {
             .set(avgVcores).equalTo(record::getAvgVcores)
             .set(avgMemory).equalTo(record::getAvgMemory)
             .set(applicationId).equalTo(record::getApplicationId)
+            .set(user).equalTo(record::getUser)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -202,6 +208,7 @@ public interface DevJobHistoryDao {
             .set(avgVcores).equalToWhenPresent(record::getAvgVcores)
             .set(avgMemory).equalToWhenPresent(record::getAvgMemory)
             .set(applicationId).equalToWhenPresent(record::getApplicationId)
+            .set(user).equalToWhenPresent(record::getUser)
             .where(id, isEqualTo(record::getId))
         );
     }

@@ -23,9 +23,9 @@
 <!--            <property name="enableSubPackages" value="false"/>-->
 <!--        </sqlMapGenerator>-->
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.dag" targetProject="src/main/java"/>
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java"/>
 
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.dag" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java"/>
 
 
 <!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
@@ -58,10 +58,10 @@
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
 
-        <table tableName="dev_dag_dependence" domainObjectName="DAGDependence" mapperName="DAGDependenceDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
+<!--        <table tableName="dev_dag_dependence" domainObjectName="DAGDependence" mapperName="DAGDependenceDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
 
 <!--        <table tableName="dev_dag_event_log" domainObjectName="DAGEventLog" mapperName="DAGEventLogDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
@@ -124,8 +124,8 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
-<!--        <table tableName="dev_job_history" mapperName="DevJobHistoryDao">-->
-<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
-<!--        </table>-->
+        <table tableName="dev_job_history" mapperName="DevJobHistoryDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+        </table>
     </context>
 </generatorConfiguration>

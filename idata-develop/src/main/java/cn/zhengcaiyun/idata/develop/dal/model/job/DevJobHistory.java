@@ -71,6 +71,13 @@ public class DevJobHistory {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.application_id")
     private String applicationId;
 
+    /**
+     * Database Column Remarks:
+     *   启动应用的user
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
+    private String user;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.id")
     public Long getId() {
         return id;
@@ -169,5 +176,15 @@ public class DevJobHistory {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.application_id")
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
+    public String getUser() {
+        return user;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.user")
+    public void setUser(String user) {
+        this.user = user;
     }
 }

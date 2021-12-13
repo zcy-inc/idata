@@ -24,7 +24,7 @@ public interface JobHistoryService {
      * @param pageSize
      * @return
      */
-    PageInfo<DevJobHistory> pagingJobHistory(Long id, Integer pageNum, Integer pageSize);
+    PageInfo<DevJobHistory> pagingJobHistoryByJobId(Long jobId, Integer pageNum, Integer pageSize);
 
     /**
      * topN分组耗时duration
@@ -43,4 +43,18 @@ public interface JobHistoryService {
      * @return
      */
     List<JobHistoryDto> topResource(DateTime startDate, DateTime endDate, int top);
+
+    /**
+     * 作业历史分页
+     * @param startDateBegin
+     * @param startDateEnd
+     * @param finishDateBegin
+     * @param finishDateEnd
+     * @param jobName
+     * @param jobStatus
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus, Integer pageNum, Integer pageSize);
 }
