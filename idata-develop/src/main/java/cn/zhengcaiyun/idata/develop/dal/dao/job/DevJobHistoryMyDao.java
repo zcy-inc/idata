@@ -67,18 +67,19 @@ public interface DevJobHistoryMyDao {
     @Select("<script>" +
             "select t1.*, t2.name as jobName " +
             "from ( " +
-            "      select * from dev_job_history where del = 0 and" +
+            "      select * from dev_job_history where del = 0 " +
+            "       and" +
             "       <if test = 'startDateBegin != null'>" +
-            "           AND start_time <!CDATA[ >= ]]> #{startDateBegin} " +
+            "           AND <![CDATA[start_time  >=  #{startDateBegin} ]]>" +
             "       </if>" +
             "       <if test = 'startDateEnd != null'>" +
-            "           AND start_time <!CDATA[ <= ]]> #{startDateEnd} " +
+            "           AND start_time <![CDATA[ <= ]]> #{startDateEnd} " +
             "       </if>" +
             "       <if test = 'finishDateBegin != null'>" +
-            "           AND finish_time <!CDATA[ >= ]]> #{finishDateBegin} " +
+            "           AND finish_time <![CDATA[ >= ]]> #{finishDateBegin} " +
             "       </if>" +
             "       <if test = 'finishDateEnd != null'>" +
-            "           AND finish_time <!CDATA[ <= ]]> #{finishDateEnd} " +
+            "           AND finish_time <![CDATA[ <= ]]> #{finishDateEnd} " +
             "       </if>" +
             "       <if test = 'jobStatus != null'>" +
             "           AND final_status = #{jobStatus} " +
