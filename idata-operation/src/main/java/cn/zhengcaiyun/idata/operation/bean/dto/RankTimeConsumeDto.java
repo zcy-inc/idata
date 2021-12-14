@@ -36,6 +36,11 @@ public class RankTimeConsumeDto {
      */
     private Date finishTime;
 
+    /**
+     *   application master container url地址
+     */
+    private String amContainerLogsUrl;
+
     public Long getJobId() {
         return jobId;
     }
@@ -84,5 +89,11 @@ public class RankTimeConsumeDto {
         this.finishTime = finishTime;
     }
 
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
 
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
+    }
 }

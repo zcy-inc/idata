@@ -58,11 +58,11 @@ public class DashboardController {
         ResourceUsageResponse response = new ResourceUsageResponse();
         BeanUtils.copyProperties(clusterMetricsDto, response);
 
-        BigDecimal memUsageRate = NumberUtil.round(response.getAllocatedMem() / response.getTotalMem(), 2);
-        response.setMemUsageRate(memUsageRate.doubleValue());
+        BigDecimal memUsageRate = NumberUtil.div(response.getAllocatedMem(), response.getTotalMem(), 4);
+        response.setMemUsageRate(NumberUtil.round(NumberUtil.mul(memUsageRate, 100), 2) + "%");
 
-        BigDecimal vCoreUsageRate = NumberUtil.round(response.getAllocatedVCores() / response.getTotalVCores(), 2);
-        response.setvCoreUsageRate(vCoreUsageRate.doubleValue());
+        BigDecimal vCoreUsageRate = NumberUtil.div(response.getAllocatedVCores(), response.getTotalVCores(), 4);
+        response.setvCoreUsageRate(NumberUtil.round(NumberUtil.mul(vCoreUsageRate, 100), 2) + "%");
         return RestResult.success(response);
     }
 
@@ -81,7 +81,6 @@ public class DashboardController {
         response.setTotal(total);
 
         //设置饼图
-        response.getNameValueResponseList().add(new NameValueResponse<>("total", response.getTotal()));
         response.getNameValueResponseList().add(new NameValueResponse<>("running", response.getRunning()));
         response.getNameValueResponseList().add(new NameValueResponse<>("failure", response.getFailure()));
         response.getNameValueResponseList().add(new NameValueResponse<>("success", response.getSuccess()));
@@ -96,14 +95,18 @@ public class DashboardController {
      * state 1：队列 2：运行中 6：失败  7：成功  -1：其他
      * @return
      */
-    @GetMapping("/page/jobSchedule")
-    public RestResult<Page<DsJobSummaryResponse>> pageJobSchedule(@RequestBody PageWrapper<JobStateRequest> pageWrapper) {
-        Page<JobHistoryDto> pageJobSchedule = dashboardService.pageJobSchedule(pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+    @PostMapping("/page/jobSchedule")
+    public RestResult<Page<DsJobSummaryResponse>> pageJobSchedule(@RequestBody PageWrapper<JobStateRequest> pageWrapper) throws NoSuchFieldException {
+        // 只查真线
+        String env = EnvEnum.prod.name();
+        Page<JobHistoryDto> pageJobSchedule = dashboardService.pageJobSchedule(env, pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
         Page<DsJobSummaryResponse> responsePage = PageUtil.convertType(pageJobSchedule, s -> {
             DsJobSummaryResponse response = new DsJobSummaryResponse();
             response.setJobId(s.getJobId());
             response.setJobStatus(s.getFinalStatus());
             response.setJobName(s.getJobName());
+            response.setTaskId(s.getJobInstanceId());
+            response.setEnvironment(env);
             return response;
         });
         return RestResult.success(responsePage);
@@ -153,7 +156,6 @@ public class DashboardController {
         response.setTotal(totalJob);
 
         //设置饼图
-        response.getNameValueResponseList().add(new NameValueResponse<>("total", response.getTotal()));
         response.getNameValueResponseList().add(new NameValueResponse<>("running", response.getRunning()));
         response.getNameValueResponseList().add(new NameValueResponse<>("failure", response.getFailure()));
         response.getNameValueResponseList().add(new NameValueResponse<>("success", response.getSuccess()));
@@ -168,14 +170,15 @@ public class DashboardController {
      * @param
      * @return
      */
-    @GetMapping("/page/yarn")
-    public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper) {
+    @PostMapping("/page/yarn")
+    public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper) throws NoSuchFieldException {
         Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
         Page<YarnJobSummaryResponse> responsePage = PageUtil.convertType(pageYarnJob, s -> {
             YarnJobSummaryResponse response = new YarnJobSummaryResponse();
             response.setJobId(s.getJobId());
             response.setJobStatus(s.getFinalStatus());
             response.setJobName(s.getJobName());
+            response.setAmContainerLogsUrl(s.getAmContainerLogsUrl());
             return response;
         });
         return RestResult.success(responsePage);
@@ -238,6 +241,8 @@ public class DashboardController {
         PageInfo<JobHistoryResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {
             JobHistoryResponse response = new JobHistoryResponse();
             BeanUtils.copyProperties(s, response);
+            // MB转GB
+            response.setAvgMemory(response.getAvgMemory()/1024);
             return response;
         });
 

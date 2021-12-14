@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto;
 
 public class JobRunOverviewDto {
 
+    // jobInstanceId
     Long id;
 
     /**
@@ -10,8 +11,6 @@ public class JobRunOverviewDto {
     private String name;
 
     private Long jobId;
-
-    private String jobInstanceId;
 
     private String state;
 
@@ -35,14 +34,6 @@ public class JobRunOverviewDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getJobInstanceId() {
-        return jobInstanceId;
-    }
-
-    public void setJobInstanceId(String jobInstanceId) {
-        this.jobInstanceId = jobInstanceId;
     }
 
     public String getState() {

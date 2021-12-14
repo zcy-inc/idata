@@ -18,7 +18,7 @@ public class ResourceUsageResponse {
     /**
      * 内存使用率
      */
-    private double memUsageRate;
+    private String memUsageRate;
 
     /**
      * The number of allocated virtual cores
@@ -33,7 +33,7 @@ public class ResourceUsageResponse {
     /**
      * cpu使用率
      */
-    private double vCoreUsageRate;
+    private String vCoreUsageRate;
 
     public Long getAllocatedMem() {
         return allocatedMem;
@@ -67,19 +67,19 @@ public class ResourceUsageResponse {
         this.totalVCores = totalVCores;
     }
 
-    public double getMemUsageRate() {
+    public String getMemUsageRate() {
         return memUsageRate;
     }
 
-    public void setMemUsageRate(double memUsageRate) {
+    public void setMemUsageRate(String memUsageRate) {
         this.memUsageRate = memUsageRate;
     }
 
-    public double getvCoreUsageRate() {
+    public String getvCoreUsageRate() {
         return vCoreUsageRate;
     }
 
-    public void setvCoreUsageRate(double vCoreUsageRate) {
+    public void setvCoreUsageRate(String vCoreUsageRate) {
         this.vCoreUsageRate = vCoreUsageRate;
     }
 }

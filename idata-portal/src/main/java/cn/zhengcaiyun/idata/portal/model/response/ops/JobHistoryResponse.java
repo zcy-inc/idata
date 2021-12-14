@@ -58,7 +58,7 @@ public class JobHistoryResponse {
 
     /**
      * Database Column Remarks:
-     *   作业平均消耗内存（MB）
+     *   作业平均消耗内存（GB）
      */
     private Long avgMemory;
 
@@ -78,6 +78,11 @@ public class JobHistoryResponse {
      *   application master container url地址
      */
     private String amContainerLogsUrl;
+
+    /**
+     * 数仓分层
+     */
+    private String layer;
 
     public Long getId() {
         return id;
@@ -181,5 +186,13 @@ public class JobHistoryResponse {
 
     public void setAmContainerLogsUrl(String amContainerLogsUrl) {
         this.amContainerLogsUrl = amContainerLogsUrl;
+    }
+
+    public String getLayer() {
+        return layer;
+    }
+
+    public void setLayer(String layer) {
+        this.layer = layer;
     }
 }

@@ -79,7 +79,7 @@ public interface DashboardService {
      * @param pageSize
      * @return
      */
-    Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize);
+    Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize) throws NoSuchFieldException;
 
     /**
      * ds作业分页　
@@ -88,5 +88,5 @@ public interface DashboardService {
      * @param pageSize
      * @return
      */
-    Page<JobHistoryDto> pageJobSchedule(Integer state, Integer pageNum, Integer pageSize);
+    Page<JobHistoryDto> pageJobSchedule(String env, Integer state, Integer pageNum, Integer pageSize) throws NoSuchFieldException;
 }

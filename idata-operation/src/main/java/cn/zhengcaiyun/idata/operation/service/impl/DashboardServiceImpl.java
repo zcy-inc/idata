@@ -19,6 +19,7 @@ import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverv
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
+import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankResourceConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
@@ -50,6 +51,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private JobHistoryService jobHistoryService;
+
+    @Autowired
+    private JobInfoService jobInfoService;
 
     @Override
     public Integer getDsTotalJob(String environment) {
@@ -96,10 +100,17 @@ public class DashboardServiceImpl implements DashboardService {
 
             xAxis.add(dateTime.toDateStr());
 
-            BigDecimal fail = NumberUtil.round(dsOverviewDto.getFailure() / dsOverviewDto.getSum(), 2);
-            BigDecimal success = NumberUtil.round(dsOverviewDto.getSuccess() / dsOverviewDto.getSum(), 2);
-            successSubList.add(fail.toString() + "%");
-            failSubList.add(success.toString() + "%");
+            Integer sum = dsOverviewDto.getSum();
+            if (sum == 0) {
+                failSubList.add("0%");
+                successSubList.add("0%");
+                continue;
+            }
+            BigDecimal fail = NumberUtil.div(dsOverviewDto.getFailure(), sum, 4);
+            failSubList.add(NumberUtil.round(NumberUtil.mul(fail, 100), 2) + "%");
+
+            BigDecimal success = NumberUtil.div(dsOverviewDto.getSuccess(), sum, 4);
+            successSubList.add(NumberUtil.round(NumberUtil.mul(success, 100), 2) + "%");
         }
 
         SfStackedLineDto dto = new SfStackedLineDto();
@@ -142,15 +153,17 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top) {
         DateTime today = DateUtil.date();
-        List<RankTimeConsumeDto> rankTimeConsumeDtoList = new ArrayList<>();
+        List<RankTimeConsumeDto> pastRankTimeConsumeDtoList = new ArrayList<>();
 
-        // 小于当天
+        // 包含过去
         boolean pastTime = DateUtil.compare(startDate, today) < 0;
+        // 包含当天
+        boolean isToday = DateUtil.isSameDay(today, endDate);
         if (pastTime) {
             // 包含过去的日期 ———— 查数据库
             List<JobHistoryDto> devJobHistoryList = jobHistoryService.topDuration(startDate, endDate, top);
             if (CollectionUtils.isNotEmpty(devJobHistoryList)) {
-                rankTimeConsumeDtoList.addAll(devJobHistoryList.stream()
+                pastRankTimeConsumeDtoList.addAll(devJobHistoryList.stream()
                         .map(e -> {
                             RankTimeConsumeDto dto = new RankTimeConsumeDto();
                             BeanUtils.copyProperties(e, dto);
@@ -158,9 +171,13 @@ public class DashboardServiceImpl implements DashboardService {
                         }).collect(Collectors.toList()));
             }
         }
+        // 如果仅包含过去，直接返回
+        if (pastTime && !isToday) {
+            return pastRankTimeConsumeDtoList;
+        }
 
+        List<RankTimeConsumeDto> todayRankTimeConsumeDtoList = new ArrayList<>();
         // TODO：此处当天实时查询取出的数据已经被分组过了，所以如果一天内执行多次的话，平均时间会不准（当天短时间的任务被忽略掉）
-        boolean isToday = DateUtil.isSameDay(today, endDate);
         if (isToday) {
             //包含查询当天的 ———— 实时查当天yarn
             LocalDateTime startLocalDate = DateUtil.beginOfDay(today).toLocalDateTime();
@@ -168,6 +185,7 @@ public class DashboardServiceImpl implements DashboardService {
             List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(startLocalDate, endLocalDate, EnvEnum.prod);
             Map<Long, Optional<ClusterAppDto>> map = list.stream().collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getElapsedTime))));
 
+            List<RankTimeConsumeDto> tmpList = new ArrayList<>();
             map.forEach((k, v) -> {
                 if (v.isPresent()) {
                     ClusterAppDto clusterAppDto = v.get();
@@ -180,17 +198,24 @@ public class DashboardServiceImpl implements DashboardService {
                     dto.setStartTime(DateUtil.parse(startTimeStr, DatePattern.NORM_DATETIME_PATTERN));
                     String finishTimeStr = LocalDateTimeUtil.format(clusterAppDto.getFinishedTime(), DatePattern.NORM_DATETIME_FORMATTER);
                     dto.setFinishTime(DateUtil.parse(finishTimeStr, DatePattern.NORM_DATETIME_PATTERN));
-                    rankTimeConsumeDtoList.add(dto);
+                    dto.setAmContainerLogsUrl(clusterAppDto.getAmContainerLogs());
+                    tmpList.add(dto);
                 }
             });
+            todayRankTimeConsumeDtoList = tmpList.stream().sorted((e1, e2) -> e2.getDuration() >= e1.getDuration() ? 1 : -1).limit(top).collect(Collectors.toList());
         }
 
-        // 此处是优化，如果时间段不同时满足既包含当天也包含过去日期的，直接返回，不需要后续的再次内存中聚合计算
-        if (!isToday || !pastTime) {
-           return rankTimeConsumeDtoList;
+        // 如果仅包含当天，直接返回
+        if (isToday && !pastTime) {
+            // 排序再
+           return todayRankTimeConsumeDtoList;
         }
 
         // 再一次分组，确保jobId数据不重复，取出top的duration
+        List<RankTimeConsumeDto> rankTimeConsumeDtoList = new ArrayList<>();
+        rankTimeConsumeDtoList.addAll(pastRankTimeConsumeDtoList);
+        rankTimeConsumeDtoList.addAll(todayRankTimeConsumeDtoList);
+
         Map<Long, Optional<RankTimeConsumeDto>> map = rankTimeConsumeDtoList
                 .stream()
                 .collect(Collectors.groupingBy(RankTimeConsumeDto::getJobId, Collectors.maxBy(Comparator.comparingLong(RankTimeConsumeDto::getDuration))));
@@ -212,15 +237,17 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top) {
         DateTime today = DateUtil.date();
-        List<RankResourceConsumeDto> rankResourceConsumeDtoList = new ArrayList<>();
+        List<RankResourceConsumeDto> pastRankResourceConsumeDtoList = new ArrayList<>();
 
-        // 小于当天
+        // 包含过去
         boolean pastTime = DateUtil.compare(startDate, today) < 0;
+        // 包含当天
+        boolean isToday = DateUtil.isSameDay(today, endDate);
         if (pastTime) {
             // 包含过去的日期 ———— 查数据库
             List<JobHistoryDto> devJobHistoryList = jobHistoryService.topResource(startDate, endDate, top);
             if (CollectionUtils.isNotEmpty(devJobHistoryList)) {
-                rankResourceConsumeDtoList.addAll(devJobHistoryList.stream()
+                pastRankResourceConsumeDtoList.addAll(devJobHistoryList.stream()
                         .map(e -> {
                             RankResourceConsumeDto dto = new RankResourceConsumeDto();
                             BeanUtils.copyProperties(e, dto);
@@ -228,15 +255,20 @@ public class DashboardServiceImpl implements DashboardService {
                         }).collect(Collectors.toList()));
             }
         }
+        // 如果仅包含过去，直接返回
+        if (pastTime && !isToday) {
+            return pastRankResourceConsumeDtoList;
+        }
 
-        boolean isToday = DateUtil.isSameDay(today, endDate);
+        List<RankResourceConsumeDto> todayRankResourceConsumeDtoList = new ArrayList<>();
         if (isToday) {
             //包含查询当天的 ———— 实时查当天yarn
             LocalDateTime startLocalDate = DateUtil.beginOfDay(today).toLocalDateTime();
             LocalDateTime endLocalDate = DateUtil.endOfDay(today).toLocalDateTime();
             List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(startLocalDate, endLocalDate, EnvEnum.prod);
-            Map<Long, Optional<ClusterAppDto>> map = list.stream().collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getElapsedTime))));
+            Map<Long, Optional<ClusterAppDto>> map = list.stream().collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getMemorySeconds))));
 
+            List<RankResourceConsumeDto> tmpList = new ArrayList<>();
             map.forEach((k, v) -> {
                 if (v.isPresent()) {
                     ClusterAppDto clusterAppDto = v.get();
@@ -252,17 +284,23 @@ public class DashboardServiceImpl implements DashboardService {
                     dto.setStartTime(DateUtil.parse(startTimeStr, DatePattern.NORM_DATETIME_PATTERN));
                     String finishTimeStr = LocalDateTimeUtil.format(clusterAppDto.getFinishedTime(), DatePattern.NORM_DATETIME_FORMATTER);
                     dto.setFinishTime(DateUtil.parse(finishTimeStr, DatePattern.NORM_DATETIME_PATTERN));
-                    rankResourceConsumeDtoList.add(dto);
+                    dto.setAmContainerLogsUrl(clusterAppDto.getAmContainerLogs());
+                    tmpList.add(dto);
                 }
             });
+            todayRankResourceConsumeDtoList = tmpList.stream().sorted((e1, e2) -> e2.getAvgMemory() >= e1.getAvgMemory() ? 1 : -1).limit(top).collect(Collectors.toList());
         }
 
-        // 此处是优化，如果时间段不同时满足既包含当天也包含过去日期的，直接返回，不需要后续的再次内存中聚合计算
+        // 如果仅包含当天，直接返回
         if (!isToday || !pastTime) {
-            return rankResourceConsumeDtoList;
+            return todayRankResourceConsumeDtoList;
         }
 
         // 再一次分组，确保jobId数据不重复，取出top的avg_mem
+        List<RankResourceConsumeDto> rankResourceConsumeDtoList = new ArrayList<>();
+        rankResourceConsumeDtoList.addAll(pastRankResourceConsumeDtoList);
+        rankResourceConsumeDtoList.addAll(todayRankResourceConsumeDtoList);
+
         Map<Long, Optional<RankResourceConsumeDto>> map = rankResourceConsumeDtoList
                 .stream()
                 .collect(Collectors.groupingBy(RankResourceConsumeDto::getJobId, Collectors.maxBy(Comparator.comparingLong(RankResourceConsumeDto::getAvgMemory))));
@@ -277,7 +315,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize) {
+    public Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize) throws NoSuchFieldException {
         LocalDateTime startTime = DateUtil.beginOfDay(new Date()).toLocalDateTime();
         LocalDateTime endTime = DateUtil.endOfDay(new Date()).toLocalDateTime();
         List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
@@ -288,29 +326,40 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(e -> {
                     JobHistoryDto dto = new JobHistoryDto();
                     dto.setJobId(e.getJobId());
+                    dto.setFinalStatus(e.getState());
                     dto.setAmContainerLogsUrl(e.getAmContainerLogs());
                     return dto;
                 }).collect(Collectors.toList());
         Page<JobHistoryDto> page = PaginationInMemory.of(dtoList).paging(PageParam.of(pageNum, pageSize));
+        jobInfoService.fillJobName(page.getContent(), JobHistoryDto.class, "jobId", "jobName");
         return page;
     }
 
     @Override
-    public Page<JobHistoryDto> pageJobSchedule(Integer state, Integer pageNum, Integer pageSize) {
-        List<JobRunOverviewDto> jobLatestRecordList = jobScheduleManager.getJobLatestRecords(EnvEnum.prod.name(), 5000);
-        List<String> stringList = DsJobStatusEnum.getDsDescriptionsByValue(state);
+    public Page<JobHistoryDto> pageJobSchedule(String env, Integer state, Integer pageNum, Integer pageSize) throws NoSuchFieldException {
+        List<JobRunOverviewDto> jobLatestRecordList = jobScheduleManager.getJobLatestRecords(env, 5000);
+        List<String> stringList = DsJobStatusEnum.getDsEnumCodeByValue(state);
         List<JobHistoryDto> dtoList = jobLatestRecordList
                 .stream()
-                .filter(e -> stringList.contains(e.getState())
+                .filter(e -> stringList.contains(StringUtils.upperCase(e.getState()))
                         && (e.getEndTime() != null && DateUtil.parse(e.getEndTime()).after(DateUtil.beginOfDay(new Date()))))
                 .map(e -> {
                     JobHistoryDto dto = new JobHistoryDto();
                     dto.setJobId(e.getJobId());
-                    dto.setJobInstanceId(e.getJobInstanceId());
+                    dto.setJobInstanceId(e.getId());
                     dto.setFinalStatus(e.getState());
                     return dto;
                 }).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(dtoList)) {
+            Page<JobHistoryDto> page = new Page<>();
+            page.setPageNum(pageNum);
+            page.setPageSize(pageSize);
+            page.setPages(0);
+            page.setContent(new ArrayList<>());
+            return page;
+        }
         Page<JobHistoryDto> page = PaginationInMemory.of(dtoList).paging(PageParam.of(pageNum, pageSize));
+        jobInfoService.fillJobName(page.getContent(), JobHistoryDto.class, "jobId", "jobName");
         return page;
     }
 
@@ -323,11 +372,11 @@ public class DashboardServiceImpl implements DashboardService {
         });
 
         JobStatisticDto dto = new JobStatisticDto();
-        dto.setFailure(map.getOrDefault(DsJobStatusEnum.FAIL, 0));
-        dto.setOther(map.getOrDefault(DsJobStatusEnum.OTHER, 0));
-        dto.setRunning(map.getOrDefault(DsJobStatusEnum.RUNNING, 0));
-        dto.setReady(map.getOrDefault(DsJobStatusEnum.READY, 0));
-        dto.setSuccess(map.getOrDefault(DsJobStatusEnum.SUCCESS, 0));
+        dto.setFailure(map.getOrDefault(YarnJobStatusEnum.FAIL, 0));
+        dto.setOther(map.getOrDefault(YarnJobStatusEnum.OTHER, 0));
+        dto.setRunning(map.getOrDefault(YarnJobStatusEnum.RUNNING, 0));
+        dto.setReady(map.getOrDefault(YarnJobStatusEnum.PENDING, 0));
+        dto.setSuccess(map.getOrDefault(YarnJobStatusEnum.SUCCESS, 0));
         return dto;
     }
 

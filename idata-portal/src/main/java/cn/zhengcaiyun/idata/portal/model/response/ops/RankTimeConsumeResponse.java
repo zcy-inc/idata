@@ -39,6 +39,11 @@ public class RankTimeConsumeResponse {
      */
     private String avgDurationStr;
 
+    /**
+     *   application master container url地址
+     */
+    private String amContainerLogsUrl;
+
     public Long getJobId() {
         return jobId;
     }
@@ -99,6 +104,14 @@ public class RankTimeConsumeResponse {
             return minutes + ":" + seconds;
         }
         return null;
+    }
+
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
     }
 }
 

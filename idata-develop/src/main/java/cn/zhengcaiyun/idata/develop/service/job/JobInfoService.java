@@ -21,10 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDetailsDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobDryRunDto;
-import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.job.OverhangJobWrapperDto;
+import cn.zhengcaiyun.idata.develop.dto.job.*;
 
 import java.util.List;
 import java.util.Map;
@@ -72,4 +69,14 @@ public interface JobInfoService {
     Map<Long, String> getNameMapByIds(Set<Long> accessIdSet);
 
     OverhangJobWrapperDto pagingOverhangJob(JobInfoCondition condition, PageParam pageParam);
+
+    /**
+     * 填充JobName
+     * @param list 填充的集合
+     * @param klass 范型类型
+     * @param jobIdFieldName 对应的jobId
+     * @param jobNameFieldName 对应的jobName
+     * @param <T>
+     */
+    <T> void fillJobName(List<T> list, Class klass, String jobIdFieldName, String jobNameFieldName) throws NoSuchFieldException;
 }

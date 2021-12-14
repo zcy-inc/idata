@@ -47,6 +47,8 @@ public interface DevJobHistoryMyDao {
             "</script>")
     void batchUpsert(List<DevJobHistory> list);
 
+
+    // 多条sql需要设置mysql allowMultiQueries=true
     //"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
     @Select("<script>" +
             "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
@@ -65,10 +67,9 @@ public interface DevJobHistoryMyDao {
     List<JobHistoryDto> topResourceGroupByJobId(String startDate, String endDate, int top);
 
     @Select("<script>" +
-            "select t1.*, t2.name as jobName " +
+            "select t1.*, t2.name as jobName, t3.enum_value as layer " +
             "from ( " +
-            "      select * from dev_job_history where del = 0 " +
-            "       and" +
+            "      select * from dev_job_history where 1 = 1 " +
             "       <if test = 'startDateBegin != null'>" +
             "           AND <![CDATA[start_time  >=  #{startDateBegin} ]]>" +
             "       </if>" +
@@ -85,12 +86,14 @@ public interface DevJobHistoryMyDao {
             "           AND final_status = #{jobStatus} " +
             "       </if>" +
             ") as t1 " +
-            "join (select * from dev_job_info where 1 = 1 " +
+            "left join (select * from dev_job_info where 1 = 1 " +
             "       <if test = 'jobName != null'>" +
             "           AND name like concat('%', #{jobName}, '%') " +
             "       </if>" +
             ") as t2 " +
             "on t1.job_id = t2.id " +
+            "left join dev_enum_value t3 " +
+            "on t2.dw_layer_code = t3.value_code " +
             "</script>")
     List<JobHistoryDto> selectList(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus);
 }

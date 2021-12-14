@@ -11,6 +11,7 @@ import java.util.List;
  */
 public enum YarnJobStatusEnum {
 
+    // 目前同DS READY/
     PENDING(1,  new String[]{"SUBMITTED", "ACCEPTED"}, "等待运行"),
 
     RUNNING(2, new String[]{"RUNNING"}, "运行中"),

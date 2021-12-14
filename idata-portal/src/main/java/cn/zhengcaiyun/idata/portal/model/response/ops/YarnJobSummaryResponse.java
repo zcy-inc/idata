@@ -43,4 +43,11 @@ public class YarnJobSummaryResponse {
         this.jobStatus = jobStatus;
     }
 
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
+    }
 }

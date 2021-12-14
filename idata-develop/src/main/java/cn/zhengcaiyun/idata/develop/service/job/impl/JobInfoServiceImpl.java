@@ -56,6 +56,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -279,6 +284,50 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         return new OverhangJobWrapperDto(cacheValueOptional.get().getFetchTime(),
                 PaginationInMemory.of(overhangJobDtoList).paging(pageParam));
+    }
+
+    @Override
+    public <T> void fillJobName(List<T> content, Class klass, String jobIdFieldName, String jobNameFieldName) throws NoSuchFieldException {
+        List<Long> jobIdList = new ArrayList<>();
+        Map<T, Long> objectMap = new HashMap<>();
+        content.forEach(e -> {
+            try {
+                PropertyDescriptor propertyDescriptor = new PropertyDescriptor(jobIdFieldName, klass);
+                Method readMethod = propertyDescriptor.getReadMethod();
+                Long jobId = (Long) readMethod.invoke(e);
+                jobIdList.add(jobId);
+                objectMap.put(e, jobId);
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                ex.printStackTrace();
+            } catch (IntrospectionException introspectionException) {
+                introspectionException.printStackTrace();
+            }
+        });
+
+        if (CollectionUtils.isEmpty(jobIdList)) {
+            return;
+        }
+
+        Map<Long, String> nameMap = new HashMap<>();
+        jobInfoRepo.queryJobInfo(jobIdList).forEach(e -> nameMap.put(e.getId(), e.getName()));
+
+        content.forEach(e -> {
+            Long jobId = objectMap.get(e);
+            String jobName = nameMap.get(jobId);
+            try {
+                PropertyDescriptor pd = new PropertyDescriptor(jobNameFieldName, klass);
+                Method wM = pd.getWriteMethod();//获得写方法
+                wM.invoke(e, jobName);
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            } catch (InvocationTargetException ex) {
+                ex.printStackTrace();
+            } catch (IntrospectionException introspectionException) {
+                introspectionException.printStackTrace();
+            }
+        });
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

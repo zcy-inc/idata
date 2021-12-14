@@ -73,4 +73,13 @@ public enum DsJobStatusEnum {
         }
         return new ArrayList<>();
     }
+
+    public static List<String> getDsEnumCodeByValue(Integer value) {
+        for (DsJobStatusEnum dsJobStatusEnum : DsJobStatusEnum.values()) {
+            if (dsJobStatusEnum.value == value) {
+                return Arrays.asList(dsJobStatusEnum.dsEnumCodes);
+            }
+        }
+        return new ArrayList<>();
+    }
 }

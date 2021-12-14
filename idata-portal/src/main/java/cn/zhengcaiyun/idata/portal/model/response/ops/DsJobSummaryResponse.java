@@ -19,6 +19,11 @@ public class DsJobSummaryResponse {
      */
     private Long taskId;
 
+    /**
+     * 环境
+     */
+    private String environment;
+
     public Long getJobId() {
         return JobId;
     }
@@ -49,5 +54,13 @@ public class DsJobSummaryResponse {
 
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

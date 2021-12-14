@@ -40,6 +40,11 @@ public class RankResourceConsumeResponse {
      */
     private Double avgDuration;
 
+    /**
+     *   application master container url地址
+     */
+    private String amContainerLogsUrl;
+
     public Long getJobId() {
         return jobId;
     }
@@ -94,6 +99,14 @@ public class RankResourceConsumeResponse {
 
     public void setAvgDuration(Double avgDuration) {
         this.avgDuration = avgDuration;
+    }
+
+    public String getAmContainerLogsUrl() {
+        return amContainerLogsUrl;
+    }
+
+    public void setAmContainerLogsUrl(String amContainerLogsUrl) {
+        this.amContainerLogsUrl = amContainerLogsUrl;
     }
 }
 

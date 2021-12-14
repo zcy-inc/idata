@@ -65,7 +65,12 @@ public class JobHistoryDto implements Comparable {
      */
     private String amContainerLogsUrl;
 
-    private String jobInstanceId;
+    private Long jobInstanceId;
+
+    /**
+     * 数仓分层
+     */
+    private String layer;
 
     public Long getId() {
         return id;
@@ -176,11 +181,19 @@ public class JobHistoryDto implements Comparable {
         return 0;
     }
 
-    public String getJobInstanceId() {
+    public Long getJobInstanceId() {
         return jobInstanceId;
     }
 
-    public void setJobInstanceId(String jobInstanceId) {
+    public void setJobInstanceId(Long jobInstanceId) {
         this.jobInstanceId = jobInstanceId;
+    }
+
+    public String getLayer() {
+        return layer;
+    }
+
+    public void setLayer(String layer) {
+        this.layer = layer;
     }
 }
