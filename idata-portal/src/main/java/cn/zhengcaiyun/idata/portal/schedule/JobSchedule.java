@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 @Component
 public class JobSchedule {
 
-    @Value("${dev.job.pull-yarn.cron}")
-    private static final String JOB_HISTORY_CRON = "0 30 8 * * ?";
+    private static final String JOB_HISTORY_DAY_CRON = "0 0 8 * * ?";
+    private static final String JOB_HISTORY_HOUR_CRON = "0 0/30 9-12 * * ?";
 
 //    @Autowired
 //    @Qualifier("yarnService")
@@ -41,31 +41,41 @@ public class JobSchedule {
     @Autowired
     private ResourceManagerService resourceManagerService;
 
-    @Scheduled(cron = JOB_HISTORY_CRON)
-    @Deprecated
-    public void pullSparkSqlJobHistory() {
+    @Scheduled(cron = JOB_HISTORY_DAY_CRON)
+    public void pullSparkSqlJobHistoryDay() {
         LocalDateTime endTime = LocalDateTimeUtil.beginOfDay(LocalDateTime.now());
         LocalDateTime startTime = endTime.minusDays(1);
+        pullJobHistory(startTime, endTime);
+    }
+
+    @Scheduled(cron = JOB_HISTORY_HOUR_CRON)
+    public void pullSparkSqlJobHistoryHourly() {
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusHours(2);
+        pullJobHistory(startTime, endTime);
+    }
+
+    private void pullJobHistory(LocalDateTime startTime, LocalDateTime endTime) {
 
         List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
         List<DevJobHistory> list = clusterAppDtoList.stream().map(e -> {
-            DevJobHistory devJobHistory = new DevJobHistory();
-            devJobHistory.setJobId(e.getJobId());
-            devJobHistory.setStartTime(Date.from(e.getStartedTime().atZone(ZoneId.systemDefault()).toInstant()));
-            devJobHistory.setFinishTime(Date.from(e.getFinishedTime().atZone(ZoneId.systemDefault()).toInstant()));
-            devJobHistory.setDuration(e.getElapsedTime());
-            devJobHistory.setFinalStatus(e.getFinalStatus());
-            Long vcoreSeconds = e.getVcoreSeconds();
-            Double elapsedTime = e.getElapsedTime().doubleValue();
-            devJobHistory.setAvgVcores(NumberUtil.round(vcoreSeconds/elapsedTime*1000, 2).doubleValue());
-            devJobHistory.setAvgMemory(e.getMemorySeconds() / (e.getElapsedTime() / 1000));
-            devJobHistory.setApplicationId(e.getAppId());
-            devJobHistory.setUser(e.getUser());
-            devJobHistory.setAmContainerLogsUrl(e.getAmContainerLogs());
+                    DevJobHistory devJobHistory = new DevJobHistory();
+                    devJobHistory.setJobId(e.getJobId());
+                    devJobHistory.setStartTime(Date.from(e.getStartedTime().atZone(ZoneId.systemDefault()).toInstant()));
+                    devJobHistory.setFinishTime(Date.from(e.getFinishedTime().atZone(ZoneId.systemDefault()).toInstant()));
+                    devJobHistory.setDuration(e.getElapsedTime());
+                    devJobHistory.setFinalStatus(e.getFinalStatus());
+                    Long vcoreSeconds = e.getVcoreSeconds();
+                    Double elapsedTime = e.getElapsedTime().doubleValue();
+                    devJobHistory.setAvgVcores(NumberUtil.round(vcoreSeconds/elapsedTime*1000, 2).doubleValue());
+                    devJobHistory.setAvgMemory(e.getMemorySeconds() / (e.getElapsedTime() / 1000));
+                    devJobHistory.setApplicationId(e.getAppId());
+                    devJobHistory.setUser(e.getUser());
+                    devJobHistory.setAmContainerLogsUrl(e.getAmContainerLogs());
 
-            return devJobHistory;
-        })
-        .collect(Collectors.toList());
+                    return devJobHistory;
+                })
+                .collect(Collectors.toList());
         jobHistoryService.batchUpsert(list);
     }
 

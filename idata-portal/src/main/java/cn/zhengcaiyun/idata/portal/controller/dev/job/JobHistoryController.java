@@ -35,7 +35,7 @@ public class JobHistoryController {
     @ApiOperation("手动触发脚本")
     @PostMapping("/script")
     public RestResult<Boolean> pullSparkSqlJobHistory() {
-        jobSchedule.pullSparkSqlJobHistory();
+        jobSchedule.pullSparkSqlJobHistoryDay();
         return RestResult.success(true);
     }
 
