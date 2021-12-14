@@ -301,7 +301,8 @@ public class DashboardServiceImpl implements DashboardService {
         List<String> stringList = DsJobStatusEnum.getDsDescriptionsByValue(state);
         List<JobHistoryDto> dtoList = jobLatestRecordList
                 .stream()
-                .filter(e -> stringList.contains(e.getState()))
+                .filter(e -> stringList.contains(e.getState())
+                        && (e.getEndTime() != null && DateUtil.parse(e.getEndTime()).after(DateUtil.beginOfDay(new Date()))))
                 .map(e -> {
                     JobHistoryDto dto = new JobHistoryDto();
                     dto.setJobId(e.getJobId());
@@ -331,8 +332,6 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
 }
-
-
 
 
 

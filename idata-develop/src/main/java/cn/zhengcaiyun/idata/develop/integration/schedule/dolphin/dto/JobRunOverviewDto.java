@@ -17,6 +17,10 @@ public class JobRunOverviewDto {
 
     private String startTime;
 
+    private String submitTime;
+
+    private String endTime;
+
     public Long getId() {
         return id;
     }
@@ -63,5 +67,21 @@ public class JobRunOverviewDto {
 
     public void setJobId(Long jobId) {
         this.jobId = jobId;
+    }
+
+    public String getSubmitTime() {
+        return submitTime;
+    }
+
+    public void setSubmitTime(String submitTime) {
+        this.submitTime = submitTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 }
