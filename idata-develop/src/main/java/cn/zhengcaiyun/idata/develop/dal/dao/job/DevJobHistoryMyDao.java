@@ -37,16 +37,15 @@ public interface DevJobHistoryMyDao {
 
     @Insert("<script>" +
             "insert into dev_job_history(create_time, job_id, start_time, finish_time, duration, final_status, " +
-            "avg_vcores, avg_memory, application_id) " +
+            "avg_vcores, avg_memory, application_id, user, am_container_logs_url) " +
             "values " +
             "<foreach collection='list' item='item' index='index' separator=','> " +
             "(#{item.createTime}, #{item.jobId}, #{item.startTime}, #{item.finishTime}, #{item.duration}, #{item.finalStatus}, " +
-            "#{item.avgVcores}, #{item.avgMemory}, #{item.applicationId})" +
+            "#{item.avgVcores}, #{item.avgMemory}, #{item.applicationId}, #{item.user}, #{item.amContainerLogsUrl})" +
             "</foreach> " +
-            "ON DUPLICATE KEY UPDATE final_status = VALUES(final_status)" +
+            "ON DUPLICATE KEY UPDATE final_status = VALUES(final_status), user = VALUES(user), am_container_logs_url = VALUES(am_container_logs_url)" +
             "</script>")
     void batchUpsert(List<DevJobHistory> list);
-
 
     // 多条sql需要设置mysql allowMultiQueries=true
     //"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
