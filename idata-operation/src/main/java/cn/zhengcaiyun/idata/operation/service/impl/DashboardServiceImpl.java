@@ -98,7 +98,7 @@ public class DashboardServiceImpl implements DashboardService {
             DateTime dateTime = DateUtil.offsetDay(startDate, i);
             JobStatisticDto dsOverviewDto = getStatisticByScope(scope, environment, DateUtil.beginOfDay(dateTime).toJdkDate(), DateUtil.endOfDay(dateTime).toJdkDate());
 
-            xAxis.add(dateTime.toDateStr());
+            xAxis.add(dateTime.toString("MM-dd"));
 
             Integer sum = dsOverviewDto.getSum();
             if (sum == 0) {
