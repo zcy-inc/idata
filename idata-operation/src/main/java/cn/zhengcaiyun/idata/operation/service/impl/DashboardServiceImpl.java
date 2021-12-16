@@ -63,7 +63,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public JobStatisticDto getDsTodayJobOverview(String environment) {
-        return getDsJobOverview(environment, DateUtil.beginOfDay(new Date()), null);
+        return getDsJobOverview(environment, DateUtil.beginOfDay(new Date()), DateUtil.endOfDay(new Date()));
     }
 
     @Override
