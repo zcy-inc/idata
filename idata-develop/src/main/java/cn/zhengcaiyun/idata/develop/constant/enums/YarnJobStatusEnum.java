@@ -18,7 +18,7 @@ public enum YarnJobStatusEnum {
 
     FAIL(6,  new String[]{"FAILURE", "KILLED"}, "失败"),
 
-    SUCCESS(7, new String[]{"FINISHED"}, "成功"),
+    SUCCESS(7, new String[]{"FINISHED", "SUCCEEDED"}, "成功"),
 
     OTHER(-1, new String[]{"NEW", "NEW_SAVING"}, "其他")
 

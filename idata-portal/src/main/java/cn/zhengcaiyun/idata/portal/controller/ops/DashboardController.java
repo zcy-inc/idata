@@ -8,6 +8,8 @@ import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
+import cn.zhengcaiyun.idata.develop.constant.enums.YarnApplicationStateEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
@@ -243,6 +245,8 @@ public class DashboardController {
             BeanUtils.copyProperties(s, response);
             // MB转GB
             response.setAvgMemory(response.getAvgMemory()/1024);
+            // 状态
+            response.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(response.getFinalStatus()));
             return response;
         });
 

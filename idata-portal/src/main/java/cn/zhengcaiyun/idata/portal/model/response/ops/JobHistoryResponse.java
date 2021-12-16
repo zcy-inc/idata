@@ -51,6 +51,12 @@ public class JobHistoryResponse {
     private String finalStatus;
 
     /**
+     * 作业最终状态（系统内部展示的状态）
+     * 1:等待运行 2：运行中 6：失败 7：成功 -1：其他
+     */
+    private Integer businessStatus;
+
+    /**
      * Database Column Remarks:
      *   作业平均消耗cpu虚拟核数
      */
@@ -194,5 +200,13 @@ public class JobHistoryResponse {
 
     public void setLayer(String layer) {
         this.layer = layer;
+    }
+
+    public Integer getBusinessStatus() {
+        return businessStatus;
+    }
+
+    public void setBusinessStatus(Integer businessStatus) {
+        this.businessStatus = businessStatus;
     }
 }
