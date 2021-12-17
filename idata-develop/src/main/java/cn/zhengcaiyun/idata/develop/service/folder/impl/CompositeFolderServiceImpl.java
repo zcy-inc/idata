@@ -94,8 +94,11 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         // 生成文件树
         List<DevTreeNodeDto> treeNodeDtoList = TreeNodeGenerator.withExpandedNodes(expandedNodeDtoList).makeTree(() -> "0");
         List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
-        Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId);
-        return filterAccessTreeNodes(teList, folderIdList);
+        if (userId != null) {
+            Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId);
+            return filterAccessTreeNodes(teList, folderIdList);
+        }
+        return teList;
     }
 
     @Override

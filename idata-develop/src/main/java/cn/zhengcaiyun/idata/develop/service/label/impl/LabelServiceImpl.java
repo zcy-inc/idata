@@ -167,7 +167,7 @@ public class LabelServiceImpl implements LabelService {
             devLabelDefineDao.updateByPrimaryKey(labelDefine);
         }
         // clear cache
-        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
 
         return PojoUtil.copyOne(devLabelDefineDao.selectOne(c ->
                         c.where(devLabelDefine.labelCode, isEqualTo(labelDefineDto.getLabelCode()))).get(),
@@ -395,7 +395,7 @@ public class LabelServiceImpl implements LabelService {
                 .where(devLabel.labelCode, isEqualTo(labelCode),
                         and(devLabel.del, isNotEqualTo(1))));
         // clear cache
-        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
 
         return true;
     }

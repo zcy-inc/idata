@@ -116,7 +116,7 @@ public class UserAccessServiceImpl implements UserAccessService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        return systemService.getFolderTree(folderPermissionMap);
+        return systemService.getDevFolderTree(folderPermissionMap);
     }
 
     @Override

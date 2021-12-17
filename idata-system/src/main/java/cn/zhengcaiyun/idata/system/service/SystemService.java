@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.system.service;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.SystemStateDto;
@@ -43,4 +44,5 @@ public interface SystemService {
      * @param folderPermissionMap key：resource type + access key; value: filePermission
      */
     List<FolderTreeNodeDto> getFolderTree(Map<String, Integer> folderPermissionMap);
+    List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap);
 }
