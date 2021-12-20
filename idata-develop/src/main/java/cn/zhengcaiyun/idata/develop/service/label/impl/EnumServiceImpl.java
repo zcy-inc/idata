@@ -116,8 +116,6 @@ public class EnumServiceImpl implements EnumService {
                 });
             }
         }
-        // clear cache
-//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
 
         return PojoUtil.copyOne(devEnumDao.selectOne(c ->
                 c.where(devEnum.enumCode, isEqualTo(enumDto.getEnumCode()))).get(), EnumDto.class);
@@ -161,22 +159,6 @@ public class EnumServiceImpl implements EnumService {
             devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
                     "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
         }
-//        checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
-//        DevEnumValue existEnumValue = devEnumValueDao.selectOne(c ->
-//                c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
-//                        and(devEnumValue.del, isNotEqualTo(1))))
-//                .orElse(null);
-//        if (existEnumValue == null) {
-//            enumValueDto.setCreator(operator);
-//            devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
-//                    "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
-//        }
-//        else {
-//            enumValueDto.setId(existEnumValue.getId());
-//            enumValueDto.setEditor(operator);
-//            devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
-//                    "id", "editor", "enumValue", "enumAttributes", "parentCode"));
-//        }
     }
 
     @Override
@@ -285,8 +267,6 @@ public class EnumServiceImpl implements EnumService {
                 .set(devEnumValue.editor).equalTo(operator)
                 .where(devEnumValue.enumCode, isEqualTo(enumCode),
                         and(devEnumValue.del, isNotEqualTo(1))));
-        // clear cache
-//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
 
         return true;
     }

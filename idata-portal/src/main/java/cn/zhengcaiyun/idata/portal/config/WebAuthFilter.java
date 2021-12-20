@@ -52,8 +52,8 @@ public class WebAuthFilter implements Filter {
 
     private final String[] featureTypes = {"F_MENU", "F_ICON"};
 
-    @Value("${access.mode:#{null}}")
-    private String ACCESS_MODE;
+//    @Value("${access.mode:#{null}}")
+//    private String ACCESS_MODE;
 
     @Autowired
     private TokenService tokenService;
@@ -94,37 +94,64 @@ public class WebAuthFilter implements Filter {
             servletResponse.getWriter().flush();
             return;
         }
-        // TODO 缺资源权限校验
         // check feature
+//        else {
+//            // accessMode选择使用哪个模式的权限
+//            if ("idata-pro".equals(ACCESS_MODE)) {
+//                // 兼容旧版权限
+//                if (path.contains("/p1/uac/currentUser")
+//                        || path.contains("/p1/uac/currentFeatureTree")
+//                        // 旧版鉴权调用
+//                        || path.contains("/p1/uac/currentAccessKeys")
+//                        || path.contains("/p1/uac/checkCurrentAccess")
+//                        || path.contains("/p1/uac/resourceAccess")) {
+//                    filterChain.doFilter(mutableRequest, servletResponse);
+//                    return;
+//                }
+//                // 新版权限
+//                Long userId = tokenService.getUserId(mutableRequest);
+//                UacUser user = uacUserDao.selectOne(c ->
+//                        c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
+//                if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
+//                    SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
+//                            and(sysFeature.featureUrlPath, isEqualTo(path))))
+//                            .orElse(null);
+//                    if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
+//                            && !userAccessService.checkFeatureAccess(userId, path)) {
+//                        servletResponse.setContentType("application/json; charset=UTF-8");
+//                        servletResponse.getWriter().write(JSON.toJSONString(
+//                                RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
+//                        servletResponse.getWriter().flush();
+//                        return;
+//                    }
+//                }
+//            }
+//        }
         else {
-            // accessMode选择使用哪个模式的权限
-            if ("idata-pro".equals(ACCESS_MODE)) {
-                // 兼容旧版权限
-                if (path.contains("/p1/uac/currentUser")
-                        || path.contains("/p1/uac/currentFeatureTree")
-                        // 旧版鉴权调用
-                        || path.contains("/p1/uac/currentAccessKeys")
-                        || path.contains("/p1/uac/checkCurrentAccess")
-                        || path.contains("/p1/uac/resourceAccess")) {
-                    filterChain.doFilter(mutableRequest, servletResponse);
+            if (path.contains("/p1/uac/currentUser")
+                    || path.contains("/p1/uac/currentFeatureTree")
+                    // 旧版鉴权调用
+                    || path.contains("/p1/uac/currentAccessKeys")
+                    || path.contains("/p1/uac/checkCurrentAccess")
+                    || path.contains("/p1/uac/resourceAccess")) {
+                filterChain.doFilter(mutableRequest, servletResponse);
+                return;
+            }
+            // 新版权限
+            Long userId = tokenService.getUserId(mutableRequest);
+            UacUser user = uacUserDao.selectOne(c ->
+                    c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
+            if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
+                SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                        and(sysFeature.featureUrlPath, isEqualTo(path))))
+                        .orElse(null);
+                if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
+                        && !userAccessService.checkFeatureAccess(userId, path)) {
+                    servletResponse.setContentType("application/json; charset=UTF-8");
+                    servletResponse.getWriter().write(JSON.toJSONString(
+                            RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
+                    servletResponse.getWriter().flush();
                     return;
-                }
-                // 新版权限
-                Long userId = tokenService.getUserId(mutableRequest);
-                UacUser user = uacUserDao.selectOne(c ->
-                        c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
-                if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
-                    SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
-                            and(sysFeature.featureUrlPath, isEqualTo(path))))
-                            .orElse(null);
-                    if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
-                            && !userAccessService.checkFeatureAccess(userId, path)) {
-                        servletResponse.setContentType("application/json; charset=UTF-8");
-                        servletResponse.getWriter().write(JSON.toJSONString(
-                                RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
-                        servletResponse.getWriter().flush();
-                        return;
-                    }
                 }
             }
         }
