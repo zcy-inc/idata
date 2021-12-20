@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execMaxParallelism, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, extensionCfg, runningState);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execMaxParallelism, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -77,7 +77,6 @@ public interface JobExecuteConfigDao {
         @Result(column="sch_fail_strategy", property="schFailStrategy", jdbcType=JdbcType.VARCHAR),
         @Result(column="exec_driver_mem", property="execDriverMem", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_worker_mem", property="execWorkerMem", jdbcType=JdbcType.INTEGER),
-        @Result(column="extension_cfg", property="extensionCfg", jdbcType=JdbcType.VARCHAR),
         @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER)
     })
     List<JobExecuteConfig> selectMany(SelectStatementProvider selectStatement);
@@ -124,7 +123,6 @@ public interface JobExecuteConfigDao {
             .map(schPriority).toProperty("schPriority")
             .map(execDriverMem).toProperty("execDriverMem")
             .map(execWorkerMem).toProperty("execWorkerMem")
-            .map(extensionCfg).toProperty("extensionCfg")
             .map(runningState).toProperty("runningState")
         );
     }
@@ -150,7 +148,6 @@ public interface JobExecuteConfigDao {
             .map(schPriority).toPropertyWhenPresent("schPriority", record::getSchPriority)
             .map(execDriverMem).toPropertyWhenPresent("execDriverMem", record::getExecDriverMem)
             .map(execWorkerMem).toPropertyWhenPresent("execWorkerMem", record::getExecWorkerMem)
-            .map(extensionCfg).toPropertyWhenPresent("extensionCfg", record::getExtensionCfg)
             .map(runningState).toPropertyWhenPresent("runningState", record::getRunningState)
         );
     }
@@ -202,7 +199,6 @@ public interface JobExecuteConfigDao {
                 .set(schPriority).equalTo(record::getSchPriority)
                 .set(execDriverMem).equalTo(record::getExecDriverMem)
                 .set(execWorkerMem).equalTo(record::getExecWorkerMem)
-                .set(extensionCfg).equalTo(record::getExtensionCfg)
                 .set(runningState).equalTo(record::getRunningState);
     }
 
@@ -226,7 +222,6 @@ public interface JobExecuteConfigDao {
                 .set(schPriority).equalToWhenPresent(record::getSchPriority)
                 .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
                 .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
-                .set(extensionCfg).equalToWhenPresent(record::getExtensionCfg)
                 .set(runningState).equalToWhenPresent(record::getRunningState);
     }
 
@@ -251,7 +246,6 @@ public interface JobExecuteConfigDao {
             .set(schPriority).equalTo(record::getSchPriority)
             .set(execDriverMem).equalTo(record::getExecDriverMem)
             .set(execWorkerMem).equalTo(record::getExecWorkerMem)
-            .set(extensionCfg).equalTo(record::getExtensionCfg)
             .set(runningState).equalTo(record::getRunningState)
             .where(id, isEqualTo(record::getId))
         );
@@ -278,7 +272,6 @@ public interface JobExecuteConfigDao {
             .set(schPriority).equalToWhenPresent(record::getSchPriority)
             .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
             .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
-            .set(extensionCfg).equalToWhenPresent(record::getExtensionCfg)
             .set(runningState).equalToWhenPresent(record::getRunningState)
             .where(id, isEqualTo(record::getId))
         );
