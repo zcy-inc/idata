@@ -144,13 +144,6 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
-     *   扩展配置字段
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
-    private String extensionCfg;
-
-    /**
-     * Database Column Remarks:
      *   作业运行状态（环境级），0：暂停运行；1：恢复运行
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
@@ -344,16 +337,6 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_worker_mem")
     public void setExecWorkerMem(Integer execWorkerMem) {
         this.execWorkerMem = execWorkerMem;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
-    public String getExtensionCfg() {
-        return extensionCfg;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extension_cfg")
-    public void setExtensionCfg(String extensionCfg) {
-        this.extensionCfg = extensionCfg;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
