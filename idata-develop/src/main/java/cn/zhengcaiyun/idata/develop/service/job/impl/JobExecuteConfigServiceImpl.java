@@ -455,6 +455,5 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 2));
         config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 2));
         config.setSchPriority(MoreObjects.firstNonNull(config.getSchPriority(), JobPriorityEnum.middle.val));
-        config.setSchFailStrategy("");
     }
 }
