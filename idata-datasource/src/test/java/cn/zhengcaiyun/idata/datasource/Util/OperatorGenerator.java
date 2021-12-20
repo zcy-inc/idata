@@ -15,32 +15,26 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.datasource.service;
+package cn.zhengcaiyun.idata.datasource.Util;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
-import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
-import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
-import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-09-15 16:47
+ * @create: 2021-12-20 11:35
  **/
-public interface DataSourceService {
+public class OperatorGenerator {
 
-    Page<DataSourceDto> pagingDataSource(DataSourceCondition condition, PageParam pageParam);
-
-    DataSourceDto getDataSource(Long id);
-
-    Long addDataSource(DataSourceDto dto, Operator operator);
-
-    Boolean editDataSource(DataSourceDto dto, Operator operator);
-
-    Boolean removeDataSource(Long id, Operator operator);
-
-    Boolean testConnection(DataSourceTypeEnum dataSourceType, DbConfigDto dto);
+    public static Operator genOne() {
+        return new Operator.Builder(9999999999L)
+                .username("TesterOne")
+                .realName("tester_idata")
+                .nickname("tester_lucky")
+                .mobile("18111112222")
+                .email("123@cai-inc.com")
+                .avatar("")
+                .employeeId("C1111111111")
+                .build();
+    }
 }

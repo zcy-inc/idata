@@ -84,7 +84,8 @@ public class DataSourceController {
      */
     @PostMapping("/datasources")
     public RestResult<DataSourceDto> addDataSource(@RequestBody DataSourceDto dto) {
-        return RestResult.success(dataSourceService.addDataSource(dto, OperatorContext.getCurrentOperator()));
+        Long id = dataSourceService.addDataSource(dto, OperatorContext.getCurrentOperator());
+        return getDataSource(id);
     }
 
     /**
@@ -95,7 +96,8 @@ public class DataSourceController {
      */
     @PutMapping("/datasources")
     public RestResult<DataSourceDto> editDataSource(@RequestBody DataSourceDto dto) {
-        return RestResult.success(dataSourceService.editDataSource(dto, OperatorContext.getCurrentOperator()));
+        dataSourceService.editDataSource(dto, OperatorContext.getCurrentOperator());
+        return getDataSource(dto.getId());
     }
 
     /**
