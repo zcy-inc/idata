@@ -88,7 +88,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     }
 
     @Override
-    public DataSourceDto addDataSource(DataSourceDto dto, Operator operator) {
+    public Long addDataSource(DataSourceDto dto, Operator operator) {
         checkDataSource(dto);
         List<DataSource> dupNameDataSources = dataSourceRepo.queryDataSource(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameDataSources), "数据源名称已存在");
@@ -97,32 +97,26 @@ public class DataSourceServiceImpl implements DataSourceService {
         dto.setOperator(operator);
         Long id = dataSourceRepo.createDataSource(dto.toModel());
         checkState(nonNull(id), "创建数据源失败");
-        Optional<DataSource> optional = dataSourceRepo.queryDataSource(id);
-        if (optional.isEmpty()) return null;
-        return DataSourceDto.from(optional.get());
+        return id;
     }
 
     @Override
-    public DataSourceDto editDataSource(DataSourceDto dto, Operator operator) {
+    public Boolean editDataSource(DataSourceDto dto, Operator operator) {
         checkArgument(nonNull(dto.getId()), "数据源编号为空");
         checkDataSource(dto);
-        List<DataSource> dupNameDataSources = dataSourceRepo.queryDataSource(dto.getName());
-        if (ObjectUtils.isNotEmpty(dupNameDataSources)) {
-            DataSource dupNameDataSource = dupNameDataSources.get(0);
-            checkArgument(Objects.equals(dto.getId(), dupNameDataSource.getId()), "数据源名称已存在");
-        }
 
         Optional<DataSource> optional = dataSourceRepo.queryDataSource(dto.getId());
         checkArgument(optional.isPresent(), "数据源不存在");
         DataSource source = optional.get();
         checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
+        if (!Objects.equals(source.getName(), dto.getName())) {
+            List<DataSource> dupNameDataSources = dataSourceRepo.queryDataSource(dto.getName());
+            checkArgument(ObjectUtils.isEmpty(dupNameDataSources), "数据源名称已存在");
+        }
 
         dto.setEditor(operator.getNickname());
-        boolean ret = dataSourceRepo.updateDataSource(dto.toModel());
-        checkState(ret, "更新数据源失败");
-        Optional<DataSource> newOptional = dataSourceRepo.queryDataSource(dto.getId());
-        if (newOptional.isEmpty()) return null;
-        return DataSourceDto.from(newOptional.get());
+        dataSourceRepo.updateDataSource(dto.toModel());
+        return Boolean.TRUE;
     }
 
     @Override
@@ -136,8 +130,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         boolean isUsing = dataSourceManager.checkInUsing(DataSourceTypeEnum.getEnum(source.getType()).orElse(null),
                 id);
         checkArgument(!isUsing, "数据源正在被使用，不能删除");
-        boolean ret = dataSourceRepo.deleteDataSource(id, operator.getNickname());
-        checkState(ret, "删除数据源失败");
+        dataSourceRepo.deleteDataSource(id, operator.getNickname());
         return true;
     }
 
