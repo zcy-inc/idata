@@ -1,1 +1,0 @@
-update idata.dev_folder set parent_id = 0 where parent_id is null;
