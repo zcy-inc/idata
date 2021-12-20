@@ -130,13 +130,6 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
-     *   调度配置-失败策略，fail：失败，success：成功
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
-    private String schFailStrategy;
-
-    /**
-     * Database Column Remarks:
      *   运行配置-驱动器内存
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
@@ -331,16 +324,6 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_priority")
     public void setSchPriority(Integer schPriority) {
         this.schPriority = schPriority;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
-    public String getSchFailStrategy() {
-        return schFailStrategy;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
-    public void setSchFailStrategy(String schFailStrategy) {
-        this.schFailStrategy = schFailStrategy;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")

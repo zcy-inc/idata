@@ -131,13 +131,6 @@ public final class JobExecuteConfigDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   调度配置-失败策略，fail：失败，success：成功
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.sch_fail_strategy")
-    public static final SqlColumn<String> schFailStrategy = jobExecuteConfig.schFailStrategy;
-
-    /**
-     * Database Column Remarks:
      *   运行配置-驱动器内存
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_driver_mem")
@@ -199,8 +192,6 @@ public final class JobExecuteConfigDynamicSqlSupport {
         public final SqlColumn<String> schTimeOutStrategy = column("sch_time_out_strategy", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> schPriority = column("sch_priority", JDBCType.INTEGER);
-
-        public final SqlColumn<String> schFailStrategy = column("sch_fail_strategy", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> execDriverMem = column("exec_driver_mem", JDBCType.INTEGER);
 

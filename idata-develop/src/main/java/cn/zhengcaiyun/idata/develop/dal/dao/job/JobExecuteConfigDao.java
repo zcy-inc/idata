@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execMaxParallelism, execWarnLevel, schTimeOutStrategy, schPriority, schFailStrategy, execDriverMem, execWorkerMem, extensionCfg, runningState);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execMaxParallelism, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, extensionCfg, runningState);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -122,7 +122,6 @@ public interface JobExecuteConfigDao {
             .map(execWarnLevel).toProperty("execWarnLevel")
             .map(schTimeOutStrategy).toProperty("schTimeOutStrategy")
             .map(schPriority).toProperty("schPriority")
-            .map(schFailStrategy).toProperty("schFailStrategy")
             .map(execDriverMem).toProperty("execDriverMem")
             .map(execWorkerMem).toProperty("execWorkerMem")
             .map(extensionCfg).toProperty("extensionCfg")
@@ -149,7 +148,6 @@ public interface JobExecuteConfigDao {
             .map(execWarnLevel).toPropertyWhenPresent("execWarnLevel", record::getExecWarnLevel)
             .map(schTimeOutStrategy).toPropertyWhenPresent("schTimeOutStrategy", record::getSchTimeOutStrategy)
             .map(schPriority).toPropertyWhenPresent("schPriority", record::getSchPriority)
-            .map(schFailStrategy).toPropertyWhenPresent("schFailStrategy", record::getSchFailStrategy)
             .map(execDriverMem).toPropertyWhenPresent("execDriverMem", record::getExecDriverMem)
             .map(execWorkerMem).toPropertyWhenPresent("execWorkerMem", record::getExecWorkerMem)
             .map(extensionCfg).toPropertyWhenPresent("extensionCfg", record::getExtensionCfg)
@@ -202,7 +200,6 @@ public interface JobExecuteConfigDao {
                 .set(execWarnLevel).equalTo(record::getExecWarnLevel)
                 .set(schTimeOutStrategy).equalTo(record::getSchTimeOutStrategy)
                 .set(schPriority).equalTo(record::getSchPriority)
-                .set(schFailStrategy).equalTo(record::getSchFailStrategy)
                 .set(execDriverMem).equalTo(record::getExecDriverMem)
                 .set(execWorkerMem).equalTo(record::getExecWorkerMem)
                 .set(extensionCfg).equalTo(record::getExtensionCfg)
@@ -227,7 +224,6 @@ public interface JobExecuteConfigDao {
                 .set(execWarnLevel).equalToWhenPresent(record::getExecWarnLevel)
                 .set(schTimeOutStrategy).equalToWhenPresent(record::getSchTimeOutStrategy)
                 .set(schPriority).equalToWhenPresent(record::getSchPriority)
-                .set(schFailStrategy).equalToWhenPresent(record::getSchFailStrategy)
                 .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
                 .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
                 .set(extensionCfg).equalToWhenPresent(record::getExtensionCfg)
@@ -253,7 +249,6 @@ public interface JobExecuteConfigDao {
             .set(execWarnLevel).equalTo(record::getExecWarnLevel)
             .set(schTimeOutStrategy).equalTo(record::getSchTimeOutStrategy)
             .set(schPriority).equalTo(record::getSchPriority)
-            .set(schFailStrategy).equalTo(record::getSchFailStrategy)
             .set(execDriverMem).equalTo(record::getExecDriverMem)
             .set(execWorkerMem).equalTo(record::getExecWorkerMem)
             .set(extensionCfg).equalTo(record::getExtensionCfg)
@@ -281,7 +276,6 @@ public interface JobExecuteConfigDao {
             .set(execWarnLevel).equalToWhenPresent(record::getExecWarnLevel)
             .set(schTimeOutStrategy).equalToWhenPresent(record::getSchTimeOutStrategy)
             .set(schPriority).equalToWhenPresent(record::getSchPriority)
-            .set(schFailStrategy).equalToWhenPresent(record::getSchFailStrategy)
             .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
             .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
             .set(extensionCfg).equalToWhenPresent(record::getExtensionCfg)
