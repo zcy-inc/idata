@@ -4,7 +4,7 @@ insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_SYSTEM_CONFIG', '系统配置', 'F_MENU');
 insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_BIGDATA_RD', '数据研发', 'F_MENU');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, feature_url_path)
+insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_OPS_CENTER', '运维中心', 'F_MENU');
 
 -- -- second level menu
@@ -62,7 +62,7 @@ values ('系统管理员', 'hdfs-site','{}', 'HADOOP');
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'yarn-site','{}', 'HADOOP');
 
-insert into sys_config(key_one, value_one) values ('{}');
-insert into sys_config(key_one, value_one)
-values ('{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
+insert into sys_config(key_one, creator, value_one) values ('trino-info', '', '{}');
+insert into sys_config(key_one, creator, value_one)
+values ('hive-info', '', '{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
 
