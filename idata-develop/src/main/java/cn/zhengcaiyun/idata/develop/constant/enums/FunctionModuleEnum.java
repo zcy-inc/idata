@@ -32,8 +32,6 @@ import java.util.Optional;
 public enum FunctionModuleEnum {
     DESIGN("DESIGN", "数仓设计"),
     DESIGN_TABLE("DESIGN.TABLE", "表"),
-    DESIGN_LABEL("DESIGN.LABEL", "标签"),
-    DESIGN_ENUM("DESIGN.ENUM", "枚举"),
 
     DAG("DAG", "DAG"),
 
@@ -52,7 +50,7 @@ public enum FunctionModuleEnum {
         this.name = name;
     }
 
-    private static final Map<String, FunctionModuleEnum> map = Maps.newHashMap();
+    public static final Map<String, FunctionModuleEnum> map = Maps.newHashMap();
 
     static {
         Arrays.stream(FunctionModuleEnum.values())

@@ -14,25 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
+package cn.zhengcaiyun.idata.system.spi;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.user.dto.RoleDto;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * @author shiyin
- * @date 2021-03-13 21:58
+ * @author caizhedong
+ * @date 2021-12-17 上午9:29
  */
-public interface RoleService {
-    Page<RoleDto> findRoles(Integer limit, Integer offset);
-    List<FeatureTreeNodeDto> getRoleFeatureTree(Long roleId);
-    List<FolderTreeNodeDto> getRoleFolderTree(Long roleId);
-    RoleDto create(RoleDto roleDto, String creator);
-    RoleDto edit(RoleDto roleDto, String editor);
-    boolean delete(Long roleId, String editor);
+
+public interface BaseTreeNodeService {
+    List<BaseTreeNodeDto> getBaseTree();
 }

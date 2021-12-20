@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.sys;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.system.dto.*;
@@ -57,7 +58,7 @@ public class SystemController {
 
     @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success(systemService.getFolderTree(new HashMap<>()));
+        return RestResult.success(systemService.getDevFolderTree(new HashMap<>()));
     }
 
     @GetMapping("/p1/sys/configTypes")

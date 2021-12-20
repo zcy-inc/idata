@@ -117,7 +117,7 @@ public class EnumServiceImpl implements EnumService {
             }
         }
         // clear cache
-        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
 
         return PojoUtil.copyOne(devEnumDao.selectOne(c ->
                 c.where(devEnum.enumCode, isEqualTo(enumDto.getEnumCode()))).get(), EnumDto.class);
@@ -286,7 +286,7 @@ public class EnumServiceImpl implements EnumService {
                 .where(devEnumValue.enumCode, isEqualTo(enumCode),
                         and(devEnumValue.del, isNotEqualTo(1))));
         // clear cache
-        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
 
         return true;
     }

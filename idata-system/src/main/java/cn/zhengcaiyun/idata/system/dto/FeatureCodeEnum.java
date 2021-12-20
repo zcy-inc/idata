@@ -14,25 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
-
-import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.user.dto.RoleDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.system.dto;
 
 /**
- * @author shiyin
- * @date 2021-03-13 21:58
+ * @author caizhedong
+ * @date 2021-12-19 下午7:52
  */
-public interface RoleService {
-    Page<RoleDto> findRoles(Integer limit, Integer offset);
-    List<FeatureTreeNodeDto> getRoleFeatureTree(Long roleId);
-    List<FolderTreeNodeDto> getRoleFolderTree(Long roleId);
-    RoleDto create(RoleDto roleDto, String creator);
-    RoleDto edit(RoleDto roleDto, String editor);
-    boolean delete(Long roleId, String editor);
+
+public enum FeatureCodeEnum {
+    F_MENU_SYSTEM_CONFIG,
+    F_MENU_USER_FEATURE,
+    F_MENU_CONFIG_CENTER,
+    F_MENU_LDAP_CONFIG,
+    F_MENU_METADATA_CONFIG,
+
+    F_MENU_BIGDATA_RD,
+    F_MENU_DATA_DEVELOP,
+    F_MENU_MEASURE_MANAGE,
+    F_MENU_DATASOURCE_CENTER,
+    F_MENU_JOB_LIST,
+    F_ICON_DATA_DEVELOP_ROOT_DIR,
+    F_ICON_RELEASE_DATA_JOB,
+
+    F_MENU_LABEL_MANAGE;
 }

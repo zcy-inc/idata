@@ -4,7 +4,7 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
 const { REACT_APP_ENV } = process.env;
 
@@ -21,12 +21,12 @@ export default defineConfig({
     siderWidth: 288,
     ...defaultSettings,
   },
-  locale: {
-    default: 'zh-CN',
-    antd: true,
-    // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
-  },
+  // locale: {
+  //   default: 'zh-CN',
+  //   antd: true,
+  //   // default true, when it is true, will use `navigator.language` overwrite default
+  //   baseNavigator: true,
+  // },
   dynamicImport: {
     loading: '@ant-design/pro-layout/es/PageLoading',
   },
@@ -59,7 +59,7 @@ export default defineConfig({
     basePath: '/',
   },
   // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector','@zcy-data/plugin-proxy'],
+  plugins: ['react-dev-inspector/plugins/umi/react-inspector', '@zcy-data/plugin-proxy'],
   inspectorConfig: {
     // loader options type and docs see below
     exclude: [],
@@ -69,11 +69,9 @@ export default defineConfig({
   resolve: {
     includes: ['src/components'],
   },
-  mfsu:{},
-  chainWebpack(memo, { env, webpack, createCSSRule }) {
-    // 设置 alias
-    memo.resolve.alias.set('foo', '/tmp/a/b/foo');
-    memo
+  mfsu: {},
+  chainWebpack(config, { webpack }) {
+    config
       .plugin('monaco-editor')
       .use(MonacoWebpackPlugin, [{ languages: ['sql', 'python', 'java', 'shell'] }]);
   },
