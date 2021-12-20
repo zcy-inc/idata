@@ -13,12 +13,33 @@ export default [
     name: '数据研发',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_BIGDATA_RD',
     routes: [
       { path: '/datapi', redirect: '/datapi/datadev' },
-      { path: '/datapi/datadev', name: '数据开发', component: './datapi/DataDev' },
-      { path: '/datapi/measure', name: '指标库', component: './datapi/Measures' },
-      { path: '/datapi/datasource', name: '数据源管理', component: './datapi/DataSource' },
-      { path: '/datapi/tasks', name: '任务列表', component: './datapi/Tasks' },
+      {
+        path: '/datapi/datadev',
+        name: '数据开发',
+        component: './datapi/DataDev',
+        featureCode: 'F_MENU_DATA_DEVELOP',
+      },
+      {
+        path: '/datapi/measure',
+        name: '指标库',
+        component: './datapi/Measures',
+        featureCode: 'F_MENU_MEASURE_MANAGE',
+      },
+      {
+        path: '/datapi/datasource',
+        name: '数据源管理',
+        component: './datapi/DataSource',
+        featureCode: 'F_MENU_DATASOURCE_CENTER',
+      },
+      {
+        path: '/datapi/tasks',
+        name: '任务列表',
+        component: './datapi/Tasks',
+        featureCode: 'F_MENU_JOB_LIST',
+      },
     ],
   },
   {
@@ -26,23 +47,18 @@ export default [
     name: '系统配置',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/c6ab0611-57cd-4e14-a68a-4384c198ed65.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/ccfa9e9b-0fa7-4f19-8e2b-e81b207b53b9.svg',
+    featureCode: 'F_MENU_SYSTEM_CONFIG',
     routes: [
-      {
-        path: '/configuration',
-        redirect: '/configuration/authority',
-      },
+      { path: '/configuration', redirect: '/configuration/authority' },
       {
         path: '/configuration/authority',
         name: '权限管理',
         component: './authority',
+        featureCode: 'F_MENU_USER_FEATURE',
         routes: [
-          {
-            path: '/configuration/authority',
-            redirect: '/configuration/authority/role',
-          },
+          { path: '/configuration/authority', redirect: '/configuration/authority/role' },
           {
             path: '/configuration/authority/role',
-            //name: '角色管理',
             hideInMenu: true,
             routes: [
               {
@@ -92,16 +108,19 @@ export default [
         path: '/configuration/integrated',
         name: '集成配置',
         component: './Integrated',
+        featureCode: 'F_MENU_CONFIG_CENTER',
       },
       {
         path: '/configuration/LDAP',
         name: 'LDAP',
         component: './LDAP',
+        featureCode: 'F_MENU_LDAP_CONFIG',
       },
       {
         path: '/configuration/labelController',
         name: '元数据属性配置',
         component: './LabelController',
+        featureCode: 'F_MENU_METADATA_CONFIG',
       },
     ],
   },
@@ -110,6 +129,7 @@ export default [
     name: '运维中心',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
+    featureCode: 'TEST',
     routes: [
       { path: '/operations', redirect: '/operations/dashboard' },
       { path: '/operations/dashboard', name: '运维看板', component: './operations/Dashboard' },

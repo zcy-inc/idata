@@ -4,3 +4,10 @@ export interface DefaultResponse {
   msg: string;
   causeMsg: string;
 }
+
+export interface IMenuItem {
+  name: string;
+  enable: boolean;
+  featureCode: string;
+  children: IMenuItem[];
+}
