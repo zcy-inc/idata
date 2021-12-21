@@ -26,7 +26,7 @@ const DrawerDependence: FC<DrawerDependenceProps> = ({ visible, onClose, data })
       visible={visible}
       onClose={onClose}
       destroyOnClose
-      width={780}
+      width={1100}
       title="依赖"
       footer={null}
       footerStyle={{
