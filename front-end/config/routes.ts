@@ -39,8 +39,8 @@ export default [
   {
     path: '/configuration',
     name: '系统配置',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/c6ab0611-57cd-4e14-a68a-4384c198ed65.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/ccfa9e9b-0fa7-4f19-8e2b-e81b207b53b9.svg',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/0545456d-5849-4a1a-885c-a72dce22fdfb.png',
+    iconDefault: "https://sitecdn.zcycdn.com/f2e-assets/6af809b7-e099-49be-8b2d-05539e7d07ae.png",
     featureCode: 'F_MENU_SYSTEM_CONFIG',
     routes: [
       { path: '/configuration', redirect: '/configuration/authority' },
