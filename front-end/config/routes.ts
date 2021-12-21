@@ -23,12 +23,6 @@ export default [
         featureCode: 'F_MENU_DATA_DEVELOP',
       },
       {
-        path: '/datapi/measure',
-        name: '指标库',
-        component: './datapi/Measures',
-        featureCode: 'F_MENU_MEASURE_MANAGE',
-      },
-      {
         path: '/datapi/datasource',
         name: '数据源管理',
         component: './datapi/DataSource',

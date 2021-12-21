@@ -76,7 +76,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         const clone = cloneDeep(defaultMenuData);
         const res = await getSideMenu();
         const { data } = res;
-        const renderMenuRouter = (config: MenuDataItem[], list: IMenuItem[]) => {
+        const renderMenuRouter = (config: MenuDataItem[], list: IMenuItem[] = []) => {
           config.forEach((item) => {
             if (item.featureCode) {
               const i = list.findIndex((_) => _.featureCode === item.featureCode);
