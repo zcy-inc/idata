@@ -69,7 +69,6 @@ export default defineConfig({
   resolve: {
     includes: ['src/components'],
   },
-  mfsu: {},
   chainWebpack(config, { webpack }) {
     config
       .plugin('monaco-editor')
