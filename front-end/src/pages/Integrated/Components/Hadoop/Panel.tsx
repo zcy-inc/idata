@@ -5,7 +5,7 @@ import type { ProColumns } from '@ant-design/pro-table';
 import { EditableProTable } from '@ant-design/pro-table';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { Button, Upload, message } from 'antd';
+import { Button, Upload, message,Tooltip } from 'antd';
 import { dataToList } from '../../utils'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -88,6 +88,7 @@ const HadoopPanel: FC<HadoopPanelProps> = (props) => {
         message.error("上传失败");
       }
     },
+    accept:".xml",
     showUploadList: false
   };
   return (
@@ -106,7 +107,9 @@ const HadoopPanel: FC<HadoopPanelProps> = (props) => {
         toolBarRender={() => {
           return [
             <Upload {...upLoadProps}>
-              <Button icon={<UploadOutlined />}>上传文件</Button>
+              <Tooltip placement="topLeft" title="仅支持上传xml文件">
+                <Button icon={<UploadOutlined />}>上传文件</Button>
+              </Tooltip>
             </Upload>,
           ];
         }}
