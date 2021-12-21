@@ -77,8 +77,8 @@ public class DashboardController {
         BeanUtils.copyProperties(jobOverview, response);
 
         // 设置总数
-        Integer total = dashboardService.getDsTotalJob(EnvEnum.prod.name());
-        response.setTotal(total);
+//        Integer total = dashboardService.getDsTotalJob(EnvEnum.prod.name());
+        response.setTotal(response.calcTotal());
 
         //设置饼图
         response.getNameValueResponseList().add(new NameValueResponse<>("running", response.getRunning()));
@@ -154,8 +154,8 @@ public class DashboardController {
         JobOverviewResponse response = new JobOverviewResponse();
         BeanUtils.copyProperties(jobOverview, response);
 
-        Integer totalJob = dashboardService.getYarnTotalJob();
-        response.setTotal(totalJob);
+//        Integer totalJob = dashboardService.getYarnTotalJob();
+        response.setTotal(response.calcTotal());
 
         //设置饼图
         response.getNameValueResponseList().add(new NameValueResponse<>("running", response.getRunning()));

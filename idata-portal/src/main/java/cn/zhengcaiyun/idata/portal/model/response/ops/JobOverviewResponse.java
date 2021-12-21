@@ -100,4 +100,24 @@ public class JobOverviewResponse {
     public void setNameValueResponseList(List<NameValueResponse> nameValueResponseList) {
         this.nameValueResponseList = nameValueResponseList;
     }
+
+    public Integer calcTotal() {
+        int sum = 0;
+        if (ready != null) {
+            sum += ready;
+        }
+        if (running != null) {
+            sum += running;
+        }
+        if (failure != null) {
+            sum += failure;
+        }
+        if (success != null) {
+            sum += success;
+        }
+        if (other != null) {
+            sum += other;
+        }
+        return sum;
+    }
 }
