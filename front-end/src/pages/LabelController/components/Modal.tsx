@@ -54,7 +54,6 @@ const Modal: FC<IModalProps> = (props) => {
       autoFocusFirstInput
       modalProps={{
         onCancel: onCancel,
-        destroyOnClose: true,
         title:"新增属性",
         width:580,
       }}
