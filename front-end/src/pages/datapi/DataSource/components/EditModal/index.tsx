@@ -29,12 +29,16 @@ const width = 300;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
 const ConnectionSuccessMsg = [
-  <IconFont type="icon-liantong" />,
-  <span style={{ color: '#05cc87' }}>已连通</span>,
+  <IconFont key="icon" type="icon-liantong" />,
+  <span key="text" style={{ color: '#05cc87', marginLeft: 4 }}>
+    已连通
+  </span>,
 ];
 const ConnectionFailedMsg = [
-  <IconFont type="icon-lianjieshibai" />,
-  <span style={{ color: '#fa8c15' }}>连接失败，可重试连接</span>,
+  <IconFont key="icon" type="icon-lianjieshibai" />,
+  <span key="text" style={{ color: '#fa8c15' }}>
+    连接失败，可重试连接
+  </span>,
 ];
 
 interface CreateModalProps {
@@ -90,6 +94,9 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
       form.setFieldsValue(values);
       setEnv(tmpEnvList);
       setDSType(initial.type);
+    }
+    if (!visible) {
+      setConnectionMsg(undefined);
     }
   }, [initial, visible]);
 
@@ -249,13 +256,28 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
         <Input size="large" style={{ width }} placeholder="请输入" />
       </Item>
       <Item className={styles.env} name="envList" label="环境" rules={ruleSelc}>
-        <Checkbox.Group options={envs as string[]} onChange={(v) => setEnv(v)} />
+        <Checkbox.Group
+          options={envs as string[]}
+          onChange={(v) => {
+            if (v.length) {
+              // 如果有值，都取第0项赋值
+              setActiveKey(v[0] as Environments);
+            }
+            setEnv(v);
+          }}
+        />
       </Item>
       <Item className={styles.comment} name="remark" label="备注说明">
         <TextArea placeholder="请输入" style={{ width }} />
       </Item>
       {env.length ? (
-        <Tabs className="reset-tabs" onChange={(k) => setActiveKey(k as Environments)}>
+        <Tabs
+          className="reset-tabs"
+          onChange={(k) => {
+            console.log(k);
+            setActiveKey(k as Environments);
+          }}
+        >
           {env.map((e) => (
             <TabPane tab={e} key={`${e}`} forceRender>
               {DSType !== 'csv' && (
@@ -349,17 +371,19 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
           >
             {showUpload && <Button icon={<UploadOutlined />}>上传文件</Button>}
           </Upload>
-          <Table
-            className={styles.table}
-            columns={preview.columns}
-            dataSource={preview.dataSource}
-            style={{ marginTop: 16 }}
-            pagination={{
-              total: preview.dataSource?.length,
-              showTotal: (t) => `共${t}条`,
-            }}
-            scroll={{ x: 'max-content' }}
-          />
+          {preview.columns?.length > 0 && (
+            <Table
+              className={styles.table}
+              columns={preview.columns}
+              dataSource={preview.dataSource}
+              style={{ marginTop: 16 }}
+              pagination={{
+                total: preview.dataSource?.length,
+                showTotal: (t) => `共${t}条`,
+              }}
+              scroll={{ x: 'max-content' }}
+            />
+          )}
         </>
       )}
     </ModalForm>

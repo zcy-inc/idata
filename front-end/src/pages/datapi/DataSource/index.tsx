@@ -129,16 +129,6 @@ const DataSource: FC = () => {
     const searchParams = form.getFieldsValue();
     getCSVDataSourceList({ limit: 10, offset: 0, ...searchParams })
       .then((res) => {
-        // const content: CSVItem[] = get(res, 'data.content', []);
-        // const tmp: CSVItemProcessed[] = [];
-        // for (let item of content) {
-        //   // 处理合并行，新增env字段显示环境，新增dbConfig字段渲染连接信息
-        //   if (item.envList.length === 2) {
-        //     tmp.concat({ ...item, env: 'stag / prod' });
-        //   } else {
-        //     tmp.concat({ ...item, env: item.envList[0] });
-        //   }
-        // }
         setListCSV(get(res, 'data.content', []));
         setTotalCSV(get(res, 'data.total', 0));
       })
@@ -147,7 +137,14 @@ const DataSource: FC = () => {
   };
 
   const onSearch = () => {
-    activeKey === 'db' ? getList() : getCSVList();
+    const type = form.getFieldValue('type');
+    if (type === 'csv') {
+      setActiveKey('file');
+      getCSVList();
+    } else {
+      setActiveKey('db');
+      getList();
+    }
   };
 
   const onEdit = (record: DataSourceItem) => {
@@ -218,7 +215,12 @@ const DataSource: FC = () => {
       <div style={{ marginTop: 8, textAlign: 'right' }}>
         <Button onClick={() => setVisible(true)}>新增数据源</Button>
       </div>
-      <Tabs className="reset-tabs" style={{ marginTop: 8 }} onChange={(k) => setActiveKey(k)}>
+      <Tabs
+        className="reset-tabs"
+        activeKey={activeKey}
+        style={{ marginTop: 8 }}
+        onChange={(k) => setActiveKey(k)}
+      >
         <TabPane tab="数据库数据源" key="db">
           <Table<DataSourceItem>
             rowKey="id"

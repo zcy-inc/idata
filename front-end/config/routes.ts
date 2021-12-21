@@ -121,8 +121,10 @@ export default [
   {
     path: '/operations',
     name: '运维中心',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
+    iconActive:
+      'https://sitecdn.zcycdn.com/f2e-assets/71ccc72f-6ceb-42d8-8442-146878701297.png?x-oss-process=image/quality,Q_75/format,jpg',
+    iconDefault:
+      'https://sitecdn.zcycdn.com/f2e-assets/937bbf3b-be59-47ef-92a2-ea7467077cbd.png?x-oss-process=image/quality,Q_75/format,jpg',
     featureCode: 'F_MENU_OPS_CENTER',
     routes: [
       { path: '/operations', redirect: '/operations/dashboard' },
