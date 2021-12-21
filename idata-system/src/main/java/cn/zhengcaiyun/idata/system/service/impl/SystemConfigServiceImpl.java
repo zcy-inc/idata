@@ -171,7 +171,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
             httpInput.setUri(connection.getConnectionUri()).setMethod(RequestMethod.GET.name());
         }
         try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
-            isConnected = response.code() == 200 || response.code() == 201;
+            isConnected = response != null && (response.code() == 200 || response.code() == 201);
         } catch (IOException e) {
             e.printStackTrace();
         }
