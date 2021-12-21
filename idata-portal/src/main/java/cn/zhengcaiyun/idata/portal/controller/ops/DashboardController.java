@@ -238,8 +238,13 @@ public class DashboardController {
     @PostMapping("/page/jobHistory")
     public RestResult<Page<JobHistoryResponse>> jobHistory(@RequestBody PageWrapper<JobHistoryRequest> pageWrapper) {
         JobHistoryRequest condition = pageWrapper.getCondition();
+        List<String> statusList = null;
+        if (condition.getJobStatus() != null) {
+            statusList = YarnJobStatusEnum.getCodesByValue(condition.getJobStatus());
+        }
+
         PageInfo<JobHistoryDto> pageInfo = jobHistoryService.pagingJobHistory(condition.getStartDateBegin(), condition.getStartDateEnd(),
-                condition.getFinishDateBegin(), condition.getFinishDateEnd(), condition.getJobName(), condition.getJobStatus(),
+                condition.getFinishDateBegin(), condition.getFinishDateEnd(), condition.getJobName(), statusList,
                 pageWrapper.getPageNum(), pageWrapper.getPageSize());
 
         PageInfo<JobHistoryResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {

@@ -57,7 +57,7 @@ public interface JobHistoryService {
      * @param pageSize
      * @return
      */
-    PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus, Integer pageNum, Integer pageSize);
+    PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, List<String> jobStatus, Integer pageNum, Integer pageSize);
 
     /**
      * 作业历史查询甘特图

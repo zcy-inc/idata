@@ -30,9 +30,9 @@ public class JobHistoryRequest {
     private String jobName;
 
     /**
-     * 最终状态
+     * 任务状态：1:队列中 2：运行中 6：失败 7：成功 -1：其他
      */
-    private String jobStatus;
+    private Integer jobStatus;
 
     public String getStartDateBegin() {
         return startDateBegin;
@@ -74,11 +74,11 @@ public class JobHistoryRequest {
         this.jobName = jobName;
     }
 
-    public String getJobStatus() {
+    public Integer getJobStatus() {
         return jobStatus;
     }
 
-    public void setJobStatus(String jobStatus) {
+    public void setJobStatus(Integer jobStatus) {
         this.jobStatus = jobStatus;
     }
 }

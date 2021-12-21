@@ -86,7 +86,7 @@ public class JobHistoryGanttResponse {
 
         /**
          * 作业最终状态（系统内部展示的状态）
-         * 1:等待运行 2：运行中 6：失败 7：成功 -1：其他
+         * 1:队列中 2：运行中 6：失败 7：成功 -1：其他
          */
         private Integer businessStatus;
 

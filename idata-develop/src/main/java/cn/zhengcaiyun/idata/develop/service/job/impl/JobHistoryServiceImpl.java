@@ -63,9 +63,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus, Integer pageNum, Integer pageSize) {
+    public PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, List<String> jobStatusList, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<JobHistoryDto> list = devJobHistoryMyDao.selectList(startDateBegin, startDateEnd, finishDateBegin, finishDateEnd, jobName, jobStatus);
+        List<JobHistoryDto> list = devJobHistoryMyDao.selectList(startDateBegin, startDateEnd, finishDateBegin, finishDateEnd, jobName, jobStatusList);
         PageInfo<JobHistoryDto> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
