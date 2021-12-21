@@ -1,4 +1,4 @@
-import { useRef,useState} from 'react';
+import { useRef, useState } from 'react';
 import type { FC } from 'react';
 import type { ProFormInstance } from '@ant-design/pro-form';
 import React, { useEffect } from 'react';
@@ -29,7 +29,7 @@ const Modal: FC<IModalProps> = (props) => {
   const formRef = useRef<ProFormInstance>();
   const { callback, onCancel, subjectType, visible, labelCode } = props;
   // TODO 后端硬要加 labelParamType 参数
-  const [labelParamType,setLabelParamType] = useState<string| undefined>()
+  const [labelParamType, setLabelParamType] = useState<string | undefined>()
   useEffect(() => {
     if (labelCode) {
       findDefine(labelCode).then(({ data }) => {
@@ -43,16 +43,20 @@ const Modal: FC<IModalProps> = (props) => {
   }, [subjectType, labelCode])
   return (
     <ModalForm<ILabelDefines>
+      className="zcy-modal"
       {...layout}
       initialValues={{
         labelRequired: 0
       }}
+      layout="horizontal"
       formRef={formRef}
       visible={visible}
       autoFocusFirstInput
       modalProps={{
         onCancel: onCancel,
-        destroyOnClose: true
+        destroyOnClose: true,
+        title:"新增属性",
+        width:580,
       }}
       onFinish={async (values) => {
         const { success } = await defineLabel({
@@ -75,7 +79,10 @@ const Modal: FC<IModalProps> = (props) => {
         placeholder="请输入名称"
       />
       <ProFormSelect
-      disabled={!!labelCode}
+        width="md"
+        name="labelTag"
+        label="属性类别"
+        disabled={!!labelCode}
         options={[
           {
             value: 'STRING_LABEL',
@@ -90,9 +97,6 @@ const Modal: FC<IModalProps> = (props) => {
             label: '布尔',
           },
         ]}
-        width="md"
-        name="labelTag"
-        label="合同约定生效方式"
       />
       <ProFormRadio.Group
         name="labelRequired"
@@ -111,18 +115,19 @@ const Modal: FC<IModalProps> = (props) => {
       <ProFormDependency name={['labelTag']}>
         {({ labelTag }) => {
           if (labelTag === "ENUM_VALUE_LABEL") {
-            return (<ProFormList
-              name="enumValues"
-              label="选型列表"
-              creatorButtonProps={{
-                position: 'bottom',
-              }}
-            >
-              <ProForm.Group size={8}>
-                <ProFormText disabled name="valueCode" label="编码" placeholder="" />
-                <ProFormText name="enumValue" label="名称" />
-              </ProForm.Group>
-            </ProFormList>)
+            return (
+              <ProFormList
+                name="enumValues"
+                label="选型列表"
+                creatorButtonProps={{
+                  position: 'bottom',
+                }}
+              >
+                <ProForm.Group size={8}>
+                  <ProFormText hidden name="valueCode" label="编码" placeholder="" />
+                  <ProFormText name="enumValue" label="" />
+                </ProForm.Group>
+              </ProFormList>)
           }
           return null;
         }
