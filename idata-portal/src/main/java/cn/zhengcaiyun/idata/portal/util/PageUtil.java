@@ -41,6 +41,9 @@ public class PageUtil {
     public static <T, E> PageInfo<E> convertType(PageInfo<T> s, Function<T, E> fun) {
         PageInfo pageInfo = new PageInfo();
         BeanUtils.copyProperties(s, pageInfo);
+        if (s.getList() == null) {
+            return pageInfo;
+        }
         List<E> responseList = s.getList().stream().map(e -> fun.apply(e)).collect(Collectors.toList());
         pageInfo.setList(responseList);
         return pageInfo;

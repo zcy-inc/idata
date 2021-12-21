@@ -8,9 +8,8 @@ import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
-import cn.zhengcaiyun.idata.develop.constant.enums.YarnApplicationStateEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
@@ -19,6 +18,7 @@ import cn.zhengcaiyun.idata.operation.bean.dto.RankTimeConsumeDto;
 import cn.zhengcaiyun.idata.operation.bean.dto.SfStackedLineDto;
 import cn.zhengcaiyun.idata.operation.service.DashboardService;
 import cn.zhengcaiyun.idata.portal.model.request.PageWrapper;
+import cn.zhengcaiyun.idata.portal.model.request.ops.JobHistoryGanttRequest;
 import cn.zhengcaiyun.idata.portal.model.request.ops.JobHistoryRequest;
 import cn.zhengcaiyun.idata.portal.model.request.ops.JobStateRequest;
 import cn.zhengcaiyun.idata.portal.model.response.StackedLineChartResponse;
@@ -26,7 +26,6 @@ import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.*;
 import cn.zhengcaiyun.idata.portal.util.PageUtil;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 
 @RestController
 @RequestMapping("/p1/ops/dashboard")
@@ -98,10 +96,12 @@ public class DashboardController {
      * @return
      */
     @PostMapping("/page/jobSchedule")
-    public RestResult<Page<DsJobSummaryResponse>> pageJobSchedule(@RequestBody PageWrapper<JobStateRequest> pageWrapper) throws NoSuchFieldException {
+    public RestResult<Page<DsJobSummaryResponse>> pageJobSchedule(@RequestBody PageWrapper<JobStateRequest> pageWrapper)
+            throws NoSuchFieldException {
         // 只查真线
         String env = EnvEnum.prod.name();
-        Page<JobHistoryDto> pageJobSchedule = dashboardService.pageJobSchedule(env, pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        Page<JobHistoryDto> pageJobSchedule = dashboardService.pageJobSchedule(env, pageWrapper.getCondition().getState(),
+                pageWrapper.getPageNum(), pageWrapper.getPageSize());
         Page<DsJobSummaryResponse> responsePage = PageUtil.convertType(pageJobSchedule, s -> {
             DsJobSummaryResponse response = new DsJobSummaryResponse();
             response.setJobId(s.getJobId());
@@ -173,8 +173,10 @@ public class DashboardController {
      * @return
      */
     @PostMapping("/page/yarn")
-    public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper) throws NoSuchFieldException {
-        Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(pageWrapper.getCondition().getState(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+    public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper)
+            throws NoSuchFieldException {
+        Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(pageWrapper.getCondition().getState(),
+                pageWrapper.getPageNum(), pageWrapper.getPageSize());
         Page<YarnJobSummaryResponse> responsePage = PageUtil.convertType(pageYarnJob, s -> {
             YarnJobSummaryResponse response = new YarnJobSummaryResponse();
             response.setJobId(s.getJobId());
@@ -253,6 +255,25 @@ public class DashboardController {
         return RestResult.success(PageUtil.covertMine(responsePageInfo));
     }
 
+    /**
+     * 作业历史查询甘特图
+     * @param pageWrapper
+     * @return
+     */
+    @PostMapping("/page/gantt/jobHistory")
+    public RestResult<Page<JobHistoryGanttResponse>> ganttJobHistory(@RequestBody PageWrapper<JobHistoryGanttRequest> pageWrapper) {
+        JobHistoryGanttRequest condition = pageWrapper.getCondition();
+        PageInfo<JobHistoryGanttDto> pageInfo = jobHistoryService.pagingGanttJobHistory(condition.getStartDate(), condition.getLayerCode(),
+                condition.getDagId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+
+        PageInfo<JobHistoryGanttResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {
+            JobHistoryGanttResponse response = new JobHistoryGanttResponse();
+            BeanUtils.copyProperties(s, response);
+            return response;
+        });
+
+        return RestResult.success(PageUtil.covertMine(responsePageInfo));
+    }
 
 
 }

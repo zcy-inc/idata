@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
 import cn.hutool.core.date.DateTime;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -94,7 +95,34 @@ public interface DevJobHistoryMyDao {
             "left join dev_enum_value t3 " +
             "on t2.dw_layer_code = t3.value_code " +
             "</script>")
-    List<JobHistoryDto> selectList(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus);
+    List<JobHistoryDto> selectList(String startDateBegin, String startDateEnd, String finishDateBegin,
+                                   String finishDateEnd, String jobName, String jobStatus);
+
+    @Select("<script>" +
+            " select t1.job_id " +
+            " from (select job_id from dev_job_history " +
+            "       where <![CDATA[ (start_time < #{endDate} and finish_time > #{startDate}) " +
+            "           or (finish_time is null and start_time < #{startDate} and finish_time > #{startDate}) ]]>) as t1 " +
+            " join (select id from dev_job_info " +
+            "       where 1= 1 <if test = 'layerCode != null'> and dw_layer_code = #{layerCode} </if>) as t2 on t1.job_id = t2.id " +
+            " <if test = 'dagId != null'> " +
+            "   join (select job_id from dev_job_execute_config where sch_dag_id = #{dagId}) as t3 on t1.job_id = t3.job_id " +
+            " </if> " +
+            " group by t1.job_id " +
+            " </script> ")
+    List<Long> selectGanttIdList(String startDate, String endDate, String layerCode, Long dagId);
+
+
+    @Select("<script> " +
+            " select t1.*, t2.name as jobName " +
+            " from (select * from dev_job_history " +
+            "       where  (<![CDATA[start_time < #{endDate} and finish_time > #{startDate}) " +
+            "               or (finish_time is null and start_time < #{startDate} and finish_time > #{startDate}]]>) " +
+            "           and job_id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t1 " +
+            " left join (select id, name from dev_job_info where id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t2 " +
+            " on t1.job_id = t2.id " +
+            " </script>")
+    List<JobHistoryDto> selectGanttList(String startDate, String endDate, List<Long> jobIdList);
 }
 
 
