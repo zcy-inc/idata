@@ -92,6 +92,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
         value={dataSource}
         onChange={setDataSource}
         recordCreatorProps={false}
+        className='card-padding-0'
         editable={{
           type: 'multiple',
           editableKeys,
