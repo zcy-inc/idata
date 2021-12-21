@@ -1,11 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Col, Drawer, Form, Input, message, Row, Select, Tabs } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  message,
+  Radio,
+  Row,
+  Select,
+  Tabs,
+} from 'antd';
 import { get } from 'lodash';
 import type { FC } from 'react';
 import styles from './index.less';
 
 import Title from '@/components/Title';
-import { concurrentOptions, restartOptions } from './constants';
+import {
+  concurrentOptions,
+  execDriverMemOptions,
+  execWorkerMemOptions,
+  restartOptions,
+} from './constants';
 import { DAGListItem, Task } from '@/types/datadev';
 import {
   getDAGList,
@@ -65,7 +82,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           config.schDryRun = [];
         }
-        config.schTimeOutStrategy = config.schTimeOutStrategy?.split(',');
         if (environment === Environments.STAG) {
           stagForm.setFieldsValue(config);
         }
@@ -91,17 +107,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!values.schDryRun) {
       values.schDryRun = 0;
     }
-    // 处理超时策略
-    if (values.schTimeOutStrategy && Array.isArray(values.schTimeOutStrategy)) {
-      values.schTimeOutStrategy = values.schTimeOutStrategy.join(',');
-    }
     if (values.schDryRun && Array.isArray(values.schDryRun)) {
       values.schDryRun = values.schDryRun.length > 0 ? 1 : 0;
     }
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
-    console.log(values);
     saveTaskConfig({ jobId: data?.id as number, environment }, { executeConfig: values })
       .then((res) => {
         if (res.success) {
@@ -181,10 +192,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 <Input size="large" style={{ width }} placeholder="请输入" suffix="分" />
               </Item>
               <Item name="schTimeOutStrategy" label="超时策略">
-                <Checkbox.Group>
-                  <Checkbox value="alarm">超时告警</Checkbox>
-                  <Checkbox value="fail">超时失败</Checkbox>
-                </Checkbox.Group>
+                <Radio.Group>
+                  <Radio value="alarm">超时告警</Radio>
+                  <Radio value="fail">超时失败</Radio>
+                </Radio.Group>
               </Item>
               <Item name="schRerunMode" label="重跑属性" rules={ruleSelc}>
                 <Select
@@ -200,6 +211,22 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   style={{ width }}
                   placeholder="请选择"
                   options={security.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+                />
+              </Item>
+              <Item name="execDriverMem" label="驱动器内存" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execDriverMemOptions}
+                />
+              </Item>
+              <Item name="execWorkerMem" label="执行器内存" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execWorkerMemOptions}
                 />
               </Item>
               <Item name="execMaxParallelism" label="任务期望最大并发数" rules={ruleSelc}>

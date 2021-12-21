@@ -39,6 +39,7 @@ const FolderTree: FC = () => {
     onViewTree,
     showLabel,
     onCreateDAG,
+    onCreateFun,
     setVisibleTask,
     setVisibleDev,
     setCurLabel,
@@ -58,6 +59,7 @@ const FolderTree: FC = () => {
     onViewTree: _.onViewTree,
     showLabel: _.showLabel,
     onCreateDAG: _.onCreateDAG,
+    onCreateFun: _.onCreateFun,
     setVisibleTask: _.setVisibleTask,
     setVisibleDev: _.setVisibleDev,
     setCurLabel: _.setCurLabel,
@@ -97,6 +99,10 @@ const FolderTree: FC = () => {
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
         新建作业
       </Menu.Item>
+      <Menu.Item key="CreateFun">
+        <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
+        新建函数
+      </Menu.Item>
     </Menu>
   );
 
@@ -134,6 +140,9 @@ const FolderTree: FC = () => {
       case 'CreateDev':
         setCurNode(node);
         setVisibleDev(true);
+        break;
+      case 'CreateFun':
+        onCreateFun();
         break;
 
       default:

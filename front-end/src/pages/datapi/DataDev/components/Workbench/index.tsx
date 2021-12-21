@@ -14,6 +14,7 @@ import TabTable from '../TabTable';
 import TabDAG from '../TabDAG';
 import TabTask from '../TabTask';
 import TabDev from '../TabDev';
+import TabFun from '../TabFun';
 
 const { TabPane } = Tabs;
 
@@ -39,6 +40,8 @@ const Workbench: FC = ({}) => {
         return <TabTask pane={pane} />;
       case FolderBelong.DEVJOB:
         return <TabDev pane={pane} />;
+      case FolderBelong.DEVFUN:
+        return <TabFun pane={pane} />;
       default:
         return null;
     }

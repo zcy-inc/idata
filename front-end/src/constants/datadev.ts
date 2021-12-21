@@ -13,6 +13,7 @@ export enum FolderBelong {
   DI = 'DI', // 数据集成
   DEV = 'DEV', // 数据开发
   DEVJOB = 'DEV.JOB', // 数据开发-作业
+  DEVFUN = 'DEV.FUN', // 数据开发-函数
 }
 
 export enum PeriodRange {
@@ -104,4 +105,12 @@ export enum StatementState {
   ERROR = 'error',
   CANCELLING = 'cancelling',
   CANCELED = 'cancelled',
+}
+
+export enum JobStatus {
+  READY = 1,
+  RUNNING = 2,
+  FAIL = 6,
+  SUCCESS = 7,
+  OTHER = -1,
 }

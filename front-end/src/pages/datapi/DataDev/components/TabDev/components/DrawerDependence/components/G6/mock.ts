@@ -1,107 +1,95 @@
-export const data = {
-  id: 'Modeling Methods',
+import { DependenceTreeNode } from '@/types/datadev';
+
+export const data: DependenceTreeNode = {
+  jobId: 1,
+  jobName: 'root',
+  jobStatus: 'waiting',
+  lastRunTime: '2021-12-06 15:21:57',
+  taskId: 1,
+  nextLevel: 2,
   children: [
     {
-      id: 'Classification',
+      jobId: 2,
+      jobName: 'prev',
+      jobStatus: 'success',
+      lastRunTime: '2021-12-06 15:21:57',
+      taskId: 2,
+      relation: 'prev',
+      nextLevel: 3,
       children: [
         {
-          id: 'Logistic regression',
+          jobId: 2,
+          jobName: 'ads_yuntiads_yunti',
+          jobStatus: 'running',
+          lastRunTime: '2021-12-06 15:21:57',
+          taskId: 2,
+          relation: 'prev',
+          nextLevel: 5,
+          children: [
+            {
+              jobId: 2,
+              jobName: 'ads_yunti',
+              jobStatus: 'success',
+              lastRunTime: '2021-12-06 15:21:57',
+              taskId: 2,
+              relation: 'prev',
+              nextLevel: 3,
+            },
+            {
+              jobId: 3,
+              jobName: 'ads_yuntiads_yunti',
+              jobStatus: 'fail',
+              lastRunTime: '2021-12-06 15:21:57',
+              taskId: 3,
+              relation: 'prev',
+            },
+          ],
         },
         {
-          id: 'Linear discriminant analysis',
-        },
-        {
-          id: 'Rules',
-        },
-        {
-          id: 'Decision trees',
-        },
-        {
-          id: 'Naive Bayes',
-        },
-        {
-          id: 'K nearest neighbor',
-        },
-        {
-          id: 'Probabilistic neural network',
-        },
-        {
-          id: 'Support vector machine',
+          jobId: 3,
+          jobName: 'ads_yunti',
+          jobStatus: 'fail',
+          lastRunTime: '2021-12-06 15:21:57',
+          taskId: 3,
+          relation: 'prev',
         },
       ],
     },
     {
-      id: 'Consensus',
+      jobId: 3,
+      jobName: 'next1',
+      jobStatus: 'others',
+      lastRunTime: '2021-12-06 15:21:57',
+      taskId: 3,
+      relation: 'next',
+      nextLevel: 3,
       children: [
         {
-          id: 'Models diversity',
-          children: [
-            {
-              id: 'Different initializations',
-            },
-            {
-              id: 'Different parameter choices',
-            },
-            {
-              id: 'Different architectures',
-            },
-            {
-              id: 'Different modeling methods',
-            },
-            {
-              id: 'Different training sets',
-            },
-            {
-              id: 'Different feature sets',
-            },
-          ],
+          jobId: 2,
+          jobName: 'ads_yunti',
+          jobStatus: 'running',
+          lastRunTime: '2021-12-06 15:21:57',
+          taskId: 2,
+          relation: 'next',
         },
         {
-          id: 'Methods',
-          children: [
-            {
-              id: 'Classifier selection',
-            },
-            {
-              id: 'Classifier fusion',
-            },
-          ],
-        },
-        {
-          id: 'Common',
-          children: [
-            {
-              id: 'Bagging',
-            },
-            {
-              id: 'Boosting',
-            },
-            {
-              id: 'AdaBoost',
-            },
-          ],
+          jobId: 3,
+          jobName: 'ads_yunti',
+          jobStatus: 'fail',
+          lastRunTime: '2021-12-06 15:21:57',
+          taskId: 3,
+          relation: 'next',
         },
       ],
     },
     {
-      id: 'Regression',
-      children: [
-        {
-          id: 'Multiple linear regression',
-        },
-        {
-          id: 'Partial least squares',
-        },
-        {
-          id: 'Multi-layer feedforward neural network',
-        },
-        {
-          id: 'General regression neural network',
-        },
-        {
-          id: 'Support vector regression',
-        },
-      ],
+      jobId: 4,
+      jobName: 'next2',
+      jobStatus: 'success',
+      lastRunTime: '2021-12-06 15:21:57',
+      taskId: 4,
+      relation: 'next',
     },
   ],
+  prevLevel: 1,
 };

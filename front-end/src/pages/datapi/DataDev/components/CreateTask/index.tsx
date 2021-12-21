@@ -78,6 +78,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           style={{ width }}
           placeholder="请选择"
           options={taskTypes.map((_) => ({ label: _.name, value: _.code }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       <Item name="name" label="任务名称" rules={rules}>
@@ -89,6 +91,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           style={{ width }}
           placeholder="请选择"
           options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
       <Item name="folderId" label="目标文件夹" rules={rules}>

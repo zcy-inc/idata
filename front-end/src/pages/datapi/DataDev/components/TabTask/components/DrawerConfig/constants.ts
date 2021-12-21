@@ -10,3 +10,13 @@ export const concurrentOptions = [...Array(20).keys()].map((_) => ({
   label: _ + 1,
   value: _ + 1,
 }));
+
+export const execDriverMemOptions = [...Array(16).keys()].map((_) => ({
+  label: _ + 1,
+  value: _ + 1,
+}));
+
+export const execWorkerMemOptions = [...Array(16).keys()].map((_) => ({
+  label: _ + 1,
+  value: _ + 1,
+}));

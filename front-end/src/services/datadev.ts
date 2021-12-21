@@ -18,6 +18,9 @@ import type {
   TaskType,
   TaskVersion,
   TreeNode,
+  DependenceTreeNode,
+  TaskHistoryItem,
+  UDF,
 } from '@/types/datadev';
 import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
@@ -680,5 +683,160 @@ export async function runQueryResult(params: {
   >('/api/p1/dev/jobs/runQueryResult', {
     method: 'GET',
     params,
+  });
+}
+
+/**
+ * 获取作业历史
+ */
+export async function getTaskHistory(data: {
+  condition: {
+    id: number;
+  };
+  pageNum: number;
+  pageSize: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        content: TaskHistoryItem[];
+        pageNum: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+      };
+    }
+  >(`/api/p1/dev/jobs/history/page`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 获取作业的依赖树
+ */
+export async function getDependenceTree(params: {
+  id: number;
+  env: Environments;
+  name?: string;
+  preLevel: number;
+  nextLevel: number;
+  searchJobId?: number;
+}) {
+  return request<DefaultResponse & { data: DependenceTreeNode }>(
+    `/api/p1/dev/jobs/dependency/${params.id}/tree`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 获取作业的依赖树节点的平铺列表
+ */
+export async function getDependenceTreeNodeList(params: {
+  searchName: string;
+  env: Environments;
+  jobId: number;
+}) {
+  return request<DefaultResponse & { data: { id: number; name: string }[] }>(
+    '/api/p1/dev/jobs/dependency/list',
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 重跑作业
+ */
+export async function rerunTask(params: { id: number; env: Environments; runPost?: boolean }) {
+  return request<DefaultResponse & { data: boolean }>(
+    `/api/p1/dev/jobs/dependency/${params.id}/rerun`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 查看作业日志
+ */
+export async function getTaskRunningLog(params: { id: number; env: Environments; taskId: number }) {
+  return request<DefaultResponse & { data: string }>(
+    `/api/p1/dev/jobs/dependency/${params.id}/running/log`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/* ========== Dev.Fun(UDF) ========== */
+/**
+ * 获取函数详情
+ */
+export async function getUDF(params: { id: number }) {
+  return request<DefaultResponse & { data: UDF }>(`/api/p1/dev/udf/${params.id}`, {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 创建函数
+ */
+export async function createUDF(data: UDF) {
+  return request<DefaultResponse & { data: UDF }>('/api/p1/dev/udf', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 更新函数
+ */
+export async function updateUDF(data: UDF) {
+  return request<DefaultResponse & { data: UDF }>('/api/p1/dev/udf', {
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
+ * 删除函数
+ */
+export async function deleteUDF(params: { id: number }) {
+  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/udf/${params.id}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * 函数代码文件上传
+ */
+export async function uploadUDFCodeFile(data: FormData) {
+  return request<
+    DefaultResponse & {
+      data: {
+        relativePath: string;
+        fileName: string;
+      };
+    }
+  >('/api/p1/hdfs/upload/udf', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 函数代码文件下载
+ */
+export async function getUDFCodeFile(params: { id: number }) {
+  return request<DefaultResponse & { data: {} }>(`/api/p1/dev/udf/download/${params.id}`, {
+    method: 'GET',
   });
 }

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Drawer, Form, Tabs } from 'antd';
+import React, { useState } from 'react';
+import { Drawer, Tabs } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
 
@@ -14,25 +14,11 @@ interface DrawerDependenceProps {
   data?: Task;
 }
 
-const { Item } = Form;
 const { TabPane } = Tabs;
-const width = 200;
 const env = Object.values(Environments).map((_) => _);
-const ruleSelc = [{ required: true, message: '请选择' }];
 
 const DrawerDependence: FC<DrawerDependenceProps> = ({ visible, onClose, data }) => {
-  const [activeKey, setActiveKey] = useState<Environments>(Environments.STAG);
-
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    if (visible) {
-    }
-  }, [visible]);
-
-  const onSave = (environment: Environments) => {
-    console.log(environment);
-  };
+  const [activeKey, setActiveKey] = useState<Environments>(Environments.PROD);
 
   return (
     <Drawer
@@ -42,11 +28,7 @@ const DrawerDependence: FC<DrawerDependenceProps> = ({ visible, onClose, data })
       destroyOnClose
       width={780}
       title="依赖"
-      footer={
-        <Button size="large" onClick={() => onSave(activeKey)}>
-          {`保存${activeKey}`}
-        </Button>
-      }
+      footer={null}
       footerStyle={{
         textAlign: 'right',
         boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
@@ -56,16 +38,16 @@ const DrawerDependence: FC<DrawerDependenceProps> = ({ visible, onClose, data })
     >
       <Tabs
         className="reset-tabs"
+        defaultActiveKey={activeKey}
         onChange={(k) => {
           setActiveKey(k as Environments);
         }}
       >
         {env.map((_) => (
-          <TabPane tab={_} key={_}>
-            <G6 />
-          </TabPane>
+          <TabPane tab={_} key={_}></TabPane>
         ))}
       </Tabs>
+      <G6 data={data} env={activeKey} />
     </Drawer>
   );
 };
