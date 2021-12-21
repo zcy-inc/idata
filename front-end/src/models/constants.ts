@@ -34,6 +34,17 @@ export const newDAG: IPane = {
   mode: 'edit',
 };
 
+export const newFun: IPane = {
+  title: '新建函数',
+  name: '新建函数',
+  key: 'newFun',
+  id: -1,
+  cid: 'newFun',
+  type: FolderTypes.RECORD,
+  belong: FolderBelong.DEVFUN,
+  mode: 'edit',
+};
+
 export const mockBelongTree = [
   {
     cid: '1',

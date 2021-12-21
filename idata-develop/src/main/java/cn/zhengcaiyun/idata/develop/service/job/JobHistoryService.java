@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import com.github.pagehelper.PageInfo;
 
@@ -56,5 +57,16 @@ public interface JobHistoryService {
      * @param pageSize
      * @return
      */
-    PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, String jobStatus, Integer pageNum, Integer pageSize);
+    PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, List<String> jobStatus, Integer pageNum, Integer pageSize);
+
+    /**
+     * 作业历史查询甘特图
+     * @param startDate
+     * @param layerCode
+     * @param dagId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo<JobHistoryGanttDto> pagingGanttJobHistory(String startDate, String layerCode, Long dagId, Integer pageNum, Integer pageSize);
 }

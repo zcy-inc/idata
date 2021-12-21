@@ -1,8 +1,8 @@
 POST http://localhost:9527/api/p1/ops/dashboard/page/jobHistory
 Content-Type: application/json
-Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM5NzA0NzI1LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.JSNegvsET3zlpzVi4g5gnnPw1ye39P6l-Km8djVGtc4AwS7X1aSYGHDX2z0Sa9rWbHq4RflZhXzsEErMitJ2YQ
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMTU2MDI5LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.flDMgpq8Prl_OSsdovHIUox23Px4gWin4ZntAY9pS4l6Vtf-dcrR1aHcPU4b18MmP-q2tXek2quN0kOshsQQ5g
 
-{"pageNum":1,"pageSize":10,"condition":{"state":7}}
+{"pageNum":1,"pageSize":10,"condition":{"jobStatus": 7}}
 
 ###
 GET http://localhost:9527/api/p1/ops/dashboard/rank/resourceConsume?recentDays=7

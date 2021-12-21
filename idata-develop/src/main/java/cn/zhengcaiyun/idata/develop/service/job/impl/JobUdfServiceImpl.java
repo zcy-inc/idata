@@ -71,6 +71,7 @@ public class JobUdfServiceImpl implements JobUdfService {
     public Long add(DevJobUdf udf) {
         try {
             devUdfDao.insertSelective(udf);
+            devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DEV_FUN);
         } catch (DuplicateKeyException duplicateKeyException) {
             throw new NameDuplicateException("UDF名：" + udf.getUdfName() + " 重复");
         }

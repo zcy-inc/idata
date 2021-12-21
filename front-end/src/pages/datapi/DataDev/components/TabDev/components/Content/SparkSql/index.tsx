@@ -6,8 +6,6 @@ import type { ForwardRefRenderFunction } from 'react';
 import type { IDisposable } from 'monaco-editor';
 import styles from './index.less';
 
-import Test from './Test';
-
 interface SparkSqlProps {
   monaco: any;
   data: {
@@ -39,11 +37,6 @@ const suggestionsSql = [
   { label: 'IN', insertText: 'IN', detail: 'description', kind: KINDS.Keyword },
   { label: 'BETWEEN', insertText: 'BETWEEN', detail: 'description', kind: KINDS.Keyword },
   { label: 'JOIN', insertText: 'JOIN', detail: 'description', kind: KINDS.Keyword },
-];
-const suggestions = [
-  { label: '测试1', insertText: '测试1', detail: '提示的文字' },
-  { label: '测试2', insertText: '测试22', detail: '提示的文字' },
-  { label: '测试3', insertText: '测试3', detail: '提示的文字' },
 ];
 
 const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
@@ -77,23 +70,14 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
     <>
       <Tabs>
         <TabPane tab="编辑器" key="editor" style={{ padding: '16px 0', height: 440 }} forceRender>
-          {/* <Test
-            key="plaintext"
-            height="260"
-            lineNumbers="off"
-            wordWrap="on"
-            defaultValue=""
-            mode="plaintext"
-            suggestions={suggestions}
-          /> */}
           <MonacoEditor
-            // ref={monaco}
+            ref={monaco}
             height="400"
-            language="sql"
+            language="plaintext"
             theme="vs-dark"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
-            options={{ automaticLayout: true }}
+            options={{ automaticLayout: true, quickSuggestions: false }}
             editorDidMount={(editor, monacoInner) => {
               editorRef.current = editor;
               monacoInnerRef.current = monacoInner.languages.registerCompletionItemProvider(

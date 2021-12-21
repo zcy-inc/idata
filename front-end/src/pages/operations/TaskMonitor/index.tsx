@@ -19,7 +19,9 @@ const ClusterMonitor: FC = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    getTasksWrapped(0);
+  }, []);
 
   const getTasksWrapped = (offset: number) => {
     const params = form.getFieldsValue();

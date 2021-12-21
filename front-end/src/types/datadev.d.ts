@@ -11,6 +11,7 @@ import {
   VersionStatus,
   SchTimeOutStrategy,
   SchPriority,
+  JobStatus,
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -223,4 +224,43 @@ export interface KylinContent {
   id?: number;
   editable?: number;
   version?: number;
+}
+
+export interface TaskHistoryItem {
+  id: number;
+  jobId: number;
+  applicationId: string;
+  avgMemory: number;
+  avgVcores: number;
+  createTime: string;
+  duration: number;
+  finalStatus: string;
+  startTime: string;
+  finishTime: string;
+}
+
+export interface DependenceTreeNode {
+  jobId: number;
+  jobName: string;
+  jobStatus: JobStatus;
+  lastRunTime: string;
+  nextLevel?: number;
+  prevLevel?: number;
+  children?: DependenceTreeNode[];
+  taskId: number;
+  relation?: 'prev' | 'next';
+}
+
+export interface UDF {
+  commandFormat: string;
+  description: string;
+  fileName: string;
+  folderId: number;
+  hdfsPath: string;
+  returnSample: string;
+  returnType: string;
+  udfName: string;
+  udfSample: string;
+  udfType: string;
+  id?: number;
 }

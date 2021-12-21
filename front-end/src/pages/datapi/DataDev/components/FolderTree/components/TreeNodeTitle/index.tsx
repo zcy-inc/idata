@@ -21,6 +21,7 @@ const MapFolderIcon = {
   [FolderBelong.DI]: 'icon-shujujicheng',
   [FolderBelong.DEV]: 'icon-shujukaifa',
   [FolderBelong.DEVJOB]: 'icon-zuoye',
+  [FolderBelong.DEVFUN]: 'icon-zuoye',
   [FolderTypes.FOLDER]: 'icon-wenjianjia',
 };
 
@@ -45,6 +46,8 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
         return <Menu.Item key="CreateDI">新建DI</Menu.Item>;
       case FolderBelong.DEVJOB:
         return <Menu.Item key="CreateDev">新建作业</Menu.Item>;
+      case FolderBelong.DEVFUN:
+        return <Menu.Item key="CreateFun">新建函数</Menu.Item>;
       default:
         return null;
     }
