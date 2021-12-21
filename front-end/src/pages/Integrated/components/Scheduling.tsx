@@ -86,7 +86,7 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
   });
   return (
     <Spin spinning={fetchLoading || saveLoading || connectionLoading}>
-      <div style={{ textAlign: 'right', paddingBottom:"16px"}}>
+      <div style={{ textAlign: 'right', padding: '0 10px 15px 10px', background: '#fff' }}>
         <Button type="primary" onClick={save}> 保存</Button>
       </div>
       <EditableProTable<IDataSourceType>
@@ -109,7 +109,6 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
       {hasConnection ?
         <Space>
           <Button
-            type="primary"
             size="small"
             icon={<PoweroffOutlined />}
             onClick={checkConnection}
