@@ -17,7 +17,7 @@ const columns: ProColumns<IDataSourceType>[] = [
   {
     title: '参数名称',
     dataIndex: 'configValueKey',
-    width: '280px',
+    width:320,
     editable: false
   },
   {
@@ -31,11 +31,6 @@ const columns: ProColumns<IDataSourceType>[] = [
           message: '此项是必填项',
         }]
     },
-  },
-  {
-    title: '备注',
-    width: '360px',
-    dataIndex: 'configValueRemarks',
   },
 ];
 const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
