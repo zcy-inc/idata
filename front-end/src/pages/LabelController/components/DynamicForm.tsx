@@ -12,7 +12,6 @@ import Modal from './Modal'
 import { useRequest } from 'umi';
 import { dataToColumns } from '../utils'
 import './index.less'
-
 type DataItem = {
   name: string;
   state: string;
@@ -68,6 +67,7 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
   return (
     <Spin spinning={fetchLoading || delLoading}>
       <BetaSchemaForm<DataItem>
+        className="label-width-140"
         layout="horizontal"
         colon={false}
         submitter={false}
