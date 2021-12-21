@@ -232,6 +232,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           jobType: TaskTypes.SQL_SPARK,
           sourceSql: monacoValue,
           externalTables: values.externalTables,
+          version,
         };
         saveSqlSpark({ jobId: pane.id }, dataSql)
           .then((res) => {
@@ -254,6 +255,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             argumentRemark: _.argumentRemark,
           })),
           mainClass: values.mainClass,
+          version,
         };
         saveSpark({ jobId: pane.id }, dataSparkJar)
           .then((res) => {
@@ -275,6 +277,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
           })),
+          version,
         };
         saveSpark({ jobId: pane.id }, dataSparkPython)
           .then((res) => {
@@ -292,6 +295,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
           sourceResource: monacoValue,
+          version,
         };
         saveScript({ jobId: pane.id }, dataScriptShell)
           .then((res) => {
@@ -313,6 +317,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
           })),
+          version,
         };
         saveScript({ jobId: pane.id }, dataScriptPython)
           .then((res) => {
@@ -333,6 +338,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           buildType: values.buildType,
           startTime: new Date(values.startTime).getTime(),
           endTime: new Date(values.endTime).getTime(),
+          version,
         };
         saveKylin({ jobId: pane.id }, dataKylin)
           .then((res) => {
