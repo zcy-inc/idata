@@ -49,7 +49,12 @@ public class HttpClientUtil {
     public static Response executeHttpRequest(HttpInput httpInput) throws IOException {
         checkArgument(httpInput.getMethod() != null, "http request method is null");
         checkArgument(httpInput.getUri() != null, "http request uri is null");
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(httpInput.getUri()).newBuilder();
+        HttpUrl.Builder urlBuilder;
+        try {
+            urlBuilder = HttpUrl.parse(httpInput.getUri()).newBuilder();
+        } catch (Exception e) {
+            return null;
+        }
         if (httpInput.getQueryParamMap() != null) {
             for (Map.Entry<String, String> entry : httpInput.getQueryParamMap().entrySet()) {
                 urlBuilder.addQueryParameter(entry.getKey(), entry.getValue());
