@@ -129,17 +129,33 @@ export default [
     name: '运维中心',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
-    featureCode: 'TEST',
+    featureCode: 'F_MENU_OPS_CENTER',
     routes: [
       { path: '/operations', redirect: '/operations/dashboard' },
-      { path: '/operations/dashboard', name: '运维看板', component: './operations/Dashboard' },
-      { path: '/operations/taskHistory', name: '作业历史', component: './operations/TaskHistory' },
+      {
+        path: '/operations/dashboard',
+        name: '运维看板',
+        component: './operations/Dashboard',
+        featureCode: 'F_MENU_OPS_DASHBOARD',
+      },
+      {
+        path: '/operations/taskHistory',
+        name: '作业历史',
+        component: './operations/TaskHistory',
+        featureCode: 'F_MENU_OPS_DASHBOARD',
+      },
       {
         path: '/operations/clusterMonitor',
         name: '集群监控',
         component: './operations/ClusterMonitor',
+        featureCode: 'F_MENU_CLUSTER_MONITORING',
       },
-      { path: '/operations/taskMonitor', name: '任务监控', component: './operations/TaskMonitor' },
+      {
+        path: '/operations/taskMonitor',
+        name: '任务监控',
+        component: './operations/TaskMonitor',
+        featureCode: 'F_MENU_JOB_MONITORING',
+      },
     ],
   },
   {
