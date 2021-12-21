@@ -86,6 +86,9 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
   });
   return (
     <Spin spinning={fetchLoading || saveLoading || connectionLoading}>
+      <div style={{ textAlign: 'right', paddingBottom:"16px"}}>
+        <Button type="primary" onClick={save}> 保存</Button>
+      </div>
       <EditableProTable<IDataSourceType>
         columns={columns}
         rowKey="configValueKey"
@@ -121,10 +124,6 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
           }
         </Space>
         : null}
-
-      <div style={{ textAlign: 'right' }}>
-        <Button type="primary" onClick={save}> 保存</Button>
-      </div>
     </Spin>
   );
 };
