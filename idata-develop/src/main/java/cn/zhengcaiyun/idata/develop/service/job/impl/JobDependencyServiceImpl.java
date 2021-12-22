@@ -140,6 +140,8 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             prevMap.put(elem.getJobId(), elem.getPrevJobId());
         }
 
+        //防止数据依赖（数据错误）
+        List<Long> visited = new ArrayList<>();
         //获取所有前继可达ids
         Queue<Long> queue = Lists.newLinkedList();
         queue.add(jobId);
@@ -147,10 +149,16 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 Long qJobId = queue.poll();
-                accessIdSet.add(qJobId);
-                queue.addAll(prevMap.get(qJobId));
+                if (!visited.contains(qJobId)) {
+                    accessIdSet.add(qJobId);
+                    visited.add(qJobId);
+                    queue.addAll(prevMap.get(qJobId));
+                }
             }
         }
+
+        //防止数据依赖（数据错误）
+        visited = new ArrayList<>();
         //获取所有后继可达ids
         queue = Lists.newLinkedList();
         queue.add(jobId);
@@ -158,12 +166,13 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 Long qJobId = queue.poll();
-                accessIdSet.add(qJobId);
-                queue.addAll(nextMap.get(qJobId));
+                if (!visited.contains(qJobId)) {
+                    accessIdSet.add(qJobId);
+                    visited.add(qJobId);
+                    queue.addAll(nextMap.get(qJobId));
+                }
             }
         }
-
-
 
         return list.stream().filter(e -> accessIdSet.contains(e.getJobId())).collect(Collectors.toList());
     }
