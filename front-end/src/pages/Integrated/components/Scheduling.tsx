@@ -8,6 +8,7 @@ import { dataToList, listToData, configToConnection } from '../utils'
 import type { TConfigType, IDataSourceType } from '@/types/system-controller'
 import type { FC } from 'react';
 import type { ProColumns } from '@ant-design/pro-table';
+
 interface IBaseConfiguration {
   hasConnection?: boolean,
   type: TConfigType
