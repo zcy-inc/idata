@@ -16,9 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.config;
 
-import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
-import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
-import cn.zhengcaiyun.idata.commons.exception.NameDuplicateException;
+import cn.zhengcaiyun.idata.commons.exception.*;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -66,6 +64,15 @@ public class ErrorHandler {
             return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
         }
         if (error instanceof ExternalIntegrationException) {
+            return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof RemoteServiceException) {
+            return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof BizProcessException) {
+            return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
+        if (error instanceof GeneralException) {
             return RestResult.error(RestResult.INTERNAL_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
         }
         if (error instanceof BindException) {
