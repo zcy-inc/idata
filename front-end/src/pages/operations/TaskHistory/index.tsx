@@ -121,7 +121,13 @@ const TaskHistory: FC = () => {
           label="状态"
           placeholder="请选择"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
-          options={[]}
+          options={[
+            { label: '队列中', value: 1 },
+            { label: '运行中', value: 2 },
+            { label: '失败', value: 6 },
+            { label: '成功', value: 7 },
+            { label: '其他', value: -1 },
+          ]}
         />
         <Button
           size="large"

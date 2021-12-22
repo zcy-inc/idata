@@ -8,6 +8,7 @@ import { dataToList, listToData, configToConnection } from '../utils'
 import type { TConfigType, IDataSourceType } from '@/types/system-controller'
 import type { FC } from 'react';
 import type { ProColumns } from '@ant-design/pro-table';
+
 interface IBaseConfiguration {
   hasConnection?: boolean,
   type: TConfigType
@@ -17,7 +18,7 @@ const columns: ProColumns<IDataSourceType>[] = [
   {
     title: '参数名称',
     dataIndex: 'configValueKey',
-    width: '280px',
+    width:320,
     editable: false
   },
   {
@@ -31,11 +32,6 @@ const columns: ProColumns<IDataSourceType>[] = [
           message: '此项是必填项',
         }]
     },
-  },
-  {
-    title: '备注',
-    width: '360px',
-    dataIndex: 'configValueRemarks',
   },
 ];
 const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
@@ -91,12 +87,16 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
   });
   return (
     <Spin spinning={fetchLoading || saveLoading || connectionLoading}>
+      <div style={{ textAlign: 'right', padding: '0 10px 15px 10px', background: '#fff' }}>
+        <Button type="primary" onClick={save}> 保存</Button>
+      </div>
       <EditableProTable<IDataSourceType>
         columns={columns}
         rowKey="configValueKey"
         value={dataSource}
         onChange={setDataSource}
         recordCreatorProps={false}
+        className='card-padding-0'
         editable={{
           type: 'multiple',
           editableKeys,
@@ -110,7 +110,6 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
       {hasConnection ?
         <Space>
           <Button
-            type="primary"
             size="small"
             icon={<PoweroffOutlined />}
             onClick={checkConnection}
@@ -125,10 +124,6 @@ const BaseConfiguration: FC<IBaseConfiguration> = (props) => {
           }
         </Space>
         : null}
-
-      <div style={{ textAlign: 'right' }}>
-        <Button type="primary" onClick={save}> 保存</Button>
-      </div>
     </Spin>
   );
 };

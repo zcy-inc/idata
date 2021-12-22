@@ -30,7 +30,10 @@ const OverViewStateMap = {
 };
 
 const { TabPane } = Tabs;
-const iconSrc = 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg';
+const iconSchedule =
+  'https://sitecdn.zcycdn.com/f2e-assets/c7efa852-da2a-4957-b7bd-d4111a8e6e14.png?x-oss-process=image/quality,Q_75/format,jpg';
+const iconCluster =
+  'https://sitecdn.zcycdn.com/f2e-assets/76fedc86-0c46-4478-8102-c35bcffc07fb.png?x-oss-process=image/quality,Q_75/format,jpg';
 
 const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
   const [visible, setVisible] = useState(false);
@@ -138,7 +141,7 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
       <div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div className={styles.flex}>
-            <img src={iconSrc} alt="icon" className={styles['img-icon']} />
+            <img src={iconSchedule} alt="icon" className={styles['img-icon']} />
             <div className={styles.flexV} style={{ marginLeft: 16 }}>
               <span className={styles['total-label']}>作业调度总数</span>
               <span style={{ width: 164 }}>
@@ -190,7 +193,7 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
         <div className={styles.divider} />
         <div style={{ display: 'flex' }}>
           <div className={styles.flex}>
-            <img src={iconSrc} alt="icon" className={styles['img-icon']} />
+            <img src={iconCluster} alt="icon" className={styles['img-icon']} />
             <div className={styles.flexV} style={{ marginLeft: 16 }}>
               <span className={styles['total-label']}>作业集群总数</span>
               <span>

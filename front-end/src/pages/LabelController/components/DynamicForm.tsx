@@ -12,7 +12,6 @@ import Modal from './Modal'
 import { useRequest } from 'umi';
 import { dataToColumns } from '../utils'
 import './index.less'
-
 type DataItem = {
   name: string;
   state: string;
@@ -32,7 +31,7 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
       reload()
     }
   });
-  const editLabel =(code?: string)=>{
+  const editLabel = (code?: string) => {
     setLabelCode(code);
     setVisible(true)
   }
@@ -41,25 +40,11 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
       const newColumns = dataToColumns({
         data,
         del: deleteLabelRun,
-        edit:editLabel
-      })
-      newColumns?.push?.({
-        title: ' ',
-        renderFormItem: () => {
-          return (
-            <Button
-              type="primary"
-              onClick={()=>{editLabel()}}
-            >
-              <PlusOutlined />
-              新建属性
-            </Button>
-          )
-        }
+        edit: editLabel
       })
       setColumns([{
         valueType: 'group',
-        columns:newColumns
+        columns: newColumns
       }])
     }
   });
@@ -67,14 +52,24 @@ const DynamicForm: FC<IDynamicFormProps> = (props) => {
 
   return (
     <Spin spinning={fetchLoading || delLoading}>
+      <div style={{ textAlign: 'right', padding: '0 10px 15px 10px', background: '#fff' }}>
+        <Button
+          type="primary"
+          onClick={() => { editLabel() }}
+        >
+          <PlusOutlined />
+          新建属性
+        </Button>
+      </div>
       <BetaSchemaForm<DataItem>
+        className="label-width-140"
         layout="horizontal"
         colon={false}
         submitter={false}
         columns={columns}
       />
       <Modal
-        callback={()=>{
+        callback={() => {
           setVisible(false)
           reload()
         }}

@@ -26,91 +26,148 @@ import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/con
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
 
-// 标签 创建
+/**
+ * 标签 创建
+ */
 export async function createTag(data: {}) {
   return request('/api/p1/dev/labelDefine', { method: 'POST', data });
 }
+
 /**
  * 标签 查看
  */
 export async function getLabel(params: { labelDefineId: number }) {
   return request(`/api/p1/dev/labelDefines/${params.labelDefineId}`, { method: 'GET', params });
 }
-// 标签 删除
+
+/**
+ * 标签 删除
+ */
 export async function deleteLabel(params: { labelCode: string }) {
   return request('/api/p1/dev/labelDefine', { method: 'DELETE', params });
 }
-// 枚举 获取names
+
+/**
+ * 枚举 获取names
+ */
 export async function getEnumNames() {
   return request('/api/p1/dev/enumNames', { method: 'GET' });
 }
-// 枚举 获取values
+
+/**
+ * 枚举 获取values
+ */
 export async function getEnumValues(params: { enumCode: string }) {
   return request('/api/p1/dev/enumValues', { method: 'GET', params });
 }
-// 枚举 查看
+
+/**
+ * 枚举 查看
+ */
 export async function getEnum(params: { enumId: number }) {
   return request(`/api/p1/dev/enums/${params.enumId}`, { method: 'GET', params });
 }
-// 枚举 创建/编辑
+
+/**
+ * 枚举 创建 / 编辑
+ */
 export async function createEnum(data: {}) {
   return request('/api/p1/dev/enum', { method: 'POST', data });
 }
-// 枚举 删除
+
+/**
+ * 枚举 删除
+ */
 export async function deleteEnum(params: { enumCode: string }) {
   return request('/api/p1/dev/enum', { method: 'DELETE', params });
 }
-// 表 创建/编辑
+
+/**
+ * 表 创建 / 编辑
+ */
 export async function createTable(data: {}) {
   return request('/api/p1/dev/tableInfo', { method: 'POST', data });
 }
-// 表 获取labels/columns
+
+/**
+ * 表 获取labels/columns
+ */
 export async function getTableLabels(params: {
   labelTag?: string;
   subjectType: 'TABLE' | 'COLUMN';
 }) {
   return request('/api/p1/dev/labelDefines', { method: 'GET', params });
 }
-// 表 获取参考数据库
+
+/**
+ * 表 获取参考数据库
+ */
 export async function getTableReferDbs() {
   return request('/api/p1/dev/dbNames', { method: 'GET' });
 }
-// 表 获取参考表
+
+/**
+ * 表 获取参考表
+ */
 export async function getTableReferTbs(params: { labelValue?: string }) {
   return request<{ data: Table[] }>('/api/p1/dev/referTables', {
     method: 'GET',
     params,
   });
 }
-// 表 获取参考字段
+
+/**
+ * 表 获取参考字段
+ */
 export async function getTableReferStr(params: { tableId: string }) {
   return request(`/api/p1/dev/columnInfos/${params.tableId}`, { method: 'GET', params });
 }
-// 表 数仓所属人
+
+/**
+ * 表 数仓所属人
+ */
 export async function getDWOwner() {
   return request('/api/p1/uac/users', { method: 'GET' });
 }
-// 表 查看
+
+/**
+ * 表 查看
+ */
 export async function getTable(params: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${params.tableId}`, { method: 'GET' });
 }
-// 表 获取关系预览图
+
+/**
+ * 表 获取关系预览图
+ */
 export async function getTableRelations(params: { tableId: string }) {
   return request('/api/p0/dev/tableRelations', { method: 'GET', params });
 }
-// 表 删除
+
+/**
+ * 表 删除
+ */
 export async function delTable(data: { tableId: any }) {
   return request(`/api/p1/dev/tableInfo/${data.tableId}`, { method: 'DELETE', data });
 }
-// 表 DDL模式
+
+/**
+ * 表 DDL模式
+ */
 export async function getDDL(params: { tableId: any }) {
   return request(`/api/p1/dev/tableDdl/${params.tableId}`, { method: 'GET', params });
 }
-// 表 同步MetaBase
+
+/**
+ * 表 同步MetaBase
+ */
 export async function postSyncMetabase(params: { tableId: any }) {
   return request(`/api/p1/dev/syncMetabaseInfo/${params.tableId}`, { method: 'POST', params });
 }
-// 表 生成表结构
+
+/**
+ * 表 生成表结构
+ */
 export async function getTableConstruct(data: { tableDdl: string; tableId: number }) {
   return request('/api/p1/dev/ddl/syncTableInfo', { method: 'POST', data });
 }
@@ -631,7 +688,7 @@ export async function getKylin(params: { jobId: number; version: number }) {
 }
 
 /**
- * runQuerySql(done)
+ * 查询日志runQuerySql
  */
 export async function runQuery(data: {
   querySource: string;
@@ -653,7 +710,7 @@ export async function runQuery(data: {
 }
 
 /**
- * runQueryResult(done)
+ * 查询结果runQueryResult
  */
 export async function runQueryResult(params: {
   sessionId: number;

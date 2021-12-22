@@ -39,8 +39,8 @@ export default [
   {
     path: '/configuration',
     name: '系统配置',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/c6ab0611-57cd-4e14-a68a-4384c198ed65.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/ccfa9e9b-0fa7-4f19-8e2b-e81b207b53b9.svg',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/0545456d-5849-4a1a-885c-a72dce22fdfb.png',
+    iconDefault: "https://sitecdn.zcycdn.com/f2e-assets/6af809b7-e099-49be-8b2d-05539e7d07ae.png",
     featureCode: 'F_MENU_SYSTEM_CONFIG',
     routes: [
       { path: '/configuration', redirect: '/configuration/authority' },
@@ -121,8 +121,10 @@ export default [
   {
     path: '/operations',
     name: '运维中心',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
+    iconActive:
+      'https://sitecdn.zcycdn.com/f2e-assets/71ccc72f-6ceb-42d8-8442-146878701297.png?x-oss-process=image/quality,Q_75/format,jpg',
+    iconDefault:
+      'https://sitecdn.zcycdn.com/f2e-assets/937bbf3b-be59-47ef-92a2-ea7467077cbd.png?x-oss-process=image/quality,Q_75/format,jpg',
     featureCode: 'F_MENU_OPS_CENTER',
     routes: [
       { path: '/operations', redirect: '/operations/dashboard' },
