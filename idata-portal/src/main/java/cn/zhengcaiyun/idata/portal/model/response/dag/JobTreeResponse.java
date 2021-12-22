@@ -23,9 +23,6 @@ public class JobTreeResponse {
     @ApiModelProperty("任务状态")
     private Integer jobStatus;
 
-    @ApiModelProperty("最后运行时间")
-    private String lastRunTime;
-
     @ApiModelProperty("任务id")
     private Long taskId;
 
@@ -68,14 +65,6 @@ public class JobTreeResponse {
 
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
-    }
-
-    public String getLastRunTime() {
-        return lastRunTime;
-    }
-
-    public void setLastRunTime(String lastRunTime) {
-        this.lastRunTime = lastRunTime;
     }
 
     public Integer getPrevLevel() {

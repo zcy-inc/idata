@@ -69,4 +69,11 @@ public interface JobHistoryService {
      * @return
      */
     PageInfo<JobHistoryGanttDto> pagingGanttJobHistory(String startDate, String layerCode, Long dagId, Integer pageNum, Integer pageSize);
+
+    /**
+     * 任务最后运行时间
+     * @param jobId
+     * @return
+     */
+    String getLatestRuntime(Long jobId);
 }

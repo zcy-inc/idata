@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
+import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.portal.model.response.dag.JobTreeResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -29,6 +30,9 @@ public class JobDependencyController {
     @Autowired
     private JobScheduleManager jobScheduleManager;
 
+    @Autowired
+    private JobHistoryService jobHistoryService;
+
 
     @ApiOperation(value = "查询job")
     @ApiImplicitParams({
@@ -40,6 +44,17 @@ public class JobDependencyController {
                                                 @RequestParam(value = "jobId") Long jobId) {
         List<JobInfo> list = jobDependencyService.getDependencyJob(searchName, jobId, env);
         return RestResult.success(list);
+    }
+
+    /**
+     * 任务最后运行时间
+     * @param jobId
+     * @return
+     */
+    @GetMapping("/{id}/latestRuntime")
+    public RestResult<String> getLatestRuntime(@PathVariable("id") Long jobId) {
+        String dateTime = jobHistoryService.getLatestRuntime(jobId);
+        return RestResult.success(dateTime);
     }
 
     @ApiOperation("加载树")

@@ -123,6 +123,9 @@ public interface DevJobHistoryMyDao {
             " on t1.job_id = t2.id " +
             " </script>")
     List<JobHistoryDto> selectGanttList(String startDate, String endDate, List<Long> jobIdList);
+
+    @Select("<script>select max(start_time) from dev_job_history where job_id = #{jobId}</script>")
+    Date getLatestRuntime(Long jobId);
 }
 
 
