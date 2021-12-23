@@ -1,5 +1,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
@@ -115,7 +117,10 @@ public class JobUdfController {
         if (!hdfsService.checkUdfPath(path)) {
             throw new GeneralException("不可访问其他路径！" + path + "不合法");
         }
-        String filename = udf.getFileName();
+        String filename = udf.getUdfName();
+        if (StringUtils.isEmpty(FileUtil.getSuffix(filename)) && StringUtils.isNotEmpty(FileUtil.getSuffix(udf.getHdfsPath()))) {
+            filename = filename + "." + FileUtil.getSuffix(udf.getHdfsPath());
+        }
         FSDataInputStream inputStream = hdfsService.open(path);
         return downloadFile(inputStream, filename);
     }
@@ -144,4 +149,5 @@ public class JobUdfController {
         logger.info("file is null" + fileName);
         return null;
     }
+
 }
