@@ -111,7 +111,7 @@ public class JobTreeResponse {
         @ApiModelProperty("prev/next 前继/后继节点关系")
         private String relation;
 
-        private List<JobNode> nextList;
+        private List<JobNode> children;
 
         public Long getJobId() {
             return jobId;
@@ -153,12 +153,12 @@ public class JobTreeResponse {
             this.relation = relation;
         }
 
-        public List<JobNode> getNextList() {
-            return nextList;
+        public List<JobNode> getChildren() {
+            return children;
         }
 
-        public void setNextList(List<JobNode> nextList) {
-            this.nextList = nextList;
+        public void setChildren(List<JobNode> children) {
+            this.children = children;
         }
 
         public Integer getJobStatus() {

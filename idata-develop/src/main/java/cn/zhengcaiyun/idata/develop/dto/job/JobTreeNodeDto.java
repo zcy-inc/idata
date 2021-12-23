@@ -25,7 +25,7 @@ public class JobTreeNodeDto {
     /**
      * 下游节点
      */
-    private List<JobTreeNodeDto> nextList;
+    private List<JobTreeNodeDto> children;
 
     /**
      * 是否高亮
@@ -74,12 +74,12 @@ public class JobTreeNodeDto {
         this.jobName = jobName;
     }
 
-    public List<JobTreeNodeDto> getNextList() {
-        return nextList;
+    public List<JobTreeNodeDto> getChildren() {
+        return children;
     }
 
-    public void setNextList(List<JobTreeNodeDto> nextList) {
-        this.nextList = nextList;
+    public void setChildren(List<JobTreeNodeDto> children) {
+        this.children = children;
     }
 
     public Boolean getHighLight() {
@@ -131,9 +131,9 @@ public class JobTreeNodeDto {
     }
 
     public void addNextListElem(JobTreeNodeDto jobTreeNodeDto) {
-        if (this.nextList == null) {
-            this.nextList = new ArrayList<>();
+        if (this.children == null) {
+            this.children = new ArrayList<>();
         }
-        this.nextList.add(jobTreeNodeDto);
+        this.children.add(jobTreeNodeDto);
     }
 }
