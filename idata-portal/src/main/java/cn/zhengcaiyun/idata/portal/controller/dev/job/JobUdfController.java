@@ -1,7 +1,6 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
@@ -18,19 +17,23 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.mortbay.util.UrlEncoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
@@ -111,50 +114,27 @@ public class JobUdfController {
             @ApiImplicitParam(name = "id", value = "udf id", dataType = "Long", required = true)
     })
     @GetMapping("/udf/download/{id}")
-    public ResponseEntity<InputStreamResource> download(@PathVariable("id") Long id) throws IOException {
+    public ResponseEntity<byte[]> download(@PathVariable("id") Long id) throws IOException {
         DevJobUdf udf = udfService.findById(id);
         String path = udf.getHdfsPath();
         if (!hdfsService.checkUdfPath(path)) {
             throw new GeneralException("不可访问其他路径！" + path + "不合法");
         }
-        String filename = udf.getUdfName();
-        if (StringUtils.isEmpty(FileUtil.getSuffix(filename)) && StringUtils.isNotEmpty(FileUtil.getSuffix(udf.getHdfsPath()))) {
-            filename = filename + "." + FileUtil.getSuffix(udf.getHdfsPath());
+        String fileName = udf.getUdfName();
+        if (StringUtils.isEmpty(FileUtil.getSuffix(fileName)) && StringUtils.isNotEmpty(FileUtil.getSuffix(udf.getHdfsPath()))) {
+            fileName = fileName + "." + FileUtil.getSuffix(udf.getHdfsPath());
         }
-        FSDataInputStream inputStream = null;
-        try {
-            inputStream = hdfsService.open(path);
-            return downloadFile(inputStream, filename);
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
-        }
-    }
-
-    /**
-     * 浏览器下载
-     * @param in
-     * @param fileName
-     * @return
-     */
-    public ResponseEntity<InputStreamResource> downloadFile(InputStream in, String fileName) {
-        try {
-            byte[] testBytes = new byte[in.available()];
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-            headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", fileName));
-            headers.add("Pragma", "no-cache");
-            headers.add("Expires", "0");
-            headers.add("Content-Language", "UTF-8");
-            //最终这句，让文件内容以流的形式输出
-            return ResponseEntity.ok().headers(headers).contentLength(testBytes.length)
-                    .contentType(MediaType.parseMediaType("application/octet-stream")).body(new InputStreamResource(in));
-        } catch (IOException e) {
-            logger.info("downfile is error" + e.getMessage());
-        }
-        logger.info("file is null" + fileName);
-        return null;
+        ByteArrayOutputStream sos = new ByteArrayOutputStream();
+        hdfsService.readFile(path, sos);
+        byte[] bytes = sos.toByteArray();
+        sos.close();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Content-Disposition", String.format("attachment; fileName=\"%s\"", URLEncoder.encode(fileName, "UTF-8")));
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        headers.add("Content-Language", "UTF-8");
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
 }

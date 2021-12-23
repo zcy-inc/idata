@@ -161,13 +161,4 @@ public class HdfsService implements InitializingBean, DisposableBean {
         return StringUtils.contains(path, HDFS_UDF_PATH);
     }
 
-    /**
-     * 下载资源 ！注意调用此方法需要手动关闭流
-     * @param path
-     * @return
-     * @throws IOException
-     */
-    public FSDataInputStream open(String path) throws IOException {
-        return fs.open(new Path(path));
-    }
 }
