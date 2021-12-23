@@ -66,6 +66,7 @@ const Workbench: FC = ({}) => {
               tab={pane.title}
               key={pane.key}
               closeIcon={<TabCloseIcon />}
+              style={{ paddingBottom: pane.belong === FolderBelong.DEVJOB ? 24 : 88 }} // pane类型为作业时没有下面的操作栏，不需要留出高度
             >
               {renderPane(pane)}
             </TabPane>

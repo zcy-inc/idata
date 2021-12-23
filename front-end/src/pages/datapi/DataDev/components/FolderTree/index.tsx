@@ -92,7 +92,7 @@ const FolderTree: FC = () => {
         新建DAG
       </Menu.Item>
       <Menu.Item key="CreateDI">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
+        <IconFont style={{ marginRight: 8 }} type="icon-xinjianDI" />
         新建DI
       </Menu.Item>
       <Menu.Item key="CreateDev">
@@ -100,7 +100,7 @@ const FolderTree: FC = () => {
         新建作业
       </Menu.Item>
       <Menu.Item key="CreateFun">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianzuoye" />
+        <IconFont style={{ marginRight: 8 }} type="icon-xinjianhanshu" />
         新建函数
       </Menu.Item>
     </Menu>
@@ -192,8 +192,8 @@ const FolderTree: FC = () => {
       }
       const index = _.name.indexOf(keyWord);
       if (index > -1) {
-        const beforeStr = _.name.substr(0, index);
-        const afterStr = _.name.substr(index + keyWord.length);
+        const beforeStr = _.name.substring(0, index);
+        const afterStr = _.name.substring(index + keyWord.length);
         tmp = (
           <span>
             {beforeStr}

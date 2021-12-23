@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Button, Form, FormInstance, Input, message, Modal, Select, Space } from 'antd';
+import { Form, FormInstance, Input, message, Modal, Select, Tooltip } from 'antd';
 import { ModalForm } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import { get } from 'lodash';
@@ -37,14 +37,13 @@ import {
   saveSqlSpark,
   submitTask,
 } from '@/services/datadev';
+import { IconFont } from '@/components';
 
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import DrawerDependence from './components/DrawerDependence';
-import IconRun from './components/IconRun';
-import IconPause from './components/IconPause';
 import SparkSql from './components/Content/SparkSql';
 import SparkJava from './components/Content/SparkJava';
 import SparkPython from './components/Content/SparkPython';
@@ -68,6 +67,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [version, setVersion] = useState<number | undefined>(-1);
   const [content, setContent] = useState<any>({});
 
+  const [visibleJobConfig, setVisibleJobConfig] = useState(false);
   const [visibleBasic, setVisibleBasic] = useState(false);
   const [visibleConfig, setVisibleConfig] = useState(false);
   const [visibleVersion, setVisibleVersion] = useState(false);
@@ -120,15 +120,31 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         monaco={monaco}
         data={{ content, log, res: results }}
         removeResult={removeResult}
+        visible={visibleJobConfig}
+        onCancel={() => setVisibleJobConfig(false)}
       />
     ),
     [TaskTypes.SPARK_JAR]: (
       <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />
     ),
-    [TaskTypes.SPARK_PYTHON]: <SparkPython ref={formRef} monaco={monaco} data={{ content, log }} />,
+    [TaskTypes.SPARK_PYTHON]: (
+      <SparkPython
+        ref={formRef}
+        monaco={monaco}
+        data={{ content, log }}
+        visible={visibleJobConfig}
+        onCancel={() => setVisibleJobConfig(false)}
+      />
+    ),
     [TaskTypes.SCRIPT_SHELL]: <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />,
     [TaskTypes.SCRIPT_PYTHON]: (
-      <ScriptPython ref={formRef} monaco={monaco} data={{ content, log }} />
+      <ScriptPython
+        ref={formRef}
+        monaco={monaco}
+        data={{ content, log }}
+        visible={visibleJobConfig}
+        onCancel={() => setVisibleJobConfig(false)}
+      />
     ),
     [TaskTypes.KYLIN]: <Kylin ref={formRef} data={content} />,
   };
@@ -213,7 +229,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               onRemovePane(pane.cid);
               getTreeWrapped();
             } else {
-              message.error(`删除失败：${res.msg}`);
+              message.error(`删除失败: ${res.msg}`);
             }
           })
           .catch((err) => {}),
@@ -234,6 +250,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           jobType: TaskTypes.SQL_SPARK,
           sourceSql: monacoValue,
           externalTables: values.externalTables,
+          udfIds: values.udfIds.join(','),
           version,
         };
         saveSqlSpark({ jobId: pane.id }, dataSql)
@@ -242,7 +259,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -265,7 +282,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -287,7 +304,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -305,7 +322,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -327,7 +344,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -348,7 +365,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('保存成功');
               getTaskVersionsWrapped();
             } else {
-              message.error(`保存失败：${res.msg}`);
+              message.error(`保存失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
@@ -443,11 +460,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
   };
 
-  /**
-   * 测试任务
-   */
-  const onTest = () => {};
-
   const renderVersionLabel = (_: TaskVersion) => {
     const env = _.environment || '';
     const verState = VersionStatusDisplayMap[_.versionStatus];
@@ -464,188 +476,113 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   return (
     <>
       <div className={styles.task}>
-        <div className={styles.toolbar}>
-          <div className={styles.version}>
-            <span>当前版本：</span>
-            {versions.length === 0 ? (
-              '-'
-            ) : (
-              <Select
-                size="large"
-                style={{ width: 'auto', color: '#304ffe', fontSize: 16 }}
-                placeholder="请选择"
-                bordered={false}
-                disabled={versions.length <= 0}
-                options={versions.map((_) => ({
-                  label: renderVersionLabel(_),
-                  value: _.version,
-                }))}
-                value={version}
-                onChange={(v) => setVersion(v as number)}
-                showSearch
-                filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-              />
-            )}
+        <div className={styles.box}>
+          <div className={styles.content}>
+            <div className={styles.header}>
+              <div className={styles.icons}>
+                <Tooltip title="保存">
+                  <IconFont type="icon-baocun" className={styles.icon} onClick={onSave} />
+                </Tooltip>
+                {(task?.jobType === TaskTypes.SQL_SPARK ||
+                  task?.jobType === TaskTypes.SPARK_PYTHON ||
+                  task?.jobType === TaskTypes.SCRIPT_PYTHON ||
+                  task?.jobType === TaskTypes.KYLIN) && (
+                  <Tooltip title="调试">
+                    <IconFont type="icon-tiaoshi" className={styles.icon} onClick={onDebug} />
+                  </Tooltip>
+                )}
+                <Tooltip title="运行">
+                  <IconFont
+                    type="icon-yunxing"
+                    className={styles.icon}
+                    onClick={() => onAction('run')}
+                  />
+                </Tooltip>
+                <Tooltip title="提交发布">
+                  <IconFont
+                    type="icon-tijiaofabu"
+                    className={styles.icon}
+                    onClick={() => {
+                      if (!versions.length) {
+                        message.info('没有版本无法提交，请先保存以创建版本');
+                        return;
+                      }
+                      setVisibleSubmit(true);
+                    }}
+                  />
+                </Tooltip>
+                <IconFont
+                  type="icon-yunxingbaise-copy"
+                  className={styles.icon}
+                  onClick={() => onAction('resume')}
+                />
+                <IconFont
+                  type="icon-zantingbaise-copy"
+                  className={styles.icon}
+                  onClick={() => onAction('pause')}
+                />
+                <IconFont
+                  type="icon-shanchubaise-copy"
+                  className={styles.icon}
+                  onClick={onDelete}
+                />
+                {(task?.jobType === TaskTypes.SQL_SPARK ||
+                  task?.jobType === TaskTypes.SPARK_PYTHON ||
+                  task?.jobType === TaskTypes.SCRIPT_PYTHON) && (
+                  <>
+                    <div className={styles.divider} />
+                    <Tooltip title="作业配置">
+                      <IconFont
+                        type="icon-peizhiguanli"
+                        className={styles.icon}
+                        onClick={() => setVisibleJobConfig(true)}
+                      />
+                    </Tooltip>
+                  </>
+                )}
+              </div>
+              <div className={styles.version}>
+                <span>当前版本:</span>
+                {versions.length === 0 ? (
+                  '-'
+                ) : (
+                  <Select
+                    size="large"
+                    style={{ width: 'auto', color: '#fff', fontSize: 14 }}
+                    placeholder="请选择"
+                    bordered={false}
+                    disabled={versions.length <= 0}
+                    options={versions.map((_) => ({
+                      label: renderVersionLabel(_),
+                      value: _.version,
+                    }))}
+                    value={version}
+                    onChange={(v) => setVersion(v as number)}
+                  />
+                )}
+              </div>
+            </div>
+            {componentMap[task?.jobType as TaskTypes]}
           </div>
-          <Space size={16}>
-            <a onClick={() => onAction('run')}>单次运行</a>
-            <a onClick={() => setVisibleBasic(true)}>基本信息</a>
-            <a onClick={() => setVisibleConfig(true)}>配置</a>
-            <a onClick={() => setVisibleDependence(true)}>依赖</a>
-            <a onClick={() => setVisibleVersion(true)}>版本</a>
-            <a onClick={() => setVisibleHistory(true)}>历史</a>
-          </Space>
+          <div className={styles.sideMenu}>
+            <div className={styles.sideMenuItem} onClick={() => setVisibleBasic(true)}>
+              基本信息
+            </div>
+            <div className={styles.sideMenuItem} onClick={() => setVisibleConfig(true)}>
+              配置
+            </div>
+            <div className={styles.sideMenuItem} onClick={() => setVisibleDependence(true)}>
+              依赖
+            </div>
+            <div className={styles.sideMenuItem} onClick={() => setVisibleVersion(true)}>
+              版本
+            </div>
+            <div className={styles.sideMenuItem} onClick={() => setVisibleHistory(true)}>
+              历史
+            </div>
+          </div>
         </div>
-        {componentMap[task?.jobType as TaskTypes]}
-        <DrawerBasic
-          visible={visibleBasic}
-          onClose={() => setVisibleBasic(false)}
-          data={task}
-          pane={pane}
-          getTaskWrapped={() => {}}
-        />
-        <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
-        <DrawerVersion
-          visible={visibleVersion}
-          onClose={() => setVisibleVersion(false)}
-          data={task}
-        />
-        <DrawerHistory
-          visible={visibleHistory}
-          onClose={() => setVisibleHistory(false)}
-          data={task}
-        />
-        <DrawerDependence
-          visible={visibleDependence}
-          onClose={() => setVisibleDependence(false)}
-          data={task}
-        />
-        <ModalForm
-          title="选择环境"
-          layout="horizontal"
-          width={536}
-          labelCol={{ span: 6 }}
-          colon={false}
-          preserve={false}
-          modalProps={{ destroyOnClose: true, onCancel: () => setVisibleAction(false) }}
-          visible={visibleAction}
-          submitter={{
-            submitButtonProps: { size: 'large', loading: loadingAction },
-            resetButtonProps: { size: 'large' },
-          }}
-          onFinish={async (values) => {
-            setLoadingAction(true);
-            const params = {
-              id: pane.id,
-              environment: values.env,
-            };
-            if (actionType === 'pause') {
-              pauseTask(params)
-                .then((res) => {
-                  if (res.success) {
-                    message.success('暂停成功');
-                    getTaskWrapped();
-                    setVisibleAction(false);
-                  } else {
-                    message.error(`暂停失败：${res.msg}`);
-                  }
-                })
-                .catch((err) => {})
-                .finally(() => setLoadingAction(false));
-            }
-            if (actionType === 'resume') {
-              resumeTask(params)
-                .then((res) => {
-                  if (res.success) {
-                    message.success('恢复成功');
-                    getTaskWrapped();
-                    setVisibleAction(false);
-                  } else {
-                    message.error(`恢复失败：${res.msg}`);
-                  }
-                })
-                .catch((err) => {})
-                .finally(() => setLoadingAction(false));
-            }
-            if (actionType === 'run') {
-              runTask(params)
-                .then((res) => {
-                  if (res.success) {
-                    message.success('单次运行成功');
-                    getTaskWrapped();
-                    setVisibleAction(false);
-                  } else {
-                    message.error(`单次运行失败：${res.msg}`);
-                  }
-                })
-                .catch((err) => {})
-                .finally(() => setLoadingAction(false));
-            }
-          }}
-        >
-          <Item name="env" label="提交环境" rules={ruleSlct}>
-            <Select
-              placeholder="请选择"
-              options={[
-                { label: '预发', value: Environments.STAG },
-                { label: '真线', value: Environments.PROD },
-              ]}
-            />
-          </Item>
-        </ModalForm>
-        <ModalForm
-          title="提交"
-          layout="horizontal"
-          width={536}
-          labelCol={{ span: 6 }}
-          colon={false}
-          preserve={false}
-          modalProps={{ destroyOnClose: true, onCancel: () => setVisibleSubmit(false) }}
-          visible={visibleSubmit}
-          submitter={{
-            submitButtonProps: { size: 'large', loading: loadingSubmit },
-            resetButtonProps: { size: 'large' },
-          }}
-          onFinish={async (values) => {
-            setLoadingSubmit(true);
-            submitTask(
-              {
-                jobId: pane.id,
-                version: content?.version as number,
-                env: values.env,
-              },
-              {
-                remark: values.remark,
-              },
-            )
-              .then((res) => {
-                if (res.success) {
-                  message.success('提交成功');
-                  setVisibleSubmit(false);
-                  return true;
-                } else {
-                  message.error(`提交失败：${res.msg}`);
-                  return false;
-                }
-              })
-              .catch((err) => {})
-              .finally(() => setLoadingSubmit(false));
-          }}
-        >
-          <Item name="env" label="提交环境" rules={ruleSlct}>
-            <Select
-              placeholder="请选择"
-              options={[
-                { label: '预发', value: Environments.STAG },
-                { label: '真线', value: Environments.PROD },
-              ]}
-            />
-          </Item>
-          <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
-            <TextArea placeholder="请输入" />
-          </Item>
-        </ModalForm>
-        <div className="workbench-submit">
+        {/* <div className="workbench-submit">
           <Space>
             <IconRun onClick={() => onAction('resume')} />
             <IconPause onClick={() => onAction('pause')} />
@@ -677,8 +614,150 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               申请发布
             </Button>
           </Space>
-        </div>
+        </div> */}
       </div>
+      <DrawerBasic
+        visible={visibleBasic}
+        onClose={() => setVisibleBasic(false)}
+        data={task}
+        pane={pane}
+        getTaskWrapped={() => {}}
+      />
+      <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
+      <DrawerVersion
+        visible={visibleVersion}
+        onClose={() => setVisibleVersion(false)}
+        data={task}
+      />
+      <DrawerHistory
+        visible={visibleHistory}
+        onClose={() => setVisibleHistory(false)}
+        data={task}
+      />
+      <DrawerDependence
+        visible={visibleDependence}
+        onClose={() => setVisibleDependence(false)}
+        data={task}
+      />
+      <ModalForm
+        title="选择环境"
+        layout="horizontal"
+        width={536}
+        labelCol={{ span: 6 }}
+        colon={false}
+        preserve={false}
+        modalProps={{ destroyOnClose: true, onCancel: () => setVisibleAction(false) }}
+        visible={visibleAction}
+        submitter={{
+          submitButtonProps: { size: 'large', loading: loadingAction },
+          resetButtonProps: { size: 'large' },
+        }}
+        onFinish={async (values) => {
+          setLoadingAction(true);
+          const params = {
+            id: pane.id,
+            environment: values.env,
+          };
+          if (actionType === 'pause') {
+            pauseTask(params)
+              .then((res) => {
+                if (res.success) {
+                  message.success('暂停成功');
+                  getTaskWrapped();
+                  setVisibleAction(false);
+                } else {
+                  message.error(`暂停失败: ${res.msg}`);
+                }
+              })
+              .catch((err) => {})
+              .finally(() => setLoadingAction(false));
+          }
+          if (actionType === 'resume') {
+            resumeTask(params)
+              .then((res) => {
+                if (res.success) {
+                  message.success('恢复成功');
+                  getTaskWrapped();
+                  setVisibleAction(false);
+                } else {
+                  message.error(`恢复失败: ${res.msg}`);
+                }
+              })
+              .catch((err) => {})
+              .finally(() => setLoadingAction(false));
+          }
+          if (actionType === 'run') {
+            runTask(params)
+              .then((res) => {
+                if (res.success) {
+                  message.success('单次运行成功');
+                  getTaskWrapped();
+                  setVisibleAction(false);
+                } else {
+                  message.error(`单次运行失败: ${res.msg}`);
+                }
+              })
+              .catch((err) => {})
+              .finally(() => setLoadingAction(false));
+          }
+        }}
+      >
+        <Item name="env" label="提交环境" rules={ruleSlct}>
+          <Select
+            placeholder="请选择"
+            options={Object.values(Environments).map((_) => ({ label: _, value: _ }))}
+          />
+        </Item>
+      </ModalForm>
+      <ModalForm
+        title="提交"
+        layout="horizontal"
+        width={536}
+        labelCol={{ span: 6 }}
+        colon={false}
+        preserve={false}
+        modalProps={{ destroyOnClose: true, onCancel: () => setVisibleSubmit(false) }}
+        visible={visibleSubmit}
+        submitter={{
+          submitButtonProps: { size: 'large', loading: loadingSubmit },
+          resetButtonProps: { size: 'large' },
+        }}
+        onFinish={async (values) => {
+          setLoadingSubmit(true);
+          submitTask(
+            {
+              jobId: pane.id,
+              version: content?.version as number,
+              env: values.env,
+            },
+            {
+              remark: values.remark,
+            },
+          )
+            .then((res) => {
+              if (res.success) {
+                message.success('提交成功');
+                setVisibleSubmit(false);
+                return true;
+              } else {
+                message.error(`提交失败: ${res.msg}`);
+                return false;
+              }
+            })
+            .catch((err) => {})
+            .finally(() => setLoadingSubmit(false));
+        }}
+      >
+        <Item name="env" label="提交环境" rules={ruleSlct}>
+          <Select
+            placeholder="请选择"
+            options={Object.values(Environments).map((_) => ({ label: _, value: _ }))}
+          />
+        </Item>
+        <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
+          <TextArea placeholder="请输入" />
+        </Item>
+      </ModalForm>
     </>
   );
 };

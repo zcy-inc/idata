@@ -4,23 +4,92 @@
       width: 148px;
     }
   }
-  .toolbar {
+  // .toolbar {
+  //   position: relative;
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  //   height: 50px;
+  //   padding: 0 12px;
+  //   color: #fff;
+  //   background-color: #e8f1ff;
+  //   border: solid 1px #cce5ff;
+  //   border-radius: 4px;
+  //   .version {
+  //     font-weight: 500;
+  //     font-size: 14px;
+  //     :global {
+  //       .ant-select-arrow {
+  //         color: #fff;
+  //       }
+  //     }
+  //   }
+  // }
+  .box {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 50px;
-    padding: 0 12px;
-    color: #304ffe;
-    background-color: #e8f1ff;
-    border: solid 1px #cce5ff;
-    border-radius: 4px;
-    .version {
-      font-weight: 500;
-      font-size: 16px;
-      :global {
-        .ant-select-arrow {
+    .content {
+      padding-right: 36px;
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        background-color: #2d3956;
+        .icons {
+          .icon {
+            padding: 8px 6px;
+            font-size: 20px;
+            cursor: pointer;
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.2);
+            }
+          }
+          .divider {
+            display: inline-block;
+            width: 1px;
+            height: 12px;
+            margin: 0 16px 2px;
+            background-color: #545c75;
+          }
+        }
+        .version {
+          color: #fff;
+          font-weight: 500;
+          font-size: 14px;
+        }
+      }
+    }
+    .sideMenu {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      width: 28px;
+      height: 100%;
+      margin-left: 8px;
+      padding: 8px;
+      background-color: #f8f9fb;
+      .sideMenuItem {
+        position: relative;
+        margin-bottom: 16px;
+        cursor: pointer;
+        &:hover {
           color: #304ffe;
+        }
+        &::after {
+          position: absolute;
+          bottom: -8px;
+          left: 1px;
+          width: 12px;
+          height: 1px;
+          background-color: #e2e5ee;
+          content: ' ';
+        }
+        &:last-child {
+          &::after {
+            display: none;
+          }
         }
       }
     }

@@ -51,15 +51,15 @@ export default () => {
       }
     }
     // 功能树格式转换
-    const featureTreeHolder = (formatTreeData(tree1, (node: FeatureTreeNode) => {
+    const featureTreeHolder = formatTreeData(tree1, (node: FeatureTreeNode) => {
       const extObj: Partial<DataNode> = {};
       extObj.title = node.name;
       extObj.key = node.featureCode;
       return extObj;
-    }) as unknown) as DataNode[];
+    }) as unknown as DataNode[];
 
     // 资源树格式转换
-    const folderTreeHolder = (formatTreeData(tree2, (node: FolderTreeNode) => {
+    const folderTreeHolder = formatTreeData(tree2, (node: FolderTreeNode) => {
       const extObj: Partial<DataNode> = {};
       extObj.title = node.name;
       if (node.type === folderTreeNodeType.F_MENU) {
@@ -70,7 +70,7 @@ export default () => {
         extObj.className = 'folder';
       }
       return extObj;
-    }) as unknown) as FolderDataNode[];
+    }) as unknown as FolderDataNode[];
     setOrigFeatureTree(tree1);
     setFeatureTree(featureTreeHolder);
     setFolderTree(folderTreeHolder);
@@ -88,6 +88,7 @@ export default () => {
       return;
     }
     const selectedKey = selectedKeys[0];
+    console.log(selectedKey);
     setSelectedFolderKey(selectedKey);
   };
 
@@ -115,10 +116,10 @@ export default () => {
       (node: FeatureTreeNode) => node.featureCode === selectedFeatureKey,
     );
     if (selectFeatureNode) {
-      const nodeList = [selectFeatureNode]
+      const nodeList = [selectFeatureNode];
       if (Array.isArray(selectFeatureNode.children) && selectFeatureNode.children.length > 0) {
         return nodeList.concat(selectFeatureNode.children);
-      } 
+      }
       return nodeList;
     }
     return [];

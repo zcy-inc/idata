@@ -245,7 +245,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             setSrcColumns(res.data);
             setDestColumns([]);
           } else {
-            message.error(`刷新失败：${res.msg}`);
+            message.error(`刷新失败: ${res.msg}`);
           }
         })
         .catch((err) => {});
@@ -278,7 +278,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               onRemovePane(pane.cid);
               getTreeWrapped();
             } else {
-              message.error(`删除失败：${res.msg}`);
+              message.error(`删除失败: ${res.msg}`);
             }
           })
           .catch((err) => {}),
@@ -298,7 +298,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     const params = {
       ...srcFormValues,
       ...destFormValues,
-      srcTables: srcFormValues.srcTables.join(','),
+      srcTables: srcFormValues.srcTables?.join(','),
       id: pane.id,
       jobId: pane.id,
       version: data?.version,
@@ -312,7 +312,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           message.success('保存成功');
           getTaskVersionsWrapped();
         } else {
-          message.error(`保存失败：${res.msg}`);
+          message.error(`保存失败: ${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -358,7 +358,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       <div className={styles.task}>
         <div className={styles.toolbar}>
           <div className={styles.version}>
-            <span>当前版本：</span>
+            <span>当前版本: </span>
             {versions.length === 0 ? (
               '-'
             ) : (
@@ -553,7 +553,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           <Button key="save" size="large" onClick={onSave}>
             保存
           </Button>
-          <Button key="stag" size="large" type="primary" onClick={() => setVisible(true)}>
+          <Button
+            key="stag"
+            size="large"
+            type="primary"
+            onClick={() => setVisible(true)}
+            disabled={versions.length === 0}
+          >
             提交
           </Button>
         </Space>
@@ -588,7 +594,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   setVisible(false);
                   return true;
                 } else {
-                  message.error(`提交失败：${res.msg}`);
+                  message.error(`提交失败: ${res.msg}`);
                   return false;
                 }
               })
@@ -599,10 +605,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           <Item name="env" label="提交环境" rules={ruleSlct}>
             <Select
               placeholder="请选择"
-              options={[
-                { label: '预发', value: Environments.STAG },
-                { label: '真线', value: Environments.PROD },
-              ]}
+              options={Object.values(Environments).map((_) => ({ label: _, value: _ }))}
             />
           </Item>
           <Item name="remark" label="变更说明" rules={ruleText} style={{ marginBottom: 0 }}>
@@ -636,7 +639,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     getTaskWrapped();
                     setVisibleAction(false);
                   } else {
-                    message.error(`暂停失败：${res.msg}`);
+                    message.error(`暂停失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
@@ -650,7 +653,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     getTaskWrapped();
                     setVisibleAction(false);
                   } else {
-                    message.error(`恢复失败：${res.msg}`);
+                    message.error(`恢复失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
@@ -660,11 +663,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               runTask(params)
                 .then((res) => {
                   if (res.success) {
-                    message.success('恢复成功');
+                    message.success('单次运行成功');
                     getTaskWrapped();
                     setVisibleAction(false);
                   } else {
-                    message.error(`恢复失败：${res.msg}`);
+                    message.error(`单次运行失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
@@ -675,10 +678,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           <Item name="env" label="提交环境" rules={ruleSlct}>
             <Select
               placeholder="请选择"
-              options={[
-                { label: '预发', value: Environments.STAG },
-                { label: '真线', value: Environments.PROD },
-              ]}
+              options={Object.values(Environments).map((_) => ({ label: _, value: _ }))}
             />
           </Item>
         </ModalForm>

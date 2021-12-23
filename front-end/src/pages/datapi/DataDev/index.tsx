@@ -1,5 +1,6 @@
 import React from 'react';
 import SplitPane from 'react-split-pane';
+// import Pane from 'react-split-pane/lib/Pane';
 import { PageContainer } from '@/components';
 import { useModel } from 'umi';
 import type { FC } from 'react';
@@ -27,6 +28,12 @@ const TableManage: FC = () => {
       >
         <FolderTree />
         <Workbench />
+        {/* <Pane initialSize="240px">
+          <FolderTree />
+        </Pane>
+        <Pane>
+          <Workbench />
+        </Pane> */}
       </SplitPane>
       {visibleLabel && <CreateLabel />}
       {visibleTask && <CreateTask />}

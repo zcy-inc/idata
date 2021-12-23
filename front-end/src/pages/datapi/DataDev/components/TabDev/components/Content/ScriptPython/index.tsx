@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Form, Tabs } from 'antd';
+import SplitPane from 'react-split-pane';
+import { Form, Modal, Tabs } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
 import ParamList from '../../ParamList';
@@ -11,21 +12,31 @@ interface ScriptPythonProps {
     content: any;
     log: any;
   };
+  visible: boolean;
+  onCancel: () => void;
 }
 
 const { TabPane } = Tabs;
 const { Item } = Form;
 
 const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
-  { monaco, data: { content, log } },
+  { monaco, data: { content, log }, visible, onCancel },
   ref,
 ) => {
   const [monacoValue, setMonacoValue] = useState('');
+  const [monacoHeight, setMonacoHeight] = useState(500);
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
     form: form,
   }));
+
+  useEffect(() => {
+    const container = document.querySelector('.ant-tabs-content-holder');
+    let height = container?.clientHeight || 500;
+    height = height - 40 - 48;
+    setMonacoHeight(height);
+  }, []);
 
   useEffect(() => {
     if (content) {
@@ -36,37 +47,37 @@ const ScriptPython: ForwardRefRenderFunction<unknown, ScriptPythonProps> = (
 
   return (
     <>
-      <Tabs>
-        <TabPane tab="编辑器" key="editor" style={{ padding: '16px 0', height: 440 }} forceRender>
+      <div style={{ position: 'relative', height: monacoHeight }}>
+        <SplitPane split="horizontal" defaultSize="60%">
           <MonacoEditor
             ref={monaco}
-            height="400"
-            language="sql"
+            height="100%"
+            language="python"
             theme="vs-dark"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true }}
           />
-        </TabPane>
-        <TabPane tab="作业配置" key="config" style={{ padding: 16 }} forceRender>
-          <Form form={form} colon={false}>
-            <Item label="参数">
-              <ParamList formName={['scriptArguments', 'argumentValue', 'argumentRemark']} />
-            </Item>
-          </Form>
-        </TabPane>
-      </Tabs>
-      <Tabs className={styles.tabs} style={{ marginTop: 16 }}>
-        <TabPane tab="日志" key="log" style={{ height: 440, padding: '16px 0' }}>
-          <MonacoEditor
-            height="400"
-            language="sql"
-            theme="vs-dark"
-            value={log.join('\n')}
-            options={{ readOnly: true, automaticLayout: true }}
-          />
-        </TabPane>
-      </Tabs>
+          <Tabs className={styles.tabs} type="editable-card" hideAdd style={{ height: '100%' }}>
+            <TabPane tab="运行日志" key="log" style={{ height: '100%' }} closable={false}>
+              <MonacoEditor
+                height="100%"
+                language="json"
+                theme="vs-dark"
+                value={log.join('\n')}
+                options={{ readOnly: true, automaticLayout: true }}
+              />
+            </TabPane>
+          </Tabs>
+        </SplitPane>
+      </div>
+      <Modal title="作业配置" visible={visible} onCancel={onCancel} forceRender>
+        <Form form={form} colon={false}>
+          <Item label="参数">
+            <ParamList formName={['scriptArguments', 'argumentValue', 'argumentRemark']} />
+          </Item>
+        </Form>
+      </Modal>
     </>
   );
 };

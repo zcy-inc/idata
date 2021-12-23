@@ -13,15 +13,15 @@ interface TreeNodeTitleProps {
 }
 
 const MapFolderIcon = {
-  [FolderBelong.DESIGN]: 'icon-shucangsheji',
-  [FolderBelong.DESIGNTABLE]: 'icon-biao1',
-  [FolderBelong.DESIGNLABEL]: 'icon-biaoqian',
-  [FolderBelong.DESIGNENUM]: 'icon-meijuleixing',
-  [FolderBelong.DAG]: 'icon-DAG',
-  [FolderBelong.DI]: 'icon-shujujicheng',
-  [FolderBelong.DEV]: 'icon-shujukaifa',
-  [FolderBelong.DEVJOB]: 'icon-zuoye',
-  [FolderBelong.DEVFUN]: 'icon-zuoye',
+  [FolderBelong.DESIGN]: 'icon-shujukaifa-shucangsheji',
+  [FolderBelong.DESIGNTABLE]: 'icon-shujukaifa-biao',
+  [FolderBelong.DESIGNLABEL]: 'icon-shujukaifa-biaoqian',
+  [FolderBelong.DESIGNENUM]: 'icon-shujukaifa-meijuleixing',
+  [FolderBelong.DAG]: 'icon-shujukaifa-dag',
+  [FolderBelong.DI]: 'icon-shujukaifa-shujujicheng',
+  [FolderBelong.DEV]: 'icon-shujukaifa-shujukaifa',
+  [FolderBelong.DEVJOB]: 'icon-shujukaifa-zuoye',
+  [FolderBelong.DEVFUN]: 'icon-shujukaifa-hanshu',
   [FolderTypes.FOLDER]: 'icon-wenjianjia',
 };
 

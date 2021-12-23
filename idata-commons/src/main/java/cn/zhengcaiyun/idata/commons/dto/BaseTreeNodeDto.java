@@ -32,6 +32,8 @@ public class BaseTreeNodeDto {
     @ApiModelProperty(value = "F_MENU | R_DATA_DEVELOP_DW_DIR | R_DATA_DEVELOP_DAG_DIR | " +
             "R_DATA_DEVELOP_DI_DIR | R_DATA_DEVELOP_DD_DIR")
     private String type;
+    @ApiModelProperty(value = "F_MENU | FOLDER | RECORD")
+    private String belong;
     private List<BaseTreeNodeDto> children;
 
     // GaS
@@ -57,6 +59,14 @@ public class BaseTreeNodeDto {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public String getBelong() {
+        return belong;
+    }
+
+    public void setBelong(String belong) {
+        this.belong = belong;
     }
 
     public String getType() {

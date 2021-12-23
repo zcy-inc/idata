@@ -25,7 +25,8 @@ import java.io.IOException;
  * @date 2021-11-23 下午7:55
  */
 
-public interface QueryRunService {
+public interface QueryService {
     QueryStatementDto runQuery(QueryDto queryDto);
     QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind, Integer from, Integer size);
+    AutocompletionTipDto getAutocompletionTipConfigs();
 }

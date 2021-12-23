@@ -2,7 +2,7 @@ import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import G6, { Graph, Item as G6Item } from '@antv/g6';
 import { findDOMNode } from 'react-dom';
-import { Button, Form, InputNumber, message, Modal, Row, Select, Spin } from 'antd';
+import { Button, Form, InputNumber, message, Modal, Row, Select, Space, Spin } from 'antd';
 import { get } from 'lodash';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
@@ -13,6 +13,7 @@ import { Environments } from '@/constants/datasource';
 import {
   getDependenceTree,
   getDependenceTreeNodeList,
+  getTaskLastTime,
   getTaskRunningLog,
   rerunTask,
 } from '@/services/datadev';
@@ -33,9 +34,17 @@ const JobStatusColorMap = {
   [JobStatus.OTHER]: ['#2D3956', '#EBEDF3'],
 };
 const DefaultColor = ['#2D3956', '#EBEDF3'];
+const ColorDisplay = [
+  { label: '等待运行', color: '#FF9324' },
+  { label: '运行中', color: '#304FFE' },
+  { label: '失败', color: '#F1331F' },
+  { label: '成功', color: '#05CC87' },
+  { label: '其他', color: '#2D3956' },
+];
 
 const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref) => {
   const [visible, setVisible] = useState(false);
+  const [lastTime, setLastTime] = useState('');
   const [current, setCurrent] = useState<DependenceTreeNode>();
   const [visibleLog, setVisibleLog] = useState(false);
   const [log, setLog] = useState('');
@@ -103,7 +112,9 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
 
       const container: any = findDOMNode(containerRef.current);
       const width = container.scrollWidth;
-      const height = container.scrollHeight || 800;
+      const drawerBody = document.querySelector('.ant-drawer-body');
+      const drawerBodyHeight = drawerBody?.clientHeight || 600;
+      const height = drawerBodyHeight - 200; // 减去其他元素和内边距的高度
       const toolbar = new G6.ToolBar();
       const graph = new G6.TreeGraph({
         container,
@@ -180,6 +191,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
         const model = get(node, '_cfg.model', {});
         setCurrent(model);
         setVisible(true);
+        getTaskLastTimeWrapped(model.jobId);
         curNodeRef.current = node;
       });
       getDependenceTreeWrapped();
@@ -189,6 +201,11 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
   useEffect(() => {
     getDependenceTreeWrapped();
   }, [data, env]);
+
+  const getTaskLastTimeWrapped = (id: number) =>
+    getTaskLastTime({ id })
+      .then((res) => setLastTime(res.data))
+      .catch((err) => {});
 
   /**
    * 获取树
@@ -282,7 +299,19 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
         </Row>
       </Form>
       <Spin spinning={loading}>
-        <div className={styles.mapping} ref={containerRef} />
+        <div style={{ position: 'relative' }}>
+          <div className={styles.mapping} ref={containerRef}></div>
+          <div className={styles.colorBar}>
+            <Space size={24}>
+              {ColorDisplay.map((_) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ height: 8, width: 8, borderRadius: 4, backgroundColor: _.color }} />
+                  <span style={{ marginLeft: 8 }}>{_.label}</span>
+                </div>
+              ))}
+            </Space>
+          </div>
+        </div>
       </Spin>
       <Modal
         title="信息"
@@ -322,7 +351,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
         ]}
       >
         <p style={{ color: '#141736' }}>{current?.jobName || '-'}</p>
-        <p style={{ color: '#737B96' }}>最近更新时间：{current?.lastRunTime || '-'}</p>
+        <p style={{ color: '#737B96' }}>最近更新时间：{lastTime || '-'}</p>
       </Modal>
       <Modal
         title="日志"

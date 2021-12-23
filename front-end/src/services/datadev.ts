@@ -820,6 +820,19 @@ export async function rerunTask(params: { id: number; env: Environments; runPost
 }
 
 /**
+ * 查看作业最后运行时间
+ */
+export async function getTaskLastTime(params: { id: number }) {
+  return request<DefaultResponse & { data: string }>(
+    `/api/p1/dev/jobs/dependency/${params.id}/latestRuntime`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
  * 查看作业日志
  */
 export async function getTaskRunningLog(params: { id: number; env: Environments; taskId: number }) {
@@ -893,7 +906,16 @@ export async function uploadUDFCodeFile(data: FormData) {
  * 函数代码文件下载
  */
 export async function getUDFCodeFile(params: { id: number }) {
-  return request<DefaultResponse & { data: {} }>(`/api/p1/dev/udf/download/${params.id}`, {
+  return request(`/api/p1/dev/udf/download/${params.id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ * 自定义函数列表获取
+ */
+export async function getUDFList() {
+  return request<DefaultResponse & { data: UDF[] }>('/api/p1/dev/udfs', {
     method: 'GET',
   });
 }

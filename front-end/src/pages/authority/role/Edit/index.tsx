@@ -29,7 +29,7 @@ const Edit = () => {
         id: Number(params.id),
       });
     },
-    () => history.push('/authority/role/list'),
+    () => history.go(-1),
   );
 
   const roleConfProps = {
