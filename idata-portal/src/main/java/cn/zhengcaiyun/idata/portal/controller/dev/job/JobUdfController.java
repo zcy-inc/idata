@@ -121,8 +121,15 @@ public class JobUdfController {
         if (StringUtils.isEmpty(FileUtil.getSuffix(filename)) && StringUtils.isNotEmpty(FileUtil.getSuffix(udf.getHdfsPath()))) {
             filename = filename + "." + FileUtil.getSuffix(udf.getHdfsPath());
         }
-        FSDataInputStream inputStream = hdfsService.open(path);
-        return downloadFile(inputStream, filename);
+        FSDataInputStream inputStream = null;
+        try {
+            inputStream = hdfsService.open(path);
+            return downloadFile(inputStream, filename);
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
     }
 
     /**

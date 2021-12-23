@@ -162,7 +162,7 @@ public class HdfsService implements InitializingBean, DisposableBean {
     }
 
     /**
-     * 下载资源
+     * 下载资源 ！注意调用此方法需要手动关闭流
      * @param path
      * @return
      * @throws IOException
