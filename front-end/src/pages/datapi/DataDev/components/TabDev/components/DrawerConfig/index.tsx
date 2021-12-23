@@ -238,6 +238,18 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
 
   const addOutRecord = () => {
     if (activeKey === Environments.STAG) {
+      if (!stagForm.getFieldValue('destWriteMode')) {
+        message.info('请选择数据写入模式');
+        return;
+      }
+      if (!stagForm.getFieldValue('destDataSourceId')) {
+        message.info('请选择本任务的输出');
+        return;
+      }
+      if (!stagForm.getFieldValue('destTable')) {
+        message.info('请填写输出的表名');
+        return;
+      }
       if (outDataStag.length > 0) {
         message.info('输出表只能存在一张');
         return;
@@ -258,6 +270,18 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       setOutDataStag([...outDataStag]);
     }
     if (activeKey === Environments.PROD) {
+      if (!prodForm.getFieldValue('destWriteMode')) {
+        message.info('请选择数据写入模式');
+        return;
+      }
+      if (!prodForm.getFieldValue('destDataSourceId')) {
+        message.info('请选择本任务的输出');
+        return;
+      }
+      if (!prodForm.getFieldValue('destTable')) {
+        message.info('请填写输出的表名');
+        return;
+      }
       if (outDataProd.length > 0) {
         message.info('输出表只能存在一张');
         return;
