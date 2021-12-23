@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.system.service.impl;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
+import cn.zhengcaiyun.idata.commons.enums.TreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoader;
 import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoaders;
@@ -144,19 +145,21 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap) {
-        BaseTreeNodeService baseTreeNode = ServiceProvidersLoaders.loadProviderIfPresent(serviceProvidersLoader,
-                BaseTreeNodeService.class, "bizTree");
-        List<BaseTreeNodeDto> baseTreeNodeList = baseTreeNode.getBaseTree();
-        List<FolderTreeNodeDto> folderTreeNodeList = changeBaseToFolder(baseTreeNodeList, folderPermissionMap);
+        BaseTreeNodeService devBaseTreeNode = ServiceProvidersLoaders.loadProviderIfPresent(serviceProvidersLoader,
+                BaseTreeNodeService.class, "devTree");
+        List<BaseTreeNodeDto> devBaseTreeNodeList = devBaseTreeNode.getBaseTree();
+        List<FolderTreeNodeDto> folderTreeNodeList = changeBaseToFolder(devBaseTreeNodeList, folderPermissionMap);
         List<String> resourceCodeList = folderTreeNodeList.stream().map(FolderTreeNodeDto::getType).collect(Collectors.toList());
         List<FeatureTreeNodeDto> featureTree = getFeatureTreeNodeByCode(resourceCodeList);
         List<FolderTreeNodeDto> echo = featureTree.stream().map(featureTreeNode -> {
             FolderTreeNodeDto folderTreeNode = PojoUtil.copyOne(featureTreeNode, FolderTreeNodeDto.class, "name",
                     "type", "featureCode");
+            folderTreeNode.setCid(featureTreeNode.getFeatureCode());
             if (ObjectUtils.isNotEmpty(featureTreeNode.getChildren())) {
                 List<FolderTreeNodeDto> childrenFolderTreeNodeList = PojoUtil.copyList(featureTreeNode.getChildren(),
                         FolderTreeNodeDto.class, "name", "type", "featureCode");
                 childrenFolderTreeNodeList.forEach(childrenFolderTreeNode -> {
+                    childrenFolderTreeNode.setCid(childrenFolderTreeNode.getFeatureCode());
                     childrenFolderTreeNode.setParentCode(folderTreeNode.getFeatureCode());
                     if (FeatureCodeEnum.F_MENU_DATA_DEVELOP.name().equals(childrenFolderTreeNode.getFeatureCode())) {
                         childrenFolderTreeNode.setChildren(folderTreeNodeList);
@@ -170,8 +173,11 @@ public class SystemServiceImpl implements SystemService {
     }
 
     private List<FolderTreeNodeDto> changeBaseToFolder(List<BaseTreeNodeDto> baseTreeNodeList, Map<String, Integer> folderPermissionMap) {
-        List<FolderTreeNodeDto> echo = baseTreeNodeList.stream().map(treeNode -> {
+        List<FolderTreeNodeDto> echo = baseTreeNodeList
+                .stream().filter(treeNode -> !TreeNodeTypeEnum.RECORD.name().equals(treeNode.getBelong())).collect(Collectors.toList())
+                .stream().map(treeNode -> {
             FolderTreeNodeDto folderTreeNode = new FolderTreeNodeDto();
+            folderTreeNode.setCid("F_" + treeNode.getId());
             folderTreeNode.setName(treeNode.getName());
             folderTreeNode.setType(treeNode.getType());
             folderTreeNode.setParentId(treeNode.getParentId().toString());
@@ -189,7 +195,7 @@ public class SystemServiceImpl implements SystemService {
             }
             return folderTreeNode;
         }).collect(Collectors.toList());
-        return echo;
+        return echo.size() > 0 ? echo : null;
     }
 
     private List<FeatureTreeNodeDto> getFeatureTreeNodeByCode(List<String> resourceCodes) {

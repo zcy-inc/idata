@@ -55,6 +55,7 @@ public class BaseTreeNodeServiceImpl implements BaseTreeNodeService {
         List<BaseTreeNodeDto> echoList = devTreeNodes.stream().map(devTreeNode -> {
             BaseTreeNodeDto echo = PojoUtil.copyOne(devTreeNode, BaseTreeNodeDto.class,
                     "id", "name", "parentId");
+            echo.setBelong(devTreeNode.getType());
             String folderType = StringUtils.isNotEmpty(nodeType) ? nodeType : null;
             if (folderType == null) {
                 FunctionModuleEnum functionModule = FunctionModuleEnum.getEnum(devTreeNode.getBelong()).get();

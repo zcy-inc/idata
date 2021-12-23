@@ -18,11 +18,9 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
-import cn.zhengcaiyun.idata.develop.service.job.QueryRunService;
+import cn.zhengcaiyun.idata.develop.service.job.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 /**
  * @author caizhedong
@@ -31,14 +29,14 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping(path = "/p1/dev/jobs")
-public class QueryRunController {
+public class QueryController {
 
     @Autowired
-    QueryRunService queryRunService;
+    private QueryService queryService;
 
     @PostMapping("/runQuery")
     public RestResult<QueryStatementDto> runQuery(@RequestBody QueryDto queryDto) {
-        return RestResult.success(queryRunService.runQuery(queryDto));
+        return RestResult.success(queryService.runQuery(queryDto));
     }
 
     @GetMapping("/runQueryResult")
@@ -47,6 +45,11 @@ public class QueryRunController {
                                                            @RequestParam("sessionKind") String sessionKind,
                                                            @RequestParam(value = "from", required = false) Integer from,
                                                            @RequestParam(value = "size", required = false) Integer size) {
-        return RestResult.success(queryRunService.runQueryResult(sessionId, statementId, sessionKind, from, size));
+        return RestResult.success(queryService.runQueryResult(sessionId, statementId, sessionKind, from, size));
+    }
+
+    @GetMapping("/autocompletionTipConfigs")
+    public RestResult<AutocompletionTipDto> getAutocompletionTipConfigs() {
+        return RestResult.success(queryService.getAutocompletionTipConfigs());
     }
 }

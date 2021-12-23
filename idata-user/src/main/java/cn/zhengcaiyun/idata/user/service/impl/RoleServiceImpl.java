@@ -116,7 +116,7 @@ public class RoleServiceImpl implements RoleService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        return systemService.getFolderTree(folderPermissionMap);
+        return systemService.getDevFolderTree(folderPermissionMap);
     }
 
     @Override

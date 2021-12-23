@@ -25,6 +25,7 @@ import java.util.List;
  * @date 2021-03-08 09:39
  */
 public class FolderTreeNodeDto {
+    private String cid;
     @ApiModelProperty(value = "F_MENU | R_DW_DESIGN_DIR | R_JOB_MANAGE_DIR | " +
             "R_RESOURCE_MANAGE_DIR | R_FUNCTION_MANAGE_DIR | R_API_DEVELOP_DIR")
     private String type;
@@ -41,6 +42,15 @@ public class FolderTreeNodeDto {
     private List<FolderTreeNodeDto> children;
 
     // GaS
+
+    public String getCid() {
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
     public String getType() {
         return type;
     }

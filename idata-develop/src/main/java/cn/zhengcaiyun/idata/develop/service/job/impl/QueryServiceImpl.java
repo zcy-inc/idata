@@ -20,22 +20,28 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
-import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.*;
-import org.apache.commons.lang3.ObjectUtils;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.system.api.SystemConfigApi;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 /**
  * @author caizhedong
@@ -43,21 +49,20 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 
 @Service
-public class QueryRunServiceImpl implements QueryRunService {
+public class QueryServiceImpl implements QueryService {
 
     private final String DROP_QUERY = "DROP";
     private final String JOB_ENVIRONMENT = "prod";
+    private final String AUTOCOMPLETION_KEY = "autocompletion-config";
 
     @Autowired
     private LivyService livyService;
     @Autowired
-    private ScriptJobService scriptJobService;
+    private SystemConfigApi systemConfigApi;
     @Autowired
-    private SparkJobService sparkJobService;
+    private TableInfoService tableInfoService;
     @Autowired
-    private JobExecuteConfigService jobExecuteConfigService;
-    @Autowired
-    private HdfsService hdfsService;
+    private DevColumnInfoDao devColumnInfoDao;
 
     @Override
     public QueryStatementDto runQuery(QueryDto queryDto) {
@@ -77,6 +82,27 @@ public class QueryRunServiceImpl implements QueryRunService {
             queryRunResult.setQueryRunLog(livyService.queryLog(sessionId, from, size));
         }
         return queryRunResult;
+    }
+
+    @Override
+    public AutocompletionTipDto getAutocompletionTipConfigs() {
+        AutocompletionTipDto echo = new AutocompletionTipDto();
+
+        ConfigDto baseAutocompletionTimConfig = systemConfigApi.getSystemConfigByKey(AUTOCOMPLETION_KEY);
+        String baseAutocompletionTimValue = baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY).getConfigValue();
+        List<String> dbNameList = tableInfoService.getDbNames().stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
+        List<String> dbTableNameList = new ArrayList<>();
+        dbNameList.forEach(dbName -> {
+            List<String> tableNameList = tableInfoService.getTablesByDataBase(dbName).stream()
+                    .map(table -> dbName + "." + table.getTableName()).collect(Collectors.toList());
+            dbTableNameList.addAll(tableNameList);
+        });
+        Set<String> columnNameList = devColumnInfoDao.select(c -> c.where(devColumnInfo.del, isNotEqualTo(1)))
+                .stream().map(DevColumnInfo::getColumnName).collect(Collectors.toSet());
+        echo.setBasicAutocompletionTips(Arrays.asList(baseAutocompletionTimValue.split(",")));
+        echo.setDbTableNames(dbTableNameList);
+        echo.setColumnNames(new ArrayList<>(columnNameList));
+        return echo;
     }
 
 }
