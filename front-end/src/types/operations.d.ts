@@ -24,7 +24,7 @@ export interface ClusterListItem {
   jobId: number;
   jobName: string;
   jobStatus: string;
-  amContainerLogsUrl: string;
+  businessLogsUrl: string;
 }
 
 export interface OperationOverview {
@@ -56,7 +56,7 @@ export interface ConsumeTimeItem {
   finishTime: string; // 结束时间
   avgDuration: number; // 平均内存
   avgDurationStr: string; // 平均执行时长(min)
-  amContainerLogsUrl: string; // application master container url地址
+  businessLogsUrl: string; // application master container url地址
 }
 
 export interface ConsumeResourceItem {
@@ -67,7 +67,7 @@ export interface ConsumeResourceItem {
   startTime: string; // 开始时间
   finishTime: string; // 结束时间
   avgDuration: number; // 平均内存
-  amContainerLogsUrl: string; // application master container url地址
+  businessLogsUrl: string; // application master container url地址
 }
 
 /* ========== 作业历史 ========== */
@@ -84,7 +84,7 @@ export interface JobHistoryItem {
   avgMemory: number; // 作业平均消耗内存（GB）
   applicationId: string; // yarn的application
   user: string; // 启动应用的user
-  amContainerLogsUrl: string; // application master container url地址
+  businessLogsUrl: string; // application master container url地址
   layer: string; // 数仓分层
   businessStatus: string; // 等待运行 1 / 运行中 2 / 失败 6 / 成功 7 / 其他 -1
 }

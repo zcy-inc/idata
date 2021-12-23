@@ -125,8 +125,8 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
     { title: '状态', dataIndex: 'jobStatus', key: 'jobStatus' },
     {
       title: '操作',
-      dataIndex: 'amContainerLogsUrl',
-      key: 'amContainerLogsUrl',
+      dataIndex: 'businessLogsUrl',
+      key: 'businessLogsUrl',
       render: (_) => (
         <a href={_} target="_blank">
           查看日志

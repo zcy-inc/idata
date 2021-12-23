@@ -237,6 +237,7 @@ export interface TaskHistoryItem {
   finalStatus: string;
   startTime: string;
   finishTime: string;
+  businessLogsUrl: string;
 }
 
 export interface DependenceTreeNode {

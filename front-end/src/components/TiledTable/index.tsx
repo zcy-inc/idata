@@ -58,7 +58,7 @@ function TiledTable<RecordType extends Record<string, any> = any>(
         <div>{rightBtns}</div>
       </div>
       <span ref={topMarkRef} />
-      {info?.show && <Table  {...tableProps}  scroll={{x:'max-content', y: info.y }} />}
+      {info?.show && <Table {...tableProps} scroll={{ y: info.y }} />}
     </div>
   );
 }
