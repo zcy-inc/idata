@@ -1,4 +1,4 @@
-import { IMenuItem } from '@/types/common';
+import type { IMenuItem,IAutocompletionTipConfigs } from '@/types/common';
 import { request } from 'umi';
 
 export interface DefaultResponse {
@@ -25,6 +25,12 @@ export async function getSystemState() {
  */
 export async function getSideMenu() {
   return request<DefaultResponse & { data: IMenuItem[] }>('/api/p1/uac/currentFeatureTree', {
+    method: 'GET',
+  });
+}
+
+export  async function getAutocompletionTipConfigs(){
+  return request<DefaultResponse&{data: IAutocompletionTipConfigs}>('/api/p1/dev/jobs/autocompletionTipConfigs', {
     method: 'GET',
   });
 }

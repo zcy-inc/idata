@@ -36,6 +36,9 @@ screenshot
 .firebase
 .eslintcache
 
+# vscode
+.vscode
+
 build
 
 /config/user.local.json

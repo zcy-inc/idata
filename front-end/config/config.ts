@@ -71,7 +71,24 @@ export default defineConfig({
   },
   chainWebpack(config, { webpack }) {
     config
-      .plugin('monaco-editor')
-      .use(MonacoWebpackPlugin, [{ languages: ['sql', 'python', 'java', 'shell'] }]);
+      .plugin('monaco')
+      .use(MonacoWebpackPlugin, [{
+        languages: ['sql', 'python', 'java', 'shell'],
+        features: [
+          'comment',
+          'format',
+          'fontZoom',
+          'folding',
+          'codelens',
+          'suggest',
+          'wordOperations',
+          'wordPartOperations',
+          'wordHighlighter',
+          'parameterHints',
+          'bracketMatching',
+          'find',
+          'linesOperations', // cmd + del 等快捷键操作
+        ],
+      }]);
   },
 });

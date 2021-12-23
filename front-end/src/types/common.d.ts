@@ -11,3 +11,9 @@ export interface IMenuItem {
   featureCode: string;
   children: IMenuItem[];
 }
+
+export interface  IAutocompletionTipConfigs{
+  basicAutocompletionTips: string[]
+  dbTableNames: string[]
+  columnNames: string[]
+}
