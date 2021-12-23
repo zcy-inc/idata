@@ -30,24 +30,27 @@ function TiledTable<RecordType extends Record<string, any> = any>(
   useEffect(() => {
     const newInfo = { show: true, y: undefined };
     // 无数据时不显示分页，不需要减去分页高度
-    const tblRestHeight =
-      props.dataSource?.length && props.dataSource?.length > 0
-        ? tableHeaderHeight + paginationHeight
-        : tableHeaderHeight;
-    if (typeof height === 'number') {
-      const bodyHeight = height - tblRestHeight;
-      Object.assign(newInfo, { y: bodyHeight });
-      wrapperRef.current?.style.setProperty(bodyHeightVarName, `${bodyHeight}px`); // 设置body高度
-    } else {
-      const rect = topMarkRef.current!.getBoundingClientRect();
-      const { clientHeight } = document.body;
-      const bodyHeight = clientHeight - rect.top - bottomPaddingHeight - tblRestHeight;
-      // 表格内容区最小高度100
-      if (bodyHeight > 100) {
-        Object.assign(newInfo, { y: bodyHeight });
-        wrapperRef.current?.style.setProperty(bodyHeightVarName, `${bodyHeight}px`); // 设置body高度
-      }
-    }
+    // const tblRestHeight =
+    //   props.dataSource?.length && props.dataSource?.length > 0
+    //     ? tableHeaderHeight + paginationHeight
+    //     : tableHeaderHeight;
+    // if (typeof height === 'number') {
+    //   const bodyHeight = height - tblRestHeight;
+    //   Object.assign(newInfo, { y: bodyHeight });
+    //   wrapperRef.current?.style.setProperty(bodyHeightVarName, `${bodyHeight}px`); // 设置body高度
+    // } else {
+    //   const rect = topMarkRef.current!.getBoundingClientRect();
+    //   const { clientHeight } = document.body;
+    //   const bodyHeight = clientHeight - rect.top - bottomPaddingHeight - tblRestHeight;
+    //   // 表格内容区最小高度100
+    //   if (bodyHeight > 100) {
+    //     Object.assign(newInfo, { y: bodyHeight });
+    //     wrapperRef.current?.style.setProperty(bodyHeightVarName, `${bodyHeight}px`); // 设置body高度
+    //   }
+    // }
+    // const zcyContent = document.querySelector('.zcy-content');
+    // const zcyContentW = zcyContent?.clientWidth - 48;
+    // Object.assign(newInfo, { x: zcyContentW });
     setInfo(newInfo);
   }, [height, props.dataSource?.length]);
 
@@ -58,7 +61,8 @@ function TiledTable<RecordType extends Record<string, any> = any>(
         <div>{rightBtns}</div>
       </div>
       <span ref={topMarkRef} />
-      {info?.show && <Table  {...tableProps}  scroll={{x:'max-content', y: info.y }} />}
+      {/* {info?.show && <Table {...tableProps} scroll={{ y: info.y }} />} */}
+      {info?.show && <Table {...tableProps} scroll={{ x: 'max-content' }} />}
     </div>
   );
 }

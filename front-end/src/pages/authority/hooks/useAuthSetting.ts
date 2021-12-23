@@ -88,7 +88,6 @@ export default () => {
       return;
     }
     const selectedKey = selectedKeys[0];
-    console.log(selectedKey);
     setSelectedFolderKey(selectedKey);
   };
 

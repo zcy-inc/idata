@@ -85,7 +85,7 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
   // 组装数据
   const loop = (data: any[]): any => {
     return data.map((_) => {
-      const { name, type, featureCode, parentCode } = _;
+      const { name, type, parentCode, cid } = _;
       const clsFolderRoot = !parentCode && type === 'F_MENU' ? 'folder-root' : '';
       let title = (
         <span key="title" className={clsFolderRoot}>
@@ -93,7 +93,7 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
         </span>
       );
 
-      const node: any = { ..._, key: featureCode };
+      const node: any = { ..._, key: cid };
       node.className = clsFolderRoot;
       node.title = title;
       parentCode && (node.parentId = parentCode);

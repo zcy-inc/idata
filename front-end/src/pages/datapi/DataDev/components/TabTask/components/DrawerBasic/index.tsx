@@ -10,7 +10,7 @@ import { editTask, getEnumValues, getTaskTypes } from '@/services/datadev';
 import { TaskCategory } from '@/constants/datadev';
 import { IPane } from '@/models/datadev';
 
-interface DrawerConfigProps {
+interface DrawerBasicProps {
   visible: boolean;
   onClose: () => void;
   data?: Task;
@@ -24,7 +24,7 @@ const widthL = 400;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
 
-const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, getTaskWrapped }) => {
+const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTaskWrapped }) => {
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [form] = Form.useForm();
@@ -76,7 +76,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
           onClose();
           getTaskWrapped();
         } else {
-          message.error(`保存失败：${res.msg}`);
+          message.error(`保存失败: ${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -136,4 +136,4 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, pane, get
   );
 };
 
-export default DrawerConfig;
+export default DrawerBasic;

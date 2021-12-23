@@ -58,8 +58,8 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
     },
     {
       title: '操作',
-      dataIndex: 'amContainerLogsUrl',
-      key: 'amContainerLogsUrl',
+      dataIndex: 'businessLogsUrl',
+      key: 'businessLogsUrl',
       fixed: 'right',
       render: (_) => (
         <a href={_} target="_blank">
@@ -81,8 +81,8 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
     },
     {
       title: '操作',
-      dataIndex: 'amContainerLogsUrl',
-      key: 'amContainerLogsUrl',
+      dataIndex: 'businessLogsUrl',
+      key: 'businessLogsUrl',
       fixed: 'right',
       render: (_) => (
         <a href={_} target="_blank">

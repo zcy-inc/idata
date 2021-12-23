@@ -621,7 +621,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         onClose={() => setVisibleBasic(false)}
         data={task}
         pane={pane}
-        getTaskWrapped={() => {}}
+        getTaskWrapped={getTaskWrapped}
       />
       <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
       <DrawerVersion
