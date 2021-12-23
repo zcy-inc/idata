@@ -1,7 +1,5 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
@@ -62,6 +60,20 @@ public class JobDependencyServiceImpl implements JobDependencyService {
     }
 
     @Override
+    public boolean isCycleDependency(Long jobId, String env, List<JobDependencyDto> extraList) {
+        // TODO
+//        Set<Long> accessIdSet = new HashSet<>();
+//        int vid = -1;
+//        for (JobDependencyDto jobDependencyDto: extraList) {
+//            if (jobDependencyDto.getJobId() == null) {
+//                jobDependencyDto.
+//            }
+//        }
+//        List<JobDependencyDto> list = getAccessJobDependency(env, jobId, accessIdSet);
+        return false;
+    }
+
+    @Override
     public Tuple2<JobTreeNodeDto, JobTreeNodeDto> loadTree(Long jobId, String env, Integer prevLevel, Integer nextLevel, Long searchJobId) {
         // 获取jobId的可达性分析
         Set<Long> accessIdSet = new HashSet<>();
@@ -114,8 +126,8 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             tree.setTaskId(dto.getId());
         }
         tree.setRelation(relation);
-        if (CollectionUtils.isNotEmpty(tree.getNextList())) {
-            tree.getNextList().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
+        if (CollectionUtils.isNotEmpty(tree.getChildren())) {
+            tree.getChildren().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
         }
     }
 
@@ -233,10 +245,12 @@ public class JobDependencyServiceImpl implements JobDependencyService {
 
         if (max > level && CollectionUtils.isNotEmpty(leafNodes)) {
             //遍历后叶子节点,清理所有不展示节点
-            leafNodes.forEach(elemId -> nodeMap.get(elemId).setNextList(null));
+            leafNodes.forEach(elemId -> nodeMap.get(elemId).setChildren(null));
         }
 
         return new Tuple2<>(treeNodeDto, max);
     }
+
+
 
 }
