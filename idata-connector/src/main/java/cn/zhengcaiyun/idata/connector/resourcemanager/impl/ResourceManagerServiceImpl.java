@@ -114,6 +114,12 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     }
 
     @Override
+    public ClusterAppDto queryAppId(String appId) {
+        ClusterApp clusterApp = yarnApiAgent.queryAppId(getYarnServiceUrl(), appId);
+        return toAppDto(clusterApp, getJobId(clusterApp.getName()), getNormalJobEvn(clusterApp.getName()));
+    }
+
+    @Override
     public Boolean killClusterApp(String appId) {
         return yarnApiAgent.setClusterAppState(getYarnServiceUrl(), appId, "KILLED");
     }

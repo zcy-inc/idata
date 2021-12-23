@@ -1,8 +1,6 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.hutool.core.date.DateTime;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
@@ -76,4 +74,11 @@ public interface JobHistoryService {
      * @return
      */
     String getLatestRuntime(Long jobId);
+
+    /**
+     * 业务方需要的日志地址逻辑
+     * http://bigdata-master3.cai-inc.com:8088/cluster/app/application_1636461038777_141467     killed  failed finished
+     * http://bigdata-master3.cai-inc.com:8088/proxy/application_1636461038777_145072/       running
+     */
+    String getBusinessLogUrl(String applicationId, String status);
 }

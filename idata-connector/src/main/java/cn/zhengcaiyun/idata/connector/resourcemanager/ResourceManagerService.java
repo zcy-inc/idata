@@ -73,4 +73,10 @@ public interface ResourceManagerService {
      * @return
      */
     Boolean killClusterApp(String appId);
+
+    /**
+     * 查询应用
+     * @param appId
+     */
+    ClusterAppDto queryAppId(String appId);
 }

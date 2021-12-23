@@ -3,7 +3,8 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.PageUtil;
+import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
+import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
@@ -14,9 +15,11 @@ import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -27,11 +30,17 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 @Service
 public class JobHistoryServiceImpl implements JobHistoryService {
 
+    @Value("${yarn.resourceManagerUri}")
+    private String YARN_RM_URI;
+
     @Autowired
     private DevJobHistoryDao devJobHistoryDao;
 
     @Autowired
     private DevJobHistoryMyDao devJobHistoryMyDao;
+
+    @Autowired
+    private ResourceManagerService resourceManagerService;
 
     @Override
     public void batchUpsert(List<DevJobHistory> devJobHistoryList) {
@@ -97,6 +106,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
             JobHistoryGanttDto.Data data = new JobHistoryGanttDto.Data();
             BeanUtils.copyProperties(e, data);
             data.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(e.getFinalStatus()));
+            data.setBusinessLogsUrl(getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus()));
             jobHistoryGanttDto.getSerialData().add(data);
 
             map.put(jobId, jobHistoryGanttDto);
@@ -113,6 +123,44 @@ public class JobHistoryServiceImpl implements JobHistoryService {
             return DateUtil.date(startTime).toString();
         }
         return "";
+    }
+
+    @Override
+    public String getBusinessLogUrl(String applicationId, String status) {
+        if (StringUtils.isEmpty(applicationId)) {
+            return null;
+        }
+
+        String defaultUrl = YARN_RM_URI + "/cluster/app/" + applicationId;
+        YarnJobStatusEnum enumCode = YarnJobStatusEnum.getByYarnEnumCode(status);
+        if (enumCode == null) {
+            return defaultUrl;
+        }
+
+        switch (enumCode) {
+            case SUCCESS:
+            case FAIL:
+                return defaultUrl;
+        }
+
+        ClusterAppDto clusterAppDto = resourceManagerService.queryAppId(applicationId);
+        String confirmStatus = clusterAppDto.getFinalStatus();
+        if (clusterAppDto == null && StringUtils.isEmpty(confirmStatus)) {
+            return defaultUrl;
+        }
+        enumCode = YarnJobStatusEnum.getByYarnEnumCode(confirmStatus);
+        switch (enumCode) {
+            case SUCCESS:
+            case FAIL:
+                return defaultUrl;
+            case RUNNING:
+                return YARN_RM_URI + "/proxy/" + applicationId;
+            case OTHER:
+            case PENDING:
+                return "";
+        }
+
+        return defaultUrl;
     }
 
 }

@@ -203,6 +203,7 @@ public class DashboardController {
         for (RankTimeConsumeDto dto : rankTimeConsumeDtos) {
             RankTimeConsumeResponse response = new RankTimeConsumeResponse();
             BeanUtils.copyProperties(dto, response);
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), "FINISHED"));
             responseList.add(response);
         }
 
@@ -224,6 +225,7 @@ public class DashboardController {
         for (RankResourceConsumeDto dto : rankTimeConsumeDtos) {
             RankResourceConsumeResponse response = new RankResourceConsumeResponse();
             BeanUtils.copyProperties(dto, response);
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), "FINISHED"));
             responseList.add(response);
         }
 

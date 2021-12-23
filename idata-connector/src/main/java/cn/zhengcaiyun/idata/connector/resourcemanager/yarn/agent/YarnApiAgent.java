@@ -21,6 +21,7 @@ package cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent;
 import cn.zhengcaiyun.idata.commons.exception.RemoteServiceException;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.param.QueryClusterAppParam;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.result.ClusterAppListResult;
+import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.result.ClusterAppResult;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.agent.result.ClusterMetricsResult;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.bean.ClusterApp;
 import cn.zhengcaiyun.idata.connector.resourcemanager.yarn.bean.ClusterAppState;
@@ -32,6 +33,7 @@ import com.google.common.collect.Maps;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,6 +69,23 @@ public class YarnApiAgent {
             ClusterAppListResult result = HttpClientUtil.executeHttpRequest(httpInput, new TypeReference<ClusterAppListResult>() {
             });
             return result.getApps().getApp();
+        } catch (Exception ex) {
+            throw new RemoteServiceException("调用Yarn服务失败", ex);
+        }
+    }
+
+    public ClusterApp queryAppId(String yarnBaseUrl, String appId) {
+        String reqUrl = yarnBaseUrl + "/ws/v1/cluster/apps/" + appId;
+        try {
+            Map<String, String> headMap = new HashMap<>();
+            headMap.put("Accept", "application/json");
+            HttpInput httpInput = new HttpInput()
+                    .setHeaderMap(headMap)
+                    .setServerName("Yarn-api-service")
+                    .setUri(reqUrl).setMethod("GET");
+            ClusterAppResult result = HttpClientUtil.executeHttpRequest(httpInput, new TypeReference<ClusterAppResult>() {
+            });
+            return result.getApp();
         } catch (Exception ex) {
             throw new RemoteServiceException("调用Yarn服务失败", ex);
         }
