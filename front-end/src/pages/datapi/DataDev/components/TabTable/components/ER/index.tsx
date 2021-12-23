@@ -148,6 +148,7 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
         graph.data(handleDataTransform(tables, edges));
         graph.render();
+        graph.fitCenter();
       })
       .finally(() => {
         setLoading(false);

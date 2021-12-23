@@ -109,7 +109,7 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           onChange: (page) => getTasksWrapped(10 * (page - 1)),
         }}
       />
-      <Modal title="日志" visible={visibleLog} onCancel={() => setVisibleLog(false)}>
+      <Modal title="日志" visible={visibleLog} footer={null} onCancel={() => setVisibleLog(false)}>
         <MonacoEditor
           height="400"
           language="sql"

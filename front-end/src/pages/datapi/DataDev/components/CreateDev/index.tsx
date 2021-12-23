@@ -86,13 +86,13 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
               setVisibleDev(false);
               getTreeWrapped();
             } else {
-              message.success(`创建作业失败：${res.msg}`);
+              message.success(`创建作业失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
       }}
     >
-      <Item name="jobType" label="任务类型" rules={rules}>
+      <Item name="jobType" label="作业类型" rules={rules}>
         <Select<TaskCategory>
           size="large"
           style={{ width }}
@@ -120,7 +120,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           />
         </Item>
       )}
-      <Item name="name" label="任务名称" rules={rules}>
+      <Item name="name" label="作业名称" rules={rules}>
         <Input size="large" style={{ width }} placeholder="请输入" />
       </Item>
       <Item name="dwLayerCode" label="数仓分层" rules={rules}>

@@ -5,7 +5,7 @@ import type { FC } from 'react';
 import { Folder, UDF } from '@/types/datadev';
 import { FolderBelong } from '@/constants/datadev';
 import Title from '@/components/Title';
-import { getFolders, getUDFCodeFile } from '@/services/datadev';
+import { getFolders } from '@/services/datadev';
 
 interface ViewUDFProps {
   data?: UDF;
@@ -27,7 +27,9 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
         <Item label="函数名称">{data?.udfName || '-'}</Item>
         <Item label="函数类型">{data?.udfType || '-'}</Item>
         <Item label="函数代码">
-          <a onClick={() => getUDFCodeFile({ id: data?.id as number }).then((res) => {})}>下载</a>
+          <a href={`/api/p1/dev/udf/download/${data?.id}`} download>
+            下载
+          </a>
         </Item>
         <Item label="返回类型">{data?.returnType || '-'}</Item>
         <Item label="返回值">{data?.returnSample || '-'}</Item>

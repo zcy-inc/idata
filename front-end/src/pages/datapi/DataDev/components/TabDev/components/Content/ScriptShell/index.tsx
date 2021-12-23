@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import type { ForwardRefRenderFunction } from 'react';
 
@@ -13,11 +13,20 @@ const ScriptShell: ForwardRefRenderFunction<unknown, ScriptShellProps> = (
   { monaco, data: { content } },
   ref,
 ) => {
+  const [monacoHeight, setMonacoHeight] = useState(500);
+
+  useEffect(() => {
+    const container = document.querySelector('.ant-tabs-content-holder');
+    let height = container?.clientHeight || 500;
+    height = height - 40 - 48;
+    setMonacoHeight(height);
+  }, []);
+
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{ position: 'relative', height: monacoHeight }}>
       <MonacoEditor
         ref={monaco}
-        height="400"
+        height="100%"
         language="shell"
         theme="vs-dark"
         value={content.sourceResource}

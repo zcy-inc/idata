@@ -249,9 +249,21 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       },
       defaultNode: {
         type: 'rect-node',
-        style: { fill: '#fff', stroke: '#ebedf3', width: 240, radius: 4 },
+        style: {
+          fill: '#fff',
+          stroke: '#ebedf3',
+          width: 240,
+          radius: 4,
+        },
       },
-      defaultEdge: { type: 'line', style: { stroke: '#304ffe', lineWidth: 2, lineDash: [3] } },
+      defaultEdge: {
+        type: 'line',
+        style: {
+          stroke: '#304ffe',
+          lineWidth: 2,
+          lineDash: [3],
+        },
+      },
     });
     graphRef.current = graph;
     graph.data(renderedData);

@@ -11,14 +11,6 @@ interface DrawerHistoryProps {
   data?: Task;
 }
 
-const columns = [
-  { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
-  { title: '执行时长', dataIndex: 'duration', key: 'duration' },
-  { title: '平均内存(GB)', dataIndex: 'avgMemory', key: 'avgMemory' },
-  { title: '平均CPU核数', dataIndex: 'avgVcores', key: 'avgVcores' },
-  { title: '最终状态', dataIndex: 'finalStatus', key: 'finalStatus' },
-];
-
 const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<TaskHistoryItem[]>([]);
@@ -63,7 +55,23 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
       <Table
         rowKey="id"
         loading={loading}
-        columns={columns}
+        columns={[
+          { title: '开始时间', dataIndex: 'start', key: 'start' },
+          { title: '执行时长', dataIndex: 'duration', key: 'duration' },
+          { title: '输出结果行数', dataIndex: 'line', key: 'line' },
+          { title: '平均内存(GB)', dataIndex: 'memory', key: 'memory' },
+          { title: '平均CPU核数', dataIndex: 'cpu', key: 'cpu' },
+          { title: '最终状态', dataIndex: 'state', key: 'state' },
+          {
+            title: '操作',
+            key: 'options',
+            render: (_) => (
+              <a href={_.amContainerLogsUrl} target="_blank">
+                查看
+              </a>
+            ),
+          },
+        ]}
         dataSource={history}
         pagination={{
           total,

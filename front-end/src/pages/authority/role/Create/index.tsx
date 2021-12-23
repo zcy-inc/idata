@@ -18,10 +18,10 @@ const Create = () => {
       const { folderTree, origFeatureTree } = authSettingProps;
       return createRole({ folderTree, featureTree: origFeatureTree, roleName: values.roleName });
     },
-    () => history.push('/authority/role/list'),
+    () => history.go(-1),
   );
 
-  const roleConfProps = { authSettingProps, form, saveBtnProps: btnProps  };
+  const roleConfProps = { authSettingProps, form, saveBtnProps: btnProps };
   return <RoleConf {...roleConfProps} />;
 };
 
