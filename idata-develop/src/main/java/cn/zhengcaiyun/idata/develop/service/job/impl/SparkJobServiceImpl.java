@@ -86,7 +86,8 @@ public class SparkJobServiceImpl implements SparkJobService {
             }
             else {
                 if (existJobContentSpark.getEditable().equals(EditableEnum.YES.val)) {
-                    if (!existSparkJob.getPythonResource().equals(sparkJobDto.getPythonResource())) {
+                    if (JobTypeEnum.SPARK_PYTHON.equals(sparkJobDto.getJobType())
+                            && !existSparkJob.getPythonResource().equals(sparkJobDto.getPythonResource())) {
                         hdfsService.modifyFile(existSparkJob.getResourceHdfsPath(), sparkJobDto.getPythonResource());
                     }
                     DevJobContentSpark jobContentSpark = PojoUtil.copyOne(sparkJobDto, DevJobContentSpark.class,

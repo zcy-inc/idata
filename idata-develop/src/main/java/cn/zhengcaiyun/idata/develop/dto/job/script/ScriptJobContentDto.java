@@ -30,6 +30,8 @@ import java.util.Objects;
 public class ScriptJobContentDto extends JobContentBaseDto {
     private String sourceResource;
     private List<JobArgumentDto> scriptArguments;
+    // JobTypeEnum.language
+    private String scriptLanguage;
 
     // GaS
     public String getSourceResource() {
