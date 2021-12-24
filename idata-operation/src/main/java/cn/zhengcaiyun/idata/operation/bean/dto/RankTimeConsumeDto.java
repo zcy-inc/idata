@@ -12,6 +12,11 @@ public class RankTimeConsumeDto {
     private Long jobId;
 
     /**
+     * 作业名称
+     */
+    private String jobName;
+
+    /**
      * 应用运行id
      */
     private String applicationId;
@@ -95,5 +100,13 @@ public class RankTimeConsumeDto {
 
     public void setAmContainerLogsUrl(String amContainerLogsUrl) {
         this.amContainerLogsUrl = amContainerLogsUrl;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
     }
 }

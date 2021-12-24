@@ -108,7 +108,7 @@ public class RankTimeConsumeResponse {
             long secondsTotal = avgDuration.longValue() / 1000;
             long minutes = secondsTotal / 60;
             long seconds = secondsTotal % 60;
-            return minutes + ":" + seconds;
+            return minutes + "分" + seconds + "秒";
         }
         return null;
     }

@@ -62,7 +62,7 @@ public interface DashboardService {
      * @param endDate 结束时间
      * @param top TOP N
      */
-    List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top);
+    List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top) throws NoSuchFieldException;
 
     /**
      * 作业耗资源 TOP N
@@ -70,7 +70,7 @@ public interface DashboardService {
      * @param endDate 结束时间
      * @param top TOP N
      */
-    List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top);
+    List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top) throws NoSuchFieldException;
 
     /**
      * yarn作业分页

@@ -72,6 +72,12 @@ public class JobHistoryDto implements Comparable {
      */
     private String layer;
 
+    /**
+     * Database Column Remarks:
+     *   启动应用的user
+     */
+    private String user;
+
     public Long getId() {
         return id;
     }
@@ -195,5 +201,13 @@ public class JobHistoryDto implements Comparable {
 
     public void setLayer(String layer) {
         this.layer = layer;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 }

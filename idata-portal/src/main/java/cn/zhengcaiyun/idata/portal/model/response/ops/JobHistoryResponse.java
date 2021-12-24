@@ -45,6 +45,11 @@ public class JobHistoryResponse {
     private Long duration;
 
     /**
+     * 平均执行时长(min)
+     */
+    private String durationStr;
+
+    /**
      * Database Column Remarks:
      *   作业最终状态
      */
@@ -96,6 +101,20 @@ public class JobHistoryResponse {
      * 数仓分层
      */
     private String layer;
+
+    public String getDurationStr() {
+        if (duration != null) {
+            long secondsTotal = duration.longValue() / 1000;
+            long minutes = secondsTotal / 60;
+            long seconds = secondsTotal % 60;
+            return minutes + "分" + seconds + "秒";
+        }
+        return null;
+    }
+
+    public void setDurationStr(String durationStr) {
+        this.durationStr = durationStr;
+    }
 
     public Long getId() {
         return id;
