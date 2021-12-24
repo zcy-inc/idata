@@ -85,6 +85,9 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
   // 组装数据
   const loop = (data: any[]): any => {
     return data.map((_) => {
+      if (!_.featureCode) {
+        return null;
+      }
       const { name, type, parentCode, cid } = _;
       const clsFolderRoot = !parentCode && type === 'F_MENU' ? 'folder-root' : '';
       let title = (

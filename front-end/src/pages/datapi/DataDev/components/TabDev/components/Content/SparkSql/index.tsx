@@ -35,6 +35,8 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   const editorRef = useRef<any>();
   const monacoInnerRef = useRef<IDisposable>();
 
+  const [loading, setLoading] = useState(false);
+
   useImperativeHandle(ref, () => ({
     form: form,
   }));
@@ -64,10 +66,13 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
     }
   }, [content]);
 
-  const getUDFListWrapped = () =>
+  const getUDFListWrapped = () => {
+    setLoading(true);
     getUDFList()
       .then((res) => setUDFList(res.data))
-      .catch((err) => {});
+      .catch((err) => {})
+      .finally(() => setLoading(false));
+  };
 
   return (
     <>
@@ -138,6 +143,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
           <Item name="udfIds" label="自定义函数">
             <Select
               mode="multiple"
+              loading={loading}
               placeholder="请选择"
               options={UDFList.map((_) => ({
                 label: _.udfName,

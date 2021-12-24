@@ -65,7 +65,12 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
             ]}
           />
         </Item>
-        <Item name="upload" label="函数代码" rules={[{ required: true }]}>
+        <Item
+          name="upload"
+          label="函数代码"
+          rules={[{ required: true }]}
+          extra={`hdfs路径: ${data?.hdfsPath || '-'}`}
+        >
           <Upload
             style={{ marginTop: 16 }}
             accept="*"
@@ -82,7 +87,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                       hdfsPath: res.data.relativePath,
                     });
                   } else {
-                    message.error(`上传失败：${res.msg}`);
+                    message.error(`上传失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {
