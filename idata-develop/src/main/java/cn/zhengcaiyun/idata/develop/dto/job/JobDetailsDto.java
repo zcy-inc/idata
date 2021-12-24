@@ -16,11 +16,30 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DiJobDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobDetailsDto;
+
 /**
  * @author caizhedong
  * @date 2021-11-29 上午9:16
  */
 
 public class JobDetailsDto {
-    private Boolean isDryRun;
+    private JobTypeEnum jobType;
+    private String driverMemory;
+    private String executorMemory;
+    private int executorCores;
+    private String yarnQueue;
+    // JobTypeEnum.engine
+    private String engineType;
+
+    private DiJobDetailsDto diJobDetails;
+    private SqlJobDetailsDto sqlJobDetails;
+    private SparkJobDetailsDto sparkJobDetails;
+    private KylinJobDto kylinJobDetails;
+    private ScriptJobContentDto scriptJobDetails;
 }
