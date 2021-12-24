@@ -9,7 +9,7 @@ import java.util.List;
 public interface JobDependenceMyDao {
 
     @Select("<script>" +
-            "select job_id, prev_job_id, name from" +
+            "select job_id, prev_job_id, name, environment from" +
             "(" +
             "  select job_id, prev_job_id from dev_job_dependence where del = 0 and environment = #{env}" +
             ") t1 left join (select id, name from dev_job_info) t2" +

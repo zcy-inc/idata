@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.develop.service.job;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
+import cn.zhengcaiyun.idata.develop.dto.job.CycleJobDependencyDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 
 import java.util.List;
@@ -35,5 +36,5 @@ public interface JobDependencyService {
      * @param extraList
      * @return
      */
-    public boolean isCycleDependency(Long jobId, String env, List<JobDependencyDto> extraList);
+    CycleJobDependencyDto isCycleDependency(Long jobId, String env, List<JobDependencyDto> extraList);
 }
