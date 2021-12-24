@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface HadoopPanelProps {
   id: string
-  headerTitle: string
+  headerTitle?: string
   dataSource?: IDataSourceType[]
   setDataSource?: (data: IDataSourceType[]) => void
   editableKeys?: React.Key[]
