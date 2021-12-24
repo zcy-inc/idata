@@ -120,10 +120,8 @@ public class JobUdfController {
         if (!hdfsService.checkUdfPath(path)) {
             throw new GeneralException("不可访问其他路径！" + path + "不合法");
         }
-        String fileName = udf.getUdfName();
-        if (StringUtils.isEmpty(FileUtil.getSuffix(fileName)) && StringUtils.isNotEmpty(FileUtil.getSuffix(udf.getHdfsPath()))) {
-            fileName = fileName + "." + FileUtil.getSuffix(udf.getHdfsPath());
-        }
+        String fileName = path.substring(path.lastIndexOf("/") + 1);
+
         ByteArrayOutputStream sos = new ByteArrayOutputStream();
         hdfsService.readFile(path, sos);
         byte[] bytes = sos.toByteArray();
@@ -135,6 +133,11 @@ public class JobUdfController {
         headers.add("Expires", "0");
         headers.add("Content-Language", "UTF-8");
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+    }
+
+    public static void main(String[] args) {
+        String s = "hdfs://nameservice1/staging_idata/upload/udf/1640071323966_15433_MurmurHashUdf-1.0.jar";
+        System.out.println(s.substring(s.lastIndexOf("/") + 1));
     }
 
 }
