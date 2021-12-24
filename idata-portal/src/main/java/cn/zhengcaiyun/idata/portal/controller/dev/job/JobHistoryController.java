@@ -3,7 +3,9 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
+import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.portal.model.request.IdRequest;
 import cn.zhengcaiyun.idata.portal.model.request.PageWrapper;
 import cn.zhengcaiyun.idata.portal.model.response.ops.JobHistoryResponse;
@@ -27,13 +29,20 @@ public class JobHistoryController {
     @Autowired
     private JobSchedule jobSchedule;
 
+    @Autowired
+    private JobInfoService jobInfoService;
+
     @ApiOperation("查看任务历史")
     @PostMapping("/page")
     public RestResult<Page<JobHistoryResponse>> pagingJobHistory(@RequestBody PageWrapper<IdRequest> pageWrapper) {
-        PageInfo<DevJobHistory> pageInfo = jobHistoryService.pagingJobHistoryByJobId(pageWrapper.getCondition().getId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        Long jobId = pageWrapper.getCondition().getId();
+        JobInfoDto jobInfo = jobInfoService.getJobInfo(jobId);
+
+        PageInfo<DevJobHistory> pageInfo = jobHistoryService.pagingJobHistoryByJobId(jobId, pageWrapper.getPageNum(), pageWrapper.getPageSize());
         PageInfo<JobHistoryResponse> pageResponse = PageUtil.convertType(pageInfo, e -> {
             JobHistoryResponse response = new JobHistoryResponse();
             BeanUtils.copyProperties(e, response);
+            response.setJobName(jobInfo.getName());
             response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus()));
 
             return response;

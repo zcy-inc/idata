@@ -24,7 +24,7 @@ public class JobHistoryResponse {
      * Database Column Remarks:
      *   作业id
      */
-    private Long jobName;
+    private String jobName;
 
     /**
      * Database Column Remarks:
@@ -121,11 +121,11 @@ public class JobHistoryResponse {
         this.jobId = jobId;
     }
 
-    public Long getJobName() {
+    public String getJobName() {
         return jobName;
     }
 
-    public void setJobName(Long jobName) {
+    public void setJobName(String jobName) {
         this.jobName = jobName;
     }
 

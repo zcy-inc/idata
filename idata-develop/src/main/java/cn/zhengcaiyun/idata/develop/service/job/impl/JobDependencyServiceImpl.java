@@ -122,7 +122,9 @@ public class JobDependencyServiceImpl implements JobDependencyService {
     public CycleJobDependencyDto isCycleDependency(Long jobId, String env, List<JobDependencyDto> extraList) {
         List<JobDependencyDto> list = jobDependenceRepo.queryJobs(env);
         Set<JobDependencyDto> set = new HashSet<>(list);
-        set.addAll(extraList);
+        if (extraList != null) {
+            set.addAll(extraList);
+        }
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();
         for (JobDependencyDto elem : list) {
@@ -153,6 +155,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
                     CycleJobDependencyDto response = new CycleJobDependencyDto();
                     response.setCycle(true);
                     response.setCycleJobId(qJobId);
+                    return response;
                 }
             }
         }
