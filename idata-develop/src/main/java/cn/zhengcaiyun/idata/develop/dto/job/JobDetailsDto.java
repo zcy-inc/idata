@@ -42,4 +42,93 @@ public class JobDetailsDto {
     private SparkJobDetailsDto sparkJobDetails;
     private KylinJobDto kylinJobDetails;
     private ScriptJobContentDto scriptJobDetails;
+
+    // GaS
+    public JobTypeEnum getJobType() {
+        return jobType;
+    }
+
+    public void setJobType(JobTypeEnum jobType) {
+        this.jobType = jobType;
+    }
+
+    public String getDriverMemory() {
+        return driverMemory;
+    }
+
+    public void setDriverMemory(String driverMemory) {
+        this.driverMemory = driverMemory;
+    }
+
+    public String getExecutorMemory() {
+        return executorMemory;
+    }
+
+    public void setExecutorMemory(String executorMemory) {
+        this.executorMemory = executorMemory;
+    }
+
+    public int getExecutorCores() {
+        return executorCores;
+    }
+
+    public void setExecutorCores(int executorCores) {
+        this.executorCores = executorCores;
+    }
+
+    public String getYarnQueue() {
+        return yarnQueue;
+    }
+
+    public void setYarnQueue(String yarnQueue) {
+        this.yarnQueue = yarnQueue;
+    }
+
+    public String getEngineType() {
+        return engineType;
+    }
+
+    public void setEngineType(String engineType) {
+        this.engineType = engineType;
+    }
+
+    public DiJobDetailsDto getDiJobDetails() {
+        return diJobDetails;
+    }
+
+    public void setDiJobDetails(DiJobDetailsDto diJobDetails) {
+        this.diJobDetails = diJobDetails;
+    }
+
+    public SqlJobDetailsDto getSqlJobDetails() {
+        return sqlJobDetails;
+    }
+
+    public void setSqlJobDetails(SqlJobDetailsDto sqlJobDetails) {
+        this.sqlJobDetails = sqlJobDetails;
+    }
+
+    public SparkJobDetailsDto getSparkJobDetails() {
+        return sparkJobDetails;
+    }
+
+    public void setSparkJobDetails(SparkJobDetailsDto sparkJobDetails) {
+        this.sparkJobDetails = sparkJobDetails;
+    }
+
+    public KylinJobDto getKylinJobDetails() {
+        return kylinJobDetails;
+    }
+
+    public void setKylinJobDetails(KylinJobDto kylinJobDetails) {
+        this.kylinJobDetails = kylinJobDetails;
+    }
+
+    public ScriptJobContentDto getScriptJobDetails() {
+        return scriptJobDetails;
+    }
+
+    public void setScriptJobDetails(ScriptJobContentDto scriptJobDetails) {
+        this.scriptJobDetails = scriptJobDetails;
+    }
 }
