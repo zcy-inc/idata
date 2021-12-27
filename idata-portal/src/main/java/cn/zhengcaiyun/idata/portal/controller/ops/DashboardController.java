@@ -10,6 +10,7 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ClusterMetricsDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
+import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.operation.bean.dto.JobStatisticDto;
@@ -26,6 +27,7 @@ import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.*;
 import cn.zhengcaiyun.idata.portal.util.PageUtil;
 import com.github.pagehelper.PageInfo;
+import org.checkerframework.framework.qual.Unused;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/p1/ops/dashboard")
@@ -268,17 +271,32 @@ public class DashboardController {
      * @return
      */
     @PostMapping("/page/gantt/jobHistory")
-    public RestResult<Page<JobHistoryGanttResponse>> ganttJobHistory(@RequestBody PageWrapper<JobHistoryGanttRequest> pageWrapper) {
+    public RestResult<Page<JobHistoryTableGanttResponse>> ganttJobHistory(@RequestBody PageWrapper<JobHistoryGanttRequest> pageWrapper) {
+
         JobHistoryGanttRequest condition = pageWrapper.getCondition();
         PageInfo<JobHistoryGanttDto> pageInfo = jobHistoryService.pagingGanttJobHistory(condition.getStartDate(), condition.getLayerCode(),
-                condition.getDagId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
+                    condition.getDagId(), pageWrapper.getPageNum(), pageWrapper.getPageSize());
 
-        PageInfo<JobHistoryGanttResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {
-            JobHistoryGanttResponse response = new JobHistoryGanttResponse();
-            BeanUtils.copyProperties(s, response);
-            return response;
-        });
+//        PageInfo<JobHistoryGanttResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {
+//            JobHistoryGanttResponse response = new JobHistoryGanttResponse();
+//            BeanUtils.copyProperties(s, response);
+//            return response;
+//        });
+//        return RestResult.success(PageUtil.covertMine(responsePageInfo));
 
+        List<JobHistoryTableGanttDto> list = jobHistoryService.transform(pageInfo.getList());
+
+        List<JobHistoryTableGanttResponse> responseList = list.stream()
+                .map(e -> {
+                    JobHistoryTableGanttResponse response = new JobHistoryTableGanttResponse();
+                    BeanUtils.copyProperties(e, response);
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        PageInfo<JobHistoryTableGanttResponse> responsePageInfo = new PageInfo<>();
+        BeanUtils.copyProperties(pageInfo, responsePageInfo);
+        responsePageInfo.setList(responseList);
         return RestResult.success(PageUtil.covertMine(responsePageInfo));
     }
 

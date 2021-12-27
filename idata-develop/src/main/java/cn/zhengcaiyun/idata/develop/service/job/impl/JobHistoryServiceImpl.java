@@ -10,10 +10,12 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
+import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Multimap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
@@ -79,6 +81,8 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Override
     public PageInfo<JobHistoryGanttDto> pagingGanttJobHistory(String startDate, String layerCode, Long dagId, Integer pageNum, Integer pageSize) {
         String endDate = DateUtil.offsetDay(DateUtil.parse(startDate, DatePattern.NORM_DATE_PATTERN), 1).toDateStr();
+
+        //先筛选出ids，是因为甘特图一个jobbIdkennel显示
         PageHelper.startPage(pageNum, pageSize);
         List<Long> jobIdList = devJobHistoryMyDao.selectGanttIdList(startDate, endDate, layerCode, dagId);
         if (CollectionUtils.isEmpty(jobIdList)) {
@@ -111,7 +115,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
             map.put(jobId, jobHistoryGanttDto);
         });
-        pageInfo.setList((List)map.values());
+        pageInfo.setList(new ArrayList<>(map.values()));
 
         return pageInfo;
     }
@@ -161,6 +165,35 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         }
 
         return defaultUrl;
+    }
+
+    @Override
+    public List<JobHistoryTableGanttDto> transform(List<JobHistoryGanttDto> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+
+        Map<Long, JobHistoryTableGanttDto> map = new HashMap<>();
+
+        for (JobHistoryGanttDto elem : list) {
+            for (JobHistoryGanttDto.yAxis yAxis : elem.getSerialYAxis()) {
+                Long jobId = yAxis.getJobId();
+                JobHistoryTableGanttDto tableGanttDto = new JobHistoryTableGanttDto();
+                tableGanttDto.setJobId(jobId);
+                tableGanttDto.setJobName(yAxis.getJobName());
+
+                map.put(jobId, tableGanttDto);
+            }
+            for (JobHistoryGanttDto.Data data : elem.getSerialData()) {
+                Long jobId = data.getJobId();
+                if (map.containsKey(jobId)) {
+                    JobHistoryTableGanttDto.Data copy = new JobHistoryTableGanttDto.Data();
+                    BeanUtils.copyProperties(data, copy);
+                    map.get(jobId).getChildren().add(copy);
+                }
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 
 }
