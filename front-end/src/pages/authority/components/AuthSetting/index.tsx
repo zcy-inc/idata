@@ -83,12 +83,12 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
   const placeholder = activeKey === '1' ? '请输入功能名称' : '请输入资源名称';
 
   // 组装数据
-  const loop = (data: any[]): any => {
+  const loop = (data: any[], treeType: 'feature' | 'folder'): any => {
     return data.map((_) => {
       if (!_.featureCode) {
         return null;
       }
-      const { name, type, parentCode, cid } = _;
+      const { name, type, parentCode, featureCode, cid } = _;
       const clsFolderRoot = !parentCode && type === 'F_MENU' ? 'folder-root' : '';
       let title = (
         <span key="title" className={clsFolderRoot}>
@@ -96,13 +96,13 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
         </span>
       );
 
-      const node: any = { ..._, key: cid };
+      const node: any = { ..._, key: treeType === 'feature' ? featureCode : cid };
       node.className = clsFolderRoot;
       node.title = title;
       parentCode && (node.parentId = parentCode);
 
       return _.children ? (
-        <TreeNode {...node}>{loop(_.children)}</TreeNode>
+        <TreeNode {...node}>{loop(_.children, treeType)}</TreeNode>
       ) : (
         <TreeNode {...node}></TreeNode>
       );
@@ -122,7 +122,7 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
               expandedKeys={featureExpandedKeys}
               onSelect={onFeatureTreeSelect}
             >
-              {loop(featureTree)}
+              {loop(featureTree, 'feature')}
             </Tree>
           </TabPane>
           <TabPane tab="资源" key="2">
@@ -133,7 +133,7 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
               onExpand={onFolderExpand}
               onSelect={onFolderTreeSelect}
             >
-              {loop(folderTree)}
+              {loop(folderTree, 'folder')}
             </Tree>
           </TabPane>
         </Tabs>

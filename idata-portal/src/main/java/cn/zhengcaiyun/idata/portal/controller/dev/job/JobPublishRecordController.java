@@ -24,10 +24,13 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * job-publish-controller
@@ -41,11 +44,18 @@ import java.util.List;
 public class JobPublishRecordController {
 
     private final JobPublishRecordService jobPublishRecordService;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public JobPublishRecordController(JobPublishRecordService jobPublishRecordService) {
+    public JobPublishRecordController(JobPublishRecordService jobPublishRecordService,
+                                      UserAccessService userAccessService) {
         this.jobPublishRecordService = jobPublishRecordService;
+        this.userAccessService = userAccessService;
     }
+
+    private final String RELEASE_DATA_JOB_ACCESS_CODE = "F_ICON_RELEASE_DATA_JOB";
+    private final String REJECT_DATA_JOB_ACCESS_CODE = "F_ICON_REJECT_DATA_JOB";
+    private final String JOB_LIST_ACCESS_CODE = "F_MENU_JOB_LIST";
 
     /**
      * 分页查询版本发布记录
@@ -57,6 +67,8 @@ public class JobPublishRecordController {
     public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(JobPublishRecordCondition condition,
                                                                         @RequestParam(value = "limit") Long limit,
                                                                         @RequestParam(value = "offset") Long offset) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_LIST_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(jobPublishRecordService.paging(condition, PageParam.of(limit, offset)));
     }
 
@@ -68,6 +80,8 @@ public class JobPublishRecordController {
      */
     @PostMapping("/approve")
     public RestResult<Boolean> approve(@RequestBody JobApproveParam param) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), RELEASE_DATA_JOB_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(jobPublishRecordService.approve(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
@@ -79,6 +93,8 @@ public class JobPublishRecordController {
      */
     @PostMapping("/reject")
     public RestResult<Boolean> reject(@RequestBody JobApproveParam param) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), REJECT_DATA_JOB_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(jobPublishRecordService.reject(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 

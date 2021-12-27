@@ -26,6 +26,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -41,6 +42,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * job-basic-controller
  *
@@ -54,13 +57,18 @@ public class JobInfoController {
 
     private final JobInfoService jobInfoService;
     private final JobExecuteConfigService jobExecuteConfigService;
+    private final UserAccessService userAccessService;
 
     @Autowired
     public JobInfoController(JobInfoService jobInfoService,
-                             JobExecuteConfigService jobExecuteConfigService) {
+                             JobExecuteConfigService jobExecuteConfigService,
+                             UserAccessService userAccessService) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
+        this.userAccessService = userAccessService;
     }
+
+    private final String JOB_MONITORING_ACCESS_CODE = "F_MENU_JOB_MONITORING";
 
     @ApiOperation(value = "查询job")
     @ApiImplicitParams({
@@ -226,6 +234,8 @@ public class JobInfoController {
     public RestResult<OverhangJobWrapperDto> pagingOverhangJob(JobInfoCondition condition,
                                                                @RequestParam(value = "limit") Long limit,
                                                                @RequestParam(value = "offset") Long offset) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_MONITORING_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(jobInfoService.pagingOverhangJob(condition, PageParam.of(limit, offset)));
     }
 

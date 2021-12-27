@@ -138,22 +138,22 @@ public class WebAuthFilter implements Filter {
                 return;
             }
             // 新版权限
-            Long userId = tokenService.getUserId(mutableRequest);
-            UacUser user = uacUserDao.selectOne(c ->
-                    c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
-            if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
-                SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
-                        and(sysFeature.featureUrlPath, isEqualTo(path))))
-                        .orElse(null);
-                if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
-                        && !userAccessService.checkFeatureAccess(userId, path)) {
-                    servletResponse.setContentType("application/json; charset=UTF-8");
-                    servletResponse.getWriter().write(JSON.toJSONString(
-                            RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
-                    servletResponse.getWriter().flush();
-                    return;
-                }
-            }
+//            Long userId = tokenService.getUserId(mutableRequest);
+//            UacUser user = uacUserDao.selectOne(c ->
+//                    c.where(uacUser.id, isEqualTo(userId), and(uacUser.del, isNotEqualTo(1)))).get();
+//            if (1 != user.getSysAdmin() && 2 != user.getSysAdmin()) {
+//                SysFeature feature = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
+//                        and(sysFeature.featureUrlPath, isEqualTo(path))))
+//                        .orElse(null);
+//                if (feature != null && Arrays.asList(featureTypes).contains(feature.getFeatureType())
+//                        && !userAccessService.checkFeatureAccess(userId, path)) {
+//                    servletResponse.setContentType("application/json; charset=UTF-8");
+//                    servletResponse.getWriter().write(JSON.toJSONString(
+//                            RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, "无权限", null)));
+//                    servletResponse.getWriter().flush();
+//                    return;
+//                }
+//            }
         }
 
         try {

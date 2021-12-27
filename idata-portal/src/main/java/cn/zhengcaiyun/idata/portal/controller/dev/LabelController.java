@@ -16,10 +16,13 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +46,10 @@ public class LabelController {
     private LabelService labelService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private UserAccessService userAccessService;
+
+    private final String CONFIG_METADATA_ACCESS_CODE = "F_MENU_METADATA_CONFIG";
 
     @GetMapping("labelDefine")
     public RestResult<LabelDefineDto> findDefine(@RequestParam("labelCode") String labelCode) {
@@ -59,6 +66,8 @@ public class LabelController {
     @GetMapping("labelDefines")
     public RestResult<List<LabelDefineDto>> findDefines(@RequestParam(value = "subjectType", required = false) String subjectType,
                                                         @RequestParam(value = "labelTag", required = false) String labelTag) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_METADATA_ACCESS_CODE),
+                    "没有元数据标签配置权限");
         return RestResult.success(labelService.findDefines(subjectType, labelTag));
     }
 

@@ -96,9 +96,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     }
 
     @Override
-    public SysFeature getFeature(String urlPath) {
-        return sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
-                and(sysFeature.featureUrlPath, isLike("%" + urlPath + "%")))).orElse(null);
+    public List<SysFeature> getFeatures(String urlPath) {
+        return sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                and(sysFeature.featureUrlPath, isLike("%" + urlPath + "%"))));
     }
 
     @Override

@@ -17,13 +17,17 @@
 
 package cn.zhengcaiyun.idata.portal.controller.ops;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.operation.bean.dto.ClusterAppMonitorDto;
 import cn.zhengcaiyun.idata.operation.service.ClusterService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * operations-controller
@@ -37,10 +41,13 @@ import java.util.List;
 public class ClusterController {
 
     private final ClusterService clusterService;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public ClusterController(ClusterService clusterService) {
+    public ClusterController(ClusterService clusterService,
+                             UserAccessService userAccessService) {
         this.clusterService = clusterService;
+        this.userAccessService = userAccessService;
     }
 
     /**
@@ -51,6 +58,8 @@ public class ClusterController {
      */
     @GetMapping("/apps")
     public RestResult<List<ClusterAppMonitorDto>> fetchClusterApp(@RequestParam(value = "state") String state) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATASOURCE_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(clusterService.fetchClusterApp(state));
     }
 

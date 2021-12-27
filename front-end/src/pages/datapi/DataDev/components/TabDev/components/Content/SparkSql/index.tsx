@@ -58,10 +58,12 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   useEffect(() => {
     if (content) {
       setMonacoValue(content.sourceSql);
-      const udfIds = content.udfIds || '';
+      const udfIds = content.udfIds?.split(',') || [];
+      console.log(udfIds);
+
       form.setFieldsValue({
         externalTables: content.externalTables,
-        udfIds: udfIds.split(','),
+        udfIds,
       });
     }
   }, [content]);

@@ -38,7 +38,7 @@ public interface SystemConfigService {
 
     ConfigDto getSystemConfigByKey(String configKey);
 
-    SysFeature getFeature(String urlPath);
+    List<SysFeature> getFeatures(String urlPath);
 
     boolean checkConnection(ConnectionDto connection);
 
