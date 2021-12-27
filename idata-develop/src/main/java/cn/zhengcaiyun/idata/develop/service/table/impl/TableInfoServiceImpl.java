@@ -397,7 +397,6 @@ public class TableInfoServiceImpl implements TableInfoService {
                 tableInfo.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
                 "无权限，请联系管理员");
 
-
         // 校验指标系统依赖
         List<DevLabel> measureList = devLabelDao.selectMany(select(devLabel.allColumns())
                 .from(devLabel)

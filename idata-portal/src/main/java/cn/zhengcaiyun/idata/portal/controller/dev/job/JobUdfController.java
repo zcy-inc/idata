@@ -11,6 +11,8 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,6 +39,8 @@ import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @Api("")
 @RestController
 @RequestMapping(path = "/p1/dev")
@@ -50,6 +54,10 @@ public class JobUdfController {
     private JobUdfService udfService;
     @Autowired
     private DevJobUdfDao devJobUdfDao;
+    @Autowired
+    private UserAccessService userAccessService;
+
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @ApiOperation("加载某个UDF详情")
     @ApiImplicitParams({
@@ -71,6 +79,10 @@ public class JobUdfController {
     public RestResult<DevJobUdf> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
         DevJobUdf udf = new DevJobUdf();
         BeanUtils.copyProperties(udfAddRequest, udf);
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(),
+                udf.getFolderId(), DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
+                "无添加权限");
+
         udf.setCreator(OperatorContext.getCurrentOperator().getNickname());
         udf.setDel(DeleteEnum.DEL_NO.val);
         udf.setCreateTime(new Date());
@@ -85,8 +97,12 @@ public class JobUdfController {
     public RestResult<DevJobUdf> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
         Long id = udfUpdateRequest.getId();
         DevJobUdf udf = devJobUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
+        Long originFolderId = udf.getFolderId();
 
         BeanUtils.copyProperties(udfUpdateRequest, udf);
+        checkArgument(userAccessService.checkUpdateAccess(OperatorContext.getCurrentOperator().getId(), originFolderId,
+                udf.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
         udf.setDel(DeleteEnum.DEL_NO.val);
