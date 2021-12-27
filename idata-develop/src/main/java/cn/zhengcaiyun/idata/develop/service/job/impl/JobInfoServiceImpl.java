@@ -120,8 +120,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Transactional
     public Long addJob(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), dto.getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameRecords), "作业名称已存在");
@@ -181,8 +179,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Transactional
     public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), id, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
-                "无权限，请联系管理员");
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
         // 检查是否已停用，只有停用后才能更改
         checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再删除作业");

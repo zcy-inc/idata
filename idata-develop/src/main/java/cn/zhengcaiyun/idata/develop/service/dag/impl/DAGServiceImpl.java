@@ -89,9 +89,6 @@ public class DAGServiceImpl implements DAGService {
     @Override
     @Transactional
     public Long addDAG(DAGDto dto, Operator operator) {
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), dto.getDagInfoDto().getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
-
         DAGInfoDto dagInfoDto = dto.getDagInfoDto();
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
@@ -180,8 +177,6 @@ public class DAGServiceImpl implements DAGService {
     @Transactional
     public Boolean removeDag(Long id, Operator operator) {
         DAGInfo dagInfo = tryFetchDAGInfo(id);
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), id, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
-                "无权限，请联系管理员");
         // 检查是否已下线，只有下线后才能更改
         checkArgument(Objects.equals(dagInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "先下线DAG再删除");
 

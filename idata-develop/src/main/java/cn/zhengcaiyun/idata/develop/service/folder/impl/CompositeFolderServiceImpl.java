@@ -79,8 +79,6 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         this.userAccessService = userAccessService;
     }
 
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
-
     @Override
     public List<DevTreeNodeDto> getFunctionTree() {
         List<CompositeFolder> folderList = compositeFolderRepo.queryFunctionFolder();
@@ -110,9 +108,6 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
 
     @Override
     public Long addFolder(CompositeFolderDto folderDto, Operator operator) {
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), folderDto.getParentId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
-
         Optional<FunctionModuleEnum> moduleEnumOptional = FunctionModuleEnum.getEnum(folderDto.getBelong());
         checkArgument(moduleEnumOptional.isPresent(), "功能文件夹为空");
         Optional<FolderTypeEnum> typeEnumOptional = FolderTypeEnum.getEnum(folderDto.getType());
@@ -174,8 +169,6 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     @Override
     public Boolean removeFolder(Long id, Operator operator) {
         checkArgument(Objects.nonNull(id), "文件夹编号为空");
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), id, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
-                "无权限，请联系管理员");
         Optional<CompositeFolder> existFolderOptional = compositeFolderRepo.queryFolder(id);
         checkArgument(existFolderOptional.isPresent(), "文件夹不存在");
         CompositeFolder folder = existFolderOptional.get();

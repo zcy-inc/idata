@@ -26,6 +26,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiImplicitParam;
@@ -69,6 +70,7 @@ public class JobInfoController {
     }
 
     private final String JOB_MONITORING_ACCESS_CODE = "F_MENU_JOB_MONITORING";
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @ApiOperation(value = "查询job")
     @ApiImplicitParams({
@@ -119,6 +121,8 @@ public class JobInfoController {
      */
     @PostMapping
     public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), jobInfoDto.getFolderId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
 
@@ -158,6 +162,8 @@ public class JobInfoController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeJob(@PathVariable Long id) {
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(jobInfoService.removeJob(id, OperatorContext.getCurrentOperator()));
     }
 
