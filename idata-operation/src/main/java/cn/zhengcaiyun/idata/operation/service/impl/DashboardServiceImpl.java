@@ -151,7 +151,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top) {
+    public List<RankTimeConsumeDto> rankConsumeTime(DateTime startDate, DateTime endDate, int top) throws NoSuchFieldException {
         DateTime today = DateUtil.date();
         List<RankTimeConsumeDto> pastRankTimeConsumeDtoList = new ArrayList<>();
 
@@ -231,11 +231,12 @@ public class DashboardServiceImpl implements DashboardService {
         //重新设置avg_duration
         rankTimeConsumeDtos.forEach(e -> e.setAvgDuration(avgDurationMap.get(e.getJobId())));
 
+        jobInfoService.fillJobName(rankTimeConsumeDtos, RankTimeConsumeDto.class, "jobId", "jobName");
         return rankTimeConsumeDtos;
     }
 
     @Override
-    public List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top) {
+    public List<RankResourceConsumeDto> rankConsumeResource(DateTime startDate, DateTime endDate, int top) throws NoSuchFieldException {
         DateTime today = DateUtil.date();
         List<RankResourceConsumeDto> pastRankResourceConsumeDtoList = new ArrayList<>();
 
@@ -305,13 +306,14 @@ public class DashboardServiceImpl implements DashboardService {
                 .stream()
                 .collect(Collectors.groupingBy(RankResourceConsumeDto::getJobId, Collectors.maxBy(Comparator.comparingLong(RankResourceConsumeDto::getAvgMemory))));
         // 对Map(key/value)排序后取TopN
-        List<RankResourceConsumeDto> rankTimeConsumeDtos = map.entrySet().stream()
+        List<RankResourceConsumeDto> rankResourceConsumeDtos = map.entrySet().stream()
                 .sorted((e1, e2) -> e2.getValue().get().getAvgMemory() >= e1.getValue().get().getAvgMemory() ? 1 : -1)
                 .map(entry -> entry.getValue().get())
                 .limit(top)
                 .collect(Collectors.toList());
 
-        return rankTimeConsumeDtos;
+        jobInfoService.fillJobName(rankResourceConsumeDtos, RankResourceConsumeDto.class, "jobId", "jobName");
+        return rankResourceConsumeDtos;
     }
 
     @Override

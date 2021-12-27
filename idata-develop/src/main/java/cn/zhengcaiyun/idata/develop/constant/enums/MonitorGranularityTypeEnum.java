@@ -14,20 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.system.dto;
+package cn.zhengcaiyun.idata.develop.constant.enums;
 
 /**
- * @author shiyin
- * @date 2021-03-09 10:38
+ * @author caizhedong
+ * @date 2021-12-24 上午10:16
  */
-public enum ResourceTypeEnum {
-    R_DW_DESIGN_DIR,
-    R_JOB_MANAGE_DIR,
-    R_RESOURCE_MANAGE_DIR,
-    R_FUNCTION_MANAGE_DIR,
-    R_API_DEVELOP_DIR,
 
-    R_DATA_DEVELOP_DIR,
-    R_MEASURE_MANAGE_DIR,
-    R_DATA_LABEL_DIR;
+public enum MonitorGranularityTypeEnum {
+    TABLE,
+    COLUMN;
 }

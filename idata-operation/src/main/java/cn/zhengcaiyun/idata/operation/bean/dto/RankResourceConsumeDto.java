@@ -10,6 +10,11 @@ public class RankResourceConsumeDto {
     private Long jobId;
 
     /**
+     * 作业名称
+     */
+    private String jobName;
+
+    /**
      * 应用运行id
      */
     private String applicationId;
@@ -45,6 +50,14 @@ public class RankResourceConsumeDto {
 
     public void setJobId(Long jobId) {
         this.jobId = jobId;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
     }
 
     public Double getAvgVcores() {

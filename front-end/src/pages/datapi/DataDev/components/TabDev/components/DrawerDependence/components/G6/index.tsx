@@ -287,12 +287,14 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
               <InputNumber
                 onStep={getDependenceTreeWrapped}
                 onPressEnter={getDependenceTreeWrapped}
+                onBlur={getDependenceTreeWrapped}
               />
             </Item>
             <Item name="nextLevel" label="下游层数" style={{ marginLeft: 20 }}>
               <InputNumber
                 onStep={getDependenceTreeWrapped}
                 onPressEnter={getDependenceTreeWrapped}
+                onBlur={getDependenceTreeWrapped}
               />
             </Item>
           </Row>

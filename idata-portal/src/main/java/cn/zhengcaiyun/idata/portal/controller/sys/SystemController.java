@@ -71,6 +71,11 @@ public class SystemController {
         return RestResult.success(systemConfigService.getSystemConfigs(configType));
     }
 
+    @GetMapping("/p1/sys/ldap/configs")
+    public RestResult<List<ConfigDto>> getLDAPConfigs() {
+        return RestResult.success(systemConfigService.getSystemConfigs(ConfigTypeEnum.LDAP.name()));
+    }
+
     @PostMapping("/p1/sys/xmlConfigValue")
     public RestResult<Map<String, ConfigValueDto>> getXmlConfigValue(@RequestParam("xmlFile") MultipartFile xmlFile) throws IOException {
         return RestResult.success(systemConfigService.getXmlConfigValues(xmlFile));

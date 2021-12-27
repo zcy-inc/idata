@@ -194,7 +194,7 @@ public class DashboardController {
      * @return
      */
     @GetMapping("/rank/timeConsume")
-    public RestResult<List<RankTimeConsumeResponse>> timeConsumeRank(@RequestParam("recentDays") Integer recentDays) {
+    public RestResult<List<RankTimeConsumeResponse>> timeConsumeRank(@RequestParam("recentDays") Integer recentDays) throws NoSuchFieldException {
         DateTime today = DateUtil.date();
         DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
         List<RankTimeConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeTime(startDate, today, 10);
@@ -216,7 +216,7 @@ public class DashboardController {
      * @return
      */
     @GetMapping("/rank/resourceConsume")
-    public RestResult<List<RankResourceConsumeResponse>> resourceConsumeRank(@RequestParam("recentDays") Integer recentDays) {
+    public RestResult<List<RankResourceConsumeResponse>> resourceConsumeRank(@RequestParam("recentDays") Integer recentDays) throws NoSuchFieldException {
         DateTime today = DateUtil.date();
         DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
         List<RankResourceConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeResource(startDate, today, 10);

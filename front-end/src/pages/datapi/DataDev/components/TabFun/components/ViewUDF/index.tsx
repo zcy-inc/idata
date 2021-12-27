@@ -27,9 +27,14 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
         <Item label="函数名称">{data?.udfName || '-'}</Item>
         <Item label="函数类型">{data?.udfType || '-'}</Item>
         <Item label="函数代码">
-          <a href={`/api/p1/dev/udf/download/${data?.id}`} download>
-            下载
-          </a>
+          <div style={{ position: 'relative', width: '100%', height: 28 }}>
+            <a href={`/api/p1/dev/udf/download/${data?.id}`} download>
+              下载
+            </a>
+            <span
+              style={{ color: 'rgba(0, 0, 0, 0.45)', position: 'absolute', left: 0, bottom: -16 }}
+            >{`hdfs路径: ${data?.hdfsPath || '-'}`}</span>
+          </div>
         </Item>
         <Item label="返回类型">{data?.returnType || '-'}</Item>
         <Item label="返回值">{data?.returnSample || '-'}</Item>

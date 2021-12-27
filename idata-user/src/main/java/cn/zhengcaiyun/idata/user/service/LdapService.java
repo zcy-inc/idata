@@ -16,8 +16,11 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 
+import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.query.LdapQueryBuilder;
@@ -38,27 +41,37 @@ import java.util.List;
 @Service
 public class LdapService implements InitializingBean {
 
-    private static final String LDAP_DOMAIN = "@ldap.cai-inc.com";
+    private static final String LDAP_CONFIG_KEY = "ldap-config";
+    private static final String LDAP_DOMAIN_KEY = "ldap.domain";
+    private static final String LDAP_URL_KEY = "ldap.url";
+    private static final String LDAP_BASE_KEY = "ldap.base";
+    private static final String LDAP_USER_DN_KEY = "ldap.userDn";
+    private static final String LDAP_PASSWORD_KEY = "ldap.password";
 
     private LdapTemplate ldapTemplate;
 
+    @Autowired
+    private SystemConfigService systemConfigService;
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        // TODO 改成查数据库的
+        ConfigDto ldapConfig = systemConfigService.getSystemConfigByKey(LDAP_CONFIG_KEY);
         LdapContextSource contextSource = new LdapContextSource();
-        contextSource.setUrl("ldap://172.16.101.127:389");
-        contextSource.setBase("DC=ldap,DC=cai-inc,DC=com");
-        contextSource.setUserDn("CN=dev,CN=Users,DC=ldap,DC=cai-inc,DC=com");
-        contextSource.setPassword("ReadOnly@ZcyDEVUser");
+        contextSource.setUrl(ldapConfig.getValueOne().get(LDAP_URL_KEY).getConfigValue());
+        contextSource.setBase(ldapConfig.getValueOne().get(LDAP_BASE_KEY).getConfigValue());
+        contextSource.setUserDn(ldapConfig.getValueOne().get(LDAP_USER_DN_KEY).getConfigValue());
+        contextSource.setPassword(ldapConfig.getValueOne().get(LDAP_PASSWORD_KEY).getConfigValue());
         contextSource.afterPropertiesSet();
         this.ldapTemplate = new LdapTemplate(contextSource);
         ldapTemplate.setIgnorePartialResultException(true);
     }
 
     public boolean checkUser(String username, String password) {
+        ConfigDto ldapConfig = systemConfigService.getSystemConfigByKey(LDAP_CONFIG_KEY);
         DirContext ctx = null;
         try {
-            ctx = ldapTemplate.getContextSource().getContext(username + LDAP_DOMAIN, password);
+            ctx = ldapTemplate.getContextSource().getContext(username
+                    + ldapConfig.getValueOne().get(LDAP_DOMAIN_KEY).getConfigValue(), password);
         } catch (Exception e) {
             e.printStackTrace();
             return false;

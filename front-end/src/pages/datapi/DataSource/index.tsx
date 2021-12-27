@@ -38,8 +38,8 @@ const DataSource: FC = () => {
       <div className={styles['table-double']}>
         {value.map((dbConfig) => (
           <div className={styles['table-double-cell']}>
-            <div key="db">{`数据库：${dbConfig.dbName || '-'}`}</div>
-            <div key="path">{`路径：${dbConfig.host || '-'}:${dbConfig.port || '-'}`}</div>
+            <div key="db">{`数据库: ${dbConfig.dbName || '-'}`}</div>
+            <div key="path">{`路径: ${dbConfig.host || '-'}:${dbConfig.port || '-'}`}</div>
           </div>
         ))}
       </div>
@@ -162,7 +162,7 @@ const DataSource: FC = () => {
             message.success('删除成功');
             getList();
           } else {
-            message.error(`删除失败：${res.msg}`);
+            message.error(`删除失败: ${res.msg}`);
           }
         }),
     });

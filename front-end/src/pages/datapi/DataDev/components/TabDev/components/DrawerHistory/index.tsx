@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { Drawer, Table } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
@@ -10,6 +11,7 @@ interface DrawerHistoryProps {
   onClose: () => void;
   data?: Task;
 }
+const fmt = 'YYYY-MM-DD HH:mm:ss';
 
 const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
   const [loading, setLoading] = useState(false);
@@ -56,12 +58,16 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
         rowKey="id"
         loading={loading}
         columns={[
-          { title: '开始时间', dataIndex: 'start', key: 'start' },
+          {
+            title: '开始时间',
+            dataIndex: 'startTime',
+            key: 'startTime',
+            render: (_) => moment(_).format(fmt),
+          },
           { title: '执行时长', dataIndex: 'duration', key: 'duration' },
-          { title: '输出结果行数', dataIndex: 'line', key: 'line' },
-          { title: '平均内存(GB)', dataIndex: 'memory', key: 'memory' },
-          { title: '平均CPU核数', dataIndex: 'cpu', key: 'cpu' },
-          { title: '最终状态', dataIndex: 'state', key: 'state' },
+          { title: '平均内存(GB)', dataIndex: 'avgMemory', key: 'avgMemory' },
+          { title: '平均CPU核数', dataIndex: 'avgVcores', key: 'avgVcores' },
+          { title: '最终状态', dataIndex: 'finalStatus', key: 'finalStatus' },
           {
             title: '操作',
             key: 'options',

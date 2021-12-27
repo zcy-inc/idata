@@ -86,7 +86,7 @@ public interface DevJobHistoryMyDao {
             "           AND (<foreach collection = 'jobStatusList' item = 'jobStatus' separator = 'or'>final_status = #{jobStatus}</foreach>) " +
             "       </if>" +
             ") as t1 " +
-            "left join (select * from dev_job_info where 1 = 1 " +
+            " join (select * from dev_job_info where 1 = 1 " +
             "       <if test = 'jobName != null'>" +
             "           AND name like concat('%', #{jobName}, '%') " +
             "       </if>" +

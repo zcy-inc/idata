@@ -3,10 +3,12 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobDependencyService;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
+import cn.zhengcaiyun.idata.portal.model.request.job.CycleJobQueryRequest;
 import cn.zhengcaiyun.idata.portal.model.response.dag.JobTreeResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -129,4 +131,15 @@ public class JobDependencyController {
         return RestResult.success(true);
     }
 
+    /**
+     * 是否是依赖循环
+     * @param request
+     */
+    @PostMapping("/isCycle")
+    public RestResult isCycleJob(@RequestBody CycleJobQueryRequest request) {
+        Long jobId = request.getJobId();
+        List<JobDependencyDto> extraList = request.getExtraList();
+        String env = request.getEnv();
+        return RestResult.success(jobDependencyService.isCycleDependency(jobId, env, extraList));
+    }
 }

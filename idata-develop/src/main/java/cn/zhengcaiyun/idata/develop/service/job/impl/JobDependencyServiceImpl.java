@@ -1,7 +1,5 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.dto.Tuple2;
 import cn.zhengcaiyun.idata.develop.constant.enums.DsJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
@@ -9,6 +7,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
+import cn.zhengcaiyun.idata.develop.dto.job.CycleJobDependencyDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
@@ -114,19 +113,64 @@ public class JobDependencyServiceImpl implements JobDependencyService {
             tree.setTaskId(dto.getId());
         }
         tree.setRelation(relation);
-        if (CollectionUtils.isNotEmpty(tree.getNextList())) {
-            tree.getNextList().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
+        if (CollectionUtils.isNotEmpty(tree.getChildren())) {
+            tree.getChildren().forEach(e -> assembleDSInfo(e, runInfoMap, relation));
         }
+    }
+
+    @Override
+    public CycleJobDependencyDto isCycleDependency(Long jobId, String env, List<JobDependencyDto> extraList) {
+        List<JobDependencyDto> list = jobDependenceRepo.queryJobs(env);
+        Set<JobDependencyDto> set = new HashSet<>(list);
+        if (extraList != null) {
+            set.addAll(extraList);
+        }
+        Multimap<Long, Long> nextMap = ArrayListMultimap.create();
+        Multimap<Long, Long> prevMap = ArrayListMultimap.create();
+        for (JobDependencyDto elem : list) {
+            nextMap.put(elem.getPrevJobId(), elem.getJobId());
+            prevMap.put(elem.getJobId(), elem.getPrevJobId());
+        }
+        CycleJobDependencyDto preDto = checkCycleDependency(prevMap, jobId);
+        if (preDto.isCycle()) {
+            return preDto;
+        }
+        CycleJobDependencyDto nextDto = checkCycleDependency(nextMap, jobId);
+        return nextDto;
+    }
+
+    private CycleJobDependencyDto checkCycleDependency(Multimap<Long, Long> map, Long jobId) {
+        List<Long> visited = new ArrayList<>();
+        //获取所有前继可达ids
+        Queue<Long> queue = Lists.newLinkedList();
+        queue.add(jobId);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                Long qJobId = queue.poll();
+                if (!visited.contains(qJobId)) {
+                    visited.add(qJobId);
+                    queue.addAll(map.get(qJobId));
+                } else {
+                    CycleJobDependencyDto response = new CycleJobDependencyDto();
+                    response.setCycle(true);
+                    response.setCycleJobId(qJobId);
+                    return response;
+                }
+            }
+        }
+        return new CycleJobDependencyDto();
     }
 
     /**
      * jobId可达性分析，筛选出集合
      * @param env 环境
      * @param jobId
-     * @param nameMap
+     * @param accessIdSet
      * @return
      */
     private List<JobDependencyDto> getAccessJobDependency(String env, Long jobId, Set<Long> accessIdSet) {
+        // 存在配置但不一定有配依赖，但没配配置依赖一定没配，此处逻辑可删可不删，根据页面操作逻辑，判断逻辑没问题。不加逻辑更加简单、清晰
         Optional<JobExecuteConfig> optional = jobExecuteConfigRepo.query(jobId, env);
         if (optional.isEmpty()) {
             return new ArrayList<>();
@@ -233,10 +277,11 @@ public class JobDependencyServiceImpl implements JobDependencyService {
 
         if (max > level && CollectionUtils.isNotEmpty(leafNodes)) {
             //遍历后叶子节点,清理所有不展示节点
-            leafNodes.forEach(elemId -> nodeMap.get(elemId).setNextList(null));
+            leafNodes.forEach(elemId -> nodeMap.get(elemId).setChildren(null));
         }
 
         return new Tuple2<>(treeNodeDto, max);
     }
+
 
 }

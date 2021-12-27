@@ -24,7 +24,7 @@ public class JobHistoryResponse {
      * Database Column Remarks:
      *   作业id
      */
-    private Long jobName;
+    private String jobName;
 
     /**
      * Database Column Remarks:
@@ -43,6 +43,11 @@ public class JobHistoryResponse {
      *   作业持续时间（ms）
      */
     private Long duration;
+
+    /**
+     * 平均执行时长(min)
+     */
+    private String durationStr;
 
     /**
      * Database Column Remarks:
@@ -97,6 +102,20 @@ public class JobHistoryResponse {
      */
     private String layer;
 
+    public String getDurationStr() {
+        if (duration != null) {
+            long secondsTotal = duration.longValue() / 1000;
+            long minutes = secondsTotal / 60;
+            long seconds = secondsTotal % 60;
+            return minutes + "分" + seconds + "秒";
+        }
+        return null;
+    }
+
+    public void setDurationStr(String durationStr) {
+        this.durationStr = durationStr;
+    }
+
     public Long getId() {
         return id;
     }
@@ -121,11 +140,11 @@ public class JobHistoryResponse {
         this.jobId = jobId;
     }
 
-    public Long getJobName() {
+    public String getJobName() {
         return jobName;
     }
 
-    public void setJobName(Long jobName) {
+    public void setJobName(String jobName) {
         this.jobName = jobName;
     }
 
