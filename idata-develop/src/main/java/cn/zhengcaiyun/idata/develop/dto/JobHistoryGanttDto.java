@@ -77,6 +77,11 @@ public class JobHistoryGanttDto {
     public static class Data {
 
         /**
+         * id
+         */
+        private Long id;
+
+        /**
          * Database Column Remarks:
          *   作业id
          */
@@ -123,6 +128,14 @@ public class JobHistoryGanttDto {
          * http://bigdata-master3.cai-inc.com:8088/proxy/application_1636461038777_145072/       running
          */
         private String businessLogsUrl;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
 
         public Long getJobId() {
             return jobId;
