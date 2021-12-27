@@ -23,13 +23,16 @@ import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
-import cn.zhengcaiyun.idata.portal.model.response.dag.JobTreeResponse;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * dag-controller
@@ -43,11 +46,16 @@ import java.util.Objects;
 public class DAGController {
 
     private final DAGService dagService;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public DAGController(DAGService dagService) {
+    public DAGController(DAGService dagService,
+                         UserAccessService userAccessService) {
         this.dagService = dagService;
+        this.userAccessService = userAccessService;
     }
+
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     /**
      * 创建DAG
@@ -57,6 +65,8 @@ public class DAGController {
      */
     @PostMapping
     public RestResult<DAGDto> addDAG(@RequestBody DAGDto dagDto) {
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), dagDto.getDagInfoDto().getFolderId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = dagService.addDAG(dagDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("创建DAG失败", "");
 
@@ -96,6 +106,8 @@ public class DAGController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) {
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(dagService.removeDag(id, OperatorContext.getCurrentOperator()));
     }
 

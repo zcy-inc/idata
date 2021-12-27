@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
@@ -33,9 +34,11 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import cn.zhengcaiyun.idata.user.service.UserManagerService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -58,6 +61,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSuppor
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 /**
@@ -75,6 +79,10 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private UserAccessService userAccessService;
+
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
@@ -106,6 +114,8 @@ public class TableInfoController {
                                                      HttpServletRequest request) {
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
+            checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId(),
+                    DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
         }
         else {
@@ -128,6 +138,8 @@ public class TableInfoController {
     @DeleteMapping("tableInfo/{tableId}")
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
                                   HttpServletRequest request) {
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
+                tableId, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(tableInfoService.delete(tableId, tokenService.getNickname(request)));
     }
 

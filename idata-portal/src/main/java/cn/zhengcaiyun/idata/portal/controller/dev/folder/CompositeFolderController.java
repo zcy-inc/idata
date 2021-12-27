@@ -55,7 +55,7 @@ public class CompositeFolderController {
     }
 
     private final String DATA_DEVELOP_ROOT_DIR_ACCESS_CODE = "F_ICON_DATA_DEVELOP_ROOT_DIR";
-    private final String CONFIG_DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     /**
      * 搜索文件树
@@ -75,7 +75,7 @@ public class CompositeFolderController {
      */
     @GetMapping("/functions/tree")
     public RestResult<List<DevTreeNodeDto>> getFunctionTree() {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATA_DEVELOP_ACCESS_CODE),
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ACCESS_CODE),
                 "没有数据开发权限");
         return RestResult.success(compositeFolderService.getFunctionTree());
     }
@@ -90,6 +90,8 @@ public class CompositeFolderController {
     public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
                 "没有根目录新增权限");
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), folderDto.getParentId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
         return getFolder(id);
