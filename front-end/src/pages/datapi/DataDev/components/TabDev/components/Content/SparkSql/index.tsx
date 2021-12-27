@@ -8,6 +8,8 @@ import styles from './index.less';
 import { getUDFList } from '@/services/datadev';
 import type { UDF } from '@/types/datadev';
 
+import SqlEditor from '@/components/SqlEditor';
+
 interface SparkSqlProps {
   monaco: any;
   data: {
@@ -59,8 +61,6 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
     if (content) {
       setMonacoValue(content.sourceSql);
       const udfIds = content.udfIds?.split(',') || [];
-      console.log(udfIds);
-
       form.setFieldsValue({
         externalTables: content.externalTables,
         udfIds,
@@ -80,12 +80,10 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
     <>
       <div style={{ position: 'relative', height: monacoHeight }}>
         <SplitPane split="horizontal" defaultSize="60%">
-          <MonacoEditor
-            ref={monaco}
+          <SqlEditor
+            formRef={monaco}
             height="100%"
             width="100%"
-            language="plaintext"
-            theme="vs-dark"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true, quickSuggestions: false }}

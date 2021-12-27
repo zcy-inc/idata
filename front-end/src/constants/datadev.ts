@@ -7,8 +7,8 @@ export enum FolderTypes {
 export enum FolderBelong {
   DESIGN = 'DESIGN', // 数仓设计
   DESIGNTABLE = 'DESIGN.TABLE', // 数仓设计-表
-  DESIGNLABEL = 'DESIGN.LABEL', // 数仓设计-标签
-  DESIGNENUM = 'DESIGN.ENUM', // 数仓设计-枚举
+  // DESIGNLABEL = 'DESIGN.LABEL', // 数仓设计-标签
+  // DESIGNENUM = 'DESIGN.ENUM', // 数仓设计-枚举
   DAG = 'DAG', // DAG
   DI = 'DI', // 数据集成
   DEV = 'DEV', // 数据开发
