@@ -48,6 +48,8 @@ import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +60,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -86,6 +87,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final OverhangJobLocalCache overhangJobLocalCache;
+    private final UserAccessService userAccessService;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
@@ -97,7 +99,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache,
-                              OverhangJobLocalCache overhangJobLocalCache) {
+                              OverhangJobLocalCache overhangJobLocalCache,
+                              UserAccessService userAccessService) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -108,12 +111,18 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.overhangJobLocalCache = overhangJobLocalCache;
+        this.userAccessService = userAccessService;
     }
+
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     @Transactional
     public Long addJob(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
+        checkArgument(userAccessService.checkAddAccess(operator.getId(), dto.getFolderId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameRecords), "作业名称已存在");
         dto.setStatus(UsingStatusEnum.ONLINE.val);
@@ -134,6 +143,8 @@ public class JobInfoServiceImpl implements JobInfoService {
     public Boolean editJobInfo(JobInfoDto dto, Operator operator) {
         checkJobInfo(dto);
         JobInfo oldJobInfo = tryFetchJobInfo(dto.getId());
+        checkArgument(userAccessService.checkUpdateAccess(operator.getId(), oldJobInfo.getFolderId(),
+                dto.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         if (ObjectUtils.isNotEmpty(dupNameRecords)) {
@@ -170,6 +181,8 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Transactional
     public Boolean removeJob(Long id, Operator operator) {
         JobInfo jobInfo = tryFetchJobInfo(id);
+        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), id, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
+                "无权限，请联系管理员");
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
         // 检查是否已停用，只有停用后才能更改
         checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再删除作业");

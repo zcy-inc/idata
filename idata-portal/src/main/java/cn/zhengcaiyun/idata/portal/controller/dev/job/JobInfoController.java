@@ -235,7 +235,7 @@ public class JobInfoController {
                                                                @RequestParam(value = "limit") Long limit,
                                                                @RequestParam(value = "offset") Long offset) {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_MONITORING_ACCESS_CODE),
-                "没有数据源管理权限");
+                "没有任务监控权限");
         return RestResult.success(jobInfoService.pagingOverhangJob(condition, PageParam.of(limit, offset)));
     }
 

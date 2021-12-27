@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
@@ -35,6 +36,8 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.ForeignKeyService;
 import cn.zhengcaiyun.idata.develop.service.table.MetabaseService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.jayway.jsonpath.internal.function.ParamType;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -100,6 +103,8 @@ public class TableInfoServiceImpl implements TableInfoService {
     private DevTreeNodeLocalCache devTreeNodeLocalCache;
     @Autowired
     private EnumService enumService;
+    @Autowired
+    private UserAccessService userAccessService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -114,6 +119,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String COLUMN_PK_LABEL = "pk:LABEL";
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -243,6 +249,9 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public TableInfoDto create(TableInfoDto tableInfoDto, String operator) {
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(tableInfoDto.getTableName()), "表名称不能为空");
         DevTableInfo checkTableInfo = devTableInfoDao.selectOne(c ->
@@ -309,6 +318,9 @@ public class TableInfoServiceImpl implements TableInfoService {
                 c.where(devTableInfo.id, isEqualTo(tableInfoDto.getId()), and(devTableInfo.del, isNotEqualTo(1))))
                 .orElse(null);
         checkArgument(checkTableInfo != null, "表不存在");
+        checkArgument(userAccessService.checkUpdateAccess(OperatorContext.getCurrentOperator().getId(),
+                checkTableInfo.getFolderId(), tableInfoDto.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
+                "无权限，请联系管理员");
 
         // 更新tableInfo表
         tableInfoDto.setEditor(operator);
@@ -381,6 +393,9 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devTableInfo.id, isEqualTo(tableId))))
                 .orElse(null);
         checkArgument(tableInfo != null, "表不存在");
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
+                tableId, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
+                "无权限，请联系管理员");
 
         // 校验指标系统依赖
         List<DevLabel> measureList = devLabelDao.selectMany(select(devLabel.allColumns())

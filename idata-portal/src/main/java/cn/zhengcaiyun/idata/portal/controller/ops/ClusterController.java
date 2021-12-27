@@ -50,6 +50,8 @@ public class ClusterController {
         this.userAccessService = userAccessService;
     }
 
+    private final String CLUSTER_MONITORING_ACCESS_CODE = "F_MENU_CLUSTER_MONITORING";
+
     /**
      * 查询集群应用
      *
@@ -58,8 +60,8 @@ public class ClusterController {
      */
     @GetMapping("/apps")
     public RestResult<List<ClusterAppMonitorDto>> fetchClusterApp(@RequestParam(value = "state") String state) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATASOURCE_ACCESS_CODE),
-                "没有数据源管理权限");
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CLUSTER_MONITORING_ACCESS_CODE),
+                "没有集群监控权限");
         return RestResult.success(clusterService.fetchClusterApp(state));
     }
 

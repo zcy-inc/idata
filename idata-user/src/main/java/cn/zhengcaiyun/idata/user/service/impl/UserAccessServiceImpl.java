@@ -16,13 +16,17 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoader;
+import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoaders;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
+import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDao;
@@ -30,9 +34,12 @@ import cn.zhengcaiyun.idata.user.dal.model.UacRoleAccess;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.dal.model.UacUserRole;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import cn.zhengcaiyun.idata.user.spi.DevFolderService;
+import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +48,7 @@ import static cn.zhengcaiyun.idata.user.dal.dao.UacRoleAccessDynamicSqlSupport.u
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDynamicSqlSupport.uacUserRole;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -59,6 +67,8 @@ public class UserAccessServiceImpl implements UserAccessService {
     private UacUserRoleDao uacUserRoleDao;
     @Autowired
     private UacRoleAccessDao uacRoleAccessDao;
+    @Autowired
+    private ServiceProvidersLoader serviceProvidersLoader;
 
     @Override
     public List<FeatureTreeNodeDto> getUserFeatureTree(Long userId) {
@@ -214,6 +224,55 @@ public class UserAccessServiceImpl implements UserAccessService {
                 and(uacUser.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
-        return false;
+
+        if (isEmpty(accessKey) || accessTypes == null || accessTypes.size() == 0) {return false;}
+
+        boolean isAccess = false;
+        Boolean checkAccess = checkAccess(userId, accessTypes, accessKey);
+        if (!checkAccess) {
+            // 逐层校验是否有资源权限
+            List<String> parentFolderIdsList = new ArrayList<>();
+            DevFolderService devFolder = ServiceProvidersLoaders.loadProviderIfPresent(serviceProvidersLoader,
+                    DevFolderService.class, "devParentFolderIds");
+            parentFolderIdsList = devFolder.getDevParentFolderIds(accessKey, parentFolderIdsList);
+            for (String parentFolderId : parentFolderIdsList) {
+                Boolean checkParentAccess = checkAccess(userId, accessTypes, parentFolderId);
+                if (checkParentAccess) {
+                    isAccess = checkParentAccess;
+                    break;
+                }
+            }
+        }
+        else {
+            isAccess = checkAccess;
+        }
+        return isAccess;
+    }
+
+    @Override
+    public boolean checkAddAccess(Long userId, Long parentId, String featureType, String resourceType) {
+        Boolean checkAccess = checkResAccess(userId, Arrays.asList(resourceType + "_W"), String.valueOf(parentId));
+        // 若为0 同时校验功能权限
+        if (checkAccess && parentId == 0L) {
+            checkArgument(isEmpty(featureType), "无权限，请联系管理员");
+            checkAccess = checkAccess(userId, featureType);
+        }
+        return checkAccess;
+    }
+
+    @Override
+    public boolean checkUpdateAccess(Long userId, Long originalParentId, Long removeParentId, String resourceType) {
+        Boolean checkAccess = checkResAccess(userId, Arrays.asList(resourceType + "_W"), String.valueOf(originalParentId));
+        // 校验拖拽，最外层不可拖拽
+        if (checkAccess && removeParentId != null) {
+            checkArgument(removeParentId != 0L, "禁止移动文件夹至根目录");
+            checkAccess = checkResAccess(userId, Arrays.asList(resourceType + "_W"), String.valueOf(removeParentId));
+        }
+        return checkAccess;
+    }
+
+    @Override
+    public boolean checkDeleteAccess(Long userId, Long parentId, String resourceType) {
+        return checkResAccess(userId, Arrays.asList(resourceType + "_D"), String.valueOf(parentId));
     }
 }

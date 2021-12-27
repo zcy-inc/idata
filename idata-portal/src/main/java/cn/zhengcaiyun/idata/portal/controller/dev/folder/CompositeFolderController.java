@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -88,7 +89,7 @@ public class CompositeFolderController {
     @PostMapping("")
     public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
-                "没有数据源管理权限");
+                "没有根目录新增权限");
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
         return getFolder(id);
@@ -125,6 +126,8 @@ public class CompositeFolderController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeFolder(@PathVariable("id") Long id) {
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(compositeFolderService.removeFolder(id, OperatorContext.getCurrentOperator()));
     }
 

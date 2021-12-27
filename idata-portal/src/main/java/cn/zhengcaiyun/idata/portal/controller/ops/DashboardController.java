@@ -86,7 +86,7 @@ public class DashboardController {
     @GetMapping("/jobSchedule/overview")
     public RestResult<JobOverviewResponse> jobDsOverview() {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), OPS_DASHBOARD_ACCESS_CODE),
-                "没有数据源管理权限");
+                "没有运维看板权限");
         JobStatisticDto jobOverview = dashboardService.getDsTodayJobOverview(EnvEnum.prod.name());
         JobOverviewResponse response = new JobOverviewResponse();
         BeanUtils.copyProperties(jobOverview, response);
@@ -255,7 +255,7 @@ public class DashboardController {
     @PostMapping("/page/jobHistory")
     public RestResult<Page<JobHistoryResponse>> jobHistory(@RequestBody PageWrapper<JobHistoryRequest> pageWrapper) {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_HISTORY_ACCESS_CODE),
-                "没有数据源管理权限");
+                "没有作业历史查看权限");
         JobHistoryRequest condition = pageWrapper.getCondition();
         List<String> statusList = null;
         if (condition.getJobStatus() != null) {

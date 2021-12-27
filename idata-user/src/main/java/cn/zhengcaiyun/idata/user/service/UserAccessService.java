@@ -33,4 +33,7 @@ public interface UserAccessService {
     boolean checkAccess(Long userId, List<String> accessTypes, String accessKey);
     boolean checkFeatureAccess(Long userId, String controllerPath);
     boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey);
+    boolean checkAddAccess(Long userId, Long parentId, String featureType, String resourceType);
+    boolean checkUpdateAccess(Long userId, Long originalParentId, Long removeParentId, String resourceType);
+    boolean checkDeleteAccess(Long userId, Long parentId, String resourceType);
 }
