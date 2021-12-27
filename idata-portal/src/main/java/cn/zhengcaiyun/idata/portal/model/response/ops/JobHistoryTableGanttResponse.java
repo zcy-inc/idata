@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.portal.model.response.ops;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -101,6 +104,11 @@ public class JobHistoryTableGanttResponse {
         private String amContainerLogsUrl;
 
         /**
+         * 作业耗时
+         */
+        private Long duration;
+
+        /**
          * 业务方需要的日志地址逻辑
          * http://bigdata-master3.cai-inc.com:8088/cluster/app/application_1636461038777_141467     killed  failed finished
          * http://bigdata-master3.cai-inc.com:8088/proxy/application_1636461038777_145072/       running
@@ -177,6 +185,14 @@ public class JobHistoryTableGanttResponse {
 
         public void setBusinessLogsUrl(String businessLogsUrl) {
             this.businessLogsUrl = businessLogsUrl;
+        }
+
+        public Long getDuration() {
+            return duration;
+        }
+
+        public void setDuration(Long duration) {
+            this.duration = duration;
         }
     }
 }

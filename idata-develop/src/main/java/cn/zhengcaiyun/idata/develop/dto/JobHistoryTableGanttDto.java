@@ -106,6 +106,11 @@ public class JobHistoryTableGanttDto {
          */
         private String businessLogsUrl;
 
+        /**
+         * 作业耗时
+         */
+        private Long duration;
+
         public Long getId() {
             return id;
         }
@@ -176,6 +181,14 @@ public class JobHistoryTableGanttDto {
 
         public void setBusinessLogsUrl(String businessLogsUrl) {
             this.businessLogsUrl = businessLogsUrl;
+        }
+
+        public Long getDuration() {
+            return duration;
+        }
+
+        public void setDuration(Long duration) {
+            this.duration = duration;
         }
     }
 }

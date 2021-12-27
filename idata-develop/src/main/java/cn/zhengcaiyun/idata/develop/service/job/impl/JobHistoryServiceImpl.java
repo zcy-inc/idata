@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.devJobHistory;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.startTime;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 @Service
@@ -189,6 +191,13 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                 if (map.containsKey(jobId)) {
                     JobHistoryTableGanttDto.Data copy = new JobHistoryTableGanttDto.Data();
                     BeanUtils.copyProperties(data, copy);
+                    Date finishTime = copy.getFinishTime();
+                    if (finishTime == null) {
+                        finishTime = DateUtil.date().toJdkDate();
+                    }
+                    if (copy.getStartTime() != null) {
+                        copy.setDuration(DateUtil.between(finishTime, copy.getStartTime(), DateUnit.MINUTE));
+                    }
                     map.get(jobId).getChildren().add(copy);
                 }
             }
