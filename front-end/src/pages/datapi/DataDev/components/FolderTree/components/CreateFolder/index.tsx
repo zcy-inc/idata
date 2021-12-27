@@ -4,7 +4,7 @@ import { Form, message } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 
-import { createFolder, getFolders, getTree, updateFolder } from '@/services/datadev';
+import { createFolder, getFolders, updateFolder } from '@/services/datadev';
 import { Folder } from '@/types/datadev';
 import { FolderTypes } from '@/constants/datadev';
 
@@ -33,7 +33,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
 
   useEffect(() => {
     let name = folderMode === 'edit' ? curNode?.name : '';
-    let parentId = curNode?.id;
+    let parentId = folderMode === 'edit' ? curNode?.parentId : curNode?.id;
     form.setFieldsValue({ name, parentId });
   }, [folderMode, curNode]);
 
@@ -78,6 +78,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
               name: values.name,
               parentId: values.parentId,
               type: FolderTypes.FOLDER,
+              belong: curNode.belong,
             })
               .then((res) => {
                 if (res.success) {
