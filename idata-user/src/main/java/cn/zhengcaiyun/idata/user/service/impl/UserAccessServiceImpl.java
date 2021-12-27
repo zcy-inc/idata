@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.user.dal.model.UacRoleAccess;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.dal.model.UacUserRole;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -195,12 +196,24 @@ public class UserAccessServiceImpl implements UserAccessService {
                 and(uacRoleAccess.roleCode, isIn(roleCodes)))).stream().map(UacRoleAccess::getAccessCode)
                 .collect(Collectors.toSet());
         String controllerUrl = controllerPath.split("api")[1];
-        SysFeature feature = systemConfigService.getFeature(controllerUrl);
-        if (feature == null) {
+        List<SysFeature> featureList = systemConfigService.getFeatures(controllerUrl);
+        if (ObjectUtils.isEmpty(featureList)) {
             return false;
         }
         else {
-            return accessCodes.contains(feature.getFeatureCode());
+            List<SysFeature> accessFeatureList = featureList.stream().filter(c -> c.getFeatureUrlPath().equals(controllerPath))
+                    .collect(Collectors.toList());
+            if (ObjectUtils.isEmpty(accessFeatureList)) return false;
+            return accessCodes.contains(accessFeatureList.get(0).getFeatureCode());
         }
+    }
+
+    @Override
+    public boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey) {
+        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
+                and(uacUser.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
+        return false;
     }
 }

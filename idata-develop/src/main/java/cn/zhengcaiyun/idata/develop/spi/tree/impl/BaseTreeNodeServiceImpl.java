@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,16 +59,9 @@ public class BaseTreeNodeServiceImpl implements BaseTreeNodeService {
             echo.setBelong(devTreeNode.getType());
             String folderType = StringUtils.isNotEmpty(nodeType) ? nodeType : null;
             if (folderType == null) {
-                FunctionModuleEnum functionModule = FunctionModuleEnum.getEnum(devTreeNode.getBelong()).get();
-                if (FunctionModuleEnum.DESIGN.equals(functionModule)) {
-                    folderType = "R_DATA_DEVELOP_DW_DIR";
-                } else if (FunctionModuleEnum.DAG.equals(functionModule)) {
-                    folderType = "R_DATA_DEVELOP_DIG_DIR";
-                } else if (FunctionModuleEnum.DI.equals(functionModule)) {
-                    folderType = "R_DATA_DEVELOP_DI_DIR";
-                } else if (FunctionModuleEnum.DEV.equals(functionModule)) {
-                    folderType = "R_DATA_DEVELOP_DD_DIR";
-                }
+                FunctionModuleEnum functionModule = FunctionModuleEnum.getEnum(devTreeNode.getBelong())
+                        .orElse(null);
+                folderType = functionModule != null ? ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() : null;
             }
             echo.setType(folderType);
             if (ObjectUtils.isNotEmpty(devTreeNode.getChildren())) {

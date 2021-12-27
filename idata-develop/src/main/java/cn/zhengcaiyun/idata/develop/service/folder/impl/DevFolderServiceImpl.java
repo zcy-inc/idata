@@ -227,11 +227,11 @@ public class DevFolderServiceImpl implements DevFolderService {
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllTableFolderIds();
 
         List<String> folderIdList = userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DW_DIR.name() + "_R");
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() + "_R");
         folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DW_DIR.name() + "_W"));
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() + "_W"));
         folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DW_DIR.name() + "_D"));
+                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() + "_D"));
         if (folderIdList.size() == 0) return new HashSet<>();
         return new HashSet<>(folderIdList);
     }

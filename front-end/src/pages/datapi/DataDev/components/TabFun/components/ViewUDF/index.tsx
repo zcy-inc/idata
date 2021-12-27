@@ -32,7 +32,17 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
               下载
             </a>
             <span
-              style={{ color: 'rgba(0, 0, 0, 0.45)', position: 'absolute', left: 0, bottom: -16 }}
+              style={{
+                color: 'rgba(0, 0, 0, 0.45)',
+                position: 'absolute',
+                left: 0,
+                top: 22,
+                display: 'inline-block',
+                width: '100%',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
             >{`hdfs路径: ${data?.hdfsPath || '-'}`}</span>
           </div>
         </Item>

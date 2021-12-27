@@ -6,7 +6,7 @@ export default [
   },
   {
     path: '/',
-    redirect: '/configuration',
+    component: './NoAuthority',
   },
   {
     path: '/datapi',
@@ -40,7 +40,7 @@ export default [
     path: '/configuration',
     name: '系统配置',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/0545456d-5849-4a1a-885c-a72dce22fdfb.png',
-    iconDefault: "https://sitecdn.zcycdn.com/f2e-assets/6af809b7-e099-49be-8b2d-05539e7d07ae.png",
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/6af809b7-e099-49be-8b2d-05539e7d07ae.png',
     featureCode: 'F_MENU_SYSTEM_CONFIG',
     routes: [
       { path: '/configuration', redirect: '/configuration/authority' },

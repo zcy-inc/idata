@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.controller.ops;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -26,6 +27,7 @@ import cn.zhengcaiyun.idata.portal.model.response.StackedLineChartResponse;
 import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
 import cn.zhengcaiyun.idata.portal.model.response.ops.*;
 import cn.zhengcaiyun.idata.portal.util.PageUtil;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.github.pagehelper.PageInfo;
 import org.checkerframework.framework.qual.Unused;
 import org.springframework.beans.BeanUtils;
@@ -37,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping("/p1/ops/dashboard")
@@ -50,6 +54,12 @@ public class DashboardController {
 
     @Autowired
     private JobHistoryService jobHistoryService;
+
+    @Autowired
+    private UserAccessService userAccessService;
+
+    private final String OPS_DASHBOARD_ACCESS_CODE = "F_MENU_OPS_DASHBOARD";
+    private final String JOB_HISTORY_ACCESS_CODE = "F_MENU_JOB_HISTORY";
 
     /**
      * 当前cpu的使用情况
@@ -75,6 +85,8 @@ public class DashboardController {
      */
     @GetMapping("/jobSchedule/overview")
     public RestResult<JobOverviewResponse> jobDsOverview() {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), OPS_DASHBOARD_ACCESS_CODE),
+                "没有数据源管理权限");
         JobStatisticDto jobOverview = dashboardService.getDsTodayJobOverview(EnvEnum.prod.name());
         JobOverviewResponse response = new JobOverviewResponse();
         BeanUtils.copyProperties(jobOverview, response);
@@ -242,6 +254,8 @@ public class DashboardController {
      */
     @PostMapping("/page/jobHistory")
     public RestResult<Page<JobHistoryResponse>> jobHistory(@RequestBody PageWrapper<JobHistoryRequest> pageWrapper) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_HISTORY_ACCESS_CODE),
+                "没有数据源管理权限");
         JobHistoryRequest condition = pageWrapper.getCondition();
         List<String> statusList = null;
         if (condition.getJobStatus() != null) {

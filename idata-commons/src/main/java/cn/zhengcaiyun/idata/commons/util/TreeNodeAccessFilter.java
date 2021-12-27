@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.commons.util;
 import cn.zhengcaiyun.idata.commons.enums.TreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.TreeNodeDto;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -101,6 +102,6 @@ public class TreeNodeAccessFilter<N extends TreeNodeDto> {
             // 重新设置经过过滤的子节点
             node.setChildren(filteredChildrenNodes);
         }
-        return node;
+        return ObjectUtils.isNotEmpty(node.getChildren()) ? node : null;
     }
 }

@@ -38,7 +38,9 @@ const Hadoop: FC = () => {
           保存
         </Button>
       </div>
-      <Collapse >
+      <Collapse
+            defaultActiveKey={["core-site"]}
+      >
         {
           configs?.map((config,index) => {
             const { id, valueOne, keyOne } = config;
@@ -48,7 +50,6 @@ const Hadoop: FC = () => {
               <Panel header={keyOne} key={keyOne}>
                 <HadoopPanel
                   id={id}
-                  headerTitle={keyOne}
                   dataSource={dataSource}
                   setDataSource={(list)=>{
                       const data = listToData(list)

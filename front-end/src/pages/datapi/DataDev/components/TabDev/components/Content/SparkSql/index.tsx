@@ -6,7 +6,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import type { IDisposable } from 'monaco-editor';
 import styles from './index.less';
 import { getUDFList } from '@/services/datadev';
-import { UDF } from '@/types/datadev';
+import type { UDF } from '@/types/datadev';
 
 interface SparkSqlProps {
   monaco: any;
@@ -58,10 +58,12 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   useEffect(() => {
     if (content) {
       setMonacoValue(content.sourceSql);
-      const udfIds = content.udfIds || '';
+      const udfIds = content.udfIds?.split(',') || [];
+      console.log(udfIds);
+
       form.setFieldsValue({
         externalTables: content.externalTables,
-        udfIds: udfIds.split(','),
+        udfIds,
       });
     }
   }, [content]);

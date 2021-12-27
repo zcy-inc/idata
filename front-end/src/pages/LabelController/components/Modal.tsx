@@ -40,7 +40,7 @@ const Modal: FC<IModalProps> = (props) => {
       formRef.current?.resetFields()
       setLabelParamType(undefined)
     }
-  }, [subjectType, labelCode])
+  }, [subjectType, labelCode,visible])
   return (
     <ModalForm<ILabelDefines>
       className="zcy-modal"
@@ -56,6 +56,7 @@ const Modal: FC<IModalProps> = (props) => {
         onCancel: onCancel,
         title:"新增属性",
         width:580,
+        destroyOnClose: true
       }}
       onFinish={async (values) => {
         const { success } = await defineLabel({

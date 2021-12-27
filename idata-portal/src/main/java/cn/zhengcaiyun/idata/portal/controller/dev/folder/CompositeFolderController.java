@@ -23,11 +23,14 @@ import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * composite-folder-controller
@@ -41,11 +44,17 @@ import java.util.Objects;
 public class CompositeFolderController {
 
     private final CompositeFolderService compositeFolderService;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public CompositeFolderController(CompositeFolderService compositeFolderService) {
+    public CompositeFolderController(CompositeFolderService compositeFolderService,
+                                     UserAccessService userAccessService) {
         this.compositeFolderService = compositeFolderService;
+        this.userAccessService = userAccessService;
     }
+
+    private final String DATA_DEVELOP_ROOT_DIR_ACCESS_CODE = "F_ICON_DATA_DEVELOP_ROOT_DIR";
+    private final String CONFIG_DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     /**
      * 搜索文件树
@@ -65,6 +74,8 @@ public class CompositeFolderController {
      */
     @GetMapping("/functions/tree")
     public RestResult<List<DevTreeNodeDto>> getFunctionTree() {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATA_DEVELOP_ACCESS_CODE),
+                "没有数据开发权限");
         return RestResult.success(compositeFolderService.getFunctionTree());
     }
 
@@ -76,6 +87,8 @@ public class CompositeFolderController {
      */
     @PostMapping("")
     public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
+                "没有数据源管理权限");
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
         return getFolder(id);
@@ -121,7 +134,7 @@ public class CompositeFolderController {
      * @param belong 所属功能模块标识
      * @return {@link RestResult}
      */
-    @GetMapping("")
+    @GetMapping("/folders")
     public RestResult<List<CompositeFolderDto>> getFolders(@RequestParam(value = "belong") String belong) {
         return RestResult.success(compositeFolderService.getFolders(belong));
     }

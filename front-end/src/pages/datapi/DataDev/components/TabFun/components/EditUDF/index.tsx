@@ -21,6 +21,7 @@ const { TextArea } = Input;
 
 const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [hdfsPath, setHdfsPath] = useState('');
 
   useEffect(() => {
     getFolders({ belong: FolderBelong.DEVFUN })
@@ -44,6 +45,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
         udfSample: data.udfSample,
       };
       form.setFieldsValue(values);
+      setHdfsPath(data.hdfsPath);
     }
   }, [data]);
 
@@ -69,7 +71,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
           name="upload"
           label="函数代码"
           rules={[{ required: true }]}
-          extra={`hdfs路径: ${data?.hdfsPath || '-'}`}
+          extra={`hdfs路径: ${hdfsPath || '-'}`}
         >
           <Upload
             style={{ marginTop: 16 }}
@@ -86,6 +88,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                       fileName: res.data.fileName,
                       hdfsPath: res.data.relativePath,
                     });
+                    setHdfsPath(res.data.relativePath);
                   } else {
                     message.error(`上传失败: ${res.msg}`);
                   }

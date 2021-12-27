@@ -64,7 +64,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
             key: 'startTime',
             render: (_) => moment(_).format(fmt),
           },
-          { title: '执行时长', dataIndex: 'duration', key: 'duration' },
+          { title: '执行时长(分)', dataIndex: 'durationStr', key: 'durationStr' },
           { title: '平均内存(GB)', dataIndex: 'avgMemory', key: 'avgMemory' },
           { title: '平均CPU核数', dataIndex: 'avgVcores', key: 'avgVcores' },
           { title: '最终状态', dataIndex: 'finalStatus', key: 'finalStatus' },
