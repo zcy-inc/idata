@@ -144,6 +144,10 @@ const middleware = async (ctx: Context, next: () => void) => {
     skip2Login({ redirect: true, redirectUrl: window.location.href });
     return;
   }
+  if (code === '403') {
+    history.replace('/');
+    return;
+  }
 };
 
 export const request: RequestConfig = {
