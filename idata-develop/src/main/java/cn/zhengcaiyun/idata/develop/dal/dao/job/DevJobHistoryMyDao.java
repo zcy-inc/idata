@@ -117,7 +117,7 @@ public interface DevJobHistoryMyDao {
             " select t1.*, t2.name as jobName " +
             " from (select * from dev_job_history " +
             "       where  ((<![CDATA[start_time < #{endDate} and finish_time > #{startDate}) " +
-            "               or (finish_time is null and start_time < #{startDate} and finish_time > #{startDate}]]>)) " +
+            "               or (finish_time is null and start_time < #{startDate} ]]>)) " +
             "           and job_id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t1 " +
             " left join (select id, name from dev_job_info where id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t2 " +
             " on t1.job_id = t2.id " +
