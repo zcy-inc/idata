@@ -90,6 +90,7 @@ public class JobUdfController {
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
         udf.setDel(DeleteEnum.DEL_NO.val);
+        udfService.update(udf);
         return RestResult.success(udfService.findById(id));
     }
 
