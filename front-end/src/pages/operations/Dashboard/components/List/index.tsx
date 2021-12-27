@@ -42,7 +42,6 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
   const columnsTime: ColumnsType<ConsumeTimeItem> = [
     { title: 'ID', dataIndex: 'jobId', key: 'jobId' },
     { title: '名称', dataIndex: 'jobName', key: 'jobName', render: (_) => _ || '-' },
-    { title: '运行时长（分）', dataIndex: 'duration', key: 'duration', render: (_) => _ || '-' },
     { title: '平均执行时长（分）', dataIndex: 'avgDurationStr', key: 'avgDurationStr' },
     {
       title: '开始时间',
