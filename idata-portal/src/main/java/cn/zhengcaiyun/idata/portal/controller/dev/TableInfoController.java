@@ -114,8 +114,6 @@ public class TableInfoController {
                                                      HttpServletRequest request) {
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
-            checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId(),
-                    DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
         }
         else {
@@ -138,8 +136,6 @@ public class TableInfoController {
     @DeleteMapping("tableInfo/{tableId}")
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
                                   HttpServletRequest request) {
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
-                tableId, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(tableInfoService.delete(tableId, tokenService.getNickname(request)));
     }
 

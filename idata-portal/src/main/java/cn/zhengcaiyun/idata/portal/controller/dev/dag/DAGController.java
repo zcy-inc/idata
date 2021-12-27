@@ -46,16 +46,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class DAGController {
 
     private final DAGService dagService;
-    private final UserAccessService userAccessService;
 
     @Autowired
-    public DAGController(DAGService dagService,
-                         UserAccessService userAccessService) {
+    public DAGController(DAGService dagService) {
         this.dagService = dagService;
-        this.userAccessService = userAccessService;
     }
-
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     /**
      * 创建DAG
@@ -65,8 +60,6 @@ public class DAGController {
      */
     @PostMapping
     public RestResult<DAGDto> addDAG(@RequestBody DAGDto dagDto) {
-        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), dagDto.getDagInfoDto().getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = dagService.addDAG(dagDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("创建DAG失败", "");
 
@@ -106,8 +99,6 @@ public class DAGController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) {
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(dagService.removeDag(id, OperatorContext.getCurrentOperator()));
     }
 

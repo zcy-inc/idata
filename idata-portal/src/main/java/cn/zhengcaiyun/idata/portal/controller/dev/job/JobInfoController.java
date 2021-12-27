@@ -121,8 +121,6 @@ public class JobInfoController {
      */
     @PostMapping
     public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
-        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), jobInfoDto.getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
 
@@ -162,8 +160,6 @@ public class JobInfoController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeJob(@PathVariable Long id) {
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(jobInfoService.removeJob(id, OperatorContext.getCurrentOperator()));
     }
 

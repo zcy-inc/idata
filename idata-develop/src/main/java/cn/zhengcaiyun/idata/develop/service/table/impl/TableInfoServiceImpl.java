@@ -119,6 +119,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String COLUMN_PK_LABEL = "pk:LABEL";
+    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -248,6 +249,9 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public TableInfoDto create(TableInfoDto tableInfoDto, String operator) {
+        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId(),
+                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(tableInfoDto.getTableName()), "表名称不能为空");
         DevTableInfo checkTableInfo = devTableInfoDao.selectOne(c ->
@@ -389,6 +393,10 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devTableInfo.id, isEqualTo(tableId))))
                 .orElse(null);
         checkArgument(tableInfo != null, "表不存在");
+        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
+                tableInfo.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
+                "无权限，请联系管理员");
+
 
         // 校验指标系统依赖
         List<DevLabel> measureList = devLabelDao.selectMany(select(devLabel.allColumns())
