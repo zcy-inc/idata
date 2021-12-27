@@ -6,7 +6,6 @@ export default [
   },
   {
     path: '/',
-    // redirect: '/configuration',
     component: './NoAuthority',
   },
   {
