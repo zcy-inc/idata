@@ -90,8 +90,6 @@ public class CompositeFolderController {
     public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
                 "没有根目录新增权限");
-        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), folderDto.getParentId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
         return getFolder(id);
@@ -128,8 +126,6 @@ public class CompositeFolderController {
      */
     @DeleteMapping("/{id}")
     public RestResult<Boolean> removeFolder(@PathVariable("id") Long id) {
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), id,
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
         return RestResult.success(compositeFolderService.removeFolder(id, OperatorContext.getCurrentOperator()));
     }
 
