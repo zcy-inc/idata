@@ -26,12 +26,15 @@ import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * data-source-controller
@@ -45,11 +48,15 @@ import java.util.stream.Collectors;
 public class DataSourceController {
 
     private final DataSourceService dataSourceService;
+    private final UserAccessService userAccessService;
 
     @Autowired
-    public DataSourceController(DataSourceService dataSourceService) {
+    public DataSourceController(DataSourceService dataSourceService, UserAccessService userAccessService) {
         this.dataSourceService = dataSourceService;
+        this.userAccessService = userAccessService;
     }
+
+    private final String CONFIG_DATASOURCE_ACCESS_CODE = "F_MENU_DATASOURCE_CENTER";
 
     /**
      * 获取数据源类型
@@ -73,6 +80,8 @@ public class DataSourceController {
     public RestResult<Page<DataSourceDto>> pagingDataSource(DataSourceCondition condition,
                                                             @RequestParam(value = "limit") Long limit,
                                                             @RequestParam(value = "offset") Long offset) {
+        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATASOURCE_ACCESS_CODE),
+                "没有数据源管理权限");
         return RestResult.success(dataSourceService.pagingDataSource(condition, PageParam.of(limit, offset)));
     }
 

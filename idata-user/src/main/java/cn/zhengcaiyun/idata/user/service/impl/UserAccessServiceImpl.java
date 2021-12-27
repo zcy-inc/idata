@@ -207,4 +207,13 @@ public class UserAccessServiceImpl implements UserAccessService {
             return accessCodes.contains(accessFeatureList.get(0).getFeatureCode());
         }
     }
+
+    @Override
+    public boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey) {
+        UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
+                and(uacUser.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return true;
+        return false;
+    }
 }
