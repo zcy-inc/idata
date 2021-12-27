@@ -199,7 +199,7 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
  * 获取平铺的文件夹列表
  */
 export async function getFolders(params: { belong: string }) {
-  return request<DefaultResponse & { data: Folder[] }>('/api/p1/dev/compositeFolders', {
+  return request<DefaultResponse & { data: Folder[] }>('/api/p1/dev/compositeFolders/folders', {
     method: 'GET',
     params,
   });
