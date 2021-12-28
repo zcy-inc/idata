@@ -47,7 +47,7 @@ public class UserManagerController {
     @Autowired
     private UserManagerService userManagerService;
 
-    private final String accessCode = "F_MENU_USER_MANAGE";
+    private final String accessCode = "F_MENU_USER_FEATURE";
 
     @GetMapping("users")
     public RestResult<Page<UserInfoDto>> findUsers(@RequestParam(value = "name", required = false) String name,

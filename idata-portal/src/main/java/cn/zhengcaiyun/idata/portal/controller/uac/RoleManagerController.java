@@ -48,7 +48,7 @@ public class RoleManagerController {
     @Autowired
     private UserAccessService userAccessService;
 
-    private final String accessCode = "F_MENU_ROLE_MANAGE";
+    private final String accessCode = "F_MENU_USER_FEATURE";
 
     @GetMapping("roles")
     public RestResult<Page<RoleDto>> findRoles(@RequestParam(value = "limit", required = false) Integer limit,
