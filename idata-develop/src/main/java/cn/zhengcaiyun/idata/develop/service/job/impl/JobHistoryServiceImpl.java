@@ -196,7 +196,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                         finishTime = DateUtil.date().toJdkDate();
                     }
                     if (copy.getStartTime() != null) {
-                        copy.setDuration(DateUtil.between(finishTime, copy.getStartTime(), DateUnit.MINUTE));
+                        copy.setDuration(DateUtil.between(finishTime, copy.getStartTime(), DateUnit.MS));
                     }
                     map.get(jobId).getChildren().add(copy);
                 }
