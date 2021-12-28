@@ -150,9 +150,4 @@ public class JobUdfController {
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
-    public static void main(String[] args) {
-        String s = "hdfs://nameservice1/staging_idata/upload/udf/1640071323966_15433_MurmurHashUdf-1.0.jar";
-        System.out.println(s.substring(s.lastIndexOf("/") + 1));
-    }
-
 }

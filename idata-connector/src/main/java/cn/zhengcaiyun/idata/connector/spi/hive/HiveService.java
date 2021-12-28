@@ -85,9 +85,4 @@ public class HiveService {
         }
     }
 
-    public static void main(String[] args) {
-        long start = System.currentTimeMillis();
-//        System.out.println(new HiveService().previewTable("dwd", "dwd_browse_click_item_log_di"));
-        System.out.println(System.currentTimeMillis() - start);
-    }
 }

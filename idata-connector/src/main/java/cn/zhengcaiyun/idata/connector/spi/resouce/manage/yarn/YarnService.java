@@ -53,32 +53,4 @@ public class YarnService implements ResourceManageService {
         return response;
     }
 
-    public static void main(String[] args) {
-
-//        String url = String.format("%s/ws/v1/cluster/apps?states=FINISHED,KILLED&finishedTimeBegin=%d&finishedTimeEnd=%d",
-//                "http://bigdata-master3.cai-inc.com:8088", DateUtil.offset(DateUtil.yesterday(), DateField.HOUR, 23).getTime(), DateUtil.date().getTime());
-//        String jsonResponse = HttpUtil.get(url);
-//
-//        System.out.println(jsonResponse);
-//
-////        YarnAppsResourceResponse yarnAppsResourceResponse = JSONUtil.toBean(jsonResponse, YarnAppsResourceResponse.class);
-////        System.out.println(yarnAppsResourceResponse.getApps().getApp().get(0).getName());
-//        YarnAppsResourceResponse yarnAppsResourceResponse = JSON.parseObject(jsonResponse, YarnAppsResourceResponse.class);
-//        System.out.println(yarnAppsResourceResponse.getApps().getApp().get(0).getName());
-//
-//
-//        List<YarnAppResourceResponse> app = yarnAppsResourceResponse.getApps().getApp();
-//        List<AppResourceDetail> appResourceDetails = Convert.toList(AppResourceDetail.class, app);
-//        System.out.println(appResourceDetails.size());
-
-        String url = String.format("%s/ws/v1/cluster/metrics", "http://bigdata-master3.cai-inc.com:8088");
-//        String jsonResponse = HttpUtil.get(url);
-        HttpResponse res = HttpRequest.get(url).execute();
-        System.out.println(res.getStatus());
-        String jsonResponse = res.body();
-        System.out.println(jsonResponse);
-        JSONObject jsonObject = JSON.parseObject(jsonResponse);
-        ClusterMetricsResponse response = JSONObject.parseObject(jsonObject.get("clusterMetrics").toString(), ClusterMetricsResponse.class);
-        System.out.println(JSON.toJSONString(response));
-    }
 }
