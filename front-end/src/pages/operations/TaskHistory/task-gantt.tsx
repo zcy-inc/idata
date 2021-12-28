@@ -56,7 +56,6 @@ const initTemplate = {
     return mouse_on_grid ? output : '';
   }
 }
-// const formatYMD = 'YYYY-MM-DD';
 
 const GanttChart: FC = ({ }) => {
   const [loading, setLoading] = useState(false);
