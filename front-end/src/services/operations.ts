@@ -1,16 +1,19 @@
-import { TaskTypes } from '@/constants/datadev';
-import { ClusterState } from '@/constants/operations';
-import {
+import type { TaskTypes } from '@/constants/datadev';
+import type { ClusterState } from '@/constants/operations';
+import type {
   Cluster,
   ClusterListItem,
   ConsumeResourceItem,
   ConsumeTimeItem,
   JobHistoryItem,
+  JobHistoryGanttItem,
   OperationLine,
   OperationOverview,
   Overhang,
   ScheduleListItem,
   UsageOverview,
+  DagItem,
+  EnumItem
 } from '@/types/operations';
 import { request } from 'umi';
 import type { DefaultResponse } from './global';
@@ -160,6 +163,65 @@ export async function getJobHistory(data: {
   >('/api/p1/ops/dashboard/page/jobHistory', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取作业甘特图数据
+ */
+ export async function getJobGantt(data: {
+  pageNum: number;
+  pageSize: number;
+  condition: {
+    startDateBegin: string;
+    startDateEnd: string;
+    finishDateBegin: string;
+    finishDateEnd: string;
+    jobName: string;
+    jobStatus: string;
+  };
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        content: JobHistoryGanttItem[];
+        total: number;
+        pageNum: number;
+        pageSize: number;
+        pages: number;
+      };
+    }
+  >('/api/p1/ops/dashboard/page/gantt/jobHistory', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 获取dag列表
+ */
+ export async function getDagList() {
+  return request<
+  DefaultResponse & {
+    data: DagItem [];
+  }
+>('/api/p1/dev/dags/info', {
+    method: 'GET',
+  });
+}
+/**
+ * 获取数仓分层列表
+ */
+ export async function getEnumgList() {
+  return request<
+  DefaultResponse & {
+    data: EnumItem [];
+  }
+>('/api/p1/dev/enumValues', {
+    method: 'GET',
+    params: {
+      enumCode: 'dwLayerEnum:ENUM'
+    }
   });
 }
 
