@@ -75,16 +75,18 @@ public class SystemController {
     }
 
     @GetMapping("/p1/sys/configs")
-    public RestResult<List<ConfigDto>> getConfigsByType(@RequestParam("configType") String configType) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_CENTER_ACCESS_CODE),
-                "没有集成配置权限");
+    public RestResult<List<ConfigDto>> getConfigsByType(@RequestParam("configType") String configType) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_CENTER_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有集成配置权限");
+        }
         return RestResult.success(systemConfigService.getSystemConfigs(configType));
     }
 
     @GetMapping("/p1/sys/ldap/configs")
-    public RestResult<List<ConfigDto>> getLDAPConfigs() {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_LDAP_ACCESS_CODE),
-                "没有LDAP配置权限");
+    public RestResult<List<ConfigDto>> getLDAPConfigs() throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_LDAP_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有LDAP配置权限");
+        }
         return RestResult.success(systemConfigService.getSystemConfigs(ConfigTypeEnum.LDAP.name()));
     }
 

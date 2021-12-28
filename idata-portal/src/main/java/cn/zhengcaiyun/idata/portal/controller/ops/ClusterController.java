@@ -59,9 +59,10 @@ public class ClusterController {
      * @return
      */
     @GetMapping("/apps")
-    public RestResult<List<ClusterAppMonitorDto>> fetchClusterApp(@RequestParam(value = "state") String state) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CLUSTER_MONITORING_ACCESS_CODE),
-                "没有集群监控权限");
+    public RestResult<List<ClusterAppMonitorDto>> fetchClusterApp(@RequestParam(value = "state") String state) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CLUSTER_MONITORING_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有集群监控权限");
+        }
         return RestResult.success(clusterService.fetchClusterApp(state));
     }
 

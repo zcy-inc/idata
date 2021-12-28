@@ -53,50 +53,56 @@ public class RoleManagerController {
     @GetMapping("roles")
     public RestResult<Page<RoleDto>> findRoles(@RequestParam(value = "limit", required = false) Integer limit,
                                                @RequestParam(value = "offset", required = false) Integer offset,
-                                               HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                                               HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         return RestResult.success(roleService.findRoles(limit, offset));
     }
 
     @GetMapping("roleFeatureTree/{roleId}")
     public RestResult<List<FeatureTreeNodeDto>> getRoleFeatureTree(@PathVariable("roleId") Long roleId,
-                                                                   HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                                                                   HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         return RestResult.success(roleService.getRoleFeatureTree(roleId));
     }
 
     @GetMapping("roleFolderTree/{roleId}")
     public RestResult<List<FolderTreeNodeDto>> getRoleFolderTree(@PathVariable("roleId") Long roleId,
-                                                                 HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                                                                 HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         return RestResult.success(roleService.getRoleFolderTree(roleId));
     }
 
     @PostMapping("role")
     public RestResult<RoleDto> create(@RequestBody RoleDto roleDto,
-                                      HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                                      HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         roleDto.setRoleCode(RandomUtil.randomStr(10));
         return RestResult.success(roleService.create(roleDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("role")
     public RestResult<RoleDto> edit(@RequestBody RoleDto roleDto,
-                                    HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                                    HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         return RestResult.success(roleService.edit(roleDto, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("role/{roleId}")
     public RestResult delete(@PathVariable("roleId") Long roleId,
-                             HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有角色管理权限");
+                             HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有角色管理权限");
+        }
         roleService.delete(roleId, tokenService.getNickname(request));
         return RestResult.success();
     }

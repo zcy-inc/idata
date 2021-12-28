@@ -74,9 +74,10 @@ public class CompositeFolderController {
      * @return
      */
     @GetMapping("/functions/tree")
-    public RestResult<List<DevTreeNodeDto>> getFunctionTree() {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ACCESS_CODE),
-                "没有数据开发权限");
+    public RestResult<List<DevTreeNodeDto>> getFunctionTree() throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有数据开发权限");
+        }
         return RestResult.success(compositeFolderService.getFunctionTree());
     }
 
@@ -88,8 +89,9 @@ public class CompositeFolderController {
      */
     @PostMapping("")
     public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) throws IllegalAccessException {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
-                "没有根目录新增权限");
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有根目录新增权限");
+        }
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新建文件夹失败", "");
         return getFolder(id);
