@@ -79,9 +79,10 @@ public class DataSourceController {
     @GetMapping("/datasources")
     public RestResult<Page<DataSourceDto>> pagingDataSource(DataSourceCondition condition,
                                                             @RequestParam(value = "limit") Long limit,
-                                                            @RequestParam(value = "offset") Long offset) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATASOURCE_ACCESS_CODE),
-                "没有数据源管理权限");
+                                                            @RequestParam(value = "offset") Long offset) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_DATASOURCE_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有数据源管理权限");
+        }
         return RestResult.success(dataSourceService.pagingDataSource(condition, PageParam.of(limit, offset)));
     }
 

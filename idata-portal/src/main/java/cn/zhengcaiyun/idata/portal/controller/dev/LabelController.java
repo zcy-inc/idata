@@ -65,9 +65,10 @@ public class LabelController {
 
     @GetMapping("labelDefines")
     public RestResult<List<LabelDefineDto>> findDefines(@RequestParam(value = "subjectType", required = false) String subjectType,
-                                                        @RequestParam(value = "labelTag", required = false) String labelTag) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_METADATA_ACCESS_CODE),
-                    "没有元数据标签配置权限");
+                                                        @RequestParam(value = "labelTag", required = false) String labelTag) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_METADATA_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有元数据标签配置权限");
+        }
         return RestResult.success(labelService.findDefines(subjectType, labelTag));
     }
 

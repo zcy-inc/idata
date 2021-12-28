@@ -66,9 +66,10 @@ public class JobPublishRecordController {
     @GetMapping("/page")
     public RestResult<Page<JobPublishRecordDto>> pagingJobPublishRecord(JobPublishRecordCondition condition,
                                                                         @RequestParam(value = "limit") Long limit,
-                                                                        @RequestParam(value = "offset") Long offset) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_LIST_ACCESS_CODE),
-                "没有任务列表权限");
+                                                                        @RequestParam(value = "offset") Long offset) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_LIST_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有任务列表权限");
+        }
         return RestResult.success(jobPublishRecordService.paging(condition, PageParam.of(limit, offset)));
     }
 
@@ -79,9 +80,10 @@ public class JobPublishRecordController {
      * @return
      */
     @PostMapping("/approve")
-    public RestResult<Boolean> approve(@RequestBody JobApproveParam param) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), RELEASE_DATA_JOB_ACCESS_CODE),
-                "没有发布作业权限");
+    public RestResult<Boolean> approve(@RequestBody JobApproveParam param) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), RELEASE_DATA_JOB_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有发布作业权限");
+        }
         return RestResult.success(jobPublishRecordService.approve(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 
@@ -92,9 +94,10 @@ public class JobPublishRecordController {
      * @return
      */
     @PostMapping("/reject")
-    public RestResult<Boolean> reject(@RequestBody JobApproveParam param) {
-        checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), REJECT_DATA_JOB_ACCESS_CODE),
-                "没有驳回作业权限");
+    public RestResult<Boolean> reject(@RequestBody JobApproveParam param) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), REJECT_DATA_JOB_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有驳回作业权限");
+        }
         return RestResult.success(jobPublishRecordService.reject(param.getRecordIds(), param.getRemark(), OperatorContext.getCurrentOperator()));
     }
 

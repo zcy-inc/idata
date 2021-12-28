@@ -47,64 +47,71 @@ public class UserManagerController {
     @Autowired
     private UserManagerService userManagerService;
 
-    private final String accessCode = "F_MENU_USER_MANAGE";
+    private final String accessCode = "F_MENU_USER_FEATURE";
 
     @GetMapping("users")
     public RestResult<Page<UserInfoDto>> findUsers(@RequestParam(value = "name", required = false) String name,
                                                    @RequestParam(value = "limit", required = false) Integer limit,
                                                    @RequestParam(value = "offset", required = false) Integer offset,
-                                                   HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                                   HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         return RestResult.success(userManagerService.findUsers(name, limit, offset));
     }
 
     @GetMapping("userFeatureTree/{userId}")
     public RestResult<List<FeatureTreeNodeDto>> getUserFeatureTree(@PathVariable("userId") Long userId,
-                                                                   HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                                                   HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         return RestResult.success(userAccessService.getUserFeatureTree(userId));
     }
 
     @GetMapping("userFolderTree/{userId}")
     public RestResult<List<FolderTreeNodeDto>> getUserFolderTree(@PathVariable("userId") Long userId,
-                                                                 HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                                                 HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         return RestResult.success(userAccessService.getUserFolderTree(userId));
     }
 
     @PostMapping("user")
     public RestResult<UserInfoDto> create(@RequestBody UserInfoDto userInfoDto,
-                                          HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                          HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         return RestResult.success(userManagerService.create(userInfoDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("user")
     public RestResult<UserInfoDto> edit(@RequestBody UserInfoDto userInfoDto,
-                                        HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                        HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         return RestResult.success(userManagerService.edit(userInfoDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("resetUserPassword/{userId}")
     public RestResult resetUserPassword(@PathVariable("userId") Long userId,
-                                        HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                                        HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         userManagerService.resetUserPassword(userId, tokenService.getNickname(request));
         return RestResult.success();
     }
 
     @DeleteMapping("user/{userId}")
     public RestResult delete(@PathVariable("userId") Long userId,
-                             HttpServletRequest request) {
-        checkArgument(userAccessService.checkAccess(tokenService.getUserId(request), accessCode),
-                "没有用户管理权限");
+                             HttpServletRequest request) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+            throw new IllegalAccessException("没有用户管理权限");
+        }
         userManagerService.delete(userId, tokenService.getNickname(request));
         return RestResult.success();
     }
