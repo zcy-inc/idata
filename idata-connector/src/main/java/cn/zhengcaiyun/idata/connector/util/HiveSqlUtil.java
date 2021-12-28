@@ -22,10 +22,4 @@ public class HiveSqlUtil {
         return listener.tableInfoMap;
     }
 
-    public static void main(String[] args) {
-        String sql = "create table db.xxx (a bigint COMMENT 'id', s string) comment '测试分区表' " +
-                "partitioned by (pt string comment '按天')";
-        System.out.println(getCreateTableInfo(sql));
-    }
-
 }
