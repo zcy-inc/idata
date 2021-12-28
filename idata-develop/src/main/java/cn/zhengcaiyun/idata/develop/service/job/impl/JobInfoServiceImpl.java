@@ -47,6 +47,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
@@ -87,7 +88,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobEventPublisher jobEventPublisher;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final OverhangJobLocalCache overhangJobLocalCache;
-    private final UserAccessService userAccessService;
+    private final DevAccessService devAccessService;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
@@ -100,7 +101,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache,
                               OverhangJobLocalCache overhangJobLocalCache,
-                              UserAccessService userAccessService) {
+                              DevAccessService devAccessService) {
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -111,17 +112,14 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.jobEventPublisher = jobEventPublisher;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.overhangJobLocalCache = overhangJobLocalCache;
-        this.userAccessService = userAccessService;
+        this.devAccessService = devAccessService;
     }
-
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     @Transactional
-    public Long addJob(JobInfoDto dto, Operator operator) {
+    public Long addJob(JobInfoDto dto, Operator operator) throws IllegalAccessException {
         checkJobInfo(dto);
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), dto.getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+        devAccessService.checkAddAccess(operator.getId(), dto.getFolderId());
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameRecords), "作业名称已存在");
@@ -140,11 +138,10 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     @Transactional
-    public Boolean editJobInfo(JobInfoDto dto, Operator operator) {
+    public Boolean editJobInfo(JobInfoDto dto, Operator operator) throws IllegalAccessException {
         checkJobInfo(dto);
         JobInfo oldJobInfo = tryFetchJobInfo(dto.getId());
-        checkArgument(userAccessService.checkUpdateAccess(operator.getId(), oldJobInfo.getFolderId(),
-                dto.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkUpdateAccess(operator.getId(), oldJobInfo.getFolderId(), dto.getFolderId());
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         if (ObjectUtils.isNotEmpty(dupNameRecords)) {
@@ -179,11 +176,10 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     @Transactional
-    public Boolean removeJob(Long id, Operator operator) {
+    public Boolean removeJob(Long id, Operator operator) throws IllegalAccessException {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), jobInfo.getFolderId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkDeleteAccess(operator.getId(), jobInfo.getFolderId());
         // 检查是否已停用，只有停用后才能更改
         checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再删除作业");
 

@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
@@ -64,22 +65,20 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory;
     private final DevFolderService devFolderService;
-    private final UserAccessService userAccessService;
+    private final DevAccessService devAccessService;
 
     @Autowired
     public CompositeFolderServiceImpl(CompositeFolderRepo compositeFolderRepo,
                                       DevTreeNodeLocalCache devTreeNodeLocalCache,
                                       BizTreeNodeSupplierFactory bizTreeNodeSupplierFactory,
                                       DevFolderService devFolderService,
-                                      UserAccessService userAccessService) {
+                                      DevAccessService devAccessService) {
         this.compositeFolderRepo = compositeFolderRepo;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.bizTreeNodeSupplierFactory = bizTreeNodeSupplierFactory;
         this.devFolderService = devFolderService;
-        this.userAccessService = userAccessService;
+        this.devAccessService = devAccessService;
     }
-
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     public List<DevTreeNodeDto> getFunctionTree() {
@@ -109,9 +108,8 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     }
 
     @Override
-    public Long addFolder(CompositeFolderDto folderDto, Operator operator) {
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), folderDto.getParentId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+    public Long addFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException {
+        devAccessService.checkAddAccess(operator.getId(), folderDto.getParentId());
 
         Optional<FunctionModuleEnum> moduleEnumOptional = FunctionModuleEnum.getEnum(folderDto.getBelong());
         checkArgument(moduleEnumOptional.isPresent(), "功能文件夹为空");
@@ -134,7 +132,7 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     }
 
     @Override
-    public Boolean editFolder(CompositeFolderDto folderDto, Operator operator) {
+    public Boolean editFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException {
         checkArgument(Objects.nonNull(folderDto.getId()), "文件夹编号为空");
         Optional<CompositeFolder> existFolderOptional = compositeFolderRepo.queryFolder(folderDto.getId());
         checkArgument(existFolderOptional.isPresent(), "文件夹不存在");
@@ -152,8 +150,7 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         Optional<CompositeFolder> dupNameFolderOptional = compositeFolderRepo.queryFolder(folderDto.getName(), folderDto.getParentId());
         if (dupNameFolderOptional.isPresent()) {
             checkArgument(Objects.equals(folderDto.getId(), dupNameFolderOptional.get().getId()), "父文件夹下存在同名文件夹");
-            checkArgument(userAccessService.checkUpdateAccess(operator.getId(), existFolderOptional.get().getParentId(),
-                    folderDto.getParentId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+            devAccessService.checkUpdateAccess(operator.getId(), existFolderOptional.get().getParentId(), folderDto.getParentId());
         }
 
         folderDto.resetEditor(operator);
@@ -172,12 +169,11 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     }
 
     @Override
-    public Boolean removeFolder(Long id, Operator operator) {
+    public Boolean removeFolder(Long id, Operator operator) throws IllegalAccessException {
         checkArgument(Objects.nonNull(id), "文件夹编号为空");
         Optional<CompositeFolder> existFolderOptional = compositeFolderRepo.queryFolder(id);
         checkArgument(existFolderOptional.isPresent(), "文件夹不存在");
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), existFolderOptional.get().getParentId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkDeleteAccess(operator.getId(), existFolderOptional.get().getParentId());
 
         CompositeFolder folder = existFolderOptional.get();
         //已删除

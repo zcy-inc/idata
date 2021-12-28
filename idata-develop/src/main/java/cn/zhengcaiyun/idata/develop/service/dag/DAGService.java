@@ -31,13 +31,13 @@ import java.util.List;
  **/
 public interface DAGService {
 
-    Long addDAG(DAGDto dto, Operator operator);
+    Long addDAG(DAGDto dto, Operator operator) throws IllegalAccessException;
 
-    Boolean editDAG(DAGDto dto, Operator operator);
+    Boolean editDAG(DAGDto dto, Operator operator) throws IllegalAccessException;
 
     DAGDto getDag(Long id);
 
-    Boolean removeDag(Long id, Operator operator);
+    Boolean removeDag(Long id, Operator operator) throws IllegalAccessException;
 
     Boolean online(Long id, Operator operator);
 

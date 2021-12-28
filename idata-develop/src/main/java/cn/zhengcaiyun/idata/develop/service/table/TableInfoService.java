@@ -35,9 +35,9 @@ public interface TableInfoService {
     List<LabelDto> getDbNames();
     String getTableDDL(Long tableId);
     TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto);
-    TableInfoDto create(TableInfoDto tableInfoDto, String creator);
-    TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
-    boolean delete(Long tableId, String editor);
+    TableInfoDto create(TableInfoDto tableInfoDto, String creator) throws IllegalAccessException;
+    TableInfoDto edit(TableInfoDto tableInfoDto, String editor) throws IllegalAccessException;
+    boolean delete(Long tableId, String editor) throws IllegalAccessException;
     String syncMetabaseInfo(Long tableId, String editor);
 
     /**

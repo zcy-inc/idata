@@ -87,7 +87,7 @@ public class CompositeFolderController {
      * @return
      */
     @PostMapping("")
-    public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) {
+    public RestResult<CompositeFolderDto> addFolder(@RequestBody CompositeFolderDto folderDto) throws IllegalAccessException {
         checkArgument(userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), DATA_DEVELOP_ROOT_DIR_ACCESS_CODE),
                 "没有根目录新增权限");
         Long id = compositeFolderService.addFolder(folderDto, OperatorContext.getCurrentOperator());
@@ -102,7 +102,7 @@ public class CompositeFolderController {
      * @return
      */
     @PutMapping("")
-    public RestResult<CompositeFolderDto> editFolder(@RequestBody CompositeFolderDto folderDto) {
+    public RestResult<CompositeFolderDto> editFolder(@RequestBody CompositeFolderDto folderDto) throws IllegalAccessException {
         compositeFolderService.editFolder(folderDto, OperatorContext.getCurrentOperator());
         return getFolder(folderDto.getId());
     }
@@ -125,7 +125,7 @@ public class CompositeFolderController {
      * @return {@link RestResult}
      */
     @DeleteMapping("/{id}")
-    public RestResult<Boolean> removeFolder(@PathVariable("id") Long id) {
+    public RestResult<Boolean> removeFolder(@PathVariable("id") Long id) throws IllegalAccessException {
         return RestResult.success(compositeFolderService.removeFolder(id, OperatorContext.getCurrentOperator()));
     }
 

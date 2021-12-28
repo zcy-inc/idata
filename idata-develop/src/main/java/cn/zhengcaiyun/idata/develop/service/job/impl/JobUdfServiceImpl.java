@@ -11,6 +11,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
@@ -42,10 +43,10 @@ public class JobUdfServiceImpl implements JobUdfService {
     private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Autowired
-    private UserAccessService userAccessService;
+    private DevAccessService devAccessService;
 
     @Override
-    public Boolean delete(Long id) {
+    public Boolean delete(Long id) throws IllegalAccessException {
         //校验是否绑定了函数，无法删除
         Boolean binded = jobContentCommonService.ifBindUDF(id);
         if (binded) {
@@ -53,8 +54,7 @@ public class JobUdfServiceImpl implements JobUdfService {
         }
 
         DevJobUdf devJobUdf = devUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
-                devJobUdf.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), devJobUdf.getFolderId());
 
         //已删除的直接返回
         if (devJobUdf.getDel() == DeleteEnum.DEL_YES.val) {

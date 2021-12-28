@@ -120,7 +120,7 @@ public class JobInfoController {
      * @return
      */
     @PostMapping
-    public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) {
+    public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) throws IllegalAccessException {
         Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
 
@@ -134,7 +134,7 @@ public class JobInfoController {
      * @return
      */
     @PutMapping
-    public RestResult<JobInfoDto> editJobInfo(@RequestBody JobInfoDto jobInfoDto) {
+    public RestResult<JobInfoDto> editJobInfo(@RequestBody JobInfoDto jobInfoDto) throws IllegalAccessException {
         Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
         if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
 
@@ -159,7 +159,7 @@ public class JobInfoController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public RestResult<Boolean> removeJob(@PathVariable Long id) {
+    public RestResult<Boolean> removeJob(@PathVariable Long id) throws IllegalAccessException {
         return RestResult.success(jobInfoService.removeJob(id, OperatorContext.getCurrentOperator()));
     }
 
