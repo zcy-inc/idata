@@ -111,7 +111,7 @@ public class TableInfoController {
 
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
-                                                     HttpServletRequest request) {
+                                                     HttpServletRequest request) throws IllegalAccessException {
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
@@ -135,7 +135,7 @@ public class TableInfoController {
 
     @DeleteMapping("tableInfo/{tableId}")
     public RestResult deleteTable(@PathVariable("tableId") Long tableId,
-                                  HttpServletRequest request) {
+                                  HttpServletRequest request) throws IllegalAccessException {
         return RestResult.success(tableInfoService.delete(tableId, tokenService.getNickname(request)));
     }
 

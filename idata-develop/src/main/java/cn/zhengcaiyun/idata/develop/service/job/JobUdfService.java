@@ -11,7 +11,7 @@ public interface JobUdfService {
      * @param id
      * @return
      */
-    Boolean delete(Long id);
+    Boolean delete(Long id) throws IllegalAccessException;
 
     /**
      * 新增

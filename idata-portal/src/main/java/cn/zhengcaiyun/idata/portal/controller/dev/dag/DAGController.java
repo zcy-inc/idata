@@ -59,7 +59,7 @@ public class DAGController {
      * @return
      */
     @PostMapping
-    public RestResult<DAGDto> addDAG(@RequestBody DAGDto dagDto) {
+    public RestResult<DAGDto> addDAG(@RequestBody DAGDto dagDto) throws IllegalAccessException {
         Long id = dagService.addDAG(dagDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("创建DAG失败", "");
 
@@ -73,7 +73,7 @@ public class DAGController {
      * @return
      */
     @PutMapping
-    public RestResult<DAGDto> editDAG(@RequestBody DAGDto dagDto) {
+    public RestResult<DAGDto> editDAG(@RequestBody DAGDto dagDto) throws IllegalAccessException {
         Boolean ret = dagService.editDAG(dagDto, OperatorContext.getCurrentOperator());
         if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑DAG失败", "");
 
@@ -98,7 +98,7 @@ public class DAGController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) {
+    public RestResult<Boolean> removeDAG(@PathVariable("id") Long id) throws IllegalAccessException {
         return RestResult.success(dagService.removeDag(id, OperatorContext.getCurrentOperator()));
     }
 

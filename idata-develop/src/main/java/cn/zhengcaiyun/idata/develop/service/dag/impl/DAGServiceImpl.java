@@ -35,6 +35,7 @@ import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGScheduleDto;
 import cn.zhengcaiyun.idata.develop.event.dag.publisher.DagEventPublisher;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
@@ -67,7 +68,7 @@ public class DAGServiceImpl implements DAGService {
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final DagEventPublisher dagEventPublisher;
-    private final UserAccessService userAccessService;
+    private final DevAccessService devAccessService;
 
     @Autowired
     public DAGServiceImpl(DAGRepo dagRepo,
@@ -75,23 +76,20 @@ public class DAGServiceImpl implements DAGService {
                           JobExecuteConfigRepo jobExecuteConfigRepo,
                           DevTreeNodeLocalCache devTreeNodeLocalCache,
                           DagEventPublisher dagEventPublisher,
-                          UserAccessService userAccessService) {
+                          DevAccessService devAccessService) {
         this.dagRepo = dagRepo;
         this.dagEventLogRepo = dagEventLogRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.dagEventPublisher = dagEventPublisher;
-        this.userAccessService = userAccessService;
+        this.devAccessService = devAccessService;
     }
-
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     @Transactional
-    public Long addDAG(DAGDto dto, Operator operator) {
+    public Long addDAG(DAGDto dto, Operator operator) throws IllegalAccessException {
         DAGInfoDto dagInfoDto = dto.getDagInfoDto();
-        checkArgument(userAccessService.checkAddAccess(operator.getId(), dagInfoDto.getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+        devAccessService.checkAddAccess(operator.getId(), dagInfoDto.getFolderId());
 
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
@@ -117,15 +115,14 @@ public class DAGServiceImpl implements DAGService {
 
     @Override
     @Transactional
-    public Boolean editDAG(DAGDto dto, Operator operator) {
+    public Boolean editDAG(DAGDto dto, Operator operator) throws IllegalAccessException {
         DAGInfoDto dagInfoDto = dto.getDagInfoDto();
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
         checkArgument(Objects.nonNull(dagInfoDto.getId()) && Objects.nonNull(dagScheduleDto.getId()), "DAG编号为空");
 
         DAGInfo oldDagInfo = tryFetchDAGInfo(dagInfoDto.getId());
-        checkArgument(userAccessService.checkUpdateAccess(operator.getId(), oldDagInfo.getFolderId(),
-                dagInfoDto.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkUpdateAccess(operator.getId(), oldDagInfo.getFolderId(), dagInfoDto.getFolderId());
         // 检查是否已下线，只有下线后才能更改
         checkArgument(Objects.equals(oldDagInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "先下线DAG再更改");
         Optional<DAGSchedule> optionalDAGSchedule = dagRepo.queryDAGSchedule(dagInfoDto.getId());
@@ -178,10 +175,9 @@ public class DAGServiceImpl implements DAGService {
 
     @Override
     @Transactional
-    public Boolean removeDag(Long id, Operator operator) {
+    public Boolean removeDag(Long id, Operator operator) throws IllegalAccessException {
         DAGInfo dagInfo = tryFetchDAGInfo(id);
-        checkArgument(userAccessService.checkDeleteAccess(operator.getId(), dagInfo.getFolderId(),
-                ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无权限，请联系管理员");
+        devAccessService.checkDeleteAccess(operator.getId(), dagInfo.getFolderId());
         // 检查是否已下线，只有下线后才能更改
         checkArgument(Objects.equals(dagInfo.getStatus(), UsingStatusEnum.OFFLINE.val), "先下线DAG再删除");
 

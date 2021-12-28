@@ -96,6 +96,9 @@ public class ErrorHandler {
             List<String> collect = constraintViolations.stream().map(o -> o.getMessage()).collect(Collectors.toList());
             return RestResult.error(HttpStatus.BAD_REQUEST.value() + "", BAD_REQUEST_MSG, String.join("\n", collect));
         }
+        if (error instanceof IllegalAccessException) {
+            return RestResult.error(RestResult.FORBIDDEN_ERROR_CODE, error.getMessage(), ExceptionUtils.getRootCauseMessage(error));
+        }
 
         if (error instanceof HttpMessageNotReadableException || error instanceof HttpRequestMethodNotSupportedException || error instanceof MissingServletRequestParameterException) {
             return RestResult.error(RestResult.INPUT_ERROR_CODE, "接口输入错误", ExceptionUtils.getRootCauseMessage(error));

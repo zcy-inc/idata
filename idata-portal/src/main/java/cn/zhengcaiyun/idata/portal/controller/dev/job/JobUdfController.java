@@ -8,9 +8,12 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,6 +40,8 @@ import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @Api("")
 @RestController
 @RequestMapping(path = "/p1/dev")
@@ -50,6 +55,8 @@ public class JobUdfController {
     private JobUdfService udfService;
     @Autowired
     private DevJobUdfDao devJobUdfDao;
+    @Autowired
+    private DevAccessService devAccessService;
 
     @ApiOperation("加载某个UDF详情")
     @ApiImplicitParams({
@@ -68,9 +75,11 @@ public class JobUdfController {
 
     @ApiOperation("新增UDF")
     @PostMapping("/udf")
-    public RestResult<DevJobUdf> add(@RequestBody @Valid UdfAddRequest udfAddRequest) {
+    public RestResult<DevJobUdf> add(@RequestBody @Valid UdfAddRequest udfAddRequest) throws IllegalAccessException {
         DevJobUdf udf = new DevJobUdf();
         BeanUtils.copyProperties(udfAddRequest, udf);
+        devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), udf.getFolderId());
+
         udf.setCreator(OperatorContext.getCurrentOperator().getNickname());
         udf.setDel(DeleteEnum.DEL_NO.val);
         udf.setCreateTime(new Date());
@@ -82,11 +91,14 @@ public class JobUdfController {
 
     @ApiOperation("更新UDF")
     @PutMapping("/udf")
-    public RestResult<DevJobUdf> update(@RequestBody UdfUpdateRequest udfUpdateRequest) {
+    public RestResult<DevJobUdf> update(@RequestBody UdfUpdateRequest udfUpdateRequest) throws IllegalAccessException {
         Long id = udfUpdateRequest.getId();
         DevJobUdf udf = devJobUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
+        Long originFolderId = udf.getFolderId();
 
         BeanUtils.copyProperties(udfUpdateRequest, udf);
+        devAccessService.checkUpdateAccess(OperatorContext.getCurrentOperator().getId(), originFolderId, udf.getFolderId());
+
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
         udf.setDel(DeleteEnum.DEL_NO.val);
@@ -101,7 +113,7 @@ public class JobUdfController {
             @ApiImplicitParam(name = "id", value = "udf id", dataType = "Long", required = true)
     })
     @DeleteMapping("/udf/{id}")
-    public RestResult<Boolean> deleteFolder(@PathVariable("id") Long id) {
+    public RestResult<Boolean> deleteFolder(@PathVariable("id") Long id) throws IllegalAccessException {
         return RestResult.success(udfService.delete(id));
     }
 

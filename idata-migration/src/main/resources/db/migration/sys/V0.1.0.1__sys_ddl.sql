@@ -8,7 +8,7 @@ create table if not exists idata.sys_config (
   editor      varchar(20)     comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   key_one     varchar(50)     not null comment '系统配置键1',
-  value_one   varchar(1000)   not null comment '系统配置值1',
+  value_one   text            comment '系统配置值1',
   type        varchar(20)     comment '配置类型'
 ) engine=innodb default charset=utf8mb4 comment='系统配置表';
 

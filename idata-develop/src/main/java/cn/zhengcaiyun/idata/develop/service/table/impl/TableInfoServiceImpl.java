@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -104,7 +105,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Autowired
     private EnumService enumService;
     @Autowired
-    private UserAccessService userAccessService;
+    private DevAccessService devAccessService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableName", "folderId"};
@@ -119,7 +120,6 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String COLUMN_PK_LABEL = "pk:LABEL";
-    private final String DATA_DEVELOP_ACCESS_CODE = "F_MENU_DATA_DEVELOP";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -248,9 +248,8 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public TableInfoDto create(TableInfoDto tableInfoDto, String operator) {
-        checkArgument(userAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId(),
-                DATA_DEVELOP_ACCESS_CODE, ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()), "无添加权限");
+    public TableInfoDto create(TableInfoDto tableInfoDto, String operator) throws IllegalAccessException {
+        devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId());
 
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(tableInfoDto.getTableName()), "表名称不能为空");
@@ -311,16 +310,15 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public TableInfoDto edit(TableInfoDto tableInfoDto, String operator) {
+    public TableInfoDto edit(TableInfoDto tableInfoDto, String operator) throws IllegalAccessException {
         checkArgument(isNotEmpty(operator), "修改者不能为空");
         checkArgument(tableInfoDto.getId() != null, "表ID不能为空");
         DevTableInfo checkTableInfo = devTableInfoDao.selectOne(c ->
                 c.where(devTableInfo.id, isEqualTo(tableInfoDto.getId()), and(devTableInfo.del, isNotEqualTo(1))))
                 .orElse(null);
         checkArgument(checkTableInfo != null, "表不存在");
-        checkArgument(userAccessService.checkUpdateAccess(OperatorContext.getCurrentOperator().getId(),
-                checkTableInfo.getFolderId(), tableInfoDto.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
-                "无权限，请联系管理员");
+        devAccessService.checkUpdateAccess(OperatorContext.getCurrentOperator().getId(),
+                checkTableInfo.getFolderId(), tableInfoDto.getFolderId());
 
         // 更新tableInfo表
         tableInfoDto.setEditor(operator);
@@ -385,7 +383,7 @@ public class TableInfoServiceImpl implements TableInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public boolean delete(Long tableId, String operator) {
+    public boolean delete(Long tableId, String operator) throws IllegalAccessException {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(tableId != null, "表ID不能为空");
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c ->
@@ -393,10 +391,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                         and(devTableInfo.id, isEqualTo(tableId))))
                 .orElse(null);
         checkArgument(tableInfo != null, "表不存在");
-        checkArgument(userAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(),
-                tableInfo.getFolderId(), ResourceTypeEnum.R_DATA_DEVELOP_DIR.name()),
-                "无权限，请联系管理员");
-
+        devAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), tableInfo.getFolderId());
 
         // 校验指标系统依赖
         List<DevLabel> measureList = devLabelDao.selectMany(select(devLabel.allColumns())

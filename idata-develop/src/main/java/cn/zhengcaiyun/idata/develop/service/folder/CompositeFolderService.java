@@ -35,13 +35,13 @@ public interface CompositeFolderService {
 
     List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition, Long userId);
 
-    Long addFolder(CompositeFolderDto folderDto, Operator operator);
+    Long addFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException;
 
-    Boolean editFolder(CompositeFolderDto folderDto, Operator operator);
+    Boolean editFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException;
 
     CompositeFolderDto getFolder(Long id);
 
-    Boolean removeFolder(Long id, Operator operator);
+    Boolean removeFolder(Long id, Operator operator) throws IllegalAccessException;
 
     List<CompositeFolderDto> getFolders(String belong);
 }

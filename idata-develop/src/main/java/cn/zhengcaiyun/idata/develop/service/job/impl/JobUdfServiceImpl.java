@@ -11,8 +11,11 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
+import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDynamicSqlSupport.devJobUdf;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
@@ -38,15 +42,19 @@ public class JobUdfServiceImpl implements JobUdfService {
     @Autowired
     private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
+    @Autowired
+    private DevAccessService devAccessService;
+
     @Override
-    public Boolean delete(Long id) {
+    public Boolean delete(Long id) throws IllegalAccessException {
         //校验是否绑定了函数，无法删除
         Boolean binded = jobContentCommonService.ifBindUDF(id);
         if (binded) {
-            throw new GeneralException("该汗水已绑定了SQL作业");
+            throw new GeneralException("该函数已绑定了SQL作业");
         }
 
         DevJobUdf devJobUdf = devUdfDao.selectByPrimaryKey(id).orElseThrow(() -> new IllegalArgumentException("数据不存在"));
+        devAccessService.checkDeleteAccess(OperatorContext.getCurrentOperator().getId(), devJobUdf.getFolderId());
 
         //已删除的直接返回
         if (devJobUdf.getDel() == DeleteEnum.DEL_YES.val) {

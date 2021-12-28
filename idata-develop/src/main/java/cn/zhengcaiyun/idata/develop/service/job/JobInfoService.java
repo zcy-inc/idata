@@ -34,15 +34,15 @@ import java.util.Set;
  **/
 public interface JobInfoService {
 
-    Long addJob(JobInfoDto dto, Operator operator);
+    Long addJob(JobInfoDto dto, Operator operator) throws IllegalAccessException;
 
-    Boolean editJobInfo(JobInfoDto dto, Operator operator);
+    Boolean editJobInfo(JobInfoDto dto, Operator operator) throws IllegalAccessException;
 
     JobInfoDto getJobInfo(Long id);
 
     JobDetailsDto getJobDetails(Long jobId, Integer version, Boolean isDryRun);
 
-    Boolean removeJob(Long id, Operator operator);
+    Boolean removeJob(Long id, Operator operator) throws IllegalAccessException;
 
     Boolean resumeJob(Long id, String environment, Operator operator);
 
