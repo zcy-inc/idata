@@ -198,6 +198,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                     if (copy.getStartTime() != null) {
                         copy.setDuration(DateUtil.between(finishTime, copy.getStartTime(), DateUnit.MS));
                     }
+                    copy.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(copy.getFinalStatus()));
                     map.get(jobId).getChildren().add(copy);
                 }
             }
