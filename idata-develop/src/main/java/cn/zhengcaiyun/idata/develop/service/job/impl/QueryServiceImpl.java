@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
@@ -96,19 +97,24 @@ public class QueryServiceImpl implements QueryService {
         ConfigDto baseAutocompletionTimConfig = systemConfigApi.getSystemConfigByKeyAndType(AUTOCOMPLETION_KEY, autocompletionType);
         String baseAutocompletionTimValue = baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY).getConfigValue();
         List<String> dbNameList = tableInfoService.getDbNames().stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
-        List<String> dbTableNameList = new ArrayList<>();
-        dbNameList.forEach(dbName -> {
-            List<String> tableNameList = tableInfoService.getTablesByDataBase(dbName).stream()
-                    .map(table -> dbName + "." + table.getTableName()).collect(Collectors.toList());
-            dbTableNameList.addAll(tableNameList);
-        });
-        echo.setDbTableNames(dbTableNameList);
+        List<TableInfoDto> tableList = new ArrayList<>();
+        dbNameList.forEach(dbName -> tableList.addAll(tableInfoService.getTablesByDataBase(dbName)));
+        Map<Long, String> dbTableMap = tableList.stream().collect(Collectors.toMap(TableInfoDto::getId,
+                tableInfo -> tableInfo.getDbName() + tableInfo.getTableName()));
+        echo.setDbTableNames(new ArrayList<>(dbTableMap.values()));
         List<Long> tableIdList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().map(DevTableInfo::getId).collect(Collectors.toList());
         List<ColumnDetailsDto> columnDetailsList = new ArrayList<>();
-        tableIdList.forEach(tableId -> columnDetailsList.addAll(
-                PojoUtil.copyList(columnInfoService.getColumnDetails(tableId), ColumnDetailsDto.class,
-                        "columnName", "columnType", "dbName", "tableName")));
+        tableIdList.forEach(tableId -> {
+            columnDetailsList.addAll(PojoUtil.copyList(columnInfoService.getColumnDetails(tableId),
+                    ColumnDetailsDto.class, "columnName", "columnType", "tableId"));
+        });
+        columnDetailsList.forEach(columnDetails -> {
+            if (dbTableMap.containsKey(columnDetails.getTableId())) {
+                columnDetails.setDbName(dbTableMap.get(columnDetails.getTableId()).split("\\.")[0]);
+                columnDetails.setTableName(dbTableMap.get(columnDetails.getTableId()).split("\\.")[1]);
+            }
+        });
         echo.setColumns(columnDetailsList);
         echo.setBasicAutocompletionTips(Arrays.asList(baseAutocompletionTimValue.split(",")));
         return echo;
