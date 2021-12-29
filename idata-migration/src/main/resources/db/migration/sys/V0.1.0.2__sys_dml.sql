@@ -54,7 +54,9 @@ values ('系统管理员', 'livy-config','{"url":{},"livy.sessionMax":{}}', 'LIV
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'ldap-config','{"ldap.url":{},"ldap.base":{},"ldap.userDn":{},"ldap.password":{},"ldap.domain":{}}', 'LDAP');
 insert into sys_config(creator ,key_one, value_one, type)
-values ('系统管理员', 'autocompletion-config','{"autocompletion-info":{}');
+values ('系统管理员', 'autocompletion-config','{}', 'SQL');
+insert into sys_config(creator ,key_one, value_one, type)
+values ('系统管理员', 'autocompletion-config','{}', 'PYTHON');
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'core-site','{}', 'HADOOP');
 insert into sys_config(creator ,key_one, value_one, type)
