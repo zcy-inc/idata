@@ -100,7 +100,7 @@ public class QueryServiceImpl implements QueryService {
         List<TableInfoDto> tableList = new ArrayList<>();
         dbNameList.forEach(dbName -> tableList.addAll(tableInfoService.getTablesByDataBase(dbName)));
         Map<Long, String> dbTableMap = tableList.stream().collect(Collectors.toMap(TableInfoDto::getId,
-                tableInfo -> tableInfo.getDbName() + tableInfo.getTableName()));
+                tableInfo -> tableInfo.getDbName() + "." + tableInfo.getTableName()));
         echo.setDbTableNames(new ArrayList<>(dbTableMap.values()));
         List<Long> tableIdList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().map(DevTableInfo::getId).collect(Collectors.toList());
