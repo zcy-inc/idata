@@ -2,8 +2,6 @@ import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { gantt } from 'dhtmlx-gantt';
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
-// import 'dhtmlx-gantt/codebase/locale/locale_cn.js';
-import './Gantt.less';
 gantt.plugins({
   tooltip: true
 });

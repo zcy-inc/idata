@@ -146,7 +146,7 @@ const GanttChart: FC = ({ }) => {
           startDate: moment('2021-12-21'),
       } }
       >
-        <ProFormDatePicker name="startDate" label="开始时间" fieldProps={{ size: 'large' }} />
+        <ProFormDatePicker name="startDate" label="开始时间" fieldProps={{style: { width: 200 }, size: 'large' }} />
         <ProFormSelect
           name="layerCode"
           label="数仓分层"

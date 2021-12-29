@@ -511,21 +511,27 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     }}
                   />
                 </Tooltip>
-                <IconFont
-                  type="icon-yunxingbaise-copy"
-                  className={styles.icon}
-                  onClick={() => onAction('resume')}
-                />
-                <IconFont
-                  type="icon-zantingbaise-copy"
-                  className={styles.icon}
-                  onClick={() => onAction('pause')}
-                />
-                <IconFont
-                  type="icon-shanchubaise-copy"
-                  className={styles.icon}
-                  onClick={onDelete}
-                />
+                <Tooltip title="恢复">
+                  <IconFont
+                    type="icon-yunxingbaise-copy"
+                    className={styles.icon}
+                    onClick={() => onAction('resume')}
+                  />
+                </Tooltip>
+                <Tooltip title="暂停">
+                  <IconFont
+                    type="icon-zantingbaise-copy"
+                    className={styles.icon}
+                    onClick={() => onAction('pause')}
+                  />
+                </Tooltip>
+                <Tooltip title="删除">
+                  <IconFont
+                    type="icon-shanchubaise-copy"
+                    className={styles.icon}
+                    onClick={onDelete}
+                  />
+                </Tooltip>
                 {(task?.jobType === TaskTypes.SQL_SPARK ||
                   task?.jobType === TaskTypes.SPARK_PYTHON ||
                   task?.jobType === TaskTypes.SCRIPT_PYTHON) && (
