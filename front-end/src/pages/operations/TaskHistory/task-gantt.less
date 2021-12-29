@@ -1,0 +1,84 @@
+@successColor: rgb(5, 204, 135);
+@inQueueColor: rgb(255, 201, 80);
+@inRunningColor: rgb(48, 79, 254);
+@failedColor: rgb(241, 51, 31);
+@otherColor: rgb(158, 168, 194);
+.job-history-gantt {
+  .milestone-7 {
+    border: 1px solid @successColor;
+    .gantt_task_progress {
+      background-color: @successColor;
+    }
+    .gantt_task_content {
+      color: @successColor;
+    }
+  }
+
+  .milestone-1 {
+    border: 1px solid @inQueueColor;
+    .gantt_task_progress {
+      background-color: @inQueueColor;
+    }
+    .gantt_task_content {
+      color: @inQueueColor;
+    }
+  }
+
+  .milestone-2 {
+    border: 1px solid @inRunningColor;
+    .gantt_task_progress {
+      background-color: @inRunningColor;
+    }
+    .gantt_task_content {
+      color: @inRunningColor;
+    }
+  }
+
+  .milestone-6 {
+    border: 1px solid @failedColor;
+    .gantt_task_progress {
+      background-color: @failedColor;
+    }
+    .gantt_task_content {
+      color: @failedColor;
+    }
+  }
+
+  .milestone--1 {
+    border: 1px solid @otherColor;
+    .gantt_task_progress {
+      background-color: @otherColor;
+    }
+    .gantt_task_content {
+      color: @otherColor;
+    }
+  }
+ 
+  .gantt_grid_head_cell {
+    padding-left: 6px;
+    text-align: left;
+  }
+}
+
+.task-gantt-tooltip {
+  line-height: 20px;
+  color:#737b96;
+  margin: 0;
+  padding: 0;
+  .task-gantt-tooltip-item {
+    &.name {
+      font-weight:500;
+      color:#141736;
+      font-size:12px;
+      margin-bottom: 4px;
+    }
+  }
+  .gantt-log-url {
+    display: block;
+    text-align: right;
+    padding-top: 8px;
+    margin-top: 6px;
+    border-top: 1px solid #ebedf3;
+  }
+}
+

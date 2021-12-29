@@ -1,5 +1,5 @@
-import { TaskTypes } from '@/constants/datadev';
-import { ClusterState } from '@/constants/operations';
+import type { TaskTypes } from '@/constants/datadev';
+import type { ClusterState } from '@/constants/operations';
 import { RuleLayer } from './objectlabel';
 
 /* ========== 运维看板 ========== */
@@ -18,6 +18,15 @@ export interface ScheduleListItem {
   jobStatus: string;
   taskId: number;
   environment: string;
+}
+export interface DagItem {
+  id: number;
+  name: string;
+}
+
+export interface EnumItem {
+  id: number;
+  enumValue: string;
 }
 
 export interface ClusterListItem {
@@ -85,6 +94,66 @@ export interface JobHistoryItem {
   applicationId: string; // yarn的application
   user: string; // 启动应用的user
   businessLogsUrl: string; // application master container url地址
+  layer: string; // 数仓分层
+  businessStatus: string; // 等待运行 1 / 运行中 2 / 失败 6 / 成功 7 / 其他 -1
+}
+
+/* ========== 作业历史 ========== */
+export interface JobHistoryGanttItem {
+  id: number;
+  createTime: number;
+  jobId: number; // 作业id
+  jobName: string; // 作业id
+  startTime: string; // 作业开始时间
+  children: Record<string, any> [], // 作业单次运行势力
+  finishTime: string; // 作业结束时间
+  duration: number; // 作业持续时间（ms）
+  finalStatus: string; // 作业最终状态
+  avgVcores: number; // 作业平均消耗cpu虚拟核数
+  avgMemory: number; // 作业平均消耗内存（GB）
+  applicationId: string; // yarn的application
+  user: string; // 启动应用的user
+  amContainerLogsUrl: string; // application master container url地址
+  layer: string; // 数仓分层
+  businessStatus: string; // 等待运行 1 / 运行中 2 / 失败 6 / 成功 7 / 其他 -1
+}
+
+/* ========== 作业历史 ========== */
+export interface JobHistoryGanttItem {
+  id: number;
+  createTime: number;
+  jobId: number; // 作业id
+  jobName: string; // 作业id
+  startTime: string; // 作业开始时间
+  children: Record<string, any> [], // 作业单次运行势力
+  finishTime: string; // 作业结束时间
+  duration: number; // 作业持续时间（ms）
+  finalStatus: string; // 作业最终状态
+  avgVcores: number; // 作业平均消耗cpu虚拟核数
+  avgMemory: number; // 作业平均消耗内存（GB）
+  applicationId: string; // yarn的application
+  user: string; // 启动应用的user
+  amContainerLogsUrl: string; // application master container url地址
+  layer: string; // 数仓分层
+  businessStatus: string; // 等待运行 1 / 运行中 2 / 失败 6 / 成功 7 / 其他 -1
+}
+
+/* ========== 作业历史 ========== */
+export interface JobHistoryGanttItem {
+  id: number;
+  createTime: number;
+  jobId: number; // 作业id
+  jobName: string; // 作业id
+  startTime: string; // 作业开始时间
+  children: Record<string, any> [], // 作业单次运行势力
+  finishTime: string; // 作业结束时间
+  duration: number; // 作业持续时间（ms）
+  finalStatus: string; // 作业最终状态
+  avgVcores: number; // 作业平均消耗cpu虚拟核数
+  avgMemory: number; // 作业平均消耗内存（GB）
+  applicationId: string; // yarn的application
+  user: string; // 启动应用的user
+  amContainerLogsUrl: string; // application master container url地址
   layer: string; // 数仓分层
   businessStatus: string; // 等待运行 1 / 运行中 2 / 失败 6 / 成功 7 / 其他 -1
 }
