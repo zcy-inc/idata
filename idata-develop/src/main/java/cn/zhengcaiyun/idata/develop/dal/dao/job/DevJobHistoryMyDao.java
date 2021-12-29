@@ -100,7 +100,7 @@ public interface DevJobHistoryMyDao {
 
     @Select("<script>" +
             " select t1.job_id " +
-            " from (select job_id from dev_job_history " +
+            " from (select job_id, start_time from dev_job_history " +
             "       where <![CDATA[ (start_time < #{endDate} and finish_time > #{startDate}) " +
             "           or (finish_time is null and start_time < #{startDate} and finish_time > #{startDate}) ]]>) as t1 " +
             " join (select id from dev_job_info " +
@@ -109,6 +109,7 @@ public interface DevJobHistoryMyDao {
             "   join (select job_id from dev_job_execute_config where sch_dag_id = #{dagId}) as t3 on t1.job_id = t3.job_id " +
             " </if> " +
             " group by t1.job_id " +
+            " order by min(start_time) " +
             " </script> ")
     List<Long> selectGanttIdList(String startDate, String endDate, String layerCode, Long dagId);
 
@@ -121,6 +122,7 @@ public interface DevJobHistoryMyDao {
             "           and job_id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t1 " +
             " left join (select id, name from dev_job_info where id in (<foreach collection = 'jobIdList' item = 'jobId' separator = ','>#{jobId}</foreach>)) as t2 " +
             " on t1.job_id = t2.id " +
+            " order by t1.start_time " +
             " </script>")
     List<JobHistoryDto> selectGanttList(String startDate, String endDate, List<Long> jobIdList);
 

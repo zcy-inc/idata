@@ -203,7 +203,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                 }
             }
         }
-        return new ArrayList<>(map.values());
+        ArrayList<JobHistoryTableGanttDto> jobHistoryTableGanttDtos = new ArrayList<>(map.values());
+        Collections.sort(jobHistoryTableGanttDtos);
+        return jobHistoryTableGanttDtos;
     }
 
 }

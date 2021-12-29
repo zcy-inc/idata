@@ -84,7 +84,7 @@ public interface JobHistoryService {
     String getBusinessLogUrl(String applicationId, String status);
 
     /**
-     * 甘特图返回变量格式转换
+     * 甘特图返回变量格式转换并进行内部排序
      * @param list
      * @return
      */
