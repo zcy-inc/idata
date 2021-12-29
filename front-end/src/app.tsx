@@ -156,7 +156,7 @@ export const request: RequestConfig = {
       return {
         ...resData,
         errorMessage: resData.msg,
-        showType: 2, // 错误提示方式.0 silent; 1 message.warn; 2 message.error; 4 notification; 9 page
+        showType: 0, // 错误提示方式.0 silent; 1 message.warn; 2 message.error; 4 notification; 9 page
       };
     },
   },
