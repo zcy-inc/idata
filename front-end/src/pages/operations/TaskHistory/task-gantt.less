@@ -53,10 +53,63 @@
       color: @otherColor;
     }
   }
+
+
+  .gantt-container {
+    height: calc(100vh - 336px);
+  }
  
   .gantt_grid_head_cell {
     padding-left: 6px;
     text-align: left;
+  }
+
+  .gantt_layout_cell_border_right {
+    box-shadow: 1px 0 2px 0px #E5E5E9;
+    border-right: none;
+    margin-right: 1px !important;
+    background-color: #fff;
+  }
+
+  .gantt_task_row.gantt_selected .gantt_task_cell {
+    border-right-color: transparent;
+  }
+
+  .scrollVer_cell {
+    border-right: 1px solid #ebebeb;
+  }
+
+  .gantt_task_row.odd, .gantt_task_row{
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .gantt_grid_data .gantt_row.gantt_selected,
+  .gantt_grid_data .gantt_row.odd.gantt_selected,
+  .gantt_task_row.gantt_selected,
+  .gantt_grid_data .gantt_row.odd:hover,
+  .gantt_grid_data .gantt_row:hover {
+    background-color:rgba(0, 0, 0, 0.05);
+  }
+
+  .gantt_row, .gantt_task_row {
+    border-bottom: none;
+  }
+
+  .gantt-tag {
+    display: inline-block;
+    font-size:12px;
+    line-height:16px;
+    font-weight:500;
+    padding: 4px;
+    background-color:#ebedf3;
+    border-radius:2px 4px;
+  }
+
+  .task-gantt-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -75,10 +128,10 @@
   }
   .gantt-log-url {
     display: block;
-    text-align: right;
     padding-top: 8px;
     margin-top: 6px;
     border-top: 1px solid #ebedf3;
   }
+
 }
 

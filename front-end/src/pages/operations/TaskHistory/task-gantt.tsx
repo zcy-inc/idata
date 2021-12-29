@@ -22,18 +22,19 @@ const timeFormat = (time: number) => {
 const initConfig = {
   readonly: true,
   duration_unit: 'minute',
+  min_column_width: 160,
   columns: [
     {
       name: 'id',
       label: 'ID',
       width: 60,
-      template: (obj: any) => `<span class="ant-tag">${obj.id}</span>`,
+      template: (obj: any) => `<span class="gantt-tag">${obj.id}</span>`,
     },
     {
       name: 'text',
       label: '作业名称',
-      width: 120,
-      template: (obj: any) => obj.text,
+      width: 200,
+      template: (obj: any) => `<span class="task-gantt-name">${obj.text || ''}</span>`,
     },
   ]
 }
