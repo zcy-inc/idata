@@ -22,7 +22,6 @@ const SqlEditor: FC<
   const monacoProviderRef = useRef<IDisposable>();
 
   useEffect(() => {
-    console.log(props);
     return () => {
       monacoProviderRef.current?.dispose();
       monacoRef.current?.dispose();
@@ -36,7 +35,6 @@ const SqlEditor: FC<
       ref={props?.formRef}
       options={{
         automaticLayout: true,
-        quickSuggestions: false,
         suggestOnTriggerCharacters: true,
       }}
       editorDidMount={async (editor, monacoInner) => {
