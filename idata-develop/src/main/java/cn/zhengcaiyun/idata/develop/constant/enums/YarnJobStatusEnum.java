@@ -12,15 +12,15 @@ import java.util.List;
 public enum YarnJobStatusEnum {
 
     // 目前同DS READY/
-    PENDING(1,  new String[]{"SUBMITTED", "ACCEPTED"}, "等待运行"),
+    PENDING(1,  new String[]{"SUBMITTED", "ACCEPTED"}, "等待运行",  new String[]{"SUBMITTED", "ACCEPTED"},  new String[]{"UNDEFINED"}),
 
-    RUNNING(2, new String[]{"RUNNING"}, "运行中"),
+    RUNNING(2, new String[]{"RUNNING"}, "运行中",  new String[]{"RUNNING"},  new String[]{"UNDEFINED"}),
 
-    FAIL(6,  new String[]{"FAILURE", "KILLED"}, "失败"),
+    FAIL(6,  new String[]{"FAILED", "KILLED"}, "失败",  new String[]{"FINISHED", "FAILED", "KILLED"},  new String[]{"FAILED", "KILLED"}),
 
-    SUCCESS(7, new String[]{"FINISHED", "SUCCEEDED"}, "成功"),
+    SUCCESS(7, new String[]{"FINISHED", "SUCCEEDED"}, "成功",  new String[]{"FINISHED", "SUCCEEDED"},  new String[]{"SUCCEEDED"}),
 
-    OTHER(-1, new String[]{"NEW", "NEW_SAVING"}, "其他")
+    OTHER(-1, new String[]{"NEW", "NEW_SAVING"}, "其他", new String[]{"NEW", "NEW_SAVING"}, new String[]{})
 
     ;
 
@@ -33,10 +33,22 @@ public enum YarnJobStatusEnum {
 
     public String description;
 
-    YarnJobStatusEnum(Integer value, String[] dsEnumCodes, String description) {
+    /**
+     * 别名描述状态
+     */
+    public String[] states;
+
+    /**
+     * 别名描述状态
+     */
+    public String[] finalStatus;
+
+    YarnJobStatusEnum(Integer value, String[] dsEnumCodes, String description, String[] states, String[] finalStatus) {
         this.value = value;
         this.yarnEnumCodes = dsEnumCodes;
         this.description = description;
+        this.states = states;
+        this.finalStatus = finalStatus;
     }
 
     public static Integer getValueByYarnEnumCode(String code) {
@@ -68,6 +80,15 @@ public enum YarnJobStatusEnum {
             }
         }
         return new ArrayList<>();
+    }
+
+    public static YarnJobStatusEnum getByValue(Integer value) {
+        for (YarnJobStatusEnum yarnEnumCodes : YarnJobStatusEnum.values()) {
+            if (yarnEnumCodes.value == value) {
+                return yarnEnumCodes;
+            }
+        }
+        return null;
     }
 
 

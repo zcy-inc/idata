@@ -321,17 +321,43 @@ public class DashboardServiceImpl implements DashboardService {
         LocalDateTime startTime = DateUtil.beginOfDay(new Date()).toLocalDateTime();
         LocalDateTime endTime = DateUtil.endOfDay(new Date()).toLocalDateTime();
         List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
-        List<String> codeList = YarnJobStatusEnum.getCodesByValue(state);
+        YarnJobStatusEnum yarnJobStatusEnum = YarnJobStatusEnum.getByValue(state);
+
         List<JobHistoryDto> dtoList = clusterAppDtoList
                 .stream()
-                .filter(e -> codeList.contains(StringUtils.upperCase(e.getState())))
+                .filter(e -> {
+                    switch (yarnJobStatusEnum) {
+                        case RUNNING:
+                           return Arrays.asList(YarnJobStatusEnum.RUNNING.states).contains(e.getState());
+                        case SUCCESS:
+                            return Arrays.asList(YarnJobStatusEnum.SUCCESS.finalStatus).contains(e.getFinalStatus());
+                        case FAIL:
+                            return Arrays.asList(YarnJobStatusEnum.FAIL.finalStatus).contains(e.getFinalStatus());
+                        case PENDING:
+                            return Arrays.asList(YarnJobStatusEnum.PENDING.states).contains(e.getFinalStatus());
+                        case OTHER:
+                            return Arrays.asList(YarnJobStatusEnum.OTHER.states).contains(e.getFinalStatus());
+                        default:
+                            return false;
+                    }
+                })
                 .map(e -> {
                     JobHistoryDto dto = new JobHistoryDto();
                     dto.setJobId(e.getJobId());
-                    dto.setFinalStatus(e.getState());
+                    dto.setFinalStatus(e.getFinalStatus());
                     dto.setAmContainerLogsUrl(e.getAmContainerLogs());
                     return dto;
                 }).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(dtoList)) {
+            Page<JobHistoryDto> page = new Page<>();
+            page.setPageNum(pageNum);
+            page.setPageSize(pageSize);
+            page.setPages(0);
+            page.setTotal(0);
+            page.setContent(new ArrayList<>());
+            return page;
+        }
         Page<JobHistoryDto> page = PaginationInMemory.of(dtoList).paging(PageParam.of(pageNum, pageSize));
         jobInfoService.fillJobName(page.getContent(), JobHistoryDto.class, "jobId", "jobName");
         return page;
