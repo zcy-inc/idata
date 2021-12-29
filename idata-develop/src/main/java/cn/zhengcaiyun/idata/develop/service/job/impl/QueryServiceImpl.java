@@ -21,11 +21,16 @@ import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.*;
+import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.system.api.SystemConfigApi;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
@@ -33,13 +38,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
@@ -62,7 +65,9 @@ public class QueryServiceImpl implements QueryService {
     @Autowired
     private TableInfoService tableInfoService;
     @Autowired
-    private DevColumnInfoDao devColumnInfoDao;
+    private ColumnInfoService columnInfoService;
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
 
     @Override
     public QueryStatementDto runQuery(QueryDto queryDto) {
@@ -85,10 +90,10 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public AutocompletionTipDto getAutocompletionTipConfigs() {
+    public AutocompletionTipDto getAutocompletionTipConfigs(String autocompletionType) {
         AutocompletionTipDto echo = new AutocompletionTipDto();
 
-        ConfigDto baseAutocompletionTimConfig = systemConfigApi.getSystemConfigByKey(AUTOCOMPLETION_KEY);
+        ConfigDto baseAutocompletionTimConfig = systemConfigApi.getSystemConfigByKeyAndType(AUTOCOMPLETION_KEY, autocompletionType);
         String baseAutocompletionTimValue = baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY).getConfigValue();
         List<String> dbNameList = tableInfoService.getDbNames().stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
         List<String> dbTableNameList = new ArrayList<>();
@@ -97,11 +102,15 @@ public class QueryServiceImpl implements QueryService {
                     .map(table -> dbName + "." + table.getTableName()).collect(Collectors.toList());
             dbTableNameList.addAll(tableNameList);
         });
-        Set<String> columnNameList = devColumnInfoDao.select(c -> c.where(devColumnInfo.del, isNotEqualTo(1)))
-                .stream().map(DevColumnInfo::getColumnName).collect(Collectors.toSet());
-        echo.setBasicAutocompletionTips(Arrays.asList(baseAutocompletionTimValue.split(",")));
         echo.setDbTableNames(dbTableNameList);
-        echo.setColumnNames(new ArrayList<>(columnNameList));
+        List<Long> tableIdList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().map(DevTableInfo::getId).collect(Collectors.toList());
+        List<ColumnDetailsDto> columnDetailsList = new ArrayList<>();
+        tableIdList.forEach(tableId -> columnDetailsList.addAll(
+                PojoUtil.copyList(columnInfoService.getColumnDetails(tableId), ColumnDetailsDto.class,
+                        "columnName", "columnType", "dbName", "tableName")));
+        echo.setColumns(columnDetailsList);
+        echo.setBasicAutocompletionTips(Arrays.asList(baseAutocompletionTimValue.split(",")));
         return echo;
     }
 

@@ -70,4 +70,10 @@ public class SystemConfigRepoImpl implements SystemConfigRepo {
         return sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo(configKey),
                 and(sysConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
+
+    @Override
+    public Optional<SysConfig> queryByKeyAndType(String configKey, String configType) {
+        return sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo(configKey),
+                and(sysConfig.del, isEqualTo(DeleteEnum.DEL_NO.val)), and(sysConfig.type, isEqualTo(configType))));
+    }
 }

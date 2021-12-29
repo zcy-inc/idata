@@ -25,4 +25,5 @@ import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 
 public interface SystemConfigApi {
     ConfigDto getSystemConfigByKey(String configKey);
+    ConfigDto getSystemConfigByKeyAndType(String configKey, String configType);
 }

@@ -34,4 +34,6 @@ public interface SystemConfigRepo {
     boolean updateById(SysConfig config);
 
     Optional<SysConfig> queryByKey(String configKey);
+
+    Optional<SysConfig> queryByKeyAndType(String configKey, String configType);
 }
