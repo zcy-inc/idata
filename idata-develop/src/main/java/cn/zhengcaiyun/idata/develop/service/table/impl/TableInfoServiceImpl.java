@@ -134,7 +134,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL)),
                         and(devLabel.labelParamValue, isEqualTo(labelValue)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        return PojoUtil.copyList(tableInfoList, TableInfoDto.class);
+        return PojoUtil.copyList(tableInfoList, TableInfoDto.class).stream().peek(d -> d.setDbName(labelValue)).collect(Collectors.toList());
     }
 
     @Override

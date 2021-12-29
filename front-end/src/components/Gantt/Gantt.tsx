@@ -2,8 +2,6 @@ import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { gantt } from 'dhtmlx-gantt';
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
-// import 'dhtmlx-gantt/codebase/locale/locale_cn.js';
-import './Gantt.less';
 gantt.plugins({
   tooltip: true
 });
@@ -42,6 +40,7 @@ const Gantt: FC<GanttProps> = ({tasks, config, zoom, templates}) => {
     gantt.clearAll();
     gantt.init(ganttContainer); // 初始化 dhtmlxGantt 到 ganttContainer 容器中
     gantt.parse(tasks); // 将数据注入到甘特图
+    gantt.scrollTo(0, 0);
   }
 
   useEffect(() => {

@@ -49,7 +49,7 @@ public class QueryController {
     }
 
     @GetMapping("/autocompletionTipConfigs")
-    public RestResult<AutocompletionTipDto> getAutocompletionTipConfigs() {
-        return RestResult.success(queryService.getAutocompletionTipConfigs());
+    public RestResult<AutocompletionTipDto> getAutocompletionTipConfigs(@RequestParam("autocompletionType") String autocompletionType) {
+        return RestResult.success(queryService.getAutocompletionTipConfigs(autocompletionType));
     }
 }
