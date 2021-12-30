@@ -51,18 +51,21 @@ public interface DevJobHistoryMyDao {
     // 多条sql需要设置mysql allowMultiQueries=true
     //"SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
     @Select("<script>" +
-            "SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
-            "select *, AVG(duration) as avg_duration " +
-            "from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by duration desc limit #{top}) as t " +
-            "group by t.job_id" +
+            " SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
+            " select *, AVG(duration) as avg_duration " +
+            " from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by duration desc limit 100000) as t " +
+            " group by t.job_id" +
+            " order by max(duration) desc" +
+            " limit #{top}" +
             "</script>")
     List<JobHistoryDto> topDurationGroupByJobId(String startDate, String endDate, int top);
 
     @Select("<script>" +
             " SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY',''));" + //设置当前会话group by可显示其他字段内容
             " select * " +
-            " from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by avg_memory/4096, avg_vcores desc limit 1000) as t " +
+            " from (select * from dev_job_history where <![CDATA[start_time >= #{startDate}]]> and <![CDATA[finish_time <= #{endDate}]]> order by avg_memory desc limit 100000) as t " +
             " group by t.job_id" +
+            " order by max(avg_memory) desc" +
             " limit #{top}" +
             "</script>")
     List<JobHistoryDto> topResourceGroupByJobId(String startDate, String endDate, int top);
