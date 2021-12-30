@@ -71,7 +71,15 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
     { title: 'ID', dataIndex: 'jobId', key: 'jobId' },
     { title: '名称', dataIndex: 'jobName', key: 'jobName', render: (_) => _ || '-' },
     { title: '平均CPU核数（个）', dataIndex: 'avgVcores', key: 'avgVcores' },
-    { title: '平均内存（GB）', dataIndex: 'avgMemory', key: 'avgMemory' },
+    {
+      title: '平均内存（GB）',
+      dataIndex: 'avgMemory',
+      key: 'avgMemory',
+      render: (_: string) => {
+        const m = Number(_) || 0;
+        return (m / 1024).toFixed(2);
+      },
+    },
     {
       title: '完成时间',
       dataIndex: 'finishTime',
@@ -93,7 +101,7 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
 
   return (
     <Tabs onChange={(k) => setActiveKey(k)}>
-      <TabPane tab="作业耗时" key="time">
+      <TabPane tab="计算时间消耗Top10" key="time">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
           <Radio.Group
             optionType="button"
@@ -114,7 +122,7 @@ const SchedulOperation: FC<SchedulOperationProps> = () => {
           scroll={{ x: 'max-content' }}
         />
       </TabPane>
-      <TabPane tab="作业耗资源" key="resource">
+      <TabPane tab="计算资源消耗Top10" key="resource">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
           <Radio.Group
             optionType="button"
