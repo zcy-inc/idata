@@ -25,6 +25,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 /**
  * @author shiyin
  * @date 2021-02-04 18:00
@@ -39,6 +42,11 @@ public class PortalApplication implements CommandLineRunner {
     public static void main(String[] args) {
         SpringApplication.run(PortalApplication.class, args);
         log.info("IData portal server started successfully...");
+    }
+
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
     @Override
