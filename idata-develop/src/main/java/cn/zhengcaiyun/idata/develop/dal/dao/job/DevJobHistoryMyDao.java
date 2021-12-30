@@ -37,14 +37,14 @@ import java.util.List;
 public interface DevJobHistoryMyDao {
 
     @Insert("<script>" +
-            "insert into dev_job_history(create_time, job_id, start_time, finish_time, duration, final_status, " +
+            "insert into dev_job_history(create_time, job_id, start_time, finish_time, duration, state, final_status, " +
             "avg_vcores, avg_memory, application_id, user, am_container_logs_url) " +
             "values " +
             "<foreach collection='list' item='item' index='index' separator=','> " +
-            "(#{item.createTime}, #{item.jobId}, #{item.startTime}, #{item.finishTime}, #{item.duration}, #{item.finalStatus}, " +
+            "(#{item.createTime}, #{item.jobId}, #{item.startTime}, #{item.finishTime}, #{item.duration}, #{item.state}, #{item.finalStatus}, " +
             "#{item.avgVcores}, #{item.avgMemory}, #{item.applicationId}, #{item.user}, #{item.amContainerLogsUrl})" +
             "</foreach> " +
-            "ON DUPLICATE KEY UPDATE final_status = VALUES(final_status), user = VALUES(user), am_container_logs_url = VALUES(am_container_logs_url)" +
+            "ON DUPLICATE KEY UPDATE final_status = VALUES(final_status), state = VALUES(state), user = VALUES(user), am_container_logs_url = VALUES(am_container_logs_url)" +
             "</script>")
     void batchUpsert(List<DevJobHistory> list);
 

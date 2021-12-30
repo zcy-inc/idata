@@ -48,6 +48,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
     @Override
     public void batchUpsert(List<DevJobHistory> devJobHistoryList) {
+        if (CollectionUtils.isEmpty(devJobHistoryList)) {
+            return;
+        }
         devJobHistoryMyDao.batchUpsert(devJobHistoryList);
     }
 
@@ -111,8 +114,8 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
             JobHistoryGanttDto.Data data = new JobHistoryGanttDto.Data();
             BeanUtils.copyProperties(e, data);
-            data.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(e.getFinalStatus()));
-            data.setBusinessLogsUrl(getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus()));
+            data.setBusinessStatus(YarnJobStatusEnum.getValueByStateAndFinalStatus(e.getState(), e.getFinalStatus()));
+            data.setBusinessLogsUrl(getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus(), e.getState()));
             jobHistoryGanttDto.getSerialData().add(data);
 
             map.put(jobId, jobHistoryGanttDto);
@@ -132,13 +135,19 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public String getBusinessLogUrl(String applicationId, String status) {
+    public String getBusinessLogUrl(String applicationId, String finalStatus, String state) {
         if (StringUtils.isEmpty(applicationId)) {
             return null;
         }
 
+        YarnJobStatusEnum enumCode;
+        if (StringUtils.isNotEmpty(state)) {
+            enumCode = YarnJobStatusEnum.getByStateAndFinalStatus(state, finalStatus);
+        } else {
+            enumCode = YarnJobStatusEnum.getByYarnEnumCode(finalStatus);
+        }
+
         String defaultUrl = YARN_RM_URI + "/cluster/app/" + applicationId;
-        YarnJobStatusEnum enumCode = YarnJobStatusEnum.getByYarnEnumCode(status);
         if (enumCode == null) {
             return defaultUrl;
         }
@@ -150,11 +159,12 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         }
 
         ClusterAppDto clusterAppDto = resourceManagerService.queryAppId(applicationId);
-        String confirmStatus = clusterAppDto.getFinalStatus();
-        if (clusterAppDto == null && StringUtils.isEmpty(confirmStatus)) {
+        String confirmFinalStatus = clusterAppDto.getFinalStatus();
+        String confirmState = clusterAppDto.getState();
+        if (clusterAppDto == null && StringUtils.isEmpty(confirmFinalStatus)) {
             return defaultUrl;
         }
-        enumCode = YarnJobStatusEnum.getByYarnEnumCode(confirmStatus);
+        enumCode = YarnJobStatusEnum.getByStateAndFinalStatus(confirmState, confirmFinalStatus);
         switch (enumCode) {
             case SUCCESS:
             case FAIL:
@@ -198,7 +208,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                     if (copy.getStartTime() != null) {
                         copy.setDuration(DateUtil.between(finishTime, copy.getStartTime(), DateUnit.MS));
                     }
-                    copy.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(copy.getFinalStatus()));
+                    copy.setBusinessStatus(YarnJobStatusEnum.getValueByStateAndFinalStatus(data.getState(), data.getFinalStatus()));
                     map.get(jobId).getChildren().add(copy);
                 }
             }

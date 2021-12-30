@@ -19,6 +19,13 @@ public class YarnJobSummaryResponse {
      */
     private String amContainerLogsUrl;
 
+    /**
+     * 业务方需要的日志地址逻辑
+     * http://bigdata-master3.cai-inc.com:8088/cluster/app/application_1636461038777_141467     killed  failed finished
+     * http://bigdata-master3.cai-inc.com:8088/proxy/application_1636461038777_145072/       running
+     */
+    private String businessLogsUrl;
+
     public Long getJobId() {
         return JobId;
     }
@@ -49,5 +56,13 @@ public class YarnJobSummaryResponse {
 
     public void setAmContainerLogsUrl(String amContainerLogsUrl) {
         this.amContainerLogsUrl = amContainerLogsUrl;
+    }
+
+    public String getBusinessLogsUrl() {
+        return businessLogsUrl;
+    }
+
+    public void setBusinessLogsUrl(String businessLogsUrl) {
+        this.businessLogsUrl = businessLogsUrl;
     }
 }

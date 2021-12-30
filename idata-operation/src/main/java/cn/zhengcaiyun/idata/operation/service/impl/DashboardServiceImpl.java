@@ -320,31 +320,21 @@ public class DashboardServiceImpl implements DashboardService {
     public Page<JobHistoryDto> pageYarnJob(Integer state, Integer pageNum, Integer pageSize) throws NoSuchFieldException {
         LocalDateTime startTime = DateUtil.beginOfDay(new Date()).toLocalDateTime();
         LocalDateTime endTime = DateUtil.endOfDay(new Date()).toLocalDateTime();
-        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
+        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, EnvEnum.prod);
         YarnJobStatusEnum yarnJobStatusEnum = YarnJobStatusEnum.getByValue(state);
 
         List<JobHistoryDto> dtoList = clusterAppDtoList
                 .stream()
                 .filter(e -> {
-                    switch (yarnJobStatusEnum) {
-                        case RUNNING:
-                           return Arrays.asList(YarnJobStatusEnum.RUNNING.states).contains(e.getState());
-                        case SUCCESS:
-                            return Arrays.asList(YarnJobStatusEnum.SUCCESS.finalStatus).contains(e.getFinalStatus());
-                        case FAIL:
-                            return Arrays.asList(YarnJobStatusEnum.FAIL.finalStatus).contains(e.getFinalStatus());
-                        case PENDING:
-                            return Arrays.asList(YarnJobStatusEnum.PENDING.states).contains(e.getFinalStatus());
-                        case OTHER:
-                            return Arrays.asList(YarnJobStatusEnum.OTHER.states).contains(e.getFinalStatus());
-                        default:
-                            return false;
-                    }
+                    YarnJobStatusEnum jobStatusEnum = YarnJobStatusEnum.getByStateAndFinalStatus(e.getState(), e.getFinalStatus());
+                    return jobStatusEnum == yarnJobStatusEnum;
                 })
                 .map(e -> {
                     JobHistoryDto dto = new JobHistoryDto();
+                    dto.setApplicationId(e.getAppId());
                     dto.setJobId(e.getJobId());
                     dto.setFinalStatus(e.getFinalStatus());
+                    dto.setState(e.getState());
                     dto.setAmContainerLogsUrl(e.getAmContainerLogs());
                     return dto;
                 }).collect(Collectors.toList());
@@ -376,6 +366,7 @@ public class DashboardServiceImpl implements DashboardService {
                     dto.setJobId(e.getJobId());
                     dto.setJobInstanceId(e.getId());
                     dto.setFinalStatus(e.getState());
+                    dto.setState(e.getState());
                     return dto;
                 }).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(dtoList)) {
@@ -395,7 +386,10 @@ public class DashboardServiceImpl implements DashboardService {
         List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(DateUtil.toLocalDateTime(startTime), DateUtil.toLocalDateTime(endTime), EnvEnum.prod);
         HashMap<YarnJobStatusEnum, Integer> map = Maps.newHashMap();
         list.forEach(e -> {
-            YarnJobStatusEnum dsJobStatusEnum = YarnJobStatusEnum.getByYarnEnumCode(e.getState());
+            String state = e.getState();
+            String finalStatus = e.getFinalStatus();
+
+            YarnJobStatusEnum dsJobStatusEnum = YarnJobStatusEnum.getByStateAndFinalStatus(state, finalStatus);
             map.put(dsJobStatusEnum, map.getOrDefault(dsJobStatusEnum, 0) + 1);
         });
 

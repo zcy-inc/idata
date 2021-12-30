@@ -81,7 +81,7 @@ public interface JobHistoryService {
      * http://bigdata-master3.cai-inc.com:8088/cluster/app/application_1636461038777_141467     killed  failed finished
      * http://bigdata-master3.cai-inc.com:8088/proxy/application_1636461038777_145072/       running
      */
-    String getBusinessLogUrl(String applicationId, String status);
+    String getBusinessLogUrl(String applicationId, String finalStatus, String state);
 
     /**
      * 甘特图返回变量格式转换并进行内部排序

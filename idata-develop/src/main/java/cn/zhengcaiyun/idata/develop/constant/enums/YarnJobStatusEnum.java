@@ -1,10 +1,10 @@
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * 映射业务的yarn state枚举
@@ -87,6 +87,25 @@ public enum YarnJobStatusEnum {
             if (yarnEnumCodes.value == value) {
                 return yarnEnumCodes;
             }
+        }
+        return null;
+    }
+
+    public static YarnJobStatusEnum getByStateAndFinalStatus(String state, String finalStatus) {
+        for (YarnJobStatusEnum yarnJobStatusEnum : YarnJobStatusEnum.values()) {
+            List<String> statesList = Arrays.asList(yarnJobStatusEnum.states);
+            List<String> finalStatusList = Arrays.asList(yarnJobStatusEnum.finalStatus);
+            if (statesList.contains(state) && finalStatusList.contains(finalStatus)) {
+                return yarnJobStatusEnum;
+            }
+        }
+        return null;
+    }
+
+    public static Integer getValueByStateAndFinalStatus(String state, String finalStatus) {
+        YarnJobStatusEnum yarnJobStatusEnum = getByStateAndFinalStatus(state, finalStatus);
+        if (yarnJobStatusEnum != null) {
+            return yarnJobStatusEnum.value;
         }
         return null;
     }

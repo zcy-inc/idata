@@ -45,6 +45,13 @@ public class DevJobHistory {
 
     /**
      * Database Column Remarks:
+     *   作业当前状态
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.state")
+    private String state;
+
+    /**
+     * Database Column Remarks:
      *   作业最终状态
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.final_status")
@@ -143,6 +150,16 @@ public class DevJobHistory {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.duration")
     public void setDuration(Long duration) {
         this.duration = duration;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.state")
+    public String getState() {
+        return state;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.state")
+    public void setState(String state) {
+        this.state = state;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.final_status")

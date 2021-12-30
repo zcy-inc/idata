@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevJobHistoryDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
-    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, finalStatus, avgVcores, avgMemory, applicationId, user, amContainerLogsUrl);
+    BasicColumn[] selectList = BasicColumn.columnList(id, createTime, jobId, startTime, finishTime, duration, state, finalStatus, avgVcores, avgMemory, applicationId, user, amContainerLogsUrl);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_history")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -63,6 +63,7 @@ public interface DevJobHistoryDao {
         @Result(column="start_time", property="startTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="finish_time", property="finishTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="duration", property="duration", jdbcType=JdbcType.BIGINT),
+        @Result(column="state", property="state", jdbcType=JdbcType.VARCHAR),
         @Result(column="final_status", property="finalStatus", jdbcType=JdbcType.VARCHAR),
         @Result(column="avg_vcores", property="avgVcores", jdbcType=JdbcType.DOUBLE),
         @Result(column="avg_memory", property="avgMemory", jdbcType=JdbcType.BIGINT),
@@ -101,6 +102,7 @@ public interface DevJobHistoryDao {
             .map(startTime).toProperty("startTime")
             .map(finishTime).toProperty("finishTime")
             .map(duration).toProperty("duration")
+            .map(state).toProperty("state")
             .map(finalStatus).toProperty("finalStatus")
             .map(avgVcores).toProperty("avgVcores")
             .map(avgMemory).toProperty("avgMemory")
@@ -118,6 +120,7 @@ public interface DevJobHistoryDao {
             .map(startTime).toPropertyWhenPresent("startTime", record::getStartTime)
             .map(finishTime).toPropertyWhenPresent("finishTime", record::getFinishTime)
             .map(duration).toPropertyWhenPresent("duration", record::getDuration)
+            .map(state).toPropertyWhenPresent("state", record::getState)
             .map(finalStatus).toPropertyWhenPresent("finalStatus", record::getFinalStatus)
             .map(avgVcores).toPropertyWhenPresent("avgVcores", record::getAvgVcores)
             .map(avgMemory).toPropertyWhenPresent("avgMemory", record::getAvgMemory)
@@ -161,6 +164,7 @@ public interface DevJobHistoryDao {
                 .set(startTime).equalTo(record::getStartTime)
                 .set(finishTime).equalTo(record::getFinishTime)
                 .set(duration).equalTo(record::getDuration)
+                .set(state).equalTo(record::getState)
                 .set(finalStatus).equalTo(record::getFinalStatus)
                 .set(avgVcores).equalTo(record::getAvgVcores)
                 .set(avgMemory).equalTo(record::getAvgMemory)
@@ -176,6 +180,7 @@ public interface DevJobHistoryDao {
                 .set(startTime).equalToWhenPresent(record::getStartTime)
                 .set(finishTime).equalToWhenPresent(record::getFinishTime)
                 .set(duration).equalToWhenPresent(record::getDuration)
+                .set(state).equalToWhenPresent(record::getState)
                 .set(finalStatus).equalToWhenPresent(record::getFinalStatus)
                 .set(avgVcores).equalToWhenPresent(record::getAvgVcores)
                 .set(avgMemory).equalToWhenPresent(record::getAvgMemory)
@@ -192,6 +197,7 @@ public interface DevJobHistoryDao {
             .set(startTime).equalTo(record::getStartTime)
             .set(finishTime).equalTo(record::getFinishTime)
             .set(duration).equalTo(record::getDuration)
+            .set(state).equalTo(record::getState)
             .set(finalStatus).equalTo(record::getFinalStatus)
             .set(avgVcores).equalTo(record::getAvgVcores)
             .set(avgMemory).equalTo(record::getAvgMemory)
@@ -210,6 +216,7 @@ public interface DevJobHistoryDao {
             .set(startTime).equalToWhenPresent(record::getStartTime)
             .set(finishTime).equalToWhenPresent(record::getFinishTime)
             .set(duration).equalToWhenPresent(record::getDuration)
+            .set(state).equalToWhenPresent(record::getState)
             .set(finalStatus).equalToWhenPresent(record::getFinalStatus)
             .set(avgVcores).equalToWhenPresent(record::getAvgVcores)
             .set(avgMemory).equalToWhenPresent(record::getAvgMemory)

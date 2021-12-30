@@ -200,6 +200,7 @@ public class DashboardController {
             response.setJobStatus(s.getFinalStatus());
             response.setJobName(s.getJobName());
             response.setAmContainerLogsUrl(s.getAmContainerLogsUrl());
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(s.getApplicationId(), s.getFinalStatus(), s.getState()));
             return response;
         });
         return RestResult.success(responsePage);
@@ -212,7 +213,7 @@ public class DashboardController {
      */
     @GetMapping("/rank/timeConsume")
     public RestResult<List<RankTimeConsumeResponse>> timeConsumeRank(@RequestParam("recentDays") Integer recentDays) throws NoSuchFieldException {
-        DateTime today = DateUtil.date();
+        DateTime today = DateUtil.beginOfDay(DateUtil.date());
         DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
         List<RankTimeConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeTime(startDate, today, 10);
 
@@ -220,7 +221,7 @@ public class DashboardController {
         for (RankTimeConsumeDto dto : rankTimeConsumeDtos) {
             RankTimeConsumeResponse response = new RankTimeConsumeResponse();
             BeanUtils.copyProperties(dto, response);
-            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), "FINISHED"));
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), null, "FINISHED"));
             responseList.add(response);
         }
 
@@ -234,7 +235,7 @@ public class DashboardController {
      */
     @GetMapping("/rank/resourceConsume")
     public RestResult<List<RankResourceConsumeResponse>> resourceConsumeRank(@RequestParam("recentDays") Integer recentDays) throws NoSuchFieldException {
-        DateTime today = DateUtil.date();
+        DateTime today = DateUtil.beginOfDay(DateUtil.date());
         DateTime startDate = DateUtil.offsetDay(today, -recentDays + 1);
         List<RankResourceConsumeDto> rankTimeConsumeDtos = dashboardService.rankConsumeResource(startDate, today, 10);
 
@@ -242,7 +243,7 @@ public class DashboardController {
         for (RankResourceConsumeDto dto : rankTimeConsumeDtos) {
             RankResourceConsumeResponse response = new RankResourceConsumeResponse();
             BeanUtils.copyProperties(dto, response);
-            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), "FINISHED"));
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(dto.getApplicationId(), null, "FINISHED"));
             responseList.add(response);
         }
 
@@ -275,7 +276,7 @@ public class DashboardController {
             // MB转GB
             response.setAvgMemory(response.getAvgMemory()/1024);
             // 状态
-            response.setBusinessStatus(YarnJobStatusEnum.getValueByYarnEnumCode(response.getFinalStatus()));
+            response.setBusinessStatus(YarnJobStatusEnum.getValueByStateAndFinalStatus(s.getState(), s.getFinalStatus()));
             return response;
         });
 

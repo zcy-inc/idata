@@ -43,7 +43,7 @@ public class JobHistoryController {
             JobHistoryResponse response = new JobHistoryResponse();
             BeanUtils.copyProperties(e, response);
             response.setJobName(jobInfo.getName());
-            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus()));
+            response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(e.getApplicationId(), e.getFinalStatus(), e.getState()));
 
             return response;
         });

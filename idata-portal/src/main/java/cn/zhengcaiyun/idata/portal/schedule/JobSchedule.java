@@ -51,7 +51,7 @@ public class JobSchedule {
     @Scheduled(cron = JOB_HISTORY_HOUR_CRON)
     public void pullSparkSqlJobHistoryHourly() {
         LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusHours(2);
+        LocalDateTime startTime = endTime.minusHours(3);
         pullJobHistory(startTime, endTime);
     }
 
@@ -65,6 +65,7 @@ public class JobSchedule {
                     devJobHistory.setFinishTime(Date.from(e.getFinishedTime().atZone(ZoneId.systemDefault()).toInstant()));
                     devJobHistory.setDuration(e.getElapsedTime());
                     devJobHistory.setFinalStatus(e.getFinalStatus());
+                    devJobHistory.setState(e.getState());
                     Long vcoreSeconds = e.getVcoreSeconds();
                     Double elapsedTime = e.getElapsedTime().doubleValue();
                     devJobHistory.setAvgVcores(NumberUtil.round(vcoreSeconds/elapsedTime*1000, 2).doubleValue());

@@ -40,6 +40,11 @@ public class JobHistoryDto implements Comparable {
      */
     private Long duration;
 
+    /***
+     * 作业状态
+     */
+    private String state;
+
     /***   作业最终状态
      */
     private String finalStatus;
@@ -209,5 +214,13 @@ public class JobHistoryDto implements Comparable {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

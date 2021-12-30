@@ -8,18 +8,16 @@ import java.util.List;
 
 public enum DsJobStatusEnum {
 
-    READY(1, new String[]{"submit success"}, new String[]{"SUBMITTED_SUCCESS"}, "等待运行"),
+    READY(1, new String[]{"submit success", "pause", "delay execution"}, new String[]{"SUBMITTED_SUCCESS", "PAUSE", "DELAY_EXECUTION"}, "等待运行"),
 
-    RUNNING(2, new String[]{"running"}, new String[]{"RUNNING_EXECUTION"}, "运行中"),
+    RUNNING(2, new String[]{"running", "ready pause", "ready stop"}, new String[]{"RUNNING_EXECUTION", "READY_PAUSE", "READY_STOP"}, "运行中"),
 
     FAIL(6, new String[]{"failure"}, new String[]{"FAILURE"}, "失败"),
 
     SUCCESS(7, new String[]{"success", "forced success"},  new String[]{"SUCCESS", "FORCED_SUCCESS"}, "成功"),
 
-    OTHER(-1, new String[]{"ready pause", "pause", "ready stop", "stop", "need fault tolerance", "kill", "waiting thread",
-            "waiting depend node complete", "delay execution"},
-            new String[]{"READY_PAUSE", "PAUSE", "READY_STOP", "STOP", "NEED_FAULT_TOLERANCE", "KILL", "WAITING_THREAD",
-            "WAITING_DEPEND", "DELAY_EXECUTION"},"其他"),
+    OTHER(-1, new String[]{ "stop", "need fault tolerance", "kill", "waiting thread", "waiting depend node complete"},
+            new String[]{ "STOP", "NEED_FAULT_TOLERANCE", "KILL", "WAITING_THREAD", "WAITING_DEPEND"},"其他"),
     ;
 
     public Integer value;

@@ -106,6 +106,11 @@ public class JobHistoryGanttDto {
         private Date finishTime;
 
         /**
+         *   作业状态
+         */
+        private String state;
+
+        /**
          * Database Column Remarks:
          *   作业最终状态
          */
@@ -199,6 +204,14 @@ public class JobHistoryGanttDto {
 
         public void setBusinessLogsUrl(String businessLogsUrl) {
             this.businessLogsUrl = businessLogsUrl;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
         }
     }
 }

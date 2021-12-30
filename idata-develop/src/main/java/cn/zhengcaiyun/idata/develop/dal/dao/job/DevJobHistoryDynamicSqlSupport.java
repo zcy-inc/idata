@@ -46,6 +46,13 @@ public final class DevJobHistoryDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   作业当前状态
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.state")
+    public static final SqlColumn<String> state = devJobHistory.state;
+
+    /**
+     * Database Column Remarks:
      *   作业最终状态
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_history.final_status")
@@ -99,6 +106,8 @@ public final class DevJobHistoryDynamicSqlSupport {
         public final SqlColumn<Date> finishTime = column("finish_time", JDBCType.TIMESTAMP);
 
         public final SqlColumn<Long> duration = column("duration", JDBCType.BIGINT);
+
+        public final SqlColumn<String> state = column("state", JDBCType.VARCHAR);
 
         public final SqlColumn<String> finalStatus = column("final_status", JDBCType.VARCHAR);
 
