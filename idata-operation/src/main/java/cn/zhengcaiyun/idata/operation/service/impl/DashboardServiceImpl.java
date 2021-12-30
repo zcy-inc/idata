@@ -183,7 +183,7 @@ public class DashboardServiceImpl implements DashboardService {
             LocalDateTime startLocalDate = DateUtil.beginOfDay(today).toLocalDateTime();
             LocalDateTime endLocalDate = DateUtil.endOfDay(today).toLocalDateTime();
             List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(startLocalDate, endLocalDate, EnvEnum.prod);
-            Map<Long, Optional<ClusterAppDto>> map = list.stream().collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getElapsedTime))));
+            Map<Long, Optional<ClusterAppDto>> map = list.stream().filter(e -> e.getJobId() != null).collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getElapsedTime))));
 
             List<RankTimeConsumeDto> tmpList = new ArrayList<>();
             map.forEach((k, v) -> {
@@ -267,7 +267,7 @@ public class DashboardServiceImpl implements DashboardService {
             LocalDateTime startLocalDate = DateUtil.beginOfDay(today).toLocalDateTime();
             LocalDateTime endLocalDate = DateUtil.endOfDay(today).toLocalDateTime();
             List<ClusterAppDto> list = resourceManagerService.fetchClusterApps(startLocalDate, endLocalDate, EnvEnum.prod);
-            Map<Long, Optional<ClusterAppDto>> map = list.stream().collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getMemorySeconds))));
+            Map<Long, Optional<ClusterAppDto>> map = list.stream().filter(e -> e.getJobId() != null).collect(Collectors.groupingBy(ClusterAppDto::getJobId, Collectors.maxBy(Comparator.comparingLong(ClusterAppDto::getMemorySeconds))));
 
             List<RankResourceConsumeDto> tmpList = new ArrayList<>();
             map.forEach((k, v) -> {
