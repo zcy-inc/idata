@@ -41,7 +41,6 @@ export async function getInitialState(): Promise<{
   systemState?: { registerEnable?: boolean };
   currentUser?: CurrentUser;
 }> {
-  console.log('getInitialState');
   const { data: systemState } = await getSystemState();
   // 如果是登录页面，不执行
   if (history.location.pathname !== '/login') {

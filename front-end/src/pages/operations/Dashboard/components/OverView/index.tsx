@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Table, Tabs, Tooltip } from 'antd';
+import MonacoEditor from 'react-monaco-editor';
+import { Drawer, Modal, Table, Tabs, Tooltip } from 'antd';
+
 import type { FC } from 'react';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
@@ -8,6 +10,7 @@ import Title from '@/components/Title';
 import { ClusterListItem, OperationOverview, ScheduleListItem } from '@/types/operations';
 import { getClusterList, getScheduleList } from '@/services/operations';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { getTaskRunningLog } from '@/services/datadev';
 
 interface OverviewProps {
   schedule: OperationOverview;
@@ -44,6 +47,9 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
   const [dataSchedule, setDataSchedule] = useState<ScheduleListItem[]>([]);
   const [dataCluster, setDataCluster] = useState<ClusterListItem[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [visibleLog, setVisibleLog] = useState(false);
+  const [log, setLog] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -120,10 +126,29 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
   };
 
   const columnsSchedule: ColumnsType<ScheduleListItem> = [
-    { title: 'ID', dataIndex: 'jobID', key: 'jobId' },
-    { title: '名称', dataIndex: 'jobName', key: 'jobName' },
+    { title: 'ID', dataIndex: 'jobId', key: 'jobId' },
+    { title: '名称', dataIndex: 'jobName', key: 'jobName', render: (_) => _ || '-' },
     { title: '状态', dataIndex: 'jobStatus', key: 'jobStatus' },
-    { title: '操作', key: 'ops', render: (_) => <a onClick={() => {}}>查看日志</a> },
+    {
+      title: '操作',
+      key: 'ops',
+      render: (_) => (
+        <a
+          onClick={() => {
+            setVisibleLog(true);
+            getTaskRunningLog({
+              id: _.jobId,
+              env: _.environment,
+              taskId: _.taskId,
+            })
+              .then((res) => setLog(res.data))
+              .catch((err) => {});
+          }}
+        >
+          查看日志
+        </a>
+      ),
+    },
   ];
 
   const columnsCluster: ColumnsType<ClusterListItem> = [
@@ -302,6 +327,22 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
             />
           )}
         </Drawer>
+        <Modal
+          title="日志"
+          visible={visibleLog}
+          onCancel={() => setVisibleLog(false)}
+          footer={null}
+          bodyStyle={{ padding: 16 }}
+          width={800}
+        >
+          <MonacoEditor
+            height="400"
+            language="json"
+            theme="vs-dark"
+            value={log}
+            options={{ readOnly: true }}
+          />
+        </Modal>
       </div>
     </>
   );
