@@ -52,8 +52,8 @@ public class SystemConfigApiImpl implements SystemConfigApi {
     @Override
     public ConfigDto getSystemConfigByKeyAndType(String configKey, String type) {
         checkArgument(StringUtils.isNotBlank(configKey), "配置键不能为空");
-        Optional<SysConfig> configOptional = systemConfigRepo.queryByKey(configKey);
-        checkState(configOptional.isPresent(), "配置键%s没有相应的配置", configKey);
+        Optional<SysConfig> configOptional = systemConfigRepo.queryByKeyAndType(configKey, type);
+        checkState(configOptional.isPresent(), "配置不存在");
         return PojoUtil.copyOne(configOptional.get(), ConfigDto.class);
     }
 }
