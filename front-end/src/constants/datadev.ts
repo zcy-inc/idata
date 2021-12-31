@@ -114,3 +114,8 @@ export enum JobStatus {
   SUCCESS = 7,
   OTHER = -1,
 }
+
+export enum AutoCompletionLangs {
+  SQL = 'SQL',
+  PYTHON = 'PYTHON',
+}

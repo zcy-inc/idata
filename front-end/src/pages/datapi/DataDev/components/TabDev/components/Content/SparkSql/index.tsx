@@ -84,6 +84,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
             formRef={monaco}
             height="100%"
             width="100%"
+            language="sql"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
             options={{ automaticLayout: true, quickSuggestions: false }}

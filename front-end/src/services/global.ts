@@ -1,4 +1,4 @@
-import type { IMenuItem,IAutocompletionTipConfigs } from '@/types/common';
+import type { IMenuItem, IAutocompletionTipConfigs } from '@/types/common';
 import { request } from 'umi';
 
 export interface DefaultResponse {
@@ -29,8 +29,17 @@ export async function getSideMenu() {
   });
 }
 
-export  async function getAutocompletionTipConfigs(){
-  return request<DefaultResponse&{data: IAutocompletionTipConfigs}>('/api/p1/dev/jobs/autocompletionTipConfigs', {
-    method: 'GET',
-  });
+/**
+ * 获取monaco编辑器的提示列表
+ */
+export async function getAutocompletionTipConfigs(params: {
+  autocompletionType: 'SQL' | 'PYTHON';
+}) {
+  return request<DefaultResponse & { data: IAutocompletionTipConfigs }>(
+    '/api/p1/dev/jobs/autocompletionTipConfigs',
+    {
+      method: 'GET',
+      params,
+    },
+  );
 }

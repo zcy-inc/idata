@@ -1,3 +1,5 @@
+import { ColumnLabel } from './datapi';
+
 export interface DefaultResponse {
   success: boolean;
   code: string;
@@ -12,8 +14,25 @@ export interface IMenuItem {
   children: IMenuItem[];
 }
 
-export interface  IAutocompletionTipConfigs{
-  basicAutocompletionTips: string[]
-  dbTableNames: string[]
-  columnNames: string[]
+export interface IAutocompletionTipConfigs {
+  basicAutocompletionTips: string[];
+  dbTableNames: string[];
+  columns: IAutocompletionTipConfigsColumn[];
+}
+
+export interface IAutocompletionTipConfigsColumn {
+  id: number;
+  pk: boolean;
+  dbName: string;
+  tableId: number;
+  tableName: string;
+  columnName: string;
+  columnType: string;
+  columnIndex: number;
+  columnDescription: string;
+  columnComment: string;
+
+  securityLevel: string;
+  partitionedColumn: string;
+  columnLabels: ColumnLabel[];
 }
