@@ -7,6 +7,11 @@ import { getWords } from './keywords';
 import { IDisposable } from 'monaco-editor';
 import { AutoCompletionLangs } from '@/constants/datadev';
 
+interface DbSchema {
+  dbName: string;
+  tableNames: string[];
+}
+
 const defaultProps = {
   height: '100%',
   width: '100%',
@@ -46,21 +51,24 @@ const SqlEditor: FC<
         const {
           basicAutocompletionTips,
           dbTableNames = [],
-          columnName = [],
+          columns = [],
         } = await getWords(props.language?.toUpperCase() as AutoCompletionLangs);
-        const dbName = dbTableNames[0]?.split(',')?.[0];
-        const tblName = dbTableNames[0]?.split(',')?.[1];
+        const dbSchema = dbTableNames.map((_: DbSchema) => {
+          return {
+            dbName: _.dbName,
+            tables: _.tableNames.map((t) => ({
+              tblName: t,
+            })),
+          };
+        });
         const sqlSnippets = new Snippets(
           monacoInner,
-          [...basicAutocompletionTips, ...dbTableNames, ...columnName],
-          async () => columnName,
+          [...basicAutocompletionTips],
+          async () => {
+            return columns;
+          },
           null,
-          [
-            {
-              dbName,
-              tables: [{ tblName, tableColumns: columnName }],
-            },
-          ],
+          dbSchema,
         );
         monacoRef.current = editor;
         monacoProviderRef.current = monacoInner.languages.registerCompletionItemProvider('sql', {
