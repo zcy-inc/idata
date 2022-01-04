@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.DbTableDto;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ import java.util.List;
 
 public class AutocompletionTipDto {
     private List<String> basicAutocompletionTips;
-    private List<String> dbTableNames;
+    private List<DbTableDto> dbTableNames;
     private List<ColumnDetailsDto> columns;
 
     // GaS
@@ -40,11 +41,11 @@ public class AutocompletionTipDto {
         this.basicAutocompletionTips = basicAutocompletionTips;
     }
 
-    public List<String> getDbTableNames() {
+    public List<DbTableDto> getDbTableNames() {
         return dbTableNames;
     }
 
-    public void setDbTableNames(List<String> dbTableNames) {
+    public void setDbTableNames(List<DbTableDto> dbTableNames) {
         this.dbTableNames = dbTableNames;
     }
 

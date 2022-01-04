@@ -26,10 +26,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
-import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
@@ -101,7 +98,15 @@ public class QueryServiceImpl implements QueryService {
         dbNameList.forEach(dbName -> tableList.addAll(tableInfoService.getTablesByDataBase(dbName)));
         Map<Long, String> dbTableMap = tableList.stream().collect(Collectors.toMap(TableInfoDto::getId,
                 tableInfo -> tableInfo.getDbName() + "." + tableInfo.getTableName()));
-        echo.setDbTableNames(new ArrayList<>(dbTableMap.values()));
+        List<DbTableDto> dbTableList = dbNameList.stream().map(dbName -> {
+            DbTableDto dbTableDto = new DbTableDto();
+            dbTableDto.setDbName(dbName);
+            List<String> tableNameList = tableInfoService.getTablesByDataBase(dbName).stream().map(TableInfoDto::getTableName)
+                    .collect(Collectors.toList());
+            dbTableDto.setTableNames(tableNameList);
+            return dbTableDto;
+        }).collect(Collectors.toList());
+        echo.setDbTableNames(dbTableList);
         List<Long> tableIdList = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                 .stream().map(DevTableInfo::getId).collect(Collectors.toList());
         List<ColumnDetailsDto> columnDetailsList = new ArrayList<>();
