@@ -496,7 +496,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 <Radio.Group
                   options={[
                     { label: '新建表', value: DestWriteMode.INIT },
-                    { label: '覆盖表', value: DestWriteMode.OVERRIDE },
+                    { label: '覆盖表', value: DestWriteMode.OVERWRITE },
+                    { label: '追加表', value: DestWriteMode.APPEND },
                   ]}
                 />
               </Item>

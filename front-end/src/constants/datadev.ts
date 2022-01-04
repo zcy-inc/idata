@@ -56,8 +56,8 @@ export enum SrcReadMode {
 
 export enum DestWriteMode {
   INIT = 'init', // 新建表
-  OVERRIDE = 'override', // 覆盖表
-  UPSERT = 'upsert', // TODO 这是什么？
+  OVERWRITE = 'overwrite', // 覆盖表
+  APPEND = 'append',
 }
 
 export enum VersionStatus {
