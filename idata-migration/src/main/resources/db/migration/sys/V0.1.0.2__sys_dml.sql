@@ -12,7 +12,7 @@ insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_METRIC_MANAGE', '指标库', 'F_MENU');
 insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_BIGDATA_RD', '数据研发', 'F_MENU');
-insert into idata.sys_feature (feature_code, feature_name, feature_type)
+insert into idata.sys_feature (feature_code, feature_name, feature_type, feature_url_path)
 values ('F_MENU_OPS_CENTER', '运维中心', 'F_MENU');
 insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_XIAOCAI_BI', '小采BI', 'F_MENU');
@@ -99,9 +99,9 @@ values ('系统管理员', 'hdfs-site','{}', 'HADOOP');
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'yarn-site','{}', 'HADOOP');
 
-insert into sys_config(key_one, creator, value_one) values ('trino-info', '', '{}');
-insert into sys_config(key_one, creator, value_one)
-values ('hive-info', '', '{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
+insert into sys_config(key_one, value_one) values ('{}');
+insert into sys_config(key_one, value_one)
+values ('{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
 
 insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
 values ('F_ICON_DW_DESIGN_ROOT_DIR', '数仓设计根目录添加', 'F_ICON', 'F_MENU_DW_DESIGN');
