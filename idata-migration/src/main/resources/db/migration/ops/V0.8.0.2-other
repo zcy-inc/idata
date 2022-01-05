@@ -1,0 +1,2 @@
+新增url属性：&allowMultiQueries=true
+url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true

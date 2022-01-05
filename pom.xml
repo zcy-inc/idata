@@ -39,6 +39,8 @@
         <module>idata-system</module>
         <module>idata-user</module>
         <module>idata-develop</module>
+        <module>idata-label</module>
+        <module>idata-map</module>
         <module>idata-connector</module>
         <module>idata-datasource</module>
         <module>idata-operation</module>
