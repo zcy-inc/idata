@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.portal.model.response.ops.*;
 import cn.zhengcaiyun.idata.portal.util.PageUtil;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.framework.qual.Unused;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -192,12 +194,17 @@ public class DashboardController {
     @PostMapping("/page/yarn")
     public RestResult<Page<YarnJobSummaryResponse>> pageYarnJob(@RequestBody PageWrapper<JobStateRequest> pageWrapper)
             throws NoSuchFieldException {
-        Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(pageWrapper.getCondition().getState(),
-                pageWrapper.getPageNum(), pageWrapper.getPageSize());
+        Integer state = pageWrapper.getCondition().getState();
+        Page<JobHistoryDto> pageYarnJob = dashboardService.pageYarnJob(state, pageWrapper.getPageNum(), pageWrapper.getPageSize());
         Page<YarnJobSummaryResponse> responsePage = PageUtil.convertType(pageYarnJob, s -> {
             YarnJobSummaryResponse response = new YarnJobSummaryResponse();
             response.setJobId(s.getJobId());
-            response.setJobStatus(s.getFinalStatus());
+
+            String jobStatus = s.getFinalStatus();
+            if (StringUtils.equalsIgnoreCase(jobStatus, "UNDEFINED")) {
+                jobStatus = s.getState();
+            }
+            response.setJobStatus(jobStatus);
             response.setJobName(s.getJobName());
             response.setAmContainerLogsUrl(s.getAmContainerLogsUrl());
             response.setBusinessLogsUrl(jobHistoryService.getBusinessLogUrl(s.getApplicationId(), s.getFinalStatus(), s.getState()));
@@ -261,13 +268,17 @@ public class DashboardController {
             throw new IllegalAccessException("没有作业历史查看权限");
         }
         JobHistoryRequest condition = pageWrapper.getCondition();
-        List<String> statusList = null;
+
+        List<String> finalStatusList = null;
+        List<String> stateList = null;
         if (condition.getJobStatus() != null) {
-            statusList = YarnJobStatusEnum.getCodesByValue(condition.getJobStatus());
+            YarnJobStatusEnum statusEnum = YarnJobStatusEnum.getByValue(condition.getJobStatus());
+            finalStatusList = Arrays.asList(statusEnum.finalStatus);
+            stateList = Arrays.asList(statusEnum.states);
         }
 
         PageInfo<JobHistoryDto> pageInfo = jobHistoryService.pagingJobHistory(condition.getStartDateBegin(), condition.getStartDateEnd(),
-                condition.getFinishDateBegin(), condition.getFinishDateEnd(), condition.getJobName(), statusList,
+                condition.getFinishDateBegin(), condition.getFinishDateEnd(), condition.getJobName(), finalStatusList, stateList,
                 pageWrapper.getPageNum(), pageWrapper.getPageSize());
 
         PageInfo<JobHistoryResponse> responsePageInfo = PageUtil.convertType(pageInfo, s -> {

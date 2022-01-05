@@ -16,7 +16,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Multimap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.devJobHistory;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.startTime;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 @Service
@@ -76,9 +74,11 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin, String finishDateEnd, String jobName, List<String> jobStatusList, Integer pageNum, Integer pageSize) {
+    public PageInfo<JobHistoryDto> pagingJobHistory(String startDateBegin, String startDateEnd, String finishDateBegin,
+                                                    String finishDateEnd, String jobName, List<String> finalStatusList,
+                                                    List<String> stateList, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        List<JobHistoryDto> list = devJobHistoryMyDao.selectList(startDateBegin, startDateEnd, finishDateBegin, finishDateEnd, jobName, jobStatusList);
+        List<JobHistoryDto> list = devJobHistoryMyDao.selectList(startDateBegin, startDateEnd, finishDateBegin, finishDateEnd, jobName, finalStatusList, stateList);
         PageInfo<JobHistoryDto> pageInfo = new PageInfo<>(list);
         return pageInfo;
     }
@@ -144,7 +144,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         if (StringUtils.isNotEmpty(state)) {
             enumCode = YarnJobStatusEnum.getByStateAndFinalStatus(state, finalStatus);
         } else {
-            enumCode = YarnJobStatusEnum.getByYarnEnumCode(finalStatus);
+            enumCode = YarnJobStatusEnum.getByFinalStatus(finalStatus);
         }
 
         String defaultUrl = YARN_RM_URI + "/cluster/app/" + applicationId;

@@ -86,8 +86,11 @@ public interface DevJobHistoryMyDao {
             "       <if test = 'finishDateEnd != null'>" +
             "           AND finish_time <![CDATA[ <= ]]> #{finishDateEnd} " +
             "       </if>" +
-            "       <if test = 'jobStatusList != null'>" +
-            "           AND (<foreach collection = 'jobStatusList' item = 'jobStatus' separator = 'or'>final_status = #{jobStatus}</foreach>) " +
+            "       <if test = 'finalStatusList != null and finalStatusList.size() != 0'>" +
+            "           AND (<foreach collection = 'finalStatusList' item = 'finalStatus' separator = 'or'>final_status = #{finalStatus}</foreach>) " +
+            "       </if>" +
+            "       <if test = 'stateList != null and stateList.size() != 0'>" +
+            "           AND (<foreach collection = 'stateList' item = 'state' separator = 'or'>state = #{state}</foreach>) " +
             "       </if>" +
             ") as t1 " +
             " join (select * from dev_job_info where 1 = 1 " +
@@ -100,7 +103,8 @@ public interface DevJobHistoryMyDao {
             "on t2.dw_layer_code = t3.value_code " +
             "</script>")
     List<JobHistoryDto> selectList(String startDateBegin, String startDateEnd, String finishDateBegin,
-                                   String finishDateEnd, String jobName, List<String> jobStatusList);
+                                   String finishDateEnd, String jobName, List<String> finalStatusList,
+                                   List<String> stateList);
 
     @Select("<script>" +
             " select t1.job_id " +
