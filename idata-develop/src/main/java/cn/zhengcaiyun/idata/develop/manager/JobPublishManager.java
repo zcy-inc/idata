@@ -47,6 +47,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Component
 public class JobPublishManager {
 
+    @Value("${dev.job.publish.whitelist}")
+    public String publishWhitelist;
+
     private final JobInfoRepo jobInfoRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
