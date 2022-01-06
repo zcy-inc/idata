@@ -134,4 +134,7 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
         return oldJdbcTemplate.queryForList(querySql);
     }
 
+    public List<Map<String, Object>> selectList(String sql) {
+        return oldJdbcTemplate.queryForList(sql);
+    }
 }

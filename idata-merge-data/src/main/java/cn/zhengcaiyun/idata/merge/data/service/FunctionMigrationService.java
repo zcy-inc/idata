@@ -17,10 +17,16 @@
 
 package cn.zhengcaiyun.idata.merge.data.service;
 
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
+
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2022-01-06 11:48
  **/
 public interface FunctionMigrationService {
+
+    List<MigrateResultDto> migrate();
 }
