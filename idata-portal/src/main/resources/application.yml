@@ -14,7 +14,6 @@ spring:
     name: idata-portal-server
   datasource:
     hikari.poolName: HikariPool-portal-mysql
-    # 待删除
     url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     username: root
     password: 123456
@@ -35,19 +34,16 @@ auth:
   jwt:
     security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
 
-# 待删除
 livy:
 #  baseUrl: http://cdh4.cai-inc.com:8998
   baseUrl: http://172.29.108.194:8998
   sessionMax: 10
   dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
 
-# 待删除
 dolphin:
   baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
   token: ed3ed02005c030e955a76f7672747715
 
-# 待删除
 hdfs:
   nameservices: nameservice1
   nn1: 172.29.108.184:8020
@@ -55,7 +51,6 @@ hdfs:
   basePath: /tmp/shiyin/
   user: hdfs
 
-# 待删除
 yarn:
   resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
 
@@ -69,8 +64,6 @@ pagehelper:
   reasonable: true
   supportMethodsArguments: true
   params: count=countSql
-
-
 
 access:
   mode : idata
