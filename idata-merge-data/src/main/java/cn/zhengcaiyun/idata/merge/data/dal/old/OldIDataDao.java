@@ -29,6 +29,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -88,7 +89,10 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
             querySql += " where " + condition;
         }
 
-        return oldJdbcTemplate.queryForList(querySql).stream().map(recordMap -> JSON.parseObject(JSON.toJSONString(recordMap))).collect(Collectors.toList());
+        return oldJdbcTemplate.queryForList(querySql)
+                .stream()
+                .map(recordMap -> JSON.parseObject(JSON.toJSONString(recordMap)))
+                .collect(Collectors.toList());
     }
 
     public List<String> queryJsonStringList(String table, List<String> columns, String condition) {
@@ -97,7 +101,37 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
             querySql += " where " + condition;
         }
 
-        return oldJdbcTemplate.queryForList(querySql).stream().map(recordMap -> JSON.toJSONString(recordMap)).collect(Collectors.toList());
+        return oldJdbcTemplate.queryForList(querySql)
+                .stream()
+                .map(recordMap -> JSON.toJSONString(recordMap))
+                .collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> queryMapList(String table, List<String> columns, String condition) {
+        String querySql = "select " + Joiner.on(",").skipNulls().join(columns) + " from " + table;
+        if (StringUtils.isNotEmpty(condition)) {
+            querySql += " where " + condition;
+        }
+
+        return oldJdbcTemplate.queryForList(querySql);
+    }
+
+    public List<JSONObject> queryList(String querySql) {
+        return oldJdbcTemplate.queryForList(querySql)
+                .stream()
+                .map(recordMap -> JSON.parseObject(JSON.toJSONString(recordMap)))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> queryJsonStringList(String querySql) {
+        return oldJdbcTemplate.queryForList(querySql)
+                .stream()
+                .map(recordMap -> JSON.toJSONString(recordMap))
+                .collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> queryMapList(String querySql) {
+        return oldJdbcTemplate.queryForList(querySql);
     }
 
 }

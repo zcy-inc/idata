@@ -17,10 +17,11 @@
 
 package cn.zhengcaiyun.idata.merge.data.service.impl;
 
-import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +37,28 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
 
     @Autowired
     private OldIDataDao oldIDataDao;
+    @Autowired
+    private DataSourceService dataSourceService;
 
     @Override
     public List<MigrateResultDto> migrate() {
+        // 查询旧版IData数据
+        List<String> dataJsonList = fetchOldData();
+        // 处理旧版数据，组装新版IData数据
+
+        // 调用新版server接口，新增数据
+//        dataSourceService.addDataSource();
+
+        // 返回迁移失败的数据 MigrateResultDto
         //DataSourceDto dto, Operator operator;
         return null;
+    }
+
+    private List<String> fetchOldData() {
+        List<String> columns = Lists.newArrayList("id", "type", "name", "description", "host", "port", "db_name",
+                "db_user", "db_psw", "operator", "owner", "status");
+        String filter = "is_del = false and host is not null and host != ''";
+        return oldIDataDao.queryJsonStringList("metadata.datasource", columns, filter);
     }
 
 }
