@@ -108,6 +108,17 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
             sourceParamList.add(new DataSourceParam(sourceDto, operator));
         });
 
+        // 未匹配的stag数据
+        stagMap.forEach((name, jsonObject) -> {
+            JSONObject stagJsonObject = jsonObject;
+            DataSourceDto sourceDto = buildDataSource(name, null, stagJsonObject);
+            String old_owner = stagJsonObject.getString("owner");
+            String old_operator = stagJsonObject.getString("operator");
+            String nickname = StringUtils.isNotEmpty(old_owner) ? old_owner : old_operator;
+            Operator operator = new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
+            sourceParamList.add(new DataSourceParam(sourceDto, operator));
+        });
+
         // 调用新版server接口，新增数据
         sourceParamList.stream()
                 .forEach(dataSourceParam ->
