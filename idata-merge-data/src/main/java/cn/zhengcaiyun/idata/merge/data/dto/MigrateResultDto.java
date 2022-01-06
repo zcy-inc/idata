@@ -15,32 +15,46 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
-
-import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
-import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
-import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
-import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.merge.data.dto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 09:43
+ * @create: 2022-01-06 16:26
  **/
-@Service
-public class DatasourceMigrationServiceImpl implements DatasourceMigrationService {
+public class MigrateResultDto {
 
-    @Autowired
-    private OldIDataDao oldIDataDao;
+    private String migrateType;
+    private String reason;
+    private String data;
 
-    @Override
-    public List<MigrateResultDto> migrate() {
-        //DataSourceDto dto, Operator operator;
-        return null;
+    public MigrateResultDto(String migrateType, String reason, String data) {
+        this.migrateType = migrateType;
+        this.reason = reason;
+        this.data = data;
     }
 
+    public String getMigrateType() {
+        return migrateType;
+    }
+
+    public void setMigrateType(String migrateType) {
+        this.migrateType = migrateType;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
 }

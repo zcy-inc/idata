@@ -17,30 +17,35 @@
 
 package cn.zhengcaiyun.idata.merge.data.service.impl;
 
-import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
-import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
-import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
-import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 09:43
+ * @create: 2022-01-06 11:42
  **/
-@Service
-public class DatasourceMigrationServiceImpl implements DatasourceMigrationService {
-
-    @Autowired
-    private OldIDataDao oldIDataDao;
-
+public class BackflowJobMigrationService implements JobMigrationService {
     @Override
-    public List<MigrateResultDto> migrate() {
-        //DataSourceDto dto, Operator operator;
+    public List<String> migrateBaseInfo() {
         return null;
     }
 
+    @Override
+    public List<String> migrateConfigInfo() {
+        return null;
+    }
+
+    @Override
+    public List<String> migrateContentInfo() {
+        return null;
+    }
+
+    @Override
+    public List<String> migratePublishInfo() {
+        return null;
+    }
 }

@@ -15,32 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
-
-import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
-import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
-import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
-import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.merge.data.service;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 09:43
+ * @create: 2022-01-06 11:45
  **/
-@Service
-public class DatasourceMigrationServiceImpl implements DatasourceMigrationService {
-
-    @Autowired
-    private OldIDataDao oldIDataDao;
-
-    @Override
-    public List<MigrateResultDto> migrate() {
-        //DataSourceDto dto, Operator operator;
-        return null;
-    }
-
+public interface DAGMigrationService {
 }
