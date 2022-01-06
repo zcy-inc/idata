@@ -126,7 +126,7 @@ public class MigrationService {
         return echoList;
     }
 
-    public List<TableInfoDto> syncTableData(Long tableId, Long folderId) {
+    public List<TableInfoDto> syncTableData(Long tableId, Long folderId) throws IllegalAccessException {
         List<Map<String, Object>> tableList = dwMetaService.getTables(tableId);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();

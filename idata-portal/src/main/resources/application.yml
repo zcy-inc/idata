@@ -24,15 +24,25 @@ spring:
       FAIL_ON_UNKNOWN_PROPERTIES: false
     date-format: yyyy-MM-dd HH:mm:ss.SSS
     time-zone: Asia/Shanghai
+  flyway:
+    enabled: false
 
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml # 配置 Mapper XML 地址
 
 auth:
   jwt:
     security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
+
+pg:
+  datasource:
+    jdbcUrl: jdbc:postgresql://pgm-9dpnl7hlk20gh0hp1o.pg.rds.aliyuncs.com:3433/db_idata?currentSchema=idata
+    username: zcy_idata
+    password: MUhSwEHb1Yx0
+
 
 livy:
 #  baseUrl: http://cdh4.cai-inc.com:8998
@@ -67,3 +77,6 @@ pagehelper:
 
 access:
   mode : idata
+
+zcy:
+  is-cloud: ture # 是否是云端，ture：云端，false：本地化
