@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -141,7 +142,12 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
 
     private DataSourceDto buildDataSource(String name, JSONObject prodJsonObject, JSONObject stagJsonObject) {
         DataSourceDto dto = new DataSourceDto();
-        dto.setName(name);
+        String newName = padId(Objects.isNull(prodJsonObject) ? null : prodJsonObject.getString("id"))
+                + "#_"
+                + padId(Objects.isNull(stagJsonObject) ? null : stagJsonObject.getString("id"))
+                + "#_"
+                + name;
+        dto.setName(newName);
 
         JSONObject mainJsonObject = Objects.isNull(prodJsonObject) ? stagJsonObject : prodJsonObject;
         DataSourceTypeEnum type = DataSourceTypeEnum.valueOf(mainJsonObject.getString("type"));
@@ -164,6 +170,14 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
             dbConfigList.add(buildDbConfig(stagJsonObject));
         }
         return dto;
+    }
+
+    private String padId(String id) {
+        String padId = id;
+        if (StringUtils.isEmpty(id)) {
+            padId = "0";
+        }
+        return Strings.padStart(padId, 8, '0');
     }
 
     private DbConfigDto buildDbConfig(JSONObject jsonObject) {
