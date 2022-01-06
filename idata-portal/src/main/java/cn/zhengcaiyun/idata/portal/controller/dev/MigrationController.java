@@ -57,7 +57,7 @@ public class MigrationController {
     @PostMapping("syncTable")
     @Transactional(rollbackFor = Throwable.class)
     public RestResult<List<TableInfoDto>> syncTable(@RequestParam(value = "tableId", required = false) Long tableId,
-                                                    @RequestParam(value = "folderId", required = false) Long folderId){
+                                                    @RequestParam(value = "folderId", required = false) Long folderId) throws IllegalAccessException {
         return RestResult.success(migrationService.syncTableData(tableId, folderId));
     }
 
