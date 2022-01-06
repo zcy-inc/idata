@@ -31,6 +31,7 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml # 配置 Mapper XML 地址
 
 auth:
   jwt:
@@ -76,3 +77,6 @@ pagehelper:
 
 access:
   mode : idata
+
+zcy:
+  is-cloud: ture # 是否是云端，ture：云端，false：本地化
