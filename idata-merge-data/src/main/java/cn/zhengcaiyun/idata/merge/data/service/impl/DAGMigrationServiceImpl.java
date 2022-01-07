@@ -29,6 +29,7 @@ import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
+import cn.zhengcaiyun.idata.merge.data.manager.DAGMigrateManager;
 import cn.zhengcaiyun.idata.merge.data.service.DAGMigrationService;
 import cn.zhengcaiyun.idata.merge.data.util.DWLayerCodeMapTool;
 import cn.zhengcaiyun.idata.merge.data.util.IdPadTool;
@@ -61,6 +62,8 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
     private CompositeFolderService compositeFolderService;
     @Autowired
     private CompositeFolderRepo compositeFolderRepo;
+    @Autowired
+    private DAGMigrateManager dagMigrateManager;
 
     @Override
     public List<MigrateResultDto> migrateFolder() {
@@ -109,15 +112,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
 
         // 调用新版server接口，新增数据
         Operator operator = new Operator.Builder(0L).nickname("系统迁移").build();
-        dagDtoList.stream()
-                .forEach(dagDto ->
-                {
-                    try {
-                        dagService.addDAG(dagDto, operator);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                });
+        dagMigrateManager.createDAG(dagDtoList, operator);
 
         // 返回迁移失败的数据 MigrateResultDto
         return resultDtoList;
