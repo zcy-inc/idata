@@ -17,7 +17,16 @@
 
 package cn.zhengcaiyun.idata.merge.data.service.impl;
 
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
+import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
+import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
+import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+import com.google.common.graph.ElementOrder;
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,8 +38,24 @@ import java.util.List;
  **/
 @Service
 public class JobMigrationServiceImpl implements JobMigrationService {
+
+    @Autowired
+    private OldIDataDao oldIDataDao;
+    @Autowired
+    private DAGService dagService;
+    @Autowired
+    private CompositeFolderService compositeFolderService;
+    @Autowired
+    private CompositeFolderRepo compositeFolderRepo;
+
     @Override
-    public List<String> migrateFolder() {
+    public List<MigrateResultDto> migrate() {
+        MutableGraph<Long> jobGraph = GraphBuilder.directed()
+                .nodeOrder(ElementOrder.<Long>natural())
+                .allowsSelfLoops(false)
+                .expectedNodeCount(5000)
+                .build();
+
         return null;
     }
 

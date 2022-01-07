@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.merge.data.service;
 
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
+
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ import java.util.List;
  **/
 public interface JobMigrationService {
 
-    List<String> migrateFolder();
+    List<MigrateResultDto> migrate();
 
     List<String> migrateBaseInfo();
 

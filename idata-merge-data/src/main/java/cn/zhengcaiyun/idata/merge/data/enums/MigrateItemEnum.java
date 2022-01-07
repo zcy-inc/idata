@@ -25,12 +25,9 @@ package cn.zhengcaiyun.idata.merge.data.enums;
 public enum MigrateItemEnum {
     all,
     datasource,
-    model_folder,
+    folder,
     model,
-    dag_folder,
     dag,
-    function_folder,
     function,
-    job_folder,
     job
 }
