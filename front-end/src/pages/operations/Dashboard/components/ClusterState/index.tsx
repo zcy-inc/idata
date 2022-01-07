@@ -45,7 +45,7 @@ const ClusterState: FC<ClusterStateProps> = ({ cluster }) => {
 
   return (
     <>
-      <Title>作业集群状态占比</Title>
+      <Title>资源调度状态占比</Title>
       <ReactECharts option={options} />
     </>
   );
