@@ -27,5 +27,5 @@ import java.util.List;
  * @create: 2022-01-06 09:43
  **/
 public interface DatasourceMigrationService {
-    List<MigrateResultDto> migrate();
+    List<MigrateResultDto> migrateDatasource();
 }

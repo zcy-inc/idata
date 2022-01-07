@@ -15,42 +15,24 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
+package cn.zhengcaiyun.idata.merge.data.util;
 
-import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 16:09
+ * @create: 2022-01-07 11:40
  **/
-@Service
-public class JobMigrationServiceImpl implements JobMigrationService {
-    @Override
-    public List<String> migrateFolder() {
-        return null;
+public class IdPadTool {
+
+    public static String padId(String id) {
+        String padId = id;
+        if (StringUtils.isEmpty(id)) {
+            padId = "0";
+        }
+        return Strings.padStart(padId, 8, '0');
     }
 
-    @Override
-    public List<String> migrateBaseInfo() {
-        return null;
-    }
-
-    @Override
-    public List<String> migrateConfigInfo() {
-        return null;
-    }
-
-    @Override
-    public List<String> migrateContentInfo() {
-        return null;
-    }
-
-    @Override
-    public List<String> migratePublishInfo() {
-        return null;
-    }
 }

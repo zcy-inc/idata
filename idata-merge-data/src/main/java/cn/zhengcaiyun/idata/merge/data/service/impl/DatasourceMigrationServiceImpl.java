@@ -26,9 +26,9 @@ import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.DatasourceMigrationService;
+import cn.zhengcaiyun.idata.merge.data.util.IdPadTool;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -55,7 +55,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
     private DataSourceService dataSourceService;
 
     @Override
-    public List<MigrateResultDto> migrate() {
+    public List<MigrateResultDto> migrateDatasource() {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 查询旧版IData数据
         List<JSONObject> dataJsonList = fetchOldData();
@@ -142,9 +142,9 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
 
     private DataSourceDto buildDataSource(String name, JSONObject prodJsonObject, JSONObject stagJsonObject) {
         DataSourceDto dto = new DataSourceDto();
-        String newName = padId(Objects.isNull(prodJsonObject) ? null : prodJsonObject.getString("id"))
+        String newName = IdPadTool.padId(Objects.isNull(prodJsonObject) ? null : prodJsonObject.getString("id"))
                 + "#_"
-                + padId(Objects.isNull(stagJsonObject) ? null : stagJsonObject.getString("id"))
+                + IdPadTool.padId(Objects.isNull(stagJsonObject) ? null : stagJsonObject.getString("id"))
                 + "#_"
                 + name;
         dto.setName(newName);
@@ -170,14 +170,6 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
             dbConfigList.add(buildDbConfig(stagJsonObject));
         }
         return dto;
-    }
-
-    private String padId(String id) {
-        String padId = id;
-        if (StringUtils.isEmpty(id)) {
-            padId = "0";
-        }
-        return Strings.padStart(padId, 8, '0');
     }
 
     private DbConfigDto buildDbConfig(JSONObject jsonObject) {
