@@ -115,15 +115,6 @@ public class CompositeFolderRepoImpl implements CompositeFolderRepo {
                 .limit(1));
     }
 
-    @Override
-    public Optional<CompositeFolder> queryFolder(String name, FunctionModuleEnum moduleEnum) {
-        return compositeFolderDao.selectOne(dsl -> dsl.where(compositeFolder.name, isEqualTo(name),
-                        and(compositeFolder.belong, isEqualTo(moduleEnum.code)),
-                        and(compositeFolder.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(compositeFolder.id.descending())
-                .limit(1));
-    }
-
     private List<CompositeFolder> queryGeneralFolder(FolderTypeEnum typeEnum) {
         return compositeFolderDao.select(dsl -> dsl.where(
                         compositeFolder.type, isEqualTo(typeEnum.name()),
