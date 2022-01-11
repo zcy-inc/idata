@@ -4,6 +4,8 @@ import cn.zhengcaiyun.idata.commons.dto.BaseDto;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -51,11 +53,6 @@ public class JobExecuteConfigDto extends BaseDto {
     private String execQueue;
 
     /**
-     * 运行配置-作业最大并发数，配置为0时表示使用默认并发数
-     */
-    private Integer execMaxParallelism;
-
-    /**
      * 运行配置-告警等级
      */
     private String execWarnLevel;
@@ -84,6 +81,11 @@ public class JobExecuteConfigDto extends BaseDto {
      * 作业运行状态（环境级），0：暂停运行；1：恢复运行
      */
     private Integer runningState;
+
+    /**
+     *   抽数配置
+     */
+    private String extractionType;
 
     public Long getId() {
         return id;
@@ -149,14 +151,6 @@ public class JobExecuteConfigDto extends BaseDto {
         this.execQueue = execQueue;
     }
 
-    public Integer getExecMaxParallelism() {
-        return execMaxParallelism;
-    }
-
-    public void setExecMaxParallelism(Integer execMaxParallelism) {
-        this.execMaxParallelism = execMaxParallelism;
-    }
-
     public String getExecWarnLevel() {
         return execWarnLevel;
     }
@@ -205,12 +199,19 @@ public class JobExecuteConfigDto extends BaseDto {
         this.runningState = runningState;
     }
 
+    public String getExtractionType() {
+        return extractionType;
+    }
+
+    public void setExtractionType(String extractionType) {
+        this.extractionType = extractionType;
+    }
+
     public static JobExecuteConfigDto from(JobExecuteConfig config) {
         JobExecuteConfigDto dto = new JobExecuteConfigDto();
         BeanUtils.copyProperties(config, dto);
 
         if (dto.getSchTimeOut() <= 0) dto.setSchTimeOut(null);
-        if (dto.getExecMaxParallelism() <= 0) dto.setExecMaxParallelism(null);
 
         return dto;
     }

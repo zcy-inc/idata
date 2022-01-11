@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -71,6 +71,7 @@ public interface DIJobContentDao {
         @Result(column="src_read_mode", property="srcReadMode", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_read_filter", property="srcReadFilter", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_read_shard_key", property="srcReadShardKey", jdbcType=JdbcType.VARCHAR),
+        @Result(column="src_sharding_num", property="srcShardingNum", jdbcType=JdbcType.INTEGER),
         @Result(column="dest_data_source_type", property="destDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_id", property="destDataSourceId", jdbcType=JdbcType.BIGINT),
         @Result(column="dest_table", property="destTable", jdbcType=JdbcType.VARCHAR),
@@ -121,6 +122,7 @@ public interface DIJobContentDao {
             .map(srcReadMode).toProperty("srcReadMode")
             .map(srcReadFilter).toProperty("srcReadFilter")
             .map(srcReadShardKey).toProperty("srcReadShardKey")
+            .map(srcShardingNum).toProperty("srcShardingNum")
             .map(destDataSourceType).toProperty("destDataSourceType")
             .map(destDataSourceId).toProperty("destDataSourceId")
             .map(destTable).toProperty("destTable")
@@ -150,6 +152,7 @@ public interface DIJobContentDao {
             .map(srcReadMode).toPropertyWhenPresent("srcReadMode", record::getSrcReadMode)
             .map(srcReadFilter).toPropertyWhenPresent("srcReadFilter", record::getSrcReadFilter)
             .map(srcReadShardKey).toPropertyWhenPresent("srcReadShardKey", record::getSrcReadShardKey)
+            .map(srcShardingNum).toPropertyWhenPresent("srcShardingNum", record::getSrcShardingNum)
             .map(destDataSourceType).toPropertyWhenPresent("destDataSourceType", record::getDestDataSourceType)
             .map(destDataSourceId).toPropertyWhenPresent("destDataSourceId", record::getDestDataSourceId)
             .map(destTable).toPropertyWhenPresent("destTable", record::getDestTable)
@@ -205,6 +208,7 @@ public interface DIJobContentDao {
                 .set(srcReadMode).equalTo(record::getSrcReadMode)
                 .set(srcReadFilter).equalTo(record::getSrcReadFilter)
                 .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
+                .set(srcShardingNum).equalTo(record::getSrcShardingNum)
                 .set(destDataSourceType).equalTo(record::getDestDataSourceType)
                 .set(destDataSourceId).equalTo(record::getDestDataSourceId)
                 .set(destTable).equalTo(record::getDestTable)
@@ -232,6 +236,7 @@ public interface DIJobContentDao {
                 .set(srcReadMode).equalToWhenPresent(record::getSrcReadMode)
                 .set(srcReadFilter).equalToWhenPresent(record::getSrcReadFilter)
                 .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
+                .set(srcShardingNum).equalToWhenPresent(record::getSrcShardingNum)
                 .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
                 .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
                 .set(destTable).equalToWhenPresent(record::getDestTable)
@@ -260,6 +265,7 @@ public interface DIJobContentDao {
             .set(srcReadMode).equalTo(record::getSrcReadMode)
             .set(srcReadFilter).equalTo(record::getSrcReadFilter)
             .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
+            .set(srcShardingNum).equalTo(record::getSrcShardingNum)
             .set(destDataSourceType).equalTo(record::getDestDataSourceType)
             .set(destDataSourceId).equalTo(record::getDestDataSourceId)
             .set(destTable).equalTo(record::getDestTable)
@@ -290,6 +296,7 @@ public interface DIJobContentDao {
             .set(srcReadMode).equalToWhenPresent(record::getSrcReadMode)
             .set(srcReadFilter).equalToWhenPresent(record::getSrcReadFilter)
             .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
+            .set(srcShardingNum).equalToWhenPresent(record::getSrcShardingNum)
             .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
             .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
             .set(destTable).equalToWhenPresent(record::getDestTable)
