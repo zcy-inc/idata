@@ -109,6 +109,13 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   数据来源-分片数量（并行度）
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_sharding_num")
+    private Integer srcShardingNum;
+
+    /**
+     * Database Column Remarks:
      *   数据去向-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_type")
@@ -315,6 +322,16 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_shard_key")
     public void setSrcReadShardKey(String srcReadShardKey) {
         this.srcReadShardKey = srcReadShardKey;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_sharding_num")
+    public Integer getSrcShardingNum() {
+        return srcShardingNum;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_sharding_num")
+    public void setSrcShardingNum(Integer srcShardingNum) {
+        this.srcShardingNum = srcShardingNum;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_type")

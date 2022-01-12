@@ -449,7 +449,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (Objects.isNull(config.getSchTimeOut())) config.setSchTimeOut(0);
         if (Objects.isNull(config.getSchDryRun())) config.setSchDryRun(0);
         config.setExecQueue(Strings.nullToEmpty(config.getExecQueue()));
-        if (Objects.isNull(config.getExecMaxParallelism())) config.setExecMaxParallelism(0);
         config.setExecWarnLevel(Strings.nullToEmpty(config.getExecWarnLevel()));
         config.setSchTimeOutStrategy(Strings.nullToEmpty(config.getSchTimeOutStrategy()));
         config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 2));

@@ -17,8 +17,10 @@
 package cn.zhengcaiyun.idata.portal.config;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
+import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
@@ -26,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ForeignKeyDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionDataService;
@@ -92,6 +95,8 @@ public class MigrationService {
     private DevForeignKeyDao devForeignKeyDao;
     @Autowired
     private DevFolderService devFolderService;
+    @Autowired
+    private CompositeFolderService compositeFolderService;
 
     public List<DevelopFolderDto> syncFolderAndTables(Long parentFolderId, String parentFolderName,
                                                       Long idataParentFolderId) {
@@ -141,16 +146,28 @@ public class MigrationService {
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<String, String> idataBizProcessMap = enumService.getEnumValues("bizProcessEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
-        Map<String, Long> folderMap = new HashMap<>();
+        Map<Long, Long> folderMap = new HashMap<>();
+        // 文件夹原有逻辑
+//        if (folderId == null) {
+//            folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
+//                    .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
+//        }
+//        else {
+//            DevFolder tableFolder = devFolderDao.selectOne(c -> c.where(devFolder.del, isNotEqualTo(1),
+//                    and(devFolder.id, isEqualTo(folderId)))).get();
+//            folderMap.put(tableFolder.getFolderName(), tableFolder.getId());
+//        }
+        // 文件夹新逻辑
         if (folderId == null) {
-            folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
-                    .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
+            folderMap = compositeFolderService.getFolders("DESIGN.TABLE")
+                    .stream().collect(Collectors.toMap(tableFolder -> Long.valueOf(tableFolder.getName().split("#_")[0]),
+                            CompositeFolderDto::getId));
         }
         else {
-            DevFolder tableFolder = devFolderDao.selectOne(c -> c.where(devFolder.del, isNotEqualTo(1),
-                    and(devFolder.id, isEqualTo(folderId)))).get();
-            folderMap.put(tableFolder.getFolderName(), tableFolder.getId());
+            CompositeFolderDto compositeFolderDto = compositeFolderService.getFolder(folderId);
+            folderMap.put(Long.valueOf(compositeFolderDto.getName().split("#_")[0]), compositeFolderDto.getId());
         }
+
         Map<String, String> idataColTypeMap = enumService.getEnumValues("hiveColTypeEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
@@ -185,14 +202,14 @@ public class MigrationService {
         List<TableInfoDto> addList = new ArrayList<>();
         List<TableInfoDto> echoList = new ArrayList<>();
         TableInfoDto echoTable;
-        Map<String, Long> finalFolderMap = folderMap;
+        Map<Long, Long> finalFolderMap = folderMap;
         tableList.forEach(tableRecord -> {
             TableInfoDto tableInfoDto = new TableInfoDto();
             tableInfoDto.setTableName((String) tableRecord.get("tbl_name"));
             if (idataTableMap.containsKey(tableInfoDto.getTableName())) {
                 tableInfoDto.setId(idataTableMap.get(tableInfoDto.getTableName()));
             }
-            tableInfoDto.setFolderId(finalFolderMap.get(tableRecord.get("folder_name").toString()));
+            tableInfoDto.setFolderId(finalFolderMap.get(Long.valueOf(tableRecord.get("folder_id").toString())));
             // 表信息
             List<LabelDto> tableLabels = new ArrayList<>();
             for (Map.Entry<String, Object> entry : tableRecord.entrySet()) {

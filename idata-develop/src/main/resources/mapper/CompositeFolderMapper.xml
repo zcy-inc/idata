@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderMyDao">
+
+    <select id="selectByName" resultType="cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder">
+        select * from dev_composite_folder
+        where name like CONCAT(#{folderId}, '%')
+    </select>
+</mapper>

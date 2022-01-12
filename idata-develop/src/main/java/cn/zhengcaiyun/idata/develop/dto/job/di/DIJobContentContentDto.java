@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
 import java.util.List;
 
 /**
@@ -44,6 +45,12 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      * 数据来源-切分键
      */
     private String srcReadShardKey;
+
+    /**
+     *   数据来源-分片数量（并行度）
+     */
+    private Integer srcShardingNum;
+
     /**
      * 数据去向-数据源类型
      */
@@ -217,6 +224,14 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setVersionDisplay(String versionDisplay) {
         this.versionDisplay = versionDisplay;
+    }
+
+    public Integer getSrcShardingNum() {
+        return srcShardingNum;
+    }
+
+    public void setSrcShardingNum(Integer srcShardingNum) {
+        this.srcShardingNum = srcShardingNum;
     }
 
     public static DIJobContentContentDto from(DIJobContent content) {

@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execMaxParallelism, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState, extractionType);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -70,14 +70,13 @@ public interface JobExecuteConfigDao {
         @Result(column="sch_time_out", property="schTimeOut", jdbcType=JdbcType.INTEGER),
         @Result(column="sch_dry_run", property="schDryRun", jdbcType=JdbcType.TINYINT),
         @Result(column="exec_queue", property="execQueue", jdbcType=JdbcType.VARCHAR),
-        @Result(column="exec_max_parallelism", property="execMaxParallelism", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_warn_level", property="execWarnLevel", jdbcType=JdbcType.VARCHAR),
         @Result(column="sch_time_out_strategy", property="schTimeOutStrategy", jdbcType=JdbcType.VARCHAR),
         @Result(column="sch_priority", property="schPriority", jdbcType=JdbcType.INTEGER),
-        @Result(column="sch_fail_strategy", property="schFailStrategy", jdbcType=JdbcType.VARCHAR),
         @Result(column="exec_driver_mem", property="execDriverMem", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_worker_mem", property="execWorkerMem", jdbcType=JdbcType.INTEGER),
-        @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER)
+        @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER),
+        @Result(column="extraction_type", property="extractionType", jdbcType=JdbcType.VARCHAR)
     })
     List<JobExecuteConfig> selectMany(SelectStatementProvider selectStatement);
 
@@ -117,13 +116,13 @@ public interface JobExecuteConfigDao {
             .map(schTimeOut).toProperty("schTimeOut")
             .map(schDryRun).toProperty("schDryRun")
             .map(execQueue).toProperty("execQueue")
-            .map(execMaxParallelism).toProperty("execMaxParallelism")
             .map(execWarnLevel).toProperty("execWarnLevel")
             .map(schTimeOutStrategy).toProperty("schTimeOutStrategy")
             .map(schPriority).toProperty("schPriority")
             .map(execDriverMem).toProperty("execDriverMem")
             .map(execWorkerMem).toProperty("execWorkerMem")
             .map(runningState).toProperty("runningState")
+            .map(extractionType).toProperty("extractionType")
         );
     }
 
@@ -142,13 +141,13 @@ public interface JobExecuteConfigDao {
             .map(schTimeOut).toPropertyWhenPresent("schTimeOut", record::getSchTimeOut)
             .map(schDryRun).toPropertyWhenPresent("schDryRun", record::getSchDryRun)
             .map(execQueue).toPropertyWhenPresent("execQueue", record::getExecQueue)
-            .map(execMaxParallelism).toPropertyWhenPresent("execMaxParallelism", record::getExecMaxParallelism)
             .map(execWarnLevel).toPropertyWhenPresent("execWarnLevel", record::getExecWarnLevel)
             .map(schTimeOutStrategy).toPropertyWhenPresent("schTimeOutStrategy", record::getSchTimeOutStrategy)
             .map(schPriority).toPropertyWhenPresent("schPriority", record::getSchPriority)
             .map(execDriverMem).toPropertyWhenPresent("execDriverMem", record::getExecDriverMem)
             .map(execWorkerMem).toPropertyWhenPresent("execWorkerMem", record::getExecWorkerMem)
             .map(runningState).toPropertyWhenPresent("runningState", record::getRunningState)
+            .map(extractionType).toPropertyWhenPresent("extractionType", record::getExtractionType)
         );
     }
 
@@ -193,13 +192,13 @@ public interface JobExecuteConfigDao {
                 .set(schTimeOut).equalTo(record::getSchTimeOut)
                 .set(schDryRun).equalTo(record::getSchDryRun)
                 .set(execQueue).equalTo(record::getExecQueue)
-                .set(execMaxParallelism).equalTo(record::getExecMaxParallelism)
                 .set(execWarnLevel).equalTo(record::getExecWarnLevel)
                 .set(schTimeOutStrategy).equalTo(record::getSchTimeOutStrategy)
                 .set(schPriority).equalTo(record::getSchPriority)
                 .set(execDriverMem).equalTo(record::getExecDriverMem)
                 .set(execWorkerMem).equalTo(record::getExecWorkerMem)
-                .set(runningState).equalTo(record::getRunningState);
+                .set(runningState).equalTo(record::getRunningState)
+                .set(extractionType).equalTo(record::getExtractionType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -216,13 +215,13 @@ public interface JobExecuteConfigDao {
                 .set(schTimeOut).equalToWhenPresent(record::getSchTimeOut)
                 .set(schDryRun).equalToWhenPresent(record::getSchDryRun)
                 .set(execQueue).equalToWhenPresent(record::getExecQueue)
-                .set(execMaxParallelism).equalToWhenPresent(record::getExecMaxParallelism)
                 .set(execWarnLevel).equalToWhenPresent(record::getExecWarnLevel)
                 .set(schTimeOutStrategy).equalToWhenPresent(record::getSchTimeOutStrategy)
                 .set(schPriority).equalToWhenPresent(record::getSchPriority)
                 .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
                 .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
-                .set(runningState).equalToWhenPresent(record::getRunningState);
+                .set(runningState).equalToWhenPresent(record::getRunningState)
+                .set(extractionType).equalToWhenPresent(record::getExtractionType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -240,13 +239,13 @@ public interface JobExecuteConfigDao {
             .set(schTimeOut).equalTo(record::getSchTimeOut)
             .set(schDryRun).equalTo(record::getSchDryRun)
             .set(execQueue).equalTo(record::getExecQueue)
-            .set(execMaxParallelism).equalTo(record::getExecMaxParallelism)
             .set(execWarnLevel).equalTo(record::getExecWarnLevel)
             .set(schTimeOutStrategy).equalTo(record::getSchTimeOutStrategy)
             .set(schPriority).equalTo(record::getSchPriority)
             .set(execDriverMem).equalTo(record::getExecDriverMem)
             .set(execWorkerMem).equalTo(record::getExecWorkerMem)
             .set(runningState).equalTo(record::getRunningState)
+            .set(extractionType).equalTo(record::getExtractionType)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -266,13 +265,13 @@ public interface JobExecuteConfigDao {
             .set(schTimeOut).equalToWhenPresent(record::getSchTimeOut)
             .set(schDryRun).equalToWhenPresent(record::getSchDryRun)
             .set(execQueue).equalToWhenPresent(record::getExecQueue)
-            .set(execMaxParallelism).equalToWhenPresent(record::getExecMaxParallelism)
             .set(execWarnLevel).equalToWhenPresent(record::getExecWarnLevel)
             .set(schTimeOutStrategy).equalToWhenPresent(record::getSchTimeOutStrategy)
             .set(schPriority).equalToWhenPresent(record::getSchPriority)
             .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
             .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
             .set(runningState).equalToWhenPresent(record::getRunningState)
+            .set(extractionType).equalToWhenPresent(record::getExtractionType)
             .where(id, isEqualTo(record::getId))
         );
     }

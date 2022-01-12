@@ -15,23 +15,17 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.util;
+package cn.zhengcaiyun.idata.merge.data.service;
 
-import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2022-01-11 17:02
+ * 文件夹迁移
  **/
-public class FolderTool {
+public interface FolderMigrationService {
 
-    public static Optional<CompositeFolder> findFolder(Long oldFolderId, List<CompositeFolder> folderList) {
-        return folderList.stream()
-                .filter(compositeFolder -> compositeFolder.getName().startsWith(IdPadTool.padId(oldFolderId.toString()) + "#_"))
-                .findFirst();
-    }
+    List<MigrateResultDto> migrate();
+
 }

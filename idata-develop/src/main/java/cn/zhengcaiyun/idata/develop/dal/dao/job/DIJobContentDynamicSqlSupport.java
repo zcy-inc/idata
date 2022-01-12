@@ -110,6 +110,13 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   数据来源-分片数量（并行度）
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_sharding_num")
+    public static final SqlColumn<Integer> srcShardingNum = DI_JOB_CONTENT.srcShardingNum;
+
+    /**
+     * Database Column Remarks:
      *   数据去向-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_type")
@@ -207,6 +214,8 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<String> srcReadFilter = column("src_read_filter", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcReadShardKey = column("src_read_shard_key", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> srcShardingNum = column("src_sharding_num", JDBCType.INTEGER);
 
         public final SqlColumn<String> destDataSourceType = column("dest_data_source_type", JDBCType.VARCHAR);
 
