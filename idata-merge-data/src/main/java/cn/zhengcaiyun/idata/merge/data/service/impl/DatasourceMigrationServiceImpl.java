@@ -35,6 +35,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
     private DataSourceService dataSourceService;
 
     @Override
+    @Transactional
     public List<MigrateResultDto> migrateDatasource() {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 查询旧版IData数据
