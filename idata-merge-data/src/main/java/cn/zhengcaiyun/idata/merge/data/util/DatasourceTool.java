@@ -34,4 +34,10 @@ public class DatasourceTool {
                 .filter(dataSource -> dataSource.getName().startsWith(IdPadTool.padId(oldDatasourceId.toString()) + "#_"))
                 .findFirst();
     }
+
+    public static Optional<DataSource> findHiveDatasource(List<DataSource> dataSourceList) {
+        return dataSourceList.stream()
+                .filter(dataSource -> dataSource.getType().equalsIgnoreCase("hive"))
+                .findFirst();
+    }
 }

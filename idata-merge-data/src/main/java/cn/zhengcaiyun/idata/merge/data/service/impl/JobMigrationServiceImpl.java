@@ -35,6 +35,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.manager.JobMigrateManager;
 import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
 import cn.zhengcaiyun.idata.merge.data.util.*;
@@ -81,8 +82,9 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     private JobMigrateManager jobMigrateManager;
 
     @Override
-    public void migrate() {
+    public List<MigrateResultDto> migrate() {
         LOGGER.info("*** *** 开始作业数据迁移... ... *** ***");
+        List<MigrateResultDto> resultDtoList = new ArrayList<>();
         // 只迁移真线已发布的版本作业
         // 获取旧版IData所有作业数据
         List<JobMigrationDto> migrationDtoList = Lists.newArrayList();
@@ -109,14 +111,15 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         for (JobMigrationDto migrationDto : migrationDtoList) {
             Long oldJobId = migrationDto.getOldJobId();
-            migrateJobNode(jobGraph, oldJobId, migratedOldJobs);
+            migrateJobNode(jobGraph, oldJobId, migratedOldJobs, resultDtoList);
         }
 
         LOGGER.info("*** *** 作业迁移结束 *** *** 计划迁移作业数[{}]，已存在作业数[{}]", migrationDtoList.size(), existJobs.size());
         JobMigrationContext.clear();
+        return resultDtoList;
     }
 
-    private void migrateJobNode(MutableGraph<Long> jobGraph, Long oldJobId, Set<Long> migratedOldJobs) {
+    private void migrateJobNode(MutableGraph<Long> jobGraph, Long oldJobId, Set<Long> migratedOldJobs, List<MigrateResultDto> resultDtoList) {
         if (migratedOldJobs.contains(oldJobId))
             return;
         // 获取上游节点
@@ -124,15 +127,15 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         if (!CollectionUtils.isEmpty(predecessors)) {
             // 先迁移上游节点
             for (Long prev_job_id : predecessors) {
-                migrateJobNode(jobGraph, prev_job_id, migratedOldJobs);
+                migrateJobNode(jobGraph, prev_job_id, migratedOldJobs, resultDtoList);
             }
         }
         // 迁移节点
-        migrateJobData(oldJobId);
+        migrateJobData(oldJobId, resultDtoList);
         migratedOldJobs.add(oldJobId);
     }
 
-    private void migrateJobData(Long oldJobId) {
+    private void migrateJobData(Long oldJobId, List<MigrateResultDto> resultDtoList) {
         JobMigrationDto migrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(oldJobId);
         JSONObject oldJobInfo = migrationDto.getOldJobInfo();
         JSONObject oldJobConfig = migrationDto.getOldJobConfig();
@@ -153,7 +156,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         Operator jobOperator = new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
 
         JobConfigCombinationDto configCombinationDto = buildJobConfig(oldJobId, oldJobInfo, oldJobConfig, oldJobContent);
-        jobMigrateManager.migrateJob(jobInfoDto, configCombinationDto, jobOperator, migrationDto);
+        List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(jobInfoDto, configCombinationDto, jobOperator, migrationDto);
+        resultDtoList.addAll(resultList);
         LOGGER.info("### ### 结束迁移作业[{}]#[{}]", oldJobId, jobName);
     }
 
@@ -308,7 +312,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             JobOutputDto outputDto = new JobOutputDto();
             outputDto.setEnvironment(EnvEnum.prod.name());
             Optional<DataSource> dataSourceOptional = DatasourceTool.findDatasource(configJson.getLong("target_id"), JobMigrationContext.getDataSourceListIfPresent());
-            checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的数据源", oldJobId);
+            checkArgument(dataSourceOptional.isPresent(), "旧作业[%s]未找到迁移后的数据源", oldJobId);
             DataSource dataSource = dataSourceOptional.get();
             outputDto.setDestDataSourceType(dataSource.getType());
             outputDto.setDestDataSourceId(dataSource.getId());
