@@ -94,7 +94,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
                 compositeFolderService.addFolder(folderDto, operator);
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new RuntimeException("无权限新增文件夹");
         }
         return null;
     }
@@ -120,7 +120,9 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
 
     private CompositeFolder getDAGFunctionFolder() {
         List<CompositeFolder> folders = compositeFolderRepo.queryFunctionFolder();
-        Optional<CompositeFolder> folderOptional = folders.stream().filter(compositeFolder -> compositeFolder.getName().equals("DAG")).findFirst();
+        Optional<CompositeFolder> folderOptional = folders.stream()
+                .filter(compositeFolder -> compositeFolder.getName().equals("DAG"))
+                .findFirst();
         return folderOptional.get();
     }
 

@@ -15,14 +15,23 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
+package cn.zhengcaiyun.idata.merge.data.util;
 
-import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:36
+ * @create: 2022-01-11 17:02
  **/
-public class SQLJobMigrationServiceImpl implements JobMigrationService {
+public class FolderTool {
+
+    public static Optional<CompositeFolder> findFolder(Long oldFolderId, List<CompositeFolder> folderList) {
+        return folderList.stream()
+                .filter(compositeFolder -> compositeFolder.getName().startsWith(IdPadTool.padId(oldFolderId.toString()) + "#_"))
+                .findFirst();
+    }
 }

@@ -15,14 +15,23 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
+package cn.zhengcaiyun.idata.merge.data.util;
 
-import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:35
+ * @create: 2022-01-11 17:02
  **/
-public class DIJobMigrationServiceImpl implements JobMigrationService {
+public class DatasourceTool {
+
+    public static Optional<DataSource> findDatasource(Long oldDatasourceId, List<DataSource> dataSourceList) {
+        return dataSourceList.stream()
+                .filter(dataSource -> dataSource.getName().startsWith(IdPadTool.padId(oldDatasourceId.toString()) + "#_"))
+                .findFirst();
+    }
 }

@@ -15,14 +15,29 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
+package cn.zhengcaiyun.idata.merge.data.util;
 
-import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:36
+ * @create: 2022-01-11 17:02
  **/
-public class SparkJobMigrationServiceImpl implements JobMigrationService {
+public class DagTool {
+
+    public static Optional<DAGInfo> findDag(final Integer oldDagId, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getName().startsWith(IdPadTool.padId(oldDagId.toString()) + "#_"))
+                .findFirst();
+    }
+
+    public static Optional<DAGInfo> findDagByNewId(final Long newDagId, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getId().equals(newDagId))
+                .findFirst();
+    }
 }

@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service.impl;
-
-import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
+package cn.zhengcaiyun.idata.merge.data.facade;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:37
+ * @create: 2022-01-10 13:42
  **/
-public class ScriptJobMigrationServiceImpl implements JobMigrationService {
+public interface MigrationFacade {
 }
