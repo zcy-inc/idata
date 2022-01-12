@@ -56,6 +56,11 @@
             <artifactId>idata-operation</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>cn.zhengcaiyun.idata</groupId>
+            <artifactId>idata-merge-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

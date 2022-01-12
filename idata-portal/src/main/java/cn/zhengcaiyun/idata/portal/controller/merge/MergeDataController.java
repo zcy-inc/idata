@@ -15,4 +15,18 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data;
+package cn.zhengcaiyun.idata.portal.controller.merge;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @description:
+ * @author: yangjianhua
+ * @create: 2022-01-12 16:18
+ **/
+@RestController
+@RequestMapping(path = "/p0/merge")
+public class MergeDataController {
+
+}
