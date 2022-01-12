@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao">
+
+    <select id="getPublishedDiJobContent" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                      and del = 0
+                      and job_id = #{jobId}
+                      and environment = #{env}
+                      and (job_type_code = 'DI_BATCH' or job_type_code = 'DI_BATCH')
+            ) as t1
+        join dev_job_content_di as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedSqlJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and job_type_code = 'SQL_SPARK'
+            ) as t1
+        join dev_job_content_sql as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedSparkJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and (job_type_code = 'SQL_SPARK' or job_type_code = 'SPARK_PYTHON')
+            ) as t1
+        join dev_job_content_spark as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedKylinJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and job_type_code = 'KYLIN'
+            ) as t1
+                join dev_job_content_sql as t2
+                     on t1.job_content_id = t2.id
+    </select>
+    <select id="getPublishedScriptJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and (job_type_code = 'SCRIPT_PYTHON' or job_type_code = 'SCRIPT_SHELL')
+            ) as t1
+                join dev_job_content_spark as t2
+                     on t1.job_content_id = t2.id
+    </select>
+
+</mapper>

@@ -18,42 +18,46 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
+import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDao;
+import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
-import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +83,10 @@ import static com.google.common.base.Preconditions.checkState;
 public class JobInfoServiceImpl implements JobInfoService {
 
     private final JobInfoRepo jobInfoRepo;
+    private final JobInfoMyDao jobInfoMyDao;
+    private final JobOutputRepo jobOutputRepo;
+    private final DevJobUdfMyDao devJobUdfMyDao;
+    private final JobPublishRecordMyDao jobPublishRecordMyDao;
     private final JobDependenceRepo jobDependenceRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
@@ -89,9 +97,14 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final OverhangJobLocalCache overhangJobLocalCache;
     private final DevAccessService devAccessService;
+    private final DataSourceApi dataSourceApi;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
+                              JobInfoMyDao jobInfoMyDao,
+                              JobOutputRepo jobOutputRepo,
+                              DevJobUdfMyDao devJobUdfMyDao,
+                              JobPublishRecordMyDao jobPublishRecordMyDao,
                               JobDependenceRepo jobDependenceRepo,
                               JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobPublishRecordRepo jobPublishRecordRepo,
@@ -101,8 +114,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache,
                               OverhangJobLocalCache overhangJobLocalCache,
-                              DevAccessService devAccessService) {
+                              DevAccessService devAccessService,
+                              DataSourceApi dataSourceApi) {
         this.jobInfoRepo = jobInfoRepo;
+        this.jobInfoMyDao = jobInfoMyDao;
+        this.jobOutputRepo = jobOutputRepo;
+        this.devJobUdfMyDao = devJobUdfMyDao;
+        this.jobPublishRecordMyDao = jobPublishRecordMyDao;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.dagRepo = dagRepo;
@@ -113,6 +131,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.overhangJobLocalCache = overhangJobLocalCache;
         this.devAccessService = devAccessService;
+        this.dataSourceApi = dataSourceApi;
     }
 
     @Override
@@ -337,6 +356,126 @@ public class JobInfoServiceImpl implements JobInfoService {
                 introspectionException.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env) {
+        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = Optional.of(jobInfoMyDao.selectJobInfoExecuteDetail(id, env))
+                .orElseThrow(() -> new IllegalArgumentException(String.format("任务不存在或配置不存在, jobId:%s，环境:%s", id, env)));
+
+        String jobType = jobInfoExecuteDetailDto.getJobType();
+        checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%d", jobType));
+
+        switch (JobTypeEnum.getEnum(jobType).get()) {
+            case DI_BATCH:
+            case DI_STREAM:
+                JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装di_job_content
+                DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
+                checkArgument(Optional.of(diJobContent).isPresent(), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(diJobContent, diResponse);
+                if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
+                    diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
+                }
+                if (StringUtils.isNotBlank(diJobContent.getDestColumns())) {
+                    diResponse.setDestCols(JSON.parseArray(diJobContent.getDestColumns(), MappingColumnDto.class));
+                }
+
+                // 封装连接信息
+                DataSourceDto dataSource = dataSourceApi.getDataSource(diJobContent.getSrcDataSourceId());
+                checkArgument(Optional.of(dataSource).isPresent(), String.format("数据源不存在, DataSourceId:%d", diJobContent.getSrcDataSourceId()));
+                checkArgument(org.apache.commons.collections.CollectionUtils.isNotEmpty(dataSource.getDbConfigList()), String.format("数据源配置缺失, DataSourceId:%d", diJobContent.getSrcDataSourceId()));
+                DataSourceTypeEnum dataSourceType = dataSource.getType();
+                diResponse.setSrcDataType(dataSourceType.name());
+
+                DbConfigDto dbConfigDto = dataSource.getDbConfigList().get(0);
+
+                diResponse.setSrcJdbcUrl(getJdbcUrl(dataSourceType, dbConfigDto.getHost(), dbConfigDto.getPort(), dbConfigDto.getDbName(), dbConfigDto.getSchema()));
+                diResponse.setSrcUsername(dbConfigDto.getUsername());
+                diResponse.setSrcPassword(dbConfigDto.getPassword());
+
+                String writeMode = diJobContent.getDestWriteMode();
+                if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
+                    // TODO 岛端不需要增量逻辑
+                }
+                return diResponse;
+            case SQL_SPARK:
+                JobInfoExecuteDetailDto.SqlJobDetailsDto sqlResponse = new JobInfoExecuteDetailDto.SqlJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装sql_job_content
+                DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
+                checkArgument(Optional.of(contentSql).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentSql, sqlResponse);
+
+                JobOutput jobOutput = jobOutputRepo.query(id, env)
+                        .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", id, env)));
+                BeanUtils.copyProperties(jobOutput, sqlResponse);
+
+                String udfIds = contentSql.getUdfIds();
+                if (StringUtils.isNotBlank(udfIds)) {
+                    List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
+                    List<DevJobUdf> udfList = devJobUdfMyDao.getByIds(idList);
+                    sqlResponse.setUdfList(udfList);
+                }
+                return sqlResponse;
+            case SPARK_PYTHON:
+            case SPARK_JAR:
+                JobInfoExecuteDetailDto.SparkJobDetailsDto sparkResponse = new JobInfoExecuteDetailDto.SparkJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装spark_job_content
+                DevJobContentSpark contentSpark = jobPublishRecordMyDao.getPublishedSparkJobContent(id, env);
+                checkArgument(Optional.of(contentSpark).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentSpark, sparkResponse);
+
+                return sparkResponse;
+            case KYLIN:
+                JobInfoExecuteDetailDto.KylinDetailJob kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJob(jobInfoExecuteDetailDto);
+
+                // 封装spark_job_content
+                DevJobContentKylin contentKylin = jobPublishRecordMyDao.getPublishedKylinJobContent(id, env);
+                checkArgument(Optional.of(contentKylin).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentKylin, kylinResponse);
+
+                return kylinResponse;
+            case SCRIPT_SHELL:
+            case SCRIPT_PYTHON:
+                JobInfoExecuteDetailDto.ScriptJobDetailsDto scriptResponse = new JobInfoExecuteDetailDto.ScriptJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装script_job_content
+                DevJobContentScript contentScript = jobPublishRecordMyDao.getPublishedScriptJobContent(id, env);
+                checkArgument(Optional.of(contentScript).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentScript, scriptResponse);
+
+                return scriptResponse;
+            default:
+                throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
+        }
+    }
+
+    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
+        String protocol = null;
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
+            protocol = "mysql";
+        } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+            protocol = "postgresql";
+        } else if (DataSourceTypeEnum.presto == sourceTypeEnum) {
+            protocol = "presto";
+        } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
+            protocol = "hive2";
+        }
+        if (StringUtils.isEmpty(protocol)) return null;
+
+        String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        return jdbcUrl;
+    }
+
+    private List<String> getHdfsPath(String udfIds) {
+        if (StringUtils.isNotBlank(udfIds)) {
+            List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
+            return devJobUdfMyDao.getConcatHdfsPath(idList);
+        }
+        return null;
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

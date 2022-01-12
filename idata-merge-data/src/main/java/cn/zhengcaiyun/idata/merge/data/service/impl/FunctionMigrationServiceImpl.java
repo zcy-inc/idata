@@ -9,6 +9,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.FunctionMigrationService;
+import cn.zhengcaiyun.idata.merge.data.util.IdPadTool;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
     }
 
     private Long getMappingFolderId(Long folderId) {
-        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(NumberUtil.decimalFormat("00000000", folderId) + "#_");
+        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(IdPadTool.padId(folderId + "") + "#_");
         if (compositeFolder != null) {
             return compositeFolder.getId();
         }

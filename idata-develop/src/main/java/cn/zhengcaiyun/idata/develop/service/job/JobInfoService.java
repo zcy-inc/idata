@@ -79,4 +79,12 @@ public interface JobInfoService {
      * @param <T>
      */
     <T> void fillJobName(List<T> list, Class klass, String jobIdFieldName, String jobNameFieldName) throws NoSuchFieldException;
+
+    /**
+     * 获取任务详情
+     * @param id
+     * @param env
+     * @return
+     */
+    JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env);
 }

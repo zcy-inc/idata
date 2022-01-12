@@ -1,11 +1,14 @@
 package cn.zhengcaiyun.idata.merge.data.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderDao;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.FolderMigrationService;
+import cn.zhengcaiyun.idata.merge.data.util.IdPadTool;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,9 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
 
     @Autowired
     private CompositeFolderDao compositeFolderDao;
+
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -120,12 +126,15 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
         Map<Long, Long> jobIdMapping = new HashMap<>();
         jobIdMapping.put(-1L, 10008L);
         doMigrate(jobList, jobIdMapping);
+        // clear cache
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DEV_FUN);
+        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_TABLE);
         return null;
     }
 
     private void doMigrate(List<CompositeFolder> list, Map<Long, Long> idMapping) {
         list.forEach(e -> {
-            e.setName(NumberUtil.decimalFormat("00000000", e.getId()) + "#_" + e.getName());
+            e.setName(IdPadTool.padId(e.getId() + "") + "#_" + e.getName());
             Long oldId = e.getId();
             compositeFolderDao.insert(e);
             // 插入后，e的id被覆盖成自增id

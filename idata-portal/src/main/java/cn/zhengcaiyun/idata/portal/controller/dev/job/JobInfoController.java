@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
@@ -26,7 +27,6 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiImplicitParam;
@@ -150,6 +150,20 @@ public class JobInfoController {
     @GetMapping("/{id}")
     public RestResult<JobInfoDto> getJobInfo(@PathVariable Long id) {
         return RestResult.success(jobInfoService.getJobInfo(id));
+    }
+
+    /**
+     * 获取作业详细信息，用于任务执行参数
+     * @param id 作业id
+     * @return
+     */
+    @GetMapping("/{id}/execute-detail")
+    public RestResult<JobInfoExecuteDetailDto> getJobInfoDetail(@PathVariable Long id,
+                                                                @RequestParam("env") String env) {
+        if (EnvEnum.getEnum(env).isEmpty()) {
+            return RestResult.error("env is invalid : " + env, "invalid params");
+        }
+        return RestResult.success(jobInfoService.getJobInfoExecuteDetail(id, env));
     }
 
     /**

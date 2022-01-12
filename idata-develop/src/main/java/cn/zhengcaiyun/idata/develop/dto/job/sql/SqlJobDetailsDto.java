@@ -30,10 +30,6 @@ public class SqlJobDetailsDto extends SqlJobContentDto {
     private String targetTableName;
     private String saveMode;
     private List<DevJobUdf> udfs;
-    private String udfName;
-    private String resourceHdfsPath;
-    private String udfType;
-    private String returnType;
     private List<DataQueryDto> dataQueries;
 
     // GaS
@@ -59,38 +55,6 @@ public class SqlJobDetailsDto extends SqlJobContentDto {
 
     public void setUdfs(List<DevJobUdf> udfs) {
         this.udfs = udfs;
-    }
-
-    public String getUdfName() {
-        return udfName;
-    }
-
-    public void setUdfName(String udfName) {
-        this.udfName = udfName;
-    }
-
-    public String getResourceHdfsPath() {
-        return resourceHdfsPath;
-    }
-
-    public void setResourceHdfsPath(String resourceHdfsPath) {
-        this.resourceHdfsPath = resourceHdfsPath;
-    }
-
-    public String getUdfType() {
-        return udfType;
-    }
-
-    public void setUdfType(String udfType) {
-        this.udfType = udfType;
-    }
-
-    public String getReturnType() {
-        return returnType;
-    }
-
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
     }
 
     public List<DataQueryDto> getDataQueries() {

@@ -39,7 +39,7 @@ public class MappingColumnDto {
     /**
      * 字段抽取sql
      */
-    private String sql;
+    private String mappingSql;
     /**
      * 映射字段
      */
@@ -77,11 +77,11 @@ public class MappingColumnDto {
         this.mappedColumn = mappedColumn;
     }
 
-    public String getSql() {
-        return sql;
+    public String getMappingSql() {
+        return mappingSql;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
+    public void setMappingSql(String mappingSql) {
+        this.mappingSql = mappingSql;
     }
 }
