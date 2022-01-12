@@ -18,13 +18,19 @@
 package cn.zhengcaiyun.idata.merge.data.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
+import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
  * @description:
@@ -34,49 +40,82 @@ import java.util.List;
 @Component
 public class JobMigrateManager {
 
+    @Autowired
+    private JobInfoService jobInfoService;
+    @Autowired
+    private JobPublishRecordService jobPublishRecordService;
+    @Autowired
+    private DIJobContentService diJobContentService;
+    @Autowired
+    private JobExecuteConfigService jobExecuteConfigService;
+    @Autowired
+    private JobContentCommonService jobContentCommonService;
+    @Autowired
+    private JobPublishRecordRepo jobPublishRecordRepo;
+
+
     @Transactional
     public void migrateJob(JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
-                           Operator jobOperator, JobMigrationDto migrationDto){
+                           Operator jobOperator, JobMigrationDto migrationDto) {
+        try {
+            Long newJobId = jobInfoService.addJob(jobInfoDto, jobOperator);
+            JobConfigCombinationDto combinationDto = jobExecuteConfigService.save(newJobId, EnvEnum.prod.name(), configCombinationDto, jobOperator);
+            Integer contentVersion = migrateContentInfo(newJobId, jobInfoDto, migrationDto);
+
+            jobContentCommonService.submit(newJobId, contentVersion, EnvEnum.prod.name(), "迁移自动提交", contentOperator);
+            Optional<JobPublishRecord> publishRecordOptional = jobPublishRecordRepo.query(newJobId, contentVersion, EnvEnum.prod.name());
+            if (publishRecordOptional.isPresent() && publishRecordOptional.get().getPublishStatus().equals(PublishStatusEnum.SUBMITTED.val)) {
+                jobPublishRecordService.approve(publishRecordOptional.get().getId(), "迁移自动发布", contentOperator);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("没有操作权限");
+        }
+    }
+
+    private Integer migrateContentInfo(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
+        Integer contentVersion;
+        switch (jobInfoDto.getJobType()) {
+            case DI_BATCH:
+                contentVersion = migrateDIContent(newJobId, jobInfoDto, migrationDto);
+            case SQL_SPARK:
+                // todo 迁移作业内容
+            case SPARK_PYTHON:
+                // todo 迁移作业内容
+            case SPARK_JAR:
+                // todo 迁移作业内容
+            case SCRIPT_PYTHON:
+                // todo 迁移作业内容
+            case SCRIPT_SHELL:
+                // todo 迁移作业内容
+            case KYLIN:
+                // todo 迁移作业内容
+            default:
+                contentVersion = null;
+        }
+        return contentVersion;
+    }
+
+    private Integer migrateDIContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 
-    void migrateBaseInfo() {
+    private Integer migrateSQLContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 
-    void migrateConfigInfo(){
+    private Integer migrateBackFlowContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 
-    void migrateContentInfo() {
+    private Integer migrateKylinContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 
-    void migratePublishInfo() {
+    private Integer migrateSparkContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 
-    void migrateDIContent() {
-
-    }
-
-    void migrateSQLContent() {
-
-    }
-
-    void migrateBackFlowContent() {
-
-    }
-
-    void migrateKylinContent() {
-
-    }
-
-    void migrateSparkContent() {
-
-    }
-
-    void migrateScriptContent() {
+    private Integer migrateScriptContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
 
     }
 }
