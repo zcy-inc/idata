@@ -16,8 +16,11 @@
  */
 package cn.zhengcaiyun.idata.merge.data.service.impl;
 
-import cn.zhengcaiyun.idata.develop.dal.dao.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
+import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
@@ -26,16 +29,13 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
-import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
-import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
-import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
-import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.DwMetaService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.merge.data.service.ModelMigrationService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,21 +74,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
-    private DimensionService dimensionService;
-    @Autowired
-    private DevEnumDao devEnumDao;
-    @Autowired
-    private ModifierService modifierService;
-    @Autowired
-    private DevLabelDefineDao devLabelDefineDao;
-    @Autowired
-    private MetricService metricService;
-    @Autowired
-    private DevColumnInfoDao devColumnInfoDao;
-    @Autowired
     private DevForeignKeyDao devForeignKeyDao;
-    @Autowired
-    private DevFolderService devFolderService;
     @Autowired
     private CompositeFolderService compositeFolderService;
 
@@ -96,10 +82,23 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
     @Transactional(rollbackFor = Throwable.class)
     public Boolean syncModelMigration() {
         // 同步业务过程
+        LOGGER.info("*** *** 开始业务过程数据迁移... ... *** ***");
         syncBizProcess();
+        LOGGER.info("*** *** 业务过程数据迁移完成... ... *** ***");
         // 同步表和字段
+        LOGGER.info("*** *** 开始数仓设计数据迁移... ... *** ***");
+        List<String> errorTableNameList = syncTables();
+        if (ObjectUtils.isEmpty(errorTableNameList)) {
+            LOGGER.info("*** *** 数仓设计数据迁移完成... ... *** ***");
+        }
+        else {
+            LOGGER.info("*** *** 数仓设计同步有误表名： " + String.join(",", errorTableNameList));
+        }
         // 同步表外键
-        return null;
+        LOGGER.info("*** *** 开始外键数据迁移... ... *** ***");
+        syncForeignKeys();
+        LOGGER.info("*** *** 外键数据迁移完成... ... *** ***");
+        return true;
     }
 
     private EnumDto syncBizProcess() {
@@ -123,8 +122,8 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         return enumService.createOrEdit(enumDto, "系统管理员");
     }
 
-    private List<TableInfoDto> syncTable(Long oldTableId) throws IllegalAccessException {
-        List<Map<String, Object>> tableList = dwMetaService.getTables(oldTableId);
+    private List<String> syncTables() {
+        List<Map<String, Object>> tableList = dwMetaService.getTables(null);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
         Map<String, String> domainMap = dwMetaService.getDomains();
@@ -139,16 +138,6 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         Map<String, String> idataBizProcessMap = enumService.getEnumValues("bizProcessEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));
         Map<Long, Long> folderMap = new HashMap<>();
-        // 文件夹原有逻辑
-//        if (folderId == null) {
-//            folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
-//                    .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
-//        }
-//        else {
-//            DevFolder tableFolder = devFolderDao.selectOne(c -> c.where(devFolder.del, isNotEqualTo(1),
-//                    and(devFolder.id, isEqualTo(folderId)))).get();
-//            folderMap.put(tableFolder.getFolderName(), tableFolder.getId());
-//        }
         // 文件夹新逻辑
         folderMap = compositeFolderService.getFolders("DESIGN.TABLE")
                 .stream().collect(Collectors.toMap(tableFolder -> Long.valueOf(tableFolder.getName().split("#_")[0]),
@@ -186,7 +175,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
             }
         });
         List<TableInfoDto> addList = new ArrayList<>();
-        List<TableInfoDto> echoList = new ArrayList<>();
+        List<String> errorTableNameList = new ArrayList<>();
         TableInfoDto echoTable;
         Map<Long, Long> finalFolderMap = folderMap;
         tableList.forEach(tableRecord -> {
@@ -280,11 +269,12 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         });
 
         for (TableInfoDto tableInfoDto : addList) {
-            echoTable = tableInfoService.create(tableInfoDto, "系统管理员");
-            System.out.println("Table Sync Success : tableName " + tableInfoDto.getTableName());
-            echoList.add(echoTable);
+            try {
+                echoTable = tableInfoService.create(tableInfoDto, "系统管理员");
+                errorTableNameList.remove(tableInfoDto.getTableName());
+            } catch (IllegalAccessException ignore) {}
         }
-        return echoList;
+        return errorTableNameList;
     }
 
     private String syncSecurityLevel(String securityLevel) {
@@ -362,6 +352,36 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
             echoList.add(echoColumn);
         }
         return echoList;
+    }
+
+    private boolean syncForeignKeys() {
+        List<Map<String, Object>> foreignKeyList = dwMetaService.getForeignKeys(null);
+        List<Map<String, Object>> columnList = dwMetaService.getColumns();
+        Map<String, String> columnMap = columnList.stream().collect(Collectors.toMap(
+                record -> record.get("id").toString(), record -> (String) record.get("col_name")));
+        Map<String, String> tableMap = dwMetaService.getTables(null).stream()
+                .collect(Collectors.toMap(record -> record.get("id").toString(), record -> (String) record.get("tbl_name")));
+        Map<String, Long> idataTableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevTableInfo::getTableName, DevTableInfo::getId));
+        List<Integer> echoList = foreignKeyList.stream().map(foreignKeyMap -> {
+            DevForeignKey echo = new DevForeignKey();
+            echo.setCreator("系统管理员");
+            echo.setTableId(idataTableMap.get(tableMap.get(foreignKeyMap.get("table_id").toString())));
+            String colIdStr = foreignKeyMap.get("col_ids").toString();
+            String[] colIdStrs = colIdStr.split("[{,}]");
+            List<String> colIdList = Arrays.stream((foreignKeyMap.get("col_ids")).toString().split("[{,}]"))
+                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            List<String> columnNameList = colIdList.stream().map(columnMap::get).collect(Collectors.toList());
+            echo.setColumnNames(String.join(",", columnNameList));
+            echo.setReferTableId(idataTableMap.get(tableMap.get(foreignKeyMap.get("refer_tbl_id").toString())));
+            List<String> referColIdList = Arrays.stream((foreignKeyMap.get("col_ids")).toString().split("[{,}]"))
+                    .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+            List<String> referColumnNameList = referColIdList.stream().map(columnMap::get).collect(Collectors.toList());
+            echo.setReferColumnNames(String.join(",", referColumnNameList));
+            echo.setErType((String) foreignKeyMap.get("er_type"));
+            return devForeignKeyDao.insertSelective(echo);
+        }).collect(Collectors.toList());
+        return true;
     }
 
     private Map<String, String> changeBizProcessCodes(Map<String, String> bizProcessCodeMap) {

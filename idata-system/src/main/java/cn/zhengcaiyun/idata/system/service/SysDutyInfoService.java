@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service;
+package cn.zhengcaiyun.idata.system.service;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:48
+ * @create: 2022-01-13 14:14
  **/
+public interface SysDutyInfoService {
 
-public interface ModelMigrationService {
-    Boolean syncModelMigration();
+    Optional<String> findDutyPhone(LocalDate date);
+
 }

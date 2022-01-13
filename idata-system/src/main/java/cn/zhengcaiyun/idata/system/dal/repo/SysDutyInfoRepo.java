@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.service;
+package cn.zhengcaiyun.idata.system.dal.repo;
+
+import cn.zhengcaiyun.idata.system.dal.model.SysDutyInfo;
+
+import java.util.Optional;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:48
+ * @create: 2022-01-13 14:10
  **/
+public interface SysDutyInfoRepo {
 
-public interface ModelMigrationService {
-    Boolean syncModelMigration();
+    Optional<SysDutyInfo> queryOne();
 }
