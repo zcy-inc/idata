@@ -267,6 +267,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
           stroke: '#ebedf3',
           width: 240,
           radius: 4,
+          cursor: 'pointer',
         },
       },
       defaultEdge: {
@@ -365,6 +366,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     graph.on('node:click', function (e: any) {
       const node = e.item;
       const model = node._cfg.model;
+      const data = model.data || {};
       if (model.tableType === 'src') {
         setVisible(true);
         setCurrentNode(model);
@@ -372,10 +374,13 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       }
       if (model.tableType === 'dest') {
         if (model.data.primaryKey) {
-          graph.updateItem(node, { label: model.data.name });
+          graph.updateItem(node, { label: model.data.name, data: { ...data, primaryKey: false } });
           set(destMap.current, `[${model.id}].primaryKey`, false);
         } else {
-          graph.updateItem(node, { label: `🔑 ${model.data.name}` });
+          graph.updateItem(node, {
+            label: `🔑 ${model.data.name}`,
+            data: { ...data, primaryKey: true },
+          });
           set(destMap.current, `[${model.id}].primaryKey`, true);
         }
       }
