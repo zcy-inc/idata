@@ -29,7 +29,5 @@ import java.util.List;
  **/
 
 public interface ModelMigrationService {
-    EnumDto syncBizProcess();
-    List<TableInfoDto> syncTable(Long oldTableId);
-    Boolean syncForeignKey();
+    Boolean syncModelMigration(Long oldTableId);
 }
