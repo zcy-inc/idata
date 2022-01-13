@@ -1,7 +1,10 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
@@ -12,6 +15,9 @@ public class JobInfoExecuteDetailDto {
     /**
      * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum
      */
+    private JobTypeEnum jobTypeEnum; // appType
+
+    @JsonIgnore
     private String jobType;
     /**
      * driver节点内存
@@ -32,7 +38,7 @@ public class JobInfoExecuteDetailDto {
     /**
      * 作业执行引擎，可传SPARK/SQOOP/KYLIN
      */
-    private String extractionType;
+    private String execEngine;
 
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
@@ -44,39 +50,23 @@ public class JobInfoExecuteDetailDto {
 
         // 连接信息
         private String srcDataType;
-        private String srcJdbcUrl;
-        private String srcUsername;
-        private String srcPassword;
-
-        // 字段
+        private String srcJdbcUrl;// jdbcUrlPath
+        private String srcUsername;// username
+        private String srcPassword;// password
+        private DriverTypeEnum srcDriverType;// driverType
+        private String srcDbName; //dbName
         /**
-         * 数据来源-字段信息
+         *   数据来源-来源表
          */
-        private List<MappingColumnDto> srcCols;
+        private String srcTables;//sourceTableName
         /**
-         * 数据去向-字段信息
+         *   数据去向-目标表
          */
-        private List<MappingColumnDto> destCols;
+        private String destTable;//带库名 targetTableName
         /**
-         *   作业版本号
+         *   数据去向-写入模式，init: 新建表，override: 覆盖表
          */
-        private Integer version;
-        /**
-         *   数据来源-数据源类型
-         */
-        private String srcDataSourceType;
-        /**
-         *   数据来源-数据源id
-         */
-        private Long srcDataSourceId;
-        /**
-         *   数据来源-读取模式，all：全量，incremental：增量
-         */
-        private String srcReadMode;
-        /**
-         *   数据来源-过滤条件
-         */
-        private String srcReadFilter;
+        private String destWriteMode; // isRecreate
         /**
          *   数据来源-切分键
          */
@@ -86,33 +76,77 @@ public class JobInfoExecuteDetailDto {
          */
         private Integer srcShardingNum;
         /**
-         *   数据去向-数据源类型
+         *   TODO
          */
-        private String destDataSourceType;
+        private String mergeSql;
         /**
-         *   数据去向-数据源id
+         *   数据来源-过滤条件
          */
-        private Long destDataSourceId;
+        private String srcReadFilter; // diCondition
         /**
-         *   数据去向-目标表
+         * TODO
          */
-        private String destTable;
+        private String diQuery;
         /**
-         *   数据去向-写入模式，init: 新建表，override: 覆盖表
+         * 数据来源-字段信息
          */
-        private String destWriteMode;
-        /**
-         *   数据去向-写入前语句
-         */
-        private String destBeforeWrite;
-        /**
-         *   数据去向-写入后语句
-         */
-        private String destAfterWrite;
-        /**
-         *   数据来源-来源表
-         */
-        private String srcTables;
+        private List<MappingColumnDto> srcCols; // diColumns
+
+//        private String jdbcUrlPath;
+//        private String username;
+//        private String password;
+//        private String sourceTableName;
+//        private String targetTableName;//带库名
+//        private Boolean isRecreate; //destWriteMode
+//        private String diCondition; // srcReadFilter
+//        private String diColumns; // srcCols
+//        private String diQuery;
+//        private String mergeSql;
+//        private DiModeType diMode;
+//        private String dbName;
+//        private SourceDriverType driverType;
+
+        // 字段
+//        /**
+//         * 数据去向-字段信息
+//         */
+//        @JsonIgnore
+//        private List<MappingColumnDto> destCols;
+//        /**
+//         *   数据来源-数据源类型
+//         */
+//        @JsonIgnore
+//        private String srcDataSourceType;
+//        /**
+//         *   数据来源-数据源id
+//         */
+//        @JsonIgnore
+//        private Long srcDataSourceId;
+//        /**
+//         *   数据来源-读取模式，all：全量，incremental：增量
+//         */
+//        @JsonIgnore
+//        private String srcReadMode;
+//        /**
+//         *   数据去向-数据源类型
+//         */
+//        @JsonIgnore
+//        private String destDataSourceType;
+//        /**
+//         *   数据去向-数据源id
+//         */
+//        @JsonIgnore
+//        private Long destDataSourceId;
+//        /**
+//         *   数据去向-写入前语句
+//         */
+//        @JsonIgnore
+//        private String destBeforeWrite;
+//        /**
+//         *   数据去向-写入后语句
+//         */
+//        @JsonIgnore
+//        private String destAfterWrite;
 
         public String getSrcDataType() {
             return srcDataType;
@@ -154,46 +188,6 @@ public class JobInfoExecuteDetailDto {
             this.srcCols = srcCols;
         }
 
-        public List<MappingColumnDto> getDestCols() {
-            return destCols;
-        }
-
-        public void setDestCols(List<MappingColumnDto> destCols) {
-            this.destCols = destCols;
-        }
-
-        public Integer getVersion() {
-            return version;
-        }
-
-        public void setVersion(Integer version) {
-            this.version = version;
-        }
-
-        public String getSrcDataSourceType() {
-            return srcDataSourceType;
-        }
-
-        public void setSrcDataSourceType(String srcDataSourceType) {
-            this.srcDataSourceType = srcDataSourceType;
-        }
-
-        public Long getSrcDataSourceId() {
-            return srcDataSourceId;
-        }
-
-        public void setSrcDataSourceId(Long srcDataSourceId) {
-            this.srcDataSourceId = srcDataSourceId;
-        }
-
-        public String getSrcReadMode() {
-            return srcReadMode;
-        }
-
-        public void setSrcReadMode(String srcReadMode) {
-            this.srcReadMode = srcReadMode;
-        }
-
         public String getSrcReadFilter() {
             return srcReadFilter;
         }
@@ -218,22 +212,6 @@ public class JobInfoExecuteDetailDto {
             this.srcShardingNum = srcShardingNum;
         }
 
-        public String getDestDataSourceType() {
-            return destDataSourceType;
-        }
-
-        public void setDestDataSourceType(String destDataSourceType) {
-            this.destDataSourceType = destDataSourceType;
-        }
-
-        public Long getDestDataSourceId() {
-            return destDataSourceId;
-        }
-
-        public void setDestDataSourceId(Long destDataSourceId) {
-            this.destDataSourceId = destDataSourceId;
-        }
-
         public String getDestTable() {
             return destTable;
         }
@@ -250,28 +228,45 @@ public class JobInfoExecuteDetailDto {
             this.destWriteMode = destWriteMode;
         }
 
-        public String getDestBeforeWrite() {
-            return destBeforeWrite;
-        }
-
-        public void setDestBeforeWrite(String destBeforeWrite) {
-            this.destBeforeWrite = destBeforeWrite;
-        }
-
-        public String getDestAfterWrite() {
-            return destAfterWrite;
-        }
-
-        public void setDestAfterWrite(String destAfterWrite) {
-            this.destAfterWrite = destAfterWrite;
-        }
-
         public String getSrcTables() {
             return srcTables;
         }
 
         public void setSrcTables(String srcTables) {
             this.srcTables = srcTables;
+        }
+
+
+        public String getMergeSql() {
+            return mergeSql;
+        }
+
+        public void setMergeSql(String mergeSql) {
+            this.mergeSql = mergeSql;
+        }
+
+        public String getDiQuery() {
+            return diQuery;
+        }
+
+        public void setDiQuery(String diQuery) {
+            this.diQuery = diQuery;
+        }
+
+        public DriverTypeEnum getSrcDriverType() {
+            return srcDriverType;
+        }
+
+        public void setSrcDriverType(DriverTypeEnum srcDriverType) {
+            this.srcDriverType = srcDriverType;
+        }
+
+        public String getSrcDbName() {
+            return srcDbName;
+        }
+
+        public void setSrcDbName(String srcDbName) {
+            this.srcDbName = srcDbName;
         }
     }
 
@@ -289,19 +284,14 @@ public class JobInfoExecuteDetailDto {
         private String destDataSourceType;
 
         /**
-         *   数据去向-数据源id
-         */
-        private Long destDataSourceId;
-
-        /**
          *   数据去向-目标表
          */
-        private String destTable;
+        private String destTable; // targetTableName
 
         /**
          *   数据去向-写入模式，overwrite，upsert
          */
-        private String destWriteMode;
+        private String destWriteMode; // saveMode
 
         /**
          *   数据来源表主键(写入模式为upsert时必填)
@@ -312,8 +302,14 @@ public class JobInfoExecuteDetailDto {
          * 是否开启小文件合并
          */
         private Boolean isOpenMergeFile;
-
-        private List<DevJobUdf> udfList;
+        /**
+         * 数据来源SQL
+         */
+        private String sourceSql; // sourceSql
+        /**
+         * 函数
+         */
+        private List<DevJobUdf> udfList; // udfs
 
         public String getDestDataSourceType() {
             return destDataSourceType;
@@ -321,14 +317,6 @@ public class JobInfoExecuteDetailDto {
 
         public void setDestDataSourceType(String destDataSourceType) {
             this.destDataSourceType = destDataSourceType;
-        }
-
-        public Long getDestDataSourceId() {
-            return destDataSourceId;
-        }
-
-        public void setDestDataSourceId(Long destDataSourceId) {
-            this.destDataSourceId = destDataSourceId;
         }
 
         public String getDestTable() {
@@ -370,6 +358,14 @@ public class JobInfoExecuteDetailDto {
         public void setUdfList(List<DevJobUdf> udfList) {
             this.udfList = udfList;
         }
+
+        public String getSourceSql() {
+            return sourceSql;
+        }
+
+        public void setSourceSql(String sourceSql) {
+            this.sourceSql = sourceSql;
+        }
     }
 
     public static class SparkJobDetailsDto extends JobInfoExecuteDetailDto {
@@ -380,9 +376,11 @@ public class JobInfoExecuteDetailDto {
             BeanUtils.copyProperties(parent, this);
         }
 
-        private String resourceHdfsPath;
-        private List<JobArgumentDto> appArxguments;
-        private String mainClass;
+        private String resourceHdfsPath; // resourceHdfsPath
+        private List<JobArgumentDto> appArguments; // appArguments
+        private String mainClass; //mainClass
+
+        private List<String> dependResHdfsPaths; // 目前缺少
 
         public String getResourceHdfsPath() {
             return resourceHdfsPath;
@@ -392,12 +390,12 @@ public class JobInfoExecuteDetailDto {
             this.resourceHdfsPath = resourceHdfsPath;
         }
 
-        public List<JobArgumentDto> getAppArxguments() {
-            return appArxguments;
+        public List<JobArgumentDto> getAppArguments() {
+            return appArguments;
         }
 
-        public void setAppArxguments(List<JobArgumentDto> appArxguments) {
-            this.appArxguments = appArxguments;
+        public void setAppArguments(List<JobArgumentDto> appArguments) {
+            this.appArguments = appArguments;
         }
 
         public String getMainClass() {
@@ -418,8 +416,6 @@ public class JobInfoExecuteDetailDto {
         }
         private String cubeName;
         private String buildType;
-        private Date startTime;
-        private Date endTime;
 
         public String getCubeName() {
             return cubeName;
@@ -436,22 +432,6 @@ public class JobInfoExecuteDetailDto {
         public void setBuildType(String buildType) {
             this.buildType = buildType;
         }
-
-        public Date getStartTime() {
-            return startTime;
-        }
-
-        public void setStartTime(Date startTime) {
-            this.startTime = startTime;
-        }
-
-        public Date getEndTime() {
-            return endTime;
-        }
-
-        public void setEndTime(Date endTime) {
-            this.endTime = endTime;
-        }
     }
 
     public static class ScriptJobDetailsDto extends JobInfoExecuteDetailDto {
@@ -465,11 +445,11 @@ public class JobInfoExecuteDetailDto {
         /**
          * 脚本资源内容
          */
-        private String sourceResource;
+        private String sourceResource; // resourceHdfsPath
         /**
          * 执行参数
          */
-        private List<JobArgumentDto> scriptArguments;
+        private List<JobArgumentDto> scriptArguments; // scriptArguments
         /**
          * JobTypeEnum.language
          */
@@ -508,6 +488,14 @@ public class JobInfoExecuteDetailDto {
         this.jobType = jobType;
     }
 
+    public JobTypeEnum getJobTypeEnum() {
+        return jobTypeEnum;
+    }
+
+    public void setJobTypeEnum(JobTypeEnum jobTypeEnum) {
+        this.jobTypeEnum = jobTypeEnum;
+    }
+
     public String getExecDriverMem() {
         return execDriverMem;
     }
@@ -540,11 +528,11 @@ public class JobInfoExecuteDetailDto {
         this.execQueue = execQueue;
     }
 
-    public String getExtractionType() {
-        return extractionType;
+    public String getExecEngine() {
+        return execEngine;
     }
 
-    public void setExtractionType(String extractionType) {
-        this.extractionType = extractionType;
+    public void setExecEngine(String execEngine) {
+        this.execEngine = execEngine;
     }
 }

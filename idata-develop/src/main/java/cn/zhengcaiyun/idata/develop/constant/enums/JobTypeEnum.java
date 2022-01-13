@@ -40,6 +40,7 @@ public enum JobTypeEnum {
     SCRIPT_PYTHON("SCRIPT_PYTHON", "SCRIPT", "Script作业", "PYTHON", ""),
     SCRIPT_SHELL("SCRIPT_SHELL", "SCRIPT", "Script作业", "SHELL", ""),
     KYLIN("KYLIN", "KYLIN", "Kylin作业", "", "KYLIN"),
+
     ;
 
     private final String code;

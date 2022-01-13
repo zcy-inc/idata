@@ -4,4 +4,4 @@ alter table dev_job_content_di
 alter table dev_job_execute_config drop column exec_max_parallelism;
 
 alter table dev_job_execute_config
-    add extraction_type varchar(30) null comment '抽数配置';
+    add exec_engine varchar(30) null comment '执行引擎';

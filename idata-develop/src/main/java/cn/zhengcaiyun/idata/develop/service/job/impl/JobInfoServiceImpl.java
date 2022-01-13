@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
@@ -71,6 +72,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.DI_BATCH;
+import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.DI_STREAM;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -366,7 +369,9 @@ public class JobInfoServiceImpl implements JobInfoService {
         String jobType = jobInfoExecuteDetailDto.getJobType();
         checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%d", jobType));
 
-        switch (JobTypeEnum.getEnum(jobType).get()) {
+        JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
+        jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
+        switch (jobTypeEnum) {
             case DI_BATCH:
             case DI_STREAM:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);
@@ -378,9 +383,9 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
                     diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
                 }
-                if (StringUtils.isNotBlank(diJobContent.getDestColumns())) {
-                    diResponse.setDestCols(JSON.parseArray(diJobContent.getDestColumns(), MappingColumnDto.class));
-                }
+//                if (StringUtils.isNotBlank(diJobContent.getDestColumns())) {
+//                    diResponse.setDestCols(JSON.parseArray(diJobContent.getDestColumns(), MappingColumnDto.class));
+//                }
 
                 // 封装连接信息
                 DataSourceDto dataSource = dataSourceApi.getDataSource(diJobContent.getSrcDataSourceId());
@@ -394,6 +399,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcJdbcUrl(getJdbcUrl(dataSourceType, dbConfigDto.getHost(), dbConfigDto.getPort(), dbConfigDto.getDbName(), dbConfigDto.getSchema()));
                 diResponse.setSrcUsername(dbConfigDto.getUsername());
                 diResponse.setSrcPassword(dbConfigDto.getPassword());
+                diResponse.setSrcDbName(dbConfigDto.getDbName());
+                diResponse.setSrcDriverType(DriverTypeEnum.valueOf(dbConfigDto.getSchema()));
 
                 String writeMode = diJobContent.getDestWriteMode();
                 if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
