@@ -14,22 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package cn.zhengcaiyun.idata.merge.data.service;
+package cn.zhengcaiyun.idata.merge.data.service.impl;
 
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.merge.data.service.ModelMigrationService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2022-01-06 11:48
- **/
+ * @author caizhedong
+ * @date 2022-01-13 上午9:59
+ */
 
-public interface ModelMigrationService {
-    EnumDto syncBizProcess();
-    List<TableInfoDto> syncTable(Long oldTableId);
-    Boolean syncForeignKey();
+@Service
+public class ModelMigrationServiceImpl implements ModelMigrationService {
+
+    @Override
+    public EnumDto syncBizProcess() {
+        return null;
+    }
+
+    @Override
+    public List<TableInfoDto> syncTable(Long oldTableId) {
+        return null;
+    }
+
+    @Override
+    public Boolean syncForeignKey() {
+        return null;
+    }
 }
