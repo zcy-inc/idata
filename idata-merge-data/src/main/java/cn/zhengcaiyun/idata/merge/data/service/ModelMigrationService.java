@@ -17,11 +17,6 @@
 
 package cn.zhengcaiyun.idata.merge.data.service;
 
-import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
-import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
-
-import java.util.List;
-
 /**
  * @description:
  * @author: yangjianhua
