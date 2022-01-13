@@ -145,10 +145,10 @@ public final class JobExecuteConfigDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   抽数配置
+     *   执行引擎
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extraction_type")
-    public static final SqlColumn<String> extractionType = jobExecuteConfig.extractionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public static final SqlColumn<String> execEngine = jobExecuteConfig.execEngine;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     public static final class JobExecuteConfig extends SqlTable {
@@ -190,7 +190,7 @@ public final class JobExecuteConfigDynamicSqlSupport {
 
         public final SqlColumn<Integer> runningState = column("running_state", JDBCType.INTEGER);
 
-        public final SqlColumn<String> extractionType = column("extraction_type", JDBCType.VARCHAR);
+        public final SqlColumn<String> execEngine = column("exec_engine", JDBCType.VARCHAR);
 
         public JobExecuteConfig() {
             super("dev_job_execute_config");

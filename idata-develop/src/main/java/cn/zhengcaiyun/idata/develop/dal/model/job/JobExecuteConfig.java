@@ -144,10 +144,10 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
-     *   抽数配置
+     *   执行引擎
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extraction_type")
-    private String extractionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    private String execEngine;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
@@ -339,13 +339,13 @@ public class JobExecuteConfig {
         this.runningState = runningState;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extraction_type")
-    public String getExtractionType() {
-        return extractionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public String getExecEngine() {
+        return execEngine;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.extraction_type")
-    public void setExtractionType(String extractionType) {
-        this.extractionType = extractionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public void setExecEngine(String execEngine) {
+        this.execEngine = execEngine;
     }
 }

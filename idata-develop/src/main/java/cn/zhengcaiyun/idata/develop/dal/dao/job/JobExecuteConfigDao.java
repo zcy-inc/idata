@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState, extractionType);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState, execEngine);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -76,7 +76,7 @@ public interface JobExecuteConfigDao {
         @Result(column="exec_driver_mem", property="execDriverMem", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_worker_mem", property="execWorkerMem", jdbcType=JdbcType.INTEGER),
         @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER),
-        @Result(column="extraction_type", property="extractionType", jdbcType=JdbcType.VARCHAR)
+        @Result(column="exec_engine", property="execEngine", jdbcType=JdbcType.VARCHAR)
     })
     List<JobExecuteConfig> selectMany(SelectStatementProvider selectStatement);
 
@@ -122,7 +122,7 @@ public interface JobExecuteConfigDao {
             .map(execDriverMem).toProperty("execDriverMem")
             .map(execWorkerMem).toProperty("execWorkerMem")
             .map(runningState).toProperty("runningState")
-            .map(extractionType).toProperty("extractionType")
+            .map(execEngine).toProperty("execEngine")
         );
     }
 
@@ -147,7 +147,7 @@ public interface JobExecuteConfigDao {
             .map(execDriverMem).toPropertyWhenPresent("execDriverMem", record::getExecDriverMem)
             .map(execWorkerMem).toPropertyWhenPresent("execWorkerMem", record::getExecWorkerMem)
             .map(runningState).toPropertyWhenPresent("runningState", record::getRunningState)
-            .map(extractionType).toPropertyWhenPresent("extractionType", record::getExtractionType)
+            .map(execEngine).toPropertyWhenPresent("execEngine", record::getExecEngine)
         );
     }
 
@@ -198,7 +198,7 @@ public interface JobExecuteConfigDao {
                 .set(execDriverMem).equalTo(record::getExecDriverMem)
                 .set(execWorkerMem).equalTo(record::getExecWorkerMem)
                 .set(runningState).equalTo(record::getRunningState)
-                .set(extractionType).equalTo(record::getExtractionType);
+                .set(execEngine).equalTo(record::getExecEngine);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -221,7 +221,7 @@ public interface JobExecuteConfigDao {
                 .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
                 .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
                 .set(runningState).equalToWhenPresent(record::getRunningState)
-                .set(extractionType).equalToWhenPresent(record::getExtractionType);
+                .set(execEngine).equalToWhenPresent(record::getExecEngine);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -245,7 +245,7 @@ public interface JobExecuteConfigDao {
             .set(execDriverMem).equalTo(record::getExecDriverMem)
             .set(execWorkerMem).equalTo(record::getExecWorkerMem)
             .set(runningState).equalTo(record::getRunningState)
-            .set(extractionType).equalTo(record::getExtractionType)
+            .set(execEngine).equalTo(record::getExecEngine)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -271,7 +271,7 @@ public interface JobExecuteConfigDao {
             .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
             .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
             .set(runningState).equalToWhenPresent(record::getRunningState)
-            .set(extractionType).equalToWhenPresent(record::getExtractionType)
+            .set(execEngine).equalToWhenPresent(record::getExecEngine)
             .where(id, isEqualTo(record::getId))
         );
     }

@@ -1,0 +1,5 @@
+GET http://localhost:9527/api/p1/dev/jobs/{id}/execute-detail?env=stag
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQyMDU2MzA4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.trr9cuTrFVTlM3Q6yuDHfBVVlN5FXEE5SEkyp_SGNNhpvGx3BRVhKwsgTBnu8p9atk085G2mj6FcNprUeY03hw
+
+

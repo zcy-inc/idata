@@ -16,7 +16,7 @@
                t2.exec_driver_mem as execDriverMem,
                t2.exec_worker_mem as execWorkerMem,
                t2.running_state as runningState,
-               t2.extraction_type as extractionType,
+               t2.exec_engine as execEngine,
                0 as executeCore,
                t3.dest_table as targetTableName
         from
