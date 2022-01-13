@@ -37,6 +37,8 @@ import cn.zhengcaiyun.idata.merge.data.service.ModelMigrationService;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +58,8 @@ import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 @Service
 public class ModelMigrationServiceImpl implements ModelMigrationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobMigrationServiceImpl.class);
 
     @Autowired
     private TableInfoService tableInfoService;
@@ -90,7 +94,11 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public Boolean syncModelMigration(Long oldTableId) {
+    public Boolean syncModelMigration() {
+        // 同步业务过程
+        syncBizProcess();
+        // 同步表和字段
+        // 同步表外键
         return null;
     }
 
@@ -145,7 +153,6 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         folderMap = compositeFolderService.getFolders("DESIGN.TABLE")
                 .stream().collect(Collectors.toMap(tableFolder -> Long.valueOf(tableFolder.getName().split("#_")[0]),
                         CompositeFolderDto::getId));
-
 
         Map<String, String> idataColTypeMap = enumService.getEnumValues("hiveColTypeEnum:ENUM")
                 .stream().collect(Collectors.toMap(EnumValueDto::getEnumValue, EnumValueDto::getValueCode));

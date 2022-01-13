@@ -29,5 +29,5 @@ import java.util.List;
  **/
 
 public interface ModelMigrationService {
-    Boolean syncModelMigration(Long oldTableId);
+    Boolean syncModelMigration();
 }
