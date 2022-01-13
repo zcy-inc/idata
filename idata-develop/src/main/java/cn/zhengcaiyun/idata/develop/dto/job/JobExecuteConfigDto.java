@@ -85,7 +85,7 @@ public class JobExecuteConfigDto extends BaseDto {
     /**
      *   抽数配置
      */
-    private String extractionType;
+    private String execEngine;
 
     public Long getId() {
         return id;
@@ -199,12 +199,12 @@ public class JobExecuteConfigDto extends BaseDto {
         this.runningState = runningState;
     }
 
-    public String getExtractionType() {
-        return extractionType;
+    public String getExecEngine() {
+        return execEngine;
     }
 
-    public void setExtractionType(String extractionType) {
-        this.extractionType = extractionType;
+    public void setExecEngine(String execEngine) {
+        this.execEngine = execEngine;
     }
 
     public static JobExecuteConfigDto from(JobExecuteConfig config) {
