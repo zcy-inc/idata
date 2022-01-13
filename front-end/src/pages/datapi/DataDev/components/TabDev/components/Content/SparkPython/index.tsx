@@ -68,7 +68,7 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
           </Tabs>
         </SplitPane>
       </div>
-      <Modal title="作业配置" visible={visible} onCancel={onCancel} forceRender>
+      <Modal title="作业配置" visible={visible} footer={null} onCancel={onCancel} forceRender>
         <Form form={form} colon={false}>
           <Item label="参数">
             <ParamList formName={['appArguments', 'argumentValue', 'argumentRemark']} />

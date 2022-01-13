@@ -19,12 +19,7 @@ import { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
 
 import Title from '@/components/Title';
-import {
-  restartOptions,
-  concurrentOptions,
-  execDriverMemOptions,
-  execWorkerMemOptions,
-} from './constants';
+import { restartOptions, execDriverMemOptions, execWorkerMemOptions } from './constants';
 import { ConfiguredTaskListItem, DAGListItem, TaskConfig, Task } from '@/types/datadev';
 import {
   getConfiguredTaskList,
@@ -35,7 +30,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
-import { SchPriority } from '@/constants/datadev';
+import { ExecEngine, SchPriority, TaskTypes } from '@/constants/datadev';
 import { getDataSourceList } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
 
@@ -78,7 +73,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         .then((res) => setExecuteQueues(res.data))
         .catch((err) => {});
       getConfiguredTaskListWrapped(Environments.STAG);
-      getDataSourceList({ type: DataSourceTypes.HIVE, limit: 999, offset: 0 })
+      getDataSourceList({ limit: 999, offset: 0 })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
     }
@@ -366,10 +361,30 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           message.success(`保存${environment}成功`);
           onClose();
         } else {
-          message.error(`保存${environment}失败：${res.msg}`);
+          message.error(`保存${environment}失败: ${res.msg}`);
         }
       })
       .catch((err) => {});
+  };
+
+  const renderExecEngineOptions = () => {
+    switch (data?.jobType) {
+      case TaskTypes.SQL_SPARK:
+      case TaskTypes.SCRIPT_PYTHON:
+      case TaskTypes.SCRIPT_SHELL:
+        return [
+          { label: 'SPARK', value: ExecEngine.SPARK },
+          { label: 'SQOOP', value: ExecEngine.SQOOP },
+          { label: 'KYLIN', value: ExecEngine.KYLIN },
+        ];
+      case TaskTypes.SPARK_PYTHON:
+      case TaskTypes.SPARK_JAR:
+        return [{ label: 'SPARK', value: ExecEngine.SPARK }];
+      case TaskTypes.KYLIN:
+        return [{ label: 'KYLIN', value: ExecEngine.KYLIN }];
+      default:
+        return [];
+    }
   };
 
   return (
@@ -485,14 +500,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execWorkerMemOptions}
                 />
               </Item>
-              <Item name="execMaxParallelism" label="任务期望最大并发数" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={concurrentOptions}
-                />
-              </Item>
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
@@ -503,6 +510,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                     { label: '中', value: SchPriority.MIDDLE },
                     { label: '高', value: SchPriority.HIGH },
                   ]}
+                />
+              </Item>
+              <Title>运行配置</Title>
+              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={renderExecEngineOptions()}
                 />
               </Item>
               <Title>依赖配置</Title>
