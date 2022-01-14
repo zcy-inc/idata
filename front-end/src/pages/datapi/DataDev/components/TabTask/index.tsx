@@ -164,6 +164,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           srcTables: r.data.srcTables.split(','),
           srcReadFilter: r.data.srcReadFilter,
           srcReadShardKey: r.data.srcReadShardKey,
+          srcShardingNum: r.data.srcShardingNum,
           srcReadMode: r.data.srcReadMode,
         };
         const destData = {
@@ -436,6 +437,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   size="large"
                   style={{ maxWidth, minWidth }}
                   placeholder="根据配置的字段进行数据分片，实现并发读取"
+                />
+              </Item>
+              <Item name="srcShardingNum" label="切分键分片数">
+                <Select
+                  size="large"
+                  style={{ maxWidth, minWidth }}
+                  placeholder="请选择"
+                  options={[1, 2, 4, 8, 16].map((_) => ({ label: _, value: _ }))}
                 />
               </Item>
               <Item name="srcReadMode" label="读取模式" rules={ruleSlct}>

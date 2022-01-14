@@ -32,7 +32,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
-import { SchPriority } from '@/constants/datadev';
+import { ExecEngine, SchPriority } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -119,7 +119,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           message.success(`保存${environment}成功`);
           onClose();
         } else {
-          message.error(`保存${environment}失败：${res.msg}`);
+          message.error(`保存${environment}失败: ${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -155,12 +155,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       >
         {env.map((_) => (
           <TabPane tab={_} key={_}>
-            <Title>调度配置</Title>
             <Form
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
             >
+              <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
                 <Checkbox.Group>
                   <Checkbox value="schDryRun" />
@@ -229,14 +229,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execWorkerMemOptions}
                 />
               </Item>
-              <Item name="execMaxParallelism" label="任务期望最大并发数" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={concurrentOptions}
-                />
-              </Item>
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
@@ -246,6 +238,19 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                     { label: '低', value: SchPriority.LOW },
                     { label: '中', value: SchPriority.MIDDLE },
                     { label: '高', value: SchPriority.HIGH },
+                  ]}
+                />
+              </Item>
+              <Title>运行配置</Title>
+              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={[
+                    { label: 'SPARK', value: ExecEngine.SPARK },
+                    { label: 'SQOOP', value: ExecEngine.SQOOP },
+                    { label: 'KYLIN', value: ExecEngine.KYLIN },
                   ]}
                 />
               </Item>

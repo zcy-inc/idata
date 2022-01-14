@@ -99,6 +99,7 @@ export interface TaskContent {
   srcTables: string; // 数据来源-表
   srcReadFilter: string; // 数据来源-过滤条件
   srcReadShardKey: string; // 数据来源-切分键
+  srcShardingNum: number; // 数据来源-分片数量（并行度）
   srcReadMode: SrcReadMode; // 数据来源-读取模式
   destDataSourceType: DataSourceTypes; // 数据去向-数据源类型
   destDataSourceId: number; // 数据去向-数据源id
@@ -113,8 +114,9 @@ export interface TaskContent {
 
 export interface MappedColumn {
   name: string;
-  dataType?: string;
   primaryKey: boolean;
+  dataType?: string;
+  mappingSql?: string;
   mappedColumn?: MappedColumn;
 }
 

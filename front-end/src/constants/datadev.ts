@@ -119,3 +119,9 @@ export enum AutoCompletionLangs {
   SQL = 'SQL',
   PYTHON = 'PYTHON',
 }
+
+export enum ExecEngine {
+  SPARK = 'SPARK',
+  SQOOP = 'SQOOP',
+  KYLIN = 'KYLIN',
+}

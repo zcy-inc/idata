@@ -20,24 +20,33 @@ package cn.zhengcaiyun.idata.merge.data.manager;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
+import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.*;
+import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
+import cn.zhengcaiyun.idata.merge.data.service.impl.JobMigrationServiceImpl;
 import cn.zhengcaiyun.idata.merge.data.util.DatasourceTool;
 import cn.zhengcaiyun.idata.merge.data.util.JobMigrationContext;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.util.$ObjectArrays;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +54,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -76,6 +86,18 @@ public class JobMigrateManager {
     private JobPublishRecordRepo jobPublishRecordRepo;
     @Autowired
     private JobTableService jobTableService;
+    @Autowired
+    private KylinJobService kylinJobService;
+    @Autowired
+    private SqlJobService sqlJobService;
+    @Autowired
+    private ScriptJobService scriptJobService;
+    @Autowired
+    private SparkJobService sparkJobService;
+    @Autowired
+    private OldIDataDao oldIDataDao;
+    @Autowired
+    private HdfsService hdfsService;
 
     @Transactional
     public List<MigrateResultDto> migrateJob(JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
@@ -114,16 +136,12 @@ public class JobMigrateManager {
                 contentVersion = migrateDIContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
             case SQL_SPARK:
                 // todo 迁移作业内容，包含数据回流
-            case SPARK_PYTHON:
-                // todo 迁移作业内容
-            case SPARK_JAR:
-                // todo 迁移作业内容
-            case SCRIPT_PYTHON:
-                // todo 迁移作业内容
-            case SCRIPT_SHELL:
-                // todo 迁移作业内容
+            case SPARK_PYTHON: case SPARK_JAR:
+                contentVersion = migrateSparkContent(newJobId, jobInfoDto, migrationDto, contentOperator);
+            case SCRIPT_PYTHON: case SCRIPT_SHELL:
+                contentVersion = migrateScriptContent(newJobId, jobInfoDto, migrationDto, contentOperator);
             case KYLIN:
-                // todo 迁移作业内容
+                contentVersion = migrateKylinContent(newJobId, jobInfoDto, migrationDto, contentOperator);
             default:
                 contentVersion = null;
         }
@@ -238,16 +256,114 @@ public class JobMigrateManager {
         return null;
     }
 
-    private Integer migrateKylinContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
-        return null;
+    private Integer migrateKylinContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto, Operator contentOperator) {
+        KylinJobDto contentDto = new KylinJobDto();
+
+        JSONObject oldJobContent = migrationDto.getOldJobContent();
+        contentDto.setJobId(newJobId);
+        contentDto.setCubeName(oldJobContent.getString("cube_name"));
+        contentDto.setBuildType(oldJobContent.getString("build_type"));
+        if (StringUtils.isNotEmpty(oldJobContent.getString("start_time"))) {
+            contentDto.setStartTime(changeStringToDate(oldJobContent.getString("start_time")));
+        }
+        if (StringUtils.isNotEmpty(oldJobContent.getString("end_time"))) {
+            contentDto.setEndTime(changeStringToDate(oldJobContent.getString("end_time")));
+        }
+
+        KylinJobDto kylinJobDto = kylinJobService.save(contentDto, contentOperator.getNickname());
+        return kylinJobDto.getVersion();
     }
 
-    private Integer migrateSparkContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
-        return null;
+    private Integer migrateSparkContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto, Operator contentOperator) {
+        SparkJobContentDto contentDto = new SparkJobContentDto();
+
+        JSONObject oldJobContent = migrationDto.getOldJobContent();
+        contentDto.setJobId(newJobId);
+        contentDto.setMainClass(oldJobContent.getString("main_class"));
+        String oldFileResourceId = oldJobContent.getString("resource_id");
+        String hdfsPath = fetchOldResource(Long.valueOf(oldFileResourceId)).get(0).getString("hdfs_path");
+        String oldAppType = oldJobContent.getString("app_type");
+        // 校验hdfs文件是否存在
+        String output;
+        try {
+            ByteArrayOutputStream sos = new ByteArrayOutputStream();
+            hdfsService.readFile(hdfsPath, sos);
+            output = sos.toString();
+            sos.close();
+            // 文件不存在打印日志，传入hdfs路径为空串
+            if (StringUtils.isEmpty(output) || "NULL".equals(output.toUpperCase())) {
+                LOGGER.info("Spark作业同步失败，HDFS文件有误，作业ID：[{}]，作业名称：{}", jobInfoDto.getId(), jobInfoDto.getName());
+                contentDto.setResourceHdfsPath("wrong hdfs path");
+            }
+            else {
+                if ("Jar".equals(oldAppType)) {
+                    contentDto.setResourceHdfsPath(hdfsPath);
+                }
+                else {
+                    contentDto.setPythonResource(output);
+                }
+            }
+        } catch (IOException e) {
+            int end = (e.getMessage() + "").indexOf("\n");
+            throw new RuntimeException((e.getMessage() + "").substring(0, end > 0 ? end : Integer.MAX_VALUE));
+        }
+        if (StringUtils.isNotEmpty(oldJobContent.getString("app_arguments"))) {
+            List<String> oldAppArguments = Arrays.asList(oldJobContent.getString("app_arguments").split(" "));
+            List<JobArgumentDto> appArgumentList = oldAppArguments.stream().map(oldAppArgument -> {
+                JobArgumentDto argumentDto = new JobArgumentDto();
+                argumentDto.setArgumentValue(oldAppArgument);
+                return argumentDto;
+            }).collect(Collectors.toList());
+            contentDto.setAppArguments(appArgumentList);
+        }
+
+        SparkJobContentDto sparkJobContentDto = new SparkJobContentDto();
+        try {
+            sparkJobContentDto = sparkJobService.save(contentDto, contentOperator.getNickname());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sparkJobContentDto.getVersion();
     }
 
-    private Integer migrateScriptContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
-        return null;
+    private Integer migrateScriptContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto, Operator contentOperator) {
+        ScriptJobContentDto contentDto = new ScriptJobContentDto();
+
+        JSONObject oldJobContent = migrationDto.getOldJobContent();
+        contentDto.setJobId(newJobId);
+        String oldFileResourceId = oldJobContent.getString("resource_id");
+        String hdfsPath = fetchOldResource(Long.valueOf(oldFileResourceId)).get(0).getString("hdfs_path");
+        // 校验hdfs文件是否存在
+        String output;
+        try {
+            ByteArrayOutputStream sos = new ByteArrayOutputStream();
+            hdfsService.readFile(hdfsPath, sos);
+            output = sos.toString();
+            sos.close();
+            // 文件不存在打印日志，传入hdfs路径为空串
+            if (StringUtils.isEmpty(output) || "NULL".equals(output.toUpperCase())) {
+                LOGGER.info("Script作业同步失败，HDFS文件有误，作业ID：[{}]，作业名称：{}", jobInfoDto.getId(), jobInfoDto.getName());
+                contentDto.setSourceResource("script wrong");
+            }
+            else {
+                contentDto.setSourceResource(output);
+            }
+        } catch (IOException e) {
+            int end = (e.getMessage() + "").indexOf("\n");
+            throw new RuntimeException((e.getMessage() + "").substring(0, end > 0 ? end : Integer.MAX_VALUE));
+        }
+        if (StringUtils.isNotEmpty(oldJobContent.getString("script_arguments"))) {
+            List<String> oldScriptArguments = Arrays.asList(oldJobContent.getString("script_arguments").split(" "));
+            List<JobArgumentDto> scriptArgumentList = oldScriptArguments.stream().map(oldAppArgument -> {
+                JobArgumentDto argumentDto = new JobArgumentDto();
+                argumentDto.setArgumentValue(oldAppArgument);
+                return argumentDto;
+            }).collect(Collectors.toList());
+            contentDto.setScriptArguments(scriptArgumentList);
+        }
+
+        ScriptJobContentDto scriptJobContentDto = scriptJobService.save(contentDto, contentOperator.getNickname());
+        return scriptJobContentDto.getVersion();
     }
 
     private String parseDestTable(DataSource srcDataSource, String sourceTable) {
@@ -268,5 +384,20 @@ public class JobMigrateManager {
         String old_editor = oldJobContent.getString("editor");
         String nickname = StringUtils.isNotEmpty(old_creator) ? old_creator : old_editor;
         return new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
+    }
+
+    private Date changeStringToDate(String dateTimeStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = sdf.parse(dateTimeStr);
+        } catch (Exception ignore) {}
+        return date;
+    }
+
+    private List<JSONObject> fetchOldResource(Long resourceId) {
+        List<String> columns = Lists.newArrayList("resource_type", "hdfs_path");
+        String filter = "del = false and id = " + resourceId;
+        return oldIDataDao.queryList("metadata.file_resource", columns, filter);
     }
 }

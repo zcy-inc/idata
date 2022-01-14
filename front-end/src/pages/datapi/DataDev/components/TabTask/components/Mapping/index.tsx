@@ -1,9 +1,12 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import MonacoEditor from 'react-monaco-editor';
 import G6, { Graph } from '@antv/g6';
 import { findDOMNode } from 'react-dom';
+import { Form, Modal } from 'antd';
 import { get, set, cloneDeep } from 'lodash';
 import type { ForwardRefRenderFunction } from 'react';
 import styles from './index.less';
+
 import { MappedColumn } from '@/types/datadev';
 
 interface MapProps {
@@ -14,11 +17,16 @@ interface MapProps {
 }
 // const SrcNodesTitle = [{ id: 'srcNodesTitle', x: 180, y: 60, tableType: 'title' }];
 // const DestNodesTitle = [{ id: 'destNodesTitle', x: 480, y: 60, tableType: 'title' }];
+const { Item } = Form;
 
 const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
   { data: { srcColumns, destColumns } },
   ref,
 ) => {
+  const [visible, setVisible] = useState(false);
+  const [currentNode, setCurrentNode] = useState<any>();
+  const [form] = Form.useForm();
+
   const containerRef = useRef(null);
   const graphRef = useRef<Graph>();
   const srcMap = useRef({}); // name对MappedColumn的映射表
@@ -40,7 +48,12 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         y: 100 + 40 * i,
         label: `${_.name} ${_.dataType || ''}`,
         tableType: 'src',
-        data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
+        data: {
+          name: _.name,
+          dataType: _.dataType,
+          primaryKey: _.primaryKey,
+          mappingSql: _.mappingSql,
+        },
       };
     });
 
@@ -52,7 +65,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-dest`,
         x: 540,
         y: 100 + 40 * i,
-        label: _.name,
+        label: `${_.primaryKey ? '🔑' : ''} ${_.name}`,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -254,6 +267,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
           stroke: '#ebedf3',
           width: 240,
           radius: 4,
+          cursor: 'pointer',
         },
       },
       defaultEdge: {
@@ -348,6 +362,29 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     graph.on('edge:click', function (e: any) {
       graph.removeItem(e.item);
     });
+    // 节点的点击功能
+    graph.on('node:click', function (e: any) {
+      const node = e.item;
+      const model = node._cfg.model;
+      const data = model.data || {};
+      if (model.tableType === 'src') {
+        setVisible(true);
+        setCurrentNode(model);
+        form.setFieldsValue({ mappingSql: model.data.mappingSql || '' });
+      }
+      if (model.tableType === 'dest') {
+        if (model.data.primaryKey) {
+          graph.updateItem(node, { label: model.data.name, data: { ...data, primaryKey: false } });
+          set(destMap.current, `[${model.id}].primaryKey`, false);
+        } else {
+          graph.updateItem(node, {
+            label: `🔑 ${model.data.name}`,
+            data: { ...data, primaryKey: true },
+          });
+          set(destMap.current, `[${model.id}].primaryKey`, true);
+        }
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -355,7 +392,29 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     graphRef.current?.changeData(renderedData);
   }, [srcColumns, destColumns]);
 
-  return <div className={styles.mapping} ref={containerRef} />;
+  return (
+    <>
+      <div className={styles.mapping} ref={containerRef} />
+      <Modal
+        title="字段抽取"
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        onOk={() => {
+          const values = form.getFieldsValue();
+          srcMap.current[currentNode.id].mappingSql = values.mappingSql;
+          setCurrentNode(null);
+          setVisible(false);
+        }}
+        bodyStyle={{ padding: 16 }}
+      >
+        <Form form={form}>
+          <Item name="mappingSql">
+            <MonacoEditor height="400" language="sql" theme="vs-dark" />
+          </Item>
+        </Form>
+      </Modal>
+    </>
+  );
 };
 
 export default forwardRef(Mapping);
