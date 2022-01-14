@@ -1,8 +1,9 @@
 package cn.zhengcaiyun.idata.commons.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum DriverTypeEnum {
     MySQL("mysql","com.mysql.jdbc.Driver"),
-    Doris("mysql","com.mysql.jdbc.Driver"),
     Hive("hive2","org.apache.hive.jdbc.HiveDriver"),
     Postgres("postgresql","org.postgresql.Driver");
 
@@ -24,7 +25,7 @@ public enum DriverTypeEnum {
 
     public static DriverTypeEnum of (String urlType) {
         for (DriverTypeEnum type : DriverTypeEnum.values()) {
-            if (type.urlType.equals(urlType)) {
+            if (StringUtils.equalsIgnoreCase(type.urlType, urlType)) {
                 return type;
             }
         }

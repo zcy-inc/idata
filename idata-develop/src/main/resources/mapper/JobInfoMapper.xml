@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoMyDao">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao">
 
     <select id="selectJobInfoExecuteDetail" resultType="cn.zhengcaiyun.idata.develop.dto.job.JobInfoExecuteDetailDto">
         select t1.*,
@@ -20,10 +20,11 @@
                0 as executeCore,
                t3.dest_table as targetTableName
         from
-            (select * from dev_job_info where id = #{id}) as t1
-        join (select * from dev_job_execute_config where environment = #{env}) t2   --此处join不可更改为left join，会影响校验
-        on t1.id = t2.job_id
-        left join (select * from dev_job_output where job_id = #{id}) t3
-        on t1.id = t3.job_id
+                (select * from dev_job_info where id = #{id}) as t1
+                    join (select * from dev_job_execute_config where environment = #{env}) t2
+                         on t1.id = t2.job_id
+                    left join (select * from dev_job_output where job_id = #{id}) t3
+                              on t1.id = t3.job_id
     </select>
+
 </mapper>

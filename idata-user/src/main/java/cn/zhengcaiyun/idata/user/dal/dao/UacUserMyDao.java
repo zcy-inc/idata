@@ -12,4 +12,5 @@ public interface UacUserMyDao {
      * @return
      */
     int insertIgnore(UacUser uacUser);
+
 }

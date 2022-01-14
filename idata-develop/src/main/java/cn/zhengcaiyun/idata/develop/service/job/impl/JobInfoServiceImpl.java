@@ -38,10 +38,7 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -54,6 +51,7 @@ import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserMyDao;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -64,6 +62,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -85,8 +84,10 @@ import static com.google.common.base.Preconditions.checkState;
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
 
+    @Autowired
+    private DevJobInfoMyDao devJobInfoMyDao;
+
     private final JobInfoRepo jobInfoRepo;
-    private final JobInfoMyDao jobInfoMyDao;
     private final JobOutputRepo jobOutputRepo;
     private final DevJobUdfMyDao devJobUdfMyDao;
     private final JobPublishRecordMyDao jobPublishRecordMyDao;
@@ -104,7 +105,6 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
-                              JobInfoMyDao jobInfoMyDao,
                               JobOutputRepo jobOutputRepo,
                               DevJobUdfMyDao devJobUdfMyDao,
                               JobPublishRecordMyDao jobPublishRecordMyDao,
@@ -120,7 +120,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                               DevAccessService devAccessService,
                               DataSourceApi dataSourceApi) {
         this.jobInfoRepo = jobInfoRepo;
-        this.jobInfoMyDao = jobInfoMyDao;
         this.jobOutputRepo = jobOutputRepo;
         this.devJobUdfMyDao = devJobUdfMyDao;
         this.jobPublishRecordMyDao = jobPublishRecordMyDao;
@@ -363,11 +362,11 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env) {
-        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = Optional.of(jobInfoMyDao.selectJobInfoExecuteDetail(id, env))
-                .orElseThrow(() -> new IllegalArgumentException(String.format("任务不存在或配置不存在, jobId:%s，环境:%s", id, env)));
+        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = Optional.of(devJobInfoMyDao.selectJobInfoExecuteDetail(id, env))
+                .orElseThrow(() -> new IllegalArgumentException(String.format("任务不存在或配置不存在, jobId:%d，环境:%s", id, env)));
 
         String jobType = jobInfoExecuteDetailDto.getJobType();
-        checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%d", jobType));
+        checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%s", jobType));
 
         JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
@@ -378,7 +377,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 封装di_job_content
                 DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
-                checkArgument(Optional.of(diJobContent).isPresent(), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
+                checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(diJobContent, diResponse);
                 if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
                     diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
@@ -389,7 +388,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 封装连接信息
                 DataSourceDto dataSource = dataSourceApi.getDataSource(diJobContent.getSrcDataSourceId());
-                checkArgument(Optional.of(dataSource).isPresent(), String.format("数据源不存在, DataSourceId:%d", diJobContent.getSrcDataSourceId()));
+                checkArgument(Objects.nonNull(dataSource), String.format("数据源不存在, DataSourceId:%d", diJobContent.getSrcDataSourceId()));
                 checkArgument(org.apache.commons.collections.CollectionUtils.isNotEmpty(dataSource.getDbConfigList()), String.format("数据源配置缺失, DataSourceId:%d", diJobContent.getSrcDataSourceId()));
                 DataSourceTypeEnum dataSourceType = dataSource.getType();
                 diResponse.setSrcDataType(dataSourceType.name());
@@ -400,7 +399,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcUsername(dbConfigDto.getUsername());
                 diResponse.setSrcPassword(dbConfigDto.getPassword());
                 diResponse.setSrcDbName(dbConfigDto.getDbName());
-                diResponse.setSrcDriverType(DriverTypeEnum.valueOf(dbConfigDto.getSchema()));
+                diResponse.setSrcDriverType(DriverTypeEnum.of(dataSource.getType().name()));
 
                 String writeMode = diJobContent.getDestWriteMode();
                 if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
@@ -412,7 +411,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 封装sql_job_content
                 DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
-                checkArgument(Optional.of(contentSql).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentSql, sqlResponse);
 
                 JobOutput jobOutput = jobOutputRepo.query(id, env)
@@ -432,16 +431,16 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 封装spark_job_content
                 DevJobContentSpark contentSpark = jobPublishRecordMyDao.getPublishedSparkJobContent(id, env);
-                checkArgument(Optional.of(contentSpark).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                checkArgument(Objects.nonNull(contentSpark), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentSpark, sparkResponse);
 
                 return sparkResponse;
             case KYLIN:
                 JobInfoExecuteDetailDto.KylinDetailJob kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJob(jobInfoExecuteDetailDto);
 
-                // 封装spark_job_content
+                // 封装kylin_job_content
                 DevJobContentKylin contentKylin = jobPublishRecordMyDao.getPublishedKylinJobContent(id, env);
-                checkArgument(Optional.of(contentKylin).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                checkArgument(Objects.nonNull(contentKylin), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentKylin, kylinResponse);
 
                 return kylinResponse;
@@ -451,7 +450,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 封装script_job_content
                 DevJobContentScript contentScript = jobPublishRecordMyDao.getPublishedScriptJobContent(id, env);
-                checkArgument(Optional.of(contentScript).isPresent(), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                checkArgument(Objects.nonNull(contentScript), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentScript, scriptResponse);
 
                 return scriptResponse;
