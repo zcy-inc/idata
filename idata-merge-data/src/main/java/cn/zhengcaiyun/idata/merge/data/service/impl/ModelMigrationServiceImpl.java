@@ -340,7 +340,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
                 }
                 else if ("security_level".equals(colKey) && columnMap.get("security_level") != null) {
                     columnLabel.setColumnName(columnName);
-                    columnLabel.setLabelCode("tblSecurityLevel:LABEL");
+                    columnLabel.setLabelCode("colSecurityLevel:LABEL");
                     columnLabel.setLabelParamValue(syncSecurityLevel((String) columnMap.get("security_level")));
                 }
                 else {
