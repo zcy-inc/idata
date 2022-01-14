@@ -13,18 +13,18 @@
                t2.exec_warn_level as execWarnLevel,
                t2.sch_time_out_strategy as schTimeOutStrategy,
                t2.sch_priority as schPriority,
-               t2.exec_driver_mem as execDriverMem,
-               t2.exec_worker_mem as execWorkerMem,
+               t2.exec_driver_mem as driverMemory,
+               t2.exec_worker_mem as executorMemory,
                t2.running_state as runningState,
                t2.exec_engine as execEngine,
                0 as executeCore,
                t3.dest_table as targetTableName
         from
-                (select * from dev_job_info where id = #{id}) as t1
-                    join (select * from dev_job_execute_config where environment = #{env}) t2
-                         on t1.id = t2.job_id
-                    left join (select * from dev_job_output where job_id = #{id}) t3
-                              on t1.id = t3.job_id
+            (select * from dev_job_info where id = #{id}) as t1
+            join (select * from dev_job_execute_config where environment = #{env}) t2
+            on t1.id = t2.job_id
+            left join (select * from dev_job_output where job_id = #{id}) t3
+            on t1.id = t3.job_id
     </select>
 
 </mapper>

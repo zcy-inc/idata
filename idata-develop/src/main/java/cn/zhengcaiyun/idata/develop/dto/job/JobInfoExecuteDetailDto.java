@@ -22,11 +22,11 @@ public class JobInfoExecuteDetailDto {
     /**
      * driver节点内存
      */
-    private String execDriverMem;
+    private String driverMemory;
     /**
      * worker节点内存
      */
-    private String execWorkerMem;
+    private String executorMemory;
     /**
      * 核数
      */
@@ -496,20 +496,20 @@ public class JobInfoExecuteDetailDto {
         this.jobTypeEnum = jobTypeEnum;
     }
 
-    public String getExecDriverMem() {
-        return execDriverMem;
+    public String getDriverMemory() {
+        return driverMemory;
     }
 
-    public void setExecDriverMem(String execDriverMem) {
-        this.execDriverMem = execDriverMem;
+    public void setDriverMemory(String driverMemory) {
+        this.driverMemory = driverMemory;
     }
 
-    public String getExecWorkerMem() {
-        return execWorkerMem;
+    public String getExecutorMemory() {
+        return executorMemory;
     }
 
-    public void setExecWorkerMem(String execWorkerMem) {
-        this.execWorkerMem = execWorkerMem;
+    public void setExecutorMemory(String executorMemory) {
+        this.executorMemory = executorMemory;
     }
 
     public int getExecutorCores() {

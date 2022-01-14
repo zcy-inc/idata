@@ -31,7 +31,7 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
-  mapper-locations: classpath:mapper/*.xml # 配置 Mapper XML 地址
+  mapper-locations: classpath*:mapper/*.xml # 配置 Mapper XML 地址
 
 auth:
   jwt:
