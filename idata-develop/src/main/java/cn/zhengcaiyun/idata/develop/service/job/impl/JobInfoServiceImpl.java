@@ -20,7 +20,6 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -29,8 +28,6 @@ import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
-import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDao;
-import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
@@ -50,8 +47,6 @@ import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
-import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
-import cn.zhengcaiyun.idata.user.dal.dao.UacUserMyDao;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -62,7 +57,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -71,8 +65,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.DI_BATCH;
-import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.DI_STREAM;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -382,9 +374,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
                     diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
                 }
-//                if (StringUtils.isNotBlank(diJobContent.getDestColumns())) {
-//                    diResponse.setDestCols(JSON.parseArray(diJobContent.getDestColumns(), MappingColumnDto.class));
-//                }
 
                 // 封装连接信息
                 DataSourceDto dataSource = dataSourceApi.getDataSource(diJobContent.getSrcDataSourceId());
@@ -395,11 +384,18 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 DbConfigDto dbConfigDto = dataSource.getDbConfigList().get(0);
 
-                diResponse.setSrcJdbcUrl(getJdbcUrl(dataSourceType, dbConfigDto.getHost(), dbConfigDto.getPort(), dbConfigDto.getDbName(), dbConfigDto.getSchema()));
+                String dbName = dbConfigDto.getDbName();
+                diResponse.setSrcJdbcUrl(getJdbcUrl(dataSourceType, dbConfigDto.getHost(), dbConfigDto.getPort(), dbName, dbConfigDto.getSchema()));
                 diResponse.setSrcUsername(dbConfigDto.getUsername());
                 diResponse.setSrcPassword(dbConfigDto.getPassword());
-                diResponse.setSrcDbName(dbConfigDto.getDbName());
+                diResponse.setSrcDbName(dbName);
                 diResponse.setSrcDriverType(DriverTypeEnum.of(dataSource.getType().name()));
+
+                // destTable带库名
+                diResponse.setDestTable(dbName + "." + diResponse.getDestTable());
+
+                // 字段类型转换
+                diResponse.setDestWriteMode(DestWriteModeEnum.valueOf(diJobContent.getDestWriteMode()));
 
                 String writeMode = diJobContent.getDestWriteMode();
                 if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
@@ -424,6 +420,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                     List<DevJobUdf> udfList = devJobUdfMyDao.getByIds(idList);
                     sqlResponse.setUdfList(udfList);
                 }
+
+                // 字段类型转换
+                sqlResponse.setDestWriteMode(DestWriteModeEnum.valueOf(jobOutput.getDestWriteMode()));
+
                 return sqlResponse;
             case SPARK_PYTHON:
             case SPARK_JAR:
@@ -433,6 +433,17 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DevJobContentSpark contentSpark = jobPublishRecordMyDao.getPublishedSparkJobContent(id, env);
                 checkArgument(Objects.nonNull(contentSpark), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentSpark, sparkResponse);
+
+                // 封装shell参数　
+                StringBuffer jarArgs = new StringBuffer("");
+                if (!CollectionUtils.isEmpty(contentSpark.getAppArguments())) {
+                    for (Object script : contentSpark.getAppArguments()) {
+                        JobArgumentDto dto = (JobArgumentDto)script;
+                        jarArgs.append(dto.getArgumentValue() + " ");
+                    }
+                    sparkResponse.setAppArguments(jarArgs.toString());
+                }
+
 
                 return sparkResponse;
             case KYLIN:
@@ -452,6 +463,16 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DevJobContentScript contentScript = jobPublishRecordMyDao.getPublishedScriptJobContent(id, env);
                 checkArgument(Objects.nonNull(contentScript), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 BeanUtils.copyProperties(contentScript, scriptResponse);
+
+                // 封装shell参数　
+                StringBuffer shellArgs = new StringBuffer("");
+                if (!CollectionUtils.isEmpty(contentScript.getScriptArguments())) {
+                    for (Object script : contentScript.getScriptArguments()) {
+                        JobArgumentDto dto = (JobArgumentDto)script;
+                        shellArgs.append(dto.getArgumentValue() + " ");
+                    }
+                    scriptResponse.setSourceResource(shellArgs.toString());
+                }
 
                 return scriptResponse;
             default:

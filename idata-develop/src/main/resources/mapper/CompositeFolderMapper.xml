@@ -4,6 +4,6 @@
 
     <select id="selectByName" resultType="cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder">
         select * from dev_composite_folder
-        where name like CONCAT(#{folderId}, '%')
+        where name like CONCAT('%', #{folderId}, '%')
     </select>
 </mapper>

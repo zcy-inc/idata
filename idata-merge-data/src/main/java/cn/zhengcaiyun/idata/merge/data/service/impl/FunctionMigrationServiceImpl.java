@@ -56,11 +56,13 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
         List<DevJobUdf> jobUdfList = list.stream()
                 .map(e -> {
                     DevJobUdf devJobUdf = JSON.parseObject(JSON.toJSONString(e), DevJobUdf.class);
+                    devJobUdf.setUdfName(IdPadTool.padId(devJobUdf.getId() + "") + "#_" + devJobUdf.getUdfName());
                     Long newId = getMappingFolderId(devJobUdf.getFolderId());
                     devJobUdf.setFolderId(newId);
                     if (newId == null) {
                         disMappingIds.add(devJobUdf.getFolderId());
                     }
+
                     return devJobUdf;
                 })
                 .collect(Collectors.toList());
@@ -76,7 +78,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
             });
             return resultDtoList;
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private Long getMappingFolderId(Long folderId) {
