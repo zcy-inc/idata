@@ -173,8 +173,10 @@ public class DataSourceServiceImpl implements DataSourceService {
         Map<EnvEnum, DbConfigDto> cfgMap = Maps.newHashMap();
         dto.getDbConfigList().forEach(cfg -> {
             checkArgument(nonNull(cfg.getEnv()), "数据库所属环境为空");
-            checkArgument(StringUtils.isNotBlank(cfg.getHost()), "数据库地址为空");
-            checkArgument(nonNull(cfg.getPort()), "数据库端口为空");
+            if (DataSourceTypeEnum.hive != dto.getType()) {
+                checkArgument(StringUtils.isNotBlank(cfg.getHost()), "数据库地址为空");
+                checkArgument(nonNull(cfg.getPort()), "数据库端口为空");
+            }
 
             if (DataSourceTypeEnum.mysql == dto.getType()
                     || DataSourceTypeEnum.postgresql == dto.getType()) {

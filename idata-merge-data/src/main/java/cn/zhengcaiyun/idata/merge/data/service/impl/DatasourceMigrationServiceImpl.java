@@ -56,7 +56,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
     private DataSourceService dataSourceService;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<MigrateResultDto> migrateDatasource() {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 查询旧版IData数据
@@ -163,6 +163,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
         if (!Objects.isNull(stagJsonObject)) {
             envList.add(EnvEnum.stag);
         }
+        dto.setEnvList(envList);
 
         List<DbConfigDto> dbConfigList = Lists.newArrayList();
         if (!Objects.isNull(prodJsonObject)) {
@@ -171,6 +172,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
         if (!Objects.isNull(stagJsonObject)) {
             dbConfigList.add(buildDbConfig(stagJsonObject));
         }
+        dto.setDbConfigList(dbConfigList);
         return dto;
     }
 
