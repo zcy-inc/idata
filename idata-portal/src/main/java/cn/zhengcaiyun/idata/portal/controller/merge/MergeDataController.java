@@ -75,23 +75,23 @@ public class MergeDataController {
 
         boolean mergeAll = modules.contains(MigrateItemEnum.all.name());
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
-        if (mergeAll || modules.contains(MigrateItemEnum.datasource)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.datasource.name())) {
             resultDtoList.addAll(datasourceMigrationService.migrateDatasource());
         }
-        if (mergeAll || modules.contains(MigrateItemEnum.folder)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.folder.name())) {
             resultDtoList.addAll(folderMigrationService.migrate());
         }
-        if (mergeAll || modules.contains(MigrateItemEnum.model)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.model.name())) {
             modelMigrationService.syncModelMigration();
         }
-        if (mergeAll || modules.contains(MigrateItemEnum.dag)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.dag.name())) {
             resultDtoList.addAll(dagMigrationService.migrateFolder());
             resultDtoList.addAll(dagMigrationService.migrateDAG());
         }
-        if (mergeAll || modules.contains(MigrateItemEnum.function)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.function.name())) {
             resultDtoList.addAll(functionMigrationService.migrate());
         }
-        if (mergeAll || modules.contains(MigrateItemEnum.job)) {
+        if (mergeAll || modules.contains(MigrateItemEnum.job.name())) {
             resultDtoList.addAll(jobMigrationService.migrate());
         }
 
