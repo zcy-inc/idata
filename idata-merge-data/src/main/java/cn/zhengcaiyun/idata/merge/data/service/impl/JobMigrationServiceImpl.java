@@ -208,8 +208,9 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private List<JSONObject> fetchOldJobInfo() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_name", "job_type", "target_tables", "description", "owner_id", "folder_id", "layer");
-        String filter = "is_del = false and job_type in ('SCRIPT', 'SPARK', 'DI', 'KYLIN', 'SQL')";
-        return oldIDataDao.queryList("metadata.job_info", columns, filter);
+// todo        String filter = "is_del = false and job_type in ('SCRIPT', 'SPARK', 'DI', 'KYLIN', 'SQL')";
+        String filter = "del = false and job_type in ('DI')";
+        return oldIDataDao.queryListWithCustom("metadata.job_info", columns, filter);
     }
 
     private JobInfoDto buildJobBaseInfo(Long oldJobId, JSONObject jobInfoJson, JSONObject oldJobContentJson) {
@@ -231,8 +232,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         } else if ("SPARK".equalsIgnoreCase(oldType)) {
             if ("Jar".equals(oldJobContentJson.getString("app_type"))) {
                 jobType = JobTypeEnum.SPARK_JAR;
-            }
-            else {
+            } else {
                 jobType = JobTypeEnum.SPARK_PYTHON;
             }
         } else if ("SCRIPT".equalsIgnoreCase(oldType)) {
@@ -240,8 +240,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             String fileResourceType = fileResource.get(0).getString("resource_type");
             if ("Python".equals(fileResourceType)) {
                 jobType = JobTypeEnum.SCRIPT_PYTHON;
-            }
-            else if ("Shell".equals(fileResourceType)) {
+            } else if ("Shell".equals(fileResourceType)) {
                 jobType = JobTypeEnum.SCRIPT_SHELL;
             }
         } else {
@@ -252,8 +251,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private List<JSONObject> fetchOldJobConfig() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id");
-        String filter = "is_del = false and sandbox = prod";
-        return oldIDataDao.queryList("metadata.job_config", columns, filter);
+        String filter = "del = false and sandbox = 'prod'";
+        return oldIDataDao.queryListWithCustom("metadata.job_config", columns, filter);
     }
 
     private JobConfigCombinationDto buildJobConfig(Long oldJobId, JSONObject jobInfoJson, JSONObject configJson,
@@ -369,28 +368,29 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     }
 
     private List<JSONObject> fetchOldDIAndSQLAndBackFlowJobContent() {
-        List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "udf_ids", "version", "status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col", "di_table_info", "merge_sql", "is_recreate", "version_comment");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}'";
-        return oldIDataDao.queryList("metadata.sql_job", columns, filter);
+//        List<String> columns_for_new = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "array_to_json(udf_ids) as udf_ids", "version", "array_to_json(status) as status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col", "di_table_info", "merge_sql", "is_recreate", "version_comment");
+        List<String> columns_for_old = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "udf_ids", "version", "status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col");
+        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
+        return oldIDataDao.queryListWithCustom("metadata.sql_job", columns_for_old, filter);
     }
 
     private List<JSONObject> fetchOldKylinJobContent() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "cube_name", "start_time", "end_time", "build_type", "status");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}'";
-        return oldIDataDao.queryList("metadata.kylin_job", columns, filter);
+        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
+        return oldIDataDao.queryListWithCustom("metadata.kylin_job", columns, filter);
     }
 
     private List<JSONObject> fetchOldSparkJobContent() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "app_type", "resource_id", "main_class", "app_arguments", "dependent_resource_ids", "status");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}'";
-        return oldIDataDao.queryList("metadata.spark_job", columns, filter);
+        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
+        return oldIDataDao.queryListWithCustom("metadata.spark_job", columns, filter);
     }
 
     private List<JSONObject> fetchOldScriptJobContent() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "resource_id", "script_arguments", "status");
         String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause," +
-                "prod}'";
-        return oldIDataDao.queryList("metadata.script_job", columns, filter);
+                "prod}')";
+        return oldIDataDao.queryListWithCustom("metadata.script_job", columns, filter);
     }
 
     private List<JSONObject> fetchOldResource(Long resourceId) {

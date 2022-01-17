@@ -16,12 +16,16 @@
  */
 package cn.zhengcaiyun.idata.merge.data.dal.old;
 
+import cn.zhengcaiyun.idata.merge.data.util.PgStringArrayJsonSerializer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,6 +102,19 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
         return oldJdbcTemplate.queryForList(querySql)
                 .stream()
                 .map(recordMap -> JSON.toJSONString(recordMap))
+                .collect(Collectors.toList());
+    }
+
+    public List<JSONObject> queryListWithCustom(String table, List<String> columns, String condition) {
+        String querySql = "select " + Joiner.on(",").skipNulls().join(columns) + " from " + table;
+        if (StringUtils.isNotEmpty(condition)) {
+            querySql += " where " + condition;
+        }
+
+        Gson gson = new GsonBuilder().registerTypeAdapter(PgArray.class, new PgStringArrayJsonSerializer()).create();
+        return oldJdbcTemplate.queryForList(querySql)
+                .stream()
+                .map(recordMap -> JSON.parseObject(gson.toJson(recordMap)))
                 .collect(Collectors.toList());
     }
 
