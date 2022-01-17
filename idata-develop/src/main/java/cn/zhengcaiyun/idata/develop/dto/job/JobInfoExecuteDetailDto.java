@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
@@ -38,7 +40,7 @@ public class JobInfoExecuteDetailDto {
     /**
      * 作业执行引擎，可传SPARK/SQOOP/KYLIN
      */
-    private String execEngine;
+    private EngineTypeEnum execEngine;
 
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
@@ -64,9 +66,10 @@ public class JobInfoExecuteDetailDto {
          */
         private String destTable;//带库名 targetTableName
         /**
-         *   数据去向-写入模式，init: 新建表，override: 覆盖表
+         *   数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
+         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
          */
-        private String destWriteMode; // isRecreate
+        private DestWriteModeEnum destWriteMode; // isRecreate
         /**
          *   数据来源-切分键
          */
@@ -91,62 +94,6 @@ public class JobInfoExecuteDetailDto {
          * 数据来源-字段信息
          */
         private List<MappingColumnDto> srcCols; // diColumns
-
-//        private String jdbcUrlPath;
-//        private String username;
-//        private String password;
-//        private String sourceTableName;
-//        private String targetTableName;//带库名
-//        private Boolean isRecreate; //destWriteMode
-//        private String diCondition; // srcReadFilter
-//        private String diColumns; // srcCols
-//        private String diQuery;
-//        private String mergeSql;
-//        private DiModeType diMode;
-//        private String dbName;
-//        private SourceDriverType driverType;
-
-        // 字段
-//        /**
-//         * 数据去向-字段信息
-//         */
-//        @JsonIgnore
-//        private List<MappingColumnDto> destCols;
-//        /**
-//         *   数据来源-数据源类型
-//         */
-//        @JsonIgnore
-//        private String srcDataSourceType;
-//        /**
-//         *   数据来源-数据源id
-//         */
-//        @JsonIgnore
-//        private Long srcDataSourceId;
-//        /**
-//         *   数据来源-读取模式，all：全量，incremental：增量
-//         */
-//        @JsonIgnore
-//        private String srcReadMode;
-//        /**
-//         *   数据去向-数据源类型
-//         */
-//        @JsonIgnore
-//        private String destDataSourceType;
-//        /**
-//         *   数据去向-数据源id
-//         */
-//        @JsonIgnore
-//        private Long destDataSourceId;
-//        /**
-//         *   数据去向-写入前语句
-//         */
-//        @JsonIgnore
-//        private String destBeforeWrite;
-//        /**
-//         *   数据去向-写入后语句
-//         */
-//        @JsonIgnore
-//        private String destAfterWrite;
 
         public String getSrcDataType() {
             return srcDataType;
@@ -220,11 +167,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public String getDestWriteMode() {
+        public DestWriteModeEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(String destWriteMode) {
+        public void setDestWriteMode(DestWriteModeEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 
@@ -279,11 +226,6 @@ public class JobInfoExecuteDetailDto {
         }
 
         /**
-         *   数据去向-数据源类型
-         */
-        private String destDataSourceType;
-
-        /**
          *   数据去向-目标表
          */
         private String destTable; // targetTableName
@@ -291,7 +233,7 @@ public class JobInfoExecuteDetailDto {
         /**
          *   数据去向-写入模式，overwrite，upsert
          */
-        private String destWriteMode; // saveMode
+        private DestWriteModeEnum destWriteMode; // saveMode
 
         /**
          *   数据来源表主键(写入模式为upsert时必填)
@@ -311,14 +253,6 @@ public class JobInfoExecuteDetailDto {
          */
         private List<DevJobUdf> udfList; // udfs
 
-        public String getDestDataSourceType() {
-            return destDataSourceType;
-        }
-
-        public void setDestDataSourceType(String destDataSourceType) {
-            this.destDataSourceType = destDataSourceType;
-        }
-
         public String getDestTable() {
             return destTable;
         }
@@ -327,11 +261,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public String getDestWriteMode() {
+        public DestWriteModeEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(String destWriteMode) {
+        public void setDestWriteMode(DestWriteModeEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 
@@ -377,7 +311,7 @@ public class JobInfoExecuteDetailDto {
         }
 
         private String resourceHdfsPath; // resourceHdfsPath
-        private List<JobArgumentDto> appArguments; // appArguments
+        private String appArguments; // appArguments
         private String mainClass; //mainClass
 
         private List<String> dependResHdfsPaths; // 目前缺少
@@ -390,11 +324,11 @@ public class JobInfoExecuteDetailDto {
             this.resourceHdfsPath = resourceHdfsPath;
         }
 
-        public List<JobArgumentDto> getAppArguments() {
+        public String getAppArguments() {
             return appArguments;
         }
 
-        public void setAppArguments(List<JobArgumentDto> appArguments) {
+        public void setAppArguments(String appArguments) {
             this.appArguments = appArguments;
         }
 
@@ -446,14 +380,11 @@ public class JobInfoExecuteDetailDto {
          * 脚本资源内容
          */
         private String sourceResource; // resourceHdfsPath
+
         /**
-         * 执行参数
+         * 脚本参数 空格隔开]
          */
-        private List<JobArgumentDto> scriptArguments; // scriptArguments
-        /**
-         * JobTypeEnum.language
-         */
-        private String scriptLanguage;
+        private String scriptArguments; // scriptArguments
 
         public String getSourceResource() {
             return sourceResource;
@@ -463,20 +394,12 @@ public class JobInfoExecuteDetailDto {
             this.sourceResource = sourceResource;
         }
 
-        public List<JobArgumentDto> getScriptArguments() {
+        public String getScriptArguments() {
             return scriptArguments;
         }
 
-        public void setScriptArguments(List<JobArgumentDto> scriptArguments) {
+        public void setScriptArguments(String scriptArguments) {
             this.scriptArguments = scriptArguments;
-        }
-
-        public String getScriptLanguage() {
-            return scriptLanguage;
-        }
-
-        public void setScriptLanguage(String scriptLanguage) {
-            this.scriptLanguage = scriptLanguage;
         }
     }
 
@@ -528,11 +451,11 @@ public class JobInfoExecuteDetailDto {
         this.execQueue = execQueue;
     }
 
-    public String getExecEngine() {
+    public EngineTypeEnum getExecEngine() {
         return execEngine;
     }
 
-    public void setExecEngine(String execEngine) {
+    public void setExecEngine(EngineTypeEnum execEngine) {
         this.execEngine = execEngine;
     }
 }
