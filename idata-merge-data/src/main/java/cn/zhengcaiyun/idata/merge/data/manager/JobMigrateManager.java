@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
@@ -35,6 +36,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
@@ -58,6 +60,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -98,6 +102,8 @@ public class JobMigrateManager {
     private OldIDataDao oldIDataDao;
     @Autowired
     private HdfsService hdfsService;
+    @Autowired
+    private JobUdfService jobUdfService;
 
     @Transactional
     public List<MigrateResultDto> migrateJob(JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
@@ -135,7 +141,7 @@ public class JobMigrateManager {
             case DI_BATCH:
                 contentVersion = migrateDIContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
             case SQL_SPARK:
-                // todo 迁移作业内容，包含数据回流
+                contentVersion = migrateSQLContent(newJobId, jobInfoDto, migrationDto, contentOperator);
             case SPARK_PYTHON: case SPARK_JAR:
                 contentVersion = migrateSparkContent(newJobId, jobInfoDto, migrationDto, contentOperator);
             case SCRIPT_PYTHON: case SCRIPT_SHELL:
@@ -248,10 +254,28 @@ public class JobMigrateManager {
         return saveContent.getVersion();
     }
 
-    private Integer migrateSQLContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
-        return null;
+    private Integer migrateSQLContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto, Operator contentOperator) {
+        SqlJobContentDto contentDto = new SqlJobContentDto();
+
+        JSONObject oldJobContent = migrationDto.getOldJobContent();
+        contentDto.setJobId(newJobId);
+        Map<String, String> udfOldMappingNewIdMap = jobUdfService.load().stream()
+                .collect(Collectors.toMap(jobUdf -> jobUdf.getUdfName().split("#_")[0], jobUdf -> jobUdf.getId().toString()));
+        // 修改目标表表名
+        String oldSourceSql = oldJobContent.getString("source_sql");
+        contentDto.setSourceSql(changeTargetTblNameSql(oldSourceSql));
+        String oldUdfIds = oldJobContent.getString("udf_ids");
+        if (!"".equals(oldUdfIds) && !"{}".equals(oldUdfIds)) {
+            List<String> newUdfIdList = Arrays.stream(oldUdfIds.substring(1, oldUdfIds.length() - 1).split(",")).map(udfOldMappingNewIdMap::get)
+                    .collect(Collectors.toList());
+            contentDto.setUdfIds(String.join(",", newUdfIdList));
+        }
+
+        SqlJobContentDto sqlJobContentDto = sqlJobService.save(contentDto, contentOperator.getNickname());
+        return sqlJobContentDto.getVersion();
     }
 
+    // TODO 回流需靠job_config的target_id判断，暂将回流作业统一放入SQL作业中
     private Integer migrateBackFlowContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto) {
         return null;
     }
@@ -399,5 +423,41 @@ public class JobMigrateManager {
         List<String> columns = Lists.newArrayList("resource_type", "hdfs_path");
         String filter = "del = false and id = " + resourceId;
         return oldIDataDao.queryList("metadata.file_resource", columns, filter);
+    }
+
+    private String changeTargetTblNameSql(String sourceSql) {
+        List<String> sqlList = Arrays.stream(sourceSql.split(" ")).filter(t -> t.contains("ods_") && t.contains(".sync_"))
+                .collect(Collectors.toList());
+        Map<String, String> tblNameMap = new HashMap<>();
+        for (String str : sqlList) {
+            List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
+            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+        }
+        for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
+            sourceSql = sourceSql.replace(values.getKey(), values.getValue());
+        }
+        return sourceSql;
+    }
+
+    public static void main(String[] args) {
+
+        String sql = "select id from ods_db_item.sync_zcy_item_copy_detail " +
+                "left join ods_db_boss.sync_zcy_item_copy_detail " +
+                "on ods_db_item.sync_zcy_item_copy_detail.id = ods_db_boss.sync_zcy_item_copy_detail.id";
+//        String sql = "select * from ods_db_item.sync_zcy_item_copy_detail";
+        String[] sqls = sql.split(" ");
+        List<String> sqlList = Arrays.stream(sqls).filter(t -> t.contains("ods_") && t.contains(".sync_"))
+                .collect(Collectors.toList());
+        Map<String, String> tblNameMap = new HashMap<>();
+        for (String str : sqlList) {
+            List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
+            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+        }
+        for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
+            sql = sql.replace(values.getKey(), values.getValue());
+        }
+        System.out.println(sql);
     }
 }
