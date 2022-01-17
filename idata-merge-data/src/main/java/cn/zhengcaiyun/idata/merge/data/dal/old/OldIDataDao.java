@@ -70,15 +70,9 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
         hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
-        if (maximumPoolSize != null) {
-            hikariConfig.setMaximumPoolSize(maximumPoolSize);
-        }
-        if (minimumIdle != null) {
-            hikariConfig.setMinimumIdle(minimumIdle);
-        }
-        if (idleTimeout != null) {
-            hikariConfig.setIdleTimeout(idleTimeout);
-        }
+        hikariConfig.setMaximumPoolSize(1);
+//        hikariConfig.setMinimumIdle(minimumIdle);
+//        hikariConfig.setIdleTimeout(idleTimeout);
         this.oldDatasource = new HikariDataSource(hikariConfig);
         this.oldJdbcTemplate = new JdbcTemplate(oldDatasource);
     }
