@@ -67,6 +67,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
 
     @Override
     public List<MigrateResultDto> migrateFolder() {
+        List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         CompositeFolder dagFolder = getDAGFunctionFolder();
         Operator operator = new Operator.Builder(0L).nickname("系统迁移").build();
         try {
@@ -96,7 +97,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("无权限新增文件夹");
         }
-        return null;
+        return resultDtoList;
     }
 
     @Override
