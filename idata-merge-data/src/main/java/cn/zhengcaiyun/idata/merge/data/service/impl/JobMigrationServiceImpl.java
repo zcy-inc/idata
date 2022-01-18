@@ -139,6 +139,11 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private void migrateJobData(Long oldJobId, List<MigrateResultDto> resultDtoList) {
         JobMigrationDto migrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(oldJobId);
+        if (Objects.isNull(migrationDto)) {
+            resultDtoList.add(new MigrateResultDto("fetchMigrateJobData", String.format("确认是否处理：旧作业[%s]数据不合法，如没有配置DAG等。", oldJobId), ""));
+            LOGGER.warn("### ### 作业[{}]数据不合法，不迁移", oldJobId);
+            return;
+        }
         JSONObject oldJobInfo = migrationDto.getOldJobInfo();
         JSONObject oldJobConfig = migrationDto.getOldJobConfig();
         JSONObject oldJobContent = migrationDto.getOldJobContent();
