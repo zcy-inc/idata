@@ -118,13 +118,13 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()), "来源数据表为空");
-        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");
-        checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");
+//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");   数据迁移完后需要取消注释
+//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");  数据迁移完后需要取消注释
 
         List<MappingColumnDto> mappingColumnDtoList = contentDto.getSrcCols().stream()
                 .filter(columnDto -> Objects.nonNull(columnDto.getMappedColumn()))
                 .collect(Collectors.toList());
-        checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");
+//todo        checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");  数据迁移完后需要取消注释
     }
 
     private boolean unUsedDestTable(String destTable, Long excludeJobId) {

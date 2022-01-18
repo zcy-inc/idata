@@ -25,7 +25,6 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
@@ -41,14 +40,11 @@ import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
-import cn.zhengcaiyun.idata.merge.data.service.impl.JobMigrationServiceImpl;
 import cn.zhengcaiyun.idata.merge.data.util.DatasourceTool;
 import cn.zhengcaiyun.idata.merge.data.util.JobMigrationContext;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.google.inject.internal.util.$ObjectArrays;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +56,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -105,7 +99,7 @@ public class JobMigrateManager {
     @Autowired
     private JobUdfService jobUdfService;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<MigrateResultDto> migrateJob(JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
                                              Operator jobOperator, JobMigrationDto migrationDto) {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
@@ -117,7 +111,7 @@ public class JobMigrateManager {
             // 保存job内容信息
             Operator contentOperator = getContentOperator(migrationDto.getOldJobContent());
             Integer contentVersion = migrateContentInfo(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
-            if (Objects.isNull(contentVersion)) {
+            if (Objects.nonNull(contentVersion)) {
                 // 提交作业内容
                 jobContentCommonService.submit(newJobId, contentVersion, EnvEnum.prod.name(), "迁移自动提交", contentOperator);
                 // 发布作业
@@ -126,7 +120,7 @@ public class JobMigrateManager {
                     jobPublishRecordService.approve(publishRecordOptional.get().getId(), "迁移自动发布", contentOperator);
                 }
             } else {
-                LOGGER.warn("*** *** migrateContentInfo of newJob:{},oldJob:{}.", newJobId, migrationDto.getOldJobId());
+                LOGGER.warn("*** *** migrateContentInfo of newJob:{},oldJob:{} failed.", newJobId, migrationDto.getOldJobId());
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("没有操作权限");
@@ -140,14 +134,21 @@ public class JobMigrateManager {
         switch (jobInfoDto.getJobType()) {
             case DI_BATCH:
                 contentVersion = migrateDIContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
+                break;
             case SQL_SPARK:
                 contentVersion = migrateSQLContent(newJobId, jobInfoDto, migrationDto, contentOperator);
-            case SPARK_PYTHON: case SPARK_JAR:
+                break;
+            case SPARK_PYTHON:
+            case SPARK_JAR:
                 contentVersion = migrateSparkContent(newJobId, jobInfoDto, migrationDto, contentOperator);
-            case SCRIPT_PYTHON: case SCRIPT_SHELL:
+                break;
+            case SCRIPT_PYTHON:
+            case SCRIPT_SHELL:
                 contentVersion = migrateScriptContent(newJobId, jobInfoDto, migrationDto, contentOperator);
+                break;
             case KYLIN:
                 contentVersion = migrateKylinContent(newJobId, jobInfoDto, migrationDto, contentOperator);
+                break;
             default:
                 contentVersion = null;
         }
@@ -167,15 +168,15 @@ public class JobMigrateManager {
         Boolean old_is_recreate = oldJobContent.getBoolean("is_recreate");
         // 岛端的 sql类型抽数作业需要标识出来，迁移后重新配置
         if (!"tableName".equals(old_source_type)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", "source_type是" + old_source_type + "（非全量抽数），迁移完需要重新配置", oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_type:[%s]是（非全量抽数），迁移完需要重新配置", migrationDto.getOldJobId(), old_source_type), oldJobContent.toJSONString()));
             return null;
         }
         if (StringUtils.isBlank(old_source_table)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", "source_table为空，迁移完需要重新配置", oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为空，迁移完需要重新配置", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
             return null;
         }
         if (old_source_table.indexOf("[") > 0) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", "source_table为多表格式，暂不支持", oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
             return null;
         }
 
@@ -233,20 +234,21 @@ public class JobMigrateManager {
 
         // 数据来源-字段信息
         List<MappingColumnDto> columnDtoList = jobTableService.getTableColumn(DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType()), srcDataSource.getId(), old_source_table);
-        if (CollectionUtils.isEmpty(columnDtoList)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", "source_table为多表格式，暂不支持", oldJobContent.toJSONString()));
-            return null;
-        }
-        List<MappingColumnDto> srcCols = columnDtoList;
+        List<MappingColumnDto> srcCols = new ArrayList<>();
         List<MappingColumnDto> destCols = new ArrayList<>();
-        columnDtoList.stream().forEach(srcColumnDto -> {
-            MappingColumnDto destColumnDto = new MappingColumnDto();
-            destColumnDto.setName(srcColumnDto.getName());
-            destColumnDto.setDataType(srcColumnDto.getDataType());
-            destColumnDto.setPrimaryKey(srcColumnDto.getPrimaryKey());
-            srcColumnDto.setMappedColumn(destColumnDto);
-            destCols.add(destColumnDto);
-        });
+        if (CollectionUtils.isEmpty(columnDtoList)) {
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]未获取到来源表字段信息，需手动重新获取", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
+        } else {
+            srcCols = columnDtoList;
+            columnDtoList.stream().forEach(srcColumnDto -> {
+                MappingColumnDto destColumnDto = new MappingColumnDto();
+                destColumnDto.setName(srcColumnDto.getName());
+                destColumnDto.setDataType(srcColumnDto.getDataType());
+                destColumnDto.setPrimaryKey(srcColumnDto.getPrimaryKey());
+                srcColumnDto.setMappedColumn(destColumnDto);
+                destCols.add(destColumnDto);
+            });
+        }
         contentDto.setSrcCols(srcCols);
         contentDto.setDestCols(destCols);
 
@@ -318,12 +320,10 @@ public class JobMigrateManager {
             if (StringUtils.isEmpty(output) || "NULL".equals(output.toUpperCase())) {
                 LOGGER.info("Spark作业同步失败，HDFS文件有误，作业ID：[{}]，作业名称：{}", jobInfoDto.getId(), jobInfoDto.getName());
                 contentDto.setResourceHdfsPath("wrong hdfs path");
-            }
-            else {
+            } else {
                 if ("Jar".equals(oldAppType)) {
                     contentDto.setResourceHdfsPath(hdfsPath);
-                }
-                else {
+                } else {
                     contentDto.setPythonResource(output);
                 }
             }
@@ -368,8 +368,7 @@ public class JobMigrateManager {
             if (StringUtils.isEmpty(output) || "NULL".equals(output.toUpperCase())) {
                 LOGGER.info("Script作业同步失败，HDFS文件有误，作业ID：[{}]，作业名称：{}", jobInfoDto.getId(), jobInfoDto.getName());
                 contentDto.setSourceResource("script wrong");
-            }
-            else {
+            } else {
                 contentDto.setSourceResource(output);
             }
         } catch (IOException e) {
@@ -415,7 +414,8 @@ public class JobMigrateManager {
         Date date = null;
         try {
             date = sdf.parse(dateTimeStr);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
         return date;
     }
 

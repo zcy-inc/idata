@@ -40,6 +40,8 @@ import cn.zhengcaiyun.idata.merge.data.manager.JobMigrateManager;
 import cn.zhengcaiyun.idata.merge.data.service.JobMigrationService;
 import cn.zhengcaiyun.idata.merge.data.util.*;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
@@ -114,7 +116,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             migrateJobNode(jobGraph, oldJobId, migratedOldJobs, resultDtoList);
         }
 
-        LOGGER.info("*** *** 作业迁移结束 *** *** 计划迁移作业数[{}]，已存在作业数[{}]", migrationDtoList.size(), existJobs.size());
+        LOGGER.info("*** *** 作业迁移结束 *** *** 本次迁移实际处理作业数[{}]，作业[{}]", JobMigrationContext.countHandledJobs(), Joiner.on(',').join(JobMigrationContext.getHandledJobs()));
         JobMigrationContext.clear();
         return resultDtoList;
     }
@@ -143,7 +145,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         String jobName = oldJobInfo.getString("job_name");
         JobInfo existJob = JobMigrationContext.getExistJobIfPresent(jobName);
         if (existJob != null) {
-            LOGGER.info("### ### 作业[{}]已存在，不需要再迁移", existJob.getName());
+            LOGGER.warn("### ### 作业[{}]已存在，不需要再迁移", existJob.getName());
             return;
         }
 
@@ -155,10 +157,15 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         String nickname = StringUtils.isNotEmpty(old_creator) ? old_creator : StringUtils.isNotEmpty(old_editor) ? old_editor : old_owner;
         Operator jobOperator = new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
 
-        JobConfigCombinationDto configCombinationDto = buildJobConfig(oldJobId, oldJobInfo, oldJobConfig, oldJobContent);
-        List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(jobInfoDto, configCombinationDto, jobOperator, migrationDto);
+        Optional<JobConfigCombinationDto> configCombinationDtoOptional = buildJobConfig(oldJobId, oldJobInfo, oldJobConfig, oldJobContent, resultDtoList);
+        if (configCombinationDtoOptional.isEmpty()) {
+            LOGGER.warn("### ### 作业[{}]配置错误，不能迁移", existJob.getName());
+            return;
+        }
+        List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(jobInfoDto, configCombinationDtoOptional.get(), jobOperator, migrationDto);
         resultDtoList.addAll(resultList);
-        LOGGER.info("### ### 结束迁移作业[{}]#[{}]", oldJobId, jobName);
+        JobMigrationContext.addHandledJob(jobInfoDto.getName());
+        LOGGER.info("### ### 结束迁移作业[{}]#[{}]，本次已处理作业计数：[{}]", oldJobId, jobName, JobMigrationContext.countHandledJobs());
     }
 
     private void fetchOldJobData(List<JobMigrationDto> outMigrationDtoList, MutableGraph<Long> outJobGraph) {
@@ -194,12 +201,12 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         oldJobConfigList.stream().forEach(jobConfig -> {
             Long job_id = jobConfig.getLong("job_id");
-            Long[] prev_job_ids = jobConfig.getJSONArray("dependent_job_ids").toArray(new Long[0]);
+            String[] prev_job_ids = jobConfig.getJSONArray("dependent_job_ids").toArray(new String[0]);
             if (prev_job_ids == null || prev_job_ids.length == 0) {
                 outJobGraph.addNode(job_id);
             } else {
-                for (Long prev_job_id : prev_job_ids) {
-                    outJobGraph.putEdge(prev_job_id, job_id);
+                for (String prev_job_id : prev_job_ids) {
+                    outJobGraph.putEdge(Long.parseLong(prev_job_id), job_id);
                 }
             }
         });
@@ -208,23 +215,25 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private List<JSONObject> fetchOldJobInfo() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_name", "job_type", "target_tables", "description", "owner_id", "folder_id", "layer");
-// todo        String filter = "is_del = false and job_type in ('SCRIPT', 'SPARK', 'DI', 'KYLIN', 'SQL')";
-        String filter = "del = false and job_type in ('DI')";
+        String filter = "del = false and job_type in ('SCRIPT', 'SPARK', 'DI', 'KYLIN', 'SQL')";
+//        String filter = "del = false and job_type in ('DI')";
         return oldIDataDao.queryListWithCustom("metadata.job_info", columns, filter);
     }
 
     private JobInfoDto buildJobBaseInfo(Long oldJobId, JSONObject jobInfoJson, JSONObject oldJobContentJson) {
         JobInfoDto dto = new JobInfoDto();
         dto.setName(jobInfoJson.getString("job_name"));
-        dto.setDwLayerCode(DWLayerCodeMapTool.getCodeEnum(jobInfoJson.getString("job_type")));
+        dto.setDwLayerCode(DWLayerCodeMapTool.getCodeEnum(jobInfoJson.getString("layer")));
         dto.setRemark(jobInfoJson.getString("description"));
         // 获取所属folderId
-        Optional<CompositeFolder> folderOptional = FolderTool.findFolder(oldJobId, JobMigrationContext.getFolderListIfPresent());
-        checkArgument(folderOptional.isPresent(), "旧作业[%s]未找到迁移后的文件夹");
+        Long oldFolderId = jobInfoJson.getLong("folder_id");
+        checkArgument(Objects.nonNull(oldFolderId), "旧作业[%s]所属文件夹为空", oldJobId);
+        Optional<CompositeFolder> folderOptional = FolderTool.findFolder(oldFolderId, JobMigrationContext.getFolderListIfPresent());
+        checkArgument(folderOptional.isPresent(), "旧作业[%s]未找到迁移后的文件夹", oldJobId);
         dto.setFolderId(folderOptional.get().getId());
 
         String oldType = jobInfoJson.getString("job_type");
-        JobTypeEnum jobType;
+        JobTypeEnum jobType = null;
         if ("DI".equalsIgnoreCase(oldType)) {
             jobType = JobTypeEnum.DI_BATCH;
         } else if ("KYLIN".equalsIgnoreCase(oldType)) {
@@ -246,22 +255,27 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         } else {
             jobType = JobTypeEnum.SQL_SPARK;
         }
+        dto.setJobType(jobType);
         return dto;
     }
 
     private List<JSONObject> fetchOldJobConfig() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id");
-        String filter = "del = false and sandbox = 'prod'";
+        String filter = "del = false and sandbox = 'prod' and dag_id is not null";
         return oldIDataDao.queryListWithCustom("metadata.job_config", columns, filter);
     }
 
-    private JobConfigCombinationDto buildJobConfig(Long oldJobId, JSONObject jobInfoJson, JSONObject configJson,
-                                                   JSONObject oldJobContent) {
+    private Optional<JobConfigCombinationDto> buildJobConfig(Long oldJobId, JSONObject jobInfoJson, JSONObject configJson,
+                                                             JSONObject oldJobContent, List<MigrateResultDto> resultDtoList) {
         JobConfigCombinationDto combinationDto = new JobConfigCombinationDto();
 
         JobExecuteConfigDto executeConfigDto = new JobExecuteConfigDto();
         executeConfigDto.setEnvironment(EnvEnum.prod.name());
         Integer oldDagId = configJson.getInteger("dag_id");
+        if (Objects.isNull(oldDagId)) {
+            resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("无法迁移：旧作业[%s]依赖DAG为空", oldJobId), configJson.toJSONString()));
+            return Optional.empty();
+        }
         Optional<DAGInfo> dagInfoOptional = DagTool.findDag(oldDagId, JobMigrationContext.getDAGIfPresent());
         checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
         executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
@@ -279,19 +293,24 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         //调度配置-优先级，1：低，2：中，3：高
         executeConfigDto.setSchPriority(JobPriorityEnum.middle.val);
         // 运行配置-驱动器内存
-        executeConfigDto.setExecDriverMem(parseExecMem(configJson.getString("driver_memory")));
+        executeConfigDto.setExecDriverMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("driver_memory")), 1));
         // 运行配置-执行器内存
-        executeConfigDto.setExecWorkerMem(parseExecMem(configJson.getString("executor_memory")));
+        executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 2));
         // 作业运行状态（环境级），0：暂停运行；1：恢复运行
         executeConfigDto.setRunningState(RunningStateEnum.pause.val);
+        executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
         combinationDto.setExecuteConfig(executeConfigDto);
 
         List<JobDependenceDto> dependencies = new ArrayList<>();
-        Long[] prev_old_job_ids = configJson.getJSONArray("dependent_job_ids").toArray(new Long[0]);
+        String[] prev_old_job_ids = configJson.getJSONArray("dependent_job_ids").toArray(new String[0]);
         if (prev_old_job_ids != null && prev_old_job_ids.length > 0) {
-            for (Long prev_old_job_id : prev_old_job_ids) {
+            for (String prev_old_job_id_str : prev_old_job_ids) {
+                Long prev_old_job_id = Long.parseLong(prev_old_job_id_str);
                 JobMigrationDto prevMigrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(prev_old_job_id);
-                checkArgument(!Objects.isNull(prevMigrationDto), "旧作业[%s]未找到依赖的旧作业[%s]", oldJobId, prev_old_job_id);
+                if (Objects.isNull(prevMigrationDto)) {
+                    resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("确认是否处理：旧作业[%s]未找到依赖的旧作业[%s]", oldJobId, prev_old_job_id), configJson.toJSONString()));
+                    continue;
+                }
                 String prev_job_name = prevMigrationDto.getOldJobInfo().getString("job_name");
                 JobInfo prevJobInfo = JobMigrationContext.getExistJobIfPresent(prev_job_name);
                 if (Objects.isNull(prevJobInfo)) {
@@ -301,14 +320,14 @@ public class JobMigrationServiceImpl implements JobMigrationService {
                     JobMigrationContext.putExistJob(prev_job_name, prevJobInfo);
                 }
 
-                Optional<JobExecuteConfig> prevConfigOptional = jobExecuteConfigRepo.query(prevJobInfo.getId(), EnvEnum.prod.name());
-                checkArgument(prevConfigOptional.isPresent() && !Objects.isNull(prevConfigOptional.get().getSchDagId()),
-                        "旧作业[%s]未找到依赖的迁移后的作业[%s]未配置prod调度配置", oldJobId, prev_job_name);
+                Optional<JobExecuteConfig> prevJobConfigOptional = jobExecuteConfigRepo.query(prevJobInfo.getId(), EnvEnum.prod.name());
+                checkArgument(prevJobConfigOptional.isPresent() && !Objects.isNull(prevJobConfigOptional.get().getSchDagId()),
+                        "旧作业[%s]依赖的迁移后的作业[%s]未配置prod调度配置", oldJobId, prev_job_name);
 
                 JobDependenceDto dependenceDto = new JobDependenceDto();
                 dependenceDto.setEnvironment(EnvEnum.prod.name());
                 dependenceDto.setPrevJobId(prevJobInfo.getId());
-                dependenceDto.setPrevJobDagId(prevConfigOptional.get().getSchDagId());
+                dependenceDto.setPrevJobDagId(prevJobConfigOptional.get().getSchDagId());
             }
         }
         combinationDto.setDependencies(dependencies);
@@ -334,7 +353,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             combinationDto.setOutput(outputDto);
         }
 
-        return combinationDto;
+        return Optional.of(combinationDto);
     }
 
     private Integer parseExecMem(String men) {

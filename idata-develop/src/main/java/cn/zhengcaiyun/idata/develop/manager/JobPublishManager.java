@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
-import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
@@ -34,7 +33,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -137,7 +135,6 @@ public class JobPublishManager {
 
         Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(optional.get().getSchDagId());
         checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
-        checkArgument(Objects.equals(UsingStatusEnum.ONLINE.val, dagInfoOptional.get().getStatus()), "DAG已停用");
     }
 
     private JobPublishRecord getJobPublishRecord(JobInfo jobInfo, JobPublishContent content, EnvEnum envEnum, String remark, Operator operator) {

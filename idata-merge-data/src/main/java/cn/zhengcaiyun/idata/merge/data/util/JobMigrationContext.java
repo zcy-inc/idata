@@ -22,10 +22,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -39,6 +41,7 @@ public class JobMigrationContext {
     private static final ThreadLocal<List<CompositeFolder>> folderTl = new ThreadLocal<>();
     private static final ThreadLocal<List<DataSource>> dataSourceTl = new ThreadLocal<>();
     private static final ThreadLocal<List<DAGInfo>> dagTl = new ThreadLocal<>();
+    private static final ThreadLocal<List<String>> actualHandleJobTl = new ThreadLocal<>();
 
     public static void setJobMigrationList(List<JobMigrationDto> migrationDtoList) {
         Map<Long, JobMigrationDto> migrationDtoMap = Maps.newHashMap();
@@ -90,6 +93,27 @@ public class JobMigrationContext {
 
     public static List<DataSource> getDataSourceListIfPresent() {
         return Optional.ofNullable(dataSourceTl.get()).orElse(null);
+    }
+
+    public static void addHandledJob(String jobName) {
+        List<String> jobs = actualHandleJobTl.get();
+        if (Objects.isNull(jobs)) {
+            jobs = Lists.newArrayList();
+            actualHandleJobTl.set(jobs);
+        }
+        jobs.add(jobName);
+    }
+
+    public static List<String> getHandledJobs() {
+        List<String> jobs = actualHandleJobTl.get();
+        if (Objects.isNull(jobs)) return Lists.newArrayList();
+        return jobs;
+    }
+
+    public static Integer countHandledJobs() {
+        List<String> jobs = actualHandleJobTl.get();
+        if (Objects.isNull(jobs)) return 0;
+        return jobs.size();
     }
 
     public static void clear() {
