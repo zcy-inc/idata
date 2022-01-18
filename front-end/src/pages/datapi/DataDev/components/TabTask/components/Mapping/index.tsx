@@ -39,7 +39,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
 
   const renderData = () => {
     // 画来源表的节点
-    const srcNodes = srcColumns.map((column, i) => {
+    const srcNodes = srcColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       srcMap.current[`${_.name}-src`] = _; // 赋srcMap的值
       return {
@@ -58,7 +58,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     });
 
     // 画去向表的节点
-    const destNodes = destColumns.map((column, i) => {
+    const destNodes = destColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       destMap.current[`${_.name}-dest`] = _; // 赋destMap的值
       return {
@@ -73,8 +73,8 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
 
     // 画线
     const edges = srcColumns
-      .filter((_) => _.mappedColumn)
-      .map((_) => ({
+      ?.filter((_) => _.mappedColumn)
+      ?.map((_) => ({
         source: `${_.name}-src`,
         sourceKey: `${_.name}-src`,
         target: `${_.mappedColumn?.name}-dest`,
