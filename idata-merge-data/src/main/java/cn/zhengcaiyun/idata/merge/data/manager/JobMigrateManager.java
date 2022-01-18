@@ -266,11 +266,11 @@ public class JobMigrateManager {
         // 修改目标表表名
         String oldSourceSql = oldJobContent.getString("source_sql");
         contentDto.setSourceSql(changeTargetTblNameSql(oldSourceSql));
-        String oldUdfIds = oldJobContent.getString("udf_ids");
-        if (!"".equals(oldUdfIds) && !"{}".equals(oldUdfIds)) {
-            List<String> newUdfIdList = Arrays.stream(oldUdfIds.substring(1, oldUdfIds.length() - 1).split(",")).map(udfOldMappingNewIdMap::get)
-                    .collect(Collectors.toList());
-            contentDto.setUdfIds(String.join(",", newUdfIdList));
+        if (oldJobContent.containsKey("udf_ids")) {
+            String[] oldUdfIdArr = oldJobContent.getJSONArray("udf_ids").toArray(new String[0]);
+            if (oldUdfIdArr != null && oldUdfIdArr.length > 0) {
+                contentDto.setUdfIds(String.join(",", oldUdfIdArr));
+            }
         }
 
         SqlJobContentDto sqlJobContentDto = sqlJobService.save(contentDto, contentOperator.getNickname());
