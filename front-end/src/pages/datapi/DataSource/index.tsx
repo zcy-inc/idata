@@ -161,8 +161,6 @@ const DataSource: FC = () => {
           if (res.data) {
             message.success('删除成功');
             getList();
-          } else {
-            message.error(`删除失败: ${res.msg}`);
           }
         }),
     });

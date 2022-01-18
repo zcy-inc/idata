@@ -188,8 +188,6 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       .then((res) => {
         if (res.success) {
           message.success('同步成功');
-        } else {
-          message.error(`同步失败: ${res.msg || '-'}`);
         }
       })
       .finally(() => {

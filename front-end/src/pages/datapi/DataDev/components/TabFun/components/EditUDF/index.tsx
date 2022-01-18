@@ -89,8 +89,6 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                       hdfsPath: res.data.relativePath,
                     });
                     setHdfsPath(res.data.relativePath);
-                  } else {
-                    message.error(`上传失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {

@@ -48,8 +48,6 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jo
                   if (res.success) {
                     onSuccess?.(res, file as unknown as XMLHttpRequest);
                     form.setFieldsValue({ resourceHdfsPath: res.data });
-                  } else {
-                    message.error(`上传失败：${res.msg}`);
                   }
                 })
                 .catch((err) => {

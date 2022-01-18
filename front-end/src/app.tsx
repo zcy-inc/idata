@@ -14,6 +14,7 @@ import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 
 import IconFont from '@/components/IconFont';
 import { IMenuItem } from './types/common';
+import { message } from 'antd';
 
 const fetchCurrentUser = async () => {
   try {
@@ -147,6 +148,9 @@ const middleware = async (ctx: Context, next: () => void) => {
   if (code === '403') {
     history.replace('/');
     return;
+  }
+  if (!ctx.res.success) {
+    message.error(`出错了: ${ctx.res.msg}`);
   }
 };
 

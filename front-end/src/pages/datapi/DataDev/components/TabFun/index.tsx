@@ -53,8 +53,6 @@ const TabUDF: FC<TabUDFProps> = ({ pane }) => {
                   title: res.data.udfName,
                   pane: { ...pane, id: res.data.id as number },
                 });
-              } else {
-                message.error('创建UDF失败');
               }
             })
             .catch((err) => {})
@@ -73,8 +71,6 @@ const TabUDF: FC<TabUDFProps> = ({ pane }) => {
                 });
                 getUDFWrapped().then(() => setMode('view'));
                 getTreeWrapped();
-              } else {
-                message.error('编辑UDF失败');
               }
             })
             .catch((err) => {})
@@ -96,8 +92,6 @@ const TabUDF: FC<TabUDFProps> = ({ pane }) => {
               message.success('删除UDF成功');
               onRemovePane(pane.cid);
               getTreeWrapped();
-            } else {
-              message.error(`删除UDF失败：${res.msg}`);
             }
           })
           .catch((err) => {}),

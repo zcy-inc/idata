@@ -181,8 +181,6 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
               if (res.success) {
                 message.success('创建文件型数据源成功');
                 reset();
-              } else {
-                message.error(`创建文件型数据源失败：${res.msg}`);
               }
             })
             .catch((err) => {})
@@ -360,8 +358,6 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
                       });
                       setPreview({ columns, dataSource });
                     });
-                  } else {
-                    message.error(`上传失败：${res.msg}`);
                   }
                 })
                 .catch((err) => {

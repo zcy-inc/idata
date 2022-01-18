@@ -118,8 +118,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
           onClose();
-        } else {
-          message.error(`保存${environment}失败: ${res.msg}`);
         }
       })
       .catch((err) => {});

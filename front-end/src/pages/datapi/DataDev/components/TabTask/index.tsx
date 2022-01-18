@@ -245,8 +245,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             message.success('刷新成功');
             setSrcColumns(res.data);
             setDestColumns([]);
-          } else {
-            message.error(`刷新失败: ${res.msg}`);
           }
         })
         .catch((err) => {});
@@ -278,8 +276,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               message.success('删除成功');
               onRemovePane(pane.cid);
               getTreeWrapped();
-            } else {
-              message.error(`删除失败: ${res.msg}`);
             }
           })
           .catch((err) => {}),
@@ -312,8 +308,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         if (res.success) {
           message.success('保存成功');
           getTaskVersionsWrapped();
-        } else {
-          message.error(`保存失败: ${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -604,7 +598,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   setVisible(false);
                   return true;
                 } else {
-                  message.error(`提交失败: ${res.msg}`);
                   return false;
                 }
               })
@@ -648,8 +641,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     message.success('暂停成功');
                     getTaskWrapped();
                     setVisibleAction(false);
-                  } else {
-                    message.error(`暂停失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
@@ -662,8 +653,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     message.success('恢复成功');
                     getTaskWrapped();
                     setVisibleAction(false);
-                  } else {
-                    message.error(`恢复失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
@@ -676,8 +665,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     message.success('单次运行成功');
                     getTaskWrapped();
                     setVisibleAction(false);
-                  } else {
-                    message.error(`单次运行失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {})
