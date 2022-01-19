@@ -572,7 +572,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     private JSONObject buildSingleTaskJson(JobInfo jobInfo, JobExecuteConfig executeConfig) {
-        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\"," + "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}}," + "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"0\",\"failRetryInterval\":\"1\"," + "\"timeoutFlag\":\"OPEN\",\"timeoutNotifyStrategy\":\"WARN,FAILED\",\"timeout\":30,\"delayTime\":\"0\",\"environmentCode\":-1}");
+        JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\"," + "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}}," + "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"2\",\"failRetryInterval\":\"5\"," + "\"timeoutFlag\":\"OPEN\",\"timeoutNotifyStrategy\":\"WARN,FAILED\",\"timeout\":30,\"delayTime\":\"0\",\"environmentCode\":-1}");
         taskJson.put("name", buildJobName(jobInfo));
         taskJson.getJSONObject("taskParams").put("rawScript", String.format("run_etl jobId=%d env=%s", jobInfo.getId(), executeConfig.getEnvironment()));
         taskJson.put("flag", "NO");

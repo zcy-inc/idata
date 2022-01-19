@@ -286,7 +286,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
         executeConfigDto.setSchRerunMode("always");
         // 调度配置-超时时间，单位：秒
-//        executeConfigDto.setSchTimeOut();
+        executeConfigDto.setSchTimeOut(30*60);
         // 调度配置-是否空跑，0否，1是
 //        executeConfigDto.setSchDryRun();
         // 运行配置-队列
