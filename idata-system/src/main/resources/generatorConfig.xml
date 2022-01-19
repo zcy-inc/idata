@@ -29,5 +29,9 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
+            <table tableName="workspace" mapperName="WorkspaceDao">
+                <generatedKey column="id" sqlStatement="MySql" identity="true" />
+                <columnOverride column="del" javaType="java.lang.Integer"/>
+            </table>
     </context>
 </generatorConfiguration>

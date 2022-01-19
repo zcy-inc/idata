@@ -24,6 +24,7 @@ import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.commons.util.DesUtil;
 import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
@@ -354,8 +355,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env) {
-        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = Optional.of(devJobInfoMyDao.selectJobInfoExecuteDetail(id, env))
-                .orElseThrow(() -> new IllegalArgumentException(String.format("任务不存在或配置不存在, jobId:%d，环境:%s", id, env)));
+        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = devJobInfoMyDao.selectJobInfoExecuteDetail(id, env);
+        checkArgument(jobInfoExecuteDetailDto != null, String.format("任务不存在或配置不存在, jobId:%d，环境:%s", id, env));
 
         String jobType = jobInfoExecuteDetailDto.getJobType();
         checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%s", jobType));
@@ -387,7 +388,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 String dbName = dbConfigDto.getDbName();
                 diResponse.setSrcJdbcUrl(getJdbcUrl(dataSourceType, dbConfigDto.getHost(), dbConfigDto.getPort(), dbName, dbConfigDto.getSchema()));
                 diResponse.setSrcUsername(dbConfigDto.getUsername());
-                diResponse.setSrcPassword(dbConfigDto.getPassword());
+                diResponse.setSrcPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
                 diResponse.setSrcDbName(dbName);
                 diResponse.setSrcDriverType(DriverTypeEnum.of(dataSource.getType().name()));
 

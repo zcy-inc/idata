@@ -75,8 +75,8 @@
                   and environment = #{env}
                   and job_type_code = 'KYLIN'
             ) as t1
-                join dev_job_content_kylin as t2
-                     on t1.job_content_id = t2.id
+        join dev_job_content_kylin as t2
+        on t1.job_content_id = t2.id
     </select>
     <select id="getPublishedScriptJobContent" resultMap="scriptMap">
         select t2.*
@@ -89,8 +89,8 @@
                   and environment = #{env}
                   and (job_type_code = 'SCRIPT_PYTHON' or job_type_code = 'SCRIPT_SHELL')
             ) as t1
-                join dev_job_content_script as t2
-                     on t1.job_content_id = t2.id
+        join dev_job_content_script as t2
+        on t1.job_content_id = t2.id
     </select>
 
 </mapper>

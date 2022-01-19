@@ -74,6 +74,7 @@
         <pagehelper.version>1.3.0</pagehelper.version>
         <validation.version>2.0.7.RELEASE</validation.version>
         <testcontainers.version>1.16.2</testcontainers.version>
+        <mail.version>1.4.1</mail.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -210,7 +211,11 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${mail.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

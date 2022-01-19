@@ -31,7 +31,7 @@ import java.io.IOException;
 import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
-@RequestMapping(path = "/p1/dev/spark")
+@RequestMapping(path = "/p0/dev/spark")
 public class SparkController {
 
     /**

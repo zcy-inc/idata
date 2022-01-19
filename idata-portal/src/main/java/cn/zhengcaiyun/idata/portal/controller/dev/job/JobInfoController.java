@@ -153,20 +153,6 @@ public class JobInfoController {
     }
 
     /**
-     * 获取作业详细信息，用于任务执行参数
-     * @param id 作业id
-     * @return
-     */
-    @GetMapping("/{id}/execute-detail")
-    public RestResult<JobInfoExecuteDetailDto> getJobInfoDetail(@PathVariable Long id,
-                                                                @RequestParam("env") String env) {
-        if (EnvEnum.getEnum(env).isEmpty()) {
-            return RestResult.error("env is invalid : " + env, "invalid params");
-        }
-        return RestResult.success(jobInfoService.getJobInfoExecuteDetail(id, env));
-    }
-
-    /**
      * 删除作业
      *
      * @param id 作业id
