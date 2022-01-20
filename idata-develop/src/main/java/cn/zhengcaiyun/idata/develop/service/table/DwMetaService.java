@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.table;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -180,9 +181,11 @@ public class DwMetaService implements InitializingBean, DisposableBean {
         Map<String, String> bizProcessMap = new HashMap<>();
         String biProcessSql = "select cn_name, en_name from idata.business_process " +
                 "where del = false order by id";
-        dwMetaJdbcTemplate.queryForList(biProcessSql).stream().forEach(record -> {
-            bizProcessMap.put((String) record.get("en_name"), (String) record.get("cn_name")) ;
-        });
+        if (ObjectUtils.isNotEmpty(dwMetaJdbcTemplate.queryForList(biProcessSql))) {
+            dwMetaJdbcTemplate.queryForList(biProcessSql).stream().forEach(record -> {
+                bizProcessMap.put((String) record.get("en_name"), (String) record.get("cn_name"));
+            });
+        }
         return bizProcessMap;
     }
 

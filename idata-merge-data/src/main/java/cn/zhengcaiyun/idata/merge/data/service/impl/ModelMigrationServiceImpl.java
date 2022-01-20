@@ -103,6 +103,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
 
     private EnumDto syncBizProcess() {
         Map<String, String> bizProcessMap = changeBizProcessCodes(dwMetaService.getBizProcessNames());
+        if (bizProcessMap.size() == 0) return new EnumDto();
         Map<String, Long> folderMap = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1)))
                 .stream().collect(Collectors.toMap(DevFolder::getFolderName, DevFolder::getId));
         EnumDto enumDto = new EnumDto();
