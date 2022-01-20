@@ -5,7 +5,7 @@ create table if not exists idata.sys_config (
   del         tinyint         not null default 0 comment '是否删除(1:是,0:否)',
   creator     varchar(20)     not null comment '创建者',
   create_time datetime(3)     not null default current_timestamp(3) comment '创建时间',
-  editor      varchar(20)     comment '修改者'
+  editor      varchar(20)     comment '修改者',
   edit_time   datetime(3)     not null default current_timestamp(3) on update current_timestamp(3) comment '修改时间',
   key_one     varchar(50)     not null comment '系统配置键1',
   value_one   text            comment '系统配置值1',

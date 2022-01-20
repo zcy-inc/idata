@@ -10,9 +10,9 @@
 
 insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_BIGDATA_RD', '数据研发', 'F_MENU');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, feature_url_path)
+insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_LABEL_MANAGE', '数据标签', 'F_MENU');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, feature_url_path)
+insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_OPS_CENTER', '运维中心', 'F_MENU');
 insert into idata.sys_feature (feature_code, feature_name, feature_type)
 values ('F_MENU_DATA_QUALITY', '数据质量', 'F_MENU');
