@@ -49,7 +49,7 @@ import java.util.List;
  * @create: 2022-01-12 16:18
  **/
 @RestController
-@RequestMapping(path = "/p0/merge")
+@RequestMapping(path = "/p1/merge")
 public class MergeDataController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MergeDataController.class);

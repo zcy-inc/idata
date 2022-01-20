@@ -141,7 +141,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         Map<Long, Long> folderMap = new HashMap<>();
         // 文件夹新逻辑
         folderMap = compositeFolderService.getFolders("DESIGN.TABLE")
-                .stream().collect(Collectors.toMap(tableFolder -> Long.valueOf(tableFolder.getName().split("#_")[0]),
+                .stream().filter(e -> e.getName().contains("#_")).collect(Collectors.toMap(tableFolder -> Long.valueOf(tableFolder.getName().split("#_")[0]),
                         CompositeFolderDto::getId));
 
         Map<String, String> idataColTypeMap = enumService.getEnumValues("hiveColTypeEnum:ENUM")
@@ -210,7 +210,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
                         tableLabel.setLabelParamValue(idataUserMap.get(userMap.get(tableRecord.get("dw_owner_id").toString())).toString());
                     }
                     else {
-                        tableLabel.setLabelParamValue(idataUserMap.get("大时").toString());
+                        tableLabel.setLabelParamValue(idataUserMap.getOrDefault("大时", -1L).toString());
                     }
                 }
                 else if ("domain_id".equals(colKey) && tableRecord.get("domain_id") != null) {

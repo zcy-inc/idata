@@ -9,6 +9,7 @@ import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.merge.data.service.FolderMigrationService;
 import cn.zhengcaiyun.idata.merge.data.util.IdPadTool;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +65,7 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
             "       t1.edit_time as editTime, " +
             "       t1.folder_name as name, " +
             "       'FOLDER' as type, " +
-            "       'DEV.JOB' as belong, " +
+            "       'DESIGN.TABLE' as belong, " +
             "       t1.parent_id as parentId " +
             "from idata.table_folder t1";
         List<Map<String, Object>> tableFolderList = oldIDataDao.selectList(sql);
@@ -108,7 +109,7 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
         // 初始化顶层id，因为顶层文件夹id不插入
         Map<Long, Long> diIdMapping = new HashMap<>();
         diIdMapping.put(-1L, 10003L);
-        doMigrate(diList, diIdMapping);
+        doMigrate(diList, diIdMapping, "DI");
 
         // 4. 迁移作业
          sql =
@@ -150,8 +151,16 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
     }
 
     private void doMigrate(List<CompositeFolder> list, Map<Long, Long> idMapping) {
+        doMigrate(list, idMapping, null);
+    }
+
+    private void doMigrate(List<CompositeFolder> list, Map<Long, Long> idMapping, String extraAlias) {
         list.forEach(e -> {
-            e.setName(IdPadTool.padId(e.getId() + "") + "#_" + e.getName());
+            if (StringUtils.isEmpty(extraAlias)) {
+                e.setName(IdPadTool.padId(e.getId() + "") + "#_" + e.getName());
+            } else {
+                e.setName(IdPadTool.padId(e.getId() + "") + "#_" + extraAlias + "#_" + e.getName());
+            }
             Long oldId = e.getId();
             compositeFolderDao.insert(e);
             // 插入后，e的id被覆盖成自增id
