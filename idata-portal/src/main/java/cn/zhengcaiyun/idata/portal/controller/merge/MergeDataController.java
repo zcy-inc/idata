@@ -104,7 +104,7 @@ public class MergeDataController {
             return;
 
         SXSSFWorkbook workbook = downloadAsExcel(resultDtoList);
-        String fileName = "merge failed data_" + System.currentTimeMillis();
+        String fileName = "merge_failed_data_" + System.currentTimeMillis();
         try {
             response.setContentType("application/octet-stream");
             response.setHeader("Content-disposition", String.format("attachment;filename=%s.xlsx",
