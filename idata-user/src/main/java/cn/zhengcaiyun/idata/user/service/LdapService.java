@@ -61,6 +61,9 @@ public class LdapService{
     }
 
     private synchronized void createLdapTemplate(){
+        if (this.ldapTemplate!=null)
+            return;
+
         ConfigDto ldapConfig = systemConfigService.getSystemConfigByKey(LDAP_CONFIG_KEY);
         LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl(ldapConfig.getValueOne().get(LDAP_URL_KEY).getConfigValue());
