@@ -116,6 +116,6 @@ values ('系统管理员', 'hdfs-site','{}', 'HADOOP');
 insert into sys_config(creator ,key_one, value_one, type)
 values ('系统管理员', 'yarn-site','{}', 'HADOOP');
 
-insert into sys_config(key_one, value_one) values ('{}');
-insert into sys_config(key_one, value_one)
-values ('{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
+insert into sys_config(creator ,key_one, value_one) values ('系统管理员', 'trino-info', '{}');
+insert into sys_config(creator ,key_one, value_one)
+values ('系统管理员', 'hive-info', '{"hive-info":{"configValue":"jdbc:hive2://bigdata-master3.cai-inc.com:10000/default"}}');
