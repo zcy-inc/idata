@@ -39,7 +39,7 @@ import java.util.List;
  * @date 2021-03-11 17:26
  */
 @Service
-public class LdapService implements InitializingBean {
+public class LdapService{
 
     private static final String LDAP_CONFIG_KEY = "ldap-config";
     private static final String LDAP_DOMAIN_KEY = "ldap.domain";
@@ -48,13 +48,19 @@ public class LdapService implements InitializingBean {
     private static final String LDAP_USER_DN_KEY = "ldap.userDn";
     private static final String LDAP_PASSWORD_KEY = "ldap.password";
 
-    private LdapTemplate ldapTemplate;
+    private volatile LdapTemplate ldapTemplate;
 
     @Autowired
     private SystemConfigService systemConfigService;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    private LdapTemplate getLdapTemplate(){
+        if (this.ldapTemplate != null)
+            return this.ldapTemplate;
+        createLdapTemplate();
+        return this.ldapTemplate;
+    }
+
+    private synchronized void createLdapTemplate(){
         ConfigDto ldapConfig = systemConfigService.getSystemConfigByKey(LDAP_CONFIG_KEY);
         LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl(ldapConfig.getValueOne().get(LDAP_URL_KEY).getConfigValue());
@@ -70,7 +76,7 @@ public class LdapService implements InitializingBean {
         ConfigDto ldapConfig = systemConfigService.getSystemConfigByKey(LDAP_CONFIG_KEY);
         DirContext ctx = null;
         try {
-            ctx = ldapTemplate.getContextSource().getContext(username
+            ctx = getLdapTemplate().getContextSource().getContext(username
                     + ldapConfig.getValueOne().get(LDAP_DOMAIN_KEY).getConfigValue(), password);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +88,7 @@ public class LdapService implements InitializingBean {
     }
 
     public UserInfoDto findUserByUsername(String userName) {
-        List<UserInfoDto> users = ldapTemplate.search(LdapQueryBuilder.query()
+        List<UserInfoDto> users = getLdapTemplate().search(LdapQueryBuilder.query()
                         .where("objectclass").is("person")
                         .and("sAMAccountName").is(userName),
                 this::toUser);
@@ -93,7 +99,7 @@ public class LdapService implements InitializingBean {
     }
 
     public List<UserInfoDto> searchUserByDisplayName(String key) {
-        List<UserInfoDto> users = ldapTemplate.search(LdapQueryBuilder.query()
+        List<UserInfoDto> users = getLdapTemplate().search(LdapQueryBuilder.query()
                         .where("objectclass").is("person")
                         .and("displayName").like(String.format("*%s*", key)),
                 this::toUser);
