@@ -68,20 +68,6 @@ values ('F_MENU_API_APP_MANAGE', '应用', 'F_MENU', 'F_MENU_DATAPI');
 insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
 values ('F_MENU_API_APP_ACCESS', '应用权限', 'F_MENU', 'F_MENU_DATAPI');
 
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_DW_DESIGN', '数仓设计', 'F_MENU', 'F_MENU_DATA_RD');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_JOB_MANAGE', '作业管理', 'F_MENU', 'F_MENU_DATA_RD');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_RESOURCE_MANAGE', '资源管理', 'F_MENU', 'F_MENU_DATA_RD');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_FUNCTION_MANAGE', '函数管理', 'F_MENU', 'F_MENU_DATA_RD');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_API_DEVELOP', 'API开发', 'F_MENU', 'F_MENU_DATAPI');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_API_APP_MANAGE', '应用', 'F_MENU', 'F_MENU_DATAPI');
-insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code)
-values ('F_MENU_API_APP_ACCESS', '应用权限', 'F_MENU', 'F_MENU_DATAPI');
 -- -- icon
 insert into idata.sys_feature (feature_code, feature_name, feature_type, parent_code, feature_url_path)
 values ('F_ICON_DATA_DEVELOP_ROOT_DIR', '数据开发文件夹根目录添加', 'F_ICON', 'F_MENU_BIGDATA_RD', '/api/p1/dev/compositeFolders');
