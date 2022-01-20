@@ -66,6 +66,8 @@ public class MergeDataController {
     private DAGMigrationService dagMigrationService;
     @Autowired
     private JobMigrationService jobMigrationService;
+    @Autowired
+    private ModifyDIJobNameService modifyDIJobNameService;
 
     @GetMapping("/data")
     public void mergeData(@RequestParam String mergeModules, HttpServletResponse response) {
@@ -93,6 +95,9 @@ public class MergeDataController {
         }
         if (mergeAll || modules.contains(MigrateItemEnum.job.name())) {
             resultDtoList.addAll(jobMigrationService.migrate());
+        }
+        if (modules.contains(MigrateItemEnum.modify_di_job_name.name())) {
+            resultDtoList.addAll(modifyDIJobNameService.modify());
         }
 
         if (CollectionUtils.isEmpty(resultDtoList))

@@ -15,20 +15,17 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.merge.data.enums;
+package cn.zhengcaiyun.idata.merge.data.service;
+
+import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:22
+ * @create: 2022-01-06 11:27
  **/
-public enum MigrateItemEnum {
-    all,
-    datasource,
-    folder,
-    model,
-    dag,
-    function,
-    job,
-    modify_di_job_name
+public interface ModifyDIJobNameService {
+    List<MigrateResultDto> modify();
 }
