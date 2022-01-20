@@ -168,15 +168,15 @@ public class JobMigrateManager {
         Boolean old_is_recreate = oldJobContent.getBoolean("is_recreate");
         // 岛端的 sql类型抽数作业需要标识出来，迁移后重新配置
         if (!"tableName".equals(old_source_type)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_type:[%s]是（非全量抽数），迁移完需要重新配置", migrationDto.getOldJobId(), old_source_type), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_type:[%s]是（非全量抽数），迁移完需要重新配置", migrationDto.getOldJobId().toString(), old_source_type), oldJobContent.toJSONString()));
             return null;
         }
         if (StringUtils.isBlank(old_source_table)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为空，迁移完需要重新配置", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为空，迁移完需要重新配置", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
         if (old_source_table.indexOf("[") > 0) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
 
@@ -201,7 +201,7 @@ public class JobMigrateManager {
         contentDto.setSrcShardingNum(4);
 
         Optional<DataSource> destDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
-        checkArgument(destDataSourceOptional.isPresent(), "旧DI作业[%s]未找到迁移后的目标数据源", migrationDto.getOldJobId());
+        checkArgument(destDataSourceOptional.isPresent(), "旧DI作业[%s]未找到迁移后的目标数据源", migrationDto.getOldJobId().toString());
         DataSource destDataSource = destDataSourceOptional.get();
         // 数据去向-数据源类型
         contentDto.setDestDataSourceType(destDataSource.getType());
@@ -209,11 +209,21 @@ public class JobMigrateManager {
         contentDto.setDestDataSourceId(destDataSource.getId());
         // 数据去向-数仓表id
         String[] target_tables = migrationDto.getOldJobInfo().getJSONArray("target_tables").toArray(new String[0]);
+        //todo 已切换新规则表名，迁移逻辑如下
+//        if (target_tables != null && target_tables.length > 0 && StringUtils.isNotBlank(target_tables[0])) {
+//            contentDto.setDestTable(target_tables[0]);
+//        } else {
+//            contentDto.setDestTable(parseDestTable(srcDataSource, old_source_table));
+//        }
+
+        // 未切换新规则表名，迁移逻辑如下，统一使用新命名替换
+        String newDestTable = parseDestTable(srcDataSource, old_source_table);
         if (target_tables != null && target_tables.length > 0 && StringUtils.isNotBlank(target_tables[0])) {
-            contentDto.setDestTable(target_tables[0]);
-        } else {
-            contentDto.setDestTable(parseDestTable(srcDataSource, old_source_table));
+            String oldDestTable = target_tables[0];
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧作业[%s]:[%s]的旧目标表[%s]已自动改为新规则表名[%s]，需确认是否修改正确",
+                    migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable, newDestTable), oldJobContent.toJSONString()));
         }
+        contentDto.setDestTable(newDestTable);
 
         // 数据去向-写入模式，init: 重建表，override：覆盖表
         if (Objects.equals(Boolean.TRUE, old_is_recreate)) {
@@ -237,7 +247,7 @@ public class JobMigrateManager {
         List<MappingColumnDto> srcCols = new ArrayList<>();
         List<MappingColumnDto> destCols = new ArrayList<>();
         if (CollectionUtils.isEmpty(columnDtoList)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]未获取到来源表字段信息，需手动重新获取", migrationDto.getOldJobId()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]未获取到来源表字段信息，需手动重新获取", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
         } else {
             srcCols = columnDtoList;
             columnDtoList.stream().forEach(srcColumnDto -> {
