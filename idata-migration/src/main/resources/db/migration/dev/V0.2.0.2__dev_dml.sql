@@ -223,5 +223,3 @@ insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'alarmLayerEnum:ENUM', 'ALARM_LEVEL_MEDIUM:ENUM_VALUE', '中');
 insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'alarmLayerEnum:ENUM', 'ALARM_LEVEL_LOW:ENUM_VALUE', '低');
-
-insert into idata.dev_enum (creator, enum_code, enum_name, folder_id) values ('系统管理员', 'assetCatalogueEnum:ENUM', '数据资产');
