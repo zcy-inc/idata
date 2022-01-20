@@ -82,7 +82,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       }));
 
     return {
-      nodes: srcNodes.concat(destNodes),
+      nodes: srcNodes?.concat(destNodes),
       edges,
     };
   };
@@ -316,16 +316,16 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         // 怎么分辨这儿的source和target分别来自哪张表？
         // 一时规避，通过两边做检查来删除
         if (srcMap.current[e.item.source]) {
-          delete srcMap.current[e.item.source].mappedColumn;
+          delete srcMap.current[e.item.source]?.mappedColumn;
         }
         if (srcMap.current[e.item.target]) {
-          delete srcMap.current[e.item.target].mappedColumn;
+          delete srcMap.current[e.item.target]?.mappedColumn;
         }
         if (destMap.current[e.item.source]) {
-          delete destMap.current[e.item.source].mappedColumn;
+          delete destMap.current[e.item.source]?.mappedColumn;
         }
         if (destMap.current[e.item.target]) {
-          delete destMap.current[e.item.target].mappedColumn;
+          delete destMap.current[e.item.target]?.mappedColumn;
         }
         /* ===== end 删除数据 ===== */
       }
