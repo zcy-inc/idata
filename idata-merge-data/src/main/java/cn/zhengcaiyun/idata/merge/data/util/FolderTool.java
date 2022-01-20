@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.merge.data.util;
 
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +30,14 @@ import java.util.Optional;
  **/
 public class FolderTool {
 
-    public static Optional<CompositeFolder> findFolder(Long oldFolderId, List<CompositeFolder> folderList) {
+    public static Optional<CompositeFolder> findFolder(Long oldFolderId, List<CompositeFolder> folderList, String module) {
+        String namePrefix = IdPadTool.padId(oldFolderId.toString()) + "#_";
+        if (StringUtils.isNotBlank(module)) {
+            namePrefix = namePrefix + module + "#_";
+        }
+        String finalNamePrefix = namePrefix;
         return folderList.stream()
-                .filter(compositeFolder -> compositeFolder.getName().startsWith(IdPadTool.padId(oldFolderId.toString()) + "#_"))
+                .filter(compositeFolder -> compositeFolder.getName().startsWith(finalNamePrefix))
                 .findFirst();
     }
 }

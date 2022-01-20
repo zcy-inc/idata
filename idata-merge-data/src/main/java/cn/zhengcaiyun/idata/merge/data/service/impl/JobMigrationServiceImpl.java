@@ -232,12 +232,13 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         dto.setRemark(jobInfoJson.getString("description"));
         // 获取所属folderId
         Long oldFolderId = jobInfoJson.getLong("folder_id");
+        String oldType = jobInfoJson.getString("job_type");
         checkArgument(Objects.nonNull(oldFolderId), "旧作业[%s]所属文件夹为空", oldJobId);
-        Optional<CompositeFolder> folderOptional = FolderTool.findFolder(oldFolderId, JobMigrationContext.getFolderListIfPresent());
+        String module = "DI".equalsIgnoreCase(oldType) ? "DI" : null;
+        Optional<CompositeFolder> folderOptional = FolderTool.findFolder(oldFolderId, JobMigrationContext.getFolderListIfPresent(), module);
         checkArgument(folderOptional.isPresent(), "旧作业[%s]未找到迁移后的文件夹", oldJobId);
         dto.setFolderId(folderOptional.get().getId());
 
-        String oldType = jobInfoJson.getString("job_type");
         JobTypeEnum jobType = null;
         if ("DI".equalsIgnoreCase(oldType)) {
             jobType = JobTypeEnum.DI_BATCH;
@@ -286,7 +287,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
         executeConfigDto.setSchRerunMode("always");
         // 调度配置-超时时间，单位：秒
-        executeConfigDto.setSchTimeOut(30*60);
+        executeConfigDto.setSchTimeOut(30 * 60);
         // 调度配置-是否空跑，0否，1是
 //        executeConfigDto.setSchDryRun();
         // 运行配置-队列
