@@ -199,7 +199,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         String tenantCode = getDSTenantCode(dagInfo.getEnvironment());
         List<String> globalParams = Lists.newArrayList();
         String description = "";
-        String scheduleJson = buildScheduleJson(dagSchedule);
+        String scheduleJson = buildScheduleJson(dagSchedule, dagInfo.getEnvironment());
 
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("name", name);
@@ -211,14 +211,14 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         return paramMap;
     }
 
-    private String buildScheduleJson(DAGSchedule dagSchedule) {
+    private String buildScheduleJson(DAGSchedule dagSchedule, String environment) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         JsonObject scheduleJson = new JsonObject();
         scheduleJson.addProperty("warningType", PARAM_DEFAULT_WARNING_TYPE);
         scheduleJson.addProperty("warningGroupId", PARAM_DEFAULT_NOTIFY_GROUP_ID);
         scheduleJson.addProperty("failureStrategy", PARAM_DEFAULT_FAILURE_POLICY);
-        scheduleJson.addProperty("workerGroup", "default");
+        scheduleJson.addProperty("workerGroup", getDSWorkGroup(environment));
         scheduleJson.addProperty("environmentCode", -1L);
         scheduleJson.addProperty("processInstancePriority", PARAM_DEFAULT_PROCESS_INSTANCE_PRIORITY);
         scheduleJson.addProperty("startTime", dateFormat.format(dagSchedule.getBeginTime()));
