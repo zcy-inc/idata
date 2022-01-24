@@ -1,0 +1,87 @@
+.wrap {
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: 306px minmax(auto, 1000px);
+  height: 670px;
+  column-gap: 8px;
+
+  .left,
+  .right {
+    height: 100%;
+    overflow-y: auto;
+    border: 1px solid #ebedf3;
+    border-radius: 2px;
+  }
+
+  .left {
+    padding: 24px;
+  }
+  .right {
+    padding: 32px;
+  }
+
+  :global {
+    .ant-tabs > .ant-tabs-nav .ant-tabs-tab {
+      margin: 0;
+      padding: 8px 46px;
+      font-weight: 500;
+    }
+    .ant-tabs-tab .ant-tabs-tab-btn {
+      font-size: 16px;
+    }
+    .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
+      height: 2px;
+    }
+    .ant-tabs-top > .ant-tabs-nav {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.featureTree {
+  :global {
+    .ant-tree-switcher {
+      color: #c0c4da;
+    }
+    .ant-tree-treenode {
+      color: var(--text-color);
+      font-size: 14px;
+      line-height: 22px;
+    }
+    .ant-tree-node-content-wrapper.ant-tree-node-selected {
+      color: var(--primary-color);
+      background: none;
+    }
+    .ant-tree-node-content-wrapper:hover {
+      background: none;
+    }
+  }
+}
+
+.folderTree {
+  :global {
+    .ant-tree-switcher {
+      color: #c0c4da;
+    }
+
+    .menu.ant-tree-treenode {
+      color: var(--text-color);
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .folder.ant-tree-treenode {
+      color: #737b96;
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .ant-tree-node-content-wrapper.ant-tree-node-selected {
+      color: var(--primary-color);
+      background: none;
+    }
+    .ant-tree-node-content-wrapper:hover {
+      background: none;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+.pageContainer {
+  display: grid;
+  grid-template-rows: 52px auto;
+  height: calc(100vh - 58px);
+  min-height: calc(100vh - 58px);
+  padding: 0 16px 16px 16px;
+
+  .title {
+    height: 22px;
+    margin: 16px 0;
+    color: #15172f;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .content {
+    padding: 24px;
+    padding-bottom: 0;
+    overflow-x: hidden;
+    background: #fff;
+  }
+
+  > dl {
+    position: relative;
+    margin: 0;
+    > dt {
+      margin: 0;
+    }
+    > dd {
+      position: absolute;
+      right: 0;
+      bottom: 14px;
+      margin: 0;
+    }
+  }
+
+  :global {
+    .ant-breadcrumb {
+      margin: 8px 0;
+    }
+    .ant-breadcrumb {
+      color: #7c8296;
+    }
+  }
+}

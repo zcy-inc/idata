@@ -1,0 +1,87 @@
+.g6 {
+  position: relative;
+  margin-top: 12px;
+  background: #fff;
+  background-image: linear-gradient(#ebedf3 1px, transparent 0),
+    linear-gradient(90deg, #ebedf3 1px, transparent 0);
+  background-size: 15px 15px, 15px 15px;
+  :global {
+    .g6-component-toolbar {
+      top: 1px;
+      left: 1px;
+      padding: 8px 24px 16px;
+      border: none;
+      border-radius: 0;
+      box-shadow: 0 3px 13px rgba(0, 0, 0, 0.07);
+      svg {
+        width: 18px;
+        height: 18px;
+        path {
+          fill: #143a8e;
+        }
+      }
+      li {
+        width: 56px;
+        &:nth-child(1),
+        &:nth-child(2) {
+          display: none;
+        }
+        &:nth-child(3) {
+          position: relative;
+          &::after {
+            position: absolute;
+            top: 20px;
+            left: 16px;
+            color: #b7c3ce;
+            font-size: 10px;
+            content: '放大';
+          }
+        }
+        &:nth-child(4) {
+          position: relative;
+          &::after {
+            position: absolute;
+            top: 20px;
+            left: 16px;
+            color: #b7c3ce;
+            font-size: 10px;
+            content: '缩小';
+          }
+        }
+        &:nth-child(5) {
+          position: relative;
+          margin-left: 16px;
+          &::before {
+            position: absolute;
+            top: 5px;
+            left: -10px;
+            width: 1px;
+            height: 24px;
+            background: #eee;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.07);
+            content: '';
+          }
+          &::after {
+            position: absolute;
+            top: 20px;
+            left: 4px;
+            color: #b7c3ce;
+            font-size: 10px;
+            content: '实际大小';
+          }
+        }
+        &:nth-child(6) {
+          position: relative;
+          &::after {
+            position: absolute;
+            top: 20px;
+            left: 4px;
+            color: #b7c3ce;
+            font-size: 10px;
+            content: '适应屏幕';
+          }
+        }
+      }
+    }
+  }
+}

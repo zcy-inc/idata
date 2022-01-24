@@ -1,0 +1,57 @@
+body {
+  // pro-layout
+  .ant-pro-global-header-logo {
+    img[alt='logo'] {
+      height: 30px;
+    }
+  }
+  .ant-pro-global-header-layout-mix {
+    padding-left: 24px;
+    background: #141736;
+  }
+  .ant-pro-basicLayout-content {
+    margin: 0;
+    background: #f7f8fc;
+
+    .ant-pro-page-container {
+      margin: 0;
+    }
+  }
+  .ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+    box-shadow: none;
+  }
+
+  // SideBar
+  .ant-menu-inline-collapsed {
+    .ant-submenu-box {
+      padding-left: 0;
+    }
+    .ant-pro-menu-item {
+      opacity: 0;
+    }
+    .ant-menu-item-sub-padding {
+      padding-left: 0;
+    }
+  }
+  .ant-menu-item-selected {
+    &::after {
+      display: none;
+    }
+  }
+  .ant-submenu-box {
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+  }
+  .ant-menu-item-child-padding {
+    padding-left: 28px;
+  }
+  .ant-menu-item-sub-padding {
+    padding-left: 8px;
+  }
+  .ant-menu-submenu-placement-rightTop {
+    .ant-menu-item-child-padding {
+      padding-left: 0;
+    }
+  }
+}

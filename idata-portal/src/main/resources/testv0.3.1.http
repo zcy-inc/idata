@@ -1,0 +1,6 @@
+POST http://localhost:9527/api/p1/ops/dashboard/page/gantt/jobHistory
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwODY2MjA3LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.MZlhNAynWm33HDNYJ-hLDmVtQFq3mv4YLXOyJsvEwbmuHrMA3q1OqoPNr6YXfxJ7KSLArV0OnR5HYdiwRmkAkA
+
+{"pageNum":1,"pageSize":10,"condition":{"startDate":"2021-12-29"}}
+

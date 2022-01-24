@@ -1,0 +1,60 @@
+server:
+  port: 9527
+  servlet:
+    context-path: /api
+
+logging:
+  file:
+    path: logs
+  level:
+    cn.zhengcaiyun.idata.user.dal.dao: debug
+
+spring:
+  application:
+    name: idata-portal-server
+  datasource:
+    hikari.poolName: HikariPool-portal-mysql
+    url:
+    username:
+    password:
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      FAIL_ON_INVALID_SUBTYPE: false
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    date-format: yyyy-MM-dd HH:mm:ss.SSS
+    time-zone: Asia/Shanghai
+
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+auth:
+  jwt:
+    security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
+
+livy:
+  baseUrl:
+  sessionMax:
+
+dolphin:
+  baseUrl:
+  token:
+
+hdfs:
+  nameservices:
+  nn1:
+  nn2:
+  basePath:
+  user:
+
+yarn:
+  resourceManagerUri:
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+

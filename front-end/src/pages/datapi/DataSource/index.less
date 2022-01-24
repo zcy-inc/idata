@@ -1,0 +1,26 @@
+.form {
+  :global {
+    .ant-form-item {
+      margin-right: 24px;
+      margin-bottom: 0;
+      .ant-form-item-no-colon {
+        width: auto;
+      }
+    }
+  }
+}
+
+.table-double {
+  .table-double-cell {
+    padding-top: 24px;
+    border-bottom: solid 1px #ecf1f3;
+    &:first-child {
+      padding-top: 0;
+      padding-bottom: 24px;
+    }
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+}

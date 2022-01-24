@@ -1,0 +1,166 @@
+@successColor: rgb(5, 204, 135);
+@inQueueColor: rgb(255, 201, 80);
+@inRunningColor: rgb(48, 79, 254);
+@failedColor: rgb(241, 51, 31);
+@otherColor: rgb(158, 168, 194);
+.job-history-gantt {
+  .gantt_task_line {
+    height: 24px !important;
+    line-height: 24px !important;
+    margin-top: 4px;
+  }
+  .milestone-7 {
+    border: 1px solid @successColor;
+    .gantt_task_progress {
+      background-color: @successColor;
+    }
+    .gantt_task_content {
+      color: @successColor;
+    }
+  }
+
+  .milestone-1 {
+    border: 1px solid @inQueueColor;
+    .gantt_task_progress {
+      background-color: @inQueueColor;
+    }
+    .gantt_task_content {
+      color: @inQueueColor;
+    }
+  }
+
+  .milestone-2 {
+    border: 1px solid @inRunningColor;
+    .gantt_task_progress {
+      background-color: @inRunningColor;
+    }
+    .gantt_task_content {
+      color: @inRunningColor;
+    }
+  }
+
+  .milestone-6 {
+    border: 1px solid @failedColor;
+    .gantt_task_progress {
+      background-color: @failedColor;
+    }
+    .gantt_task_content {
+      color: @failedColor;
+    }
+  }
+
+  .milestone--1 {
+    border: 1px solid @otherColor;
+    .gantt_task_progress {
+      background-color: @otherColor;
+    }
+    .gantt_task_content {
+      color: @otherColor;
+    }
+  }
+
+
+  .gantt-container {
+    height: calc(100vh - 336px);
+  }
+ 
+  .gantt_grid_head_cell, .gantt_cell {
+    padding-left: 16px;
+    text-align: left;
+  }
+
+  .gantt_grid_scale .gantt_grid_head_cell {
+    color:#737b96;
+  }
+
+  .gantt_task .gantt_task_scale .gantt_scale_line:nth-child(2) .gantt_scale_cell {
+    text-align: left;
+    border-right: 1px solid transparent;
+    padding-left: 4px;
+  }
+
+  .gantt_layout_cell_border_right {
+    box-shadow: 1px 0 2px 0px #E5E5E9;
+    margin-right: 1px !important;
+    background-color: #fff;
+    border-color: #ebedf3;
+  }
+
+  .gantt_task_row.gantt_selected .gantt_task_cell {
+    border-right-color: transparent;
+  }
+
+  .gantt_scale_line,.gantt_grid_scale, .gantt_task_scale {
+    border-color: #ebebeb;
+  }
+
+  .scrollVer_cell {
+    border-right: 1px solid #ebebeb;
+  }
+
+  // .gantt_data_area {
+  //   background-color: rgba(0, 0, 0, 0.02);
+  // }
+
+  .gantt_task_row.odd, .gantt_task_row{
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .gantt_grid_data .gantt_row.odd:hover,
+  .gantt_grid_data .gantt_row:hover {
+    background-color: transparent;
+    cursor: pointer;
+  }
+
+  .gantt_grid_data .gantt_row.gantt_selected,
+  .gantt_grid_data .gantt_row.odd.gantt_selected,
+  .gantt_task_row.gantt_selected {
+    background-color:rgba(0, 0, 0, 0.05);
+  }
+
+  .gantt_row, .gantt_task_row {
+    border-bottom: none;
+    border-color: #ebedf3;
+  }
+
+  .gantt-tag {
+    display: inline-block;
+    font-size:12px;
+    line-height:16px;
+    font-weight:550;
+    padding: 4px;
+    background-color:#ebedf3;
+    border-radius:2px 4px;
+    color:#545c75;
+  }
+
+  .task-gantt-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.task-gantt-tooltip {
+  line-height: 20px;
+  color:#737b96;
+  margin: 0;
+  padding: 0;
+  .task-gantt-tooltip-item {
+    &.name {
+      font-weight:500;
+      color:#141736;
+      font-size:12px;
+      margin-bottom: 4px;
+    }
+  }
+  .gantt-log-url {
+    display: block;
+    padding-top: 8px;
+    margin-top: 6px;
+    border-top: 1px solid #ebedf3;
+  }
+
+}
+

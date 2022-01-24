@@ -1,0 +1,32 @@
+.tiledTblWrapper {
+  --tbl-body-height: '';
+
+  :global {
+    .ant-table-thead > tr > th {
+      &::before {
+        background-color: transparent !important;
+      }
+    }
+    .ant-table-body {
+      height: var(--tbl-body-height);
+    }
+
+    .ant-table-empty .ant-table-body {
+      display: flex;
+    }
+    .ant-table-empty .ant-table-body > table {
+      align-self: center;
+    }
+    .ant-table-empty .ant-table-tbody > tr.ant-table-placeholder {
+      > td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .btnWrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+}

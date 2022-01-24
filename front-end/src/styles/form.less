@@ -1,0 +1,28 @@
+body {
+  // Form.Item
+  .ant-form-inline {
+    .ant-form-item {
+      margin-bottom: 24px;
+    }
+  }
+
+  .ant-form-item-label
+    > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+    margin-right: 2px;
+    font-weight: 500;
+  }
+
+  .ant-form-item-explain {
+    padding-top: 1px;
+    font-size: 12px;
+  }
+
+  .ant-form-item-no-colon {
+    display: flex;
+    justify-content: flex-end;
+    width: 100px;
+    height: 100%;
+    max-height: 36px;
+    color: #4c546e;
+  }
+}

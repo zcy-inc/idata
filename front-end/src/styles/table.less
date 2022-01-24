@@ -1,0 +1,28 @@
+body {
+  // Table - 表格
+  .ant-table .ant-table-thead > tr > th {
+    color: #737b96;
+    font-weight: bold;
+    border-radius: 4px 4px 0 0;
+    &::before {
+      background-color: transparent !important;
+    }
+  }
+  .ant-table-tbody > tr > td {
+    color: #15172f;
+    border-bottom: 1px solid #ecf1f3;
+  }
+  .ant-table-tbody > tr.ant-table-row:hover > td {
+    background: #f7fbfd;
+  }
+  // 此处按照视觉规范修改单元格内边距，但是添加该样式后，在操作列固定后会多出一部分宽度从而出现滚动，故注释
+  // .ant-table-tbody > tr > td,
+  // .ant-table-thead > tr > th,
+  // .ant-table tfoot > tr > td,
+  // .ant-table tfoot > tr > th {
+  //   padding: 24px;
+  // }
+  tr.ant-table-measure-row {
+    visibility: collapse; // 设置scroll后会出现一行空的 查阅issue后有类似问题 这里做规避处理
+  }
+}

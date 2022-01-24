@@ -1,0 +1,145 @@
+@import '~antd/es/style/themes/default.less';
+@import './styles/index.less';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-menu-submenu-title {
+  display: flex;
+  align-items: center;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+@media (max-width: @screen-xs) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+    &-thead > tr,
+    &-tbody > tr {
+      > th,
+      > td {
+        white-space: pre;
+        > span {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+// 兼容IE11
+@media screen and(-ms-high-contrast: active), (-ms-high-contrast: none) {
+  body .ant-design-pro > .ant-layout {
+    min-height: 100vh;
+  }
+}
+
+// Resizer
+// div[data-type='Resizer'] {
+//   z-index: 1;
+//   -moz-box-sizing: border-box;
+//   -webkit-box-sizing: border-box;
+//   box-sizing: border-box;
+//   background: #ebedf3;
+//   -moz-background-clip: padding;
+//   -webkit-background-clip: padding;
+//   background-clip: padding-box;
+// }
+
+// div[data-type='Resizer']:hover {
+//   -webkit-transition: all 2s ease;
+//   transition: all 2s ease;
+// }
+
+// div[data-type='Resizer'][data-attribute='vertical'] {
+//   width: 12px;
+//   margin: 0 -5px;
+//   border-right: 5px solid transparent;
+//   border-left: 5px solid transparent;
+//   cursor: col-resize;
+// }
+
+// div[data-type='Resizer'][data-attribute='horizontal'] {
+//   width: 100%;
+//   height: 12px;
+//   margin: -5px 0;
+//   border-top: 5px solid transparent;
+//   border-bottom: 5px solid transparent;
+//   cursor: row-resize;
+// }
+
+.Resizer {
+  z-index: 1;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  background: #f0f2f5;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+}
+
+.Resizer:hover {
+  -webkit-transition: all 2s ease;
+  transition: all 2s ease;
+}
+
+.Resizer.vertical {
+  width: 11px;
+  margin: 0 -5px;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  cursor: col-resize;
+}
+
+.Resizer.horizontal {
+  width: 100%;
+  height: 11px;
+  margin: -5px 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  cursor: row-resize;
+}
+
+.Resizer.disabled {
+  cursor: not-allowed;
+}
+
+.Resizer.disabled:hover {
+  border-color: transparent;
+}
+
+.zcy-content {
+  padding: 20px;
+  background-color: #fff;
+}
+// 覆盖alert组件的背景
+.ant-alert-success,.ant-alert-error {
+  background-color: transparent;
+  border: 0;
+}
