@@ -216,6 +216,11 @@
                 <artifactId>mail</artifactId>
                 <version>${mail.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.gov.zcy.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>3.0.3-RELEASE</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
