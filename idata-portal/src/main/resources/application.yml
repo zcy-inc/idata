@@ -1,5 +1,5 @@
 server:
-  port: 9527
+  port: 8080
   servlet:
     context-path: /api
 
@@ -11,7 +11,7 @@ logging:
 
 spring:
   application:
-    name: idata-portal-server
+    name: web-idata-portal-server
   datasource:
     hikari.poolName: HikariPool-portal-mysql
     url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
