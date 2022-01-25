@@ -27,6 +27,15 @@ spring:
   flyway:
     enabled: false
 
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info, metrics, threaddump
 
 mybatis:
   configuration:
