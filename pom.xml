@@ -75,7 +75,6 @@
         <validation.version>2.0.7.RELEASE</validation.version>
         <testcontainers.version>1.16.2</testcontainers.version>
         <mail.version>1.4.1</mail.version>
-        <spring-boot-starter-actuator.version>3.0.3-RELEASE</spring-boot-starter-actuator.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -217,22 +216,6 @@
                 <artifactId>mail</artifactId>
                 <version>${mail.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>cn.gov.zcy.boot</groupId>-->
-<!--                <artifactId>spring-boot-starter-actuator</artifactId>-->
-<!--                <version>${spring-boot-starter-actuator.version}</version>-->
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.hibernate.validator</groupId>-->
-<!--                        <artifactId>hibernate-validator</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>io.micrometer</groupId>-->
-<!--                <artifactId>micrometer-registry-prometheus</artifactId>-->
-<!--                <version>1.0.5</version>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 </project>
