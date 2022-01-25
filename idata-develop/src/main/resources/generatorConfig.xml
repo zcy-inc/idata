@@ -38,16 +38,16 @@
 <!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
 <!--        </table>-->
 
-<!--        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">-->
-<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
-<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
-<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
-<!--        </table>-->
-        <table tableName="dev_job_execute_config" domainObjectName="JobExecuteConfig" mapperName="JobExecuteConfigDao">
+        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="sch_dry_run" javaType="java.lang.Integer"/>
+            <columnOverride column="editable" javaType="java.lang.Integer"/>
         </table>
+<!--        <table tableName="dev_job_execute_config" domainObjectName="JobExecuteConfig" mapperName="JobExecuteConfigDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="sch_dry_run" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
 <!--        <table tableName="dev_job_publish_record" domainObjectName="JobPublishRecord" mapperName="JobPublishRecordDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
@@ -108,13 +108,13 @@
 <!--            <columnOverride column="app_arguments" javaType="java.util.List"-->
 <!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
 <!--        </table>-->
-        <table tableName="dev_job_content_script" mapperName="DevJobContentScriptDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="editable" javaType="java.lang.Integer"/>
-            <columnOverride column="script_arguments" javaType="java.util.List"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-        </table>
+<!--        <table tableName="dev_job_content_script" mapperName="DevJobContentScriptDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="script_arguments" javaType="java.util.List"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
 <!--        <table tableName="dev_job_content_kylin" mapperName="DevJobContentKylinDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
