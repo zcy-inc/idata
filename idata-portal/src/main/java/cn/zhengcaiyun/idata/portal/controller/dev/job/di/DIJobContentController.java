@@ -68,4 +68,14 @@ public class DIJobContentController {
         return RestResult.success(diJobContentService.get(jobId, version));
     }
 
+    /**
+     * 自动生成mergeSql
+     * @param jobId
+     * @return
+     */
+    @GetMapping("/default/merge-sql")
+    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId) {
+        return RestResult.success(diJobContentService.generateMergeSql(jobId));
+    }
+
 }

@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
@@ -31,10 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -108,6 +107,64 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
         return DIJobContentContentDto.from(jobContentOptional.get());
     }
+
+    @Override
+    public String generateMergeSql(Long jobId) {
+        return null;
+    }
+
+//    private String createMergeSql(String dbName, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+//        String[] hiveTableSplit = hiveTable.split("\\.");
+//        if (hiveTableSplit.length != 2) {
+//            throw new IllegalArgumentException("The hive table must have db name");
+//        }
+//        String[] hiveDb = hiveTableSplit[0].split("_");
+//        String srcHiveTable = (hiveDb.length > 1 ? (hiveDb[0] + "_") : "") + "src." + hiveTableSplit[1];
+//        Map<Integer, String> sourceTableMap = getSourceTableMap(table);
+//        boolean isMulPartition = typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1;
+//        if (isMulPartition) {
+//            table = sourceTableMap.values().stream().findFirst().get();
+//        }
+//        String[] columns = getDBTableColumns(dbName, table, typeEnum);
+//        StringBuilder sb = new StringBuilder();
+//        if (diMode == DestWriteModeEnum.append) {
+//            if (isMulPartition) {
+//                sb.append("set hive.exec.dynamic.partition=true;\n");
+//                sb.append("set hive.exec.dynamic.partition.mode=nonstrict;\n");
+//                sb.append("set hive.exec.max.dynamic.partitions.pernode=1000;\n");
+//            }
+//            sb.append("alter table AAABBBAAABBB_pt drop if exists partition(pt<'${day-3d}');\n");
+//            sb.append("insert overwrite table AAABBBAAABBB_pt partition(pt='${day}'");
+//            String columnStr = columns[0];
+//            if (isMulPartition) {
+//                sb.append(",num");
+//                columnStr = columns[0] + ",num";
+//            }
+//            sb.append(") \n");
+//            String []cols = columnStr.split(",");
+//            String linesColumn = columnStr.replace(",", "\n,");
+//            StringBuilder condition = new StringBuilder();
+//            for (String col : cols) {
+//                condition.append("\n,coalesce(t1.").append(col).append(",t2.").append(col).append(") ").append(col);
+//            }
+//            sb.append("select ").append(condition.substring(2, condition.length())).append("\n");
+//            sb.append("from \n(select ").append(linesColumn).append("\nfrom ").append(hiveTable).append(") t1 \n");
+//            sb.append("full join \n(select ").append(linesColumn).append("\nfrom AAABBBAAABBB_pt where pt='${day-1d}') t2 \n");
+//            String columnKey = StringUtils.defaultIfBlank(columns[1], "id");
+//            sb.append("on t1.").append(columnKey).append("=t2.").append(columnKey);
+//            if (isMulPartition) {
+//                sb.append(" and t1.num=t2.num");
+//            }
+//            sb.append(";\n");
+//            sb.append("insert overwrite table ").append(hiveTable);
+//            if (isMulPartition) {
+//                sb.append(" partition(num)");
+//            }
+//            sb.append("\n select ").append(linesColumn)
+//                    .append("\nfrom AAABBBAAABBB_pt where pt='${day}';");
+//        }
+//        return sb.toString().replace("AAABBBAAABBB", srcHiveTable);
+//    }
 
     private void checkJobContent(DIJobContentContentDto contentDto) {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");

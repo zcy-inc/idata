@@ -30,4 +30,6 @@ public interface DIJobContentService {
     DIJobContentContentDto save(Long jobId, DIJobContentContentDto contentDto, Operator operator);
 
     DIJobContentContentDto get(Long jobId, Integer version);
+
+    String generateMergeSql(Long jobId);
 }
