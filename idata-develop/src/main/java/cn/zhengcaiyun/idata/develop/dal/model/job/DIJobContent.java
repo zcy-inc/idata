@@ -165,6 +165,13 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   DI作业增量模式的mergeSql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    private String mergeSql;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-来源表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
@@ -402,6 +409,16 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.content_hash")
     public void setContentHash(String contentHash) {
         this.contentHash = contentHash;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public String getMergeSql() {
+        return mergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public void setMergeSql(String mergeSql) {
+        this.mergeSql = mergeSql;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")

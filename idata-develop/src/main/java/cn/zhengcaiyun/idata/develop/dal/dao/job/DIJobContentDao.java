@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, mergeSql, srcTables, srcColumns, destColumns);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -79,6 +79,7 @@ public interface DIJobContentDao {
         @Result(column="dest_before_write", property="destBeforeWrite", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_after_write", property="destAfterWrite", jdbcType=JdbcType.VARCHAR),
         @Result(column="content_hash", property="contentHash", jdbcType=JdbcType.VARCHAR),
+        @Result(column="merge_sql", property="mergeSql", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_tables", property="srcTables", jdbcType=JdbcType.LONGVARCHAR),
         @Result(column="src_columns", property="srcColumns", jdbcType=JdbcType.LONGVARCHAR),
         @Result(column="dest_columns", property="destColumns", jdbcType=JdbcType.LONGVARCHAR)
@@ -91,12 +92,12 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.countFrom(this::count, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -108,7 +109,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int insert(DIJobContent record) {
-        return MyBatis3Utils.insert(this::insert, record, DI_JOB_CONTENT, c ->
+        return MyBatis3Utils.insert(this::insert, record, DIJobContent, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -130,6 +131,7 @@ public interface DIJobContentDao {
             .map(destBeforeWrite).toProperty("destBeforeWrite")
             .map(destAfterWrite).toProperty("destAfterWrite")
             .map(contentHash).toProperty("contentHash")
+            .map(mergeSql).toProperty("mergeSql")
             .map(srcTables).toProperty("srcTables")
             .map(srcColumns).toProperty("srcColumns")
             .map(destColumns).toProperty("destColumns")
@@ -138,7 +140,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int insertSelective(DIJobContent record) {
-        return MyBatis3Utils.insert(this::insert, record, DI_JOB_CONTENT, c ->
+        return MyBatis3Utils.insert(this::insert, record, DIJobContent, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -160,6 +162,7 @@ public interface DIJobContentDao {
             .map(destBeforeWrite).toPropertyWhenPresent("destBeforeWrite", record::getDestBeforeWrite)
             .map(destAfterWrite).toPropertyWhenPresent("destAfterWrite", record::getDestAfterWrite)
             .map(contentHash).toPropertyWhenPresent("contentHash", record::getContentHash)
+            .map(mergeSql).toPropertyWhenPresent("mergeSql", record::getMergeSql)
             .map(srcTables).toPropertyWhenPresent("srcTables", record::getSrcTables)
             .map(srcColumns).toPropertyWhenPresent("srcColumns", record::getSrcColumns)
             .map(destColumns).toPropertyWhenPresent("destColumns", record::getDestColumns)
@@ -168,17 +171,17 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default Optional<DIJobContent> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default List<DIJobContent> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default List<DIJobContent> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -190,7 +193,7 @@ public interface DIJobContentDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, DI_JOB_CONTENT, completer);
+        return MyBatis3Utils.update(this::update, DIJobContent, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -216,6 +219,7 @@ public interface DIJobContentDao {
                 .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalTo(record::getDestAfterWrite)
                 .set(contentHash).equalTo(record::getContentHash)
+                .set(mergeSql).equalTo(record::getMergeSql)
                 .set(srcTables).equalTo(record::getSrcTables)
                 .set(srcColumns).equalTo(record::getSrcColumns)
                 .set(destColumns).equalTo(record::getDestColumns);
@@ -244,6 +248,7 @@ public interface DIJobContentDao {
                 .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)
                 .set(contentHash).equalToWhenPresent(record::getContentHash)
+                .set(mergeSql).equalToWhenPresent(record::getMergeSql)
                 .set(srcTables).equalToWhenPresent(record::getSrcTables)
                 .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
                 .set(destColumns).equalToWhenPresent(record::getDestColumns);
@@ -273,6 +278,7 @@ public interface DIJobContentDao {
             .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
             .set(destAfterWrite).equalTo(record::getDestAfterWrite)
             .set(contentHash).equalTo(record::getContentHash)
+            .set(mergeSql).equalTo(record::getMergeSql)
             .set(srcTables).equalTo(record::getSrcTables)
             .set(srcColumns).equalTo(record::getSrcColumns)
             .set(destColumns).equalTo(record::getDestColumns)
@@ -304,6 +310,7 @@ public interface DIJobContentDao {
             .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
             .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)
             .set(contentHash).equalToWhenPresent(record::getContentHash)
+            .set(mergeSql).equalToWhenPresent(record::getMergeSql)
             .set(srcTables).equalToWhenPresent(record::getSrcTables)
             .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
             .set(destColumns).equalToWhenPresent(record::getDestColumns)

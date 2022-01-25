@@ -1,0 +1,154 @@
+GET http://idata.cai-inc.com/wx_dx/api/v1/idata/environment?clusterName=WX&envName=prod
+Accept: application/json
+
+###
+DELETE http://bigdatatest-1:8999/sessions/130
+
+
+###
+POST http://localhost:9527/api/p1/dev/jobs/dependency/isCycle
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMzMwNDEyLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.aMICQVGOnc6xVFia0xIOLWR1_-gzpkmlbJCoctJRPcdDIgLuEW-ynkZZJRlmIEXd20WgQVHKcIn-tue_uUJjnA
+
+{
+  "jobId": 5003,
+  "env": "stag"
+}
+
+###
+GET http://localhost:9527/api/p1/dev/jobs/dependency/list?env=prod&jobId=7
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM5MDQwNjY0LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.C4Emow3p3HTUxJr553_N_GoVbKPG8-CtTy667RzZKjnz5FLwPOIwO7mMVES9YvwVEhcojzNpmKDkMPWCcmo0bA
+
+###
+GET http://localhost:9527/api/p1/dev/compositeFolders?belong=DEV.FUN
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM5MDQwNjY0LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.C4Emow3p3HTUxJr553_N_GoVbKPG8-CtTy667RzZKjnz5FLwPOIwO7mMVES9YvwVEhcojzNpmKDkMPWCcmo0bA
+
+###
+POST http://localhost:9527//api/p1/dev/compositeFolders/tree
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM5MDQwNjY0LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.C4Emow3p3HTUxJr553_N_GoVbKPG8-CtTy667RzZKjnz5FLwPOIwO7mMVES9YvwVEhcojzNpmKDkMPWCcmo0bA
+
+{"belongFunctions":["DESIGN","DESIGN.TABLE","DESIGN.LABEL","DESIGN.ENUM","DAG","DI","DEV","DEV.JOB","DEV.FUN"],"keyWord":""}
+
+###
+POST http://localhost:9527/api/p1/dev/compositeFolders/tree
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+{"belongFunctions":["DESIGN","DESIGN.TABLE","DESIGN.LABEL","DESIGN.ENUM","DAG","DI","DEV","DEV.JOB"],"keyWord":""}
+
+###最新运行
+GET http://localhost:9527/api/p1/dev/jobs/dependency/4767/latestRuntime
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMjQ2Njk0LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.LviaCUZH4DOn0jW8JwStnucCgdgOLgXCUyKHgM-2ZgJtduAx1zflyuisJFPBumt35w5dcb6d1DWk_FVQdS7JNw
+
+###任务依赖
+GET http://localhost:9527/api/p1/dev/jobs/dependency/5003/tree?id=5003&env=stag&preLevel=2&nextLevel=2
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; _gid=GA1.2.1555211678.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMzMwNDEyLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.aMICQVGOnc6xVFia0xIOLWR1_-gzpkmlbJCoctJRPcdDIgLuEW-ynkZZJRlmIEXd20WgQVHKcIn-tue_uUJjnA
+
+###查询job
+GET http://localhost:9527/api/p1/dev/jobs?searchName=晨兮
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+###历史作业脚本
+POST http://localhost:9527/api/p1/dev/jobs/history/script
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwODY2MjA3LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.MZlhNAynWm33HDNYJ-hLDmVtQFq3mv4YLXOyJsvEwbmuHrMA3q1OqoPNr6YXfxJ7KSLArV0OnR5HYdiwRmkAkA
+
+###历史作业查询
+POST http://localhost:9527/api/p1/dev/jobs/history/page
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMzMwNDEyLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.aMICQVGOnc6xVFia0xIOLWR1_-gzpkmlbJCoctJRPcdDIgLuEW-ynkZZJRlmIEXd20WgQVHKcIn-tue_uUJjnA
+
+{"pageNum":2,"pageSize":1,"condition":{"id":5003}}
+
+### 加载udf列表
+GET http://localhost:9527/api/p1/dev/udfs
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+### 加载udf
+GET http://localhost:9527/api/p1/dev/udf/1
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwNDI0MDQzLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.KtzEi0l9cM5UwxheroRxj0G23dtbgBEby3b3hfSxx1pnKQOR-XhL8L7xsu_Pe2IvlULAz66mka5Sr3WF2vQHng
+
+### 删除udf
+DELETE http://localhost:9527/api/p1/dev/udf/1
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+### 更细udf
+PUT http://localhost:9527/api/p1/dev/udf
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+{"id":"6", "udfName":"udfName12062", "udfType":"udfType12062", "fileName":"fileName12062", "hdfsPath":"/tmp/shiyin/udf/1638750228216_AD密码重置指导.docx", "returnType": "xxx12062", "folderId":0}
+
+###新增udf
+POST http://localhost:9527/api/p1/dev/udf
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
+
+{"udfName":"udfName1206", "udfType":"udfType1206", "fileName":"fileName1206", "hdfsPath":"/tmp/shiyin/udf/1638750228216_AD密码重置指导.docx", "returnType": "xxx1206", "folderId":0}
+
+###下载udf文件
+GET http://localhost:9527/api//p1/dev/udf/download/4
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQwMTU2MDI5LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.flDMgpq8Prl_OSsdovHIUox23Px4gWin4ZntAY9pS4l6Vtf-dcrR1aHcPU4b18MmP-q2tXek2quN0kOshsQQ5g
+
+###
+POST http://localhost:9527/api/p1/dev/tableInfo
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_token__=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_user__=zhanqian; __sso_department__=数据平台; __sso_realName__=占乾; __sso_nickName__=北笙; redirect=
+
+{"folderId":7,"tableName":"test_beisheng1207","tableLabels":[{"labelCode":"dbName:LABEL","labelParamValue":"stag_tmp"},{"labelCode":"partitionedTbl:LABEL","labelParamValue":"true"},{"labelCode":"dwLayer:LABEL","labelParamValue":"DW_LAYER_ADS:ENUM_VALUE"},{"labelCode":"tblComment:LABEL","labelParamValue":"中文"},{"labelCode":"dwOwnerId:LABEL","labelParamValue":"51"},{"labelCode":"pwOwnerId:LABEL","labelParamValue":"beisheng"},{"labelCode":"domainId:LABEL","labelParamValue":"USER_DOMAIN:ENUM_VALUE"}],"columnInfos":[{"columnIndex":0,"columnName":"id","id":14991,"columnLabels":[{"columnName":"id","labelCode":"pk:LABEL","labelParamValue":true},{"columnName":"id","labelCode":"columnType:LABEL","labelParamValue":"HIVE_COL_TYPE_BIGINT:ENUM_VALUE"},{"columnName":"id","labelCode":"partitionedCol:LABEL","labelParamValue":false}]},{"columnIndex":1,"columnName":"name","id":14992,"columnLabels":[{"columnName":"name","labelCode":"pk:LABEL","labelParamValue":false},{"columnName":"name","labelCode":"columnType:LABEL","labelParamValue":"HIVE_COL_TYPE_STRING:ENUM_VALUE"},{"columnName":"name","labelCode":"columnComment:LABEL","labelParamValue":"ssss"},{"columnName":"name","labelCode":"partitionedCol:LABEL","labelParamValue":true}]},{"columnIndex":2,"columnName":"age5","id":14993,"columnLabels":[{"columnName":"age5","labelCode":"pk:LABEL","labelParamValue":false},{"columnName":"age5","labelCode":"columnType:LABEL","labelParamValue":"HIVE_COL_TYPE_DOUBLE:ENUM_VALUE"},{"columnName":"age5","labelCode":"columnComment:LABEL","labelParamValue":"aaaa"},{"columnName":"age5","labelCode":"partitionedCol:LABEL","labelParamValue":false}]}],"foreignKeys":[],"id":353}
+###
+GET http://localhost:9527/api/p1/dev/table/techInfo/8
+Accept: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_token__=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_user__=zhanqian; __sso_department__=数据平台; __sso_realName__=占乾; __sso_nickName__=北笙; redirect=
+
+###AAA
+GET http://localhost:9527/api/p1/dev/tableInfo/353
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_token__=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_user__=zhanqian; __sso_department__=%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0; __sso_realName__=%E5%8D%A0%E4%B9%BE; __sso_nickName__=%E5%8C%97%E7%AC%99; redirect=
+###AAA
+
+### 本地表同步到hive
+POST http://localhost:9527/api/p1/dev/syncHiveInfo/354
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_token__=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Mzg4NDQwOTQsImlzcyI6InpoYW5xaWFuIiwidXNlcmlkIjoiNjAyMjEyMDQ4IiwidXNlck5hbWUiOiJ6aGFucWlhbiIsIm5pY2tOYW1lIjoi5YyX56yZIiwicmVhbE5hbWUiOiLljaDkub4iLCJtYWlsIjoiemhhbnFpYW5AY2FpLWluYy5jb20iLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJkZXBhcnRtZW50IjpbMzgwNDE4NDg5XSwiZGVwYXJ0bWVudHMiOlsi5pWw5o2u5bmz5Y-wIl0sIkFsbFBhdGgiOlsi5pWw5o2u5bmz5Y-wLOWkp-aVsOaNriznoJTlj5Hpg6gs5pS_6YeH5LqR5pyJ6ZmQ5YWs5Y-4Il0sIkFsbFBhdGhJZHMiOltbMzgwNDE4NDg5LDk5Mjg5MTYyLDQyNjY0NjksMV1dLCJpc0xlYWRlciI6ZmFsc2UsInBvc2l0aW9uIjoiIiwiYXZhdGFyIjoiIn0.amlCceHpvl0zbtxuH0Z1bjUq0z6UMZqzz3XYa9sVcBQ; __sso_user__=zhanqian; __sso_department__=数据平台; __sso_realName__=占乾; __sso_nickName__=北笙; redirect=
+
+###
+POST http://localhost:9527/api/p1/dev/compositeFolders/tree
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM3MjI0Njk4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.x9VgHvJyBrYh5vW5oay5nQZKnkT2TyPspe-kwXSYDSS1u5u10GeFOBs2njzGsSGdxQTcmWI__g8p2sv13p9aiw
+
+{"belongFunctions":["DESIGN","DESIGN.TABLE","DESIGN.LABEL","DESIGN.ENUM","DAG","DI","DEV","DEV.JOB"],"keyWord":""}
+
+### DDL模式生成表结构
+POST http://localhost:9527/api/p1/dev/ddl/syncTableInfo
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM3MjI0Njk4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.x9VgHvJyBrYh5vW5oay5nQZKnkT2TyPspe-kwXSYDSS1u5u10GeFOBs2njzGsSGdxQTcmWI__g8p2sv13p9aiw
+
+{"tableDdl":"create external table `dwd`.`dwd_category_district_detail`(\n  `back_category_id` bigint comment '后台类目id',\n  `back_category_name` STRING comment '后台类目名称',\n  `year` BIGINT comment '年份',\n  `district_code` STRING comment '区划编码',\n  `district_name` STRING comment '区划名称',\n  `district_city_code` STRING comment '市级区划编码',\n  `district_city_name` STRING comment '市级区划名称',\n  `district_province_code` STRING comment '省级区划编码',\n  `district_province_name` STRING comment '省级区划名称',\n  `limit_price` BIGINT comment '限价额度',\n  `limit_level` STRING comment '限价等级',\n  `is_enegry` BIGINT comment '是否节能',\n  `is_enegry_control` BIGINT comment '是否节能强控',\n  `is_water` BIGINT comment '是否节水',\n  `is_water_control` BIGINT comment '是否节水强控',\n  `is_environ` BIGINT comment '是否环保',\n  `is_environ_control` BIGINT comment '是否环保强控',\n  `gmt_created_time` TIMESTAMP comment '创建时间',\n  `gmt_updated_time` TIMESTAMP comment '更新时间') \ncomment '类目区划配置信息表' \nstored as orc \nlocation 'hdfs://nameservice1/hive/dwd.db/dwd_category_district_detail' \n","tableId":332}
+
+
+###
+POST http://localhost:9527/api/p1/script/pull/hiveInfo
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4OTI2NzY2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.bQoibe6Javvyvg-h_rK6gEJEfym8HwF0yVdKCGt85r1efqRjojJHvXurrVh-bplOHsY8NG7R-4GvEdDGYzwnWQ
+
+[355]
+
+###
+POST http://idata.cai-inc.com/api/p1/script/pull/hiveInfo
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjEyOCwiYXZhdGFyIjoiTlVMTCIsImV4cCI6MTYzODk3MDAxMywiZW1haWwiOiJ6aGFucWlhbkBjYWktaW5jLmNvbSIsInVzZXJuYW1lIjoiemhhbnFpYW4ifQ.wXuxy6bfcau4CZ7i0h34YDLHN2-BA97cUaoMnLqAqEtA_Khqp_0-dVNQ59ojVgE1eiNgTxZ2GcGfvLqnIqDyqQ
+
+[332]
+
+
