@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
 import java.util.List;
 
 /**
@@ -96,11 +97,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      * 作业内容hash，查询作业内容时返回，保存新的作业内容时需将该值一起提交，用于判断作业内容是否有变更
      */
     private String contentHash;
-
-    /**
-     * DI作业增量模式的mergeSql
-     */
-    private String mergeSql;
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;
@@ -236,14 +232,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setSrcShardingNum(Integer srcShardingNum) {
         this.srcShardingNum = srcShardingNum;
-    }
-
-    public String getMergeSql() {
-        return mergeSql;
-    }
-
-    public void setMergeSql(String mergeSql) {
-        this.mergeSql = mergeSql;
     }
 
     public static DIJobContentContentDto from(DIJobContent content) {
