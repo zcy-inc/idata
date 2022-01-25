@@ -11,7 +11,7 @@ logging:
 
 spring:
   application:
-    name: web-idata-portal-server
+    name: idata-portal-server
   datasource:
     hikari.poolName: HikariPool-portal-mysql
     url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
