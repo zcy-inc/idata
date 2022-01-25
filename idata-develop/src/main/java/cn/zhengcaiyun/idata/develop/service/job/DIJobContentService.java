@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 
 /**
@@ -31,5 +33,14 @@ public interface DIJobContentService {
 
     DIJobContentContentDto get(Long jobId, Integer version);
 
-    String generateMergeSql(Long jobId);
+    /**
+     * 生成merge sql
+     * @param dataSourceId
+     * @param table
+     * @param hiveTable
+     * @param diMode
+     * @param typeEnum
+     * @return
+     */
+    String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
 }

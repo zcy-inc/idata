@@ -43,4 +43,6 @@ public interface DataSourceService {
     Boolean removeDataSource(Long id, Operator operator);
 
     Boolean testConnection(DataSourceTypeEnum dataSourceType, DbConfigDto dto);
+
+    String[] getDBTableColumns(Long id, String tableName);
 }

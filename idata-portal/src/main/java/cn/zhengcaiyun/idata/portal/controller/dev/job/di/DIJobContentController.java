@@ -18,7 +18,9 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +76,14 @@ public class DIJobContentController {
      * @return
      */
     @GetMapping("/default/merge-sql")
-    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId) {
-        return RestResult.success(diJobContentService.generateMergeSql(jobId));
+    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
+                                              @RequestParam("dataSourceId") Long dataSourceId,
+                                              @RequestParam("table") String table,
+                                              @RequestParam("hiveTable") String hiveTable,
+                                              @RequestParam("diMode") String destWriteMode,
+                                              @RequestParam("driverType") String driverType) {
+
+        return RestResult.success(diJobContentService.generateMergeSql(dataSourceId, table, hiveTable, DestWriteModeEnum.valueOf(destWriteMode), DriverTypeEnum.of(driverType)));
     }
 
 }

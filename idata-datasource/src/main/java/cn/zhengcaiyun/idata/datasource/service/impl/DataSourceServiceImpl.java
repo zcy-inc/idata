@@ -20,9 +20,12 @@ package cn.zhengcaiyun.idata.datasource.service.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.connector.common.factory.JdbcTemplateFactory;
+import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
@@ -31,9 +34,11 @@ import cn.zhengcaiyun.idata.datasource.dal.repo.DataSourceRepo;
 import cn.zhengcaiyun.idata.datasource.manager.DataSourceManager;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,6 +61,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     private final DataSourceRepo dataSourceRepo;
     private final DataSourceManager dataSourceManager;
+
+    @Autowired
+    private DataSourceApi dataSourceApi;
 
     @Autowired
     public DataSourceServiceImpl(DataSourceRepo dataSourceRepo,
@@ -154,6 +162,48 @@ public class DataSourceServiceImpl implements DataSourceService {
             checkArgument(StringUtils.isNotBlank(dto.getPassword()), "数据库密码为空");
         }
         return dataSourceManager.testConnectionWithJDBC(dataSourceType, dto);
+    }
+
+    @Override
+    public String[] getDBTableColumns(Long id, String tableName) {
+        cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto dataSource = dataSourceApi.getDataSource(id);
+        List<DbConfigDto> dbConfigList = dataSource.getDbConfigList();
+        checkArgument(CollectionUtils.isNotEmpty(dbConfigList));
+
+        DataSourceTypeEnum dataSourceType = dataSource.getType();
+        DbConfigDto dbConfigDto = dbConfigList.get(0);
+        String dbName = dbConfigDto.getDbName();
+        String jdbc = String.format("jdbc:%s://%s:%s/%s", dataSourceType.name(), dbConfigDto.getHost(),
+                dbConfigDto.getPort(), dbName);
+        JdbcTemplate jdbcTemplate = JdbcTemplateFactory.getJdbcTemplate(jdbc, dbConfigDto.getUsername(), dbConfigDto.getPassword());
+
+        String mysqlSchemaSQL = "SELECT a.table_comment,b.column_name,b.data_type,b.column_comment,b.column_key,b.extra,"
+                + "b.numeric_precision,b.numeric_scale FROM information_schema.TABLES a join information_schema.COLUMNS b "
+                + "on a.TABLE_NAME=b.table_name and a.TABLE_SCHEMA=b.TABLE_SCHEMA WHERE LOWER(a.TABLE_SCHEMA)='%s' and LOWER(a.table_name) = '%s'";
+        String pgSchemaSQL ="SELECT a.attname as column_name, t.typname as data_type, b.description as column_comment, '' as column_key,'' as extra "
+                + "FROM (select c.relname,c.oid,n.nspname from pg_class c left join pg_catalog.pg_namespace n on c.relnamespace = n.oid) u, pg_attribute a "
+                + "LEFT JOIN pg_description b ON a.attrelid = b.objoid AND a.attnum = b.objsubid, pg_type t WHERE u.nspname = '%s' AND u.relname = '%s' "
+                + "AND a.attnum > 0 AND a.attrelid = u.oid AND a.atttypid = t.oid ORDER BY a.attnum";
+        String columnKey = "";
+        String extra = "";
+        StringBuilder columns = new StringBuilder();
+        List<Map<String, Object>> schemaMapList;
+        if (dataSourceType == DataSourceTypeEnum.mysql) {
+            schemaMapList = jdbcTemplate.queryForList(String.format(mysqlSchemaSQL, dbName.toLowerCase(), tableName.toLowerCase()));
+        } else {
+            schemaMapList = jdbcTemplate.queryForList(String.format(pgSchemaSQL,
+                    tableName.split("\\.")[0].toLowerCase(), tableName.split("\\.")[1].toLowerCase()));
+        }
+        for(Map<String, Object> schemaMap : schemaMapList) {
+            columns.append(schemaMap.get("column_name")).append(",");
+            if ("PRI".equalsIgnoreCase((String) schemaMap.get("column_key"))) {
+                columnKey = (String) schemaMap.get("column_name");
+            }
+            if ("DEFAULT_GENERATED on update CURRENT_TIMESTAMP".equalsIgnoreCase((String) schemaMap.get("extra"))) {
+                extra = (String) schemaMap.get("column_name");
+            }
+        }
+        return new String[]{columns.substring(0, columns.length() - 1), columnKey, extra};
     }
 
     private boolean supportTestConnection(DataSourceTypeEnum dataSourceType) {
