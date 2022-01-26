@@ -287,7 +287,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
         executeConfigDto.setSchRerunMode("always");
         // 调度配置-超时时间，单位：秒
-        executeConfigDto.setSchTimeOut(30 * 60);
+        executeConfigDto.setSchTimeOut(60 * 60);
         // 调度配置-是否空跑，0否，1是
 //        executeConfigDto.setSchDryRun();
         // 运行配置-队列
@@ -299,9 +299,9 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         //调度配置-优先级，1：低，2：中，3：高
         executeConfigDto.setSchPriority(JobPriorityEnum.middle.val);
         // 运行配置-驱动器内存
-        executeConfigDto.setExecDriverMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("driver_memory")), 1));
+        executeConfigDto.setExecDriverMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("driver_memory")), 3));
         // 运行配置-执行器内存
-        executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 2));
+        executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 4));
         // 作业运行状态（环境级），0：暂停运行；1：恢复运行
         executeConfigDto.setRunningState(RunningStateEnum.pause.val);
         executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
