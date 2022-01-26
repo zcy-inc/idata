@@ -16,6 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author caizhedong
  * @date 2021-11-29 下午3:55
@@ -23,7 +25,25 @@ package cn.zhengcaiyun.idata.develop.constant.enums;
 
 public enum SrcReadModeEnum {
 
-    all,
-    incremental;
+    ALL("all", "全量"),
+    INC("incremental", "增量");
+
+    public final String value;
+
+    public final String description;
+
+    SrcReadModeEnum(String value, String description) {
+        this.value = value;
+        this.description = description;
+    }
+
+    public static SrcReadModeEnum getByValue(String value) {
+      for (SrcReadModeEnum ele : SrcReadModeEnum.values()) {
+          if (StringUtils.equals(ele.value, value)) {
+              return ele;
+          }
+      }
+      return null;
+    }
 
 }
