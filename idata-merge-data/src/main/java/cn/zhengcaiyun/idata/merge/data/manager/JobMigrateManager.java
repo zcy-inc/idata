@@ -198,7 +198,7 @@ public class JobMigrateManager {
         // 数据来源-切分键
         contentDto.setSrcReadShardKey(StringUtils.defaultString(old_source_table_pk));
         // 数据来源-分片数量（并行度）
-        contentDto.setSrcShardingNum(4);
+        contentDto.setSrcShardingNum(1);
 
         Optional<DataSource> destDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
         checkArgument(destDataSourceOptional.isPresent(), "旧DI作业[%s]未找到迁移后的目标数据源", migrationDto.getOldJobId().toString());
