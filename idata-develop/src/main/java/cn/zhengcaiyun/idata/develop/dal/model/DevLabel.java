@@ -65,6 +65,9 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.table_id")
     private Long tableId;
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    private Long columnId;
+
     /**
      * Database Column Remarks:
      *   打标主体字段名
@@ -78,6 +81,13 @@ public class DevLabel {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.label_param_value")
     private String labelParamValue;
+
+    /**
+     * Database Column Remarks:
+     *   是否隐藏不展示
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    private Integer hidden;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.id")
     public Long getId() {
@@ -159,6 +169,16 @@ public class DevLabel {
         this.tableId = tableId;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_id")
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.column_name")
     public String getColumnName() {
         return columnName;
@@ -177,5 +197,15 @@ public class DevLabel {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.label_param_value")
     public void setLabelParamValue(String labelParamValue) {
         this.labelParamValue = labelParamValue;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    public Integer getHidden() {
+        return hidden;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_label.hidden")
+    public void setHidden(Integer hidden) {
+        this.hidden = hidden;
     }
 }

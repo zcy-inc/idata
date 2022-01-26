@@ -75,6 +75,8 @@
         <validation.version>2.0.7.RELEASE</validation.version>
         <testcontainers.version>1.16.2</testcontainers.version>
         <mail.version>1.4.1</mail.version>
+        <commons-pool2.version>2.10.0</commons-pool2.version>
+        <hutool-all.version>5.3.5</hutool-all.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -159,6 +161,11 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons-pool2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>

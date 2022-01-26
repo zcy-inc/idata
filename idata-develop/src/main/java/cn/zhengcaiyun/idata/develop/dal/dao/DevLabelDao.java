@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevLabelDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, labelCode, tableId, columnName, labelParamValue);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, labelCode, tableId, columnId, columnName, labelParamValue, hidden);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -65,8 +65,10 @@ public interface DevLabelDao {
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="label_code", property="labelCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="table_id", property="tableId", jdbcType=JdbcType.BIGINT),
+        @Result(column="column_id", property="columnId", jdbcType=JdbcType.BIGINT),
         @Result(column="column_name", property="columnName", jdbcType=JdbcType.VARCHAR),
-        @Result(column="label_param_value", property="labelParamValue", jdbcType=JdbcType.VARCHAR)
+        @Result(column="label_param_value", property="labelParamValue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="hidden", property="hidden", jdbcType=JdbcType.TINYINT)
     })
     List<DevLabel> selectMany(SelectStatementProvider selectStatement);
 
@@ -101,8 +103,10 @@ public interface DevLabelDao {
             .map(editTime).toProperty("editTime")
             .map(labelCode).toProperty("labelCode")
             .map(tableId).toProperty("tableId")
+            .map(columnId).toProperty("columnId")
             .map(columnName).toProperty("columnName")
             .map(labelParamValue).toProperty("labelParamValue")
+            .map(hidden).toProperty("hidden")
         );
     }
 
@@ -116,8 +120,10 @@ public interface DevLabelDao {
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(labelCode).toPropertyWhenPresent("labelCode", record::getLabelCode)
             .map(tableId).toPropertyWhenPresent("tableId", record::getTableId)
+            .map(columnId).toPropertyWhenPresent("columnId", record::getColumnId)
             .map(columnName).toPropertyWhenPresent("columnName", record::getColumnName)
             .map(labelParamValue).toPropertyWhenPresent("labelParamValue", record::getLabelParamValue)
+            .map(hidden).toPropertyWhenPresent("hidden", record::getHidden)
         );
     }
 
@@ -157,8 +163,10 @@ public interface DevLabelDao {
                 .set(editTime).equalTo(record::getEditTime)
                 .set(labelCode).equalTo(record::getLabelCode)
                 .set(tableId).equalTo(record::getTableId)
+                .set(columnId).equalTo(record::getColumnId)
                 .set(columnName).equalTo(record::getColumnName)
-                .set(labelParamValue).equalTo(record::getLabelParamValue);
+                .set(labelParamValue).equalTo(record::getLabelParamValue)
+                .set(hidden).equalTo(record::getHidden);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label")
@@ -170,8 +178,10 @@ public interface DevLabelDao {
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(labelCode).equalToWhenPresent(record::getLabelCode)
                 .set(tableId).equalToWhenPresent(record::getTableId)
+                .set(columnId).equalToWhenPresent(record::getColumnId)
                 .set(columnName).equalToWhenPresent(record::getColumnName)
-                .set(labelParamValue).equalToWhenPresent(record::getLabelParamValue);
+                .set(labelParamValue).equalToWhenPresent(record::getLabelParamValue)
+                .set(hidden).equalToWhenPresent(record::getHidden);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_label")
@@ -184,8 +194,10 @@ public interface DevLabelDao {
             .set(editTime).equalTo(record::getEditTime)
             .set(labelCode).equalTo(record::getLabelCode)
             .set(tableId).equalTo(record::getTableId)
+            .set(columnId).equalTo(record::getColumnId)
             .set(columnName).equalTo(record::getColumnName)
             .set(labelParamValue).equalTo(record::getLabelParamValue)
+            .set(hidden).equalTo(record::getHidden)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -200,8 +212,10 @@ public interface DevLabelDao {
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(labelCode).equalToWhenPresent(record::getLabelCode)
             .set(tableId).equalToWhenPresent(record::getTableId)
+            .set(columnId).equalToWhenPresent(record::getColumnId)
             .set(columnName).equalToWhenPresent(record::getColumnName)
             .set(labelParamValue).equalToWhenPresent(record::getLabelParamValue)
+            .set(hidden).equalToWhenPresent(record::getHidden)
             .where(id, isEqualTo(record::getId))
         );
     }

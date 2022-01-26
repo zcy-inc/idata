@@ -19,9 +19,11 @@ package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
@@ -33,10 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,8 +61,7 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
-        String jdbcUrl = getConnectionCfg();
-        String tableSize = hiveService.getTableSize(jdbcUrl, db, table);
+        String tableSize = hiveService.getTableSize(db, table);
         TableTechInfoDto techInfoDto = new TableTechInfoDto();
         techInfoDto.setTableSize(tableSize);
         return techInfoDto;
@@ -137,6 +135,16 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     }
 
     @Override
+    public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
+        return hiveService.getHiveTableColumns(dbName, tableName);
+    }
+
+    @Override
+    public MetadataInfo getHiveMetadataInfo(String dbName, String tableName) {
+        return hiveService.getMetadataInfo(dbName, tableName);
+    }
+
+    @Override
     public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
@@ -169,6 +177,11 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
                 .orElse(null);
         checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
         return PojoUtil.copyOne(hiveConfig, ConfigDto.class).getValueOne().get("hive-info").getConfigValue();
+    }
+
+    @Override
+    public boolean existHiveTable(String dbName, String tableName) {
+        return hiveService.existHiveTable(dbName, tableName);
     }
 
     private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {

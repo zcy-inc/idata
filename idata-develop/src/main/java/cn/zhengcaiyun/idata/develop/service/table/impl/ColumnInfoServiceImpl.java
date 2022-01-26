@@ -17,18 +17,18 @@
 package cn.zhengcaiyun.idata.develop.service.table.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
-import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
-import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +39,14 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.tableId;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -68,6 +70,11 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private DevEnumValueDao devEnumValueDao;
     @Autowired
     private LabelService labelService;
+    @Autowired
+    private TableInfoService tableInfoService;
+
+    @Autowired
+    private DevTableInfoDao devTableInfoDao;
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
@@ -79,6 +86,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private final String COLUMN_SECURITY_LABEL = "colSecurityLevel:LABEL";
     private final String COLUMN_SECURITY_ENUM = "securityLevelEnum:ENUM";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
+    private final String COLUMN_PARTITION_LABEL = "partitionedCol:LABEL";
     private final String[] columnLabelTags = {LabelTagEnum.STRING_LABEL.name(), LabelTagEnum.BOOLEAN_LABEL.name(),
     LabelTagEnum.USER_LABEL.name(), LabelTagEnum.ENUM_LABEL.name(), LabelTagEnum.ENUM_VALUE_LABEL.name()};
 
@@ -106,6 +114,26 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
         return echoList;
     }
+
+//    @Override
+//    @Deprecated
+//    public void compareColumns(TableInfoDto tableInfo) {
+//        Long tableId = tableInfo.getId();
+//        if (tableInfo.getHiveTableName() != null) {
+//            // 同步过hive的表才进行比较
+//            // 将多的字段、少的字段、不同的字段都获取到
+//            List<ColumnInfoDto> localColumnInfos = tableInfo.getColumnInfos();
+//            Set<String> diffColumnNameList = new HashSet<>();
+//            CompareInfoDTO compareInfoDTO = tableInfoService.compareHiveInfo(tableId);
+//            diffColumnNameList.addAll(compareInfoDTO.getLessList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            diffColumnNameList.addAll(compareInfoDTO.getMoreList().stream().map(CompareInfoDTO.BasicColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            diffColumnNameList.addAll(compareInfoDTO.getDifferentList().stream().map(CompareInfoDTO.ChangeColumnInfo::getColumnName).collect(Collectors.toSet()));
+//            localColumnInfos.stream().forEach(e -> {
+//                e.setEnableCompare(true);
+//                e.setHiveDiff(diffColumnNameList.contains(e.getColumnName()));
+//            });
+//        }
+//    }
 
     @Override
     public List<ColumnDetailsDto> getColumnDetails(Long tableId) {
@@ -151,6 +179,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                     else if (columnLabel.getLabelCode().equals(COLUMN_DESCRIPTION_LABEL)) {
                         echo.setColumnDescription(columnLabel.getLabelParamValue());
                     }
+                    else if (columnLabel.getLabelCode().equals(COLUMN_PARTITION_LABEL)) {
+                        echo.setPartitionedColumn(columnLabel.getLabelParamValue());
+                    }
                 });
                 return echo;
             }).collect(Collectors.toList());
@@ -161,7 +192,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList,
+    public List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<Long> columnIdList,
                                             String operator) {
         checkArgument(isNotEmpty(operator), "操作者不能为空");
         checkArgument(tableId != null, "字段所属表ID不能为空");
@@ -177,10 +208,10 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .from(devColumnInfo)
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
-        Map<String, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
-                .collect(Collectors.toMap(DevColumnInfo::getColumnName, existColumnInfo -> existColumnInfo));
+        Map<Long, DevColumnInfo> existColumnInfoMap = existColumnInfoList.stream()
+                .collect(Collectors.toMap(DevColumnInfo::getId, existColumnInfo -> existColumnInfo));
         List<DevColumnInfo> deleteColumnInfoList = existColumnInfoList.stream()
-                .filter(devColumnInfoDto -> !columnNameList.contains(devColumnInfoDto.getColumnName())).collect(Collectors.toList());
+                .filter(devColumnInfoDto -> !columnIdList.contains(devColumnInfoDto.getId())).collect(Collectors.toList());
         // 与已存在字段比较，删除未传字段记录
         deleteColumnInfoList.forEach(deleteColumnInfo -> deleteColumnInfo(deleteColumnInfo.getId(), operator));
 
@@ -199,9 +230,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                             and(devColumnInfo.columnName, isEqualTo(columnInfoDto.getColumnName()))))
                     .ifPresent(checkDevColumn -> columnInfoDto.setId(checkDevColumn.getId()));
             columnInfoDto.setTableId(tableId);
-            boolean isCreate = !existColumnInfoMap.containsKey(columnInfoDto.getColumnName());
+            boolean isCreate = !existColumnInfoMap.containsKey(columnInfoDto.getId());
             if (!isCreate) {
-                columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getColumnName()).getId());
+                columnInfoDto.setId(existColumnInfoMap.get(columnInfoDto.getId()).getId());
             }
 
             return createOrUpdateColumn(columnInfoDto, columnLabelList, isCreate, operator);
@@ -256,6 +287,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             // 插入label表
             echoColumnLabelList = columnLabelList.stream()
                     .map(columnLabel ->  {
+                        columnLabel.setColumnId(echoColumnInfoDto.getId());
                         columnLabel.setTableId(columnInfoDto.getTableId());
                         return labelService.label(columnLabel, operator);})
                     .collect(Collectors.toList());
@@ -274,7 +306,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             if (columnLabelList != null) {
                 List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                         .from(devLabel)
-                        .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
+                        .where(devLabel.del, isNotEqualTo(1),
+                                and(devLabel.hidden, isEqualTo(0)),
+                                and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
                                 and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())))
                         .build().render(RenderingStrategies.MYBATIS3)),
                         LabelDto.class, "id", "tableId", "labelCode", "columnName");
@@ -286,6 +320,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 deleteColumnLabelList.forEach(deleteColumnLabel -> labelService.removeLabel(deleteColumnLabel, operator));
                 echoColumnLabelList = columnLabelList.stream()
                         .map(columnLabel -> {
+                            columnLabel.setColumnId(columnInfoDto.getId());
                             columnLabel.setTableId(columnInfoDto.getTableId());
                             return labelService.label(columnLabel, operator);
                         })
@@ -309,6 +344,30 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 .where(devColumnInfo.del, isNotEqualTo(1), and(devColumnInfo.tableId, isEqualTo(tableId)))
                 .build().render(RenderingStrategies.MYBATIS3));
         return columnInfoList.stream().map(DevColumnInfo::getColumnName).collect(Collectors.toList()).contains(columnName);
+    }
+
+    @Override
+    public List<String> getColumnNames(Long tableId) {
+        return devColumnInfoDao.selectMany(
+                select(devColumnInfo.columnName)
+                .from(devColumnInfo)
+                .where(devColumnInfo.tableId, isEqualTo(tableId), and(devColumnInfo.del, isEqualTo(DEL_NO.val)))
+                        .build().render(RenderingStrategies.MYBATIS3))
+                .stream()
+                .map(DevColumnInfo::getColumnName)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<DevColumnInfo> getColumnInfo(Long tableId) {
+        return devColumnInfoDao.selectMany(
+                        select(devColumnInfo.allColumns())
+                                .from(devColumnInfo)
+                                .where(devColumnInfo.tableId, isEqualTo(tableId), and(devColumnInfo.del, isEqualTo(DEL_NO.val)))
+                                .build().render(RenderingStrategies.MYBATIS3))
+                .stream()
+                .collect(Collectors.toList());
     }
 
     private boolean deleteColumnInfo(Long columnId, String operator) {
