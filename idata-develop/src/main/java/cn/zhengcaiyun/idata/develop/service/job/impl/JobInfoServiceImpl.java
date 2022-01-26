@@ -397,6 +397,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 字段类型转换
                 diResponse.setDestWriteMode(DestWriteModeEnum.valueOf(diJobContent.getDestWriteMode()));
+                diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
 
                 String writeMode = diJobContent.getDestWriteMode();
                 if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
