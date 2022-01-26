@@ -1,4 +1,4 @@
-import type { IMenuItem, IAutocompletionTipConfigs } from '@/types/common';
+import type { IMenuItem, IAutocompletionTipConfigs, GlobalEnvironment } from '@/types/common';
 import { request } from 'umi';
 
 export interface DefaultResponse {
@@ -42,4 +42,13 @@ export async function getAutocompletionTipConfigs(params: {
       params,
     },
   );
+}
+
+/**
+ * 获取全局环境
+ */
+export async function getEnvironments() {
+  return request<DefaultResponse & { data: GlobalEnvironment[] }>('/api/p1/workspaces/list', {
+    method: 'GET',
+  });
 }

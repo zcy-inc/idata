@@ -36,3 +36,10 @@ export interface IAutocompletionTipConfigsColumn {
   partitionedColumn: string;
   columnLabels: ColumnLabel[];
 }
+
+export interface GlobalEnvironment {
+  id: number;
+  name: string; // 工作空间名称
+  code: string; // 工作空间code
+  urlPath: string; // 工作空间url path前缀
+}

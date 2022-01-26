@@ -7,7 +7,7 @@ export const wsStorageKey = 'workspace__idata__pro';
 
 export const mainPublicPath = `${location.pathname}#/operations/dashboard`;
 
-export const defaultWs = 'zcy'; // 默认环境
+export const defaultWs = ''; // 默认环境
 
 export enum authTypeEnum {
   LDAP = 'LDAP',
