@@ -28,8 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
