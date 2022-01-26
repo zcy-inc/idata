@@ -4,11 +4,13 @@ import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
 import java.util.Date;
 import java.util.List;
 
@@ -70,6 +72,10 @@ public class JobInfoExecuteDetailDto {
          * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
          */
         private DestWriteModeEnum destWriteMode; // isRecreate
+        /**
+         *   数据来源-读取模式，all：全量，incremental：增量
+         */
+        private SrcReadModeEnum srcReadMode;
         /**
          *   数据来源-切分键
          */
@@ -214,6 +220,14 @@ public class JobInfoExecuteDetailDto {
 
         public void setSrcDbName(String srcDbName) {
             this.srcDbName = srcDbName;
+        }
+
+        public SrcReadModeEnum getSrcReadMode() {
+            return srcReadMode;
+        }
+
+        public void setSrcReadMode(SrcReadModeEnum srcReadMode) {
+            this.srcReadMode = srcReadMode;
         }
     }
 
@@ -458,4 +472,6 @@ public class JobInfoExecuteDetailDto {
     public void setExecEngine(EngineTypeEnum execEngine) {
         this.execEngine = execEngine;
     }
+
+
 }
