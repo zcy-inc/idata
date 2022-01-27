@@ -58,8 +58,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * @description:
  * @author: yangjianhua
@@ -181,7 +179,10 @@ public class JobMigrateManager {
         }
 
         Optional<DataSource> srcDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
-        checkArgument(srcDataSourceOptional.isPresent(), "旧DI作业[%s]未找到迁移后的来源数据源", migrationDto.getOldJobId());
+        if (!srcDataSourceOptional.isPresent()) {
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧DI作业[%s]未找到迁移后的来源数据源，迁移后需人工处理", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            return null;
+        }
         DataSource srcDataSource = srcDataSourceOptional.get();
         // 数据来源-数据源类型
         contentDto.setSrcDataSourceType(srcDataSource.getType());
@@ -201,7 +202,10 @@ public class JobMigrateManager {
         contentDto.setSrcShardingNum(1);
 
         Optional<DataSource> destDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
-        checkArgument(destDataSourceOptional.isPresent(), "旧DI作业[%s]未找到迁移后的目标数据源", migrationDto.getOldJobId().toString());
+        if (!destDataSourceOptional.isPresent()) {
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧DI作业[%s]未找到迁移后的目标数据源，迁移后需人工处理", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            return null;
+        }
         DataSource destDataSource = destDataSourceOptional.get();
         // 数据去向-数据源类型
         contentDto.setDestDataSourceType(destDataSource.getType());
