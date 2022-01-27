@@ -171,6 +171,13 @@ export async function postSyncMetabase(params: { tableId: any }) {
 export async function getTableConstruct(data: { tableDdl: string; tableId: number }) {
   return request('/api/p1/dev/ddl/syncTableInfo', { method: 'POST', data });
 }
+// 表 同步Hive
+export async function syncHive(data: { tableId: number }) {
+  return request<DefaultResponse>(`/api/p1/dev/syncHiveInfo/${data.tableId}`, {
+    method: 'POST',
+    data,
+  });
+}
 
 /* ==================== DataDev ==================== */
 /**

@@ -35,8 +35,11 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
       const tmpData = initial.columnInfos?.map((column: ColumnLabel) => {
         const tmpKey = new Date().getTime();
         const tmp = {
+          id: column.id,
           key: column.columnName || tmpKey,
           columnName: column.columnName,
+          enableCompare: column.enableCompare,
+          hiveDiff: column.hiveDiff,
         };
         column.columnLabels?.forEach((label: TableLable) => {
           let v: string | boolean = label.labelParamValue;
@@ -46,7 +49,6 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
         tmpKeys.push(tmp.key);
         return tmp;
       });
-
       setData(tmpData);
       setKeys(tmpKeys);
     }
@@ -69,10 +71,18 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     setData([...data]);
   };
 
+  const renderInputPrefix = (_: any, i: number) => {
+    if (i === 0 && _?.enableCompare && _?.hiveDiff) {
+      return <IconFont type="icon-baocuo" />;
+    } else {
+      return null;
+    }
+  };
+
   // 渲染表结构的列
   const renderColumns = () =>
     checkedList
-      .map((labelCode) => {
+      .map((labelCode, i) => {
         const _ = columnsMap?.get(labelCode);
         const column: ProColumns = {
           title: [
@@ -91,6 +101,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
                   placeholder="请输入"
                   onChange={({ target: { value } }) => setValue(schema, value)}
                   required
+                  prefix={renderInputPrefix(schema.entity, i)}
                 />
               ),
             });
