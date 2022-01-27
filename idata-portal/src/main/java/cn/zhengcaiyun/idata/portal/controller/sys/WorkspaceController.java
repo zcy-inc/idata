@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.portal.controller.workspace;
+package cn.zhengcaiyun.idata.portal.controller.sys;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.dal.dao.WorkspaceDao;
