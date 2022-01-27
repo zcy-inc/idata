@@ -1,0 +1,9 @@
+
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('1','f','沐泽','','2020-03-06 13:58:50.109088','2020-03-06 13:58:50.109088','政采云','ZCY','zcy');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('2','f','沐泽','','2020-03-06 13:59:44.865442','2020-03-06 13:59:44.865442','上海','SH','sh');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('3','f','沐泽','','2020-04-08 17:13:44.4899','2020-04-08 17:13:44.4899','山西','SX','sx');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('5','f','沐泽','','2021-02-25 16:12:51.742595','2021-02-25 16:12:51.742595','无锡（电信云）','WX_dx','wx_dx');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('4','t','沐泽','','2020-10-29 15:21:05.881446','2020-10-29 15:21:05.881446','无锡','WX','wx');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('6','f','沐泽','','2021-04-23 15:16:37.755025','2021-04-23 15:16:37.755025','贵州','GZ','gz');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('39','f','时光','','2021-10-08 10:38:55.912934','2021-10-08 10:38:55.912934','江西','JX','jx');
+INSERT INTO idata.workspace (id, del, creator, editor, create_time, edit_time, name, code, url_path) VALUES ('40','f','时光','','2021-11-30 15:19:52.855186','2021-11-30 15:19:52.855186','安徽','AH','ah');
