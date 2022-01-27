@@ -6,6 +6,10 @@ export default [
   },
   {
     path: '/',
+    redirect: '/operations/dashboard',
+  },
+  {
+    path: '/noAuthority',
     component: './NoAuthority',
   },
   {
@@ -23,6 +27,12 @@ export default [
         featureCode: 'F_MENU_DATA_DEVELOP',
       },
       {
+        path: '/datapi/measure',
+        name: '指标库',
+        component: './datapi/Measures',
+        featureCode: 'F_MENU_MEASURE_MANAGE',
+      },
+      {
         path: '/datapi/datasource',
         name: '数据源管理',
         component: './datapi/DataSource',
@@ -35,6 +45,14 @@ export default [
         featureCode: 'F_MENU_JOB_LIST',
       },
     ],
+  },
+  {
+    path: '/objectLabel',
+    name: '数据标签',
+    component: './ObjectLabel',
+    featureCode: 'F_MENU_LABEL_MANAGE',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
   },
   {
     path: '/configuration',

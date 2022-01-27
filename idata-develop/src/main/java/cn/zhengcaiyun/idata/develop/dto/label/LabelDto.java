@@ -37,6 +37,7 @@ public class LabelDto {
     private String labelName;
     private Long tableId;
     private String columnName;
+    private Long columnId;
     private String columnComment;
     private String labelParamType;
     private String labelParamValue;
@@ -48,6 +49,7 @@ public class LabelDto {
     private String dbName;
     private DataTypeEnum columnDataType;
     private String metabaseUrl;
+    private Integer hidden;
 
     // GaS
     public Long getId() {
@@ -138,6 +140,14 @@ public class LabelDto {
         this.columnName = columnName;
     }
 
+    public Long getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(Long columnId) {
+        this.columnId = columnId;
+    }
+
     public String getLabelParamType() {
         return labelParamType;
     }
@@ -216,5 +226,13 @@ public class LabelDto {
 
     public void setMetabaseUrl(String metabaseUrl) {
         this.metabaseUrl = metabaseUrl;
+    }
+
+    public Integer getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Integer hidden) {
+        this.hidden = hidden;
     }
 }

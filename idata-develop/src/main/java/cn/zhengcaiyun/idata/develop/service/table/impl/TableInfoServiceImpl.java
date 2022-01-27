@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
@@ -43,9 +44,7 @@ import com.jayway.jsonpath.internal.function.ParamType;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +55,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -106,9 +104,11 @@ public class TableInfoServiceImpl implements TableInfoService {
     private EnumService enumService;
     @Autowired
     private DevAccessService devAccessService;
+    @Autowired
+    private HiveService hiveService;
 
     private final String[] tableInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
-            "tableName", "folderId"};
+            "tableName", "hiveTableName", "folderId"};
     private String[] foreignKeyFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "tableId", "columnNames", "referTableId", "referColumnNames", "erType"};
     private final String DB_NAME_LABEL = "dbName:LABEL";
@@ -183,7 +183,7 @@ public class TableInfoServiceImpl implements TableInfoService {
                 .filter(columnInfoDto -> "true".equals(columnInfoDto.getPartitionedColumn()))
                 .collect(Collectors.toList());
 
-        ddl.append("create external table ").append("`").append(tableDbName).append("`.`").append(tableInfo.getTableName()).append("`(\n");
+        ddl.append("create table ").append("`").append(tableDbName).append("`.`").append(tableInfo.getTableName()).append("`(\n");
         for (int i = 0; i < columnInfoDtoList.size(); i++) {
             if ("false".equals(columnInfoDtoList.get(i).getPartitionedColumn())) {
                 ddl.append("  `").append(columnInfoDtoList.get(i).getColumnName()).append("` ").append(columnInfoDtoList.get(i).getColumnType());
@@ -207,7 +207,7 @@ public class TableInfoServiceImpl implements TableInfoService {
             }
         }
         ddl.append("stored as orc \n");
-        ddl.append(String.format("location 'hdfs://nameservice1/hive/%s.db/%s' \n", tableDbName, tableInfo.getTableName()));
+//        ddl.append(String.format("location 'hdfs://nameservice1/hive/%s.db/%s' \n", tableDbName, tableInfo.getTableName()));
         return ddl.toString();
     }
 
@@ -289,9 +289,10 @@ public class TableInfoServiceImpl implements TableInfoService {
         List<ColumnInfoDto> columnInfoDtoList = tableInfoDto.getColumnInfos() != null && tableInfoDto.getColumnInfos().size() > 0
                         ? tableInfoDto.getColumnInfos() : null;
         if (columnInfoDtoList != null) {
+            List<Long> columnIdList = columnInfoDtoList.stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
             List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
-                    tableInfo.getId(), columnNameList, operator);
+                    tableInfo.getId(), columnIdList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
             // 外键表操作
             List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
@@ -333,6 +334,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (tableLabelDtoList != null) {
             List<LabelDto> existTableLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                     .from(devLabel).where(devLabel.del, isNotEqualTo(1),
+                            and(devLabel.hidden, isEqualTo(0)),
                             and(devLabel.tableId, isEqualTo(tableInfo.getId())),
                             and(devLabel.columnName, isNull(), or(devLabel.columnName, isEqualTo(""))))
                             .build().render(RenderingStrategies.MYBATIS3)),
@@ -358,9 +360,10 @@ public class TableInfoServiceImpl implements TableInfoService {
             existColumnIdList.forEach(columnId -> columnInfoService.delete(columnId, operator));
         }
         else {
+            List<Long> columnIdList = columnInfoDtoList.stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
             List<String> columnNameList = columnInfoDtoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
             List<ColumnInfoDto> echoColumnInfoDtoList = columnInfoService.createOrEdit(columnInfoDtoList,
-                    tableInfo.getId(), columnNameList, operator);
+                    tableInfo.getId(), columnIdList, operator);
             echoTableInfoDto.setColumnInfos(echoColumnInfoDtoList);
             // 外键表操作
             List<ForeignKeyDto> foreignKeyDtoList = tableInfoDto.getForeignKeys() != null && tableInfoDto.getForeignKeys().size() > 0
@@ -489,6 +492,21 @@ public class TableInfoServiceImpl implements TableInfoService {
         return metadataQueryApi.getTableTechInfo(getDbName(tableId), tableInfo.getTableName());
     }
 
+    @Override
+    public void updateHiveTableName(Long tableId, String hiveTableName, String operator) {
+        devTableInfoDao.update(c -> c.set(devTableInfo.hiveTableName).equalTo(hiveTableName)
+                .set(devTableInfo.editor).equalTo(operator)
+                .set(devTableInfo.editTime).equalTo(new Date())
+                .where(devTableInfo.id, isEqualTo(tableId)));
+    }
+
+    @Override
+    public DevTableInfo getSimpleById(Long tableId) {
+        return devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
+                        and(devTableInfo.del, isNotEqualTo(1))))
+                .orElseThrow(() -> new IllegalArgumentException("表不存在"));
+    }
+
     private TableInfoDto getTableInfoById(Long tableId) {
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.id, isEqualTo(tableId),
                 and(devTableInfo.del, isNotEqualTo(1))))
@@ -536,6 +554,13 @@ public class TableInfoServiceImpl implements TableInfoService {
         return listener.tableInfoMap;
     }
 
+    /**
+     * 校验列信息并封装
+     * @param tableInfoMap
+     * @param existColumnInfoList
+     * @param tableId
+     * @return
+     */
     private List<ColumnInfoDto> getColumnInfosByDdl(Map<String, Object> tableInfoMap,
                                                     List<ColumnInfoDto> existColumnInfoList, Long tableId) {
         List<ColumnInfoDto> echoColumnInfoList = new ArrayList<>();
@@ -554,6 +579,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (tableInfoMap.get("columns") != null) {
             tableInfoColumnList.addAll((List<Map<String, String>>) tableInfoMap.get("columns"));
         }
+        // 兼容类型大小写，将colType统一转化成大写，便于后续映射、校验
+        tableInfoColumnList.forEach(map -> map.put("colType", StringUtils.upperCase(map.get("colType"))));
+
         if (tableInfoColumnList.size() > 0) {
             tableInfoColumnList.stream().forEach(columnMap -> {
                 checkColumn(columnMap.get("colName"), columnMap.get("colType"));
@@ -625,6 +653,11 @@ public class TableInfoServiceImpl implements TableInfoService {
         return echoColumnInfoList;
     }
 
+    /**
+     * 校验字段类型和维护的枚举字段类型是否一致
+     * @param colName
+     * @param colType
+     */
     private void checkColumn(String colName, String colType) {
         checkArgument(isNotEmpty(colName), "字段名称不能为空");
         checkArgument(isNotEmpty(colType), "字段类型不能为空");
@@ -650,4 +683,5 @@ public class TableInfoServiceImpl implements TableInfoService {
 //        }
 //        return assetCatalogues;
 //    }
+
 }

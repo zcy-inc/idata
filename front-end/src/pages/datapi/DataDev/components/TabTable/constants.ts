@@ -19,10 +19,6 @@ export const EROps = [
   { label: 'M:N', value: 'M2N' },
 ];
 
-export const ViewInitialColumns = [
-  { title: '字段英文名', dataIndex: 'columnName', key: 'columnName' },
-];
-
 export const TransformBoolean = {
   true: '是',
   false: '否',

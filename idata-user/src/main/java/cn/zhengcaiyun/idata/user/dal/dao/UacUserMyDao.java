@@ -13,4 +13,5 @@ public interface UacUserMyDao {
      */
     int insertIgnore(UacUser uacUser);
 
+    UacUser findOneByUsername(String username);
 }

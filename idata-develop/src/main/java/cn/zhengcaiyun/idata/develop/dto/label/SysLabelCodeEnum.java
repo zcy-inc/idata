@@ -16,7 +16,6 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.label;
 
-import java.util.List;
 
 /**
  * @author caizhedong
@@ -28,9 +27,14 @@ public enum SysLabelCodeEnum {
     TBL_COMMENT_LABEL("tblComment:LABEL"),
     PK_LABEL("pk:LABEL"),
     COLUMN_TYPE_LABEL("columnType:LABEL"),
-    COLUMN_COMMENT_LABEL("columnComment:LABEL");
+    COLUMN_COMMENT_LABEL("columnComment:LABEL"),
+    PARTITION_COL_LABEL("partitionedCol:LABEL"),
+    HIVE_COLUMN_COMMENT_LABEL("hiveColumnComment:LABEL"),
+    HIVE_COLUMN_TYPE_LABEL("hiveColumnType:LABEL"),
+    HIVE_COLUMN_NAME_LABEL("hiveColumnName:LABEL"),
+    HIVE_PARTITION_COL_LABEL("hivePartitionedCol:LABEL");
 
-    private String labelCode;
+    public final String labelCode;
 
     SysLabelCodeEnum(String labelCode) {
         this.labelCode = labelCode;

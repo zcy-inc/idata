@@ -1,2 +1,0 @@
-update idata.sys_config set value_one = '{"url":{"configValue":""},"token":{"configValue":""},"prodDSProjectCode":{"configValue":""},"stagDSProjectCode":{"configValue":""},"DStenantCode":{"configValue":""},"DSWorkGroup":{"configValue":""},"dagTimeout":{"configValue":""}}'
-where key_one = 'ds-config';

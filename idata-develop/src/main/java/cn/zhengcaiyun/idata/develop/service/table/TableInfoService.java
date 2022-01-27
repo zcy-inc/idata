@@ -17,6 +17,9 @@
 package cn.zhengcaiyun.idata.develop.service.table;
 
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
@@ -31,8 +34,13 @@ import java.util.List;
 public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
     List<TableInfoDto> getTablesByDataBase(String database);
-//    List<TableInfoDto> getTablesByEnumValue(String enumValue);
     List<LabelDto> getDbNames();
+
+    /**
+     * 获取table的创建语句DDL
+     * @param tableId
+     * @return
+     */
     String getTableDDL(Long tableId);
     TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto);
     TableInfoDto create(TableInfoDto tableInfoDto, String creator) throws IllegalAccessException;
@@ -46,4 +54,19 @@ public interface TableInfoService {
      * @return
      */
     TableTechInfoDto getTableTechInfo(Long tableId);
+
+    /**
+     * 更新hive表名字
+     * @param tableId
+     * @param hiveTableName
+     * @param operator
+     */
+    void updateHiveTableName(Long tableId, String hiveTableName, String operator);
+
+    /**
+     * 获取简单的表数据信息（非连表）
+     * @param tableId
+     * @return
+     */
+    DevTableInfo getSimpleById(Long tableId);
 }
