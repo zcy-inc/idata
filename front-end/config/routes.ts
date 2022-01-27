@@ -6,6 +6,10 @@ export default [
   },
   {
     path: '/',
+    redirect: '/operations/dashboard',
+  },
+  {
+    path: '/noAuthority',
     component: './NoAuthority',
   },
   {
@@ -46,6 +50,7 @@ export default [
     path: '/objectLabel',
     name: '数据标签',
     component: './ObjectLabel',
+    featureCode: 'F_MENU_LABEL_MANAGE',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/96f6bf29-38e9-42a9-af58-c5f173bd07c6.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c00131f7-0482-4b79-abcd-0aa1952acd3c.svg',
   },
