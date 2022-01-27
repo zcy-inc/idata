@@ -114,16 +114,13 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-        String[] hiveTableSplit = hiveTable.split("\\.");
-        if (hiveTableSplit.length != 2) {
-            throw new IllegalArgumentException("The hive table must have db name");
-        }
-        String[] hiveDb = hiveTableSplit[0].split("_");
-        String srcHiveTable = (hiveDb.length > 1 ? (hiveDb[0] + "_") : "") + "src." + hiveTableSplit[1];
+    public String generateMergeSql(Long dataSourceId, String table, String hiveTableName, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+        String srcHiveTable = "src." + hiveTableName;
+
         Map<Integer, String> sourceTableMap = getSourceTableMap(table);
-        boolean isMulPartition = typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1;
-        if (isMulPartition) {
+        boolean isMulPartition = false;
+        if (typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1) {
+            isMulPartition = true;
             table = sourceTableMap.values().stream().findFirst().get();
         }
         String[] columns = dataSourceService.getDBTableColumns(dataSourceId, table);
@@ -197,6 +194,88 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         sourceTableMap.put(0, sourceTable);
         return sourceTableMap;
     }
+
+//    @Override
+//    public String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+//        String[] hiveTableSplit = hiveTable.split("\\.");
+//        String[] hiveDb = hiveTableSplit[0].split("_");
+//        String srcHiveTable = (hiveDb.length > 1 ? (hiveDb[0] + "_") : "") + "src." + hiveTableSplit[1];
+//        Map<Integer, String> sourceTableMap = getSourceTableMap(table);
+//        boolean isMulPartition = typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1;
+//        if (isMulPartition) {
+//            table = sourceTableMap.values().stream().findFirst().get();
+//        }
+//        String[] columns = dataSourceService.getDBTableColumns(dataSourceId, table);
+//        StringBuilder sb = new StringBuilder();
+//        if (diMode == DestWriteModeEnum.append) {
+//            if (isMulPartition) {
+//                sb.append("set hive.exec.dynamic.partition=true;\n");
+//                sb.append("set hive.exec.dynamic.partition.mode=nonstrict;\n");
+//                sb.append("set hive.exec.max.dynamic.partitions.pernode=1000;\n");
+//            }
+//            sb.append("alter table AAABBBAAABBB_pt drop if exists partition(pt<'${day-3d}');\n");
+//            sb.append("insert overwrite table AAABBBAAABBB_pt partition(pt='${day}'");
+//            String columnStr = columns[0];
+//            if (isMulPartition) {
+//                sb.append(",num");
+//                columnStr = columns[0] + ",num";
+//            }
+//            sb.append(") \n");
+//            String []cols = columnStr.split(",");
+//            String linesColumn = columnStr.replace(",", "\n,");
+//            StringBuilder condition = new StringBuilder();
+//            for (String col : cols) {
+//                condition.append("\n,coalesce(t1.").append(col).append(",t2.").append(col).append(") ").append(col);
+//            }
+//            sb.append("select ").append(condition.substring(2, condition.length())).append("\n");
+//            sb.append("from \n(select ").append(linesColumn).append("\nfrom ").append(hiveTable).append(") t1 \n");
+//            sb.append("full join \n(select ").append(linesColumn).append("\nfrom AAABBBAAABBB_pt where pt='${day-1d}') t2 \n");
+//            String columnKey = StringUtils.defaultIfBlank(columns[1], "id");
+//            sb.append("on t1.").append(columnKey).append("=t2.").append(columnKey);
+//            if (isMulPartition) {
+//                sb.append(" and t1.num=t2.num");
+//            }
+//            sb.append(";\n");
+//            sb.append("insert overwrite table ").append(hiveTable);
+//            if (isMulPartition) {
+//                sb.append(" partition(num)");
+//            }
+//            sb.append("\n select ").append(linesColumn)
+//                    .append("\nfrom AAABBBAAABBB_pt where pt='${day}';");
+//        }
+//        return sb.toString().replace("AAABBBAAABBB", srcHiveTable);
+//    }
+//
+//    private static Map<Integer, String> getSourceTableMap(String sourceTable) {
+//        Map<Integer, String> sourceTableMap = new HashMap<>();
+//        // 2623tableName1,2333tableName2
+//        if (sourceTable.contains(",")) {
+//            String[] tableNames = sourceTable.split(",");
+//            for (String tableName : tableNames) {
+//                int len = tableName.length();
+//                while (StringUtils.isNumeric(tableName.substring(--len)));
+//                sourceTableMap.put(NumberUtils.toInt(tableName.substring(len + 1)), tableName);
+//            }
+//            return sourceTableMap;
+//        }
+//        // zcy_backlog_handler_ref_t_[0-63]
+//        if (sourceTable.contains("[")) {
+//            int leftBracket = sourceTable.indexOf("[");
+//            int idx = sourceTable.indexOf("-");
+//            int rightBracket = sourceTable.indexOf("]");
+//            String baseSourceTable = sourceTable.substring(0, leftBracket);
+//            String leftNum = sourceTable.substring(leftBracket + 1, idx);
+//            String rightNum = sourceTable.substring(idx + 1, rightBracket);
+//            int start = NumberUtils.toInt(leftNum);
+//            int end = NumberUtils.toInt(rightNum);
+//            for (;start <= end; start++) {
+//                sourceTableMap.put(start, baseSourceTable + start);
+//            }
+//            return sourceTableMap;
+//        }
+//        sourceTableMap.put(0, sourceTable);
+//        return sourceTableMap;
+//    }
 
     private void checkJobContent(DIJobContentContentDto contentDto) {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");

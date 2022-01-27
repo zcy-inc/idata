@@ -79,11 +79,14 @@ public class DIJobContentController {
     public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
                                               @RequestParam("dataSourceId") Long dataSourceId,
                                               @RequestParam("table") String table,
-                                              @RequestParam("hiveTable") String hiveTable,
+                                              @RequestParam("hiveTableName") String hiveTableName,
                                               @RequestParam("diMode") String destWriteMode,
                                               @RequestParam("driverType") String driverType) {
-
-        return RestResult.success(diJobContentService.generateMergeSql(dataSourceId, table, hiveTable, DestWriteModeEnum.valueOf(destWriteMode), DriverTypeEnum.of(driverType)));
+        String[] hiveTableSplit = hiveTable.split("\\.");
+        if (hiveTableSplit.length != 2) {
+            throw new IllegalArgumentException("The hive table must have db name");
+        }
+        return RestResult.success(diJobContentService.generateMergeSql(dataSourceId, table, hiveTableName, DestWriteModeEnum.valueOf(destWriteMode), DriverTypeEnum.of(driverType)));
     }
 
 }
