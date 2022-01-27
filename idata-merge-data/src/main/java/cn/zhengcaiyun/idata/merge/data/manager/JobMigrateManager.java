@@ -118,7 +118,7 @@ public class JobMigrateManager {
                     jobPublishRecordService.approve(publishRecordOptional.get().getId(), "迁移自动发布", contentOperator);
                 }
             } else {
-                LOGGER.warn("*** *** migrateContentInfo of newJob:{},oldJob:{} failed.", newJobId, migrationDto.getOldJobId());
+                LOGGER.warn("*** *** migrateContentInfo of newJob:{}, oldJob:{} failed.", newJobId, migrationDto.getOldJobId());
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("没有操作权限");

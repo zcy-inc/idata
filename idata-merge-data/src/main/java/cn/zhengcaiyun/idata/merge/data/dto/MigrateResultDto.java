@@ -17,6 +17,9 @@
 
 package cn.zhengcaiyun.idata.merge.data.dto;
 
+import cn.zhengcaiyun.idata.merge.data.dal.model.MigrateResult;
+import org.springframework.beans.BeanUtils;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -56,5 +59,11 @@ public class MigrateResultDto {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public MigrateResult toModel() {
+        MigrateResult result = new MigrateResult();
+        BeanUtils.copyProperties(this, result);
+        return result;
     }
 }

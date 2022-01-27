@@ -33,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
+import cn.zhengcaiyun.idata.merge.data.dal.dao.MigrateResultDao;
 import cn.zhengcaiyun.idata.merge.data.dal.old.OldIDataDao;
 import cn.zhengcaiyun.idata.merge.data.dto.JobMigrationDto;
 import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
@@ -82,11 +83,12 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     private JobExecuteConfigRepo jobExecuteConfigRepo;
     @Autowired
     private JobMigrateManager jobMigrateManager;
+    @Autowired
+    private MigrateResultDao migrateResultDao;
 
     @Override
     public List<MigrateResultDto> migrate() {
         LOGGER.info("*** *** 开始作业数据迁移... ... *** ***");
-        List<MigrateResultDto> resultDtoList = new ArrayList<>();
         // 只迁移真线已发布的版本作业
         // 获取旧版IData所有作业数据
         List<JobMigrationDto> migrationDtoList = Lists.newArrayList();
@@ -113,15 +115,15 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         for (JobMigrationDto migrationDto : migrationDtoList) {
             Long oldJobId = migrationDto.getOldJobId();
-            migrateJobNode(jobGraph, oldJobId, migratedOldJobs, resultDtoList);
+            migrateJobNode(jobGraph, oldJobId, migratedOldJobs);
         }
 
         LOGGER.info("*** *** 作业迁移结束 *** *** 本次迁移实际处理作业数[{}]，作业[{}]", JobMigrationContext.countHandledJobs(), Joiner.on(',').join(JobMigrationContext.getHandledJobs()));
         JobMigrationContext.clear();
-        return resultDtoList;
+        return Lists.newArrayList();
     }
 
-    private void migrateJobNode(MutableGraph<Long> jobGraph, Long oldJobId, Set<Long> migratedOldJobs, List<MigrateResultDto> resultDtoList) {
+    private void migrateJobNode(MutableGraph<Long> jobGraph, Long oldJobId, Set<Long> migratedOldJobs) {
         if (migratedOldJobs.contains(oldJobId))
             return;
         // 获取上游节点
@@ -129,20 +131,39 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         if (!CollectionUtils.isEmpty(predecessors)) {
             // 先迁移上游节点
             for (Long prev_job_id : predecessors) {
-                migrateJobNode(jobGraph, prev_job_id, migratedOldJobs, resultDtoList);
+                migrateJobNode(jobGraph, prev_job_id, migratedOldJobs);
             }
         }
         // 迁移节点
-        migrateJobData(oldJobId, resultDtoList);
-        migratedOldJobs.add(oldJobId);
+        List<MigrateResultDto> resultDtoList;
+        boolean isSuc = true;
+        try {
+            resultDtoList = migrateJobData(oldJobId);
+        } catch (Exception ex) {
+            resultDtoList = new ArrayList<>();
+            resultDtoList.add(new MigrateResultDto("migrateJobNode", String.format("迁移失败：旧作业[%s]迁移失败，原因：%s", oldJobId, ex.getMessage()), ""));
+            isSuc = false;
+        }
+        if (!CollectionUtils.isEmpty(resultDtoList)) {
+            saveMigrateResult(resultDtoList);
+        }
+        if (isSuc)
+            migratedOldJobs.add(oldJobId);
     }
 
-    private void migrateJobData(Long oldJobId, List<MigrateResultDto> resultDtoList) {
+    private void saveMigrateResult(List<MigrateResultDto> resultDtoList) {
+        for (MigrateResultDto resultDto : resultDtoList) {
+            migrateResultDao.insertSelective(resultDto.toModel());
+        }
+    }
+
+    private List<MigrateResultDto> migrateJobData(Long oldJobId) {
+        List<MigrateResultDto> resultDtoList = new ArrayList<>();
         JobMigrationDto migrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(oldJobId);
         if (Objects.isNull(migrationDto)) {
             resultDtoList.add(new MigrateResultDto("fetchMigrateJobData", String.format("确认是否处理：旧作业[%s]数据不合法，如没有配置DAG等。", oldJobId), ""));
             LOGGER.warn("### ### 作业[{}]数据不合法，不迁移", oldJobId);
-            return;
+            return resultDtoList;
         }
         JSONObject oldJobInfo = migrationDto.getOldJobInfo();
         JSONObject oldJobConfig = migrationDto.getOldJobConfig();
@@ -151,7 +172,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         JobInfo existJob = JobMigrationContext.getExistJobIfPresent(jobName);
         if (existJob != null) {
             LOGGER.warn("### ### 作业[{}]已存在，不需要再迁移", existJob.getName());
-            return;
+            return resultDtoList;
         }
 
         LOGGER.info("*** *** 开始迁移作业[{}]#[{}]", oldJobId, jobName);
@@ -165,12 +186,13 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         Optional<JobConfigCombinationDto> configCombinationDtoOptional = buildJobConfig(oldJobId, oldJobInfo, oldJobConfig, oldJobContent, resultDtoList);
         if (configCombinationDtoOptional.isEmpty()) {
             LOGGER.warn("### ### 作业[{}]配置错误，不能迁移", existJob.getName());
-            return;
+            return resultDtoList;
         }
         List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(jobInfoDto, configCombinationDtoOptional.get(), jobOperator, migrationDto);
         resultDtoList.addAll(resultList);
         JobMigrationContext.addHandledJob(jobInfoDto.getName());
         LOGGER.info("### ### 结束迁移作业[{}]#[{}]，本次已处理作业计数：[{}]", oldJobId, jobName, JobMigrationContext.countHandledJobs());
+        return resultDtoList;
     }
 
     private void fetchOldJobData(List<JobMigrationDto> outMigrationDtoList, MutableGraph<Long> outJobGraph) {
