@@ -76,6 +76,7 @@
         <testcontainers.version>1.16.2</testcontainers.version>
         <mail.version>1.4.1</mail.version>
         <spring-boot-starter-actuator.version>3.0.3-RELEASE</spring-boot-starter-actuator.version>
+        <expression.version>5.3.14</expression.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -136,6 +137,12 @@
                 <artifactId>presto-jdbc</artifactId>
                 <version>${presto-jdbc.version}</version>
             </dependency>
+<!--            &lt;!&ndash; https://mvnrepository.com/artifact/org.springframework/spring-expression &ndash;&gt;-->
+<!--            <dependency>-->
+<!--                <groupId>org.springframework</groupId>-->
+<!--                <artifactId>spring-expression</artifactId>-->
+<!--                <version>${expression.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.apache.hive</groupId>
                 <artifactId>hive-jdbc</artifactId>

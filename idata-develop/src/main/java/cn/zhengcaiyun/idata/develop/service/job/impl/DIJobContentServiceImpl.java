@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
@@ -33,6 +34,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -114,168 +120,82 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public String generateMergeSql(Long dataSourceId, String table, String hiveTableName, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-        String srcHiveTable = "src." + hiveTableName;
+    public String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+        String tmpTable = "src." + hiveTable.split("\\.")[1] + "_pt";
+        // 匹配规则：例如 "tableName[1-2]"
+        String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
+        // 匹配规则：例如 "212tableName2,223tableName2"
+        String regex2 = "(\\d+(\\w+)[,]{0,1})+";
 
-        Map<Integer, String> sourceTableMap = getSourceTableMap(table);
+        // 是否涉及多张表（分区表）
         boolean isMulPartition = false;
-        if (typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1) {
-            isMulPartition = true;
-            table = sourceTableMap.values().stream().findFirst().get();
+        if (typeEnum == DriverTypeEnum.MySQL) {
+            if (ReUtil.isMatch(regex1, table)) {
+                isMulPartition = true;
+                // 抽取基表名称
+                table = ReUtil.get(regex1, table, 1);
+            } else if (ReUtil.isMatch(regex2, table)) {
+                isMulPartition = true;
+                // 抽取基表名称
+                table = ReUtil.get(regex2, table, 2);
+            }
         }
+        return buildMergeSql(isMulPartition, tmpTable, hiveTable, dataSourceId, table);
+    }
+
+    /**
+     * 生成merge_sql
+     * @param isMulPartition 是否是分区表
+     * @param tmpTable 临时表名称（带库名）
+     * @param hiveTable 目标表名称（带库名）
+     * @param dataSourceId 数据源id
+     * @param table
+     * @return
+     */
+    private String buildMergeSql(boolean isMulPartition, String tmpTable, String hiveTable, Long dataSourceId, String table) {
+
         String[] columns = dataSourceService.getDBTableColumns(dataSourceId, table);
-        StringBuilder sb = new StringBuilder();
-        if (diMode == DestWriteModeEnum.append) {
-            if (isMulPartition) {
-                sb.append("set hive.exec.dynamic.partition=true;\n");
-                sb.append("set hive.exec.dynamic.partition.mode=nonstrict;\n");
-                sb.append("set hive.exec.max.dynamic.partitions.pernode=1000;\n");
-            }
-            sb.append("alter table AAABBBAAABBB_pt drop if exists partition(pt<'${day-3d}');\n");
-            sb.append("insert overwrite table AAABBBAAABBB_pt partition(pt='${day}'");
-            String columnStr = columns[0];
-            if (isMulPartition) {
-                sb.append(",num");
-                columnStr = columns[0] + ",num";
-            }
-            sb.append(") \n");
-            String []cols = columnStr.split(",");
-            String linesColumn = columnStr.replace(",", "\n,");
-            StringBuilder condition = new StringBuilder();
-            for (String col : cols) {
-                condition.append("\n,coalesce(t1.").append(col).append(",t2.").append(col).append(") ").append(col);
-            }
-            sb.append("select ").append(condition.substring(2, condition.length())).append("\n");
-            sb.append("from \n(select ").append(linesColumn).append("\nfrom ").append(hiveTable).append(") t1 \n");
-            sb.append("full join \n(select ").append(linesColumn).append("\nfrom AAABBBAAABBB_pt where pt='${day-1d}') t2 \n");
-            String columnKey = StringUtils.defaultIfBlank(columns[1], "id");
-            sb.append("on t1.").append(columnKey).append("=t2.").append(columnKey);
-            if (isMulPartition) {
-                sb.append(" and t1.num=t2.num");
-            }
-            sb.append(";\n");
-            sb.append("insert overwrite table ").append(hiveTable);
-            if (isMulPartition) {
-                sb.append(" partition(num)");
-            }
-            sb.append("\n select ").append(linesColumn)
-                    .append("\nfrom AAABBBAAABBB_pt where pt='${day}';");
-        }
-        return sb.toString().replace("AAABBBAAABBB", srcHiveTable);
-    }
+        List columnList = Arrays.asList(columns[0].split(","));
+        // 筛选的列名
+        String selectStr = StringUtils.join(columnList, "\n,") + "\n[,num]";
+        // 筛选的带函数的列名
+        String selectCoalesceStr = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,")
+                + "\n[,coalesce(t1.num, t2.num) num]";
 
-    private static Map<Integer, String> getSourceTableMap(String sourceTable) {
-        Map<Integer, String> sourceTableMap = new HashMap<>();
-        // 2623tableName1,2333tableName2
-        if (sourceTable.contains(",")) {
-            String[] tableNames = sourceTable.split(",");
-            for (String tableName : tableNames) {
-                int len = tableName.length();
-                while (StringUtils.isNumeric(tableName.substring(--len)));
-                sourceTableMap.put(NumberUtils.toInt(tableName.substring(len + 1)), tableName);
-            }
-            return sourceTableMap;
-        }
-        // zcy_backlog_handler_ref_t_[0-63]
-        if (sourceTable.contains("[")) {
-            int leftBracket = sourceTable.indexOf("[");
-            int idx = sourceTable.indexOf("-");
-            int rightBracket = sourceTable.indexOf("]");
-            String baseSourceTable = sourceTable.substring(0, leftBracket);
-            String leftNum = sourceTable.substring(leftBracket + 1, idx);
-            String rightNum = sourceTable.substring(idx + 1, rightBracket);
-            int start = NumberUtils.toInt(leftNum);
-            int end = NumberUtils.toInt(rightNum);
-            for (;start <= end; start++) {
-                sourceTableMap.put(start, baseSourceTable + start);
-            }
-            return sourceTableMap;
-        }
-        sourceTableMap.put(0, sourceTable);
-        return sourceTableMap;
-    }
+        String templateSQL = "" +
+                "[" +
+                "set hive.exec.dynamic.partition=true;\n" +
+                "set hive.exec.dynamic.partition.mode=nonstrict;\n" +
+                "set hive.exec.max.dynamic.partitions.pernode=1000;" +
+                "]\n" +
 
-//    @Override
-//    public String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-//        String[] hiveTableSplit = hiveTable.split("\\.");
-//        String[] hiveDb = hiveTableSplit[0].split("_");
-//        String srcHiveTable = (hiveDb.length > 1 ? (hiveDb[0] + "_") : "") + "src." + hiveTableSplit[1];
-//        Map<Integer, String> sourceTableMap = getSourceTableMap(table);
-//        boolean isMulPartition = typeEnum == DriverTypeEnum.MySQL && sourceTableMap.size() > 1;
-//        if (isMulPartition) {
-//            table = sourceTableMap.values().stream().findFirst().get();
-//        }
-//        String[] columns = dataSourceService.getDBTableColumns(dataSourceId, table);
-//        StringBuilder sb = new StringBuilder();
-//        if (diMode == DestWriteModeEnum.append) {
-//            if (isMulPartition) {
-//                sb.append("set hive.exec.dynamic.partition=true;\n");
-//                sb.append("set hive.exec.dynamic.partition.mode=nonstrict;\n");
-//                sb.append("set hive.exec.max.dynamic.partitions.pernode=1000;\n");
-//            }
-//            sb.append("alter table AAABBBAAABBB_pt drop if exists partition(pt<'${day-3d}');\n");
-//            sb.append("insert overwrite table AAABBBAAABBB_pt partition(pt='${day}'");
-//            String columnStr = columns[0];
-//            if (isMulPartition) {
-//                sb.append(",num");
-//                columnStr = columns[0] + ",num";
-//            }
-//            sb.append(") \n");
-//            String []cols = columnStr.split(",");
-//            String linesColumn = columnStr.replace(",", "\n,");
-//            StringBuilder condition = new StringBuilder();
-//            for (String col : cols) {
-//                condition.append("\n,coalesce(t1.").append(col).append(",t2.").append(col).append(") ").append(col);
-//            }
-//            sb.append("select ").append(condition.substring(2, condition.length())).append("\n");
-//            sb.append("from \n(select ").append(linesColumn).append("\nfrom ").append(hiveTable).append(") t1 \n");
-//            sb.append("full join \n(select ").append(linesColumn).append("\nfrom AAABBBAAABBB_pt where pt='${day-1d}') t2 \n");
-//            String columnKey = StringUtils.defaultIfBlank(columns[1], "id");
-//            sb.append("on t1.").append(columnKey).append("=t2.").append(columnKey);
-//            if (isMulPartition) {
-//                sb.append(" and t1.num=t2.num");
-//            }
-//            sb.append(";\n");
-//            sb.append("insert overwrite table ").append(hiveTable);
-//            if (isMulPartition) {
-//                sb.append(" partition(num)");
-//            }
-//            sb.append("\n select ").append(linesColumn)
-//                    .append("\nfrom AAABBBAAABBB_pt where pt='${day}';");
-//        }
-//        return sb.toString().replace("AAABBBAAABBB", srcHiveTable);
-//    }
-//
-//    private static Map<Integer, String> getSourceTableMap(String sourceTable) {
-//        Map<Integer, String> sourceTableMap = new HashMap<>();
-//        // 2623tableName1,2333tableName2
-//        if (sourceTable.contains(",")) {
-//            String[] tableNames = sourceTable.split(",");
-//            for (String tableName : tableNames) {
-//                int len = tableName.length();
-//                while (StringUtils.isNumeric(tableName.substring(--len)));
-//                sourceTableMap.put(NumberUtils.toInt(tableName.substring(len + 1)), tableName);
-//            }
-//            return sourceTableMap;
-//        }
-//        // zcy_backlog_handler_ref_t_[0-63]
-//        if (sourceTable.contains("[")) {
-//            int leftBracket = sourceTable.indexOf("[");
-//            int idx = sourceTable.indexOf("-");
-//            int rightBracket = sourceTable.indexOf("]");
-//            String baseSourceTable = sourceTable.substring(0, leftBracket);
-//            String leftNum = sourceTable.substring(leftBracket + 1, idx);
-//            String rightNum = sourceTable.substring(idx + 1, rightBracket);
-//            int start = NumberUtils.toInt(leftNum);
-//            int end = NumberUtils.toInt(rightNum);
-//            for (;start <= end; start++) {
-//                sourceTableMap.put(start, baseSourceTable + start);
-//            }
-//            return sourceTableMap;
-//        }
-//        sourceTableMap.put(0, sourceTable);
-//        return sourceTableMap;
-//    }
+                "alter table %tmpTable drop if exists partition(pt<'${day-3d}');\n" +
+
+                "insert overwrite table %tmpTable partition(pt='${day}' [,num]) \n" +
+                "select %selectCoalesceStr" +
+                "from \n" +
+                "(select \n%selectStr" +
+                "from %hiveTable) t1 \n" +
+                "full join \n" +
+                "(select \n %selectStr" +
+                "from %tmpTable where pt='${day-1d}') t2 \n" +
+                "on t1.id=t2.id [and t1.num=t2.num];\n" +
+
+                "insert overwrite table %hiveTable [partition(num)]\n" +
+                "select \n%selectStr" +
+                "from %tmpTable where pt='${day}';";
+        String mergeSql = templateSQL
+                .replaceAll("%tmpTable", tmpTable)
+                .replaceAll("%hiveTable", hiveTable)
+                .replaceAll("%selectStr", selectStr)
+                .replaceAll("%selectCoalesceStr", selectCoalesceStr);
+        if (isMulPartition) {
+            //去掉'['和'
+            return mergeSql.replaceAll("\\]", "").replaceAll("\\[", "");
+        }
+        // 去掉[]以及内部的内容
+        return mergeSql.replaceAll("\\[[^]]*\\]", "");
+    }
 
     private void checkJobContent(DIJobContentContentDto contentDto) {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");
