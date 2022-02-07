@@ -18,9 +18,9 @@
 package cn.zhengcaiyun.idata.portal.controller.merge;
 
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
-import cn.zhengcaiyun.idata.merge.data.dto.MigrateResultDto;
-import cn.zhengcaiyun.idata.merge.data.enums.MigrateItemEnum;
-import cn.zhengcaiyun.idata.merge.data.service.*;
+import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
+import cn.zhengcaiyun.idata.mergedata.enums.MigrateItemEnum;
+import cn.zhengcaiyun.idata.mergedata.service.*;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
