@@ -23,8 +23,13 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentContentRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.GenerateMergeSqlRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /**
  * job-content-controller
@@ -48,12 +53,14 @@ public class DIJobContentController {
      * 保存DI作业内容
      *
      * @param jobId      作业id
-     * @param contentDto 作业内容信息
+     * @param contentRequest 作业内容信息
      * @return
      */
     @PostMapping("/contents")
     public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody DIJobContentContentDto contentDto) {
+                                                          @RequestBody DIJobContentContentRequest contentRequest) {
+        DIJobContentContentDto contentDto = new DIJobContentContentDto();
+        BeanUtils.copyProperties(contentRequest, contentDto);
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
     }
 
@@ -75,22 +82,30 @@ public class DIJobContentController {
      * @param jobId
      * @return
      */
-    @GetMapping("/default/merge-sql")
+    @PostMapping("/generate/merge-sql")
     public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
-                                              @RequestParam("dataSourceId") Long dataSourceId,
-                                              @RequestParam("table") String table,
-                                              @RequestParam("hiveTable") String hiveTable,
-                                              @RequestParam("diMode") String destWriteMode,
-                                              @RequestParam("driverType") String driverType) {
+                                              @RequestBody @Valid GenerateMergeSqlRequest request) {
+        String destWriteMode = request.getDestWriteMode();
         DestWriteModeEnum diMode = DestWriteModeEnum.valueOf(destWriteMode);
         if (diMode != DestWriteModeEnum.append) {
             return RestResult.success("");
         }
-        String[] hiveTableSplit = hiveTable.split("\\.");
+        String destTable = request.getDestTable();
+        String[] hiveTableSplit = destTable.split("\\.");
         if (hiveTableSplit.length != 2) {
             throw new IllegalArgumentException("The hive table must have db name");
         }
-        return RestResult.success(diJobContentService.generateMergeSql(dataSourceId, table, hiveTable, diMode, DriverTypeEnum.of(driverType)));
+
+        // 格式化输入列，为后续处理做准备
+        request.formatColumns();
+
+        String driverType = request.getDriverType();
+        String sourceTable = request.getSourceTable();
+        String keyColumns = request.getKeyColumns();
+        String selectColumns = request.getSelectColumns();
+        return RestResult.success(diJobContentService.generateMergeSql(selectColumns, keyColumns, sourceTable, destTable, diMode, DriverTypeEnum.of(driverType)));
     }
+
+
 
 }

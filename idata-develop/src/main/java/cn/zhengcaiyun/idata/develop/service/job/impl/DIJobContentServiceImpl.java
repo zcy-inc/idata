@@ -77,6 +77,11 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         checkArgument(unUsedDestTable(contentDto.getDestTable(), jobId), "目标表已经被其他作业使用");
 
         Integer version = contentDto.getVersion();
+
+        // 可视化的query无法手写，自动生成
+        String srcQuery = generateSrcQuery(contentDto.getSrcCols(), contentDto.getSrcReadFilter(), contentDto.getSrcTables());
+        contentDto.setSrcQuery(srcQuery);
+
         boolean startNewVersion = true;
         if (Objects.nonNull(version)) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
@@ -109,6 +114,27 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return get(jobId, version);
     }
 
+    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String condition, String srcTables) {
+        boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
+        if (!generate) {
+            return null;
+        }
+
+        List<String> columns = mappingColumnList.stream().map(e -> {
+            String name = e.getName();
+            String mappingSql = e.getMappingSql();
+            return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
+        }).collect(Collectors.toList());
+
+        String selectColumns = StringUtils.join(columns, ",");
+        StringBuffer stringBuffer = new StringBuffer("select " + selectColumns);
+        stringBuffer.append(" from " + srcTables);
+        if (StringUtils.isNotEmpty(condition)) {
+            stringBuffer.append(" where " + condition);
+        }
+        return stringBuffer.toString();
+    }
+
     @Override
     public DIJobContentContentDto get(Long jobId, Integer version) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
@@ -120,8 +146,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-        String tmpTable = "src." + hiveTable.split("\\.")[1] + "_pt";
+    public String generateMergeSql(String selectColumns, String keyColumns, String sourceTable, String destTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+        String tmpTable = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
         // 匹配规则：例如 "212tableName2,223tableName2"
@@ -130,37 +156,40 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         // 是否涉及多张表（分区表）
         boolean isMulPartition = false;
         if (typeEnum == DriverTypeEnum.MySQL) {
-            if (ReUtil.isMatch(regex1, table)) {
+            if (ReUtil.isMatch(regex1, sourceTable)) {
                 isMulPartition = true;
                 // 抽取基表名称
-                table = ReUtil.get(regex1, table, 1);
-            } else if (ReUtil.isMatch(regex2, table)) {
+                sourceTable = ReUtil.get(regex1, sourceTable, 1);
+            } else if (ReUtil.isMatch(regex2, sourceTable)) {
                 isMulPartition = true;
                 // 抽取基表名称
-                table = ReUtil.get(regex2, table, 2);
+                sourceTable = ReUtil.get(regex2, sourceTable, 2);
             }
         }
-        return buildMergeSql(isMulPartition, tmpTable, hiveTable, dataSourceId, table);
+        return buildMergeSql(isMulPartition, tmpTable, destTable, selectColumns, keyColumns, sourceTable);
     }
 
     /**
      * 生成merge_sql
      * @param isMulPartition 是否是分区表
      * @param tmpTable 临时表名称（带库名）
-     * @param hiveTable 目标表名称（带库名）
-     * @param dataSourceId 数据源id
-     * @param table
+     * @param destTable 目标表名称（带库名）
+     * @param selectColumns 筛选的列
+     * @param keyColumns 主键列
+     * @param sourceTable 源库
      * @return
      */
-    private String buildMergeSql(boolean isMulPartition, String tmpTable, String hiveTable, Long dataSourceId, String table) {
-
-        String[] columns = dataSourceService.getDBTableColumns(dataSourceId, table);
-        List columnList = Arrays.asList(columns[0].split(","));
+    private String buildMergeSql(boolean isMulPartition, String tmpTable, String destTable, String selectColumns, String keyColumns, String sourceTable) {
+//        String[] columns = dataSourceService.getDBTableColumns(dataSourceId, sourceTable);
+        List<String> columnList = Arrays.asList(selectColumns.split(","));
         // 筛选的列名
         String selectStr = StringUtils.join(columnList, "\n,") + "\n[,num]";
         // 筛选的带函数的列名
         String selectCoalesceStr = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,")
                 + "\n[,coalesce(t1.num, t2.num) num]";
+        //key连接表，例如"t1.id=t2.id"
+        List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
+        String keyCondition = StringUtils.join(keyColumnList, " and ");
 
         String templateSQL = "" +
                 "[" +
@@ -174,21 +203,24 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 "insert overwrite table %tmpTable partition(pt='${day}' [,num]) \n" +
                 "select %selectCoalesceStr" +
                 "from \n" +
-                "(select \n%selectStr" +
+                "(select \n" +
+                "%selectStr" +
                 "from %hiveTable) t1 \n" +
                 "full join \n" +
                 "(select \n %selectStr" +
                 "from %tmpTable where pt='${day-1d}') t2 \n" +
-                "on t1.id=t2.id [and t1.num=t2.num];\n" +
+                "on %keyCondition [and t1.num=t2.num];\n" +
 
                 "insert overwrite table %hiveTable [partition(num)]\n" +
-                "select \n%selectStr" +
+                "select \n" +
+                "%selectStr" +
                 "from %tmpTable where pt='${day}';";
         String mergeSql = templateSQL
                 .replaceAll("%tmpTable", tmpTable)
-                .replaceAll("%hiveTable", hiveTable)
+                .replaceAll("%hiveTable", destTable)
                 .replaceAll("%selectStr", selectStr)
-                .replaceAll("%selectCoalesceStr", selectCoalesceStr);
+                .replaceAll("%selectCoalesceStr", selectCoalesceStr)
+                .replaceAll("%keyCondition", keyCondition);
         if (isMulPartition) {
             //去掉'['和'
             return mergeSql.replaceAll("\\]", "").replaceAll("\\[", "");

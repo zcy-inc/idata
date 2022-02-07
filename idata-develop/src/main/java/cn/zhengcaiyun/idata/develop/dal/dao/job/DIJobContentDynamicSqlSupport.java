@@ -75,6 +75,13 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   数据流向，IN-数据集成、OUT-数据回流
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
+    public static final SqlColumn<String> direct = DI_JOB_CONTENT.direct;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_type")
@@ -89,6 +96,13 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   来源为kafka数据类型的topic
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
+    public static final SqlColumn<String> srcTopic = DI_JOB_CONTENT.srcTopic;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-读取模式，all：全量，incremental：增量
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
@@ -100,6 +114,13 @@ public final class DIJobContentDynamicSqlSupport {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_filter")
     public static final SqlColumn<String> srcReadFilter = DI_JOB_CONTENT.srcReadFilter;
+
+    /**
+     * Database Column Remarks:
+     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
+    public static final SqlColumn<String> srcQuery = DI_JOB_CONTENT.srcQuery;
 
     /**
      * Database Column Remarks:
@@ -128,6 +149,13 @@ public final class DIJobContentDynamicSqlSupport {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_id")
     public static final SqlColumn<Long> destDataSourceId = DI_JOB_CONTENT.destDataSourceId;
+
+    /**
+     * Database Column Remarks:
+     *   目标为kafka的数据类的topic
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_topic")
+    public static final SqlColumn<String> destTopic = DI_JOB_CONTENT.destTopic;
 
     /**
      * Database Column Remarks:
@@ -173,6 +201,41 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   脚本模式，作用同可视化src_columns
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
+    public static final SqlColumn<String> scriptSelectColumns = DI_JOB_CONTENT.scriptSelectColumns;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化src_columns中primaryKey字段
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_key_columns")
+    public static final SqlColumn<String> scriptKeyColumns = DI_JOB_CONTENT.scriptKeyColumns;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化merge_sql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
+    public static final SqlColumn<String> scriptMergeSql = DI_JOB_CONTENT.scriptMergeSql;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化src_query
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
+    public static final SqlColumn<String> scriptQuery = DI_JOB_CONTENT.scriptQuery;
+
+    /**
+     * Database Column Remarks:
+     *   配置模式，1：可视化模式，2：脚本模式
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.config_mode")
+    public static final SqlColumn<Integer> configMode = DI_JOB_CONTENT.configMode;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-来源表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
@@ -212,13 +275,19 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<Integer> version = column("version", JDBCType.INTEGER);
 
+        public final SqlColumn<String> direct = column("direct", JDBCType.VARCHAR);
+
         public final SqlColumn<String> srcDataSourceType = column("src_data_source_type", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> srcDataSourceId = column("src_data_source_id", JDBCType.BIGINT);
 
+        public final SqlColumn<String> srcTopic = column("src_topic", JDBCType.VARCHAR);
+
         public final SqlColumn<String> srcReadMode = column("src_read_mode", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcReadFilter = column("src_read_filter", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> srcQuery = column("src_query", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcReadShardKey = column("src_read_shard_key", JDBCType.VARCHAR);
 
@@ -227,6 +296,8 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<String> destDataSourceType = column("dest_data_source_type", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> destDataSourceId = column("dest_data_source_id", JDBCType.BIGINT);
+
+        public final SqlColumn<String> destTopic = column("dest_topic", JDBCType.VARCHAR);
 
         public final SqlColumn<String> destTable = column("dest_table", JDBCType.VARCHAR);
 
@@ -239,6 +310,16 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<String> contentHash = column("content_hash", JDBCType.VARCHAR);
 
         public final SqlColumn<String> mergeSql = column("merge_sql", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> scriptSelectColumns = column("script_select_columns", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> scriptKeyColumns = column("script_key_columns", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> scriptMergeSql = column("script_merge_sql", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> scriptQuery = column("script_query", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> configMode = column("config_mode", JDBCType.TINYINT);
 
         public final SqlColumn<String> srcTables = column("src_tables", JDBCType.LONGVARCHAR);
 

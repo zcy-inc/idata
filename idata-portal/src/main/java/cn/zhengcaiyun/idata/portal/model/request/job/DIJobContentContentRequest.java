@@ -1,14 +1,14 @@
-package cn.zhengcaiyun.idata.develop.dto.job.di;
+package cn.zhengcaiyun.idata.portal.model.request.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import javax.annotation.Generated;
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ import java.util.List;
  * @author: yangjianhua
  * @create: 2021-09-23 11:20
  **/
-public class DIJobContentContentDto extends JobContentBaseDto {
+public class DIJobContentContentRequest extends JobContentBaseDto {
     /**
      * 作业版本号描述
      */
@@ -111,11 +111,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      *   数据流向，IN-数据集成、OUT-数据回流
      */
     private String direct;
-
-    /**
-     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
-     */
-    private String srcQuery;
 
     /**
      *   来源为kafka数据类型的topic
@@ -304,14 +299,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
         this.direct = direct;
     }
 
-    public String getSrcQuery() {
-        return srcQuery;
-    }
-
-    public void setSrcQuery(String srcQuery) {
-        this.srcQuery = srcQuery;
-    }
-
     public String getSrcTopic() {
         return srcTopic;
     }
@@ -366,36 +353,5 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setConfigMode(Integer configMode) {
         this.configMode = configMode;
-    }
-
-    public static DIJobContentContentDto from(DIJobContent content) {
-        DIJobContentContentDto dto = new DIJobContentContentDto();
-        BeanUtils.copyProperties(content, dto);
-
-        if (StringUtils.isNotBlank(content.getSrcColumns())) {
-            dto.setSrcCols(JSON.parseArray(content.getSrcColumns(), MappingColumnDto.class));
-        }
-        if (StringUtils.isNotBlank(content.getDestColumns())) {
-            dto.setDestCols(JSON.parseArray(content.getDestColumns(), MappingColumnDto.class));
-        }
-        dto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
-        return dto;
-    }
-
-    public DIJobContent toModel() {
-        DIJobContent content = new DIJobContent();
-        BeanUtils.copyProperties(this, content);
-
-        if (ObjectUtils.isNotEmpty(this.srcCols)) {
-            content.setSrcColumns(JSON.toJSONString(this.srcCols));
-        } else {
-            content.setSrcColumns("");
-        }
-        if (ObjectUtils.isNotEmpty(this.destCols)) {
-            content.setDestColumns(JSON.toJSONString(this.destCols));
-        } else {
-            content.setDestColumns("");
-        }
-        return content;
     }
 }

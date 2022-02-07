@@ -42,5 +42,5 @@ public interface DIJobContentService {
      * @param typeEnum
      * @return
      */
-    String generateMergeSql(Long dataSourceId, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
+    String generateMergeSql(String selectColumns, String keyColumns, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
 }
