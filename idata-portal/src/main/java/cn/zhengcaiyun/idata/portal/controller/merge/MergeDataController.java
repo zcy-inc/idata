@@ -21,9 +21,11 @@ import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.mergedata.enums.MigrateItemEnum;
 import cn.zhengcaiyun.idata.mergedata.service.*;
+import cn.zhengcaiyun.idata.mergedata.util.MergeDataRequestLimiter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -68,6 +70,8 @@ public class MergeDataController {
     private JobMigrationService jobMigrationService;
     @Autowired
     private ModifyDIJobNameService modifyDIJobNameService;
+    @Autowired
+    private MergeDataRequestLimiter mergeDataRequestLimiter;
 
     @GetMapping("/data")
     public void mergeData(@RequestParam String mergeModules, HttpServletResponse response) {
@@ -78,26 +82,34 @@ public class MergeDataController {
         boolean mergeAll = modules.contains(MigrateItemEnum.all.name());
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         if (mergeAll || modules.contains(MigrateItemEnum.datasource.name())) {
-            resultDtoList.addAll(datasourceMigrationService.migrateDatasource());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.datasource)))
+                resultDtoList.addAll(datasourceMigrationService.migrateDatasource());
         }
         if (mergeAll || modules.contains(MigrateItemEnum.folder.name())) {
-            resultDtoList.addAll(folderMigrationService.migrate());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.folder)))
+                resultDtoList.addAll(folderMigrationService.migrate());
         }
         if (mergeAll || modules.contains(MigrateItemEnum.model.name())) {
-            modelMigrationService.syncModelMigration();
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.model)))
+                modelMigrationService.syncModelMigration();
         }
         if (mergeAll || modules.contains(MigrateItemEnum.dag.name())) {
-            resultDtoList.addAll(dagMigrationService.migrateFolder());
-            resultDtoList.addAll(dagMigrationService.migrateDAG());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.dag))) {
+                resultDtoList.addAll(dagMigrationService.migrateFolder());
+                resultDtoList.addAll(dagMigrationService.migrateDAG());
+            }
         }
         if (mergeAll || modules.contains(MigrateItemEnum.function.name())) {
-            resultDtoList.addAll(functionMigrationService.migrate());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.function)))
+                resultDtoList.addAll(functionMigrationService.migrate());
         }
         if (mergeAll || modules.contains(MigrateItemEnum.job.name())) {
-            resultDtoList.addAll(jobMigrationService.migrate());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.job)))
+                resultDtoList.addAll(jobMigrationService.migrate());
         }
         if (modules.contains(MigrateItemEnum.modify_di_job_name.name())) {
-            resultDtoList.addAll(modifyDIJobNameService.modify());
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.modify_di_job_name)))
+                resultDtoList.addAll(modifyDIJobNameService.modify());
         }
 
         if (CollectionUtils.isEmpty(resultDtoList))
