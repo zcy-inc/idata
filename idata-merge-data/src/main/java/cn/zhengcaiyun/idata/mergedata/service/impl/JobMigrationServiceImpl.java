@@ -357,6 +357,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
                 dependenceDto.setEnvironment(EnvEnum.prod.name());
                 dependenceDto.setPrevJobId(prevJobInfo.getId());
                 dependenceDto.setPrevJobDagId(prevJobConfigOptional.get().getSchDagId());
+                dependencies.add(dependenceDto);
             }
         }
         combinationDto.setDependencies(dependencies);
