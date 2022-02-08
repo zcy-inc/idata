@@ -16,8 +16,9 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.service.DevFolderService;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author caizhedong
@@ -42,8 +44,9 @@ public class DevelopFolderController {
     private DevFolderService devFolderService;
 
     @GetMapping("devFolderTree")
-    public RestResult<List<DevelopFolderTreeNodeDto>> getDevFolderTree(@RequestParam(value = "devTreeType", required = false) String devTreeType) {
-        return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType));
+    public RestResult<List<DevelopFolderTreeNodeDto>> getDevFolderTree(@RequestParam("devTreeType") String devTreeType,
+                                                                       @RequestParam(value = "treeNodeName", required = false) String treeNodeName) {
+        return RestResult.success(devFolderService.getDevelopFolderTree(devTreeType, treeNodeName));
     }
 
     @GetMapping("devFolders")

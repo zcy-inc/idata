@@ -18,19 +18,21 @@ package cn.zhengcaiyun.idata.develop.service.label.impl;
 
 import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
+import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 import cn.zhengcaiyun.idata.develop.dto.label.MetaTypeEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumDynamicSqlSupport.devEnum;
@@ -39,6 +41,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSuppo
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -60,6 +63,8 @@ public class EnumServiceImpl implements EnumService {
     private DevTableInfoDao devTableInfoDao;
     @Autowired
     private DevLabelDefineMyDao devLabelDefineMyDao;
+    @Autowired
+    private DevTreeNodeLocalCache devTreeNodeLocalCache;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -73,7 +78,7 @@ public class EnumServiceImpl implements EnumService {
             if (enumDto.getEnumValues() != null) {
                 enumDto.getEnumValues().forEach(enumValueDto -> {
                     enumValueDto.setEnumCode(enumDto.getEnumCode());
-                    createEnumValue(enumValueDto, operator);
+                    createOrEditEnumValue(enumValueDto, operator);
                 });
             }
         }
@@ -86,16 +91,34 @@ public class EnumServiceImpl implements EnumService {
             devEnumDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumDto, DevEnum.class,
                     "id", "editor", "enumName", "folderId"));
             if (enumDto.getEnumValues() != null) {
-                enumDto.getEnumValues().forEach(enumValueDto -> {
-                    if (enumValueDto.getValueCode() == null) {
-                        createEnumValue(enumValueDto, operator);
+                List<EnumValueDto> enumValueList = enumDto.getEnumValues();
+                List<EnumValueDto> existEnumValueList = getEnumValues(enumDto.getEnumCode());
+                Set<String> enumValues = enumValueList.stream().map(EnumValueDto::getValueCode).collect(Collectors.toSet());
+                Set<String> existEnumValues = existEnumValueList.stream().map(EnumValueDto::getValueCode).collect(Collectors.toSet());
+                Set<String> addEnumValues = new HashSet<>(enumValues);
+                addEnumValues.removeAll(existEnumValues);
+                Set<String> deleteEnumValues = new HashSet<>(existEnumValues);
+                deleteEnumValues.removeAll(enumValues);
+                enumValueList.forEach(enumValueDto -> {
+                    if (!deleteEnumValues.contains(enumValueDto.getValueCode())) {
+                        enumValueDto.setEnumCode(enumDto.getEnumCode());
+                        createOrEditEnumValue(enumValueDto, operator);
                     }
-                    else {
-                        editEnumValue(enumValueDto, operator);
+                });
+                existEnumValueList.forEach(enumValueDto -> {
+                    if (deleteEnumValues.contains(enumValueDto.getValueCode())) {
+                        devEnumValueDao.update(c -> c.set(devEnumValue.del).equalTo(1)
+                                .set(devEnumValue.editor).equalTo(operator)
+                                .where(devEnumValue.del, isNotEqualTo(1),
+                                        and(devEnumValue.enumCode, isEqualTo(enumDto.getEnumCode())),
+                                        and(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()))));
                     }
                 });
             }
         }
+        // clear cache
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+
         return PojoUtil.copyOne(devEnumDao.selectOne(c ->
                 c.where(devEnum.enumCode, isEqualTo(enumDto.getEnumCode()))).get(), EnumDto.class);
     }
@@ -105,8 +128,7 @@ public class EnumServiceImpl implements EnumService {
         checkArgument(enumValueDto.getEnumValue() != null, "enumValue不能为空");
         checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
         devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
-                "creator", "enumCode", "valueCode", "enumValue",
-                "enumAttributes", "parentCode"));
+                "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
     }
 
     private void editEnumValue(EnumValueDto enumValueDto, String operator) {
@@ -118,6 +140,43 @@ public class EnumServiceImpl implements EnumService {
         enumValueDto.setEditor(operator);
         devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
                 "id", "editor", "enumValue", "enumAttributes", "parentCode"));
+    }
+
+    private void createOrEditEnumValue(EnumValueDto enumValueDto, String operator) {
+        checkArgument(isNotEmpty(enumValueDto.getEnumValue()), "enumValue不能为空");
+        if (StringUtils.isNotEmpty(enumValueDto.getValueCode())) {
+            DevEnumValue existEnumValue = devEnumValueDao.selectOne(c ->
+                c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
+                        and(devEnumValue.del, isNotEqualTo(1))))
+                .orElse(null);
+            checkArgument(existEnumValue != null, "枚举值有误");
+            enumValueDto.setId(existEnumValue.getId());
+            enumValueDto.setEditor(operator);
+            devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+                    "id", "editor", "enumValue", "enumAttributes", "parentCode"));
+        }
+        else {
+            enumValueDto.setValueCode(RandomUtil.randomStr(10) + ":ENUM_VALUE");
+            enumValueDto.setCreator(operator);
+            devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+                    "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
+        }
+//        checkArgument(enumValueDto.getValueCode() != null, "valueCode不能为空");
+//        DevEnumValue existEnumValue = devEnumValueDao.selectOne(c ->
+//                c.where(devEnumValue.valueCode, isEqualTo(enumValueDto.getValueCode()),
+//                        and(devEnumValue.del, isNotEqualTo(1))))
+//                .orElse(null);
+//        if (existEnumValue == null) {
+//            enumValueDto.setCreator(operator);
+//            devEnumValueDao.insertSelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+//                    "creator", "enumCode", "valueCode", "enumValue", "enumAttributes", "parentCode"));
+//        }
+//        else {
+//            enumValueDto.setId(existEnumValue.getId());
+//            enumValueDto.setEditor(operator);
+//            devEnumValueDao.updateByPrimaryKeySelective(PojoUtil.copyOne(enumValueDto, DevEnumValue.class,
+//                    "id", "editor", "enumValue", "enumAttributes", "parentCode"));
+//        }
     }
 
     @Override
@@ -133,7 +192,14 @@ public class EnumServiceImpl implements EnumService {
     }
 
     @Override
-    public List<EnumDto> getEnumNames() {
+    public String getEnumCode(Long enumId) {
+        DevEnum enumDto = devEnumDao.selectOne(c -> c.where(devEnum.del, isNotEqualTo(1), and(devLabel.id, isEqualTo(enumId))))
+                .orElseThrow(() -> new IllegalArgumentException("枚举不存在"));
+        return enumDto.getEnumCode();
+    }
+
+    @Override
+    public List<EnumDto> getEnums() {
         return PojoUtil.copyList(devEnumDao.select(c ->
                 c.where(devEnum.del, isNotEqualTo(1))), EnumDto.class);
     }
@@ -185,10 +251,9 @@ public class EnumServiceImpl implements EnumService {
     }
 
     @Override
-    public List<String> getEnumValues(List<String> valueCodes) {
+    public List<DevEnumValue> getEnumValues(List<String> valueCodes) {
         return devEnumValueDao.select(c ->
-                c.where(devEnumValue.valueCode, isIn(valueCodes), and(devEnumValue.del, isNotEqualTo(1))))
-                .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+                c.where(devEnumValue.valueCode, isIn(valueCodes), and(devEnumValue.del, isNotEqualTo(1))));
     }
 
     @Override
@@ -220,6 +285,25 @@ public class EnumServiceImpl implements EnumService {
                 .set(devEnumValue.editor).equalTo(operator)
                 .where(devEnumValue.enumCode, isEqualTo(enumCode),
                         and(devEnumValue.del, isNotEqualTo(1))));
+        // clear cache
+//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_ENUM);
+
         return true;
+    }
+
+    @Override
+    public Map<String, String> getEnumValueMapByCode(String enumCode) {
+        return devEnumValueDao.select(c ->
+                c.where(devEnumValue.enumCode, isEqualTo(enumCode), and(devEnumValue.del, isNotEqualTo(1))))
+                .stream()
+                .collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+    }
+
+    @Override
+    public Map<String, String> getCodeMapByEnumValue(String enumCode) {
+        return devEnumValueDao.select(c ->
+                        c.where(devEnumValue.enumCode, isEqualTo(enumCode), and(devEnumValue.del, isNotEqualTo(1))))
+                .stream()
+                .collect(Collectors.toMap(DevEnumValue::getEnumValue, DevEnumValue::getValueCode));
     }
 }

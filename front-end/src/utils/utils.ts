@@ -108,7 +108,7 @@ export const cutTreeData = <T extends TreeNode>(roots: T[], level: number) => {
   const holder = cloneDeep(roots);
   const stack: T[] = [];
   const loop = (nodes: T[]) => {
-    nodes.forEach((node) => {
+    nodes?.forEach((node) => {
       stack.push(node);
       if (stack.length >= level) {
         delete node.children;
@@ -239,4 +239,27 @@ export const getAllParentsKey = <T extends TreeNode>(
     }
   }
   return arr;
+};
+
+/**
+ * combine request url
+ */
+export const getRequestUrl = (url: string) => {
+  const workspaceString = sessionStorage.getItem('workspace');
+  let workspace = '';
+  if (workspaceString) {
+    try {
+      const workspaceJson = JSON.parse(workspaceString);
+      workspace = workspaceJson.urlPath || '';
+      if (workspaceJson.urlPath === 'zcy') {
+        workspace = '';
+      }
+    } catch (e) {
+      workspace = '';
+    }
+  }
+  if (workspace) {
+    return `/${workspace}${url}`;
+  }
+  return url;
 };

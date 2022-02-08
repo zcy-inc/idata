@@ -66,6 +66,13 @@ public final class SysFeatureDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.parent_code")
     public static final SqlColumn<String> parentCode = sysFeature.parentCode;
 
+    /**
+     * Database Column Remarks:
+     *   功能请求路径
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: sys_feature.feature_url_path")
+    public static final SqlColumn<String> featureUrlPath = sysFeature.featureUrlPath;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_feature")
     public static final class SysFeature extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -83,6 +90,8 @@ public final class SysFeatureDynamicSqlSupport {
         public final SqlColumn<String> featureType = column("feature_type", JDBCType.VARCHAR);
 
         public final SqlColumn<String> parentCode = column("parent_code", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> featureUrlPath = column("feature_url_path", JDBCType.VARCHAR);
 
         public SysFeature() {
             super("sys_feature");

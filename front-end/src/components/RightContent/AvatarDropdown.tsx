@@ -31,7 +31,24 @@ const AvatarDropdown: React.FC = () => {
     [],
   );
 
-  const loading = (
+  const menuHeaderDropdown = (
+    <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
+      <Menu.Item key="logout">
+        <LogoutOutlined />
+        退出登录
+      </Menu.Item>
+    </Menu>
+  );
+
+  return initialState?.currentUser ? (
+    <HeaderDropdown overlay={menuHeaderDropdown}>
+      <div className={`${styles.action}`}>
+        <Avatar src={initialState?.currentUser.avatar} size={25} />
+        <span className={styles.nickname}>{initialState?.currentUser.nickname}</span>
+        <CaretDownOutlined className={styles.downIcon} />
+      </div>
+    </HeaderDropdown>
+  ) : (
     <span className={`${styles.action} ${styles.account}`}>
       <Spin
         size="small"
@@ -41,34 +58,6 @@ const AvatarDropdown: React.FC = () => {
         }}
       />
     </span>
-  );
-
-  if (!initialState) {
-    return loading;
-  }
-
-  const { currentUser } = initialState;
-
-  if (!currentUser) {
-    return loading;
-  }
-
-  const menuHeaderDropdown = (
-    <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-      <Menu.Item key="logout">
-        <LogoutOutlined />
-        退出登录
-      </Menu.Item>
-    </Menu>
-  );
-  return (
-    <HeaderDropdown overlay={menuHeaderDropdown}>
-      <div className={`${styles.action}`}>
-        <Avatar src={currentUser.avatar} />
-        <span className={styles.nickname}>{currentUser.nickname}</span>
-        <CaretDownOutlined className={styles.downIcon} />
-      </div>
-    </HeaderDropdown>
   );
 };
 

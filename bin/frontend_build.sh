@@ -6,7 +6,7 @@ cd "$parent_path"/../front-end
 
 if [ ! -d "./node_modules" ]
 then
-  npm i --registry=http://mirrors-front.cai-inc.com
+  npm i --registry=http://mirrors-front.cai-inc.com --force
 fi
 
 npm run build

@@ -16,17 +16,26 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.sys;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.SystemStateDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.system.dto.*;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author shiyin
@@ -37,6 +46,13 @@ public class SystemController {
 
     @Autowired
     private SystemService systemService;
+    @Autowired
+    private SystemConfigService systemConfigService;
+    @Autowired
+    private UserAccessService userAccessService;
+
+    private final String CONFIG_CENTER_ACCESS_CODE = "F_MENU_CONFIG_CENTER";
+    private final String CONFIG_LDAP_ACCESS_CODE = "F_MENU_LDAP_CENTER";
 
     @GetMapping("/p0/sys/state")
     public RestResult<SystemStateDto> getSystemState() {
@@ -50,6 +66,42 @@ public class SystemController {
 
     @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success(systemService.getFolderTree(new HashMap<>()));
+        return RestResult.success(systemService.getDevFolderTree(new HashMap<>()));
+    }
+
+    @GetMapping("/p1/sys/configTypes")
+    public RestResult<List<String>> getConfigTypes() {
+        return RestResult.success(systemConfigService.getConfigTypes());
+    }
+
+    @GetMapping("/p1/sys/configs")
+    public RestResult<List<ConfigDto>> getConfigsByType(@RequestParam("configType") String configType) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_CENTER_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有集成配置权限");
+        }
+        return RestResult.success(systemConfigService.getSystemConfigs(configType));
+    }
+
+    @GetMapping("/p1/sys/ldap/configs")
+    public RestResult<List<ConfigDto>> getLDAPConfigs() throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_LDAP_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有LDAP配置权限");
+        }
+        return RestResult.success(systemConfigService.getSystemConfigs(ConfigTypeEnum.LDAP.name()));
+    }
+
+    @PostMapping("/p1/sys/xmlConfigValue")
+    public RestResult<Map<String, ConfigValueDto>> getXmlConfigValue(@RequestParam("xmlFile") MultipartFile xmlFile) throws IOException {
+        return RestResult.success(systemConfigService.getXmlConfigValues(xmlFile));
+    }
+
+    @PostMapping("/p1/sys/checkConnection")
+    public RestResult<Boolean> checkConfigConnection(@RequestBody ConnectionDto connection) {
+        return RestResult.success(systemConfigService.checkConnection(connection));
+    }
+
+    @PutMapping("/p1/sys/config")
+    public RestResult<List<ConfigDto>> editSystemConfig(@RequestBody List<ConfigDto> configs) {
+        return RestResult.success(systemConfigService.editSystemConfigs(configs, OperatorContext.getCurrentOperator().getNickname()));
     }
 }

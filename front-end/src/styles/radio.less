@@ -1,0 +1,22 @@
+body {
+  .ant-radio-wrapper {
+    color: #737b96;
+    .ant-radio-inner {
+      border-color: #bfc4d5;
+    }
+    .ant-radio-checked .ant-radio-inner {
+      border-color: var(--primary-color);
+      border-width: 5px;
+      &::after {
+        display: none;
+      }
+    }
+    .ant-radio-disabled .ant-radio-inner {
+      background-color: #eeeff2;
+      border-color: #bfc4d5 !important;
+    }
+    .ant-radio-disabled + span {
+      color: #737b96;
+    }
+  }
+}

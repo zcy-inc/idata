@@ -2,18 +2,18 @@ import { useState } from 'react';
 import type { ReactNode, Key } from 'react';
 
 import { getFolderTree } from '@/services/objectlabel';
-import { TreeNode } from '@/types/objectlabel';
+import { RuleLayer, TreeNode } from '@/types/objectlabel';
 
 interface ITab {
-  key: Key;
+  key: Key; // `${originId}` | Date.now()
+  originId: number; // originId
   title: string | ReactNode;
-  originId: number;
   [key: string]: any;
 }
 const newObjectLabel = {
-  title: '新建数据标签',
-  key: 'newObjectLabel',
+  key: Date.now(),
   originId: -1,
+  title: '新建数据标签',
   mode: 'edit',
 };
 
@@ -27,7 +27,7 @@ export default () => {
   const [tabs, setTabs] = useState<ITab[]>([]);
   const [activeTab, setActiveTab] = useState('');
   // editRules
-  const [editLayers, setEditLayers] = useState([]);
+  const [editLayers, setEditLayers] = useState<RuleLayer[]>([]);
 
   // 获取树
   const getTree = () => {
@@ -40,17 +40,31 @@ export default () => {
   const viewTab = (node: TreeNode) => {
     const { name, id, type } = node;
     if (!tabs.some((_) => _.key === `${id}`)) {
-      setTabs([...tabs, { key: `${id}`, originId: id as number, title: name, type, mode: 'view' }]);
+      // 关于tabs的key
+      // 数据标签中存在【标签历史版本】这一概念, 其存在属性originId和id
+      // originId为该标签的唯一标识符, 所有该标签的历史版本共享一个, 编辑操作不改变originId
+      // id为该标签某一个历史版本的唯一标识符, 编辑操作后修改id
+      // GET 使用originId
+      // POST, DELETE 使用id
+      setTabs([
+        ...tabs,
+        {
+          key: `${id}`,
+          originId: id as number,
+          title: name,
+          type,
+          mode: 'view',
+        },
+      ]);
     }
     setActiveTab(`${id}`);
   };
 
   // 增加一个tab
   const createTab = () => {
-    if (!tabs.some((_) => _.key === 'newObjectLabel')) {
-      setTabs([...tabs, newObjectLabel]);
-    }
-    setActiveTab('newObjectLabel');
+    const key = Date.now().toString();
+    setTabs([...tabs, { ...newObjectLabel, key }]);
+    setActiveTab(key);
   };
 
   // 关闭一个tab
@@ -64,6 +78,21 @@ export default () => {
     }
     setTabs(curPanes);
     setActiveTab(curActiveKey);
+  };
+
+  // 新建完成后替换该Tab的key
+  const replaceTab = (oldKey: string, newKey: number, title: string) => {
+    let targetI = tabs.findIndex((_) => _.key === oldKey);
+    let newTab: ITab = {
+      key: `${newKey}`,
+      title: title,
+      originId: newKey,
+      mode: 'view',
+    };
+    tabs[targetI] = newTab;
+    getTree();
+    setActiveTab(`${newKey}`);
+    setTabs([...tabs]);
   };
 
   return {
@@ -82,6 +111,7 @@ export default () => {
     viewTab,
     createTab,
     removeTab,
+    replaceTab,
     // editRules
     editLayers,
     setEditLayers,

@@ -12,47 +12,120 @@
                         connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
                         userId="root" password="123456"/>
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model" targetProject="src/main/java"/>
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao" targetProject="src/main/java"/>
+<!--        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.integration" targetProject="src/main/java">-->
 
-        <table tableName="dev_folder" mapperName="DevFolderDao">
+<!--        </javaModelGenerator>-->
+<!--        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.integration" targetProject="src/main/java" type="XMLMAPPER">-->
+
+<!--        </javaClientGenerator>-->
+
+<!--        <sqlMapGenerator targetPackage="mappers" targetProject="src/main/resources">-->
+<!--            <property name="enableSubPackages" value="false"/>-->
+<!--        </sqlMapGenerator>-->
+
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java"/>
+
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java"/>
+
+
+<!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="label_required" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="label_attributes" javaType="java.util.List"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--            <columnOverride column="special_attribute" javaType="cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
+
+        <table tableName="dev_job_content_di" domainObjectName="DIJobContent" mapperName="DIJobContentDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
+            <columnOverride column="editable" javaType="java.lang.Integer"/>
         </table>
-        <table tableName="dev_table_info" mapperName="DevTableInfoDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_column_info" mapperName="DevColumnInfoDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="label_required" javaType="java.lang.Integer"/>
-            <columnOverride column="label_attributes" javaType="java.util.List"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-            <columnOverride column="special_attribute" javaType="cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-        </table>
-        <table tableName="dev_label" mapperName="DevLabelDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_enum" mapperName="DevEnumDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
-        <table tableName="dev_enum_value" mapperName="DevEnumValueDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="enum_attributes" javaType="java.util.List"
-                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>
-        </table>
-        <table tableName="dev_foreign_key" mapperName="DevForeignKeyDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
+<!--        <table tableName="dev_job_execute_config" domainObjectName="JobExecuteConfig" mapperName="JobExecuteConfigDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="sch_dry_run" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_publish_record" domainObjectName="JobPublishRecord" mapperName="JobPublishRecordDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_dag_info" domainObjectName="DAGInfo" mapperName="DAGInfoDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_dag_dependence" domainObjectName="DAGDependence" mapperName="DAGDependenceDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_dag_event_log" domainObjectName="DAGEventLog" mapperName="DAGEventLogDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_job_event_log" domainObjectName="JobEventLog" mapperName="JobEventLogDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_job_dependence" domainObjectName="JobDependence" mapperName="JobDependenceDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="dev_job_output" domainObjectName="JobOutput" mapperName="JobOutputDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="ite_ds_entity_mapping" domainObjectName="DSEntityMapping" mapperName="DSEntityMappingDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="ite_ds_dependence_node" domainObjectName="DSDependenceNode" mapperName="DSDependenceNodeDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_info" mapperName="DevJobInfoDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_content_sql" mapperName="DevJobContentSqlDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_content_spark" mapperName="DevJobContentSparkDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="app_arguments" javaType="java.util.List"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_content_script" mapperName="DevJobContentScriptDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="script_arguments" javaType="java.util.List"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_content_kylin" mapperName="DevJobContentKylinDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_udf" mapperName="DevJobUdfDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_history" mapperName="DevJobHistoryDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--        </table>-->
     </context>
 </generatorConfiguration>

@@ -16,10 +16,13 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
+import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
@@ -28,10 +31,14 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnTypeEnum;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import com.alibaba.fastjson.JSON;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +46,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelTag;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -61,50 +71,65 @@ public class DimensionServiceImpl implements DimensionService {
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private DimensionService dimensionService;
     @Autowired
     private ColumnInfoService columnInfoService;
 
-    private String[] dimensionInfos = new String[]{"enName", "dimensionId", "dimensionDefine"};
+    private final String[] dimensionInfos = new String[]{"enName", "dimensionId", "dimensionDefine"};
+    private final String DB_NAME = "dbName:LABEL";
+    private final String EN_NAME = "enName";
+    private final String COL_COMMENT = "columnComment:LABEL";
+    private final String TBL_COMMENT = "tblComment:LABEL";
+    private final String COLUMN_TYPE = "columnType:LABEL";
+    private final String COL_TYPE_ENUM = "hiveColTypeEnum:ENUM";
 
     @Override
     public MeasureDto findDimension(String dimensionCode) {
-        DevLabelDefine dimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
-                .orElse(null);
-        checkArgument(dimension != null, "维度不存在");
-
-        MeasureDto echoDimension = PojoUtil.copyOne(dimension, MeasureDto.class);
-        echoDimension.setMeasureLabels(labelService.findLabelsByCode(dimensionCode));
-        return echoDimension;
+        return getDimensionByCode(dimensionCode);
     }
 
     // 利用指标code反查维度
     @Override
-    public List<MeasureDto> findDimensionsByLabelCode(String labelCode) {
-        DevLabelDefine dimensionLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelTag, isNotLike("%_DISABLE")), and(devLabelDefine.labelCode, isEqualTo(labelCode))))
+    public List<MeasureDto> findDimensionsByMetricCode(String metricCode) {
+        DevLabelDefine metricLabelDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelTag, isLike("%_METRIC_LABEL%")), and(devLabelDefine.labelCode, isEqualTo(metricCode))))
                 .orElse(null);
-        checkArgument(dimensionLabelDefine != null, "维度不存在或已停用");
-        List<LabelDto> dimensionLabelList = PojoUtil.copyList(devLabelDao.select(c -> c.where(devLabel.del,
-                isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(labelCode)))), LabelDto.class);
-        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
-                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
-        dimensionLabelList.forEach(dimensionLabel -> {
-            if (tableMap.containsKey(dimensionLabel.getTableId())) {
-                dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId()));
-            }
-        });
-        return null;
+        checkArgument(metricLabelDefine != null, "指标不存在");
+        List<MeasureDto> echoDimensionList = new ArrayList<>();
+        if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metricLabelDefine.getLabelTag())) {
+            echoDimensionList = getDimensionsByAtomicMetricCode(metricCode);
+        }
+        else if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metricLabelDefine.getLabelTag())) {
+            echoDimensionList = getDimensionsByAtomicMetricCode(metricLabelDefine.getSpecialAttribute().getAtomicMetricCode());
+        }
+        return echoDimensionList;
     }
 
     @Override
     public List<String> findDimensionValues(String dimensionCode) {
-        // TODO 展天底表暂无，mock数据用于联调
-        String[] mockDimensionValues = new String[]{"339900", "330899", "330802"};
-        return Arrays.asList(mockDimensionValues);
+        DevLabelDefine dimensionDefine = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())),
+                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
+                .orElseThrow(() -> new IllegalArgumentException("维度不存在"));
+        DevLabel dimensionLabel = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(dimensionCode)), and(devLabel.labelParamValue, isEqualTo("true"))))
+                .orElse(null);
+        if (dimensionLabel == null) { return null; }
+        DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.id, isEqualTo(dimensionLabel.getTableId())))).get();
+        String dbName = devLabelDao.selectOne(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.tableId, isEqualTo(dimensionLabel.getTableId())), and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .get().getLabelParamValue();
+        String selectSql = String.format("SELECT DISTINCT %s FROM %s.%s", dimensionLabel.getColumnName(), dbName,
+                tableInfo.getTableName());
+        List<String> echoDimensionValues = new ArrayList<>();
+        // TODO mock数据用于联调，sql已完成，待调用查询方法
+        echoDimensionValues = Arrays.asList("339900", "330899", "330802");
+        return echoDimensionValues;
     }
 
     @Override
@@ -126,7 +151,7 @@ public class DimensionServiceImpl implements DimensionService {
             throw new IllegalArgumentException(String.join(",", dimensionInfoList) + "不能为空");
         }
         checkArgument(dimension.getMeasureLabels() != null && dimension.getMeasureLabels().size() > 0, "关联信息不能为空");
-        checkArgument(dimension.getSpecialAttribute().getDegradeDim() != null, "是否退化维不能我空");
+        checkArgument(dimension.getSpecialAttribute().getDegradeDim() != null, "是否退化维不能为空");
 
         List<LabelDto> dimensionLabelList = dimension.getMeasureLabels();
         // 校验关联信息
@@ -186,8 +211,9 @@ public class DimensionServiceImpl implements DimensionService {
             List<LabelDto> deleteDimensionLabelList = existDimensionLabelList.stream().filter(dimensionLabel ->
                     deleteDimensionStr.contains(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName())
             ).collect(Collectors.toList());
-            List<LabelDto> addEchoDimensionLabelList = addDimensionLabelList.stream().map(dimensionLabel ->
-                    labelService.label(dimensionLabel, operator))
+            List<LabelDto> addEchoDimensionLabelList = addDimensionLabelList.stream().map(dimensionLabel -> {
+                    dimensionLabel.setLabelCode(dimension.getLabelCode());
+                    return labelService.label(dimensionLabel, operator);})
                     .collect(Collectors.toList());
             boolean isDelete = deleteDimensionLabelList.stream().allMatch(deleteDimensionLabel ->
                     labelService.removeLabel(deleteDimensionLabel, operator));
@@ -199,19 +225,21 @@ public class DimensionServiceImpl implements DimensionService {
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public MeasureDto disable(String dimensionCode, String operator) {
+    public MeasureDto disableOrAble(String dimensionCode, String labelTag, String operator) {
         checkArgument(isNotEmpty(operator), "修改者不能为空");
         checkArgument(isNotEmpty(dimensionCode), "维度Code不能为空");
+        String existLabelTag = LabelTagEnum.DIMENSION_LABEL_DISABLE.name().equals(labelTag) ?
+                LabelTagEnum.DIMENSION_LABEL.name() : LabelTagEnum.DIMENSION_LABEL_DISABLE.name();
         DevLabelDefine checkDimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(dimensionCode)), and(devLabelDefine.labelTag,
-                        isEqualTo(LabelTagEnum.DIMENSION_LABEL.name()))))
+                        isEqualTo(existLabelTag))))
                 .orElse(null);
-        checkArgument(checkDimension != null, "维度不存在或已停用");
+        checkArgument(checkDimension != null, "维度不存在");
 
-        devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(LabelTagEnum.DIMENSION_LABEL_DISABLE.name())
+        devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(labelTag)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelCode, isEqualTo(dimensionCode)),
-                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name()))));
+                        and(devLabelDefine.labelTag, isEqualTo(existLabelTag))));
         return dimensionService.findDimension(dimensionCode);
     }
 
@@ -221,10 +249,84 @@ public class DimensionServiceImpl implements DimensionService {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(isNotEmpty(dimensionCode), "维度Code不能为空");
         DevLabelDefine checkDimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
+                and(devLabelDefine.labelCode, isEqualTo(dimensionCode)),
+                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL_DISABLE.name()))))
                 .orElse(null);
-        checkArgument(checkDimension != null, "维度不存在");
+        checkArgument(checkDimension != null, "维度不存在或未停用或已删除");
 
         return labelService.deleteDefine(dimensionCode, operator);
+    }
+
+    private MeasureDto getDimensionByCode(String dimensionCode) {
+        DevLabelDefine dimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(dimensionCode))))
+                .orElse(null);
+        checkArgument(dimension != null, "维度不存在");
+
+        MeasureDto echoDimension = PojoUtil.copyOne(dimension, MeasureDto.class);
+        echoDimension.setMeasureLabels(labelService.findLabelsByCode(dimensionCode));
+        return echoDimension;
+    }
+
+    private List<MeasureDto> getDimensionsByAtomicMetricCode(String atomicMetricCode) {
+        Map<Long, String> dwdTableInfoMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(DB_NAME))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COL_COMMENT))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<Long, String> tableCommentMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(TBL_COMMENT))))
+                .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(COLUMN_TYPE))))
+                .stream().collect(Collectors.toMap(record -> record.getTableId() + "_" + record.getColumnName(), DevLabel::getLabelParamValue));
+        Map<String, String> columnTypeEnumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isEqualTo(COL_TYPE_ENUM))))
+                .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
+
+        List<LabelDto> metricLabelList = PojoUtil.copyList(devLabelDao.select(c -> c.where(devLabel.del,
+                isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(atomicMetricCode)))), LabelDto.class);
+        List<Long> metricLabelTableIdList = metricLabelList.stream().map(LabelDto::getTableId).collect(Collectors.toList());
+        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+        List<LabelDto> dimensionLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+                .from(devLabel)
+                .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.tableId, isIn(metricLabelTableIdList)),
+                        and(devLabelDefine.del, isNotEqualTo(1)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())))
+                .build().render(RenderingStrategies.MYBATIS3)), LabelDto.class)
+                .stream().peek(dimensionLabel -> {
+                    dimensionLabel.setTableName(tableMap.get(dimensionLabel.getTableId()));
+                    dimensionLabel.setTableComment(tableCommentMap.get(dimensionLabel.getTableId()));
+                    dimensionLabel.setDbName(dwdTableInfoMap.get(dimensionLabel.getTableId()));
+                    String columnComment = columnCommentMap.containsKey(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName())
+                            ? columnCommentMap.get(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName()) : dimensionLabel.getColumnName();
+                    dimensionLabel.setColumnComment(columnComment);
+                    dimensionLabel.setColumnDataType(ColumnTypeEnum.toDataType(columnTypeEnumMap
+                            .get(columnTypeMap.get(dimensionLabel.getTableId() + "_" + dimensionLabel.getColumnName()))));
+                }).collect(Collectors.toList());
+        if (dimensionLabelList.size() == 0) {
+            return null;
+        }
+        Map<String, List<LabelDto>> dimensionLabelMap = dimensionLabelList.stream().collect(Collectors.groupingBy(LabelDto::getLabelCode));
+        Set<String> dimensionLabelCodeList = dimensionLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toSet());
+        List<LabelDefineDto> dimensionLabelDefineList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.DIMENSION_LABEL.name())),
+                        and(devLabelDefine.labelCode, isIn(dimensionLabelCodeList)))), LabelDefineDto.class);
+        return dimensionLabelDefineList.stream().map(dimension -> {
+            MeasureDto echoDimension = new MeasureDto();
+            echoDimension.setLabelCode(dimension.getLabelCode());
+            echoDimension.setLabelName(dimension.getLabelName());
+            String enName = dimension.getLabelAttributes()
+                    .stream().filter(labelAttribute -> labelAttribute.getAttributeKey().equals(EN_NAME))
+                    .findAny()
+                    .get().getAttributeValue();
+            echoDimension.setEnName(enName);
+            echoDimension.setMeasureLabels(dimensionLabelMap.get(dimension.getLabelCode()));
+            return echoDimension;
+        }).collect(Collectors.toList());
     }
 }

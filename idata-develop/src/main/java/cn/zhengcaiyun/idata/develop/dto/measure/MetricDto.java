@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.dto.measure;
 
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.DataTypeEnum;
 
 import java.util.List;
 

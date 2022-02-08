@@ -34,6 +34,7 @@ public class DevelopFolderTreeNodeDto {
 
     private Long folderId;
     private String fileCode;
+    private String folderType;
 
     private Long parentId;
     private List<DevelopFolderTreeNodeDto> children;
@@ -77,6 +78,14 @@ public class DevelopFolderTreeNodeDto {
 
     public void setFileCode(String fileCode) {
         this.fileCode = fileCode;
+    }
+
+    public String getFolderType() {
+        return folderType;
+    }
+
+    public void setFolderType(String folderType) {
+        this.folderType = folderType;
     }
 
     public Long getParentId() {

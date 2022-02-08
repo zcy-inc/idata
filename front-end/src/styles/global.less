@@ -1,0 +1,70 @@
+.split-panel {
+  padding: 0 !important;
+  .board {
+    height: 100%;
+  }
+}
+
+.folder-tree {
+  height: 100%;
+  padding: 16px 18px 16px 16px;
+  .ant-tabs-tab {
+    margin-left: 0;
+    padding: 12px 28px;
+    .ant-tabs-tab-btn {
+      font-size: 16px;
+    }
+  }
+  .ant-tabs-tab-active {
+    font-weight: bold;
+  }
+  .ant-tree {
+    height: calc(100% - 98px);
+    overflow-y: auto;
+  }
+  .ant-tree-switcher {
+    width: 15px;
+    color: #c0c4da;
+  }
+  .ant-tree-title {
+    word-break: break-all;
+    .anticon {
+      margin-right: 4px;
+      font-size: 15px;
+    }
+  }
+  .search {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    .icon-plus {
+      margin-left: 8px;
+      font-size: 18px;
+    }
+  }
+  .folder-root {
+    font-weight: bold;
+  }
+  .search-match {
+    color: var(--warning-color);
+  }
+}
+
+.workbench-submit {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 12px 48px;
+  background: #fff;
+  box-shadow: 0 -5px 4px -3px #f0f2f5;
+  z-index: 2;
+}
+
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

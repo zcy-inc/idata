@@ -34,10 +34,12 @@ public class TableInfoDto {
     private String editor;
     private Date editTime;
     private String tableName;
+    private String hiveTableName;
     private Long folderId;
     private List<LabelDto> tableLabels;
     private List<ColumnInfoDto> columnInfos;
     private List<ForeignKeyDto> foreignKeys;
+    private String dbName;
 
     // GaS
     public Long getId() {
@@ -126,5 +128,21 @@ public class TableInfoDto {
 
     public void setForeignKeys(List<ForeignKeyDto> foreignKeys) {
         this.foreignKeys = foreignKeys;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public String getHiveTableName() {
+        return hiveTableName;
+    }
+
+    public void setHiveTableName(String hiveTableName) {
+        this.hiveTableName = hiveTableName;
     }
 }

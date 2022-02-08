@@ -1,21 +1,32 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Space, Empty } from 'antd';
+import React, { CSSProperties, Fragment, useEffect, useState } from 'react';
+import { Button, Card, Descriptions, Typography, Skeleton, Tabs, Table, Empty, Spin } from 'antd';
+import { get } from 'lodash';
 import type { FC, Key } from 'react';
-import styles from '../../index.less';
 
 import Title from '../Title';
 import ViewRules from './components/ViewRules';
 
-import { getObjectLabelLayer, exportObjectLabel } from '@/services/objectlabel';
+import { getObjectLabelLayer } from '@/services/objectlabel';
 import { ObjectLabel, RuleLayer } from '@/types/objectlabel';
 import { ObjectTypeView } from './constants';
 
 export interface ViewLabelProps {
   data: ObjectLabel;
 }
+interface Column {
+  columnName: string;
+  columnType: string;
+  dataType: string;
+}
 
 const { Item } = Descriptions;
-const { Link } = Typography;
+const { Link, Text } = Typography;
+const ellipsis: CSSProperties = {
+  display: 'inline-block',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [visible, setVisible] = useState(false);
@@ -24,7 +35,6 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
   const [activeKey, setActiveKey] = useState<string>('');
 
   const [loading, setLoading] = useState(false);
-  const [loadingExport, setLoadingExport] = useState(false);
   const [columns, setColumns] = useState<{ title: string; key: Key; dataIndex: Key }[][]>([]);
   const [list, setList] = useState<{ [key: string]: any }[][]>([]);
 
@@ -33,28 +43,36 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      setLayers(data.ruleLayers);
-      setActiveKey(`${data.ruleLayers[0].layerId}`);
+      const tmpRuleLayers = get(data, 'ruleLayers', []);
+      const tmpActiveKey = get(data, 'ruleLayers.[0].layerId', '');
+      setLayers(tmpRuleLayers);
+      setActiveKey(`${tmpActiveKey}`);
     }
   }, [data]);
 
-  const getActiveIndex = () => layers.findIndex((layer) => `${layer.layerId}` === activeKey);
+  const getActiveIndex = () => layers.findIndex((layer) => `${layer.layerId}` === `${activeKey}`);
 
   const getList = () => {
     setLoading(true);
     getObjectLabelLayer({ id: data.id, layerId: activeKey })
       .then((res) => {
-        const c = res.data.columns.map((column, i) => ({
+        // 处理列
+        const resColumns: Column[] = get(res, 'data.columns', []);
+        const c = resColumns.map((column, i) => ({
           title: column.columnName,
           key: i,
           dataIndex: i,
         }));
-        const d = res.data.data.map((r) => {
+        // 处理数据
+        const resData: string[][] = get(res, 'data.data', []);
+        const d = resData.map((r) => {
           const tmp = { id: Date.now() };
           r.forEach((v, i) => (tmp[i] = v));
           return tmp;
         });
+        // 获取当前显示的分层下标
         const i = getActiveIndex();
+
         columns[i] = c;
         list[i] = d;
         setColumns([...columns]);
@@ -64,37 +82,10 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
       .finally(() => setLoading(false));
   };
 
-  const onExport = () => {
-    setLoadingExport(true);
-    exportObjectLabel({ id: data.id, layerId: activeKey })
-      .then((res) => {
-        const body = document.querySelector('body');
-        const link = document.createElement('a');
-        const blob = new Blob([res], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
-        link.href = window.URL.createObjectURL(blob); // 创建URL对象 param: blob
-        link.download = `${data.name}_${activeKey}`;
-        // fix Firefox
-        link.style.display = 'none';
-        body?.appendChild(link);
-        link.click();
-        body?.removeChild(link);
-        window.URL.revokeObjectURL(link.href); // 释放创建的URL对象
-      })
-      .catch((err) => {})
-      .finally(() => setLoadingExport(false));
-  };
-
   return (
     <Fragment>
       <Title>基本信息</Title>
-      <Descriptions
-        column={3}
-        colon={false}
-        labelStyle={{ color: '#8A8FAE' }}
-        style={{ margin: '16px 0' }}
-      >
+      <Descriptions column={3} colon={false} style={{ margin: '16px 0' }}>
         <Item label="标签名称">{data?.name}</Item>
         <Item label="标签英文名">{data?.nameEn}</Item>
         <Item label="标签主体">{ObjectTypeView[data?.objectType]}</Item>
@@ -102,46 +93,56 @@ const ViewLabel: FC<ViewLabelProps> = ({ data }) => {
           <Link onClick={showModal}>查看详情</Link>
         </Item>
         <Item label="更新人">{data?.editor}</Item>
-        <Item label="最近编辑时间">{data?.editTime}</Item>
+        <Item label="最近编辑时间" contentStyle={ellipsis}>
+          {data?.editTime}
+        </Item>
         <Item label="备注" span={3}>
-          {data?.remark}
+          {data?.remark || '-'}
         </Item>
       </Descriptions>
       <Title>数据内容</Title>
-      <Card className={`${styles.content} ${styles.reset}`}>
-        <Tabs
-          onChange={setActiveKey}
-          tabBarExtraContent={{
-            right: (
-              <Space>
-                <Button onClick={onExport} loading={loadingExport} disabled={loading}>
-                  导出
-                </Button>
-                <Button onClick={getList} disabled={loading || loadingExport}>
+      <Card style={{ marginTop: 16 }}>
+        {layers.length ? (
+          <Tabs
+            className="reset-tabs"
+            onChange={setActiveKey}
+            tabBarExtraContent={{
+              right: [
+                <Button key="search" onClick={getList} disabled={loading}>
                   查询
-                </Button>
-              </Space>
-            ),
-          }}
-        >
-          {layers.map((layer, i) => (
-            <Tabs.TabPane tab={layer.layerName} key={layer.layerId} style={{ marginTop: 16 }}>
-              <Skeleton loading={loading} active>
-                {columns[i] ? (
-                  <Table
-                    rowKey="id"
-                    columns={columns[i]}
-                    dataSource={list[i]}
-                    pagination={false}
-                    scroll={{ x: 'max-content' }}
-                  />
-                ) : (
-                  <Empty />
-                )}
-              </Skeleton>
-            </Tabs.TabPane>
-          ))}
-        </Tabs>
+                </Button>,
+              ],
+            }}
+          >
+            {layers?.map((layer, i) => (
+              <Tabs.TabPane
+                tab={
+                  <Text ellipsis style={{ maxWidth: 88 }}>
+                    {layer.layerName}
+                  </Text>
+                }
+                key={layer.layerId}
+                style={{ marginTop: 16 }}
+              >
+                <Skeleton loading={loading} active>
+                  {columns[i] ? (
+                    <Table
+                      rowKey="id"
+                      columns={columns[i]}
+                      dataSource={list[i]}
+                      pagination={false}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  ) : (
+                    <Empty />
+                  )}
+                </Skeleton>
+              </Tabs.TabPane>
+            ))}
+          </Tabs>
+        ) : (
+          <Empty />
+        )}
       </Card>
       {visible && <ViewRules layers={layers} visible={visible} onCancel={hideModal} />}
     </Fragment>

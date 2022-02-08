@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal } from 'antd';
 import { useModel } from 'umi';
 import type { FC, ChangeEvent } from 'react';
-import styles from '../../index.less';
+import styles from './index.less';
 
 import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
@@ -19,7 +19,7 @@ export interface TreeNode {
   children?: TreeNode[];
   [key: string]: any;
 }
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   key: string;
   name: string;
   parentId?: string;
@@ -39,7 +39,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
-  const flatTree = useRef<FlatTreeNode[]>([]);
+  const flatTree = useRef<TreeNodeOption[]>([]);
 
   const [visible, setVisible] = useState(false);
 
@@ -73,15 +73,15 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      <Menu.Item key="objectLabel">新建数据标签</Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="folder">新建文件夹</Menu.Item>
-      {curNode?.type === 'FOLDER' && (
+      {curNode?.type === 'FOLDER' ? (
         <Fragment>
+          <Menu.Item key="objectLabel">新建数据标签</Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="folder">新建文件夹</Menu.Item>
           <Menu.Item key="edit">编辑文件夹</Menu.Item>
           <Menu.Item key="delete">删除文件夹</Menu.Item>
         </Fragment>
-      )}
+      ) : null}
     </Menu>
   );
 
@@ -110,6 +110,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   const onDeleteFolder = () =>
     confirm({
       title: '您确定要删除该文件夹吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteFolder({ id: curNode?.id })
           .then((res) => {
@@ -128,9 +129,11 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       const { name, type, cid } = _;
       const _i = name.indexOf(searchValue);
       const node = { ..._, key: cid };
+      const clsFolderRoot = (!parentId && type === 'FOLDER' && 'folder-root') || '';
+      const clsFolderMargin = ((type === 'FOLDER' || i === n - 1) && 'folder-margin') || '';
       let _type = type;
       let title = (
-        <span key="title" className={!parentId && type === 'FOLDER' && styles['folder-root']}>
+        <span key="title" className={clsFolderRoot}>
           {name}
         </span>
       );
@@ -142,16 +145,15 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       if (_i > -1) {
         const beforeStr = name.substring(0, _i);
         const afterStr = name.substring(_i + searchValue?.length);
-        const className = (!parentId && type === 'FOLDER' && styles['folder-root']) || '';
         title = (
-          <span key="title" className={className}>
+          <span key="title" className={clsFolderRoot}>
             {beforeStr}
-            <span className={styles['search-match']}>{searchValue}</span>
+            <span className="search-match">{searchValue}</span>
             {afterStr}
           </span>
         );
       }
-      (type === 'FOLDER' || i === n - 1) && (node.className = styles['folder-margin']);
+      node.className = clsFolderMargin;
       node.title = [NodeTypeIcon[_type], title];
       parentId && (node.parentId = parentId);
 
@@ -183,7 +185,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       return;
     }
     const keys = flatTree.current
-      .map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
+      ?.map((node) => (node.name.indexOf(value) > -1 ? node.parentId : ''))
       .filter((_) => !!_);
     setExpandedKeys(keys);
     setSearchValue(value);
@@ -196,20 +198,19 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
   };
 
   return (
-    <Fragment>
-      <div className={styles.search}>
+    <div className="folder-tree">
+      <div
+        className="search"
+        style={{ paddingBottom: 16, borderBottom: '1px solid #f0f0f0', marginBottom: 16 }}
+      >
         <Input
-          className={styles['search-input']}
+          className="search-input"
           placeholder="请输入关键字进行搜索"
           prefix={<IconFont type="icon-sousuo" />}
           onChange={onFilterTree}
         />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont
-            type="icon-xinjian"
-            className={styles['icon-plus']}
-            onClick={() => setCurNode(null)}
-          />
+          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode(null)} />
         </Dropdown>
       </div>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
@@ -229,7 +230,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
         </Tree>
       </Dropdown>
       {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
-    </Fragment>
+    </div>
   );
 };
 

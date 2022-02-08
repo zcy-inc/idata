@@ -16,10 +16,12 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author caizhedong
@@ -29,10 +31,25 @@ import java.util.List;
 public interface EnumService {
     EnumDto createOrEdit(EnumDto enumDto, String operator);
     EnumDto findEnum(String enumCode);
-    List<EnumDto> getEnumNames();
+    String getEnumCode(Long enumId);
+    List<EnumDto> getEnums();
     List<EnumValueDto> getEnumValues(String enumCode);
     String getEnumName(String enumCode);
     String getEnumValue(String valueCode);
-    List<String> getEnumValues(List<String> valueCodes);
+    List<DevEnumValue> getEnumValues(List<String> valueCodes);
     boolean delete(String enumCode, String operator);
+
+    /**
+     * 根据enumCode获取valuecode和enumvalue映射
+     * @param enumCode
+     * @return
+     */
+    Map<String, String> getEnumValueMapByCode(String enumCode);
+
+    /**
+     * 根据enumCode获取enumvalue和valuecode映射
+     * @param enumCode
+     * @return
+     */
+    Map<String, String> getCodeMapByEnumValue(String enumCode);
 }

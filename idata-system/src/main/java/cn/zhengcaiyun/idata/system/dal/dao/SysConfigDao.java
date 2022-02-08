@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.system.dal.dao;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.*;
 
+import cn.zhengcaiyun.idata.system.dal.JsonColumnHandler;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface SysConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, createTime, editTime, keyOne, valueOne);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, keyOne, valueOne, type);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -58,10 +59,13 @@ public interface SysConfigDao {
     @Results(id="SysConfigResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT),
         @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
+        @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="key_one", property="keyOne", jdbcType=JdbcType.VARCHAR),
-        @Result(column="value_one", property="valueOne", jdbcType=JdbcType.VARCHAR)
+        @Result(column="value_one", property="valueOne", typeHandler=JsonColumnHandler.class, jdbcType=JdbcType.VARCHAR),
+        @Result(column="type", property="type", jdbcType=JdbcType.VARCHAR)
     })
     List<SysConfig> selectMany(SelectStatementProvider selectStatement);
 
@@ -83,10 +87,13 @@ public interface SysConfigDao {
     default int insert(SysConfig record) {
         return MyBatis3Utils.insert(this::insert, record, sysConfig, c ->
             c.map(del).toProperty("del")
+            .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
+            .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(keyOne).toProperty("keyOne")
             .map(valueOne).toProperty("valueOne")
+            .map(type).toProperty("type")
         );
     }
 
@@ -94,10 +101,13 @@ public interface SysConfigDao {
     default int insertSelective(SysConfig record) {
         return MyBatis3Utils.insert(this::insert, record, sysConfig, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
+            .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
+            .map(editor).toPropertyWhenPresent("editor", record::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(keyOne).toPropertyWhenPresent("keyOne", record::getKeyOne)
             .map(valueOne).toPropertyWhenPresent("valueOne", record::getValueOne)
+            .map(type).toPropertyWhenPresent("type", record::getType)
         );
     }
 
@@ -124,18 +134,24 @@ public interface SysConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_config")
     static UpdateDSL<UpdateModel> updateAllColumns(SysConfig record, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalTo(record::getDel)
+                .set(creator).equalTo(record::getCreator)
                 .set(createTime).equalTo(record::getCreateTime)
+                .set(editor).equalTo(record::getEditor)
                 .set(editTime).equalTo(record::getEditTime)
                 .set(keyOne).equalTo(record::getKeyOne)
-                .set(valueOne).equalTo(record::getValueOne);
+                .set(valueOne).equalTo(record::getValueOne)
+                .set(type).equalTo(record::getType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: sys_config")
     static UpdateDSL<UpdateModel> updateSelectiveColumns(SysConfig record, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalToWhenPresent(record::getDel)
+                .set(creator).equalToWhenPresent(record::getCreator)
                 .set(createTime).equalToWhenPresent(record::getCreateTime)
+                .set(editor).equalToWhenPresent(record::getEditor)
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(keyOne).equalToWhenPresent(record::getKeyOne)
-                .set(valueOne).equalToWhenPresent(record::getValueOne);
+                .set(valueOne).equalToWhenPresent(record::getValueOne)
+                .set(type).equalToWhenPresent(record::getType);
     }
 }

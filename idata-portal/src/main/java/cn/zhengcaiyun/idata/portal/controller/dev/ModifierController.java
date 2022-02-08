@@ -25,6 +25,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * @author caizhedong
  * @date 2021-05-26 21:35
@@ -44,11 +48,16 @@ public class ModifierController {
         return RestResult.success(modifierService.findModifier(modifierCode));
     }
 
+    @GetMapping("modifiersByAtomic")
+    public RestResult<List<MeasureDto>> findByAtomicMetricCode(@RequestParam("atomicMetricCode") String atomicMetricCode) {
+        return RestResult.success(modifierService.findModifiersByAtomicCode(atomicMetricCode));
+    }
+
     @PostMapping("modifier")
     public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto modifier,
                                                       HttpServletRequest request) {
         MeasureDto echoModifier;
-        if (modifier.getId() == null) {
+        if (isEmpty(modifier.getLabelCode())) {
             echoModifier = modifierService.create(modifier, tokenService.getNickname(request));
         }
         else {
@@ -57,10 +66,11 @@ public class ModifierController {
         return RestResult.success(echoModifier);
     }
 
-    @PostMapping("modifier/disableModifier")
-    public RestResult disableModifier(@RequestParam("modifierCode") String modifierCode,
-                                     HttpServletRequest request) {
-        return RestResult.success(modifierService.disable(modifierCode, tokenService.getNickname(request)));
+    @PostMapping("modifier/disableOrAbleModifier")
+    public RestResult disableOrAbleModifier(@RequestParam("modifierCode") String modifierCode,
+                                            @RequestParam("labelTag") String labelTag,
+                                            HttpServletRequest request) {
+        return RestResult.success(modifierService.disableOrAble(modifierCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("modifier")

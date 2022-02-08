@@ -1,4 +1,4 @@
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   id: number;
   folderName: string;
 }
@@ -39,13 +39,16 @@ export interface RuleLayer {
   layerName: string;
   ruleDef: RuleDef;
 }
+
+export type ObjectType = 'supplier:LABEL' | 'purchaserOrg:LABEL';
+
 export interface ObjectLabel {
   id: number;
   originId: number;
   folderId: number;
   name: string;
   nameEn: string;
-  objectType: string;
+  objectType: ObjectType;
   remark: string;
   editor: string;
   editTime: string;

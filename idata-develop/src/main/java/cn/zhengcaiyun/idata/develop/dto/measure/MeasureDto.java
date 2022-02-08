@@ -30,6 +30,10 @@ public class MeasureDto extends LabelDefineDto {
     private List<LabelDto> measureLabels;
     private MeasureDto atomicMetric;
     private List<ModifierDto> modifiers;
+    private String enName;
+    private String bizTypeValue;
+    private String measureId;
+    private String measureDefine;
 
     // GaS
     public List<LabelDto> getMeasureLabels() {
@@ -54,5 +58,37 @@ public class MeasureDto extends LabelDefineDto {
 
     public void setModifiers(List<ModifierDto> modifiers) {
         this.modifiers = modifiers;
+    }
+
+    public String getEnName() {
+        return enName;
+    }
+
+    public void setEnName(String enName) {
+        this.enName = enName;
+    }
+
+    public String getBizTypeValue() {
+        return bizTypeValue;
+    }
+
+    public void setBizTypeValue(String bizTypeValue) {
+        this.bizTypeValue = bizTypeValue;
+    }
+
+    public String getMeasureId() {
+        return measureId;
+    }
+
+    public void setMeasureId(String measureId) {
+        this.measureId = measureId;
+    }
+
+    public String getMeasureDefine() {
+        return measureDefine;
+    }
+
+    public void setMeasureDefine(String measureDefine) {
+        this.measureDefine = measureDefine;
     }
 }

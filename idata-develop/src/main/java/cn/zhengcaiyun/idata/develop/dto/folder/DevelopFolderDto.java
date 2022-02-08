@@ -32,6 +32,7 @@ public class DevelopFolderDto {
     private Date editTime;
     private String folderName;
     private Long parentId;
+    private String folderType;
 
     // GaS
     public Long getId() {
@@ -92,6 +93,14 @@ public class DevelopFolderDto {
 
     public Long getParentId() {
         return parentId;
+    }
+
+    public String getFolderType() {
+        return folderType;
+    }
+
+    public void setFolderType(String folderType) {
+        this.folderType = folderType;
     }
 
     public void setParentId(Long parentId) {

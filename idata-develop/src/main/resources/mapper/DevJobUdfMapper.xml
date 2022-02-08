@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao">
+
+    <select id="getConcatHdfsPath" resultType="java.lang.String">
+        select GROUP_CONCAT(hdfs_path) from dev_job_udf
+        where id in (<foreach collection="list" item="id" separator=",">#{id}</foreach>)
+    </select>
+
+    <select id="getByIds" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf">
+        select * from dev_job_udf
+        where id in (<foreach collection="list" item="id" separator=",">#{id}</foreach>)
+    </select>
+
+</mapper>

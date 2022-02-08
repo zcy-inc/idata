@@ -60,6 +60,13 @@ public class DevTableInfo {
 
     /**
      * Database Column Remarks:
+     *   同步至hive的表
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.hive_table_name")
+    private String hiveTableName;
+
+    /**
+     * Database Column Remarks:
      *   文件夹ID,null表示最外层文件夹
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.folder_id")
@@ -133,6 +140,16 @@ public class DevTableInfo {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.table_name")
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.hive_table_name")
+    public String getHiveTableName() {
+        return hiveTableName;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.hive_table_name")
+    public void setHiveTableName(String hiveTableName) {
+        this.hiveTableName = hiveTableName;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_table_info.folder_id")

@@ -30,8 +30,9 @@ public interface MetricService {
     MetricDto findMetric(String metricCode);
     List<MeasureDto> findMetrics(String labelTag);
     List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag);
+    String getMetricSql(String metricCode);
     MeasureDto create(MeasureDto metric, String operator);
     MeasureDto edit(MeasureDto metric, String operator);
-    MeasureDto disable(String metricCode, String operator);
+    MeasureDto disableOrAble(String metricCode, String labelTag, String operator);
     boolean delete(String metricCode, String operator);
 }

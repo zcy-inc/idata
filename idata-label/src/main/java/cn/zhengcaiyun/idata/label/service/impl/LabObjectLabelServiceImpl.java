@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package cn.zhengcaiyun.idata.label.service.impl;
 
 import cn.zhengcaiyun.idata.label.compute.LabelDataComputer;
@@ -65,7 +81,7 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
     }
 
     @Override
-    public Long createLabel(LabObjectLabelDto labelDto, String operator) {
+    public LabObjectLabelDto createLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel existRecord = objectLabelManager.getObjectLabel(labelDto.getName());
         checkState(Objects.isNull(existRecord), "标签名称已存在");
         Optional.ofNullable(labelDto.getFolderId())
@@ -73,11 +89,12 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         checkArgument(isNotEmpty(labelDto.getObjectType()), "标签主体不能为空");
 
         LabObjectLabel label = newCreatedObjectLabel(labelDto, operator);
-        return objectLabelManager.saveLabel(label);
+        Long labelId = objectLabelManager.saveLabel(label);
+        return toDto(objectLabelManager.getObjectLabel(labelId, "标签不存在"));
     }
 
     @Override
-    public Long editLabel(LabObjectLabelDto labelDto, String operator) {
+    public LabObjectLabelDto editLabel(LabObjectLabelDto labelDto, String operator) {
         LabObjectLabel label = objectLabelManager.getObjectLabel(labelDto.getId(), "标签不存在");
         LabObjectLabel checkNameLabel = objectLabelManager.getObjectLabel(labelDto.getName());
         if (!Objects.isNull(checkNameLabel)) {
@@ -95,16 +112,13 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
         //标签主体限制修改
         newLabel.setObjectType(label.getObjectType());
         objectLabelManager.renewLabel(newLabel, label.getId());
-        return newLabel.getId();
+        return toDto(objectLabelManager.getObjectLabel(newLabel.getId(), "标签不存在"));
     }
 
     @Override
     public LabObjectLabelDto getLabel(Long originId) {
         LabObjectLabel label = objectLabelManager.getObjectLabelByOriginId(originId, "标签不存在");
-        LabObjectLabelDto dto = new LabObjectLabelDto();
-        BeanUtils.copyProperties(label, dto);
-        dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));
-        return dto;
+        return toDto(label);
     }
 
     @Override
@@ -167,6 +181,13 @@ public class LabObjectLabelServiceImpl implements LabObjectLabelService {
             }
         }
         return ruleLayers;
+    }
+
+    private LabObjectLabelDto toDto(LabObjectLabel label) {
+        LabObjectLabelDto dto = new LabObjectLabelDto();
+        BeanUtils.copyProperties(label, dto);
+        dto.setRuleLayers(fillNames(ruleLayerFromJson(label.getRules())));
+        return dto;
     }
 
     private String ruleLayerToJson(List<LabelRuleLayerDto> ruleLayers) {

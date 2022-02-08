@@ -1,6 +1,6 @@
 import { TreeNodeType, LabelRequired, LabelTag, ERType } from '@/constants/datapi';
 
-export interface FlatTreeNode {
+export interface TreeNodeOption {
   id: number;
   folderName: string;
 }
@@ -13,6 +13,7 @@ export interface TreeNode {
   fileCode?: number;
   children?: TreeNode[];
 }
+
 export interface Label {
   id: number;
   labelName: string;
@@ -44,6 +45,7 @@ export interface LabelAttribute {
   attributeValue: string;
   enumNameOrValue?: string;
   enumValue?: string;
+  enumName?: string;
 }
 export interface Enum {
   id: number;
@@ -56,6 +58,7 @@ export interface Enum {
 
 export interface TableLable extends Label {
   tableId: number;
+  tableName: string;
   columnName: string;
   enumValues: EnumValue[];
 }
@@ -65,6 +68,8 @@ export interface ColumnLabel extends TableLable {
   columnComment: string;
   columnLabels: TableLable[];
   pk: boolean;
+  enableCompare?: boolean;
+  hiveDiff?: boolean;
 }
 export interface ForeignKey {
   id: number;
@@ -93,15 +98,38 @@ export interface Table {
   foreignKeys: ForeignKey[];
 }
 
-/* ========== kipsystem ========== */
+/* ========== measure ========== */
+export interface MetricModifier {
+  modifierName: string;
+  modifierCode: string;
+  enumValues: string[];
+  enumValueCodes: string[];
+  modifierAttribute: LabelAttribute;
+}
 export interface Dimension {
   id: numebr;
   folderId?: numebr;
   labelName: string;
   labelTag: LabelTag;
+  labelCode: string;
   labelAttributes: LabelAttribute[];
-  specialAttributes: {};
-  targetLabels: TableLable[];
+  measureLabels: TableLable[];
+  specialAttribute: {
+    degradeDim: boolean;
+    aggregatorCode: string;
+    complexMetricFormula: string;
+    modifiers: MetricModifier[];
+    atomicMetricCode: string;
+    atomicMetricName: string;
+  };
+  enName?: string;
 }
 export interface Modifier extends Dimension {}
-export interface Metric extends Dimension {}
+export interface Metric extends Dimension {
+  dimensions: Dimension[];
+  modifiers: MetricModifier[];
+  deriveMetrics: {
+    labelName: string;
+    bizProcessValue: string;
+  }[];
+}

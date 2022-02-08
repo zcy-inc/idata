@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao">
+
+    <resultMap id="scriptMap" type="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript">
+        <result property="id" column="id"/>
+        <result property="del" column="del" javaType="Integer"/>
+        <result property="creator" column="creator" javaType="string"/>
+        <result property="createTime" column="create_time" javaType="Date"/>
+        <result property="editor" column="editor" javaType="string"/>
+        <result property="editTime" column="edit_time" javaType="Date"/>
+        <result property="jobId" column="job_id" javaType="Long"/>
+        <result property="editable" column="editable" javaType="Integer"/>
+        <result property="version" column="version" javaType="Integer"/>
+        <result property="scriptArguments" column="script_arguments" typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler" javaType="java.util.List"/>
+        <result property="sourceResource" column="source_resource" javaType="string"/>
+    </resultMap>
+    
+    <select id="getPublishedDiJobContent" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                      and del = 0
+                      and job_id = #{jobId}
+                      and environment = #{env}
+                      and (job_type_code = 'DI_BATCH' or job_type_code = 'DI_BATCH')
+            ) as t1
+        join dev_job_content_di as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedSqlJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and job_type_code = 'SQL_SPARK'
+            ) as t1
+        join dev_job_content_sql as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedSparkJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and (job_type_code = 'SPARK_JAR' or job_type_code = 'SPARK_PYTHON')
+            ) as t1
+        join dev_job_content_spark as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+    <select id="getPublishedKylinJobContent"
+            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and job_type_code = 'KYLIN'
+            ) as t1
+        join dev_job_content_kylin as t2
+        on t1.job_content_id = t2.id
+    </select>
+    <select id="getPublishedScriptJobContent" resultMap="scriptMap">
+        select t2.*
+        from
+            (
+                select * from dev_job_publish_record
+                where publish_status = 2
+                  and del = 0
+                  and job_id = #{jobId}
+                  and environment = #{env}
+                  and (job_type_code = 'SCRIPT_PYTHON' or job_type_code = 'SCRIPT_SHELL')
+            ) as t1
+        join dev_job_content_script as t2
+        on t1.job_content_id = t2.id
+    </select>
+
+</mapper>

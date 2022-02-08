@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * @author caizhedong
  * @date 2021-05-26 21:34
@@ -57,11 +59,16 @@ public class MetricController {
         return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 
+    @GetMapping("metricSql")
+    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
+        return RestResult.success(metricService.getMetricSql(metricCode));
+    }
+
     @PostMapping("metric")
     public RestResult<MeasureDto> addOrUpdateMetric(@RequestBody MeasureDto metric,
                                                     HttpServletRequest request) {
         MeasureDto echoMetric;
-        if (metric.getId() == null) {
+        if (isEmpty(metric.getLabelCode())) {
             echoMetric = metricService.create(metric, tokenService.getNickname(request));
         }
         else {
@@ -70,10 +77,11 @@ public class MetricController {
         return RestResult.success(echoMetric);
     }
 
-    @PostMapping("metric/disableMetric")
-    public RestResult disableMetric(@RequestParam("metricCode") String metricCode,
-                                   HttpServletRequest request) {
-        return RestResult.success(metricService.disable(metricCode, tokenService.getNickname(request)));
+    @PostMapping("metric/disableOrAbleMetric")
+    public RestResult disableOrAbleMetric(@RequestParam("metricCode") String metricCode,
+                                          @RequestParam("labelTag") String labelTag,
+                                          HttpServletRequest request) {
+        return RestResult.success(metricService.disableOrAble(metricCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("metric")

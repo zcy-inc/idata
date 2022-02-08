@@ -3,11 +3,12 @@ import { Button, Input, Modal, Form, message } from 'antd';
 import { pick } from 'lodash';
 import { TiledTable, Operation, PageContainer, SearchPanel } from '@/components';
 import { usePaginated, useSave } from '@/hooks';
-import type { ColumnsType } from 'antd/es/table';
 import { getUserList, deleteUser, addUser, editUser, resetUserPassword } from '@/services/user';
-import type { Tuser } from '@/interfaces/user';
 import { authTypeEnum } from '@/constants/common';
 import { getDeleteFn } from '@/utils/utils';
+import type { Tuser } from '@/interfaces/user';
+import type { ColumnsType } from 'antd/es/table';
+
 import RoleSelect from '../../components/RoleSelect';
 import AuthSetting from '../../components/AuthSetting';
 import useAuthSetting from '../../hooks/useAuthSetting';
@@ -77,14 +78,8 @@ const List: React.FC = () => {
   };
 
   const columns: ColumnsType<Tuser> = [
-    {
-      title: '账号名称',
-      dataIndex: 'username',
-    },
-    {
-      title: '员工名称',
-      dataIndex: 'nickname',
-    },
+    { title: '账号名称', dataIndex: 'username' },
+    { title: '员工名称', dataIndex: 'nickname' },
     {
       title: '系统管理员',
       dataIndex: 'sysAdmin',
@@ -93,27 +88,17 @@ const List: React.FC = () => {
     {
       title: '所属角色',
       dataIndex: 'roleNames',
-      render: (roleNames) => (Array.isArray(roleNames) ? roleNames.join('、') : ''),
+      render: (roleNames) =>
+        Array.isArray(roleNames) && roleNames.length ? roleNames.join('、') : '-',
     },
-    {
-      title: '所属部门',
-      dataIndex: 'department',
-    },
-    {
-      title: '联系方式',
-      dataIndex: 'mobile',
-    },
-    {
-      title: '信息来源',
-      dataIndex: 'authType',
-    },
-    {
-      title: '最近编辑人',
-      dataIndex: 'editor',
-    },
+    { title: '所属部门', dataIndex: 'department', render: (_) => _ || '-' },
+    { title: '联系方式', dataIndex: 'mobile' },
+    { title: '信息来源', dataIndex: 'authType' },
+    { title: '最近编辑人', dataIndex: 'editor', render: (_) => _ || '-' },
     {
       title: '操作',
       width: 200,
+      fixed: 'right',
       render: (_, row) => (
         <Operation.Group>
           <Operation label="权限查看" onClick={() => onShowAuth(row)} />
@@ -124,7 +109,7 @@ const List: React.FC = () => {
     },
   ];
   return (
-    <PageContainer>
+    <>
       <SearchPanel
         templateColumns="280px"
         options={[
@@ -213,7 +198,7 @@ const List: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </PageContainer>
+    </>
   );
 };
 

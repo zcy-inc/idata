@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 /**
  * @author caizhedong
  * @date 2021-05-25 11:10
@@ -54,7 +56,7 @@ public class DimensionController {
     public RestResult<MeasureDto> addOrUpdateDimension(@RequestBody MeasureDto dimension,
                                                        HttpServletRequest request) {
         MeasureDto echoDimension;
-        if (dimension.getId() == null) {
+        if (isEmpty(dimension.getLabelCode())) {
             echoDimension = dimensionService.create(dimension, tokenService.getNickname(request));
         }
         else {
@@ -63,10 +65,11 @@ public class DimensionController {
         return RestResult.success(echoDimension);
     }
 
-    @PostMapping("dimension/disableDimension")
-    public RestResult disableDimension(@RequestParam("dimensionCode") String dimensionCode,
-                                      HttpServletRequest request) {
-        return RestResult.success(dimensionService.disable(dimensionCode, tokenService.getNickname(request)));
+    @PostMapping("dimension/disableOrAbleDimension")
+    public RestResult disableOrAbleDimension(@RequestParam("dimensionCode") String dimensionCode,
+                                             @RequestParam("labelTag") String labelTag,
+                                             HttpServletRequest request) {
+        return RestResult.success(dimensionService.disableOrAble(dimensionCode, labelTag, tokenService.getNickname(request)));
     }
 
     @DeleteMapping("dimension")

@@ -30,10 +30,12 @@ public class SpecialAttributeDto {
     @ApiModelProperty(value = "AGGREGATOR_SUM:ENUM_VALUE | AGGREGATOR_AVG:ENUM_VALUE | AGGREGATOR_MAX:ENUM_VALUE | " +
             "AGGREGATOR_MIN:ENUM_VALUE | AGGREGATOR_CNT:ENUM_VALUE | AGGREGATOR_CNTD:ENUM_VALUE")
     private String aggregatorCode;
+    @ApiModelProperty(value = "SUM | AVG | MAX | MIN | CNT | CNTD")
+    private String aggregate;
     private Boolean degradeDim;
     private String atomicMetricCode;
-    private String atomicMetricName; // TODO 前端确认是否需要
-    private String complexMetricFormula; // TODO 命名
+    private String atomicMetricName;
+    private String complexMetricFormula;
     private List<ModifierDto> modifiers;
 
     // GaS
@@ -83,5 +85,13 @@ public class SpecialAttributeDto {
 
     public void setModifiers(List<ModifierDto> modifiers) {
         this.modifiers = modifiers;
+    }
+
+    public String getAggregate() {
+        return aggregate;
+    }
+
+    public void setAggregate(String aggregate) {
+        this.aggregate = aggregate;
     }
 }

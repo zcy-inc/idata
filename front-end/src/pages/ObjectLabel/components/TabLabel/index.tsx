@@ -1,8 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Form, message, Modal } from 'antd';
+import { Button, Form, message, Modal, Space, Spin } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
-import styles from '../../index.less';
 
 import ViewLabel from './ViewLabel';
 import EditLabel from './EditLabel';
@@ -17,20 +16,23 @@ import { NewObjectLabelOriginId } from './constants';
 
 export interface TabObjectLabelProps {
   initialMode: 'view' | 'edit';
+  tabKey: string;
   originId: number;
 }
 
 const { confirm } = Modal;
 
-const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originId }) => {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode, tabKey, originId }) => {
+  const [mode, setMode] = useState<'view' | 'edit'>();
   const [data, setData] = useState<ObjectLabel>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [getLoading, setGetLoading] = useState(false);
   const [form] = Form.useForm();
-  const { getTree, removeTab, editLayers } = useModel('objectlabel', (_) => ({
+  const { getTree, removeTab, editLayers, replaceTab } = useModel('objectlabel', (_) => ({
     getTree: _.getTree,
     removeTab: _.removeTab,
     editLayers: _.editLayers,
+    replaceTab: _.replaceTab,
   }));
 
   useEffect(() => {
@@ -41,11 +43,14 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
   }, [initialMode]);
 
   const getLabel = (originId: number) => {
+    setGetLoading(true);
     getObjectLabel({ id: originId })
       .then((res) => {
         setData(res.data);
       })
-      .catch((err) => {});
+      .finally(() => {
+        setGetLoading(false);
+      });
   };
 
   const onSubmit = () => {
@@ -61,9 +66,7 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
               .then((res) => {
                 if (res.success) {
                   message.success('创建数据标签成功');
-                  setMode('view');
-                  getTree();
-                  getLabel(res.data);
+                  replaceTab(tabKey, res.data.originId, res.data.name);
                 }
               })
               .catch((err) => {})
@@ -72,9 +75,10 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
               .then((res) => {
                 if (res.success) {
                   message.success('更新数据标签成功');
-                  setMode('view');
+                  replaceTab(`${res.data.originId}`, res.data.originId, res.data.name);
                   getTree();
                   getLabel(originId);
+                  setMode('view');
                 }
               })
               .catch((err) => {})
@@ -85,18 +89,16 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
 
   const onDelete = () =>
     confirm({
-      title: '您确定要删除该数据标签吗？',
+      title: '删除数据标签',
+      content: '您确定要删除该数据标签吗？',
+      autoFocusButton: null,
       onOk: () =>
         deleteObjectLabel({ id: data!.id })
           .then((res) => {
             if (res.success) {
               message.success('删除数据标签成功');
               getTree();
-              if (originId === NewObjectLabelOriginId) {
-                removeTab('newObjectLabel');
-              } else {
-                removeTab(`${data!.originId}`);
-              }
+              removeTab(`${data!.originId}`);
             }
           })
           .catch((err) => {}),
@@ -104,7 +106,7 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
 
   const onCancel = () => {
     if (originId === NewObjectLabelOriginId) {
-      removeTab('newObjectLabel');
+      removeTab(tabKey);
     } else {
       setMode('view');
       getLabel(originId);
@@ -113,25 +115,31 @@ const TabObjectLabel: FC<TabObjectLabelProps> = ({ initialMode = 'view', originI
 
   return (
     <Fragment>
-      {mode === 'view' && <ViewLabel data={data as ObjectLabel} />}
-      {mode === 'edit' && <EditLabel initial={data} form={form} />}
-      <div className={styles.submit}>
-        {mode === 'view' && [
-          <Button key="edit" type="primary" onClick={() => setMode('edit')}>
-            编辑
-          </Button>,
-          <Button key="del" onClick={onDelete}>
-            删除
-          </Button>,
-        ]}
-        {mode === 'edit' && [
-          <Button key="save" type="primary" onClick={onSubmit} loading={loading}>
-            保存
-          </Button>,
-          <Button key="cancel" onClick={onCancel}>
-            取消
-          </Button>,
-        ]}
+      <Spin spinning={getLoading}>
+        {mode === 'view' && <ViewLabel data={data as ObjectLabel} />}
+        {mode === 'edit' && <EditLabel initial={data} form={form} />}
+      </Spin>
+      <div className="workbench-submit">
+        {mode === 'view' && (
+          <Space>
+            <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
+              编辑
+            </Button>
+            <Button key="del" size="large" onClick={onDelete}>
+              删除
+            </Button>
+          </Space>
+        )}
+        {mode === 'edit' && (
+          <Space>
+            <Button key="save" size="large" type="primary" onClick={onSubmit} loading={loading}>
+              保存
+            </Button>
+            <Button key="cancel" size="large" onClick={onCancel}>
+              取消
+            </Button>
+          </Space>
+        )}
       </div>
     </Fragment>
   );

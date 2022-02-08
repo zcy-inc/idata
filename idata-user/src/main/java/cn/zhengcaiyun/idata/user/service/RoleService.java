@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;

@@ -16,7 +16,11 @@
  */
 package cn.zhengcaiyun.idata.system.service.impl;
 
+import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
+import cn.zhengcaiyun.idata.commons.enums.TreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoader;
+import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoaders;
 import cn.zhengcaiyun.idata.system.IDataSystem;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
@@ -24,8 +28,9 @@ import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SystemService;
-import cn.zhengcaiyun.idata.system.zcy.ZcyService;
+import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +40,7 @@ import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sysConfig;
 import static cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDynamicSqlSupport.sysFeature;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
-import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author shiyin
@@ -50,7 +54,7 @@ public class SystemServiceImpl implements SystemService {
     @Autowired
     private SysFeatureDao sysFeatureDao;
     @Autowired
-    private ZcyService zcyService;
+    private ServiceProvidersLoader serviceProvidersLoader;
 
     @Override
     public SystemStateDto getSystemState() {
@@ -58,7 +62,9 @@ public class SystemServiceImpl implements SystemService {
         systemStateDto.setSysStartTime(IDataSystem.getSysStartTime());
         SysConfig config = sysConfigDao.selectOne(c -> c.where(sysConfig.keyOne,
                 isEqualTo(SysConfKeyEnum.REGISTER_ENABLE.name()))).orElse(null);
-        if (config != null && config.getValueOne().trim().equalsIgnoreCase("true") ) {
+        // 修改valueOne类型
+        if (config != null && PojoUtil.copyOne(config, ConfigDto.class).getValueOne().get(SysConfKeyEnum.REGISTER_ENABLE.name())
+                .getConfigValue().trim().equalsIgnoreCase("true") ) {
             systemStateDto.setRegisterEnable(true);
         }
         else {
@@ -125,57 +131,87 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
-    public List<FolderTreeNodeDto> getFolderTree(Map<String, Integer> folderPermissionMap) {
-        Set<String> folderMenuSet = new HashSet<>(Arrays.asList("F_MENU_DW_DESIGN", "F_MENU_JOB_MANAGE",
-                "F_MENU_RESOURCE_MANAGE", "F_MENU_FUNCTION_MANAGE", "F_MENU_API_DEVELOP"));
-        List<FolderTreeNodeDto> folderTree = PojoUtil.castType(getFeatureTree(FeatureTreeMode.PART, folderMenuSet),
-                new TypeReference<>(){});
-        folderTree.forEach(folderTreeNode -> setFolderTreeChild(folderTreeNode, folderPermissionMap));
-        return folderTree;
+    public List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap) {
+        BaseTreeNodeService devBaseTreeNode = ServiceProvidersLoaders.loadProviderIfPresent(serviceProvidersLoader,
+                BaseTreeNodeService.class, "devTree");
+        List<BaseTreeNodeDto> devBaseTreeNodeList = devBaseTreeNode.getBaseTree();
+        List<FolderTreeNodeDto> folderTreeNodeList = changeBaseToFolder(devBaseTreeNodeList, folderPermissionMap);
+        List<String> resourceCodeList = folderTreeNodeList.stream().map(FolderTreeNodeDto::getType).collect(Collectors.toList());
+        List<FeatureTreeNodeDto> featureTree = getFeatureTreeNodeByCode(resourceCodeList);
+        List<FolderTreeNodeDto> echo = featureTree.stream().map(featureTreeNode -> {
+            FolderTreeNodeDto folderTreeNode = PojoUtil.copyOne(featureTreeNode, FolderTreeNodeDto.class, "name",
+                    "type", "featureCode");
+            folderTreeNode.setCid(featureTreeNode.getFeatureCode());
+            if (ObjectUtils.isNotEmpty(featureTreeNode.getChildren())) {
+                List<FolderTreeNodeDto> childrenFolderTreeNodeList = PojoUtil.copyList(featureTreeNode.getChildren(),
+                        FolderTreeNodeDto.class, "name", "type", "featureCode");
+                childrenFolderTreeNodeList.forEach(childrenFolderTreeNode -> {
+                    childrenFolderTreeNode.setCid(childrenFolderTreeNode.getFeatureCode());
+                    childrenFolderTreeNode.setParentCode(folderTreeNode.getFeatureCode());
+                    if (FeatureCodeEnum.F_MENU_DATA_DEVELOP.name().equals(childrenFolderTreeNode.getFeatureCode())) {
+                        childrenFolderTreeNode.setChildren(folderTreeNodeList);
+                    }
+                });
+                folderTreeNode.setChildren(childrenFolderTreeNodeList);
+            }
+            return folderTreeNode;
+        }).collect(Collectors.toList());
+        return echo;
     }
 
-    private void setFolderTreeChild(FolderTreeNodeDto folderTreeNode, Map<String, Integer> folderPermissionMap) {
-        ResourceTypeEnum resourceType = null;
-        if ("F_MENU_DW_DESIGN".equals(folderTreeNode.getFeatureCode())) {
-            resourceType = ResourceTypeEnum.R_DW_DESIGN_DIR;
-        }
-        else if ("F_MENU_JOB_MANAGE".equals(folderTreeNode.getFeatureCode())) {
-            resourceType = ResourceTypeEnum.R_JOB_MANAGE_DIR;
-        }
-        else if ("F_MENU_RESOURCE_MANAGE".equals(folderTreeNode.getFeatureCode())) {
-            resourceType = ResourceTypeEnum.R_RESOURCE_MANAGE_DIR;
-        }
-        else if ("F_MENU_FUNCTION_MANAGE".equals(folderTreeNode.getFeatureCode())) {
-            resourceType = ResourceTypeEnum.R_FUNCTION_MANAGE_DIR;
-        }
-        else if ("F_MENU_API_DEVELOP".equals(folderTreeNode.getFeatureCode())) {
-            resourceType = ResourceTypeEnum.R_API_DEVELOP_DIR;
-        }
-        if (resourceType != null) {
-            folderTreeNode.setChildren(getFolderTree(resourceType, folderPermissionMap));
-        }
-        if (folderTreeNode.getChildren() != null) {
-            folderTreeNode.getChildren().forEach(childNode -> setFolderTreeChild(childNode, folderPermissionMap));
-        }
-    }
-
-    private List<FolderTreeNodeDto> getFolderTree(ResourceTypeEnum resourceType,
-                                                  Map<String, Integer> folderPermissionMap) {
-        List<FolderTreeNodeDto> folderTree = zcyService.getFolders(resourceType).stream().peek(folderTreeNode -> {
-            Integer folderPermission = folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId());
-            if (folderPermission != null && folderPermission > 0) {
-                folderTreeNode.setFilePermission(folderPermission);
+    private List<FolderTreeNodeDto> changeBaseToFolder(List<BaseTreeNodeDto> baseTreeNodeList, Map<String, Integer> folderPermissionMap) {
+        List<FolderTreeNodeDto> echo = baseTreeNodeList
+                .stream().filter(treeNode -> !TreeNodeTypeEnum.RECORD.name().equals(treeNode.getBelong())).collect(Collectors.toList())
+                .stream().map(treeNode -> {
+            FolderTreeNodeDto folderTreeNode = new FolderTreeNodeDto();
+            folderTreeNode.setCid("F_" + treeNode.getId());
+            folderTreeNode.setName(treeNode.getName());
+            folderTreeNode.setType(treeNode.getType());
+            folderTreeNode.setParentId(treeNode.getParentId().toString());
+            folderTreeNode.setFolderId(treeNode.getId().toString());
+            if (folderPermissionMap.containsKey(folderTreeNode.getType() + folderTreeNode.getFolderId())
+                    && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) != null
+                    && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) > 0) {
+                folderTreeNode.setFilePermission(folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()));
             }
             else {
                 folderTreeNode.setFilePermission(0);
             }
+            if (ObjectUtils.isNotEmpty(treeNode.getChildren())) {
+                folderTreeNode.setChildren(changeBaseToFolder(treeNode.getChildren(), folderPermissionMap));
+            }
+            return folderTreeNode;
         }).collect(Collectors.toList());
-        return getFolderChildren("-1", folderTree);
+        return echo.size() > 0 ? echo : null;
     }
 
-    private List<FolderTreeNodeDto> getFolderChildren(String parentId, List<FolderTreeNodeDto> folderTreeNodes) {
-        return folderTreeNodes.stream().filter(f -> (f.getParentId() != null && f.getParentId().equals(parentId)))
-                .peek(folderTreeNode -> folderTreeNode.setChildren(getFolderChildren(folderTreeNode.getFolderId(), folderTreeNodes)))
-                .collect(Collectors.toList());
+    private List<FeatureTreeNodeDto> getFeatureTreeNodeByCode(List<String> resourceCodes) {
+        List<String> featureCodeList = getFeatureCodeByResourceCode(resourceCodes);
+        List<SysFeature> sysFeatures = sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                and(sysFeature.featureCode, isIn(featureCodeList))));
+        List<String> parentCodeList = sysFeatures.stream().map(SysFeature::getParentCode).collect(Collectors.toList());
+        sysFeatures.addAll(sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                and(sysFeature.featureCode, isIn(parentCodeList)))));
+        sysFeatures.addAll(sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                and(sysFeature.featureType, isEqualTo(FeatureTypeEnum.F_MENU.name())),
+                and(sysFeature.featureCode, isNotIn(featureCodeList)),
+                and(sysFeature.parentCode, isIn(parentCodeList)))));
+        return getFeatureChildren(null, sysFeatures, null, FeatureTreeMode.FULL);
+    }
+
+    private List<String> getFeatureCodeByResourceCode(List<String> resourceCodes) {
+        return resourceCodes.stream().map(resourceCode -> {
+            String featureCode = null;
+            if (resourceCode.contains("_DATA_DEVELOP_")) {
+                featureCode = FeatureCodeEnum.F_MENU_DATA_DEVELOP.name();
+            }
+            else if (resourceCode.contains("_MEASURE_MANAGE_")) {
+                featureCode = FeatureCodeEnum.F_MENU_MEASURE_MANAGE.name();
+            }
+            else if (resourceCode.contains("_DATA_LABEL_")) {
+                featureCode = FeatureCodeEnum.F_MENU_LABEL_MANAGE.name();
+            }
+            return featureCode;
+        }).collect(Collectors.toList());
     }
 }

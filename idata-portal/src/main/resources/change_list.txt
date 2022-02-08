@@ -1,0 +1,17 @@
+-------------------------------- 迁移版本 --------------------------------
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml # 配置 Mapper XML 地址
+zcy:
+  is-cloud: ture # 是否是云端，ture：云端，false：本地化
+
+py udf：
+重新打jar，注册get_value_by_key_from_jsonarray 删除
+
+
+-------------------------------- 作业测试 ------------------------
+旧DI作业[1510]未找到迁移后的来源数据源
+
+alter table dev_job_info modify name varchar(128) not null comment '作业名称';
+
+alter table dev_composite_folder modify name varchar(64) not null comment '名称';
+

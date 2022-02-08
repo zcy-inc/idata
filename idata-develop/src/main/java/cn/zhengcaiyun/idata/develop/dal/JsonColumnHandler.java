@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dal;
 
+import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
 import cn.zhengcaiyun.idata.develop.dto.label.SpecialAttributeDto;
 import com.alibaba.fastjson.JSON;
@@ -61,7 +62,9 @@ public class JsonColumnHandler implements TypeHandler {
     enum JsonColumnTypeEnum {
         EnumAttributes("enum_attributes", new TypeReference<List<AttributeDto>>(){}),
         LabelAttributes("label_attributes", new TypeReference<List<AttributeDto>>(){}),
-        SpecialAttribute("special_attribute", new TypeReference<SpecialAttributeDto>(){});
+        SpecialAttribute("special_attribute", new TypeReference<SpecialAttributeDto>(){}),
+        AppArguments("app_arguments", new TypeReference<List<JobArgumentDto>>(){}),
+        ScriptArguments("script_arguments", new TypeReference<List<JobArgumentDto>>(){});
         private String columnName;
         private TypeReference<?> type;
 

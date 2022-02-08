@@ -65,6 +65,13 @@ public class DevFolder {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.parent_id")
     private Long parentId;
 
+    /**
+     * Database Column Remarks:
+     *   文件夹所属模块类型
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.folder_type")
+    private String folderType;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.id")
     public Long getId() {
         return id;
@@ -143,5 +150,15 @@ public class DevFolder {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.parent_id")
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.folder_type")
+    public String getFolderType() {
+        return folderType;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.folder_type")
+    public void setFolderType(String folderType) {
+        this.folderType = folderType;
     }
 }

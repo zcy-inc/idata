@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package cn.zhengcaiyun.idata.portal.controller.lab;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -48,12 +64,12 @@ public class LabObjectLabelController {
     }
 
     @PostMapping("/objectLabel")
-    public RestResult<Long> createLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
+    public RestResult<LabObjectLabelDto> createLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
         return RestResult.success(objectLabelService.createLabel(labelDto, tokenService.getNickname(request)));
     }
 
     @PutMapping("/objectLabel")
-    public RestResult<Long> editLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
+    public RestResult<LabObjectLabelDto> editLabel(@RequestBody LabObjectLabelDto labelDto, HttpServletRequest request) {
         return RestResult.success(objectLabelService.editLabel(labelDto, tokenService.getNickname(request)));
     }
 
@@ -77,7 +93,7 @@ public class LabObjectLabelController {
     public void exportLabelResultData(@PathVariable("id") Long id,
                                       @PathVariable("layerId") Long layerId,
                                       HttpServletResponse response) {
-        LabelQueryDataDto queryDataDto = objectLabelService.queryLabelResultData(id, layerId, 50000L, null);
+        LabelQueryDataDto queryDataDto = objectLabelService.queryLabelResultData(id, layerId, 1L, null);
         SXSSFWorkbook workbook = downloadAsExcel(queryDataDto);
         String fileName = queryDataDto.getLabelName() + "_" + queryDataDto.getLayerName() + "_" + System.currentTimeMillis();
         try {

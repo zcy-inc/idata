@@ -66,6 +66,13 @@ public final class DevFolderDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.parent_id")
     public static final SqlColumn<Long> parentId = devFolder.parentId;
 
+    /**
+     * Database Column Remarks:
+     *   文件夹所属模块类型
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_folder.folder_type")
+    public static final SqlColumn<String> folderType = devFolder.folderType;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_folder")
     public static final class DevFolder extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -83,6 +90,8 @@ public final class DevFolderDynamicSqlSupport {
         public final SqlColumn<String> folderName = column("folder_name", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> parentId = column("parent_id", JDBCType.BIGINT);
+
+        public final SqlColumn<String> folderType = column("folder_type", JDBCType.VARCHAR);
 
         public DevFolder() {
             super("dev_folder");

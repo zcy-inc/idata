@@ -4,6 +4,8 @@ import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+
 const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
@@ -16,16 +18,15 @@ export default defineConfig({
     hmr: true,
   },
   layout: {
-    siderWidth: 220,
+    siderWidth: 288,
     ...defaultSettings,
   },
-  locale: {
-    // default zh-CN
-    default: 'zh-CN',
-    antd: true,
-    // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
-  },
+  // locale: {
+  //   default: 'zh-CN',
+  //   antd: true,
+  //   // default true, when it is true, will use `navigator.language` overwrite default
+  //   baseNavigator: true,
+  // },
   dynamicImport: {
     loading: '@ant-design/pro-layout/es/PageLoading',
   },
@@ -36,11 +37,19 @@ export default defineConfig({
   routes,
   // Theme for antd: https://ant.design/docs/react/customize-theme-cn
   theme: {
+    'root-entry-name': 'default', // 修复4.17alpha的问题
     'primary-color': '#304FFE',
-    'text-color': '#2D3956',
+    'success-color': '#05cc87',
+    'warning-color': '#ff9324',
+    'error-color': '#ff5753',
+    'disabled-color': '#eeeff2',
+
+    'text-color': '#2d3956',
+    'border-color-base': '#dce1ef',
+    'input-placeholder-color': '#a0a8c0',
+    'background-color-light': '#f8f8fa',
+
     'border-radius-base': '4px',
-    'border-color-base': '#EBEDF3',
-    'input-placeholder-color': '#BFC4D5',
   },
   esbuild: {},
   title: false,
@@ -50,7 +59,7 @@ export default defineConfig({
     basePath: '/',
   },
   // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector'],
+  plugins: ['react-dev-inspector/plugins/umi/react-inspector', '@zcy-data/plugin-proxy'],
   inspectorConfig: {
     // loader options type and docs see below
     exclude: [],
@@ -59,5 +68,27 @@ export default defineConfig({
   },
   resolve: {
     includes: ['src/components'],
+  },
+  chainWebpack(config, { webpack }) {
+    config
+      .plugin('monaco')
+      .use(MonacoWebpackPlugin, [{
+        languages: ['sql', 'python', 'java', 'shell'],
+        features: [
+          'comment',
+          'format',
+          'fontZoom',
+          'folding',
+          'codelens',
+          'suggest',
+          'wordOperations',
+          'wordPartOperations',
+          'wordHighlighter',
+          'parameterHints',
+          'bracketMatching',
+          'find',
+          'linesOperations', // cmd + del 等快捷键操作
+        ],
+      }]);
   },
 });

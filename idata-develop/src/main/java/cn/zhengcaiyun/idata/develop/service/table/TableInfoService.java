@@ -16,7 +16,12 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
+import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
@@ -28,9 +33,40 @@ import java.util.List;
 
 public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
-    List<TableInfoDto> getTables(String database);
+    List<TableInfoDto> getTablesByDataBase(String database);
     List<LabelDto> getDbNames();
-    TableInfoDto create(TableInfoDto tableInfoDto, String creator);
-    TableInfoDto edit(TableInfoDto tableInfoDto, String editor);
-    boolean delete(Long tableId, String editor);
+
+    /**
+     * 获取table的创建语句DDL
+     * @param tableId
+     * @return
+     */
+    String getTableDDL(Long tableId);
+    TableInfoDto syncTableInfoByDDL(TableDdlDto tableDdlDto);
+    TableInfoDto create(TableInfoDto tableInfoDto, String creator) throws IllegalAccessException;
+    TableInfoDto edit(TableInfoDto tableInfoDto, String editor) throws IllegalAccessException;
+    boolean delete(Long tableId, String editor) throws IllegalAccessException;
+    String syncMetabaseInfo(Long tableId, String editor);
+
+    /**
+     * 获取表技术相关信息
+     * @param tableId
+     * @return
+     */
+    TableTechInfoDto getTableTechInfo(Long tableId);
+
+    /**
+     * 更新hive表名字
+     * @param tableId
+     * @param hiveTableName
+     * @param operator
+     */
+    void updateHiveTableName(Long tableId, String hiveTableName, String operator);
+
+    /**
+     * 获取简单的表数据信息（非连表）
+     * @param tableId
+     * @return
+     */
+    DevTableInfo getSimpleById(Long tableId);
 }

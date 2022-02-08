@@ -17,17 +17,21 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumDto;
 import cn.zhengcaiyun.idata.develop.dto.label.EnumValueDto;
+import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
+ * dev-enum-controller
  * @author caizhedong
  * @date 2021-05-19 10:41
  */
@@ -46,9 +50,16 @@ public class EnumController {
         return RestResult.success(enumService.findEnum(enumCode));
     }
 
+    @GetMapping("enums/{enumId}")
+    public RestResult<EnumDto> getEnum(@PathVariable(value = "enumId") Long enumId) {
+        String enumCode = enumService.getEnumCode(enumId);
+        checkArgument(StringUtils.isNotBlank(enumCode), "枚举编号不存在");
+        return RestResult.success(enumService.findEnum(enumCode));
+    }
+
     @GetMapping("enumNames")
     public RestResult<List<EnumDto>> getEnumNames() {
-        return RestResult.success(enumService.getEnumNames());
+        return RestResult.success(enumService.getEnums());
     }
 
     @GetMapping("enumValues")

@@ -4,17 +4,17 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  headerHeight: 52,
+  headerHeight: 58,
   navTheme: 'light',
   primaryColor: '#304FFE',
   layout: 'mix',
   contentWidth: 'Fluid',
-  fixedHeader: false,
+  fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
   title: '',
   pwa: false,
-  logo: 'https://sitecdn.zcycdn.com/f2e-assets/8e7350f7-a0de-460b-b2ba-a861eab56f06.svg',
+  logo: 'https://sitecdn.zcycdn.com/f2e-assets/98aefdbd-ae05-428a-b954-44c10b303f94.svg',
   iconfontUrl: '//at.alicdn.com/t/font_2411167_841hs576aa7.js',
 };
 

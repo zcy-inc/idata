@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
 /**
  * @author shiyin
@@ -30,6 +34,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(scanBasePackages={"cn.zhengcaiyun.idata"})
 @MapperScan("cn.zhengcaiyun.idata.*.dal.dao")
+@EnableScheduling
 public class PortalApplication implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(PortalApplication.class);
@@ -37,6 +42,11 @@ public class PortalApplication implements CommandLineRunner {
     public static void main(String[] args) {
         SpringApplication.run(PortalApplication.class, args);
         log.info("IData portal server started successfully...");
+    }
+
+    @PostConstruct
+    void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
     @Override

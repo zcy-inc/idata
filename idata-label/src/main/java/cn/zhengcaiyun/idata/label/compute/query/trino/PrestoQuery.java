@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package cn.zhengcaiyun.idata.label.compute.query.trino;
 
 
@@ -117,16 +133,4 @@ public class PrestoQuery implements Query {
         return queryResult;
     }
 
-    public static void main(String[] args) throws SQLException {
-        ConnectionDto connectionDto = new ConnectionDto();
-        connectionDto.setHost("172.29.108.184");
-        connectionDto.setPort(18080);
-        connectionDto.setDbCatalog("hive");
-        connectionDto.setUsername("presto");
-//        new PrestoQuery().getConnection(connectionDto);
-//        System.out.println(new PrestoQuery().getSchemas(connectionDto));
-//        System.out.println(new PrestoQuery().getTables(connectionDto, "tmp"));
-//        System.out.println(new PrestoQuery().getColumns(connectionDto, "tmp", "tmp_charge_bill_order_goods"));
-        System.out.println(new PrestoQuery().query(connectionDto, "select loan_time from dwd.dwd_loan_repayment_detail where loan_time > date('2019-01-01') limit 1"));
-    }
 }

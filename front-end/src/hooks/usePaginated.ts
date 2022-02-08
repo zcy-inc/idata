@@ -49,13 +49,16 @@ export default <T>(service: TpaginatedFn<T>, options?: { refreshDeps?: any[] }) 
     setParams((prev) => ({ ...prev, current: p.current || 1 }));
   }, []);
   const result: {
-    tableProps: Pick<TableProps<T>, 'dataSource' | 'loading' | 'onChange' | 'pagination'>;
+    tableProps: Pick<TableProps<T>, 'dataSource' | 'loading' | 'onChange' | 'pagination' | 'scroll'>;
     refresh: typeof refresh;
   } = {
     tableProps: {
       dataSource: data.content,
       loading,
       onChange: changeTable,
+      scroll: {
+        x: 'max-content',
+      },
       pagination: data.total <= pageSize ? false : {
         total: data.total,
         showQuickJumper: true,
