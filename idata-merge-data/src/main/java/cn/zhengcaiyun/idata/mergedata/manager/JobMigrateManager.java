@@ -241,6 +241,9 @@ public class JobMigrateManager {
                 contentDto.setDestWriteMode("overwrite");
             }
         }
+        // todo 因岛端环境老IData还是旧表名规则，迁移后的数据先将写入模式设置为init，后续作业稳定后统一订正为append，迁移云端数据时注释该代码
+        contentDto.setDestWriteMode("init");
+
         // 数据去向-写入前语句
         contentDto.setDestBeforeWrite("");
         // 数据去向-写入后语句
