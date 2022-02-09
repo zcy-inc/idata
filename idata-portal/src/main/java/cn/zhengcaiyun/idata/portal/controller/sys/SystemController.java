@@ -26,6 +26,7 @@ import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +44,9 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 @RestController
 public class SystemController {
+
+    @Value("${idataEtl.checkToken:#{null}}")
+    private String IDATA_ETL_CHECK_TOKEN;
 
     @Autowired
     private SystemService systemService;
@@ -75,7 +79,12 @@ public class SystemController {
     }
 
     @GetMapping("/p1/sys/configs")
-    public RestResult<List<ConfigDto>> getConfigsByType(@RequestParam("configType") String configType) throws IllegalAccessException {
+    public RestResult<List<ConfigDto>> getConfigsByType(@RequestParam("configType") String configType,
+                                                        @RequestHeader("Authorization") String token) throws IllegalAccessException {
+        // 内部调用特殊token鉴权
+        if (IDATA_ETL_CHECK_TOKEN != null && IDATA_ETL_CHECK_TOKEN.equals(token)) {
+            return RestResult.success(systemConfigService.getSystemConfigs(configType));
+        }
         if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), CONFIG_CENTER_ACCESS_CODE)) {
             throw new IllegalAccessException("没有集成配置权限");
         }

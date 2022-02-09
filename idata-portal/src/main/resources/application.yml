@@ -90,3 +90,7 @@ access:
 zcy:
   is-cloud: ture # 是否是云端，ture：云端，false：本地化
 
+idataEtl:
+  checkToken: 89f30cec4f8fbc0ccdca079d025be0d4
+
+
