@@ -50,9 +50,9 @@ livy:
   sessionMax: 10
   dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
 
-dolphin:
-  baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
-  token: ed3ed02005c030e955a76f7672747715
+#dolphin:
+#  baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
+#  token: ed3ed02005c030e955a76f7672747715
 
 hdfs:
   nameservices: nameservice1

@@ -1,15 +1,11 @@
 package cn.zhengcaiyun.idata.portal.model.request.job;
 
-import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
-import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
-import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -146,6 +142,26 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
      *   配置模式，1：可视化模式，2：脚本模式
      */
     private Integer configMode;
+
+    /**
+     *   多分片写入（并行度）
+     */
+    private Integer destShardingNum;
+
+    /**
+     *   单次批量写入数据条数
+     */
+    private Long destBulkNum;
+
+    /**
+     *   merge_sql的参数
+     */
+    private ScriptMergeSqlParamDto scriptMergeSqlParamDto;
+
+    /**
+     *   目标库中间件的内置属性
+     */
+    private Map<String, String> destPropertyMap;
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;
@@ -353,5 +369,45 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
 
     public void setConfigMode(Integer configMode) {
         this.configMode = configMode;
+    }
+
+    public Integer getDestShardingNum() {
+        return destShardingNum;
+    }
+
+    public void setDestShardingNum(Integer destShardingNum) {
+        this.destShardingNum = destShardingNum;
+    }
+
+    public Long getDestBulkNum() {
+        return destBulkNum;
+    }
+
+    public void setDestBulkNum(Long destBulkNum) {
+        this.destBulkNum = destBulkNum;
+    }
+
+    public ScriptMergeSqlParamDto getScriptMergeSqlParam() {
+        return scriptMergeSqlParamDto;
+    }
+
+    public void setScriptMergeSqlParam(ScriptMergeSqlParamDto scriptMergeSqlParamDto) {
+        this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
+    }
+
+    public ScriptMergeSqlParamDto getScriptMergeSqlParamDto() {
+        return scriptMergeSqlParamDto;
+    }
+
+    public void setScriptMergeSqlParamDto(ScriptMergeSqlParamDto scriptMergeSqlParamDto) {
+        this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
+    }
+
+    public Map<String, String> getDestPropertyMap() {
+        return destPropertyMap;
+    }
+
+    public void setDestPropertyMap(Map<String, String> destPropertyMap) {
+        this.destPropertyMap = destPropertyMap;
     }
 }

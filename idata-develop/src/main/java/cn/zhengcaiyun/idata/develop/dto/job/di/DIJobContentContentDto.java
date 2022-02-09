@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 
 import javax.annotation.Generated;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -151,6 +152,26 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      *   配置模式，1：可视化模式，2：脚本模式
      */
     private Integer configMode;
+
+    /**
+     *   多分片写入（并行度）
+     */
+    private Integer destShardingNum;
+
+    /**
+     *   单次批量写入数据条数
+     */
+    private Long destBulkNum;
+
+    /**
+     *   merge_sql的参数
+     */
+    private ScriptMergeSqlParamDto scriptMergeSqlParamDto;
+
+    /**
+     *   目标库中间件的内置属性
+     */
+    private Map<String, String> destPropertyMap;
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;
@@ -368,6 +389,38 @@ public class DIJobContentContentDto extends JobContentBaseDto {
         this.configMode = configMode;
     }
 
+    public Integer getDestShardingNum() {
+        return destShardingNum;
+    }
+
+    public void setDestShardingNum(Integer destShardingNum) {
+        this.destShardingNum = destShardingNum;
+    }
+
+    public Long getDestBulkNum() {
+        return destBulkNum;
+    }
+
+    public void setDestBulkNum(Long destBulkNum) {
+        this.destBulkNum = destBulkNum;
+    }
+
+    public ScriptMergeSqlParamDto getScriptMergeSqlParamDto() {
+        return scriptMergeSqlParamDto;
+    }
+
+    public void setScriptMergeSqlParamDto(ScriptMergeSqlParamDto scriptMergeSqlParamDto) {
+        this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
+    }
+
+    public Map<String, String> getDestPropertyMap() {
+        return destPropertyMap;
+    }
+
+    public void setDestPropertyMap(Map<String, String> destPropertyMap) {
+        this.destPropertyMap = destPropertyMap;
+    }
+
     public static DIJobContentContentDto from(DIJobContent content) {
         DIJobContentContentDto dto = new DIJobContentContentDto();
         BeanUtils.copyProperties(content, dto);
@@ -377,6 +430,12 @@ public class DIJobContentContentDto extends JobContentBaseDto {
         }
         if (StringUtils.isNotBlank(content.getDestColumns())) {
             dto.setDestCols(JSON.parseArray(content.getDestColumns(), MappingColumnDto.class));
+        }
+        if (StringUtils.isNotEmpty(content.getScriptMergeSqlParam())) {
+            dto.setScriptMergeSqlParamDto(JSON.parseObject(content.getScriptMergeSqlParam(), ScriptMergeSqlParamDto.class));
+        }
+        if (StringUtils.isNotEmpty(content.getDestProperties())) {
+            dto.setDestPropertyMap(JSON.parseObject(content.getDestProperties(), Map.class));
         }
         dto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
         return dto;
@@ -395,6 +454,16 @@ public class DIJobContentContentDto extends JobContentBaseDto {
             content.setDestColumns(JSON.toJSONString(this.destCols));
         } else {
             content.setDestColumns("");
+        }
+        if (ObjectUtils.isNotEmpty(this.scriptMergeSqlParamDto)) {
+            content.setScriptMergeSqlParam(JSON.toJSONString(this.scriptMergeSqlParamDto));
+        } else {
+            content.setScriptMergeSqlParam("");
+        }
+        if (ObjectUtils.isNotEmpty(this.destPropertyMap)) {
+            content.setDestProperties(JSON.toJSONString(this.destPropertyMap));
+        } else {
+            content.setDestProperties("");
         }
         return content;
     }

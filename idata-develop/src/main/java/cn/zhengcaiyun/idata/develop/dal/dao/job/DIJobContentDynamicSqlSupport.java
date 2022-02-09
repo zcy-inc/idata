@@ -8,252 +8,280 @@ import org.mybatis.dynamic.sql.SqlTable;
 
 public final class DIJobContentDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    public static final DIJobContent DI_JOB_CONTENT = new DIJobContent();
+    public static final DIJobContent DIJobContent = new DIJobContent();
 
     /**
      * Database Column Remarks:
      *   主键
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.id")
-    public static final SqlColumn<Long> id = DI_JOB_CONTENT.id;
+    public static final SqlColumn<Long> id = DIJobContent.id;
 
     /**
      * Database Column Remarks:
      *   是否删除，0否，1是
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.del")
-    public static final SqlColumn<Integer> del = DI_JOB_CONTENT.del;
+    public static final SqlColumn<Integer> del = DIJobContent.del;
 
     /**
      * Database Column Remarks:
      *   创建者
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.creator")
-    public static final SqlColumn<String> creator = DI_JOB_CONTENT.creator;
+    public static final SqlColumn<String> creator = DIJobContent.creator;
 
     /**
      * Database Column Remarks:
      *   创建时间
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.create_time")
-    public static final SqlColumn<Date> createTime = DI_JOB_CONTENT.createTime;
+    public static final SqlColumn<Date> createTime = DIJobContent.createTime;
 
     /**
      * Database Column Remarks:
      *   修改者
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.editor")
-    public static final SqlColumn<String> editor = DI_JOB_CONTENT.editor;
+    public static final SqlColumn<String> editor = DIJobContent.editor;
 
     /**
      * Database Column Remarks:
      *   修改时间
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.edit_time")
-    public static final SqlColumn<Date> editTime = DI_JOB_CONTENT.editTime;
+    public static final SqlColumn<Date> editTime = DIJobContent.editTime;
 
     /**
      * Database Column Remarks:
      *   作业id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.job_id")
-    public static final SqlColumn<Long> jobId = DI_JOB_CONTENT.jobId;
+    public static final SqlColumn<Long> jobId = DIJobContent.jobId;
 
     /**
      * Database Column Remarks:
      *   是否可编辑，0否，1是
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.editable")
-    public static final SqlColumn<Integer> editable = DI_JOB_CONTENT.editable;
+    public static final SqlColumn<Integer> editable = DIJobContent.editable;
 
     /**
      * Database Column Remarks:
      *   作业版本号
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.version")
-    public static final SqlColumn<Integer> version = DI_JOB_CONTENT.version;
+    public static final SqlColumn<Integer> version = DIJobContent.version;
 
     /**
      * Database Column Remarks:
      *   数据流向，IN-数据集成、OUT-数据回流
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
-    public static final SqlColumn<String> direct = DI_JOB_CONTENT.direct;
+    public static final SqlColumn<String> direct = DIJobContent.direct;
 
     /**
      * Database Column Remarks:
      *   数据来源-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_type")
-    public static final SqlColumn<String> srcDataSourceType = DI_JOB_CONTENT.srcDataSourceType;
+    public static final SqlColumn<String> srcDataSourceType = DIJobContent.srcDataSourceType;
 
     /**
      * Database Column Remarks:
      *   数据来源-数据源id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_id")
-    public static final SqlColumn<Long> srcDataSourceId = DI_JOB_CONTENT.srcDataSourceId;
+    public static final SqlColumn<Long> srcDataSourceId = DIJobContent.srcDataSourceId;
 
     /**
      * Database Column Remarks:
      *   来源为kafka数据类型的topic
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
-    public static final SqlColumn<String> srcTopic = DI_JOB_CONTENT.srcTopic;
+    public static final SqlColumn<String> srcTopic = DIJobContent.srcTopic;
 
     /**
      * Database Column Remarks:
      *   数据来源-读取模式，all：全量，incremental：增量
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
-    public static final SqlColumn<String> srcReadMode = DI_JOB_CONTENT.srcReadMode;
+    public static final SqlColumn<String> srcReadMode = DIJobContent.srcReadMode;
 
     /**
      * Database Column Remarks:
      *   数据来源-过滤条件
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_filter")
-    public static final SqlColumn<String> srcReadFilter = DI_JOB_CONTENT.srcReadFilter;
-
-    /**
-     * Database Column Remarks:
-     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
-    public static final SqlColumn<String> srcQuery = DI_JOB_CONTENT.srcQuery;
+    public static final SqlColumn<String> srcReadFilter = DIJobContent.srcReadFilter;
 
     /**
      * Database Column Remarks:
      *   数据来源-切分键
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_shard_key")
-    public static final SqlColumn<String> srcReadShardKey = DI_JOB_CONTENT.srcReadShardKey;
+    public static final SqlColumn<String> srcReadShardKey = DIJobContent.srcReadShardKey;
 
     /**
      * Database Column Remarks:
      *   数据来源-分片数量（并行度）
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_sharding_num")
-    public static final SqlColumn<Integer> srcShardingNum = DI_JOB_CONTENT.srcShardingNum;
+    public static final SqlColumn<Integer> srcShardingNum = DIJobContent.srcShardingNum;
 
     /**
      * Database Column Remarks:
      *   数据去向-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_type")
-    public static final SqlColumn<String> destDataSourceType = DI_JOB_CONTENT.destDataSourceType;
+    public static final SqlColumn<String> destDataSourceType = DIJobContent.destDataSourceType;
 
     /**
      * Database Column Remarks:
      *   数据去向-数据源id
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_data_source_id")
-    public static final SqlColumn<Long> destDataSourceId = DI_JOB_CONTENT.destDataSourceId;
+    public static final SqlColumn<Long> destDataSourceId = DIJobContent.destDataSourceId;
 
     /**
      * Database Column Remarks:
      *   目标为kafka的数据类的topic
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_topic")
-    public static final SqlColumn<String> destTopic = DI_JOB_CONTENT.destTopic;
+    public static final SqlColumn<String> destTopic = DIJobContent.destTopic;
 
     /**
      * Database Column Remarks:
      *   数据去向-目标表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table")
-    public static final SqlColumn<String> destTable = DI_JOB_CONTENT.destTable;
+    public static final SqlColumn<String> destTable = DIJobContent.destTable;
 
     /**
      * Database Column Remarks:
      *   数据去向-写入模式，init: 新建表，override: 覆盖表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_write_mode")
-    public static final SqlColumn<String> destWriteMode = DI_JOB_CONTENT.destWriteMode;
+    public static final SqlColumn<String> destWriteMode = DIJobContent.destWriteMode;
 
     /**
      * Database Column Remarks:
      *   数据去向-写入前语句
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_before_write")
-    public static final SqlColumn<String> destBeforeWrite = DI_JOB_CONTENT.destBeforeWrite;
+    public static final SqlColumn<String> destBeforeWrite = DIJobContent.destBeforeWrite;
 
     /**
      * Database Column Remarks:
      *   数据去向-写入后语句
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_after_write")
-    public static final SqlColumn<String> destAfterWrite = DI_JOB_CONTENT.destAfterWrite;
+    public static final SqlColumn<String> destAfterWrite = DIJobContent.destAfterWrite;
+
+    /**
+     * Database Column Remarks:
+     *   目标库中间件的内置属性
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_properties")
+    public static final SqlColumn<String> destProperties = DIJobContent.destProperties;
+
+    /**
+     * Database Column Remarks:
+     *   多分片写入（并行度）
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_sharding_num")
+    public static final SqlColumn<Integer> destShardingNum = DIJobContent.destShardingNum;
+
+    /**
+     * Database Column Remarks:
+     *   单次批量写入数据条数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_bulk_num")
+    public static final SqlColumn<Long> destBulkNum = DIJobContent.destBulkNum;
 
     /**
      * Database Column Remarks:
      *   作业内容hash
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.content_hash")
-    public static final SqlColumn<String> contentHash = DI_JOB_CONTENT.contentHash;
+    public static final SqlColumn<String> contentHash = DIJobContent.contentHash;
 
     /**
      * Database Column Remarks:
      *   DI作业增量模式的mergeSql
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
-    public static final SqlColumn<String> mergeSql = DI_JOB_CONTENT.mergeSql;
+    public static final SqlColumn<String> mergeSql = DIJobContent.mergeSql;
 
     /**
      * Database Column Remarks:
      *   脚本模式，作用同可视化src_columns
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
-    public static final SqlColumn<String> scriptSelectColumns = DI_JOB_CONTENT.scriptSelectColumns;
+    public static final SqlColumn<String> scriptSelectColumns = DIJobContent.scriptSelectColumns;
 
     /**
      * Database Column Remarks:
      *   脚本模式，同可视化src_columns中primaryKey字段
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_key_columns")
-    public static final SqlColumn<String> scriptKeyColumns = DI_JOB_CONTENT.scriptKeyColumns;
+    public static final SqlColumn<String> scriptKeyColumns = DIJobContent.scriptKeyColumns;
 
     /**
      * Database Column Remarks:
-     *   脚本模式，同可视化merge_sql
+     *   merge_sql的参数，json格式
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
-    public static final SqlColumn<String> scriptMergeSql = DI_JOB_CONTENT.scriptMergeSql;
-
-    /**
-     * Database Column Remarks:
-     *   脚本模式，同可视化src_query
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
-    public static final SqlColumn<String> scriptQuery = DI_JOB_CONTENT.scriptQuery;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql_param")
+    public static final SqlColumn<String> scriptMergeSqlParam = DIJobContent.scriptMergeSqlParam;
 
     /**
      * Database Column Remarks:
      *   配置模式，1：可视化模式，2：脚本模式
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.config_mode")
-    public static final SqlColumn<Integer> configMode = DI_JOB_CONTENT.configMode;
+    public static final SqlColumn<Integer> configMode = DIJobContent.configMode;
 
     /**
      * Database Column Remarks:
      *   数据来源-来源表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
-    public static final SqlColumn<String> srcTables = DI_JOB_CONTENT.srcTables;
+    public static final SqlColumn<String> srcTables = DIJobContent.srcTables;
 
     /**
      * Database Column Remarks:
      *   数据来源-字段信息，json格式
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_columns")
-    public static final SqlColumn<String> srcColumns = DI_JOB_CONTENT.srcColumns;
+    public static final SqlColumn<String> srcColumns = DIJobContent.srcColumns;
+
+    /**
+     * Database Column Remarks:
+     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
+    public static final SqlColumn<String> srcQuery = DIJobContent.srcQuery;
 
     /**
      * Database Column Remarks:
      *   数据去向-字段信息，json格式
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
-    public static final SqlColumn<String> destColumns = DI_JOB_CONTENT.destColumns;
+    public static final SqlColumn<String> destColumns = DIJobContent.destColumns;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化merge_sql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
+    public static final SqlColumn<String> scriptMergeSql = DIJobContent.scriptMergeSql;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化src_query
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
+    public static final SqlColumn<String> scriptQuery = DIJobContent.scriptQuery;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     public static final class DIJobContent extends SqlTable {
@@ -287,8 +315,6 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> srcReadFilter = column("src_read_filter", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> srcQuery = column("src_query", JDBCType.VARCHAR);
-
         public final SqlColumn<String> srcReadShardKey = column("src_read_shard_key", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> srcShardingNum = column("src_sharding_num", JDBCType.INTEGER);
@@ -307,6 +333,12 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> destAfterWrite = column("dest_after_write", JDBCType.VARCHAR);
 
+        public final SqlColumn<String> destProperties = column("dest_properties", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> destShardingNum = column("dest_sharding_num", JDBCType.INTEGER);
+
+        public final SqlColumn<Long> destBulkNum = column("dest_bulk_num", JDBCType.BIGINT);
+
         public final SqlColumn<String> contentHash = column("content_hash", JDBCType.VARCHAR);
 
         public final SqlColumn<String> mergeSql = column("merge_sql", JDBCType.VARCHAR);
@@ -315,9 +347,7 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> scriptKeyColumns = column("script_key_columns", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> scriptMergeSql = column("script_merge_sql", JDBCType.VARCHAR);
-
-        public final SqlColumn<String> scriptQuery = column("script_query", JDBCType.VARCHAR);
+        public final SqlColumn<String> scriptMergeSqlParam = column("script_merge_sql_param", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> configMode = column("config_mode", JDBCType.TINYINT);
 
@@ -325,7 +355,13 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> srcColumns = column("src_columns", JDBCType.LONGVARCHAR);
 
+        public final SqlColumn<String> srcQuery = column("src_query", JDBCType.LONGVARCHAR);
+
         public final SqlColumn<String> destColumns = column("dest_columns", JDBCType.LONGVARCHAR);
+
+        public final SqlColumn<String> scriptMergeSql = column("script_merge_sql", JDBCType.LONGVARCHAR);
+
+        public final SqlColumn<String> scriptQuery = column("script_query", JDBCType.LONGVARCHAR);
 
         public DIJobContent() {
             super("dev_job_content_di");
