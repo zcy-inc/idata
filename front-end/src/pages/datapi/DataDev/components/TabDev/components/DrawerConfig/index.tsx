@@ -187,7 +187,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 

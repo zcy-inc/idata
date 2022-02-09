@@ -468,7 +468,7 @@ export async function submitTask(
 /**
  * 获取DAG列表
  */
-export async function getDAGList(params: { dwLayerCode: string; environment: Environments }) {
+export async function getDAGList(params: { environment: Environments; dwLayerCode?: string }) {
   return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
     method: 'GET',
     params,

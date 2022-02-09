@@ -17,12 +17,7 @@ import type { FC } from 'react';
 import styles from './index.less';
 
 import Title from '@/components/Title';
-import {
-  concurrentOptions,
-  execDriverMemOptions,
-  execWorkerMemOptions,
-  restartOptions,
-} from './constants';
+import { execDriverMemOptions, execWorkerMemOptions, restartOptions } from './constants';
 import { DAGListItem, Task } from '@/types/datadev';
 import {
   getDAGList,
@@ -92,7 +87,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
