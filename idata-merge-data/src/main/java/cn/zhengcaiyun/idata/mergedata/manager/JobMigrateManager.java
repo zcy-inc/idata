@@ -166,21 +166,21 @@ public class JobMigrateManager {
         Boolean old_is_recreate = oldJobContent.getBoolean("is_recreate");
         // 岛端的 sql类型抽数作业需要标识出来，迁移后重新配置
         if (!"tableName".equals(old_source_type)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_type:[%s]是（非全量抽数），迁移完需要重新配置", migrationDto.getOldJobId().toString(), old_source_type), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧作业[%s]的source_type:[%s]是（非全量抽数），需要修改后重迁或者迁移完重新配置DI作业", migrationDto.getOldJobId().toString(), old_source_type), oldJobContent.toJSONString()));
             return null;
         }
         if (StringUtils.isBlank(old_source_table)) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为空，迁移完需要重新配置", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧作业[%s]的source_table为空，需要修改后重迁或者迁移完重新配置DI作业", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
         if (old_source_table.indexOf("[") > 0) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
 
         Optional<DataSource> srcDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
         if (!srcDataSourceOptional.isPresent()) {
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧DI作业[%s]未找到迁移后的来源数据源，迁移后需人工处理", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧DI作业[%s]未找到迁移后的来源数据源，迁移后需人工处理", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
         DataSource srcDataSource = srcDataSourceOptional.get();
@@ -201,7 +201,9 @@ public class JobMigrateManager {
         // 数据来源-分片数量（并行度）
         contentDto.setSrcShardingNum(1);
 
-        Optional<DataSource> destDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
+        // 目标数据源
+        Long old_dest_id = migrationDto.getOldJobConfig().getLong("target_id");
+        Optional<DataSource> destDataSourceOptional = DatasourceTool.findDatasource(old_dest_id, JobMigrationContext.getDataSourceListIfPresent());
         if (!destDataSourceOptional.isPresent()) {
             resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需处理：旧DI作业[%s]未找到迁移后的目标数据源，迁移后需人工处理", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
