@@ -392,8 +392,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcDbName(dbName);
                 diResponse.setSrcDriverType(DriverTypeEnum.of(dataSource.getType().name()));
 
-                // destTable带库名
-                diResponse.setDestTable(dbName + "." + diResponse.getDestTable());
+                diResponse.setDestTable(diResponse.getDestTable());
 
                 // 字段类型转换
                 diResponse.setDestWriteMode(DestWriteModeEnum.valueOf(diJobContent.getDestWriteMode()));
