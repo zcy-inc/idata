@@ -53,15 +53,15 @@ pg:
     password: userOFstaging0726
 
 
-livy:
-#  baseUrl: http://cdh4.cai-inc.com:8998
-  baseUrl: http://172.29.108.194:8998
-  sessionMax: 10
-  dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
+#livy:
+##  baseUrl: http://cdh4.cai-inc.com:8998
+#  baseUrl: http://172.29.108.194:8998
+#  sessionMax: 10
+#  dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
 
-dolphin:
-  baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
-  token: ed3ed02005c030e955a76f7672747715
+#dolphin:
+#  baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
+#  token: ed3ed02005c030e955a76f7672747715
 
 hdfs:
   nameservices: nameservice1
@@ -70,8 +70,8 @@ hdfs:
   basePath: /tmp/shiyin/
   user: hdfs
 
-yarn:
-  resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
+#yarn:
+#  resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
 
 dev:
   job:
