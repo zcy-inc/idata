@@ -11,7 +11,9 @@ import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SparkSqlUtil {
 
@@ -23,6 +25,21 @@ public class SparkSqlUtil {
         AddDatabaseEnvListener listener = new AddDatabaseEnvListener(tokenStream, env);
         walker.walk(listener, parser.statement());
         return listener.rewriter.getText();
+    }
+
+    public static Map<String, String> insertErase(String sql) {
+        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(sql), true));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SparkSqlParser parser = new SparkSqlParser(tokenStream);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        InsertEraseListener listener = new InsertEraseListener(tokenStream);
+        walker.walk(listener, parser.statement());
+        Map<String, String> result = new HashMap<>();
+        if (listener.insertTable != null) {
+            result.put("insertTable", listener.insertTable);
+            result.put("selectSql", listener.rewriter.getText());
+        }
+        return result;
     }
 
     public static class AddDatabaseEnvListener extends SparkSqlBaseListener {
@@ -48,4 +65,43 @@ public class SparkSqlUtil {
         }
     }
 
+    public static class InsertEraseListener extends SparkSqlBaseListener {
+
+        public String insertTable = null;
+        private String op = null;
+        public final TokenStreamRewriter rewriter;
+
+        public InsertEraseListener(TokenStream tokenStream) {
+            this.rewriter = new TokenStreamRewriter(tokenStream);
+        }
+
+        @Override
+        public void enterTableIdentifier(SparkSqlParser.TableIdentifierContext ctx) {
+            if (op != null) {
+                insertTable = ctx.getText().toLowerCase();
+            }
+        }
+
+        @Override
+        public void enterInsertIntoTable(SparkSqlParser.InsertIntoTableContext ctx) {
+            op = "INSERT INTO";
+            rewriter.delete(ctx.start, ctx.stop);
+        }
+
+        @Override
+        public void exitInsertIntoTable(SparkSqlParser.InsertIntoTableContext ctx) {
+            op = null;
+        }
+
+        @Override
+        public void enterInsertOverwriteTable(SparkSqlParser.InsertOverwriteTableContext ctx) {
+            op = "INSERT OVERWRITE";
+            rewriter.delete(ctx.start, ctx.stop);
+        }
+
+        @Override
+        public void exitInsertOverwriteTable(SparkSqlParser.InsertOverwriteTableContext ctx) {
+            op = null;
+        }
+    }
 }

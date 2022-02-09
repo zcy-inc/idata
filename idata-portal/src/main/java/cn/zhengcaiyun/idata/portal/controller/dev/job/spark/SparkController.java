@@ -16,17 +16,12 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev.job.spark;
 
-import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
-import cn.zhengcaiyun.idata.develop.service.job.SparkJobService;
 import cn.zhengcaiyun.idata.portal.model.request.job.SqlParserRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -43,5 +38,17 @@ public class SparkController {
     public RestResult<String> addDatabaseEnv(@RequestBody SqlParserRequest request) {
         checkArgument(request.getSql() != null, "sql不能为空");
         return RestResult.success(SparkSqlUtil.addDatabaseEnv(request.getSql(), request.getEnv()));
+    }
+
+    @PostMapping("insertErase")
+    public RestResult<Map<String, String>> insertErase(@RequestBody SqlParserRequest sql) {
+        checkArgument(sql.getSql() != null, "sql不能为空");
+        Map<String, String> result = SparkSqlUtil.insertErase(sql.getSql());
+        if (result.get("insertTable") != null) {
+            result.put("insertErase", "true");
+        } else {
+            result.put("insertErase", "false");
+        }
+        return RestResult.success(result);
     }
 }
