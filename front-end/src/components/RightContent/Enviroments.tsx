@@ -22,6 +22,8 @@ const Enviroments: FC<EnviromentsProps> = ({}) => {
         const workspaceJson = JSON.parse(workspaceString);
         const env = workspaceJson.urlPath || 'zcy';
         form.setFieldsValue({ env });
+      } else {
+        form.setFieldsValue({ env: 'zcy' });
       }
     } catch (e) {
       form.setFieldsValue({ env: 'zcy' });
