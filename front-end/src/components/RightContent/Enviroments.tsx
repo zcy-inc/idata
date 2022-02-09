@@ -60,6 +60,8 @@ const Enviroments: FC<EnviromentsProps> = ({}) => {
     <Form form={form}>
       <Form.Item name="env" style={{ marginBottom: 0 }}>
         <Select
+          style={{ width: 120 }}
+          placeholder="请选择环境"
           options={envs.map((_) => ({ label: _.name, value: _.urlPath }))}
           onChange={(v) => onEnvChange(v as string)}
         />
