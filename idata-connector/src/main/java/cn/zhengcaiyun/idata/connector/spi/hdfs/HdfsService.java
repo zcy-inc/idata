@@ -47,46 +47,46 @@ public class HdfsService implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Configuration cfg = new Configuration();
-
-        String nameService = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NAMESERVICES);
-        String nn1 = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NN1);
-        String nn2 = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NN2);
-        String user = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_USER);
-
-        cfg.set("fs.defaultFS", "hdfs://" + nameService); //HDFS_NAMESERVICES
-        cfg.set("dfs.nameservices", nameService);
-        cfg.set("dfs.ha.namenodes." + nameService, "nn1,nn2");
-        cfg.set("dfs.namenode.rpc-address." + nameService + ".nn1", nn1);
-        cfg.set("dfs.namenode.rpc-address." + nameService + ".nn2", nn2);
-        cfg.set("dfs.client.failover.proxy.provider." + nameService,
-                "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
-
-        try {
-            fs = FileSystem.get(URI.create(HDFS_BASE_PATH), cfg, user);
-            HDFS_CSV_PATH = HDFS_BASE_PATH + "csv/";
-            if (!fs.exists(new Path(HDFS_CSV_PATH))) {
-                fs.mkdirs(new Path(HDFS_CSV_PATH));
-            }
-            HDFS_RESOURCE_PATH = HDFS_BASE_PATH + "resource/";
-            if (!fs.exists(new Path(HDFS_RESOURCE_PATH))) {
-                fs.mkdirs(new Path(HDFS_RESOURCE_PATH));
-            }
-            HDFS_TMP_PYTHON_PATH = HDFS_BASE_PATH + "python/tmp/";
-            if (!fs.exists(new Path(HDFS_TMP_PYTHON_PATH))) {
-                fs.mkdirs(new Path(HDFS_TMP_PYTHON_PATH));
-            }
-            HDFS_PYTHON_PATH = HDFS_BASE_PATH + "python/";
-            if (!fs.exists(new Path(HDFS_PYTHON_PATH))) {
-                fs.mkdirs(new Path(HDFS_PYTHON_PATH));
-            }
-            HDFS_UDF_PATH = HDFS_BASE_PATH + "udf/";
-            if (!fs.exists(new Path(HDFS_UDF_PATH))) {
-                fs.mkdirs(new Path(HDFS_UDF_PATH));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        Configuration cfg = new Configuration();
+//
+//        String nameService = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NAMESERVICES);
+//        String nn1 = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NN1);
+//        String nn2 = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_NN2);
+//        String user = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_OTHER_CONFIG, SystemConfigConstant.OTHER_CONFIG_HDFS_USER);
+//
+//        cfg.set("fs.defaultFS", "hdfs://" + nameService); //HDFS_NAMESERVICES
+//        cfg.set("dfs.nameservices", nameService);
+//        cfg.set("dfs.ha.namenodes." + nameService, "nn1,nn2");
+//        cfg.set("dfs.namenode.rpc-address." + nameService + ".nn1", nn1);
+//        cfg.set("dfs.namenode.rpc-address." + nameService + ".nn2", nn2);
+//        cfg.set("dfs.client.failover.proxy.provider." + nameService,
+//                "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
+//
+//        try {
+//            fs = FileSystem.get(URI.create(HDFS_BASE_PATH), cfg, user);
+//            HDFS_CSV_PATH = HDFS_BASE_PATH + "csv/";
+//            if (!fs.exists(new Path(HDFS_CSV_PATH))) {
+//                fs.mkdirs(new Path(HDFS_CSV_PATH));
+//            }
+//            HDFS_RESOURCE_PATH = HDFS_BASE_PATH + "resource/";
+//            if (!fs.exists(new Path(HDFS_RESOURCE_PATH))) {
+//                fs.mkdirs(new Path(HDFS_RESOURCE_PATH));
+//            }
+//            HDFS_TMP_PYTHON_PATH = HDFS_BASE_PATH + "python/tmp/";
+//            if (!fs.exists(new Path(HDFS_TMP_PYTHON_PATH))) {
+//                fs.mkdirs(new Path(HDFS_TMP_PYTHON_PATH));
+//            }
+//            HDFS_PYTHON_PATH = HDFS_BASE_PATH + "python/";
+//            if (!fs.exists(new Path(HDFS_PYTHON_PATH))) {
+//                fs.mkdirs(new Path(HDFS_PYTHON_PATH));
+//            }
+//            HDFS_UDF_PATH = HDFS_BASE_PATH + "udf/";
+//            if (!fs.exists(new Path(HDFS_UDF_PATH))) {
+//                fs.mkdirs(new Path(HDFS_UDF_PATH));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
