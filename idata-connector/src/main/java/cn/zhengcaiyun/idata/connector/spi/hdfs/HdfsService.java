@@ -69,7 +69,8 @@ public class HdfsService {
      */
     public boolean checkUdfPath(String path) {
         String udfPath = HDFS_BASE_PATH + "udf/";
-        return StringUtils.contains(path, udfPath);
+        // 为了兼容历史迁移数据，包括进resource目录
+        return StringUtils.contains(path, udfPath) || StringUtils.contains(path, "resource");
     }
 
     private String uploadFile(InputStream inputStream, String directory, String originalName) {
