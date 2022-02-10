@@ -4,6 +4,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -141,7 +142,8 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
     /**
      *   配置模式，1：可视化模式，2：脚本模式
      */
-    private Integer configMode;
+   @NotNull(message = "配置模式不能为空")
+   private Integer configMode;
 
     /**
      *   多分片写入（并行度）

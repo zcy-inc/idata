@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 public class GenerateMergeSqlRequest {
 
@@ -11,7 +12,7 @@ public class GenerateMergeSqlRequest {
      * 筛选列，字符串列，逗号换行分隔
      */
     @NotEmpty(message = "selectColumns 不能为空")
-    private String selectColumns;
+    private List<String> selectColumnList;
 
     /**
      * 主键id，支持组合，逗号分隔
@@ -45,12 +46,12 @@ public class GenerateMergeSqlRequest {
     @NotEmpty(message = "driverType 不能为空")
     private String driverType;
 
-    public String getSelectColumns() {
-        return selectColumns;
+    public List<String> getSelectColumnList() {
+        return selectColumnList;
     }
 
-    public void setSelectColumns(String selectColumns) {
-        this.selectColumns = selectColumns;
+    public void setSelectColumnList(List<String> selectColumnList) {
+        this.selectColumnList = selectColumnList;
     }
 
     public String getKeyColumns() {
@@ -97,7 +98,6 @@ public class GenerateMergeSqlRequest {
      * 将换行符和空格去除
      */
     public void formatColumns() {
-        this.selectColumns = this.selectColumns.replaceAll("\n", "").replaceAll(" ", "");
         this.keyColumns = this.keyColumns.replaceAll("\n", "").replaceAll(" ", "");
     }
 }

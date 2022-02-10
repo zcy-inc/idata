@@ -22,6 +22,8 @@ import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -35,12 +37,12 @@ public interface DIJobContentService {
 
     /**
      * 生成merge sql
-     * @param dataSourceId
+     * @param selectColumnList 筛选的列
      * @param table
      * @param hiveTable
      * @param diMode
      * @param typeEnum
      * @return
      */
-    String generateMergeSql(String selectColumns, String keyColumns, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
+    String generateMergeSql(List<String> selectColumnList, String keyColumns, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
 }

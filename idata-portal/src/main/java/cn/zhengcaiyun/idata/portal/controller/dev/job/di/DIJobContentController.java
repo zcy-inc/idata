@@ -102,8 +102,7 @@ public class DIJobContentController {
         String driverType = request.getDriverType();
         String sourceTable = request.getSourceTable();
         String keyColumns = request.getKeyColumns();
-        String selectColumns = request.getSelectColumns();
-        return RestResult.success(diJobContentService.generateMergeSql(selectColumns, keyColumns, sourceTable, destTable, diMode, DriverTypeEnum.of(driverType)));
+        return RestResult.success(diJobContentService.generateMergeSql(request.getSelectColumnList(), keyColumns, sourceTable, destTable, diMode, DriverTypeEnum.of(driverType)));
     }
 
 

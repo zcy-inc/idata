@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
@@ -78,9 +79,16 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
         Integer version = contentDto.getVersion();
 
-        // 可视化的query无法手写，自动生成
-        String srcQuery = generateSrcQuery(contentDto.getSrcCols(), contentDto.getSrcReadFilter(), contentDto.getSrcTables());
-        contentDto.setSrcQuery(srcQuery);
+        // 可视化的query/mergeSql自动生成
+        DiConfigModeEnum modeEnum = DiConfigModeEnum.getByValue(contentDto.getConfigMode());
+        switch (modeEnum) {
+            case VISIBLE:
+                String srcQuery = generateSrcQuery(contentDto.getSrcCols(), contentDto.getSrcReadFilter(), contentDto.getSrcTables());
+                contentDto.setSrcQuery(srcQuery);
+                break;
+            case SCRIPT:
+                break;
+        }
 
         boolean startNewVersion = true;
         if (Objects.nonNull(version)) {
@@ -127,12 +135,11 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         }).collect(Collectors.toList());
 
         String selectColumns = StringUtils.join(columns, ",");
-        StringBuffer stringBuffer = new StringBuffer("select " + selectColumns);
-        stringBuffer.append(" from " + srcTables);
+        String srcQuery = String.format("select %s from %s ", selectColumns, srcTables);
         if (StringUtils.isNotEmpty(condition)) {
-            stringBuffer.append(" where " + condition);
+            srcQuery += (" where " + condition);
         }
-        return stringBuffer.toString();
+        return srcQuery;
     }
 
     @Override
@@ -146,7 +153,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public String generateMergeSql(String selectColumns, String keyColumns, String sourceTable, String destTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+    public String generateMergeSql(List<String> selectColumnList, String keyColumns, String sourceTable, String destTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
         String tmpTable = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
@@ -166,7 +173,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 sourceTable = ReUtil.get(regex2, sourceTable, 2);
             }
         }
-        return buildMergeSql(isMulPartition, tmpTable, destTable, selectColumns, keyColumns, sourceTable);
+        return buildMergeSql(isMulPartition, tmpTable, destTable, selectColumnList, keyColumns, sourceTable);
     }
 
     /**
@@ -179,13 +186,11 @@ public class DIJobContentServiceImpl implements DIJobContentService {
      * @param sourceTable 源库
      * @return
      */
-    private String buildMergeSql(boolean isMulPartition, String tmpTable, String destTable, String selectColumns, String keyColumns, String sourceTable) {
-//        String[] columns = dataSourceService.getDBTableColumns(dataSourceId, sourceTable);
-        List<String> columnList = Arrays.asList(selectColumns.split(","));
+    private String buildMergeSql(boolean isMulPartition, String tmpTable, String destTable, List<String> selectColumnList, String keyColumns, String sourceTable) {
         // 筛选的列名
-        String selectStr = StringUtils.join(columnList, "\n,") + "\n[,num]";
+        String selectStr = StringUtils.join(selectColumnList, "\n,") + "\n[,num]";
         // 筛选的带函数的列名
-        String selectCoalesceStr = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,")
+        String selectCoalesceStr = StringUtils.join(selectColumnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,")
                 + "\n[,coalesce(t1.num, t2.num) num]";
         //key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
