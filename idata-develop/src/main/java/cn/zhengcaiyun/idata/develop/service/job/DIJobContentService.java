@@ -35,14 +35,4 @@ public interface DIJobContentService {
 
     DIJobContentContentDto get(Long jobId, Integer version);
 
-    /**
-     * 生成merge sql
-     * @param selectColumnList 筛选的列
-     * @param table
-     * @param hiveTable
-     * @param diMode
-     * @param typeEnum
-     * @return
-     */
-    String generateMergeSql(List<String> selectColumnList, String keyColumns, String table, String hiveTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum);
 }

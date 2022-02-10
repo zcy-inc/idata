@@ -17,9 +17,11 @@
 
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
@@ -31,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -38,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
@@ -75,18 +79,42 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
         // 判断目标表是否在其他job中已经存在
-        checkArgument(unUsedDestTable(contentDto.getDestTable(), jobId), "目标表已经被其他作业使用");
+        String destTable = contentDto.getDestTable();
+        checkArgument(unUsedDestTable(destTable, jobId), "目标表已经被其他作业使用");
 
         Integer version = contentDto.getVersion();
 
-        // 可视化的query/mergeSql自动生成
+        // query/mergeSql自动生成
         DiConfigModeEnum modeEnum = DiConfigModeEnum.getByValue(contentDto.getConfigMode());
+        String srcTables = contentDto.getSrcTables();
+        String srcReadFilter = contentDto.getSrcReadFilter();
+        DriverTypeEnum driverTypeEnum = DriverTypeEnum.of(contentDto.getSrcDataSourceType());
         switch (modeEnum) {
             case VISIBLE:
-                String srcQuery = generateSrcQuery(contentDto.getSrcCols(), contentDto.getSrcReadFilter(), contentDto.getSrcTables());
+                List<MappingColumnDto> srcCols = contentDto.getSrcCols();
+                String srcQuery = generateSrcQuery(srcCols, srcReadFilter, srcTables);
                 contentDto.setSrcQuery(srcQuery);
+
+                // 设置MergeSql
+                List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
+                List<String> visKeyColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
+                String visKeys = "id";
+                if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
+                    visKeys = StringUtils.join(visKeyColumnList, ",");
+                }
+                String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum);
+                contentDto.setMergeSql(mergeSql);
                 break;
             case SCRIPT:
+                // 设置SrcQuery
+                String scriptSelectColumns = contentDto.getScriptSelectColumns();
+                String scriptQuery = generateScriptQuery(scriptSelectColumns, srcReadFilter, srcTables);
+                contentDto.setScriptQuery(scriptQuery);
+
+                // 设置ScriptMergeSql
+                List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
+                String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum);
+                contentDto.setScriptMergeSql(scriptMergeSql);
                 break;
         }
 
@@ -122,7 +150,15 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return get(jobId, version);
     }
 
-    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String condition, String srcTables) {
+    private String generateScriptQuery(String selectColumns, String srcReadFilter, String srcTables) {
+        String scriptQuery = String.format("select %s from %s ", selectColumns, srcTables);
+        if (StringUtils.isNotEmpty(srcReadFilter)) {
+            scriptQuery += (" where " + srcReadFilter);
+        }
+        return scriptQuery;
+    }
+
+    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables) {
         boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
         if (!generate) {
             return null;
@@ -136,8 +172,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
         String selectColumns = StringUtils.join(columns, ",");
         String srcQuery = String.format("select %s from %s ", selectColumns, srcTables);
-        if (StringUtils.isNotEmpty(condition)) {
-            srcQuery += (" where " + condition);
+        if (StringUtils.isNotEmpty(srcReadFilter)) {
+            srcQuery += (" where " + srcReadFilter);
         }
         return srcQuery;
     }
@@ -152,86 +188,42 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return DIJobContentContentDto.from(jobContentOptional.get());
     }
 
-    @Override
-    public String generateMergeSql(List<String> selectColumnList, String keyColumns, String sourceTable, String destTable, DestWriteModeEnum diMode, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-        String tmpTable = "src." + destTable.split("\\.")[1] + "_pt";
+    private String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTableParam, DriverTypeEnum typeEnum) throws IllegalArgumentException {
+        String tmpTableParam = "src." + destTableParam.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
         // 匹配规则：例如 "212tableName2,223tableName2"
         String regex2 = "(\\d+(\\w+)[,]{0,1})+";
 
         // 是否涉及多张表（分区表）
-        boolean isMulPartition = false;
-        if (typeEnum == DriverTypeEnum.MySQL) {
-            if (ReUtil.isMatch(regex1, sourceTable)) {
-                isMulPartition = true;
-                // 抽取基表名称
-                sourceTable = ReUtil.get(regex1, sourceTable, 1);
-            } else if (ReUtil.isMatch(regex2, sourceTable)) {
-                isMulPartition = true;
-                // 抽取基表名称
-                sourceTable = ReUtil.get(regex2, sourceTable, 2);
-            }
+        boolean isMulPartitionParam = false;
+        if (typeEnum == DriverTypeEnum.MySQL && (ReUtil.isMatch(regex1, sourceTable) || ReUtil.isMatch(regex2, sourceTable))) {
+            isMulPartitionParam = true;
         }
-        return buildMergeSql(isMulPartition, tmpTable, destTable, selectColumnList, keyColumns, sourceTable);
-    }
 
-    /**
-     * 生成merge_sql
-     * @param isMulPartition 是否是分区表
-     * @param tmpTable 临时表名称（带库名）
-     * @param destTable 目标表名称（带库名）
-     * @param selectColumns 筛选的列
-     * @param keyColumns 主键列
-     * @param sourceTable 源库
-     * @return
-     */
-    private String buildMergeSql(boolean isMulPartition, String tmpTable, String destTable, List<String> selectColumnList, String keyColumns, String sourceTable) {
         // 筛选的列名
-        String selectStr = StringUtils.join(selectColumnList, "\n,") + "\n[,num]";
+        String columnsParam = StringUtils.join(columnList, "\n,");
         // 筛选的带函数的列名
-        String selectCoalesceStr = StringUtils.join(selectColumnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,")
-                + "\n[,coalesce(t1.num, t2.num) num]";
-        //key连接表，例如"t1.id=t2.id"
+        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,");
+        //生成keyCondition，key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
-        String keyCondition = StringUtils.join(keyColumnList, " and ");
+        String keyConditionParam = StringUtils.join(keyColumnList, " and ");
 
-        String templateSQL = "" +
-                "[" +
-                "set hive.exec.dynamic.partition=true;\n" +
-                "set hive.exec.dynamic.partition.mode=nonstrict;\n" +
-                "set hive.exec.max.dynamic.partitions.pernode=1000;" +
-                "]\n" +
+        FileReader fileReader = new FileReader("classpath*:template/merge_sql_template.sql");
+        String mergeSqlTemplate = fileReader.readString();
 
-                "alter table %tmpTable drop if exists partition(pt<'${day-3d}');\n" +
+        // 通过SpEL解析
+        ExpressionParser parser = new SpelExpressionParser();
+        EvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("isMulPartition", isMulPartitionParam);
+        context.setVariable("destTable", destTableParam);
+        context.setVariable("columns", columnsParam);
+        context.setVariable("tmpTable", tmpTableParam);
+        context.setVariable("coalesceColumns", coalesceColumnsParam);
+        context.setVariable("keyCondition", keyConditionParam);
 
-                "insert overwrite table %tmpTable partition(pt='${day}' [,num]) \n" +
-                "select %selectCoalesceStr" +
-                "from \n" +
-                "(select \n" +
-                "%selectStr" +
-                "from %hiveTable) t1 \n" +
-                "full join \n" +
-                "(select \n %selectStr" +
-                "from %tmpTable where pt='${day-1d}') t2 \n" +
-                "on %keyCondition [and t1.num=t2.num];\n" +
-
-                "insert overwrite table %hiveTable [partition(num)]\n" +
-                "select \n" +
-                "%selectStr" +
-                "from %tmpTable where pt='${day}';";
-        String mergeSql = templateSQL
-                .replaceAll("%tmpTable", tmpTable)
-                .replaceAll("%hiveTable", destTable)
-                .replaceAll("%selectStr", selectStr)
-                .replaceAll("%selectCoalesceStr", selectCoalesceStr)
-                .replaceAll("%keyCondition", keyCondition);
-        if (isMulPartition) {
-            //去掉'['和'
-            return mergeSql.replaceAll("\\]", "").replaceAll("\\[", "");
-        }
-        // 去掉[]以及内部的内容
-        return mergeSql.replaceAll("\\[[^]]*\\]", "");
+        Expression expression = parser.parseExpression(mergeSqlTemplate, new TemplateParserContext());
+        return expression.getValue(context, String.class);
     }
 
     private void checkJobContent(DIJobContentContentDto contentDto) {

@@ -1,3 +1,9 @@
+POST http://idata.cai-inc.com/wx_dx_portal/api/p0/dev/spark/addDatabaseEnv
+Content-Type: application/json
+
+{}
+
+###
 GET http://localhost:8080/api/p0/test
 Accept: application/json
 

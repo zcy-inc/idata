@@ -77,34 +77,32 @@ public class DIJobContentController {
         return RestResult.success(diJobContentService.get(jobId, version));
     }
 
-    /**
-     * 自动生成mergeSql
-     * @param jobId
-     * @return
-     */
-    @PostMapping("/generate/merge-sql")
-    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
-                                              @RequestBody @Valid GenerateMergeSqlRequest request) {
-        String destWriteMode = request.getDestWriteMode();
-        DestWriteModeEnum diMode = DestWriteModeEnum.valueOf(destWriteMode);
-        if (diMode != DestWriteModeEnum.append) {
-            return RestResult.success("");
-        }
-        String destTable = request.getDestTable();
-        String[] hiveTableSplit = destTable.split("\\.");
-        if (hiveTableSplit.length != 2) {
-            throw new IllegalArgumentException("The hive table must have db name");
-        }
-
-        // 格式化输入列，为后续处理做准备
-        request.formatColumns();
-
-        String driverType = request.getDriverType();
-        String sourceTable = request.getSourceTable();
-        String keyColumns = request.getKeyColumns();
-        return RestResult.success(diJobContentService.generateMergeSql(request.getSelectColumnList(), keyColumns, sourceTable, destTable, diMode, DriverTypeEnum.of(driverType)));
-    }
-
-
+//    /**
+//     * 自动生成mergeSql
+//     * @param jobId
+//     * @return
+//     */
+//    @PostMapping("/generate/merge-sql")
+//    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
+//                                              @RequestBody @Valid GenerateMergeSqlRequest request) {
+//        String destWriteMode = request.getDestWriteMode();
+//        DestWriteModeEnum diMode = DestWriteModeEnum.valueOf(destWriteMode);
+//        if (diMode != DestWriteModeEnum.append) {
+//            return RestResult.success("");
+//        }
+//        String destTable = request.getDestTable();
+//        String[] hiveTableSplit = destTable.split("\\.");
+//        if (hiveTableSplit.length != 2) {
+//            throw new IllegalArgumentException("The hive table must have db name");
+//        }
+//
+//        // 格式化输入列，为后续处理做准备
+//        request.formatColumns();
+//
+//        String driverType = request.getDriverType();
+//        String sourceTable = request.getSourceTable();
+//        String keyColumns = request.getKeyColumns();
+//        return RestResult.success(diJobContentService.generateMergeSql(request.getSelectColumnList(), keyColumns, sourceTable, destTable, DriverTypeEnum.of(driverType)));
+//    }
 
 }
