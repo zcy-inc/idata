@@ -228,7 +228,7 @@ const FolderTree: FC = () => {
     });
 
   // 获取父节点的key
-  const getParentKey = (key: string, tree: Treenode[]): string => {
+  const getParentKey = (key: string, tree: Treenode[] = []): string => {
     let parentKey = '';
     for (let i = 0; i < tree.length; i++) {
       const node = tree[i];
@@ -274,7 +274,7 @@ const FolderTree: FC = () => {
         </Dropdown>
         <Popover
           content={
-            functionTree.length ? (
+            functionTree?.length ? (
               <Tree
                 blockNode
                 checkable
@@ -302,7 +302,7 @@ const FolderTree: FC = () => {
           </div>
         </Popover>
       </div>
-      {tree.length ? (
+      {tree?.length ? (
         <div className={styles.tree} style={{ marginTop: 16, height: '100%' }}>
           <Tree
             blockNode
