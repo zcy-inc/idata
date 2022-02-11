@@ -377,7 +377,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             outputDto.setDestTable(target_tables[0]);
             String save_mode = oldJobContent.getString("save_mode");
             save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
-            outputDto.setDestWriteMode(save_mode.toLowerCase());
+            outputDto.setDestWriteMode(save_mode.toUpperCase());
             String source_table_pk = oldJobContent.getString("source_table_pk");
             outputDto.setJobTargetTablePk(source_table_pk);
             combinationDto.setOutput(outputDto);
