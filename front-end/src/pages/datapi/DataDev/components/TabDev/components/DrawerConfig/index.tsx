@@ -252,6 +252,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       }
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
       const destTable = stagForm.getFieldValue('destTable');
+      const destWriteMode = stagForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
@@ -284,6 +285,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
       const destTable = prodForm.getFieldValue('destTable');
+      const destWriteMode = stagForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
@@ -540,6 +542,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </a>
               </div>
               <Table<ConfiguredTaskListItem>
+                rowKey="jobName"
                 columns={columnsDependence}
                 dataSource={activeKey === Environments.STAG ? depDataStag : depDataProd}
                 pagination={false}
@@ -611,6 +614,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </Col>
               </Row>
               <Table
+                rowKey="destTable"
                 columns={columnsOutput}
                 dataSource={activeKey === Environments.STAG ? outDataStag : outDataProd}
                 pagination={false}

@@ -241,10 +241,7 @@ export const getAllParentsKey = <T extends TreeNode>(
   return arr;
 };
 
-/**
- * combine request url
- */
-export const getRequestUrl = (url: string) => {
+export const getWorkspacePrefix = () => {
   const workspaceString = sessionStorage.getItem('workspace');
   let workspace = '';
   if (workspaceString) {
@@ -258,6 +255,15 @@ export const getRequestUrl = (url: string) => {
       workspace = '';
     }
   }
+
+  return workspace;
+};
+
+/**
+ * combine request url
+ */
+export const getRequestUrl = (url: string) => {
+  const workspace = getWorkspacePrefix();
   if (workspace) {
     return `/${workspace}${url}`;
   }
