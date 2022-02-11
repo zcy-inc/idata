@@ -4,13 +4,13 @@ public class ScriptMergeSqlParamDto {
     /**
      * 近n天
      */
-    private int recentDays;
+    private Integer recentDays;
 
-    public int getRecentDays() {
+    public Integer getRecentDays() {
         return recentDays;
     }
 
-    public void setRecentDays(int recentDays) {
+    public void setRecentDays(Integer recentDays) {
         this.recentDays = recentDays;
     }
 }

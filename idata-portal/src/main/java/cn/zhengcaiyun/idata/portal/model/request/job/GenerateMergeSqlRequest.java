@@ -12,7 +12,7 @@ public class GenerateMergeSqlRequest {
      * 筛选列，字符串列，逗号换行分隔
      */
     @NotEmpty(message = "selectColumns 不能为空")
-    private List<String> selectColumnList;
+    private String selectColumns;
 
     /**
      * 主键id，支持组合，逗号分隔
@@ -46,12 +46,25 @@ public class GenerateMergeSqlRequest {
     @NotEmpty(message = "driverType 不能为空")
     private String driverType;
 
-    public List<String> getSelectColumnList() {
-        return selectColumnList;
+    /**
+     * 近天数，默认3
+     */
+    private Integer days = 3;
+
+    public Integer getDays() {
+        return days;
     }
 
-    public void setSelectColumnList(List<String> selectColumnList) {
-        this.selectColumnList = selectColumnList;
+    public void setDays(Integer days) {
+        this.days = days;
+    }
+
+    public String getSelectColumns() {
+        return selectColumns;
+    }
+
+    public void setSelectColumns(String selectColumns) {
+        this.selectColumns = selectColumns;
     }
 
     public String getKeyColumns() {

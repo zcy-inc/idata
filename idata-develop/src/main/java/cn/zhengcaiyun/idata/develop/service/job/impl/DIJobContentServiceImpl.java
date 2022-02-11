@@ -21,9 +21,7 @@ import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
-import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
@@ -32,11 +30,11 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -63,9 +61,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     private final JobInfoRepo jobInfoRepo;
 
     @Autowired
-    private DataSourceService dataSourceService;
-
-    @Autowired
     public DIJobContentServiceImpl(DIJobContentRepo diJobContentRepo,
                                    JobInfoRepo jobInfoRepo) {
         this.diJobContentRepo = diJobContentRepo;
@@ -85,11 +80,10 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Integer version = contentDto.getVersion();
 
         // query/mergeSql自动生成
-        DiConfigModeEnum modeEnum = DiConfigModeEnum.getByValue(contentDto.getConfigMode());
         String srcTables = contentDto.getSrcTables();
         String srcReadFilter = contentDto.getSrcReadFilter();
         DriverTypeEnum driverTypeEnum = DriverTypeEnum.of(contentDto.getSrcDataSourceType());
-        switch (modeEnum) {
+        switch (DiConfigModeEnum.getByValue(contentDto.getConfigMode())) {
             case VISIBLE:
                 List<MappingColumnDto> srcCols = contentDto.getSrcCols();
                 String srcQuery = generateSrcQuery(srcCols, srcReadFilter, srcTables);
@@ -97,12 +91,12 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
                 // 设置MergeSql
                 List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
-                List<String> visKeyColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
+                List<String> visKeyColumnList = srcCols.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toList());
                 String visKeys = "id";
                 if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
                     visKeys = StringUtils.join(visKeyColumnList, ",");
                 }
-                String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum);
+                String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum, 3);
                 contentDto.setMergeSql(mergeSql);
                 break;
             case SCRIPT:
@@ -112,13 +106,19 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 contentDto.setScriptQuery(scriptQuery);
 
                 // 设置ScriptMergeSql
+                ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
+                int days = 3;
+                if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
+                    days = scriptMergeSqlParamDto.getRecentDays();
+                }
                 List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
-                String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum);
+                String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum, days);
                 contentDto.setScriptMergeSql(scriptMergeSql);
                 break;
         }
 
         boolean startNewVersion = true;
+        //更新
         if (Objects.nonNull(version)) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在或已删除");
@@ -135,6 +135,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
             }
         }
 
+        // 保存
         if (startNewVersion) {
             // 版本为空或不可编辑，新增版本
             version = diJobContentRepo.newVersion(jobId);
@@ -188,8 +189,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return DIJobContentContentDto.from(jobContentOptional.get());
     }
 
-    private String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTableParam, DriverTypeEnum typeEnum) throws IllegalArgumentException {
-        String tmpTableParam = "src." + destTableParam.split("\\.")[1] + "_pt";
+    @Override
+    public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DriverTypeEnum typeEnum, int days) throws IllegalArgumentException {
+        String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
         // 匹配规则：例如 "212tableName2,223tableName2"
@@ -216,11 +218,12 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         ExpressionParser parser = new SpelExpressionParser();
         EvaluationContext context = new StandardEvaluationContext();
         context.setVariable("isMulPartition", isMulPartitionParam);
-        context.setVariable("destTable", destTableParam);
+        context.setVariable("destTable", destTable);
         context.setVariable("columns", columnsParam);
         context.setVariable("tmpTable", tmpTableParam);
         context.setVariable("coalesceColumns", coalesceColumnsParam);
         context.setVariable("keyCondition", keyConditionParam);
+        context.setVariable("days", days);
 
         Expression expression = parser.parseExpression(mergeSqlTemplate, new TemplateParserContext());
         return expression.getValue(context, String.class);

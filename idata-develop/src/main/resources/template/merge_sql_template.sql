@@ -2,7 +2,7 @@
 set hive.exec.dynamic.partition.mode=nonstrict;
 set hive.exec.max.dynamic.partitions.pernode=1000;' : ''}
 
-alter table #{#tmpTable} drop if exists partition(pt<'${day-3d}');
+alter table #{#tmpTable} drop if exists partition(pt<'${day-#{#days}d}');
 
 insert overwrite table #{#tmpTable} partition(pt='${day}' #{#isMulPartition ? ',num' : ''})
 select #{#coalesceColumns}

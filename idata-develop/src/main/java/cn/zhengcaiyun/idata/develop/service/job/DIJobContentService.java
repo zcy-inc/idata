@@ -35,4 +35,16 @@ public interface DIJobContentService {
 
     DIJobContentContentDto get(Long jobId, Integer version);
 
+    /**
+     * 生成mergeSql
+     * @param columnList select的列
+     * @param keyColumns 主见keys，逗号分隔
+     * @param sourceTable 源数据表，可能是多张，按正则解析
+     * @param destTable 目标表（带库名）
+     * @param typeEnum 驱动类型 @see cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum
+     * @param days 天数，近几天
+     * @return
+     * @throws IllegalArgumentException
+     */
+    String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DriverTypeEnum typeEnum, int days) throws IllegalArgumentException;
 }
