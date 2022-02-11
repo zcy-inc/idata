@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.DiDirectEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
@@ -79,43 +80,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
         Integer version = contentDto.getVersion();
 
-        // query/mergeSql自动生成
-        String srcTables = contentDto.getSrcTables();
-        String srcReadFilter = contentDto.getSrcReadFilter();
-        DriverTypeEnum driverTypeEnum = DriverTypeEnum.of(contentDto.getSrcDataSourceType());
-        switch (DiConfigModeEnum.getByValue(contentDto.getConfigMode())) {
-            case VISIBLE:
-                List<MappingColumnDto> srcCols = contentDto.getSrcCols();
-                String srcQuery = generateSrcQuery(srcCols, srcReadFilter, srcTables);
-                contentDto.setSrcQuery(srcQuery);
+        // query/mergeSql封装
+        assembleQueryAndMergeSql(contentDto);
 
-                // 设置MergeSql
-                List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
-                List<String> visKeyColumnList = srcCols.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toList());
-                String visKeys = "id";
-                if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
-                    visKeys = StringUtils.join(visKeyColumnList, ",");
-                }
-                String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum, 3);
-                contentDto.setMergeSql(mergeSql);
-                break;
-            case SCRIPT:
-                // 设置SrcQuery
-                String scriptSelectColumns = contentDto.getScriptSelectColumns();
-                String scriptQuery = generateScriptQuery(scriptSelectColumns, srcReadFilter, srcTables);
-                contentDto.setScriptQuery(scriptQuery);
-
-                // 设置ScriptMergeSql
-                ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
-                int days = 3;
-                if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
-                    days = scriptMergeSqlParamDto.getRecentDays();
-                }
-                List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
-                String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum, days);
-                contentDto.setScriptMergeSql(scriptMergeSql);
-                break;
-        }
 
         boolean startNewVersion = true;
         //更新
@@ -149,6 +116,57 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         }
 
         return get(jobId, version);
+    }
+
+    /**
+     * 封装query和mergesql
+     * @param contentDto
+     */
+    private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto) {
+        // 数据回流不拼mergeSql
+        boolean buildMergeSql = DiDirectEnum.IN.equals(DiDirectEnum.valueOf(contentDto.getDirect()));
+        String destTable = contentDto.getDestTable();
+        String srcTables = contentDto.getSrcTables();
+        String srcReadFilter = contentDto.getSrcReadFilter();
+        DriverTypeEnum driverTypeEnum = DriverTypeEnum.of(contentDto.getSrcDataSourceType());
+        switch (DiConfigModeEnum.getByValue(contentDto.getConfigMode())) {
+            case VISIBLE:
+                // 设置SrcQuery
+                List<MappingColumnDto> srcCols = contentDto.getSrcCols();
+                String srcQuery = generateSrcQuery(srcCols, srcReadFilter, srcTables);
+                contentDto.setSrcQuery(srcQuery);
+
+                // 设置MergeSql
+                List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
+                List<String> visKeyColumnList = srcCols.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toList());
+                String visKeys = "id";
+                if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
+                    visKeys = StringUtils.join(visKeyColumnList, ",");
+                }
+                if (buildMergeSql) {
+                    String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum, 3);
+                    contentDto.setMergeSql(mergeSql);
+                }
+                break;
+            case SCRIPT:
+                // 设置SrcQuery
+                String scriptSelectColumns = contentDto.getScriptSelectColumns();
+                String scriptQuery = generateScriptQuery(scriptSelectColumns, srcReadFilter, srcTables);
+                contentDto.setScriptQuery(scriptQuery);
+
+                // 设置ScriptMergeSql
+                ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
+                int days = 3;
+                if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
+                    days = scriptMergeSqlParamDto.getRecentDays();
+                }
+                if (buildMergeSql) {
+                    List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
+                    String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum, days);
+                    contentDto.setScriptMergeSql(scriptMergeSql);
+                }
+                break;
+        }
     }
 
     private String generateScriptQuery(String selectColumns, String srcReadFilter, String srcTables) {
