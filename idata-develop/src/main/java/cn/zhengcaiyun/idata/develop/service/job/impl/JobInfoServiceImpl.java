@@ -423,7 +423,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 字段类型转换
-                sqlResponse.setDestWriteMode(DestWriteModeEnum.valueOf(jobOutput.getDestWriteMode()));
+                sqlResponse.setDestWriteMode(JobWriteModeEnum.valueOf(jobOutput.getDestWriteMode()));
 
                 return sqlResponse;
             case SPARK_PYTHON:

@@ -1,10 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -68,7 +65,7 @@ public class JobInfoExecuteDetailDto {
          */
         private String destTable;//带库名 targetTableName
         /**
-         *   数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
+         * 数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
          * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
          */
         private DestWriteModeEnum destWriteMode; // isRecreate
@@ -247,7 +244,7 @@ public class JobInfoExecuteDetailDto {
         /**
          *   数据去向-写入模式，overwrite，upsert
          */
-        private DestWriteModeEnum destWriteMode; // saveMode
+        private JobWriteModeEnum destWriteMode; // saveMode
 
         /**
          *   数据来源表主键(写入模式为upsert时必填)
@@ -275,11 +272,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public DestWriteModeEnum getDestWriteMode() {
+        public JobWriteModeEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(DestWriteModeEnum destWriteMode) {
+        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 
