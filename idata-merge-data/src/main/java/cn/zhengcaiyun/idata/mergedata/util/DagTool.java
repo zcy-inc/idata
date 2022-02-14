@@ -40,4 +40,10 @@ public class DagTool {
                 .filter(dagInfo -> dagInfo.getId().equals(newDagId))
                 .findFirst();
     }
+
+    public static Optional<DAGInfo> findLayerDag(final String dwLayerCode, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getDwLayerCode().equals(dwLayerCode))
+                .findFirst();
+    }
 }

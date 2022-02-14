@@ -40,7 +40,6 @@ import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.mergedata.manager.JobMigrateManager;
 import cn.zhengcaiyun.idata.mergedata.service.JobMigrationService;
 import cn.zhengcaiyun.idata.mergedata.util.*;
-import cn.zhengcaiyun.idata.mergedata.util.*;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
@@ -290,7 +289,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private List<JSONObject> fetchOldJobConfig() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id");
-        String filter = "del = false and sandbox = 'prod' and dag_id is not null";
+//        String filter = "del = false and sandbox = 'prod' and dag_id is not null";
+        String filter = "del = false and sandbox = 'prod'";
         return oldIDataDao.queryListWithCustom("metadata.job_config", columns, filter);
     }
 
@@ -300,12 +300,19 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         JobExecuteConfigDto executeConfigDto = new JobExecuteConfigDto();
         executeConfigDto.setEnvironment(EnvEnum.prod.name());
+
         Integer oldDagId = configJson.getInteger("dag_id");
+        Optional<DAGInfo> dagInfoOptional;
         if (Objects.isNull(oldDagId)) {
-            resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("无法迁移：旧作业[%s]依赖DAG为空", oldJobId), configJson.toJSONString()));
-            return Optional.empty();
+            if ("ODS".equalsIgnoreCase(jobInfoJson.getString("layer"))) {
+                dagInfoOptional = DagTool.findLayerDag("DW_LAYER_ODS:ENUM_VALUE", JobMigrationContext.getDAGIfPresent());
+            } else {
+                resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("无法迁移：旧作业[%s]依赖DAG为空", oldJobId), configJson.toJSONString()));
+                return Optional.empty();
+            }
+        } else {
+            dagInfoOptional = DagTool.findDag(oldDagId, JobMigrationContext.getDAGIfPresent());
         }
-        Optional<DAGInfo> dagInfoOptional = DagTool.findDag(oldDagId, JobMigrationContext.getDAGIfPresent());
         checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
         executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
         executeConfigDto.setSchRerunMode("always");
