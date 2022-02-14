@@ -282,7 +282,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         if ("High".equals(securityLevel)) {
             return "SECURITY_LEVEL_HIGH:ENUM_VALUE";
         }
-        else if ("Low".equals(securityLevel)) {
+        else if ("Medium".equals(securityLevel)) {
             return "SECURITY_LEVEL_MEDIUM:ENUM_VALUE";
         }
         else {
