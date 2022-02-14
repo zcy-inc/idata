@@ -143,6 +143,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             resultDtoList = new ArrayList<>();
             resultDtoList.add(new MigrateResultDto("migrateJobNode", String.format("迁移失败：旧作业[%s]迁移失败，原因：%s", oldJobId, ex.getMessage()), ""));
             isSuc = false;
+            LOGGER.warn("migrateJobNode exception: {}", ex);
         }
         if (!CollectionUtils.isEmpty(resultDtoList)) {
             saveMigrateResult(resultDtoList);
