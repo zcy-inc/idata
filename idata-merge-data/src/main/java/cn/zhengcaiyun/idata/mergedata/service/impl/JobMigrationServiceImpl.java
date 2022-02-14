@@ -397,7 +397,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     private Integer parseExecMem(String men) {
         if (StringUtils.isBlank(men))
             return null;
-        String men_num_str = men.substring(0, men.indexOf("G"));
+        String men_num_str = men.substring(0, men.indexOf("G") > 0 ? men.indexOf("G") : men.indexOf("g"));
         if (StringUtils.isBlank(men_num_str))
             return null;
         try {
