@@ -451,7 +451,13 @@ public class JobMigrateManager {
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
-            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            // 兼容--注释问题
+            if (strSplitList.contains("--") && strSplitList.size() == 3) {
+                tblNameMap.put(str, "-- ods.ods_" + strSplitList.get(1) + "_" + strSplitList.get(2));
+            }
+            else {
+                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            }
         }
         for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
             sourceSql = sourceSql.replace(values.getKey(), values.getValue());
@@ -461,9 +467,74 @@ public class JobMigrateManager {
 
     public static void main(String[] args) {
 
-        String sql = "select id from ods_db_item.sync_zcy_item_copy_detail " +
-                "left join ods_db_boss.sync_zcy_item_copy_detail " +
-                "on ods_db_item.sync_zcy_item_copy_detail.id = ods_db_boss.sync_zcy_item_copy_detail.id";
+        String sql = "WITH orgs AS\n" +
+                "  (SELECT operator_id AS org_id,\n" +
+                "          operator_name AS org_name,\n" +
+                "          '04' AS category,\n" +
+                "          registered_at AS registered_at,\n" +
+                "          district AS district,\n" +
+                "          address AS address,\n" +
+                "          NULL AS logo_file,\n" +
+                "          expert_level AS extra_info_1,\n" +
+                "          expert_level_name AS extra_info_2,\n" +
+                "          education AS extra_info_3,\n" +
+                "          last_work_lives AS extra_info_4,\n" +
+                "          jobtitle AS extra_info_5,\n" +
+                "          NULL AS extra_info_6\n" +
+                "   FROM ads.credit_expert_base_info\n" +
+                "   UNION SELECT org_id,\n" +
+                "                org_name,\n" +
+                "                '03' AS category,\n" +
+                "                registered_at,\n" +
+                "                district,\n" +
+                "                address,\n" +
+                "                logo_file,\n" +
+                "                economic_type AS extra_info_1,\n" +
+                "                license_start_time AS extra_info_2,\n" +
+                "                NULL AS extra_info_3,\n" +
+                "                NULL AS extra_info_4,\n" +
+                "                NULL AS extra_info_5,\n" +
+                "                NULL AS extra_info_6\n" +
+                "   FROM ads_credit.credit_agency_base_info\n" +
+                "   UNION SELECT d.supplier_org_id AS org_id,\n" +
+                "                d.supplier_org_name AS org_name,\n" +
+                "                '0202' AS category,\n" +
+                "                CASE\n" +
+                "                    WHEN d.gmt_created_time IS NOT NULL THEN d.gmt_created_time\n" +
+                "                    ELSE CAST(UNIX_TIMESTAMP('01/01/1900', 'MM/dd/yyyy') AS TIMESTAMP)\n" +
+                "                END AS registered_at,\n" +
+                "                d.first_settled_district_code AS district,\n" +
+                "                d.biz_address AS address,\n" +
+                "                s.logo_path AS logo_file,\n" +
+                "                d.economy_trade_name AS extra_info_1,\n" +
+                "                d.supplier_type_name AS extra_info_2,\n" +
+                "                d.legal_persons AS extra_info_3 ,\n" +
+                "                d.enterprise_scale_name AS extra_info_4,\n" +
+                "                s.web_address AS extra_info_5 ,\n" +
+                "                date_format(s.found_date, 'yyyy-MM-dd') AS extra_info_6\n" +
+                "   FROM dim.dim_supplier_org d\n" +
+                "   LEFT JOIN -- ods_db_supplier.sync_supplier_baseinfo s \n" +
+                "             ods_db_supplier.sync_supplier_baseinfo s ON d.supplier_org_id = s.supplier_id\n" +
+                "   WHERE zcy_status_id = 'OFFICIAL' )\n" +
+                "SELECT r_orgs.org_id,\n" +
+                "       r_orgs.org_name,\n" +
+                "       r_orgs.category,\n" +
+                "       r_orgs.registered_at,\n" +
+                "       r_orgs.district,\n" +
+                "       r_orgs.address,\n" +
+                "       r_orgs.logo_file,\n" +
+                "       r_orgs.extra_info_1,\n" +
+                "       r_orgs.extra_info_2,\n" +
+                "       r_orgs.extra_info_3,\n" +
+                "       r_orgs.extra_info_4,\n" +
+                "       r_orgs.extra_info_5,\n" +
+                "       r_orgs.extra_info_6\n" +
+                "FROM\n" +
+                "  (SELECT *,\n" +
+                "          row_number() over(partition BY org_id,category\n" +
+                "                            ORDER BY registered_at DESC) AS row_id\n" +
+                "   FROM orgs) AS r_orgs\n" +
+                "WHERE r_orgs.row_id=1\n";
 //        String sql = "select * from ods_db_item.sync_zcy_item_copy_detail";
         String[] sqls = sql.split(" ");
         List<String> sqlList = Arrays.stream(sqls).filter(t -> t.contains("ods_") && t.contains(".sync_"))
@@ -472,7 +543,12 @@ public class JobMigrateManager {
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
-            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            if (strSplitList.contains("--") && strSplitList.size() == 3) {
+                tblNameMap.put(str, "-- ods.ods_" + strSplitList.get(1) + "_" + strSplitList.get(2));
+            }
+            else {
+                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            }
         }
         for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
             sql = sql.replace(values.getKey(), values.getValue());
