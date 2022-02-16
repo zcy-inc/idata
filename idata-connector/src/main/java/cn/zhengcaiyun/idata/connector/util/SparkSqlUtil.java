@@ -4,16 +4,16 @@ import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlBaseListener;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
+import com.alibaba.fastjson.JSON;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SparkSqlUtil {
 
@@ -38,6 +38,8 @@ public class SparkSqlUtil {
         if (listener.insertTable != null) {
             result.put("insertTable", listener.insertTable);
             result.put("selectSql", listener.rewriter.getText());
+            result.put("isHasPt", String.valueOf(listener.isHasPt));
+            result.put("ptColumns", listener.ptColumns);
         }
         return result;
     }
@@ -70,6 +72,8 @@ public class SparkSqlUtil {
         public String insertTable = null;
         private String op = null;
         public final TokenStreamRewriter rewriter;
+        public boolean isHasPt = false;
+        public String ptColumns;
 
         public InsertEraseListener(TokenStream tokenStream) {
             this.rewriter = new TokenStreamRewriter(tokenStream);
@@ -79,6 +83,19 @@ public class SparkSqlUtil {
         public void enterTableIdentifier(SparkSqlParser.TableIdentifierContext ctx) {
             if (op != null) {
                 insertTable = ctx.getText().toLowerCase();
+            }
+        }
+
+        @Override public void enterPartitionVal(SparkSqlParser.PartitionValContext ctx) {
+            String text = ctx.getText().toLowerCase();
+            if (StringUtils.isEmpty(text)) {
+                return;
+            }
+            isHasPt = true;
+            if (StringUtils.isEmpty(ptColumns)) {
+                ptColumns = text;
+            } else {
+                ptColumns += ("," + text);
             }
         }
 
@@ -103,5 +120,6 @@ public class SparkSqlUtil {
         public void exitInsertOverwriteTable(SparkSqlParser.InsertOverwriteTableContext ctx) {
             op = null;
         }
+
     }
 }
