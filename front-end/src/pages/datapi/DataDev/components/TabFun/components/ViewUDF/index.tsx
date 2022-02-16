@@ -22,10 +22,13 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
   }, []);
 
   const renderDownload = () => {
-    const workspace = getWorkspacePrefix();
+    let workspace = getWorkspacePrefix();
+    if (workspace) {
+      workspace = `/${workspace}`;
+    }
 
     return (
-      <a href={`${workspace}/api/p1/dev/udf/download/${data?.id}`} download>
+      <a href={`${location.origin}${workspace}/api/p1/dev/udf/download/${data?.id}`} download>
         下载
       </a>
     );

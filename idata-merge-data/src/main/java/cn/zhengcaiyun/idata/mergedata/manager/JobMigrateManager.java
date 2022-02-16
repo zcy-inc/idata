@@ -445,13 +445,16 @@ public class JobMigrateManager {
     }
 
     private String changeTargetTblNameSql(String sourceSql) {
-        List<String> sqlList = Arrays.stream(sourceSql.split(" ")).filter(t -> t.contains("ods_") && t.contains(".sync_"))
+        // 兼容空格、注释和逗号
+        List<String> sqlList = Arrays.stream(sourceSql.split(" |,|--")).filter(t -> t.contains("ods_") && t.contains(".sync_"))
                 .collect(Collectors.toList());
         Map<String, String> tblNameMap = new HashMap<>();
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
-            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            if (strSplitList.size() == 2) {
+                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            }
         }
         for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
             sourceSql = sourceSql.replace(values.getKey(), values.getValue());
@@ -461,18 +464,48 @@ public class JobMigrateManager {
 
     public static void main(String[] args) {
 
-        String sql = "select id from ods_db_item.sync_zcy_item_copy_detail " +
-                "left join ods_db_boss.sync_zcy_item_copy_detail " +
-                "on ods_db_item.sync_zcy_item_copy_detail.id = ods_db_boss.sync_zcy_item_copy_detail.id";
+        String sql = "SELECT  c.expert_id as expert_id\n" +
+                "        ,'none' as expert_name\n" +
+                "        ,ROUND(AVG(c.score), 2) as avg_score\n" +
+                "        ,COUNT(*) as counter\n" +
+                "FROM    (\n" +
+                "            SELECT  b.id AS expert_id\n" +
+                "                    ,a.evaluateder AS expert_name\n" +
+                "                    ,CASE    WHEN a.module_type = 3 THEN a.score / 10 ELSE CASE\n" +
+                "                             WHEN a.score > 100 THEN 100 \n" +
+                "                             ELSE a.score \n" +
+                "                     END END AS score\n" +
+                "            FROM    ods_db_credit.sync_credit_evaluate_t a\n" +
+                "                    -- ods_db_paas_user.sync_paas_operator b\n" +
+                "            WHERE   a.rule_type = 5\n" +
+                "            AND     a.module_type IS NOT NULL\n" +
+                "            AND     a.evaluated_id < 10000000000\n" +
+                "            AND     a.evaluated_id = b.employee_id\n" +
+                "            AND     b.user_type = '0402'\n" +
+                "            UNION ALL\n" +
+                "            SELECT  a.evaluated_id AS expert_id\n" +
+                "                    ,a.evaluateder AS expert_name\n" +
+                "                    ,CASE    WHEN a.module_type = 3 THEN a.score / 10 ELSE CASE\n" +
+                "                             WHEN a.score > 100 THEN 100 \n" +
+                "                             ELSE a.score \n" +
+                "                     END END AS score\n" +
+                "            FROM    ods_db_credit.sync_credit_evaluate_t a\n" +
+                "            WHERE   a.rule_type = 5\n" +
+                "            AND     a.module_type IS NOT NULL\n" +
+                "            AND     a.evaluated_id >= 10000000000\n" +
+                "        ) c\n" +
+                "GROUP BY c.expert_id\n";
 //        String sql = "select * from ods_db_item.sync_zcy_item_copy_detail";
-        String[] sqls = sql.split(" ");
+        String[] sqls = sql.split(" |,|--");
         List<String> sqlList = Arrays.stream(sqls).filter(t -> t.contains("ods_") && t.contains(".sync_"))
                 .collect(Collectors.toList());
         Map<String, String> tblNameMap = new HashMap<>();
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|.sync_")).filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
-            tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            if (strSplitList.size() == 2) {
+                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+            }
         }
         for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
             sql = sql.replace(values.getKey(), values.getValue());
