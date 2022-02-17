@@ -44,6 +44,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
@@ -387,7 +388,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
             checkArgument(target_tables != null && target_tables.length > 0, "旧SQL作业[%s]目标表名为空", oldJobId);
             outputDto.setDestTable(target_tables[0]);
-            String save_mode = oldJobContent.getString("save_mode");
+            String save_mode = Strings.emptyToNull(oldJobContent.getString("save_mode"));
             save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
             outputDto.setDestWriteMode(save_mode.toUpperCase());
             String source_table_pk = oldJobContent.getString("source_table_pk");
