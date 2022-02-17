@@ -226,12 +226,19 @@ public class JobMigrateManager {
 
         // 未切换新规则表名，迁移逻辑如下，统一使用新命名替换
         String newDestTable = parseDestTable(srcDataSource, old_source_table);
+        String finalDestTable = newDestTable;
         if (target_tables != null && target_tables.length > 0 && StringUtils.isNotBlank(target_tables[0])) {
             String oldDestTable = target_tables[0];
-            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧作业[%s]:[%s]的旧目标表[%s]已自动改为新规则表名[%s]，需确认是否修改正确",
-                    migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable, newDestTable), oldJobContent.toJSONString()));
+            if (oldDestTable.startsWith("ods_") && oldDestTable.indexOf(".sync_") > 0) {
+                resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧作业[%s]:[%s]的旧目标表[%s]已自动改为新规则表名[%s]，需确认是否修改正确",
+                        migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable, newDestTable), oldJobContent.toJSONString()));
+            } else {
+                finalDestTable = oldDestTable;
+                resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧DI作业[%s]:[%s]延用非常规目标表[%s]，不自动改表名",
+                        migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable), oldJobContent.toJSONString()));
+            }
         }
-        contentDto.setDestTable(newDestTable);
+        contentDto.setDestTable(finalDestTable);
 
         // 数据去向-写入模式，init: 重建表，override：覆盖表
         if (Objects.equals(Boolean.TRUE, old_is_recreate)) {
