@@ -236,7 +236,7 @@ public class JobInfoExecuteDetailDto {
 //        private String sourceTableName;
         private List<DevJobUdf> udfList; // udfs;
         private DriverTypeEnum destDriverType;//;targetDriverType;
-        private String destJdbcUrl;//targetUrlPath;
+        private String destUrlPath;//targetUrlPath;
         private String destUserName;//username;
         private String destPassword;//password;
         private String destTable;//targetTableName;
@@ -277,12 +277,12 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public String getDestJdbcUrl() {
-            return destJdbcUrl;
+        public String getDestUrlPath() {
+            return destUrlPath;
         }
 
-        public void setDestJdbcUrl(String destJdbcUrl) {
-            this.destJdbcUrl = destJdbcUrl;
+        public void setDestUrlPath(String destUrlPath) {
+            this.destUrlPath = destUrlPath;
         }
 
         public DriverTypeEnum getDestDriverType() {
