@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
-import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -424,7 +423,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     // 封装连接信息
                     DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId());
                     backFlowResponse.setSrcSql(contentSql.getSourceSql());
-                    backFlowResponse.setDestJdbcUrl(destSourceDetail.getJdbcUrl());
+                    backFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
                     backFlowResponse.setDestUserName(destSourceDetail.getUserName());
                     backFlowResponse.setDestPassword(destSourceDetail.getPassword());
                     backFlowResponse.setDestWriteMode(writeModeEnum);
