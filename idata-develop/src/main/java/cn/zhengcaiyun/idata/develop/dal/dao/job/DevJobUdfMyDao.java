@@ -11,4 +11,6 @@ public interface DevJobUdfMyDao {
     List<String> getConcatHdfsPath(List<Long> idList);
 
     List<DevJobUdf> getByIds(List<Long> idList);
+
+    void insert(DevJobUdf e);
 }
