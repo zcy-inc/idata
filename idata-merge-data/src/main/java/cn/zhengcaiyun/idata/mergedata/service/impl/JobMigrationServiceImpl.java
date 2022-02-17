@@ -305,6 +305,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         JobExecuteConfigDto executeConfigDto = new JobExecuteConfigDto();
         executeConfigDto.setEnvironment(EnvEnum.prod.name());
 
+        String oldType = jobInfoJson.getString("job_type");
         Integer oldDagId = configJson.getInteger("dag_id");
         Optional<DAGInfo> dagInfoOptional;
         if (Objects.isNull(oldDagId)) {
@@ -338,7 +339,13 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 4));
         // 作业运行状态（环境级），0：暂停运行；1：恢复运行
         executeConfigDto.setRunningState(RunningStateEnum.pause.val);
-        executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
+        // todo 云平台需要确定是否这些引擎
+        if ("DI".equalsIgnoreCase(oldType)) {
+            executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
+        } else {
+            executeConfigDto.setExecEngine(EngineTypeEnum.SPARK.name());
+        }
+
         combinationDto.setExecuteConfig(executeConfigDto);
 
         List<JobDependenceDto> dependencies = new ArrayList<>();
@@ -375,7 +382,6 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         combinationDto.setDependencies(dependencies);
 
         // 只有sql作业需要配置作业输出
-        String oldType = jobInfoJson.getString("job_type");
         if ("SQL".equalsIgnoreCase(oldType)) {
             JobOutputDto outputDto = new JobOutputDto();
             outputDto.setEnvironment(EnvEnum.prod.name());
