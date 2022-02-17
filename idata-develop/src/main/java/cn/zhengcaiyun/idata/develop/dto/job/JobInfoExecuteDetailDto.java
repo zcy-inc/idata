@@ -7,8 +7,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
-import javax.annotation.Generated;
-import java.util.Date;
 import java.util.List;
 
 public class JobInfoExecuteDetailDto {
@@ -225,6 +223,114 @@ public class JobInfoExecuteDetailDto {
 
         public void setSrcReadMode(SrcReadModeEnum srcReadMode) {
             this.srcReadMode = srcReadMode;
+        }
+    }
+
+    // web方面接触到
+    public static class BackFlowDetailDto extends JobInfoExecuteDetailDto {
+        /**
+         * 作业sql内容，里面包含srcTable以及逻辑
+         */
+        private String srcSql;//sourceSql;
+        private JobWriteModeEnum destWriteMode; //DestWriteModeEnum destWriteMode;
+//        private String sourceTableName;
+        private List<DevJobUdf> udfList; // udfs;
+        private DriverTypeEnum destDriverType;//;targetDriverType;
+        private String destJdbcUrl;//targetUrlPath;
+        private String destUserName;//username;
+        private String destPassword;//password;
+        private String destTable;//targetTableName;
+        private String dbColumnNames;
+        private String destBeforeWrite;//targetPrefix; 新版本
+        private String destAfterWrite;//targetPostfix; 新版本
+        private String updateKey; //新版本
+        private Integer parallelism; //新版本
+
+        public BackFlowDetailDto() {
+        }
+
+        public BackFlowDetailDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        public JobWriteModeEnum getDestWriteMode() {
+            return destWriteMode;
+        }
+
+        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
+            this.destWriteMode = destWriteMode;
+        }
+
+        public String getSrcSql() {
+            return srcSql;
+        }
+
+        public void setSrcSql(String srcSql) {
+            this.srcSql = srcSql;
+        }
+
+        public String getDestTable() {
+            return destTable;
+        }
+
+        public void setDestTable(String destTable) {
+            this.destTable = destTable;
+        }
+
+        public String getDestJdbcUrl() {
+            return destJdbcUrl;
+        }
+
+        public void setDestJdbcUrl(String destJdbcUrl) {
+            this.destJdbcUrl = destJdbcUrl;
+        }
+
+        public DriverTypeEnum getDestDriverType() {
+            return destDriverType;
+        }
+
+        public void setDestDriverType(DriverTypeEnum destDriverType) {
+            this.destDriverType = destDriverType;
+        }
+
+        public List<DevJobUdf> getUdfList() {
+            return udfList;
+        }
+
+        public void setUdfList(List<DevJobUdf> udfList) {
+            this.udfList = udfList;
+        }
+
+        public String getDestUserName() {
+            return destUserName;
+        }
+
+        public void setDestUserName(String destUserName) {
+            this.destUserName = destUserName;
+        }
+
+        public String getDestPassword() {
+            return destPassword;
+        }
+
+        public void setDestPassword(String destPassword) {
+            this.destPassword = destPassword;
+        }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
         }
     }
 

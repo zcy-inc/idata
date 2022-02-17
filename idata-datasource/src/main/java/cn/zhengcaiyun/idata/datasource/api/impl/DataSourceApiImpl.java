@@ -17,11 +17,18 @@
 
 package cn.zhengcaiyun.idata.datasource.api.impl;
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.commons.util.DesUtil;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.datasource.dal.repo.DataSourceRepo;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,5 +62,42 @@ public class DataSourceApiImpl implements DataSourceApi {
         DataSource source = optional.get();
         checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
         return DataSourceDto.from(source);
+    }
+
+    @Override
+    public DataSourceDetailDto getDataSourceDetail(Long id) {
+        DataSourceDto dataSource = getDataSource(id);
+        checkArgument(Objects.nonNull(dataSource), String.format("数据源不存在, DataSourceId:%d", id));
+        checkArgument(CollectionUtils.isNotEmpty(dataSource.getDbConfigList()), String.format("数据源配置缺失, DataSourceId:%d", id));
+        DbConfigDto dbConfigDto = dataSource.getDbConfigList().get(0);
+
+        DataSourceDetailDto res = new DataSourceDetailDto();
+        res.setDataSourceTypeEnum(dataSource.getType());
+
+        String dbName = dbConfigDto.getDbName();
+        res.setJdbcUrl(getJdbcUrl(dataSource.getType(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbName, dbConfigDto.getSchema()));
+        res.setUserName(dbConfigDto.getUsername());
+        res.setPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
+        res.setDbName(dbName);
+        res.setDriverTypeEnum(DriverTypeEnum.of(dataSource.getType().name()));
+
+        return res;
+    }
+
+    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
+        String protocol = null;
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
+            protocol = "mysql";
+        } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+            protocol = "postgresql";
+        } else if (DataSourceTypeEnum.presto == sourceTypeEnum) {
+            protocol = "presto";
+        } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
+            protocol = "hive2";
+        }
+        if (StringUtils.isEmpty(protocol)) return null;
+
+        String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        return jdbcUrl;
     }
 }
