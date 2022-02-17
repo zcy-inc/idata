@@ -35,4 +35,11 @@ public interface DataSourceApi {
      * @return
      */
     DataSourceDetailDto getDataSourceDetail(Long id);
+
+    /**
+     * 获取表主键，逗号分隔
+     * @return
+     * @throws Exception
+     */
+    String getPrimaryKey(Long id, String tableName);
 }

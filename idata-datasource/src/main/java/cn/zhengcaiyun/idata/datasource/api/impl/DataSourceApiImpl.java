@@ -32,6 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -99,5 +105,34 @@ public class DataSourceApiImpl implements DataSourceApi {
 
         String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
         return jdbcUrl;
+    }
+
+    @Override
+    public String getPrimaryKey(Long id, String tableName) {
+        DataSourceDetailDto detail = getDataSourceDetail(id);
+
+        List<String> pkList = new ArrayList<>();
+        try {
+            // 加载驱动到JVM
+            Class.forName("com.mysql.jdbc.Driver");
+            // 获取连接
+            Connection connection = DriverManager.getConnection(detail.getJdbcUrl(), detail.getUserName(), DesUtil.decrypt(detail.getPassword()));
+            // 数据库的所有数据
+            DatabaseMetaData metaData = connection.getMetaData();
+            // 获取表的主键名字
+            ResultSet pkInfo = metaData.getPrimaryKeys(null, "%", tableName);
+            while (pkInfo.next()) {
+//            System.out.print("数据库名称:"+pkInfo.getString("TABLE_CAT")+"                  ");
+//            System.out.print("表名称:"+pkInfo.getString("TABLE_NAME")+"                  ");
+//            System.out.print("主键列的名称:"+pkInfo.getString("COLUMN_NAME")+"                  ");
+//            System.out.print("类型:"+pkInfo.getString("PK_NAME")+"                  ");
+//            System.out.println("");
+                pkList.add(pkInfo.getString("COLUMN_NAME"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return StringUtils.join(pkList, ",");
     }
 }

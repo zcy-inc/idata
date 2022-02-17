@@ -429,6 +429,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     backFlowResponse.setDestWriteMode(writeModeEnum);
                     backFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
 
+                    backFlowResponse.setUpdateKey(dataSourceApi.getPrimaryKey(jobOutput.getDestDataSourceId(), backFlowResponse.getDestTable()));
                     return backFlowResponse;
                 }
 

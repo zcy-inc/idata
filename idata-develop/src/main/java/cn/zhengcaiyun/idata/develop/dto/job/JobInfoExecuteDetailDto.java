@@ -253,6 +253,14 @@ public class JobInfoExecuteDetailDto {
             BeanUtils.copyProperties(parent, this);
         }
 
+        public String getUpdateKey() {
+            return updateKey;
+        }
+
+        public void setUpdateKey(String updateKey) {
+            this.updateKey = updateKey;
+        }
+
         public JobWriteModeEnum getDestWriteMode() {
             return destWriteMode;
         }
