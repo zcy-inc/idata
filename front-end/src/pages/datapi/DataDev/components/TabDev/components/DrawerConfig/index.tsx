@@ -285,8 +285,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
       const destTable = prodForm.getFieldValue('destTable');
-      const destWriteMode = stagForm.getFieldValue('destWriteMode');
-      const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
+      const destWriteMode = prodForm.getFieldValue('destWriteMode');
+      const jobTargetTablePk = prodForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.PROD,
