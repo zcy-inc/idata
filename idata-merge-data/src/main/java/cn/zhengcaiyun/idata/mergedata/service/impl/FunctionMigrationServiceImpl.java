@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.mergedata.service.impl;
 
 import cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.mergedata.dal.old.OldIDataDao;
@@ -27,7 +28,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
     private OldIDataDao oldIDataDao;
 
     @Autowired
-    private DevJobUdfDao devJobUdfDao;
+    private DevJobUdfMyDao devJobUdfMyDao;
 
     @Autowired
     private CompositeFolderMyDao compositeFolderMyDao;
@@ -61,13 +62,12 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
                     if (newId == null) {
                         disMappingIds.add(devJobUdf.getFolderId());
                     }
-
                     return devJobUdf;
                 })
                 .collect(Collectors.toList());
 
         // 插入新数据库
-        jobUdfList.forEach(e -> devJobUdfDao.insert(e));
+        jobUdfList.forEach(e -> devJobUdfMyDao.insert(e));
 
         if (CollectionUtils.isNotEmpty(disMappingIds)) {
             List<MigrateResultDto> resultDtoList = new ArrayList<>();
