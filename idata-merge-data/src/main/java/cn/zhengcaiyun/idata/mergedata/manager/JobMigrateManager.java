@@ -449,14 +449,13 @@ public class JobMigrateManager {
     }
 
     private String changeTargetTblNameSql(String sourceSql) {
-        // 兼容空格、注释和逗号
-        List<String> sqlList = Arrays.stream(sourceSql.split(" |,|--")).filter(t -> t.contains("ods_") && t.contains(".sync_"))
+        // 兼容空格、注释、逗号和换行符
+        List<String> sqlList = Arrays.stream(sourceSql.split(" |,|--|\n")).filter(t -> t.contains("ods_") && t.contains(".sync_"))
                 .collect(Collectors.toList());
         Map<String, String> tblNameMap = new HashMap<>();
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|\\.sync_"))
-                    // 兼容换行
-                    .filter(strS -> StringUtils.isNotEmpty(strS) && !"\n".equals(strS))
+                    .filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
@@ -472,93 +471,40 @@ public class JobMigrateManager {
     }
 
     public static void main(String[] args) {
-        String sql = "select \n" +
-                "\tt_a_art.id \t\t\t\t\t\tas id\n" +
-                "\t,t_a_art.title \t\t\t\t\tas title\n" +
-                "\t,t_a_art.district \t\t\t\tas district\n" +
-                "\t,t_a_art.announcement_type \t\tas announcement_type_code\n" +
-                "\t,t_a_type.type_name \t\t\tas announcement_type_name\n" +
-                "\t,t_a_art.project_name \t\t\tas project_name\n" +
-                "\t,t_a_art.project_code \t\t\tas project_code\n" +
-                "\t,t_a_art.created_at \t\t\tas created_at\n" +
-                "\t,t_a_art.released_at \t\t\tas released_at\n" +
-                "\t,t_a_art.expired_at \t\t\tas expired_at\n" +
-                "\t,t_a_art.checked_at \t\t\tas checked_at\n" +
-                "\t,t_a_art.creator_name \t\t\tas creator_name\n" +
-                "\t,t_a_art.creator_id \t\t\tas creator_id\n" +
-                "\t,t_a_art.checker_name \t\t\tas checker_name\n" +
-                "\t,t_a_art.checker_id \t\t\tas checker_id\n" +
-                "\t,t_a_art.out_url \t\t\t\tas out_url\n" +
-                "\t,case when (t_a_art.serial_num = '' or t_a_art.serial_num is null) then '是'\n" +
-                "\t\t  else '否' \n" +
-                "    end \t\t\t\t\t\t\tas is_contract\n" +
-                "\t,t_a_art.is_secret \t\t\t\tas is_secret\n" +
-                "\t,t_a_art.is_delete \t\t\t\tas is_delete\n" +
-                "\t,t_a_art.update_time \t\t\tas update_time\n" +
-                "\t,t_a_art.create_orgid \t\t\tas create_orgid\n" +
-                "\t,case when t_a_type.biz_ann_type = 1 then '采购公告'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 2 then '结果公告'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 3 then '合同公告'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 4 then '更正公告'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 5 then '履约验收公告'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 6 then '意见征询及公示'\n" +
-                "\t\t  when t_a_type.biz_ann_type = 7 then '采购监管公告'\n" +
-                "\t\t  else '其他公告' \n" +
-                "    end \t\t\t\t\t\t\tas biz_ann_type\n" +
-                "\t,case when t_a_type.biz_type=1 then '项目采购'\n" +
-                "\t\t  when t_a_type.biz_type=11 then '项目采购-公开招标'\n" +
-                "\t\t  when t_a_type.biz_type=12 then '项目采购-邀请招标'\n" +
-                "\t\t  when t_a_type.biz_type=13 then '项目采购-竞争性谈判'\n" +
-                "\t\t  when t_a_type.biz_type=14 then '项目采购-竞争性磋商'\n" +
-                "\t\t  when t_a_type.biz_type=15 then '项目采购-询价'\n" +
-                "\t\t  when t_a_type.biz_type=16 then '项目采购-单一来源'\n" +
-                "\t\t  when t_a_type.biz_type=2 then '电子卖场'\n" +
-                "\t\t  when t_a_type.biz_type=21 then '电子卖场-在线询价'\n" +
-                "\t\t  when t_a_type.biz_type=22 then '电子卖场-反向竞价'\n" +
-                "\t\t  when t_a_type.biz_type=23 then '电子卖场-通用定点'\n" +
-                "\t\t  when t_a_type.biz_type=24 then '电子卖场-协议供货'\n" +
-                "\t\t  when t_a_type.biz_type=25 then '电子卖场-网上超市'\n" +
-                "\t\t  when t_a_type.biz_type=26 then '电子卖场-精选服务'\n" +
-                "\t\t  when t_a_type.biz_type=3 then '非政府采购'\n" +
-                "\t\t  when t_a_type.biz_type=31 then '非政府采购-公款竞争性存放'\n" +
-                "\t\t  when t_a_type.biz_type=32 then '非政府采购-国库现金管理'\n" +
-                "\t\t  else '其他' \n" +
-                "\tend \t\t\t\t\t\t\tas biz_type\n" +
-                "\t,t_a_type.type_name\n" +
-                "\t,case when t_a_type.trade_type = 1 then '直购'\n" +
-                "\t\t  when t_a_type.trade_type = 2 then '竞价'\n" +
-                "\t\t  when t_a_type.trade_type = 3 then '团购'\n" +
-                "\t\t  when t_a_type.trade_type = 4 then '议价'\n" +
-                "\t\t  when t_a_type.trade_type = 5 then '无限制'\n" +
-                "\t\t  else '其他' \n" +
-                "\tend \t\t\t\t\t\t\tas trade_type\n" +
-                "\t, null  as announcement_budget_amount     --sacsr.bid_amount as announcement_budget_amount\n" +
-                "from ods_db_manage.sync_announcement_article t_a_art\n" +
-                "left outer join ods_db_manage.sync_announcement_types t_a_type\n" +
-                "on t_a_type.type_code = t_a_art.announcement_type and t_a_type.env = 5\n" +
-                "--left join(\n" +
-                "--select\n" +
-                "--  * \n" +
-                "--from(\n" +
-                "--\tselect\n" +
-                "--    \tannouncement_id\n" +
-                "--    \t,bid_amount\n" +
-                "--    \t,row_number() over(partition by announcement_id order by create_at desc) as rn \n" +
-                "--\tfrom ods_db_manage.sync_announcement_ccgp_sync_record \n" +
-                "--\twhere push_status = 1\n" +
-                "-- \t)T \n" +
-                "--where T.rn = 1 \n" +
-                "--) sacsr \n" +
-                "--on t_a_art.id = sacsr.announcement_id\n" +
-                "where (t_a_art.status = 4 or t_a_art.status = 5)";
-//        String sql = "select * from ods_db_item.sync_zcy_item_copy_detail";
-        String[] sqls = sql.split(" |,|--");
+        String sql = "SELECT \n" +
+                "gr.id AS record_id,\n" +
+                "cs.org_id AS org_id,\n" +
+                "cs.org_name AS org_name,\n" +
+                "cs.district_code AS district_code,\n" +
+                "gr.actual_grade_score AS actual_grade_score,\n" +
+                "cs.config_id AS config_id,\n" +
+                "gr.created_at AS record_created_at,\n" +
+                "gr.updated_at AS record_updated_at,\n" +
+                "now() AS created_at,\n" +
+                "now() AS updated_at\n" +
+                "from\n" +
+                "(SELECT \n" +
+                "\tds.supplier_org_name org_name,\n" +
+                "\tds.supplier_org_id org_id,\n" +
+                "\tconfig.id config_id,\n" +
+                "\tds.settled_district_code district_code\n" +
+                "FROM dim.dim_supplier ds\n" +
+                "LEFT JOIN (SELECT c.id,district,c.status FROM ods_db_credit.sync_credit_reward_punish_district_config c LATERAL VIEW EXPLODE(SPLIT(districts,',')) t AS district) config\n" +
+                "WHERE ds.zcy_status_id = \"OFFICIAL\" \n" +
+                "AND ds.settled_district_code = config.district) cs\n" +
+                "LEFT JOIN\n" +
+                "ods_db_credit.sync_credit_reward_punish_grade_record\n" +
+                "ON cs.org_id = gr.grade_org_id\n" +
+                "WHERE gr.actual_grade_score < 0";
+//        String sql = "ON cs.org_id = gr.grade_org_id\n" +
+//                "WHERE gr.actual_grade_score < 0";
+        String[] sqls = sql.split(" |,|--|\n");
         List<String> sqlList = Arrays.stream(sqls).filter(t -> t.contains("ods_") && t.contains(".sync_"))
                 .collect(Collectors.toList());
         Map<String, String> tblNameMap = new HashMap<>();
         for (String str : sqlList) {
             List<String> strSplitList = Arrays.stream(str.split("ods_|\\.sync_"))
-                    .filter(strS -> StringUtils.isNotEmpty(strS) && !"\n".equals(strS))
+                    .filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
