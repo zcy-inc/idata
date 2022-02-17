@@ -48,6 +48,7 @@ public class SparkController {
             result.put("insertErase", "true");
         } else {
             result.put("insertErase", "false");
+            result.put("isHasPt", "false");
         }
         return RestResult.success(result);
     }

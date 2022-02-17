@@ -40,9 +40,11 @@ import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.mergedata.manager.JobMigrateManager;
 import cn.zhengcaiyun.idata.mergedata.service.JobMigrationService;
 import cn.zhengcaiyun.idata.mergedata.util.*;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.GraphBuilder;
@@ -229,7 +231,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         oldJobConfigList.stream().forEach(jobConfig -> {
             Long job_id = jobConfig.getLong("job_id");
-            String[] prev_job_ids = jobConfig.getJSONArray("dependent_job_ids").toArray(new String[0]);
+            JSONArray depJsonArray = jobConfig.getJSONArray("dependent_job_ids");
+            String[] prev_job_ids = Objects.isNull(depJsonArray) ? null : depJsonArray.toArray(new String[0]);
             if (prev_job_ids == null || prev_job_ids.length == 0) {
                 outJobGraph.addNode(job_id);
             } else {
@@ -339,7 +342,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         combinationDto.setExecuteConfig(executeConfigDto);
 
         List<JobDependenceDto> dependencies = new ArrayList<>();
-        String[] prev_old_job_ids = configJson.getJSONArray("dependent_job_ids").toArray(new String[0]);
+        JSONArray depJsonArray = configJson.getJSONArray("dependent_job_ids");
+        String[] prev_old_job_ids = Objects.isNull(depJsonArray) ? null : depJsonArray.toArray(new String[0]);
         if (prev_old_job_ids != null && prev_old_job_ids.length > 0) {
             for (String prev_old_job_id_str : prev_old_job_ids) {
                 Long prev_old_job_id = Long.parseLong(prev_old_job_id_str);
@@ -380,10 +384,11 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             DataSource dataSource = dataSourceOptional.get();
             outputDto.setDestDataSourceType(dataSource.getType());
             outputDto.setDestDataSourceId(dataSource.getId());
-            String[] target_tables = jobInfoJson.getJSONArray("target_tables").toArray(new String[0]);
+            JSONArray targetTableJsonArray = jobInfoJson.getJSONArray("target_tables");
+            String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
             checkArgument(target_tables != null && target_tables.length > 0, "旧SQL作业[%s]目标表名为空", oldJobId);
             outputDto.setDestTable(target_tables[0]);
-            String save_mode = oldJobContent.getString("save_mode");
+            String save_mode = Strings.emptyToNull(oldJobContent.getString("save_mode"));
             save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
             outputDto.setDestWriteMode(save_mode.toUpperCase());
             String source_table_pk = oldJobContent.getString("source_table_pk");

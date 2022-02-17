@@ -42,6 +42,7 @@ import cn.zhengcaiyun.idata.mergedata.dto.JobMigrationDto;
 import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
 import cn.zhengcaiyun.idata.mergedata.util.DatasourceTool;
 import cn.zhengcaiyun.idata.mergedata.util.JobMigrationContext;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -214,7 +215,8 @@ public class JobMigrateManager {
         // 数据去向-数据源id
         contentDto.setDestDataSourceId(destDataSource.getId());
         // 数据去向-数仓表id
-        String[] target_tables = migrationDto.getOldJobInfo().getJSONArray("target_tables").toArray(new String[0]);
+        JSONArray targetTableJsonArray = migrationDto.getOldJobInfo().getJSONArray("target_tables");
+        String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
         //todo 已切换新规则表名，迁移逻辑如下
 //        if (target_tables != null && target_tables.length > 0 && StringUtils.isNotBlank(target_tables[0])) {
 //            contentDto.setDestTable(target_tables[0]);
@@ -290,7 +292,8 @@ public class JobMigrateManager {
         }
         contentDto.setSourceSql(echoSourceSql);
         if (oldJobContent.containsKey("udf_ids")) {
-            String[] oldUdfIdArr = oldJobContent.getJSONArray("udf_ids").toArray(new String[0]);
+            JSONArray udfIdJsonArray = oldJobContent.getJSONArray("udf_ids");
+            String[] oldUdfIdArr = Objects.isNull(udfIdJsonArray) ? null : udfIdJsonArray.toArray(new String[0]);
             if (oldUdfIdArr != null && oldUdfIdArr.length > 0) {
                 contentDto.setUdfIds(String.join(",", oldUdfIdArr));
             }
@@ -459,8 +462,7 @@ public class JobMigrateManager {
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
-            }
-            else {
+            } else {
                 tblNameMap.put(str, "!ERROR!");
             }
         }
