@@ -411,7 +411,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 额外判断：旧版idata中sql作业中涉及回流作业，htool对回流作业处理不一样
-                if (!StringUtils.equalsIgnoreCase(jobOutput.getDestDataSourceType(), "hive")) {
+                DataSourceDto dataSource = dataSourceApi.getDataSource(jobOutput.getDestDataSourceId());
+                if (!StringUtils.equalsIgnoreCase(dataSource.getType().name(), "hive")) {
                     JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
                     backFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
                     backFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
