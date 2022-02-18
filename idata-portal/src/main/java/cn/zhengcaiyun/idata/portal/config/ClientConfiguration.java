@@ -30,7 +30,7 @@ public class ClientConfiguration {
     @Bean
     public HivePool getHivePool() {
         ConfigDto systemConfigByKey = systemConfigApi.getSystemConfigByKey("hive-info");
-        String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info33").getConfigValue();
+        String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setJdbc(jdbcUrl);
         return null;
