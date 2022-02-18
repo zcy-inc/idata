@@ -33,7 +33,7 @@ public class ClientConfiguration {
         String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setJdbc(jdbcUrl);
-        return null;
+        return new HivePool(connectInfo);
     }
 
 }
