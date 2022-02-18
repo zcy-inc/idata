@@ -16,8 +16,10 @@
  */
 package cn.zhengcaiyun.idata.develop.service.table;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
 
@@ -28,9 +30,31 @@ import java.util.List;
 
 public interface ColumnInfoService {
     List<ColumnInfoDto> getColumns(Long tableId);
+
+    /**
+     * 和远端（hive）表进x行列比较，差异信息封装在tableInfo字段中
+     * @param tableInfo
+     */
+//    void compareColumns(TableInfoDto tableInfo);
+
     List<ColumnDetailsDto> getColumnDetails(Long tableId);
-    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<String> columnNameList, String operator);
+    List<ColumnInfoDto> createOrEdit(List<ColumnInfoDto> columnInfoDtoList, Long tableId, List<Long> columnIdList,
+                                     String operator);
 //    ColumnInfoDto edit(ColumnInfoDto columnInfoDto, String operator);
     boolean delete(Long columnId, String operator);
     boolean checkColumn(String columnName, Long tableId);
+
+    /**
+     * 根据tableId获取列name
+     * @param tableId
+     * @return
+     */
+    List<String> getColumnNames(Long tableId);
+
+    /**
+     * 根据表id获取列名
+     * @param tableId
+     * @return
+     */
+    List<DevColumnInfo> getColumnInfo(Long tableId);
 }

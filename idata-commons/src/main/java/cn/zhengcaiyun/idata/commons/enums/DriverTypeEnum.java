@@ -3,9 +3,15 @@ package cn.zhengcaiyun.idata.commons.enums;
 import org.apache.commons.lang3.StringUtils;
 
 public enum DriverTypeEnum {
+
     MySQL("mysql","com.mysql.jdbc.Driver"),
+    Doris("mysql","com.mysql.jdbc.Driver"),
+    DorisSql("mysql","com.mysql.jdbc.Driver"),
     Hive("hive2","org.apache.hive.jdbc.HiveDriver"),
-    Postgres("postgresql","org.postgresql.Driver");
+    Postgres("postgresql","org.postgresql.Driver"),
+    Phoenix("phoenix",""),
+    Kafka("kafka",""),
+    Elasticsearch("elasticsearch","");
 
     private String urlType;
     private String driverName;

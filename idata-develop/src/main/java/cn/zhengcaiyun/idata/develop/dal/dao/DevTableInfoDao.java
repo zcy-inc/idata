@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevTableInfoDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_table_info")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, tableName, folderId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, tableName, hiveTableName, folderId);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_table_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -64,6 +64,7 @@ public interface DevTableInfoDao {
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="table_name", property="tableName", jdbcType=JdbcType.VARCHAR),
+        @Result(column="hive_table_name", property="hiveTableName", jdbcType=JdbcType.VARCHAR),
         @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT)
     })
     List<DevTableInfo> selectMany(SelectStatementProvider selectStatement);
@@ -98,6 +99,7 @@ public interface DevTableInfoDao {
             .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(tableName).toProperty("tableName")
+            .map(hiveTableName).toProperty("hiveTableName")
             .map(folderId).toProperty("folderId")
         );
     }
@@ -111,6 +113,7 @@ public interface DevTableInfoDao {
             .map(editor).toPropertyWhenPresent("editor", record::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(tableName).toPropertyWhenPresent("tableName", record::getTableName)
+            .map(hiveTableName).toPropertyWhenPresent("hiveTableName", record::getHiveTableName)
             .map(folderId).toPropertyWhenPresent("folderId", record::getFolderId)
         );
     }
@@ -150,6 +153,7 @@ public interface DevTableInfoDao {
                 .set(editor).equalTo(record::getEditor)
                 .set(editTime).equalTo(record::getEditTime)
                 .set(tableName).equalTo(record::getTableName)
+                .set(hiveTableName).equalTo(record::getHiveTableName)
                 .set(folderId).equalTo(record::getFolderId);
     }
 
@@ -161,6 +165,7 @@ public interface DevTableInfoDao {
                 .set(editor).equalToWhenPresent(record::getEditor)
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(tableName).equalToWhenPresent(record::getTableName)
+                .set(hiveTableName).equalToWhenPresent(record::getHiveTableName)
                 .set(folderId).equalToWhenPresent(record::getFolderId);
     }
 
@@ -173,6 +178,7 @@ public interface DevTableInfoDao {
             .set(editor).equalTo(record::getEditor)
             .set(editTime).equalTo(record::getEditTime)
             .set(tableName).equalTo(record::getTableName)
+            .set(hiveTableName).equalTo(record::getHiveTableName)
             .set(folderId).equalTo(record::getFolderId)
             .where(id, isEqualTo(record::getId))
         );
@@ -187,6 +193,7 @@ public interface DevTableInfoDao {
             .set(editor).equalToWhenPresent(record::getEditor)
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(tableName).equalToWhenPresent(record::getTableName)
+            .set(hiveTableName).equalToWhenPresent(record::getHiveTableName)
             .set(folderId).equalToWhenPresent(record::getFolderId)
             .where(id, isEqualTo(record::getId))
         );

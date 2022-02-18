@@ -109,13 +109,13 @@ const DataSource: FC = () => {
   }, []);
 
   useEffect(() => {
-    activeKey === 'db' ? getList() : getCSVList();
+    activeKey === 'db' ? getList(1) : getCSVList(1);
   }, [activeKey]);
 
-  const getList = () => {
+  const getList = (page: number = 1) => {
     setLoading(true);
     const searchParams = form.getFieldsValue();
-    getDataSourceList({ limit: 10, offset: 0, ...searchParams })
+    getDataSourceList({ limit: 10, offset: 10 * (page - 1), ...searchParams })
       .then((res) => {
         setList(res.data.content);
         setTotal(res.data.total);
@@ -124,10 +124,10 @@ const DataSource: FC = () => {
       .finally(() => setLoading(false));
   };
 
-  const getCSVList = () => {
+  const getCSVList = (page: number = 1) => {
     setLoading(true);
     const searchParams = form.getFieldsValue();
-    getCSVDataSourceList({ limit: 10, offset: 0, ...searchParams })
+    getCSVDataSourceList({ limit: 10, offset: 10 * (page - 1), ...searchParams })
       .then((res) => {
         setListCSV(get(res, 'data.content', []));
         setTotalCSV(get(res, 'data.total', 0));
@@ -225,7 +225,7 @@ const DataSource: FC = () => {
             columns={columns}
             dataSource={list}
             scroll={{ x: 'max-content' }}
-            pagination={{ total, showTotal: (t) => `共${t}条` }}
+            pagination={{ total, showTotal: (t) => `共${t}条`, onChange: (page) => getList(page) }}
             loading={loading}
           />
         </TabPane>

@@ -31,10 +31,6 @@ public class JobSchedule {
     private static final String JOB_HISTORY_DAY_CRON = "0 0 8 * * ?";
     private static final String JOB_HISTORY_HOUR_CRON = "0 0/30 9-12 * * ?";
 
-//    @Autowired
-//    @Qualifier("yarnService")
-//    private ResourceManageService yarnService;
-
     @Autowired
     private JobHistoryService jobHistoryService;
 
@@ -56,6 +52,7 @@ public class JobSchedule {
     }
 
     private void pullJobHistory(LocalDateTime startTime, LocalDateTime endTime) {
+        Date now = new Date();
 
         List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchClusterApps(startTime, endTime, null);
         List<DevJobHistory> list = clusterAppDtoList.stream().map(e -> {
@@ -73,42 +70,12 @@ public class JobSchedule {
                     devJobHistory.setApplicationId(e.getAppId());
                     devJobHistory.setUser(e.getUser());
                     devJobHistory.setAmContainerLogsUrl(e.getAmContainerLogs());
+                    devJobHistory.setCreateTime(now);
 
                     return devJobHistory;
                 })
                 .collect(Collectors.toList());
         jobHistoryService.batchUpsert(list);
     }
-
-
-//    @Scheduled(cron = JOB_HISTORY_CRON)
-//    @Deprecated
-//    public void pullSparkSqlJobHistory() {
-//        List<AppResourceDetail> appResourceDetailList = yarnService.loadAppResourceDetailList(DateUtil.yesterday().getTime(), DateUtil.date().getTime());
-//        List<DevJobHistory> devJobHistoryList = appResourceDetailList
-//                .stream()
-//                .filter(e -> ReUtil.isMatch("SparkSQL-[p/s]-\\d*", e.getName()))
-//                .map(e -> {
-//                    DevJobHistory devJobHistory = new DevJobHistory();
-//                    devJobHistory.setApplicationId(e.getId());
-//
-//                    // 抽取出SparkSQL-[p/s]-xxxx  xxxx(jobId)
-//                    // di 、 kylin 、 script 、 spark 、sql
-//                    String jobIdStr = ReUtil.get("SparkSQL-[p/s]-(\\d*)", e.getName(), 1);
-//                    devJobHistory.setJobId(Long.valueOf(jobIdStr));
-//                    devJobHistory.setStartTime(new Timestamp(e.getStartedTime()));
-//                    devJobHistory.setFinishTime(new Timestamp(e.getFinishedTime()));
-//                    devJobHistory.setFinalStatus(e.getFinalStatus());
-//                    devJobHistory.setDuration(e.getElapsedTime());
-//                    devJobHistory.setAvgMemory(e.getMemorySeconds() / (e.getElapsedTime() / 1000));
-//                    Long vcoreSeconds = e.getVcoreSeconds();
-//                    Double elapsedTime = e.getElapsedTime().doubleValue();
-//                    devJobHistory.setAvgVcores(NumberUtil.round(vcoreSeconds/elapsedTime*1000, 2).doubleValue());
-//                    return devJobHistory;
-//                })
-//                .collect(Collectors.toList());
-//        jobHistoryService.batchUpsert(devJobHistoryList);
-//    }
-
 
 }

@@ -22,6 +22,8 @@ const Enviroments: FC<EnviromentsProps> = ({}) => {
         const workspaceJson = JSON.parse(workspaceString);
         const env = workspaceJson.urlPath || 'zcy';
         form.setFieldsValue({ env });
+      } else {
+        form.setFieldsValue({ env: 'zcy' });
       }
     } catch (e) {
       form.setFieldsValue({ env: 'zcy' });
@@ -60,6 +62,8 @@ const Enviroments: FC<EnviromentsProps> = ({}) => {
     <Form form={form}>
       <Form.Item name="env" style={{ marginBottom: 0 }}>
         <Select
+          style={{ width: 120 }}
+          placeholder="请选择环境"
           options={envs.map((_) => ({ label: _.name, value: _.urlPath }))}
           onChange={(v) => onEnvChange(v as string)}
         />

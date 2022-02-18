@@ -45,4 +45,20 @@ public interface SystemConfigService {
     Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile xmlFile) throws IOException;
 
     List<ConfigDto> editSystemConfigs(List<ConfigDto> configs, String editor);
+
+    /**
+     * 通用获取String属性值方法
+     * @param keyOne 属性一级类别
+     * @param valueAttr json属性值的具体key
+     * @return
+     */
+    String getValueWithCommon(String keyOne, String valueAttr);
+
+    /**
+     * 通用获取属性值方法
+     * @param keyOne 属性一级类别
+     * @param valueAttr json属性值的具体key
+     * @return
+     */
+    <T> T getValueWithCommon(String keyOne, String valueAttr, Class<T> clazz);
 }

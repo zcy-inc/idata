@@ -187,7 +187,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
@@ -251,6 +252,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       }
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
       const destTable = stagForm.getFieldValue('destTable');
+      const destWriteMode = stagForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
@@ -283,7 +285,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
       const destTable = prodForm.getFieldValue('destTable');
-      const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
+      const destWriteMode = prodForm.getFieldValue('destWriteMode');
+      const jobTargetTablePk = prodForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.PROD,
@@ -539,6 +542,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </a>
               </div>
               <Table<ConfiguredTaskListItem>
+                rowKey="jobName"
                 columns={columnsDependence}
                 dataSource={activeKey === Environments.STAG ? depDataStag : depDataProd}
                 pagination={false}
@@ -610,6 +614,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </Col>
               </Row>
               <Table
+                rowKey="destTable"
                 columns={columnsOutput}
                 dataSource={activeKey === Environments.STAG ? outDataStag : outDataProd}
                 pagination={false}

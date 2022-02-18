@@ -103,7 +103,7 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.gov.zcy.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>

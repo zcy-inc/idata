@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.connector.util;
 
 
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
@@ -20,6 +21,22 @@ public class HiveSqlUtil {
         CreateTableListener listener = new CreateTableListener();
         walker.walk(listener, parser.statement());
         return listener.tableInfoMap;
+    }
+
+    public static MetadataInfo getTableInfo(String sql) {
+        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(sql), true));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SparkSqlParser parser = new SparkSqlParser(tokenStream);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        CreateTableListener listener = new CreateTableListener();
+        walker.walk(listener, parser.statement());
+        return listener.metadataInfo;
+    }
+
+    public static void main(String[] args) {
+        String sql = "create table db.xxx (a bigint COMMENT 'id', s string) comment '测试分区表' " +
+                "partitioned by (pt string comment '按天')";
+        System.out.println(getCreateTableInfo(sql));
     }
 
 }

@@ -1,15 +1,12 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
-import java.util.Date;
 import java.util.List;
 
 public class JobInfoExecuteDetailDto {
@@ -66,10 +63,14 @@ public class JobInfoExecuteDetailDto {
          */
         private String destTable;//带库名 targetTableName
         /**
-         *   数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
+         * 数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
          * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
          */
         private DestWriteModeEnum destWriteMode; // isRecreate
+        /**
+         *   数据来源-读取模式，all：全量，incremental：增量
+         */
+        private SrcReadModeEnum srcReadMode;
         /**
          *   数据来源-切分键
          */
@@ -215,6 +216,130 @@ public class JobInfoExecuteDetailDto {
         public void setSrcDbName(String srcDbName) {
             this.srcDbName = srcDbName;
         }
+
+        public SrcReadModeEnum getSrcReadMode() {
+            return srcReadMode;
+        }
+
+        public void setSrcReadMode(SrcReadModeEnum srcReadMode) {
+            this.srcReadMode = srcReadMode;
+        }
+    }
+
+    // web方面接触到
+    public static class BackFlowDetailDto extends JobInfoExecuteDetailDto {
+        /**
+         * 作业sql内容，里面包含srcTable以及逻辑
+         */
+        private String srcSql;//sourceSql;
+        private JobWriteModeEnum destWriteMode; //DestWriteModeEnum destWriteMode;
+//        private String sourceTableName;
+        private List<DevJobUdf> udfList; // udfs;
+        private DriverTypeEnum destDriverType;//;targetDriverType;
+        private String destUrlPath;//targetUrlPath;
+        private String destUserName;//username;
+        private String destPassword;//password;
+        private String destTable;//targetTableName;
+        private String dbColumnNames;
+        private String destBeforeWrite;//targetPrefix; 新版本
+        private String destAfterWrite;//targetPostfix; 新版本
+        private String updateKey; //新版本
+        private Integer parallelism; //新版本
+
+        public BackFlowDetailDto() {
+        }
+
+        public BackFlowDetailDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        public String getUpdateKey() {
+            return updateKey;
+        }
+
+        public void setUpdateKey(String updateKey) {
+            this.updateKey = updateKey;
+        }
+
+        public JobWriteModeEnum getDestWriteMode() {
+            return destWriteMode;
+        }
+
+        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
+            this.destWriteMode = destWriteMode;
+        }
+
+        public String getSrcSql() {
+            return srcSql;
+        }
+
+        public void setSrcSql(String srcSql) {
+            this.srcSql = srcSql;
+        }
+
+        public String getDestTable() {
+            return destTable;
+        }
+
+        public void setDestTable(String destTable) {
+            this.destTable = destTable;
+        }
+
+        public String getDestUrlPath() {
+            return destUrlPath;
+        }
+
+        public void setDestUrlPath(String destUrlPath) {
+            this.destUrlPath = destUrlPath;
+        }
+
+        public DriverTypeEnum getDestDriverType() {
+            return destDriverType;
+        }
+
+        public void setDestDriverType(DriverTypeEnum destDriverType) {
+            this.destDriverType = destDriverType;
+        }
+
+        public List<DevJobUdf> getUdfList() {
+            return udfList;
+        }
+
+        public void setUdfList(List<DevJobUdf> udfList) {
+            this.udfList = udfList;
+        }
+
+        public String getDestUserName() {
+            return destUserName;
+        }
+
+        public void setDestUserName(String destUserName) {
+            this.destUserName = destUserName;
+        }
+
+        public String getDestPassword() {
+            return destPassword;
+        }
+
+        public void setDestPassword(String destPassword) {
+            this.destPassword = destPassword;
+        }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
+        }
     }
 
     public static class SqlJobDetailsDto extends JobInfoExecuteDetailDto {
@@ -233,7 +358,7 @@ public class JobInfoExecuteDetailDto {
         /**
          *   数据去向-写入模式，overwrite，upsert
          */
-        private DestWriteModeEnum destWriteMode; // saveMode
+        private JobWriteModeEnum destWriteMode; // saveMode
 
         /**
          *   数据来源表主键(写入模式为upsert时必填)
@@ -261,11 +386,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public DestWriteModeEnum getDestWriteMode() {
+        public JobWriteModeEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(DestWriteModeEnum destWriteMode) {
+        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 
@@ -458,4 +583,6 @@ public class JobInfoExecuteDetailDto {
     public void setExecEngine(EngineTypeEnum execEngine) {
         this.execEngine = execEngine;
     }
+
+
 }

@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.user.service;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserMyDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
@@ -129,27 +130,35 @@ public class TokenService {
             }
         } else {
             // 本地验证
-            boolean isExpired;
             try {
                 Claims claims = Jwts.parser()
                         .setSigningKey(jwtSecurity)
                         .parseClaimsJws(token)
                         .getBody();
-                isExpired = new Date().after(claims.getExpiration());
+                boolean isExpired = new Date().after(claims.getExpiration());
+                if (isExpired) {
+                    return false;
+                }
             } catch (Exception e) {
-                isExpired = true;
+                e.printStackTrace();
+                return false;
             }
+
             // 用户insertIgnore操作
             JSONObject payload = getPayload(token);
             UacUser uacUser = JSON.parseObject(JSON.toJSONString(payload), UacUser.class);
-            uacUser.setDel(DeleteEnum.DEL_NO.val);
-            uacUser.setCreateTime(new Date());
-            uacUser.setEditTime(new Date());
-            uacUser.setCreator(uacUser.getNickname());
-            uacUser.setEditor(uacUser.getNickname());
-            uacUserMyDao.insertIgnore(uacUser);
 
-            return !isExpired;
+            // 用户不存在，则新建
+            if (uacUserMyDao.findOneByUsername(uacUser.getUsername()) == null) {
+                uacUser.setDel(DeleteEnum.DEL_NO.val);
+                uacUser.setCreateTime(new Date());
+                uacUser.setEditTime(new Date());
+                uacUser.setCreator(uacUser.getNickname());
+                uacUser.setEditor(uacUser.getNickname());
+                uacUserMyDao.insertIgnore(uacUser);
+            }
+
+            return true;
         }
     }
 

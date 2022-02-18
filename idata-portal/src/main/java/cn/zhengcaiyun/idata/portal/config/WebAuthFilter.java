@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -54,6 +55,8 @@ public class WebAuthFilter implements Filter {
 
 //    @Value("${access.mode:#{null}}")
 //    private String ACCESS_MODE;
+    @Value("${idataEtl.checkToken:#{null}}")
+    private String IDATA_ETL_CHECK_TOKEN;
 
     @Autowired
     private TokenService tokenService;
@@ -83,6 +86,11 @@ public class WebAuthFilter implements Filter {
         String path = ((HttpServletRequest) servletRequest).getRequestURI();
         if (path.contains("/v2/api-docs")
                 || path.contains("/p0/")) {
+            filterChain.doFilter(mutableRequest, servletResponse);
+            return;
+        }
+        // 内部对接token写死
+        if (StringUtils.isNotEmpty(token) && IDATA_ETL_CHECK_TOKEN.equals(token)) {
             filterChain.doFilter(mutableRequest, servletResponse);
             return;
         }

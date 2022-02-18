@@ -8,5 +8,8 @@
         values (#{id}, #{del}, #{creator}, #{createTime}, #{editor}, #{editTime}, #{username}, #{sysAdmin}, #{authType},
             #{password}, #{nickname}, #{employeeId}, #{department}, #{realName}, #{avatar}, #{email}, #{mobile})
     </insert>
+    <select id="findOneByUsername" resultType="cn.zhengcaiyun.idata.user.dal.model.UacUser">
+        select * from uac_user where username = #{username} limit 1
+    </select>
 
 </mapper>

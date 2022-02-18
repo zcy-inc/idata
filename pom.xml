@@ -75,6 +75,8 @@
         <validation.version>2.0.7.RELEASE</validation.version>
         <testcontainers.version>1.16.2</testcontainers.version>
         <mail.version>1.4.1</mail.version>
+        <commons-pool2.version>2.10.0</commons-pool2.version>
+        <hutool-all.version>5.3.5</hutool-all.version>
         <spring-boot-starter-actuator.version>3.0.3-RELEASE</spring-boot-starter-actuator.version>
         <expression.version>5.3.14</expression.version>
     </properties>
@@ -137,12 +139,6 @@
                 <artifactId>presto-jdbc</artifactId>
                 <version>${presto-jdbc.version}</version>
             </dependency>
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/org.springframework/spring-expression &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework</groupId>-->
-<!--                <artifactId>spring-expression</artifactId>-->
-<!--                <version>${expression.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.apache.hive</groupId>
                 <artifactId>hive-jdbc</artifactId>
@@ -167,6 +163,11 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons-pool2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
