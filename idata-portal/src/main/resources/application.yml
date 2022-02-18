@@ -84,8 +84,8 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-access:
-  mode : idata-merge
+#access:
+#  mode : idata-merge
 
 zcy:
   is-cloud: ture # 是否是云端，ture：云端，false：本地化

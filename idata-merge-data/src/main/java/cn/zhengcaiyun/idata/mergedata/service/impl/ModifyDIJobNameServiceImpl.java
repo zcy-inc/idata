@@ -70,6 +70,10 @@ public class ModifyDIJobNameServiceImpl implements ModifyDIJobNameService {
                 resultDtoList.add(new MigrateResultDto("ModifyDIJobName", String.format("作业[%s]目标表名为空", jobInfo.getName()), null));
                 continue;
             }
+            if (!destTable.startsWith("ods.ods_")) {
+                resultDtoList.add(new MigrateResultDto("ModifyDIJobName", String.format("作业[%s]目标表名未改，不修改作业名称", jobInfo.getName()), null));
+                continue;
+            }
 
             JobInfoDto jobInfoDto = JobInfoDto.from(jobInfo);
             jobInfoDto.setName(destTable);
