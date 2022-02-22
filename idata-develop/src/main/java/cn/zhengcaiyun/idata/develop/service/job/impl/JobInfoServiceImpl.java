@@ -504,6 +504,9 @@ public class JobInfoServiceImpl implements JobInfoService {
      * @return
      */
     private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables, String srcDbName) {
+        if (CollectionUtils.isEmpty(mappingColumnList)) {
+            return null;
+        }
         boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
         if (!generate) {
             return null;
