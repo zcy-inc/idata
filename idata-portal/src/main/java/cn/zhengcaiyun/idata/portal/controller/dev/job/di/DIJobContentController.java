@@ -57,16 +57,21 @@ public class DIJobContentController {
     @PostMapping("/contents")
     public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
                                                           @RequestBody DIJobContentContentDto contentDto) {
-        // mapping sql添加AS columnName
+        // mapping_sql添加AS columnName
         List<MappingColumnDto> destCols = contentDto.getDestCols();
         if (CollectionUtils.isNotEmpty(destCols)) {
-            destCols.stream().filter(e -> StringUtils.isNotBlank(e.getMappingSql()))
+            destCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
                     .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
         }
-
         List<MappingColumnDto> srcCols = contentDto.getSrcCols();
         if (CollectionUtils.isNotEmpty(srcCols)) {
-            srcCols.stream().filter(e -> StringUtils.isNotBlank(e.getMappingSql()))
+            srcCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
                     .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
         }
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
