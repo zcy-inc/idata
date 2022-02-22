@@ -110,14 +110,14 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
-        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, null);
         if (StringUtils.isBlank(jdbcUrl)) {
             return Lists.newArrayList();
         }
 
         List<ColumnInfoDto> tableColumns = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
+             ResultSet rs = conn.getMetaData().getColumns(dbName, StringUtils.isBlank(schema) ? "%" : schema, tableName, "%")) {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");  //列名
                 String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
