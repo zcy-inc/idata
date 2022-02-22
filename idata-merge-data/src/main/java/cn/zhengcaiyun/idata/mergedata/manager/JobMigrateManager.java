@@ -425,7 +425,14 @@ public class JobMigrateManager {
     private String parseDestTable(DataSource srcDataSource, String sourceTable) {
         DbConfigDto dbConfigDto = getDbConfigDto(srcDataSource);
         String dbName = dbConfigDto.getDbName();
-        return "ods.ods_" + dbName + "_" + sourceTable;
+        String tableName = sourceTable;
+        if (DataSourceTypeEnum.postgresql.name().equals(srcDataSource.getType())) {
+            int dot_idx = sourceTable.indexOf(".");
+            if (dot_idx > 0) {
+                tableName = sourceTable.substring(dot_idx + 1);
+            }
+        }
+        return "ods.ods_" + dbName + "_" + tableName;
     }
 
     private DbConfigDto getDbConfigDto(DataSource srcDataSource) {
