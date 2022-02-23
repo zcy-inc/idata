@@ -17,7 +17,9 @@
     </resultMap>
     
     <select id="getPublishedDiJobContent" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent">
-        select t2.*
+        select
+            t2.*,
+            ifnull(t2.src_sharding_num, 1) as src_sharding_num
         from
             (
                 select * from dev_job_publish_record
