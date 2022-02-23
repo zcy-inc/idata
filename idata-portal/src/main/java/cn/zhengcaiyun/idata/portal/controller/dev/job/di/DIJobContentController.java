@@ -62,16 +62,14 @@ public class DIJobContentController {
         if (CollectionUtils.isNotEmpty(destCols)) {
             destCols.stream()
                     .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
-                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
-                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS "))
                     .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
         }
         List<MappingColumnDto> srcCols = contentDto.getSrcCols();
         if (CollectionUtils.isNotEmpty(srcCols)) {
             srcCols.stream()
                     .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
-                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
-                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS "))
                     .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
         }
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
