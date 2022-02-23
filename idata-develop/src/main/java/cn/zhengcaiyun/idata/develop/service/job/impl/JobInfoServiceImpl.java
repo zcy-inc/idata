@@ -373,6 +373,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                     diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
                 }
 
+                //兼容数据库数据错误
+                if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
+                    diResponse.setSrcShardingNum(1);
+                }
+
                 // 封装连接信息
                 DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId());
                 diResponse.setSrcDataType(srcSourceDetail.getDataSourceTypeEnum().name());
