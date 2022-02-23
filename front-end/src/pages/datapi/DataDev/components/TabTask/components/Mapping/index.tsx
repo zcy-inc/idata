@@ -20,7 +20,7 @@ interface MapProps {
 const { Item } = Form;
 
 const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
-  { data: { srcColumns, destColumns } },
+  { data: { srcColumns = [], destColumns = [] } },
   ref,
 ) => {
   const [visible, setVisible] = useState(false);

@@ -177,6 +177,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         };
         getDataSourceListWrapped(srcData.srcDataSourceType, 'src');
         getDataSourceListWrapped(destData.destDataSourceType, 'dest');
+        /* ===== */
+        getTaskTablesWrapped(r.data.srcDataSourceId);
+        /* ===== */
         srcForm.setFieldsValue(srcData);
         destForm.setFieldsValue(destData);
         setData(r.data);
