@@ -250,14 +250,17 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         message.info('输出表只能存在一张');
         return;
       }
+
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
+      const destDataSourceType =
+        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
       const destTable = stagForm.getFieldValue('destTable');
       const destWriteMode = stagForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.STAG,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType,
         destDataSourceId,
         destTable,
         destWriteMode,
@@ -284,13 +287,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
+      const destDataSourceType =
+        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
       const destTable = prodForm.getFieldValue('destTable');
       const destWriteMode = prodForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = prodForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.PROD,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType,
         destDataSourceId,
         destTable,
         destWriteMode,
@@ -326,6 +331,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
+
     const params = {
       executeConfig: {
         jobId: data?.id as number,
@@ -351,7 +357,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       output: {
         jobId: data?.id as number,
         environment: activeKey,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType: outData.destDataSourceType,
         destDataSourceId: outData.destDataSourceId,
         destTable: outData.destTable,
         destWriteMode: outData.destWriteMode,
