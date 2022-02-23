@@ -135,7 +135,7 @@ public class JobMigrateManager {
                 contentVersion = migrateDIContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
                 break;
             case SQL_SPARK:
-                contentVersion = migrateSQLContent(newJobId, jobInfoDto, migrationDto, contentOperator);
+                contentVersion = migrateSQLContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
                 break;
             case SPARK_PYTHON:
             case SPARK_JAR:
@@ -284,7 +284,8 @@ public class JobMigrateManager {
         return saveContent.getVersion();
     }
 
-    private Integer migrateSQLContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto, Operator contentOperator) {
+    private Integer migrateSQLContent(Long newJobId, JobInfoDto jobInfoDto, JobMigrationDto migrationDto,
+                                      Operator contentOperator, List<MigrateResultDto> resultDtoList) {
         SqlJobContentDto contentDto = new SqlJobContentDto();
 
         JSONObject oldJobContent = migrationDto.getOldJobContent();
@@ -296,6 +297,10 @@ public class JobMigrateManager {
         String echoSourceSql = changeTargetTblNameSql(oldSourceSql);
         if (echoSourceSql.contains("!ERROR!")) {
             LOGGER.warn("******SQL作业迁移有误，错误作业ID：" + newJobId);
+            resultDtoList.add(new MigrateResultDto("migrateSqlContent",
+                    String.format("需处理：旧作业[%s]的source_sql改写失败，需要修改后重迁或者迁移完重新修改Sql作业",
+                            migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+            return null;
         }
         contentDto.setSourceSql(echoSourceSql);
         if (oldJobContent.containsKey("udf_ids")) {
@@ -469,7 +474,11 @@ public class JobMigrateManager {
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
-            } else {
+            }
+            else if (strSplitList.size() == 3) {
+                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1) + "ods_" + strSplitList.get(2));
+            }
+            else {
                 tblNameMap.put(str, "!ERROR!");
             }
         }
@@ -480,31 +489,68 @@ public class JobMigrateManager {
     }
 
     public static void main(String[] args) {
-        String sql = "SELECT \n" +
-                "gr.id AS record_id,\n" +
-                "cs.org_id AS org_id,\n" +
-                "cs.org_name AS org_name,\n" +
-                "cs.district_code AS district_code,\n" +
-                "gr.actual_grade_score AS actual_grade_score,\n" +
-                "cs.config_id AS config_id,\n" +
-                "gr.created_at AS record_created_at,\n" +
-                "gr.updated_at AS record_updated_at,\n" +
-                "now() AS created_at,\n" +
-                "now() AS updated_at\n" +
-                "from\n" +
-                "(SELECT \n" +
-                "\tds.supplier_org_name org_name,\n" +
-                "\tds.supplier_org_id org_id,\n" +
-                "\tconfig.id config_id,\n" +
-                "\tds.settled_district_code district_code\n" +
-                "FROM dim.dim_supplier ds\n" +
-                "LEFT JOIN (SELECT c.id,district,c.status FROM ods_db_credit.sync_credit_reward_punish_district_config c LATERAL VIEW EXPLODE(SPLIT(districts,',')) t AS district) config\n" +
-                "WHERE ds.zcy_status_id = \"OFFICIAL\" \n" +
-                "AND ds.settled_district_code = config.district) cs\n" +
-                "LEFT JOIN\n" +
-                "ods_db_credit.sync_credit_reward_punish_grade_record\n" +
-                "ON cs.org_id = gr.grade_org_id\n" +
-                "WHERE gr.actual_grade_score < 0";
+        String sql = "with s_ca as (\n" +
+                "select category_id, district_code, concat('{', categorys ,'}') as ca_json  \n" +
+                "  from (\n" +
+                "    select category_id, district_code, explode(split(replace(replace(purchase_category, '[{'), '}]'), '\\\\},\\\\{' )) as categorys\n" +
+                "      from ods_db_fixed_universal.sync_tenant_open\n" +
+                "     where status = 1\n" +
+                "))\n" +
+                "\n" +
+                "select a.id, \n" +
+                "       a.layer,\n" +
+                "       c.category_id, \n" +
+                "       d.district_code, \n" +
+                "       get_json_object(d.ca_json, '$.id')   as node_id,\n" +
+                "       get_json_object(d.ca_json, '$.code') as ca_code,\n" +
+                "       get_json_object(d.ca_json, '$.name') as ca_name,\n" +
+                "       ''                                   as is_central\n" +
+                "  from ods_db_item.sync_parana_items a \n" +
+                "  join ods_db_agreement.sync_ag_protocol_goods_mapper b \n" +
+                "    on a.id = b.goods_id\n" +
+                "  join ods_db_fixed_universal.sync_service_item c \n" +
+                "    on b.bid_id = c.id\n" +
+                "  join s_ca d \n" +
+                "    on c.category_id = d.category_id\n" +
+                " where a.layer = 125\n" +
+                "\n" +
+                " union all\n" +
+                " \n" +
+                "select a.id, \n" +
+                "       a.layer, \n" +
+                "       a.category_id, \n" +
+                "       a.district_code, \n" +
+                "       d.id                                 as node_id, \n" +
+                "       d.code                               as ca_code, \n" +
+                "       d.name                               as ca_name, \n" +
+                "       d.type_code                          as is_central\n" +
+                "  from dim.dim_item_sales_district a \n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatlog_t b \n" +
+                "    on a.district_code = b.district_code and b.year = year(current_date())\n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatalog_map_t c \n" +
+                "    on b.id = c.gp_catalog_id and a.category_id = c.prd_catalog_node_id and c.is_deprecated = 0\n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatalog_node_t d \n" +
+                "    on c.gp_catalog_node_id = d.node_id and d.is_deprecated = 0\n" +
+                " where a.layer != 125\n" +
+                " \n" +
+                " union all\n" +
+                " \n" +
+                "select a.id, \n" +
+                "       a.layer, \n" +
+                "       a.category_id, \n" +
+                "       a.district_code, \n" +
+                "       d.id                                 as node_id, \n" +
+                "       d.code                               as ca_code, \n" +
+                "       d.name                               as ca_name, \n" +
+                "       d.type_code                          as is_central\n" +
+                "  from dim.dim_item_sales_district a \n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatlog_t b \n" +
+                "    on a.district_code = b.district_code and b.year = year(current_date())\n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatalog_map_t c \n" +
+                "    on b.id = c.gp_catalog_id and a.category_id = c.prd_catalog_node_id and c.is_deprecated = 0\n" +
+                "  left join ods_db_gpcatalog.sync_zcy_gpcatalog_node_t d \n" +
+                "    on c.gp_catalog_node_id = d.node_id and d.is_deprecated = 0\n" +
+                " where a.layer is null\n";
 //        String sql = "ON cs.org_id = gr.grade_org_id\n" +
 //                "WHERE gr.actual_grade_score < 0";
         String[] sqls = sql.split(" |,|--|\n");
@@ -515,8 +561,12 @@ public class JobMigrateManager {
             List<String> strSplitList = Arrays.stream(str.split("ods_|\\.sync_"))
                     .filter(StringUtils::isNotEmpty)
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
+            String newTblName = "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1);
             if (strSplitList.size() == 2) {
-                tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
+                tblNameMap.put(str, newTblName);
+            }
+            else if (strSplitList.size() == 3) {
+                tblNameMap.put(str, newTblName + "ods_" + strSplitList.get(2));
             }
         }
         for (Map.Entry<String, String> values : tblNameMap.entrySet()) {
