@@ -9,6 +9,7 @@ import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sys
 import static com.google.common.base.Preconditions.checkState;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
+@DependsOn("flywayInitializer")
 @Configuration
 public class ClientConfiguration {
 

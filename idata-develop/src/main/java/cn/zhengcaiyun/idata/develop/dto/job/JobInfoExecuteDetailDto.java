@@ -88,7 +88,7 @@ public class JobInfoExecuteDetailDto {
          */
         private String srcReadFilter; // diCondition
         /**
-         * TODO
+         * 替代 srcReadFilter + columns
          */
         private String diQuery;
         /**

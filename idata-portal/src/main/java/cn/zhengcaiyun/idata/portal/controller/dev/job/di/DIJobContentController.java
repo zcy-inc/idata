@@ -20,9 +20,14 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * job-content-controller
@@ -52,6 +57,23 @@ public class DIJobContentController {
     @PostMapping("/contents")
     public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
                                                           @RequestBody DIJobContentContentDto contentDto) {
+        // mapping_sql添加AS columnName
+        List<MappingColumnDto> destCols = contentDto.getDestCols();
+        if (CollectionUtils.isNotEmpty(destCols)) {
+            destCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
+                    .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
+        }
+        List<MappingColumnDto> srcCols = contentDto.getSrcCols();
+        if (CollectionUtils.isNotEmpty(srcCols)) {
+            srcCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS ")
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql().trim(), " "))
+                    .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
+        }
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
     }
 

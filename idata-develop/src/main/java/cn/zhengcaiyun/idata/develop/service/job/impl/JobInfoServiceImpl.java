@@ -363,7 +363,6 @@ public class JobInfoServiceImpl implements JobInfoService {
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
         switch (jobTypeEnum) {
             case DI_BATCH:
-            case DI_STREAM:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);
 
                 // 封装di_job_content
@@ -382,6 +381,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcPassword(srcSourceDetail.getPassword());
                 diResponse.setSrcDbName(srcSourceDetail.getDbName());
                 diResponse.setSrcDriverType(srcSourceDetail.getDriverTypeEnum());
+
+                diResponse.setDiQuery(generateSrcQuery(diResponse.getSrcCols(), diResponse.getSrcReadFilter(), diResponse.getSrcTables(), diResponse.getSrcDbName()));
 
                 // 字段类型转换
                 diResponse.setDestWriteMode(DestWriteModeEnum.valueOf(diJobContent.getDestWriteMode()));
@@ -460,7 +461,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                     sparkResponse.setAppArguments(jarArgs.toString());
                 }
 
-
                 return sparkResponse;
             case KYLIN:
                 JobInfoExecuteDetailDto.KylinDetailJob kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJob(jobInfoExecuteDetailDto);
@@ -496,29 +496,34 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
     }
 
-    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
-        String protocol = null;
-        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
-            protocol = "mysql";
-        } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
-            protocol = "postgresql";
-        } else if (DataSourceTypeEnum.presto == sourceTypeEnum) {
-            protocol = "presto";
-        } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
-            protocol = "hive2";
+    /**
+     * 生成src query
+     * @param mappingColumnList
+     * @param srcReadFilter
+     * @param srcTables
+     * @return
+     */
+    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables, String srcDbName) {
+        if (CollectionUtils.isEmpty(mappingColumnList)) {
+            return null;
         }
-        if (StringUtils.isEmpty(protocol)) return null;
-
-        String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
-        return jdbcUrl;
-    }
-
-    private List<String> getHdfsPath(String udfIds) {
-        if (StringUtils.isNotBlank(udfIds)) {
-            List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
-            return devJobUdfMyDao.getConcatHdfsPath(idList);
+        boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
+        if (!generate) {
+            return null;
         }
-        return null;
+
+        List<String> columns = mappingColumnList.stream().map(e -> {
+            String name = e.getName();
+            String mappingSql = e.getMappingSql();
+            return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
+        }).collect(Collectors.toList());
+
+        String selectColumns = StringUtils.join(columns, ",");
+        String srcQuery = String.format("select %s from %s.%s ", selectColumns, srcDbName, srcTables);
+        if (StringUtils.isNotEmpty(srcReadFilter)) {
+            srcQuery += (" where " + srcReadFilter);
+        }
+        return srcQuery;
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

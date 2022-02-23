@@ -68,7 +68,7 @@ const HadoopPanel: FC<HadoopPanelProps> = (props) => {
       },
     }
   ];
-  const upLoadProps: () => UploadProps = () => {
+  const createUpLoadProps: () => UploadProps = () => {
     const action = getRequestUrl('/api/p1/sys/xmlConfigValue')
 
     return {
@@ -111,13 +111,15 @@ const HadoopPanel: FC<HadoopPanelProps> = (props) => {
           }),
         }}
         toolBarRender={() => {
-          return [
+          //TODO 待完善
+            const upLoadProps= createUpLoadProps()
+          return (
             <Upload {...upLoadProps}>
               <Tooltip placement="topLeft" title="仅支持上传xml文件">
                 <Button icon={<UploadOutlined />}>上传文件</Button>
               </Tooltip>
-            </Upload>,
-          ];
+            </Upload>
+          );
         }}
         editable={{
           type: 'multiple',
