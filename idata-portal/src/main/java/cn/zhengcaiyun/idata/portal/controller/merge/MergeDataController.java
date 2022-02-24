@@ -72,9 +72,47 @@ public class MergeDataController {
     private ModifyDIJobNameService modifyDIJobNameService;
     @Autowired
     private MergeDataRequestLimiter mergeDataRequestLimiter;
+    @Autowired
+    private DatapiSQLChangeService datapiSQLChangeService;
 
     @GetMapping("/data")
-    public void mergeData(@RequestParam String mergeModules, HttpServletResponse response) {
+    public void handleMerge(@RequestParam String mergeModules,
+                            @RequestParam String datapiIds,
+                            HttpServletResponse response) {
+        if (StringUtils.isNotBlank(mergeModules)) {
+            mergeData(mergeModules, response);
+        } else if (StringUtils.isNotBlank(datapiIds)) {
+            changeDatapiSql(datapiIds, response);
+        } else {
+            throw new BizProcessException("需要指定迁移模块：" + Joiner.on(",").join(MigrateItemEnum.values()));
+        }
+    }
+
+    public void changeDatapiSql(String datapiIds,
+                                HttpServletResponse response) {
+        List<MigrateResultDto> resultDtoList = datapiSQLChangeService.change(datapiIds);
+        if (CollectionUtils.isEmpty(resultDtoList))
+            return;
+
+        SXSSFWorkbook workbook = downloadAsExcel(resultDtoList);
+        String fileName = "change_datapi_data_" + System.currentTimeMillis();
+        try {
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-disposition", String.format("attachment;filename=%s.xlsx",
+                    new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
+            ServletOutputStream sos = response.getOutputStream();
+            workbook.write(sos);
+            sos.flush();
+            sos.close();
+            response.flushBuffer();
+            workbook.dispose();
+        } catch (IOException ex) {
+            LOGGER.warn("exportLabelResultData failed. ex: {}.", ex);
+        }
+    }
+
+    public void mergeData(String mergeModules,
+                          HttpServletResponse response) {
         if (StringUtils.isBlank(mergeModules))
             throw new BizProcessException("需要指定迁移模块：" + Joiner.on(",").join(MigrateItemEnum.values()));
         List<String> modules = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(mergeModules);

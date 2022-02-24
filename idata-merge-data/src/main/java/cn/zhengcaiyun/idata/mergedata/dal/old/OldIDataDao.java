@@ -20,6 +20,8 @@ import cn.zhengcaiyun.idata.mergedata.util.PgStringArrayJsonSerializer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zaxxer.hikari.HikariConfig;
@@ -147,5 +149,31 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
 
     public List<Map<String, Object>> selectList(String sql) {
         return oldJdbcTemplate.queryForList(sql);
+    }
+
+    public int changeDatapiSql(JSONObject oldDatapiCfg) {
+        String sql = "INSERT INTO idata.api_config (" +
+                "creator, " +
+                "editor, " +
+                "api_id, " +
+                "sql_template, " +
+                "limit_count, " +
+                "excel_template, " +
+                "version, " +
+                "edit_enable, " +
+                "status, " +
+                "datasource_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return oldJdbcTemplate.update(sql,
+                Strings.nullToEmpty(oldDatapiCfg.getString("creator")),
+                "改表名",
+                oldDatapiCfg.getLong("api_id"),
+                oldDatapiCfg.getString("destSql"),
+                oldDatapiCfg.getInteger("limit_count"),
+                oldDatapiCfg.getString("excel_template"),
+                MoreObjects.firstNonNull(oldDatapiCfg.getShort("version"), 0).shortValue() + 1,
+                oldDatapiCfg.getBoolean("edit_enable"),
+                "{DRAFT}",
+                oldDatapiCfg.getLong("datasource_id"));
     }
 }
