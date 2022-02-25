@@ -163,14 +163,14 @@ public class OldIDataDao implements InitializingBean, DisposableBean {
                 "edit_enable, " +
                 "status, " +
                 "datasource_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?::json, ?, ?, ?::character varying[], ?)";
         return oldJdbcTemplate.update(sql,
                 Strings.nullToEmpty(oldDatapiCfg.getString("creator")),
                 "改表名",
                 oldDatapiCfg.getLong("api_id"),
                 oldDatapiCfg.getString("destSql"),
                 oldDatapiCfg.getInteger("limit_count"),
-                oldDatapiCfg.getString("excel_template"),
+                oldDatapiCfg.getJSONObject("excel_template").getJSONObject("value").toJSONString(),
                 MoreObjects.firstNonNull(oldDatapiCfg.getShort("version"), 0).shortValue() + 1,
                 oldDatapiCfg.getBoolean("edit_enable"),
                 "{DRAFT}",
