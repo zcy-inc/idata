@@ -3,11 +3,13 @@ import { ModalForm } from '@ant-design/pro-form';
 import { Form, Input, message, Select } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
+import { CreateDIJobDto } from '@/types/datadev';
 import styles from './index.less';
 
-import { createTask, getEnumValues, getFolders, getTaskTypes } from '@/services/datadev';
-import { FolderBelong, TaskCategory } from '@/constants/datadev';
-import { Folder, TaskType } from '@/types/datadev';
+import { getEnumValues, getFolders, createDIJob } from '@/services/datadev';
+import { useDIJobTypeOptions, useDISyncModeOptions } from '@/hooks/datadev';
+import { FolderBelong } from '@/constants/datadev';
+import { Folder } from '@/types/datadev';
 
 interface CreateTaskProps {}
 
@@ -17,7 +19,6 @@ const width = 300;
 const rules = [{ required: true, message: '请选择' }];
 
 const CreateTask: FC<CreateTaskProps> = ({}) => {
-  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [form] = Form.useForm();
@@ -26,11 +27,20 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     setVisibleTask: _.setVisibleTask,
     getTreeWrapped: _.getTreeWrapped,
   }));
+  const [jobTypeOptions] = useDIJobTypeOptions();
+  const [syncModeOptions] = useDISyncModeOptions();
+  const handleCreateDI = async (values: CreateDIJobDto) => {
+    const { success, msg } = await createDIJob(values);
+    if (success) {
+      message.success('创建任务成功');
+      setVisibleTask(false);
+      getTreeWrapped();
+    } else {
+      message.success(`创建任务失败: ${msg}`);
+    }
+  };
 
   useEffect(() => {
-    getTaskTypes({ catalog: TaskCategory.DI })
-      .then((res) => setTaskTypes(res.data))
-      .catch((err) => {});
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
       .catch((err) => {});
@@ -58,36 +68,24 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
         submitButtonProps: { size: 'large' },
         resetButtonProps: { size: 'large' },
       }}
-      onFinish={async (values) => {
-        createTask(values)
-          .then((res) => {
-            if (res.success) {
-              message.success('创建任务成功');
-              setVisibleTask(false);
-              getTreeWrapped();
-            } else {
-              message.success(`创建任务失败: ${res.msg}`);
-            }
-          })
-          .catch((err) => {});
-      }}
+      onFinish={handleCreateDI}
     >
-      <Item name="1" label="任务类型" rules={rules}>
+      <Item name="jobType" label="任务类型" rules={rules}>
         <Select
           size="large"
           style={{ width }}
           placeholder="请选择"
-          options={taskTypes.map((_) => ({ label: _.name, value: _.code }))}
+          options={jobTypeOptions}
           showSearch
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="jobType" label="同步类型" rules={rules}>
+      <Item name="syncMode" label="同步类型" rules={rules}>
         <Select
           size="large"
           style={{ width }}
           placeholder="请选择"
-          options={taskTypes.map((_) => ({ label: _.name, value: _.code }))}
+          options={syncModeOptions}
           showSearch
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />

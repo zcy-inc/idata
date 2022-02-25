@@ -21,6 +21,7 @@ import type {
   DependenceTreeNode,
   TaskHistoryItem,
   UDF,
+  CreateDIJobDto,
 } from '@/types/datadev';
 import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
@@ -925,4 +926,35 @@ export async function getUDFList() {
   return request<DefaultResponse & { data: UDF[] }>('/api/p1/dev/udfs', {
     method: 'GET',
   });
+}
+
+/**
+ * 获取DI任务类型下拉列表
+ */
+export async function getDIJobTypes() {
+  return request<Tresponse<{ name: string; value: string }[]>>(
+    '/api/p1/dev/jobs/di/meta/job-type',
+    {
+      method: 'GET',
+    },
+  ).then(({ data = [] }) => data.map(({ name, value }) => ({ label: name, value })));
+}
+
+/**
+ * 获取DI同步类型下拉列表
+ */
+export async function getDISyncMode() {
+  return request<Tresponse<{ name: string; value: string }[]>>(
+    '/api/p1/dev/jobs/di/meta/sync-mode',
+    {
+      method: 'GET',
+    },
+  ).then(({ data = [] }) => data.map(({ name, value }) => ({ label: name, value })));
+}
+
+/**
+ * 新增DI
+ */
+export async function createDIJob(data: CreateDIJobDto) {
+  return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
 }

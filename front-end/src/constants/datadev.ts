@@ -38,6 +38,16 @@ export enum TaskCategory {
   SQL = 'SQL',
 }
 
+export enum DIJobType {
+  DI = 'DI',
+  BACK_FLOW = 'BACK_FLOW',
+}
+
+export enum DISyncMode {
+  BATCH = 'BATCH',
+  STREAM = 'STREAM',
+}
+
 export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步

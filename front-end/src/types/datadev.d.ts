@@ -12,6 +12,8 @@ import {
   SchTimeOutStrategy,
   SchPriority,
   JobStatus,
+  DIJobType,
+  DISyncMode,
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -266,4 +268,13 @@ export interface UDF {
   udfSample: string;
   udfType: string;
   id?: number;
+}
+
+export interface CreateDIJobDto {
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  remark?: string;
 }
