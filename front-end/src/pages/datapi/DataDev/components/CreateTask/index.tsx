@@ -28,7 +28,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     getTreeWrapped: _.getTreeWrapped,
   }));
   const [jobTypeOptions] = useDIJobTypeOptions();
-  const [syncModeOptions] = useDISyncModeOptions();
+  const { options: syncModeOptions, getOptions: getSyncModeOptions } = useDISyncModeOptions();
+
   const handleCreateDI = async (values: CreateDIJobDto) => {
     const { success, msg } = await createDIJob(values);
     if (success) {
@@ -78,6 +79,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           options={jobTypeOptions}
           showSearch
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
+          onChange={getSyncModeOptions}
         />
       </Item>
       <Item name="syncMode" label="同步类型" rules={rules}>
