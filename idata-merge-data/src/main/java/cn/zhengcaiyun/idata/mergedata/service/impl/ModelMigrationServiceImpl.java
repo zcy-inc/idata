@@ -87,13 +87,13 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         LOGGER.info("*** *** 业务过程数据迁移完成... ... *** ***");
         // 同步表和字段
         LOGGER.info("*** *** 开始数仓设计数据迁移... ... *** ***");
-        List<String> errorTableNameList = syncTables();
-        if (ObjectUtils.isEmpty(errorTableNameList)) {
-            LOGGER.info("*** *** 数仓设计数据迁移完成... ... *** ***");
-        }
-        else {
-            LOGGER.info("*** *** 数仓设计同步有误表名： " + String.join(",", errorTableNameList));
-        }
+        syncTables();
+//        if (ObjectUtils.isEmpty(errorTableNameList)) {
+//            LOGGER.info("*** *** 数仓设计数据迁移完成... ... *** ***");
+//        }
+//        else {
+//            LOGGER.info("*** *** 数仓设计同步有误表名： " + String.join(",", errorTableNameList));
+//        }
         // 同步表外键
         LOGGER.info("*** *** 开始外键数据迁移... ... *** ***");
         syncForeignKeys();
@@ -123,7 +123,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
         return enumService.createOrEdit(enumDto, "系统管理员");
     }
 
-    private List<String> syncTables() {
+    private boolean syncTables() {
         List<Map<String, Object>> tableList = dwMetaService.getTables(null);
         List<Map<String, Object>> columnList = dwMetaService.getColumns();
         Map<String, String> userMap = dwMetaService.getUsers();
@@ -190,6 +190,7 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
             List<LabelDto> tableLabels = new ArrayList<>();
             for (Map.Entry<String, Object> entry : tableRecord.entrySet()) {
                 LabelDto tableLabel = new LabelDto();
+                tableLabel.setTableName((String) tableRecord.get("tbl_name"));
                 String colKey = entry.getKey();
                 if ("db_name".equals(colKey) && tableRecord.get("db_name") != null) {
                     tableLabel.setLabelCode("dbName:LABEL");
@@ -275,7 +276,14 @@ public class ModelMigrationServiceImpl implements ModelMigrationService {
                 errorTableNameList.remove(tableInfoDto.getTableName());
             } catch (IllegalAccessException ignore) {}
         }
-        return errorTableNameList;
+
+        if (ObjectUtils.isEmpty(errorTableNameList)) {
+            LOGGER.info("*** *** 数仓设计数据迁移完成... ... *** ***");
+        }
+        else {
+            LOGGER.info("*** *** 数仓设计同步有误表名： " + String.join(",", errorTableNameList));
+        }
+        return ObjectUtils.isEmpty(errorTableNameList);
     }
 
     private String syncSecurityLevel(String securityLevel) {
