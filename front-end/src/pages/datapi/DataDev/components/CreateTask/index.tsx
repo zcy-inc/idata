@@ -41,6 +41,11 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     }
   };
 
+  const hanldeChangeDIType = (val: string) => {
+    form.resetFields(['syncMode']);
+    getSyncModeOptions(val);
+  };
+
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
@@ -79,7 +84,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           options={jobTypeOptions}
           showSearch
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-          onChange={getSyncModeOptions}
+          onChange={hanldeChangeDIType}
         />
       </Item>
       <Item name="syncMode" label="同步类型" rules={rules}>
