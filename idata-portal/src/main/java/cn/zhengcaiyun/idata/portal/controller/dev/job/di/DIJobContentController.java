@@ -18,20 +18,15 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
-import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
-import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentContentRequest;
-import cn.zhengcaiyun.idata.portal.model.request.job.GenerateMergeSqlRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentRequest;
+import cn.zhengcaiyun.idata.portal.model.response.job.DIJobContentResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * job-content-controller
@@ -60,22 +55,51 @@ public class DIJobContentController {
      */
     @PostMapping("/contents")
     public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody DIJobContentContentRequest contentRequest) {
+                                                          @RequestBody DIJobContentRequest contentRequest) {
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
         return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
     }
 
     /**
-     * 获取DI作业内容
+     * 适配获取DI作业内容
      *
      * @param jobId   作业id
      * @param version 作业版本号
      * @return
      */
-    @GetMapping("/contents/{version}")
-    public RestResult<DIJobContentContentDto> getContent(@PathVariable("jobId") Long jobId,
-                                                         @PathVariable("version") Integer version) {
-        return RestResult.success(diJobContentService.get(jobId, version));
+    @GetMapping("/adapt/contents/{version}")
+    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
+        DIJobContentContentDto diJobContentContentDto = diJobContentService.get(jobId, version);
+
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(diJobContentContentDto, response);
+
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        JobTypeEnum jobType = diJobContentContentDto.getJobType();
+        switch (jobType) {
+            case DI_STREAM:
+                response.setJobTypeDesc("集成");
+                response.setSyncModeDesc("实时");
+                break;
+            case DI_BATCH:
+                response.setJobTypeDesc("集成");
+                response.setSyncModeDesc("离线");
+                break;
+            case BACK_FLOW_STREAM:
+                response.setJobTypeDesc("回流");
+                response.setSyncModeDesc("实时");
+                break;
+            case BACK_FLOW_BATCH:
+                response.setJobTypeDesc("回流");
+                response.setSyncModeDesc("离线");
+                break;
+        }
+
+        // 映射转换
+        return RestResult.success(response);
     }
+
+
 }

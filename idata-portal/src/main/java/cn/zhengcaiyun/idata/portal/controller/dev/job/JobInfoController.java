@@ -27,13 +27,17 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,6 +125,35 @@ public class JobInfoController {
      */
     @PostMapping
     public RestResult<JobInfoDto> addJobInfo(@RequestBody JobInfoDto jobInfoDto) throws IllegalAccessException {
+        Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
+
+        return getJobInfo(id);
+    }
+
+    /**
+     * 新增DI作业接口
+     * 由于DI前端下拉和数据库模型映射不一致，需要做额外转换，所以单独addJobInfo()拉出一个接口
+     * @return
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/di")
+    public RestResult<JobInfoDto> addDIJobInfo(@RequestBody DIJobInfoAddRequest request) throws IllegalAccessException {
+        JobInfoDto jobInfoDto = new JobInfoDto();
+        BeanUtils.copyProperties(request, jobInfoDto);
+
+        String jobType = request.getJobType();
+        String syncMode = request.getSyncMode();
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        Table<String, String, JobTypeEnum> table = HashBasedTable.create();
+        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW_BATCH);
+        table.put("BACK_FLOW", "STREAM", JobTypeEnum.BACK_FLOW_STREAM);
+        table.put("DI", "BATCH", JobTypeEnum.DI_BATCH);
+        table.put("DI", "STREAM", JobTypeEnum.DI_STREAM);
+
+        // 映射成数据库的jobType
+        jobInfoDto.setJobType(table.get(jobType, syncMode));
+
         Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
         if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
 

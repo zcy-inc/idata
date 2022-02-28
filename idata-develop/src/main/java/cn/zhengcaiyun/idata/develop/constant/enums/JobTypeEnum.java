@@ -32,15 +32,16 @@ import java.util.Optional;
  * @create: 2021-09-23 10:28
  **/
 public enum JobTypeEnum {
-    DI_BATCH("DI_BATCH", "DI", "离线同步", "", ""),
-    DI_STREAM("DI_STREAM", "DI", "实时同步", "", ""),
+    DI_BATCH("DI_BATCH", "DI", "数据抽取-离线", "", ""),
+    DI_STREAM("DI_STREAM", "DI", "数据抽取-实时", "", ""),
+    BACK_FLOW_BATCH("BACK_FLOW_BATCH", "DI", "数据回流-离线", "", ""),
+    BACK_FLOW_STREAM("BACK_FLOW_STREAM", "DI", "数据回流-实时", "", ""),
     SQL_SPARK("SQL_SPARK", "SQL", "Sql作业", "SQL", "SPARK"),
     SPARK_PYTHON("SPARK_PYTHON", "SPARK", "Spark作业", "PYTHON", "SPARK"),
     SPARK_JAR("SPARK_JAR", "SPARK", "Spark作业", "JAR", "SPARK"),
     SCRIPT_PYTHON("SCRIPT_PYTHON", "SCRIPT", "Script作业", "PYTHON", ""),
     SCRIPT_SHELL("SCRIPT_SHELL", "SCRIPT", "Script作业", "SHELL", ""),
     KYLIN("KYLIN", "KYLIN", "Kylin作业", "", "KYLIN"),
-    BACK_FLOW("BACK_FLOW", "BACK_FLOW", "回流作业", "", "BACK_FLOW");
     ;
 
     private final String code;

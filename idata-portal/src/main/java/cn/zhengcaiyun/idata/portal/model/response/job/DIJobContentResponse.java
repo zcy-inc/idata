@@ -1,19 +1,43 @@
-package cn.zhengcaiyun.idata.portal.model.request.job;
+package cn.zhengcaiyun.idata.portal.model.response.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @description:
- * @author: yangjianhua
- * @create: 2021-09-23 11:20
- **/
-public class DIJobContentContentRequest extends JobContentBaseDto {
+public class DIJobContentResponse {
+
+    private Long id;
+    private Long jobId;
+    private Integer editable;
+    private Integer version;
+    /**
+     * 作业描述：数据集成/数据回流
+     */
+    private String jobTypeDesc;
+    /**
+     * 作业类型code：DI/BACK_FLOW
+     *
+     */
+    private String jobTypeCode;
+    /**
+     * 同步方式描述 实时/离线
+     */
+    private String syncModeDesc;
+
+    /**
+     * jobType枚举，历史保留
+     */
+    private JobTypeEnum jobType;
+
     /**
      * 作业版本号描述
      */
@@ -110,6 +134,11 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
     private String direct;
 
     /**
+     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
+     */
+    private String srcQuery;
+
+    /**
      *   来源为kafka数据类型的topic
      */
     private String srcTopic;
@@ -142,8 +171,7 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
     /**
      *   配置模式，1：可视化模式，2：脚本模式
      */
-   @NotNull(message = "配置模式不能为空")
-   private Integer configMode;
+    private Integer configMode;
 
     /**
      *   多分片写入（并行度）
@@ -164,6 +192,54 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
      *   目标库中间件的内置属性
      */
     private Map<String, String> destPropertyMap;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
+    }
+
+    public Integer getEditable() {
+        return editable;
+    }
+
+    public void setEditable(Integer editable) {
+        this.editable = editable;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public String getSyncModeDesc() {
+        return syncModeDesc;
+    }
+
+    public void setSyncModeDesc(String syncModeDesc) {
+        this.syncModeDesc = syncModeDesc;
+    }
+
+    public String getJobTypeDesc() {
+        return jobTypeDesc;
+    }
+
+    public void setJobTypeDesc(String jobTypeDesc) {
+        this.jobTypeDesc = jobTypeDesc;
+    }
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;
@@ -317,6 +393,14 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
         this.direct = direct;
     }
 
+    public String getSrcQuery() {
+        return srcQuery;
+    }
+
+    public void setSrcQuery(String srcQuery) {
+        this.srcQuery = srcQuery;
+    }
+
     public String getSrcTopic() {
         return srcTopic;
     }
@@ -389,14 +473,6 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
         this.destBulkNum = destBulkNum;
     }
 
-    public ScriptMergeSqlParamDto getScriptMergeSqlParam() {
-        return scriptMergeSqlParamDto;
-    }
-
-    public void setScriptMergeSqlParam(ScriptMergeSqlParamDto scriptMergeSqlParamDto) {
-        this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
-    }
-
     public ScriptMergeSqlParamDto getScriptMergeSqlParamDto() {
         return scriptMergeSqlParamDto;
     }
@@ -411,5 +487,21 @@ public class DIJobContentContentRequest extends JobContentBaseDto {
 
     public void setDestPropertyMap(Map<String, String> destPropertyMap) {
         this.destPropertyMap = destPropertyMap;
+    }
+
+    public JobTypeEnum getJobType() {
+        return jobType;
+    }
+
+    public void setJobType(JobTypeEnum jobType) {
+        this.jobType = jobType;
+    }
+
+    public String getJobTypeCode() {
+        return jobTypeCode;
+    }
+
+    public void setJobTypeCode(String jobTypeCode) {
+        this.jobTypeCode = jobTypeCode;
     }
 }
