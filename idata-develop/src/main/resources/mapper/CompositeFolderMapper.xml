@@ -4,6 +4,11 @@
 
     <select id="selectByName" resultType="cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder">
         select * from dev_composite_folder
-        where name like CONCAT(#{folderName}, '%')
+        <where>
+            name like CONCAT(#{folderName}, '%')
+            <if test="belong != null">
+                and belong = #{belong}
+            </if>
+        </where>
     </select>
 </mapper>

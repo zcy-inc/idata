@@ -9,5 +9,5 @@ public interface CompositeFolderMyDao {
      * @param folderName
      * @return
      */
-    CompositeFolder selectByName(String folderName);
+    CompositeFolder selectByName(String folderName, String belong);
 }
