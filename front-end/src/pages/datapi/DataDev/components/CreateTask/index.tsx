@@ -66,13 +66,23 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
               setVisibleTask(false);
               getTreeWrapped();
             } else {
-              message.success(`创建任务失败：${res.msg}`);
+              message.success(`创建任务失败: ${res.msg}`);
             }
           })
           .catch((err) => {});
       }}
     >
-      <Item name="jobType" label="任务类型" rules={rules}>
+      <Item name="1" label="任务类型" rules={rules}>
+        <Select
+          size="large"
+          style={{ width }}
+          placeholder="请选择"
+          options={taskTypes.map((_) => ({ label: _.name, value: _.code }))}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
+        />
+      </Item>
+      <Item name="jobType" label="同步类型" rules={rules}>
         <Select
           size="large"
           style={{ width }}

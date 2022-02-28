@@ -27,6 +27,8 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
+import ScriptMapping from './components/ScriptMapping';
+import SwitchTab from './components/SwitchTab';
 import {
   SrcReadMode,
   DestWriteMode,
@@ -54,11 +56,11 @@ const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
 const RefreshSelect: FC<{
-  srcTables: TaskTable[];
-  getTaskTableColumnsWrapped: () => void;
+  options: TaskTable[];
+  onRefresh: () => void;
   value?: string[];
   onChange?: (value: string[]) => void;
-}> = ({ srcTables, getTaskTableColumnsWrapped, value, onChange }) => {
+}> = ({ options, onRefresh, value, onChange }) => {
   return (
     <>
       <Select
@@ -66,7 +68,7 @@ const RefreshSelect: FC<{
         mode="multiple"
         style={{ maxWidth, minWidth }}
         placeholder="请选择"
-        options={srcTables.map((_) => ({ label: _.tableName, value: _.tableName }))}
+        options={options.map((_) => ({ label: _.tableName, value: _.tableName }))}
         value={value}
         onChange={onChange}
         optionFilterProp="label"
@@ -76,10 +78,12 @@ const RefreshSelect: FC<{
           return label.indexOf(input) >= 0;
         }}
       />
-      <a className={styles.refresh} onClick={getTaskTableColumnsWrapped}></a>
+      <a className={styles.refresh} onClick={onRefresh}></a>
     </>
   );
 };
+
+type MapType = 'visual' | 'script';
 
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
@@ -97,6 +101,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [mapType, setMapType] = useState<MapType>('script');
 
   const [srcForm] = Form.useForm();
   const [destForm] = Form.useForm();
@@ -177,6 +182,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         };
         getDataSourceListWrapped(srcData.srcDataSourceType, 'src');
         getDataSourceListWrapped(destData.destDataSourceType, 'dest');
+        /* ===== */
+        getTaskTablesWrapped(r.data.srcDataSourceId);
+        /* ===== */
         srcForm.setFieldsValue(srcData);
         destForm.setFieldsValue(destData);
         setData(r.data);
@@ -348,6 +356,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
+  const switchTabConfirm = (v: MapType) =>
+    confirm({
+      title: '提示',
+      content: '您确定要转化为脚本模式吗? 转化将不保存之前操作!',
+      onOk: () => setMapType(v),
+    });
+
   return (
     <>
       <div className={styles.task}>
@@ -414,10 +429,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 />
               </Item>
               <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
-                <RefreshSelect
-                  srcTables={srcTables}
-                  getTaskTableColumnsWrapped={getTaskTableColumnsWrapped}
-                />
+                <RefreshSelect options={srcTables} onRefresh={getTaskTableColumnsWrapped} />
               </Item>
               {/* 这个位置放动态增删的表单，后续版本有需要可以从 ./FormList 里复制 */}
               <Item name="srcReadFilter" label="数据过滤">
@@ -481,7 +493,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 />
               </Item>
               <Item name="destTable" label="表" rules={ruleText}>
-                <Input size="large" style={{ maxWidth, minWidth }} placeholder="请选择" />
+                <RefreshSelect options={[]} onRefresh={() => {}} />
               </Item>
               <Item name="destBeforeWrite" label="导入前准备语句">
                 <TextArea
@@ -520,14 +532,25 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               >
                 复制来源表
               </Button>
-              <Button className="normal" onClick={onCancelMapping}>
-                取消映射
-              </Button>
-              <Button onClick={onEponymousMapping}>同名映射</Button>
+              <SwitchTab value={mapType} onChange={switchTabConfirm} />
             </Space>
           </div>
         </Title>
-        <Mapping ref={mapRef} data={{ srcColumns, destColumns }} />
+        {mapType === 'visual' ? (
+          <div style={{ position: 'relative' }}>
+            <Space style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+              <Button className="normal" onClick={onCancelMapping}>
+                取消映射
+              </Button>
+              <Button className="normal" onClick={onEponymousMapping}>
+                同名映射
+              </Button>
+            </Space>
+            <Mapping ref={mapRef} data={{ srcColumns, destColumns }} />
+          </div>
+        ) : (
+          <ScriptMapping />
+        )}
         <DrawerBasic
           visible={visibleBasic}
           onClose={() => setVisibleBasic(false)}
