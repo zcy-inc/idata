@@ -367,10 +367,34 @@ public class JobInfoServiceImpl implements JobInfoService {
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
         switch (jobTypeEnum) {
             case BACK_FLOW:
-                // Doris  非 doris 目标数据源是否是doris
+                JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
+                backFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                backFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
 
+                // 封装di_job_content
+                DIJobContent bfJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
+                checkArgument(Objects.nonNull(bfJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
 
-                return null;
+                BeanUtils.copyProperties(bfJobContent, backFlowResponse);
+
+//                backFlowResponse.setUpdateKey(bfJobOutput.getJobTargetTablePk());
+//                backFlowResponse.setDestWriteMode(JobWriteModeEnum.valueOf(bfJobOutput.getDestWriteMode()));
+//
+//                // 根据回流启用模式，填充数据
+//                if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
+//                    backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
+//                } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
+//                    backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
+//                }
+//                backFlowResponse.setParallelism(bfJobContent.getSrcShardingNum());
+//
+//                // 封装连接信息
+//                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobOutput.getDestDataSourceId());
+//                backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
+//                backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
+//                backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
+//                backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+                return backFlowResponse;
             case DI_BATCH:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);
 
@@ -427,24 +451,24 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 额外判断：旧版idata中sql作业中涉及回流作业，htool对回流作业处理不一样
                 DataSourceDto dataSource = dataSourceApi.getDataSource(jobOutput.getDestDataSourceId());
                 if (!StringUtils.equalsIgnoreCase(dataSource.getType().name(), "hive")) {
-                    JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
-                    backFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
-                    backFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
+                    JobInfoExecuteDetailDto.BackFlowDetailDto oldBackFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
+                    oldBackFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                    oldBackFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
 
-                    BeanUtils.copyProperties(contentSql, backFlowResponse);
-                    BeanUtils.copyProperties(jobOutput, backFlowResponse);
-                    backFlowResponse.setUdfList(udfList);
+                    BeanUtils.copyProperties(contentSql, oldBackFlowResponse);
+                    BeanUtils.copyProperties(jobOutput, oldBackFlowResponse);
+                    oldBackFlowResponse.setUdfList(udfList);
 
                     // 封装连接信息
                     DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId());
-                    backFlowResponse.setSrcSql(contentSql.getSourceSql());
-                    backFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
-                    backFlowResponse.setDestUserName(destSourceDetail.getUserName());
-                    backFlowResponse.setDestPassword(destSourceDetail.getPassword());
-                    backFlowResponse.setDestWriteMode(writeModeEnum);
-                    backFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
-                    backFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
-                    return backFlowResponse;
+                    oldBackFlowResponse.setSrcSql(contentSql.getSourceSql());
+                    oldBackFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
+                    oldBackFlowResponse.setDestUserName(destSourceDetail.getUserName());
+                    oldBackFlowResponse.setDestPassword(destSourceDetail.getPassword());
+                    oldBackFlowResponse.setDestWriteMode(writeModeEnum);
+                    oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
+                    oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+                    return oldBackFlowResponse;
                 }
 
                 JobInfoExecuteDetailDto.SqlJobDetailsDto sqlResponse = new JobInfoExecuteDetailDto.SqlJobDetailsDto(jobInfoExecuteDetailDto);

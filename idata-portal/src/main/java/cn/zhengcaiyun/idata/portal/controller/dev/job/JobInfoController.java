@@ -201,16 +201,16 @@ public class JobInfoController {
         JobTypeEnum jobType = jobInfo.getJobType();
         switch (jobType) {
             case DI_STREAM:
-                response.setJobTypeDesc("抽取");
-                response.setSyncModeDesc("实时");
+                response.setJobType("DI");
+                response.setSyncMode("STREAM");
                 break;
             case DI_BATCH:
-                response.setJobTypeDesc("抽取");
-                response.setSyncModeDesc("离线");
+                response.setJobType("DI");
+                response.setSyncMode("BATCH");
                 break;
             case BACK_FLOW:
-                response.setJobTypeDesc("回流");
-                response.setSyncModeDesc("离线");
+                response.setJobType("BACK_FLOW");
+                response.setSyncMode("BATCH");
                 break;
         }
         return RestResult.success(response);

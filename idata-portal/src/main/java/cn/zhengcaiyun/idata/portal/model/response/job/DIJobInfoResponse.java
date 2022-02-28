@@ -22,14 +22,16 @@ public class DIJobInfoResponse extends BaseDto {
      * 作业名称
      */
     private String name;
+
     /**
-     * 作业类型
+     * 此处的jobType和JobTypeEnum的name不相同，枚举值为DI/BACK_FLOW
      */
-    private JobTypeEnum jobType;
+    private String jobType;
 
-    private String jobTypeDesc;
-
-    private String syncModeDesc;
+    /**
+     * BATCH/STREAM
+     */
+    private String syncMode;
     /**
      * 数仓分层
      */
@@ -61,14 +63,6 @@ public class DIJobInfoResponse extends BaseDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public JobTypeEnum getJobType() {
-        return jobType;
-    }
-
-    public void setJobType(JobTypeEnum jobType) {
-        this.jobType = jobType;
     }
 
     public String getDwLayerCode() {
@@ -103,19 +97,19 @@ public class DIJobInfoResponse extends BaseDto {
         this.folderId = folderId;
     }
 
-    public String getJobTypeDesc() {
-        return jobTypeDesc;
+    public String getJobType() {
+        return jobType;
     }
 
-    public void setJobTypeDesc(String jobTypeDesc) {
-        this.jobTypeDesc = jobTypeDesc;
+    public void setJobType(String jobType) {
+        this.jobType = jobType;
     }
 
-    public String getSyncModeDesc() {
-        return syncModeDesc;
+    public String getSyncMode() {
+        return syncMode;
     }
 
-    public void setSyncModeDesc(String syncModeDesc) {
-        this.syncModeDesc = syncModeDesc;
+    public void setSyncMode(String syncMode) {
+        this.syncMode = syncMode;
     }
 }

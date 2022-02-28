@@ -81,7 +81,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Integer version = contentDto.getVersion();
 
         // query/mergeSql封装
-        assembleQueryAndMergeSql(contentDto);
+        String jobType = jobInfoOptional.get().getJobType();
+        assembleQueryAndMergeSql(contentDto, jobType);
 
 
         boolean startNewVersion = true;
@@ -122,9 +123,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
      * 封装query和mergesql
      * @param contentDto
      */
-    private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto) {
+    private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
         // 数据回流不拼mergeSql
-        boolean buildMergeSql = DiDirectEnum.IN.equals(DiDirectEnum.valueOf(contentDto.getDirect()));
+        boolean buildMergeSql = StringUtils.containsIgnoreCase(jobType, "DI");
         String destTable = contentDto.getDestTable();
         String srcTables = contentDto.getSrcTables();
         String srcReadFilter = contentDto.getSrcReadFilter();
@@ -160,7 +161,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
                     days = scriptMergeSqlParamDto.getRecentDays();
                 }
-                if (buildMergeSql) {
+                if (buildMergeSql && StringUtils.isNotEmpty(scriptSelectColumns)) {
                     List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
                     String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum, days);
                     contentDto.setScriptMergeSql(scriptMergeSql);

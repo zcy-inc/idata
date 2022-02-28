@@ -350,6 +350,14 @@ public class JobInfoExecuteDetailDto {
         public void setDestPropMap(Map<String, String> destPropMap) {
             this.destPropMap = destPropMap;
         }
+
+        public Integer getParallelism() {
+            return parallelism;
+        }
+
+        public void setParallelism(Integer parallelism) {
+            this.parallelism = parallelism;
+        }
     }
 
     public static class SqlJobDetailsDto extends JobInfoExecuteDetailDto {

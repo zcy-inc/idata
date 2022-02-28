@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -60,7 +61,7 @@ public class DIJobContentController {
      */
     @PostMapping("/contents")
     public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody DIJobContentRequest contentRequest) {
+                                                          @RequestBody @Valid DIJobContentRequest contentRequest) {
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
 
