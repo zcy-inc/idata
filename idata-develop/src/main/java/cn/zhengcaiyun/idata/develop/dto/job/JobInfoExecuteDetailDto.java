@@ -73,11 +73,11 @@ public class JobInfoExecuteDetailDto {
          */
         private SrcReadModeEnum srcReadMode;
         /**
-         *   数据来源-切分键
+         *   数据来源-切分键 srcShardingNum>1 必填
          */
         private String srcReadShardKey;
         /**
-         *   数据来源-分片数量（并行度）
+         *   数据来源-分片数量（并行度） 必填
          */
         private Integer srcShardingNum;
         /**
@@ -89,7 +89,7 @@ public class JobInfoExecuteDetailDto {
          */
         private String srcReadFilter; // diCondition
         /**
-         * TODO
+         * 替代 srcReadFilter + columns
          */
         private String diQuery;
         /**

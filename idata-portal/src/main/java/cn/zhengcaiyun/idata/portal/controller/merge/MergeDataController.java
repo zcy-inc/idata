@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletOutputStream;
@@ -72,9 +71,50 @@ public class MergeDataController {
     private ModifyDIJobNameService modifyDIJobNameService;
     @Autowired
     private MergeDataRequestLimiter mergeDataRequestLimiter;
+    @Autowired
+    private DatapiSQLChangeService datapiSQLChangeService;
 
     @GetMapping("/data")
-    public void mergeData(@RequestParam String mergeModules, HttpServletResponse response) {
+    public void handleMerge(MergeParam mergeParam,
+                            HttpServletResponse response) {
+        if ("merge_data".equals(mergeParam.getType())) {
+            mergeData(mergeParam.getMergeModules(), response);
+            return;
+        }
+        if ("change_api".equals(mergeParam.getType())) {
+            changeDatapiSql(mergeParam.getDatapiIds(), response);
+            return;
+        }
+        throw new BizProcessException("需要指定必要参数");
+    }
+
+    public void changeDatapiSql(String datapiIds,
+                                HttpServletResponse response) {
+        if (StringUtils.isBlank(datapiIds))
+            throw new BizProcessException("需要指定接口id或者all");
+        List<MigrateResultDto> resultDtoList = datapiSQLChangeService.change(datapiIds.trim());
+        if (CollectionUtils.isEmpty(resultDtoList))
+            return;
+
+        SXSSFWorkbook workbook = downloadAsExcel(resultDtoList);
+        String fileName = "change_datapi_data_" + System.currentTimeMillis();
+        try {
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-disposition", String.format("attachment;filename=%s.xlsx",
+                    new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
+            ServletOutputStream sos = response.getOutputStream();
+            workbook.write(sos);
+            sos.flush();
+            sos.close();
+            response.flushBuffer();
+            workbook.dispose();
+        } catch (IOException ex) {
+            LOGGER.warn("exportLabelResultData failed. ex: {}.", ex);
+        }
+    }
+
+    public void mergeData(String mergeModules,
+                          HttpServletResponse response) {
         if (StringUtils.isBlank(mergeModules))
             throw new BizProcessException("需要指定迁移模块：" + Joiner.on(",").join(MigrateItemEnum.values()));
         List<String> modules = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(mergeModules);
@@ -170,6 +210,37 @@ public class MergeDataController {
             cell_2.setCellStyle(cellStyle);
         }
         return workbook;
+    }
+
+    public static class MergeParam {
+        // merge_data, change_api
+        private String type;
+        private String mergeModules;
+        private String datapiIds;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getMergeModules() {
+            return mergeModules;
+        }
+
+        public void setMergeModules(String mergeModules) {
+            this.mergeModules = mergeModules;
+        }
+
+        public String getDatapiIds() {
+            return datapiIds;
+        }
+
+        public void setDatapiIds(String datapiIds) {
+            this.datapiIds = datapiIds;
+        }
     }
 
 }

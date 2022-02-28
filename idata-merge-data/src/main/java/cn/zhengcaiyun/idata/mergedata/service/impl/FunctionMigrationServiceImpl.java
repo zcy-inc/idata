@@ -81,7 +81,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
     }
 
     private Long getMappingFolderId(Long folderId) {
-        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(IdPadTool.padId(folderId + "") + "#_");
+        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(IdPadTool.padId(folderId + "") + "#_", "DEV.FUN");
         if (compositeFolder != null) {
             return compositeFolder.getId();
         }
