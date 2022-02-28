@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
+import java.util.Map;
 
 public class JobInfoExecuteDetailDto {
 
@@ -245,6 +246,7 @@ public class JobInfoExecuteDetailDto {
         private String destAfterWrite;//targetPostfix; 新版本
         private String updateKey; //新版本
         private Integer parallelism; //新版本
+        private Map<String, String> destPropMap; //其余属性定义map
 
         public BackFlowDetailDto() {
         }
@@ -339,6 +341,14 @@ public class JobInfoExecuteDetailDto {
 
         public void setDestAfterWrite(String destAfterWrite) {
             this.destAfterWrite = destAfterWrite;
+        }
+
+        public Map<String, String> getDestPropMap() {
+            return destPropMap;
+        }
+
+        public void setDestPropMap(Map<String, String> destPropMap) {
+            this.destPropMap = destPropMap;
         }
     }
 

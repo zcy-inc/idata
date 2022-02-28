@@ -144,7 +144,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.CREATED, operator);
         jobEventPublisher.whenCreated(eventLog);
 
-        devTreeNodeLocalCache.invalidate(dto.getJobType().belong());
+        FunctionModuleEnum belong = dto.getJobType().belong();
+        if (belong == null && dto.getJobType() == JobTypeEnum.BACK_FLOW) {
+            belong = FunctionModuleEnum.DI;
+        }
+        devTreeNodeLocalCache.invalidate(belong);
         return jobId;
     }
 
@@ -362,6 +366,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
         switch (jobTypeEnum) {
+            case BACK_FLOW:
+                // Doris  非 doris 目标数据源是否是doris
+
+
+                return null;
             case DI_BATCH:
             case DI_STREAM:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);

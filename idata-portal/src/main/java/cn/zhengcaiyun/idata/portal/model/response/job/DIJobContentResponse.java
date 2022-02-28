@@ -20,18 +20,10 @@ public class DIJobContentResponse {
     private Integer editable;
     private Integer version;
     /**
-     * 作业描述：数据集成/数据回流
-     */
-    private String jobTypeDesc;
-    /**
      * 作业类型code：DI/BACK_FLOW
      *
      */
     private String jobTypeCode;
-    /**
-     * 同步方式描述 实时/离线
-     */
-    private String syncModeDesc;
 
     /**
      * jobType枚举，历史保留
@@ -223,22 +215,6 @@ public class DIJobContentResponse {
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public String getSyncModeDesc() {
-        return syncModeDesc;
-    }
-
-    public void setSyncModeDesc(String syncModeDesc) {
-        this.syncModeDesc = syncModeDesc;
-    }
-
-    public String getJobTypeDesc() {
-        return jobTypeDesc;
-    }
-
-    public void setJobTypeDesc(String jobTypeDesc) {
-        this.jobTypeDesc = jobTypeDesc;
     }
 
     public String getSrcDataSourceType() {

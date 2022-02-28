@@ -76,28 +76,6 @@ public class DIJobContentController {
         DIJobContentResponse response = new DIJobContentResponse();
         BeanUtils.copyProperties(diJobContentContentDto, response);
 
-        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
-        JobTypeEnum jobType = diJobContentContentDto.getJobType();
-        switch (jobType) {
-            case DI_STREAM:
-                response.setJobTypeDesc("集成");
-                response.setSyncModeDesc("实时");
-                break;
-            case DI_BATCH:
-                response.setJobTypeDesc("集成");
-                response.setSyncModeDesc("离线");
-                break;
-            case BACK_FLOW_STREAM:
-                response.setJobTypeDesc("回流");
-                response.setSyncModeDesc("实时");
-                break;
-            case BACK_FLOW_BATCH:
-                response.setJobTypeDesc("回流");
-                response.setSyncModeDesc("离线");
-                break;
-        }
-
-        // 映射转换
         return RestResult.success(response);
     }
 

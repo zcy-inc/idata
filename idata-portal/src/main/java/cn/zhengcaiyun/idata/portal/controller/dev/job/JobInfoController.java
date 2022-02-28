@@ -18,7 +18,6 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
@@ -28,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
+import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -146,8 +146,7 @@ public class JobInfoController {
         String syncMode = request.getSyncMode();
         //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
         Table<String, String, JobTypeEnum> table = HashBasedTable.create();
-        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW_BATCH);
-        table.put("BACK_FLOW", "STREAM", JobTypeEnum.BACK_FLOW_STREAM);
+        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW);
         table.put("DI", "BATCH", JobTypeEnum.DI_BATCH);
         table.put("DI", "STREAM", JobTypeEnum.DI_STREAM);
 
@@ -183,6 +182,38 @@ public class JobInfoController {
     @GetMapping("/{id}")
     public RestResult<JobInfoDto> getJobInfo(@PathVariable Long id) {
         return RestResult.success(jobInfoService.getJobInfo(id));
+    }
+
+    /**
+     * 适配获取作业信息
+     *
+     * @param id 作业id
+     * @return
+     */
+    @GetMapping("/di/{id}")
+    public RestResult<DIJobInfoResponse> getDIJobInfo(@PathVariable Long id) {
+        JobInfoDto jobInfo = jobInfoService.getJobInfo(id);
+
+        DIJobInfoResponse response = new DIJobInfoResponse();
+        BeanUtils.copyProperties(jobInfo, response);
+
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        JobTypeEnum jobType = jobInfo.getJobType();
+        switch (jobType) {
+            case DI_STREAM:
+                response.setJobTypeDesc("抽取");
+                response.setSyncModeDesc("实时");
+                break;
+            case DI_BATCH:
+                response.setJobTypeDesc("抽取");
+                response.setSyncModeDesc("离线");
+                break;
+            case BACK_FLOW:
+                response.setJobTypeDesc("回流");
+                response.setSyncModeDesc("离线");
+                break;
+        }
+        return RestResult.success(response);
     }
 
     /**
