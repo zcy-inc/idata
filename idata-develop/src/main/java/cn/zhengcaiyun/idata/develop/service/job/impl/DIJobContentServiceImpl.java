@@ -230,7 +230,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");
 
-        FileReader fileReader = new FileReader("classpath*:template/merge_sql_template.sql");
+        FileReader fileReader = new FileReader("classpath:template/merge_sql_template.sql");
         String mergeSqlTemplate = fileReader.readString();
 
         // 通过SpEL解析

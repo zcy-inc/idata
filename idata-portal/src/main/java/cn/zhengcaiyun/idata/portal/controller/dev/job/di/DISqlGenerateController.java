@@ -20,8 +20,11 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import cn.zhengcaiyun.idata.portal.model.request.job.GenerateMergeSqlRequest;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +52,9 @@ public class DISqlGenerateController {
      */
     @PostMapping("/generate/merge-sql")
     public RestResult<String> defaultMergeSql(@RequestBody @Valid GenerateMergeSqlRequest request) {
-        String destWriteMode = request.getDestWriteMode();
-        DestWriteModeEnum diMode = DestWriteModeEnum.valueOf(destWriteMode);
-        if (diMode != DestWriteModeEnum.append) {
+        System.out.println("merge-sql: " + JSON.toJSONString(request));
+        String srcReadMode = request.getSrcReadMode();
+        if (!StringUtils.equalsIgnoreCase(srcReadMode, SrcReadModeEnum.INC.value)) {
             return RestResult.success("");
         }
         String destTable = request.getDestTable();

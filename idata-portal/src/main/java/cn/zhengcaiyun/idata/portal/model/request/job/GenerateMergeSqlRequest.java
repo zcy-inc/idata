@@ -1,10 +1,6 @@
 package cn.zhengcaiyun.idata.portal.model.request.job;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.validation.annotation.Validated;
-
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 public class GenerateMergeSqlRequest {
 
@@ -37,11 +33,11 @@ public class GenerateMergeSqlRequest {
     /**
      * 写入模式 init/overwrite/append;
      */
-    @NotEmpty(message = "destWriteMode 不能为空")
-    private String destWriteMode;
+    @NotEmpty(message = "srcReadMode 不能为空")
+    private String srcReadMode;
 
     /**
-     * 目标表驱动类型mysql/hive2/postgresql
+     * 数据开源驱动类型mysql/hive2/postgresql
      */
     @NotEmpty(message = "driverType 不能为空")
     private String driverType;
@@ -91,12 +87,12 @@ public class GenerateMergeSqlRequest {
         this.destTable = destTable;
     }
 
-    public String getDestWriteMode() {
-        return destWriteMode;
+    public String getSrcReadMode() {
+        return srcReadMode;
     }
 
-    public void setDestWriteMode(String destWriteMode) {
-        this.destWriteMode = destWriteMode;
+    public void setSrcReadMode(String srcReadMode) {
+        this.srcReadMode = srcReadMode;
     }
 
     public String getDriverType() {
