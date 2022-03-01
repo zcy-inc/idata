@@ -45,12 +45,10 @@ public class DISqlGenerateController {
 
     /**
      * 自动生成mergeSql
-     * @param jobId
      * @return
      */
     @PostMapping("/generate/merge-sql")
-    public RestResult<String> defaultMergeSql(@PathVariable("jobId") Long jobId,
-                                              @RequestBody @Valid GenerateMergeSqlRequest request) {
+    public RestResult<String> defaultMergeSql(@RequestBody @Valid GenerateMergeSqlRequest request) {
         String destWriteMode = request.getDestWriteMode();
         DestWriteModeEnum diMode = DestWriteModeEnum.valueOf(destWriteMode);
         if (diMode != DestWriteModeEnum.append) {

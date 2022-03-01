@@ -134,10 +134,10 @@ public class DIJobContentRequest extends JobContentBaseDto {
      */
     private String scriptMergeSql;
 
-    /**
-     *   脚本模式，同可视化src_query
-     */
-    private String scriptQuery;
+//    /**
+//     *   脚本模式，同可视化src_query
+//     */
+//    private String scriptQuery;
 
     /**
      *   配置模式，1：可视化模式，2：脚本模式
@@ -357,13 +357,13 @@ public class DIJobContentRequest extends JobContentBaseDto {
         this.scriptMergeSql = scriptMergeSql;
     }
 
-    public String getScriptQuery() {
-        return scriptQuery;
-    }
-
-    public void setScriptQuery(String scriptQuery) {
-        this.scriptQuery = scriptQuery;
-    }
+//    public String getScriptQuery() {
+//        return scriptQuery;
+//    }
+//
+//    public void setScriptQuery(String scriptQuery) {
+//        this.scriptQuery = scriptQuery;
+//    }
 
     public Integer getConfigMode() {
         return configMode;
