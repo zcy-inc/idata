@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { ModalForm } from '@ant-design/pro-form';
 import { Form, Input, message, Select } from 'antd';
 import { useModel } from 'umi';
+import { useRequest } from 'ahooks';
 import type { FC } from 'react';
 import { CreateDIJobDto } from '@/types/datadev';
 import styles from './index.less';
 
-import { getEnumValues, getFolders, createDIJob } from '@/services/datadev';
-import { useDIJobTypeOptions, useDISyncModeOptions } from '@/hooks/datadev';
+import {
+  getEnumValues,
+  getFolders,
+  createDIJob,
+  getDIJobTypes,
+  getDISyncMode,
+} from '@/services/datadev';
 import { FolderBelong } from '@/constants/datadev';
 import { Folder } from '@/types/datadev';
 
@@ -27,8 +33,10 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     setVisibleTask: _.setVisibleTask,
     getTreeWrapped: _.getTreeWrapped,
   }));
-  const [jobTypeOptions] = useDIJobTypeOptions();
-  const { options: syncModeOptions, getOptions: getSyncModeOptions } = useDISyncModeOptions();
+  const { data: jobTypeOptions } = useRequest(getDIJobTypes);
+  const { data: syncModeOptions = [], run: getSyncModeOptions } = useRequest(getDISyncMode, {
+    manual: true,
+  });
 
   const handleCreateDI = async (values: CreateDIJobDto) => {
     const { success, msg } = await createDIJob(values);
@@ -43,7 +51,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
 
   const hanldeChangeDIType = (val: string) => {
     form.resetFields(['syncMode']);
-    getSyncModeOptions(val);
+    getSyncModeOptions({ jobType: val });
   };
 
   useEffect(() => {
