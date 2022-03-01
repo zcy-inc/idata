@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoUpdateRequest;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.HashBasedTable;
@@ -41,6 +42,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -167,6 +169,34 @@ public class JobInfoController {
      */
     @PutMapping
     public RestResult<JobInfoDto> editJobInfo(@RequestBody JobInfoDto jobInfoDto) throws IllegalAccessException {
+        Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
+
+        return getJobInfo(jobInfoDto.getId());
+    }
+
+    /**
+     * 编辑DI作业信息
+     *
+     * @param request 作业基础信息
+     * @return
+     */
+    @PutMapping("/di")
+    public RestResult<JobInfoDto> editDIJobInfo(@RequestBody @Valid DIJobInfoUpdateRequest request) throws IllegalAccessException {
+        JobInfoDto jobInfoDto = new JobInfoDto();
+        BeanUtils.copyProperties(request, jobInfoDto);
+
+        String jobType = request.getJobType();
+        String syncMode = request.getSyncMode();
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        Table<String, String, JobTypeEnum> table = HashBasedTable.create();
+        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW);
+        table.put("DI", "BATCH", JobTypeEnum.DI_BATCH);
+        table.put("DI", "STREAM", JobTypeEnum.DI_STREAM);
+
+        // 映射成数据库的jobType
+        jobInfoDto.setJobType(table.get(jobType, syncMode));
+
         Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
         if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
 

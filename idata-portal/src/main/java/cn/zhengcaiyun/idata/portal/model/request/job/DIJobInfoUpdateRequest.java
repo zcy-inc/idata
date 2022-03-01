@@ -1,20 +1,20 @@
 package cn.zhengcaiyun.idata.portal.model.request.job;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
-import org.springframework.beans.BeanUtils;
 
-import java.util.Objects;
-import java.util.Optional;
+import javax.validation.constraints.NotNull;
 
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2021-09-23 11:20
  **/
-public class DIJobInfoAddRequest extends BaseDto {
-
+public class DIJobInfoUpdateRequest extends BaseDto {
+    /**
+     * 主键
+     */
+    @NotNull(message = "id 不能为空")
+    private Long id;
     /**
      * 作业名称
      */
@@ -43,6 +43,14 @@ public class DIJobInfoAddRequest extends BaseDto {
      * 文件夹id
      */
     private Long folderId;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
