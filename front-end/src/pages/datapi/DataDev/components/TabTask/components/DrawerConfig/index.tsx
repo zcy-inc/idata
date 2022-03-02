@@ -18,7 +18,7 @@ import styles from './index.less';
 
 import Title from '@/components/Title';
 import { execDriverMemOptions, execWorkerMemOptions, restartOptions } from './constants';
-import { DAGListItem, Task } from '@/types/datadev';
+import { DAGListItem, DIJobBasicInfo } from '@/types/datadev';
 import {
   getDAGList,
   getDataDevConfig,
@@ -32,7 +32,7 @@ import { ExecEngine, SchPriority } from '@/constants/datadev';
 interface DrawerConfigProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
 }
 
 const { Item } = Form;

@@ -39,14 +39,35 @@ export enum TaskCategory {
 }
 
 export enum DIJobType {
-  DI = 'DI',
-  BACK_FLOW = 'BACK_FLOW',
+  DI = 'DI', // 数据抽取（集成）
+  BACK_FLOW = 'BACK_FLOW', // 数据回流
 }
 
 export enum DISyncMode {
   BATCH = 'BATCH',
   STREAM = 'STREAM',
 }
+
+export enum DIConfigMode {
+  VISUALIZATION = 1,
+  SCRIPT,
+}
+
+export enum DIConfigModeLable {
+  VISUALIZATION = '可视化模式',
+  SCRIPT = '脚本模式',
+}
+
+export const diConfigOptions = [
+  {
+    label: DIConfigModeLable.VISUALIZATION,
+    value: DIConfigMode.VISUALIZATION,
+  },
+  {
+    label: DIConfigModeLable.SCRIPT,
+    value: DIConfigMode.SCRIPT,
+  },
+];
 
 export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步

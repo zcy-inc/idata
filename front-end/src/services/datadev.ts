@@ -22,6 +22,8 @@ import type {
   TaskHistoryItem,
   UDF,
   CreateDIJobDto,
+  DIJobBasicInfo,
+  MergeSqlParamDto,
 } from '@/types/datadev';
 import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
@@ -59,7 +61,10 @@ export async function getEnumNames() {
  * 枚举 获取values
  */
 export async function getEnumValues(params: { enumCode: string }) {
-  return request('/api/p1/dev/enumValues', { method: 'GET', params });
+  return request<Tresponse<{ enumValue: string; valueCode: string }[]>>('/api/p1/dev/enumValues', {
+    method: 'GET',
+    params,
+  });
 }
 
 /**
@@ -943,11 +948,12 @@ export async function getDIJobTypes() {
 /**
  * 获取DI同步类型下拉列表
  */
-export async function getDISyncMode() {
+export async function getDISyncMode(params: { jobType: string }) {
   return request<Tresponse<{ name: string; value: string }[]>>(
     '/api/p1/dev/jobs/di/meta/sync-mode',
     {
       method: 'GET',
+      params,
     },
   ).then(({ data = [] }) => data.map(({ name, value }) => ({ label: name, value })));
 }
@@ -957,4 +963,41 @@ export async function getDISyncMode() {
  */
 export async function createDIJob(data: CreateDIJobDto) {
   return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
+}
+
+/**
+ * 获取DI基础信息
+ */
+export async function getDIJobBasicInfo(jobId: number) {
+  return request<Tresponse<DIJobBasicInfo>>(`/api/p1/dev/jobs/di/${jobId}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取DI作业内容
+ */
+export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
+  return request(`/api/p1/dev/jobs/${jobId}/di/adapt/contents/${version}`);
+}
+
+/**
+ * 保存DI作业内容
+ */
+export async function saveDIJobContent(data: any) {
+  const { jobId } = data;
+  return request(`/api/p1/dev/jobs/${jobId}/di/contents`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 自动生成mergeSql
+ */
+export async function genMergeSQL(data: MergeSqlParamDto) {
+  return request(`/api/p1/dev/jobs/di/generate/merge-sql`, {
+    method: 'POST',
+    data,
+  });
 }

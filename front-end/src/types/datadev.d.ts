@@ -278,3 +278,29 @@ export interface CreateDIJobDto {
   folderId: number;
   remark?: string;
 }
+
+export interface DIJobBasicInfo {
+  id: number;
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  creator: string;
+  status: 0 | 1; // 0 停用，1 启用
+  remark?: string;
+}
+
+export interface MergeSqlParamDto {
+  selectColumns: string;
+  keyColumns: string;
+  sourceTable: string;
+  destTable: string;
+  srcReadMode: string;
+  driverType: string;
+  days?: number;
+}
+
+export interface DIJobContent {
+  id: save;
+}

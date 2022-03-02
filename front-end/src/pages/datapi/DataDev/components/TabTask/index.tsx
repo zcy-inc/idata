@@ -1,40 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, Fragment } from 'react';
 import { Button, Form, Input, message, Modal, Radio, Select, Space } from 'antd';
+import RadioGroup, { Option } from '@/components/RadioGroup';
+import { useRequest } from 'ahooks';
 import { useModel } from 'umi';
 import { get, cloneDeep } from 'lodash';
 import type { FC } from 'react';
 import styles from './index.less';
-
 import { IPane } from '@/models/datadev';
 import {
-  getTaskContent,
   getTaskTables,
   getTaskVersions,
   pauseTask,
-  getTask,
   deleteTask,
-  saveTask,
   submitTask,
   getTaskTableColumns,
   runTask,
   resumeTask,
+  getDIJobBasicInfo,
+  saveDIJobContent,
+  getDIJobContent,
+  genMergeSQL,
 } from '@/services/datadev';
-import { MappedColumn, Task, TaskContent, TaskTable, TaskVersion } from '@/types/datadev';
-
+import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import Title from '@/components/Title';
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import Mapping from './components/Mapping';
-import ScriptMapping from './components/ScriptMapping';
-import SwitchTab from './components/SwitchTab';
 import {
   SrcReadMode,
   DestWriteMode,
   VersionStatusDisplayMap,
   VersionStatus,
   EnvRunningState,
+  DIJobType,
+  diConfigOptions,
+  DIConfigMode,
 } from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
@@ -55,22 +57,37 @@ const minWidth = 200;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
-const RefreshSelect: FC<{
+const getDataSourceOptions = async (type: DataSourceTypes) => {
+  const res = await getDataSourceList({ type, limit: 10000, offset: 0 });
+  return (get(res, 'data.content', []) as DataSourceItem[]).map(({ name, id }) => ({
+    label: name,
+    value: id,
+  }));
+};
+
+// 表选择组件
+const TableSelect: FC<{
   options: TaskTable[];
   onRefresh: () => void;
-  value?: string[];
-  onChange?: (value: string[]) => void;
-}> = ({ options, onRefresh, value, onChange }) => {
+  value?: string;
+  onChange?: (value?: string) => void;
+  showRefresh?: boolean;
+}> = ({ options, onRefresh, value, onChange, showRefresh }) => {
+  const innerVal = value?.split(',');
+  const handleChange = (val?: string[]) => {
+    const parsedVal = Array.isArray(val) && val.length > 0 ? val?.join(',') : undefined;
+    onChange?.(parsedVal);
+  };
   return (
-    <>
+    <Fragment>
       <Select
         size="large"
         mode="multiple"
         style={{ maxWidth, minWidth }}
         placeholder="请选择"
         options={options.map((_) => ({ label: _.tableName, value: _.tableName }))}
-        value={value}
-        onChange={onChange}
+        value={innerVal}
+        onChange={handleChange}
         optionFilterProp="label"
         showSearch
         filterOption={(input, option) => {
@@ -78,22 +95,62 @@ const RefreshSelect: FC<{
           return label.indexOf(input) >= 0;
         }}
       />
-      <a className={styles.refresh} onClick={onRefresh}></a>
-    </>
+      {showRefresh && <a className={styles.refresh} onClick={onRefresh}></a>}
+    </Fragment>
   );
 };
 
-type MapType = 'visual' | 'script';
+// 表输入组件
+const TableInput: FC<{
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  showRefresh?: boolean;
+  onRefresh: () => void;
+}> = ({ showRefresh, value, onChange, onRefresh }) => {
+  return (
+    <Fragment>
+      <Input size="large" style={{ maxWidth, minWidth }} value={value} onChange={onChange} />
+      {showRefresh && <a className={styles.refresh} onClick={onRefresh}></a>}
+    </Fragment>
+  );
+};
 
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
-  const [task, setTask] = useState<Task>();
-  const [versions, setVersions] = useState<TaskVersion[]>([]);
-  const [version, setVersion] = useState<number | undefined>(-1);
-  const [DSTypes, setDSTypes] = useState<string[]>([]);
-  const [DSSrcList, setDSSrcList] = useState<DataSourceItem[]>([]);
-  const [DSDestList, setDSDestList] = useState<DataSourceItem[]>([]);
-  const [srcTables, setSrcTables] = useState<TaskTable[]>([]);
-  const [data, setData] = useState<TaskContent>();
+  const { id: jobId } = pane;
+  // 获取DI基础信息
+  const { data: basicInfo, refresh: refreshBasicInfo } = useRequest(() => getDIJobBasicInfo(jobId));
+  // 当前版本
+  const [version, setVersion] = useState<number>();
+  // 版本列表
+  const { data: versions = [], refresh: refreshVersions } = useRequest(
+    () => getTaskVersions({ jobId: pane.id }).then(({ data }) => data),
+    {
+      onSuccess: (data) => {
+        if (typeof version === 'undefined' && typeof data[0]?.version !== 'undefined') {
+          setVersion(data[0]?.version);
+        }
+      },
+    },
+  );
+  // 获取数据源类型下拉列表
+  const { data: dataSourceOptions } = useRequest(() =>
+    getDataSourceTypes().then(({ data }) => data.map((item) => ({ label: item, value: item }))),
+  );
+  // 数据来源-数据源名称 下拉列表
+  const { data: srcDSOptions, run: getSrcDSOptions } = useRequest(getDataSourceOptions, {
+    manual: true,
+  });
+  // 数据去向-数据源名称 下拉列表
+  const { data: destDSOptions, run: getDestDSOptions } = useRequest(getDataSourceOptions, {
+    manual: true,
+  });
+  // 数据来源-表 下拉列表
+  const { data: { data: srcTableOptions = [] } = {}, run: getSrcTableOptions } = useRequest(
+    getTaskTables,
+    {
+      manual: true,
+    },
+  );
   const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
   const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
   const [visible, setVisible] = useState(false);
@@ -101,10 +158,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [mapType, setMapType] = useState<MapType>('script');
 
-  const [srcForm] = Form.useForm();
-  const [destForm] = Form.useForm();
   const mapRef = useRef<{
     srcMap: { [key: string]: any };
     destMap: { [key: string]: any };
@@ -119,145 +173,117 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     onRemovePane: _.onRemovePane,
     getTreeWrapped: _.getTreeWrapped,
   }));
+  const formInitialValues = {
+    srcReadMode: SrcReadMode.ALL,
+    destWriteMode: DestWriteMode.INIT,
+    configMode: DIConfigMode.VISUALIZATION,
+  };
+  const [form] = Form.useForm();
+  const [jobContent, setJobContent] = useState<Record<string, any>>({});
+  const {
+    srcDataSourceType,
+    srcDataSourceId,
+    srcReadMode,
+    srcTables,
+    destDataSourceType,
+    configMode,
+  } = jobContent;
 
-  useEffect(() => {
-    if (pane) {
-      getTaskWrapped();
-      getTaskVersionsWrapped();
-      getDataSourceTypesWrapped();
-    }
-  }, [pane.id]);
-
-  useEffect(() => {
-    if (version && version > 0) {
-      getTaskContentWrapped();
-    }
-  }, [version]);
-
-  /**
-   * 获取作业配置
-   */
-  const getTaskWrapped = () =>
-    getTask({ id: pane.id })
-      .then((res) => setTask(res.data))
-      .catch((err) => {});
-
-  /**
-   * 获取作业版本
-   */
-  const getTaskVersionsWrapped = () =>
-    getTaskVersions({ jobId: pane.id })
-      .then((res) => {
-        setVersions(res.data);
-        if (res.data[0]?.version) {
-          setVersion(res.data[0]?.version);
-        } else {
-          setVersion(undefined);
-        }
-      })
-      .catch((err) => {});
-
-  /**
-   * 获取作业内容
-   */
-  const getTaskContentWrapped = () =>
-    getTaskContent({ jobId: pane.id, version: version as number })
-      .then((r) => {
-        const srcData = {
-          srcDataSourceType: r.data.srcDataSourceType,
-          srcDataSourceId: r.data.srcDataSourceId,
-          srcTables: r.data.srcTables.split(','),
-          srcReadFilter: r.data.srcReadFilter,
-          srcReadShardKey: r.data.srcReadShardKey,
-          srcShardingNum: r.data.srcShardingNum,
-          srcReadMode: r.data.srcReadMode,
-        };
-        const destData = {
-          destDataSourceType: r.data.destDataSourceType,
-          destDataSourceId: r.data.destDataSourceId,
-          destTable: r.data.destTable,
-          destBeforeWrite: r.data.destBeforeWrite,
-          destAfterWrite: r.data.destAfterWrite,
-          destWriteMode: r.data.destWriteMode,
-        };
-        getDataSourceListWrapped(srcData.srcDataSourceType, 'src');
-        getDataSourceListWrapped(destData.destDataSourceType, 'dest');
-        /* ===== */
-        getTaskTablesWrapped(r.data.srcDataSourceId);
-        /* ===== */
-        srcForm.setFieldsValue(srcData);
-        destForm.setFieldsValue(destData);
-        setData(r.data);
-        setSrcColumns(r.data.srcCols);
-        setDestColumns(r.data.destCols);
-      })
-      .catch((err) => {});
-
-  /**
-   * 获取数据源类型
-   */
-  const getDataSourceTypesWrapped = () =>
-    getDataSourceTypes()
-      .then((res) => setDSTypes(res.data))
-      .catch((err) => {});
-
-  /**
-   * 获取该数据源类型下的数据源列表
-   */
-  const getDataSourceListWrapped = (type: DataSourceTypes, dir: 'src' | 'dest') => {
-    if (dir === 'src') {
-      // 修改来源类型时置空来源数据源和表
-      srcForm.setFieldsValue({ srcDataSourceId: null, srcTables: [] });
-    }
-    if (dir === 'dest') {
-      // 修改目标类型时置空目标数据源
-      destForm.setFieldsValue({ destDataSourceId: null });
-    }
-    getDataSourceList({ type, limit: 10000, offset: 0 })
-      .then((res) => {
-        const content = get(res, 'data.content', []);
-        dir === 'src' && setDSSrcList(content);
-        dir === 'dest' && setDSDestList(content);
-      })
-      .catch((err) => {});
+  const handleFormValuesChange = (_: unknown, allValues: Record<string, unknown>) => {
+    setJobContent(Object.assign({}, jobContent, allValues));
   };
 
-  /**
-   * 获取该数据源下的表
-   */
-  const getTaskTablesWrapped = (dataSourceId: number) => {
-    // 置空来源表的表单项
-    srcForm.setFieldsValue({ srcTables: [] });
-    const dataSourceType = srcForm.getFieldValue('srcDataSourceType');
-    getTaskTables({ dataSourceType, dataSourceId })
-      .then((res) => setSrcTables(res.data))
-      .catch((err) => {});
+  // 获取作业内容
+  useEffect(() => {
+    (async () => {
+      if (typeof jobId !== 'undefined' && typeof version !== 'undefined') {
+        const { data } = await getDIJobContent({ jobId, version });
+        setJobContent(data);
+        setSrcColumns(data.srcCols);
+        setDestColumns(data.destCols);
+        form.setFieldsValue(data);
+      }
+    })();
+  }, [jobId, version]);
+
+  // 数据来源-数据源类型改变: 1. 清空`数据源名称` 和 `表`; 2. 刷新`数据源名称`下拉列表
+  useEffect(() => {
+    if (srcDataSourceType) {
+      getSrcDSOptions(srcDataSourceType);
+    }
+  }, [form, srcDataSourceType]);
+
+  // 数据去向-数据源类型改变: 1. 清空`数据源名称`; 2. 刷新`数据源名称`下拉列表
+  useEffect(() => {
+    if (destDataSourceType) {
+      getDestDSOptions(destDataSourceType);
+    }
+  }, [form, destDataSourceType]);
+
+  // 数据来源-数据源名称改变: 1. 清空`表`; 2. 刷新`表`下拉列表
+  useEffect(() => {
+    if (typeof srcDataSourceType !== 'undefined' && typeof srcDataSourceId !== 'undefined') {
+      getSrcTableOptions({
+        dataSourceId: srcDataSourceId,
+        dataSourceType: srcDataSourceType,
+      });
+    }
+  }, [form, srcDataSourceId, srcDataSourceType]);
+
+  // 数据去向-数据源名称改变: 1. 清空`表`  2. 刷新`表`下拉列表
+  // useEffect(() => {
+  //   const destDataSourceType = form.getFieldValue('destDataSourceType');
+  //   if (typeof destDataSourceType !== 'undefined' && typeof destDataSourceId !== 'undefined') {
+  //     form.resetFields(['destTable']);
+  //     getDestTableOptions({
+  //       dataSourceId: srcDataSourceId,
+  //       dataSourceType: destDataSourceType,
+  //     });
+  //   }
+  // }, [form, destDataSourceId]);
+
+  // 刷新mergeSQL
+  const refreshMergeSQL = async () => {
+    const {
+      srcDataSourceType,
+      destTable,
+      srcReadMode,
+      srcTables,
+      scriptSelectColumns,
+      scriptKeyColumns,
+      scriptMergeSqlParamDto,
+    } = jobContent;
+    const { data, success } = await genMergeSQL({
+      destTable,
+      srcReadMode,
+      selectColumns: scriptSelectColumns,
+      keyColumns: scriptKeyColumns,
+      sourceTable: srcTables,
+      driverType: srcDataSourceType,
+      days: scriptMergeSqlParamDto?.recentDays,
+    });
+    if (success) {
+      form.setFieldsValue({
+        scriptMergeSql: data,
+      });
+    }
   };
 
-  /**
-   * 获取该表下的字段
-   */
-  const getTaskTableColumnsWrapped = () => {
-    let tables = srcForm.getFieldValue('srcTables');
-    if (!Array.isArray(tables)) {
-      tables = [];
+  // 刷新可视化视图
+  const refreshVisualise = async () => {
+    const tables = srcTables?.split(',') || [];
+    if (tables.length === 0) {
+      return message.info('请选择表');
     }
-    if (tables.length) {
-      getTaskTableColumns({
-        tableName: tables[0],
-        dataSourceType: srcForm.getFieldValue('srcDataSourceType'),
-        dataSourceId: srcForm.getFieldValue('srcDataSourceId'),
-      })
-        .then((res) => {
-          if (res.success) {
-            message.success('刷新成功');
-            setSrcColumns(res.data);
-            setDestColumns([]);
-          }
-        })
-        .catch((err) => {});
-    } else {
-      message.info('请选择表');
+    const { success, data } = await getTaskTableColumns({
+      tableName: tables[0],
+      dataSourceType: srcDataSourceType,
+      dataSourceId: srcDataSourceId,
+    });
+    if (success) {
+      message.success('刷新成功');
+      setSrcColumns(data);
+      setDestColumns([]);
     }
   };
 
@@ -298,24 +324,26 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     const destMap = mapRef.current?.destMap || {};
     const srcCols: MappedColumn[] = Object.values(srcMap);
     const destCols: MappedColumn[] = Object.values(destMap);
-    const srcFormValues = srcForm.getFieldsValue();
-    const destFormValues = destForm.getFieldsValue();
+    // const srcFormValues = srcForm.getFieldsValue();
+    // const destFormValues = destForm.getFieldsValue();
+    const values = form.getFieldsValue();
     const params = {
-      ...srcFormValues,
-      ...destFormValues,
-      srcTables: srcFormValues.srcTables?.join(','),
-      id: pane.id,
+      // ...srcFormValues,
+      // ...destFormValues,
+      ...values,
+      // srcTables: values.srcTables?.join(','),
+      id: pane.id, // FIXME: id和jobId 不同
       jobId: pane.id,
-      version: data?.version,
+      version: jobContent?.version,
       srcCols,
       destCols,
-      contentHash: data?.contentHash,
+      contentHash: jobContent?.contentHash,
     };
-    saveTask(params)
+    saveDIJobContent(params)
       .then((res) => {
         if (res.success) {
           message.success('保存成功');
-          getTaskVersionsWrapped();
+          refreshVersions();
         }
       })
       .catch((err) => {});
@@ -356,15 +384,183 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
-  const switchTabConfirm = (v: MapType) =>
-    confirm({
-      title: '提示',
-      content: '您确定要转化为脚本模式吗? 转化将不保存之前操作!',
-      onOk: () => setMapType(v),
+  const onBeforeConfigModeChange = (_: any, { label }: Option) =>
+    new Promise((resolve) => {
+      confirm({
+        title: '提示',
+        content: `您确定要转化为${label}吗? 转化将不保存之前操作!`,
+        onOk: () => {
+          // 切换时清空脚本模式下输入内容
+          form.resetFields([
+            'scriptSelectColumns',
+            'scriptKeyColumns',
+            'scriptMergeSqlParamDto',
+            'mergeSql',
+          ]);
+          return resolve('');
+        },
+      });
     });
 
+  const srcTablesNode =
+    basicInfo?.jobType === DIJobType.DI ? (
+      <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshVisualise} />
+    ) : (
+      <TableInput showRefresh onRefresh={refreshVisualise} />
+    );
+  const srcItemsNode = (
+    <Fragment>
+      <Item name="srcDataSourceType" label="数据源类型" rules={ruleSlct}>
+        <Select
+          size="large"
+          style={{ maxWidth, minWidth }}
+          placeholder="请选择"
+          options={dataSourceOptions}
+          showSearch
+          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
+          onChange={() => form.resetFields(['srcDataSourceId', 'srcTables'])}
+        />
+      </Item>
+      <Item name="srcDataSourceId" label="数据源名称" rules={ruleSlct}>
+        <Select
+          size="large"
+          style={{ maxWidth, minWidth }}
+          placeholder="请选择"
+          options={srcDSOptions}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
+          onChange={() => form.resetFields(['srcTables'])}
+        />
+      </Item>
+      <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
+        {srcTablesNode}
+      </Item>
+      <Item name="srcReadFilter" label="数据过滤">
+        <TextArea style={{ maxWidth, minWidth }} placeholder="请参考相应SQL语法填写where过滤语句" />
+      </Item>
+      {basicInfo?.jobType === DIJobType.DI && (
+        <Fragment>
+          <Item name="srcReadShardKey" label="切分键">
+            <Input
+              size="large"
+              style={{ maxWidth, minWidth }}
+              placeholder="根据配置的字段进行数据分片，实现并发读取"
+            />
+          </Item>
+          <Item name="srcShardingNum" label="切分键分片数">
+            <Select
+              size="large"
+              style={{ maxWidth, minWidth }}
+              placeholder="请选择"
+              options={[1, 2, 4, 8, 16].map((_) => ({ label: _, value: _ }))}
+            />
+          </Item>
+          <Item name="srcReadMode" label="读取模式" rules={ruleSlct}>
+            <Radio.Group
+              options={[
+                { label: '全量', value: SrcReadMode.ALL },
+                { label: '增量', value: SrcReadMode.INCREMENTAL },
+              ]}
+            />
+          </Item>
+        </Fragment>
+      )}
+    </Fragment>
+  );
+  const destWriteModeItem = (
+    <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
+      <Radio.Group
+        options={[
+          { label: '新建表', value: DestWriteMode.INIT },
+          { label: '覆盖表', value: DestWriteMode.OVERWRITE },
+          { label: '追加表', value: DestWriteMode.APPEND },
+        ]}
+      />
+    </Item>
+  );
+  const showDestTableRefresh = basicInfo?.jobType !== DIJobType.DI;
+  const destItemsNode = (
+    <Fragment>
+      <Item name="destDataSourceType" label="数据源类型" rules={ruleSlct}>
+        <Select
+          size="large"
+          style={{ maxWidth, minWidth }}
+          placeholder="请选择"
+          options={dataSourceOptions}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
+          onChange={() => form.resetFields(['destDataSourceId'])}
+        />
+      </Item>
+      <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct}>
+        <Select
+          size="large"
+          style={{ maxWidth, minWidth }}
+          placeholder="请选择"
+          options={destDSOptions}
+          showSearch
+          filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
+        />
+      </Item>
+      <Item name="destTable" label="表" rules={ruleText}>
+        {/* TODO: */}
+        <TableInput showRefresh={showDestTableRefresh} onRefresh={() => {}} />
+      </Item>
+      {basicInfo?.jobType === DIJobType.DI && (
+        <Fragment>
+          <Item name="destBeforeWrite" label="导入前准备语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据前执行的SQL脚本" />
+          </Item>
+          <Item name="destAfterWrite" label="导入后完成语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据后执行的SQL脚本" />
+          </Item>
+          {destWriteModeItem}
+        </Fragment>
+      )}
+    </Fragment>
+  );
+  const scriptItemsNode = (
+    <div className={styles.form}>
+      <Item label="字段" name="scriptSelectColumns">
+        <TextArea placeholder="请输入" autoSize={{ minRows: 5 }} />
+      </Item>
+      <div className={styles.tip}>
+        <div>
+          <span className={styles['tip-title']}>示例</span>
+          announcement_id,
+        </div>
+        <div className={styles['tip-second']}>
+          convert(meta_data USING utf8) as meta_data 字段命名须与源表名称保持一致
+        </div>
+      </div>
+      <Item label="去向表关键键" name="scriptKeyColumns">
+        <TextArea placeholder="若获取关键键失败，则默认显示id。" autoSize={{ minRows: 5 }} />
+      </Item>
+      {srcReadMode === SrcReadMode.INCREMENTAL && (
+        <Fragment>
+          <Item label="抽取天数" name={['scriptMergeSqlParamDto', 'recentDays']}>
+            <Input placeholder="单位为天，可输入数值范围为1-7" />
+          </Item>
+          <Item
+            label={
+              <Fragment>
+                <span style={{ marginRight: 8 }}>mergeSQL</span>
+                <a onClick={refreshMergeSQL} style={{ fontWeight: 'normal' }}>
+                  刷新
+                </a>
+              </Fragment>
+            }
+            name="scriptMergeSql"
+          >
+            <TextArea autoSize={{ minRows: 5 }} disabled />
+          </Item>
+        </Fragment>
+      )}
+    </div>
+  );
+
   return (
-    <>
+    <Fragment>
       <div className={styles.task}>
         <div className={styles.toolbar}>
           <div className={styles.version}>
@@ -383,7 +579,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   value: _.version,
                 }))}
                 value={version}
-                onChange={(v) => setVersion(v as number)}
+                onChange={(v) => setVersion(v)}
                 showSearch
                 filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
               />
@@ -397,178 +593,58 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             <a onClick={() => setVisibleHistory(true)}>历史</a>
           </Space>
         </div>
-        <div className={styles['form-box']}>
-          <div className={styles['form-box-item']}>
-            <Title>数据来源</Title>
-            <Form
-              form={srcForm}
-              layout="horizontal"
-              colon={false}
-              initialValues={{ srcReadMode: SrcReadMode.ALL }}
-            >
-              <Item name="srcDataSourceType" label="数据源类型" rules={ruleSlct}>
-                <Select
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请选择"
-                  options={DSTypes.map((_) => ({ label: _, value: _ }))}
-                  onChange={(v) => getDataSourceListWrapped(v as DataSourceTypes, 'src')}
-                  showSearch
-                  filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-                />
-              </Item>
-              <Item name="srcDataSourceId" label="数据源名称" rules={ruleSlct}>
-                <Select
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请选择"
-                  options={DSSrcList.map((_) => ({ label: _.name, value: _.id }))}
-                  onChange={(v) => getTaskTablesWrapped(v as number)}
-                  showSearch
-                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
-                />
-              </Item>
-              <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
-                <RefreshSelect options={srcTables} onRefresh={getTaskTableColumnsWrapped} />
-              </Item>
-              {/* 这个位置放动态增删的表单，后续版本有需要可以从 ./FormList 里复制 */}
-              <Item name="srcReadFilter" label="数据过滤">
-                <TextArea
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请参考相应SQL语法填写where过滤语句"
-                />
-              </Item>
-              <Item name="srcReadShardKey" label="切分键">
-                <Input
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="根据配置的字段进行数据分片，实现并发读取"
-                />
-              </Item>
-              <Item name="srcShardingNum" label="切分键分片数">
-                <Select
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请选择"
-                  options={[1, 2, 4, 8, 16].map((_) => ({ label: _, value: _ }))}
-                />
-              </Item>
-              <Item name="srcReadMode" label="读取模式" rules={ruleSlct}>
-                <Radio.Group
-                  options={[
-                    { label: '全量', value: SrcReadMode.ALL },
-                    { label: '增量', value: SrcReadMode.INCREMENTAL },
-                  ]}
-                />
-              </Item>
-            </Form>
+        <Form
+          form={form}
+          layout="horizontal"
+          colon={false}
+          initialValues={formInitialValues}
+          onValuesChange={handleFormValuesChange}
+        >
+          <div className={styles['form-box']}>
+            <div className={styles['form-box-item']}>
+              <Title>数据来源</Title>
+              {srcItemsNode}
+            </div>
+            <div className={styles['form-box-item']}>
+              <Title>数据去向</Title>
+              {destItemsNode}
+            </div>
           </div>
-          <div className={styles['form-box-item']}>
-            <Title>数据去向</Title>
-            <Form
-              form={destForm}
-              layout="horizontal"
-              colon={false}
-              initialValues={{ destWriteMode: DestWriteMode.INIT }}
-            >
-              <Item name="destDataSourceType" label="数据源类型" rules={ruleSlct}>
-                <Select
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请选择"
-                  options={DSTypes.map((_) => ({ label: _, value: _ }))}
-                  onChange={(v) => getDataSourceListWrapped(v as DataSourceTypes, 'dest')}
-                  showSearch
-                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
-                />
-              </Item>
-              <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct}>
-                <Select
-                  size="large"
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请选择"
-                  options={DSDestList.map((_) => ({ label: _.name, value: _.id }))}
-                  showSearch
-                  filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
-                />
-              </Item>
-              <Item name="destTable" label="表" rules={ruleText}>
-                <RefreshSelect options={[]} onRefresh={() => {}} />
-              </Item>
-              <Item name="destBeforeWrite" label="导入前准备语句">
-                <TextArea
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请输入导入数据前执行的SQL脚本"
-                />
-              </Item>
-              <Item name="destAfterWrite" label="导入后完成语句">
-                <TextArea
-                  style={{ maxWidth, minWidth }}
-                  placeholder="请输入导入数据后执行的SQL脚本"
-                />
-              </Item>
-              <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
-                <Radio.Group
-                  options={[
-                    { label: '新建表', value: DestWriteMode.INIT },
-                    { label: '覆盖表', value: DestWriteMode.OVERWRITE },
-                    { label: '追加表', value: DestWriteMode.APPEND },
-                  ]}
-                />
-              </Item>
-            </Form>
-          </div>
-        </div>
-        <Title>
-          <div className={styles['string-map-title']}>
-            <span>字段映射</span>
-            <Space>
-              <Button
-                className="normal"
-                onClick={() => {
-                  const newColumns = cloneDeep(srcColumns);
-                  setDestColumns(newColumns);
-                }}
-              >
-                复制来源表
-              </Button>
-              <SwitchTab value={mapType} onChange={switchTabConfirm} />
-            </Space>
-          </div>
-        </Title>
-        {mapType === 'visual' ? (
-          <div style={{ position: 'relative' }}>
-            <Space style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
-              <Button className="normal" onClick={onCancelMapping}>
-                取消映射
-              </Button>
-              <Button className="normal" onClick={onEponymousMapping}>
-                同名映射
-              </Button>
-            </Space>
-            <Mapping ref={mapRef} data={{ srcColumns, destColumns }} />
-          </div>
-        ) : (
-          <ScriptMapping />
-        )}
-        <DrawerBasic
-          visible={visibleBasic}
-          onClose={() => setVisibleBasic(false)}
-          data={task}
-          pane={pane}
-          getTaskWrapped={getTaskWrapped}
-        />
-        <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
-        <DrawerVersion
-          visible={visibleVersion}
-          onClose={() => setVisibleVersion(false)}
-          data={task}
-        />
-        <DrawerHistory
-          visible={visibleHistory}
-          onClose={() => setVisibleHistory(false)}
-          data={task}
-        />
+          <Title>
+            <div className={styles['string-map-title']}>
+              <span>字段映射</span>
+              <Space>
+                <Button
+                  className="normal"
+                  onClick={() => {
+                    const newColumns = cloneDeep(srcColumns);
+                    setDestColumns(newColumns);
+                  }}
+                >
+                  复制来源表
+                </Button>
+                <Item name="configMode" rules={ruleSlct} noStyle>
+                  <RadioGroup options={diConfigOptions} onBeforeChange={onBeforeConfigModeChange} />
+                </Item>
+              </Space>
+            </div>
+          </Title>
+          {configMode === DIConfigMode.VISUALIZATION ? (
+            <div style={{ position: 'relative' }}>
+              <Space style={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+                <Button className="normal" onClick={onCancelMapping}>
+                  取消映射
+                </Button>
+                <Button className="normal" onClick={onEponymousMapping}>
+                  同名映射
+                </Button>
+              </Space>
+              <Mapping ref={mapRef} data={{ srcColumns, destColumns }} />
+            </div>
+          ) : (
+            scriptItemsNode
+          )}
+        </Form>
       </div>
       <div className="workbench-submit">
         <Space>
@@ -585,7 +661,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             size="large"
             type="primary"
             onClick={() => setVisible(true)}
-            disabled={versions.length === 0}
+            disabled={versions?.length === 0}
           >
             提交
           </Button>
@@ -608,7 +684,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             submitTask(
               {
                 jobId: pane.id,
-                version: data?.version as number,
+                version: jobContent?.version as number,
                 env: values.env,
               },
               {
@@ -662,7 +738,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 .then((res) => {
                   if (res.success) {
                     message.success('暂停成功');
-                    getTaskWrapped();
+                    refreshBasicInfo();
                     setVisibleAction(false);
                   }
                 })
@@ -674,7 +750,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 .then((res) => {
                   if (res.success) {
                     message.success('恢复成功');
-                    getTaskWrapped();
+                    refreshBasicInfo();
                     setVisibleAction(false);
                   }
                 })
@@ -686,7 +762,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 .then((res) => {
                   if (res.success) {
                     message.success('单次运行成功');
-                    getTaskWrapped();
+                    refreshBasicInfo();
                     setVisibleAction(false);
                   }
                 })
@@ -703,7 +779,33 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           </Item>
         </ModalForm>
       </div>
-    </>
+      {!!basicInfo && (
+        <Fragment>
+          <DrawerBasic
+            visible={visibleBasic}
+            onClose={() => setVisibleBasic(false)}
+            data={basicInfo}
+            pane={pane}
+            refreshBasicInfo={refreshBasicInfo}
+          />
+          <DrawerConfig
+            visible={visibleConfig}
+            onClose={() => setVisibleConfig(false)}
+            data={basicInfo}
+          />
+          <DrawerVersion
+            visible={visibleVersion}
+            onClose={() => setVisibleVersion(false)}
+            data={basicInfo}
+          />
+          <DrawerHistory
+            visible={visibleHistory}
+            onClose={() => setVisibleHistory(false)}
+            data={basicInfo}
+          />
+        </Fragment>
+      )}
+    </Fragment>
   );
 };
 
