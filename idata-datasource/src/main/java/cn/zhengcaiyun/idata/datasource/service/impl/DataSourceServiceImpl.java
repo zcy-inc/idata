@@ -62,6 +62,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Autowired
     private DataSourceApi dataSourceApi;
 
+
     @Autowired
     public DataSourceServiceImpl(DataSourceRepo dataSourceRepo,
                                  DataSourceManager dataSourceManager) {
@@ -205,6 +206,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     @Override
     public List<String> getTopics(Long dataSourceId) {
+
         return Arrays.asList(new String[]{"topic1", "topic2"});
     }
 
