@@ -257,7 +257,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         }
         checkArgument(StringUtils.isNotBlank(contentDto.getDestDataSourceType()), "目标数据源类型为空");
         checkArgument(Objects.nonNull(contentDto.getDestDataSourceId()), "目标数据源编号为空");
-        checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
+        if (!StringUtils.equalsIgnoreCase(contentDto.getDestDataSourceType(), DriverTypeEnum.Kafka.name())) {
+            checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
+        }
         checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()), "来源数据表为空");
 //todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");   数据迁移完后需要取消注释
