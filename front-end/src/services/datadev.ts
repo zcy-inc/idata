@@ -975,6 +975,16 @@ export async function getDIJobBasicInfo(jobId: number) {
 }
 
 /**
+ * 保存DI作业基础信息
+ */
+export async function saveDIJobBasicInfo(data: unknown) {
+  return request('/api/p1/dev/jobs/di', {
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
  * 获取DI作业内容
  */
 export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {

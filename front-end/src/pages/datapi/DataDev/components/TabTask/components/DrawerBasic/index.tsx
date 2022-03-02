@@ -5,7 +5,7 @@ import { useRequest } from 'ahooks';
 import _ from 'lodash';
 import Title from '@/components/Title';
 import { DIJobBasicInfo } from '@/types/datadev';
-import { editTask, getEnumValues, getDIJobTypes, getDISyncMode } from '@/services/datadev';
+import { editTask, getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
 
 import styles from './index.less';
@@ -50,14 +50,13 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
     })();
   }, [visible, data]);
 
-  // FIXME: 保存出错
   const onSave = () => {
     const values = form.getFieldsValue();
     const params = {
       ...data,
       ...values,
     };
-    editTask(params)
+    saveDIJobBasicInfo(params)
       .then((res) => {
         if (res.success) {
           message.success('保存成功');
