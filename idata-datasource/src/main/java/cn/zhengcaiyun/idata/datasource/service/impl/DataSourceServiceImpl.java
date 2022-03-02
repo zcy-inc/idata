@@ -41,10 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -204,6 +201,11 @@ public class DataSourceServiceImpl implements DataSourceService {
             }
         }
         return new String[]{columns.substring(0, columns.length() - 1), columnKey, extra};
+    }
+
+    @Override
+    public List<String> getTopics(Long dataSourceId) {
+        return Arrays.asList(new String[]{"topic1", "topic2"});
     }
 
     private boolean supportTestConnection(DataSourceTypeEnum dataSourceType) {

@@ -15,9 +15,9 @@ Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.126
 ###
 POST http://localhost:8080/api/p1/dev/jobs/763/di/contents
 Content-Type: application/json
-Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQ2MjAzMTA3LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.x9ILg-vppbL-LU3OkdS3MJs0Xt99gVtrpRDdW3ZwrAmMdsgYUjsv6bRxjrQVsKoqGXz4MXu5l8Lbz1EwafwfLg
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQ2MjkwMzQ5LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.3chVbasmls4zRE7iZqIxbAMCKj1YhS3rHBzV1zC7xe3odgUzz4GuXE4iwvAsUSE2rlEzHJH7di_0S6AHEHVa1Q
 
-{"srcDataSourceType":"mysql","srcDataSourceId":40,"srcTables":"dev_dag_dependence","srcReadFilter":"","destDataSourceType":"mysql","destDataSourceId":40,"destTable":"dev_dag_info","configMode":2,"scriptSelectColumns":"announcement_id,\nconvert(meta_data USING utf8) as meta_data","scriptKeyColumns":"id","scriptMergeSqlParamDto":{"recentDays":"5"},"srcReadShardKey":"aaa","srcShardingNum":2,"srcReadMode":"all","destBeforeWrite":"","destAfterWrite":"","destWriteMode":"init","id":765,"jobId":765,"version":1,"srcCols":[],"destCols":[],"contentHash":""}
+{"configMode":1,"srcDataSourceType":"mysql","srcDataSourceId":40,"srcTables":"das_data_source","srcReadFilter":"","destDataSourceType":"mysql","destDataSourceId":40,"destTable":"aaaaa","destWriteMode":"OVERWRITE","destBulkNum":"12","destShardingNum\t":"2","jobId":769,"srcCols":[],"destCols":[]}
 
 ###
 POST http://localhost:8080/api/p1/dev/jobs/di

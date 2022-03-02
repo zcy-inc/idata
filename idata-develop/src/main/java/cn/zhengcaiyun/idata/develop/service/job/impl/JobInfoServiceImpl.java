@@ -18,7 +18,6 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -423,11 +422,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setDiQuery(generateSrcQuery(diResponse.getSrcCols(), diResponse.getSrcReadFilter(), diResponse.getSrcTables(), diResponse.getSrcDbName()));
 
                 // 字段类型转换
-                diResponse.setDestWriteMode(DestWriteModeEnum.valueOf(diJobContent.getDestWriteMode()));
+                diResponse.setDestWriteMode(WriteModeEnum.DiEnum.valueOf(diJobContent.getDestWriteMode()));
                 diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
 
                 String writeMode = diJobContent.getDestWriteMode();
-                if (StringUtils.equalsIgnoreCase(writeMode, JobWriteModeEnum.UPSERT.name())) {
+                if (StringUtils.equalsIgnoreCase(writeMode, WriteModeEnum.SqlEnum.UPSERT.name())) {
                     // TODO 岛端不需要增量逻辑
                 }
                 return diResponse;
@@ -439,7 +438,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
                 checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
 
-                JobWriteModeEnum writeModeEnum = JobWriteModeEnum.valueOf(jobOutput.getDestWriteMode());
 
                 List<DevJobUdf> udfList = new ArrayList<>();
                 String udfIds = contentSql.getUdfIds();
@@ -465,7 +463,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
                     oldBackFlowResponse.setDestUserName(destSourceDetail.getUserName());
                     oldBackFlowResponse.setDestPassword(destSourceDetail.getPassword());
-                    oldBackFlowResponse.setDestWriteMode(writeModeEnum);
+                    oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
                     oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
                     return oldBackFlowResponse;
@@ -477,7 +475,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 sqlResponse.setUdfList(udfList);
 
                 // 字段类型转换
-                sqlResponse.setDestWriteMode(writeModeEnum);
+                sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
 
                 return sqlResponse;
             case SPARK_PYTHON:

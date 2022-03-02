@@ -43,10 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -196,6 +193,8 @@ public class JobInfoController {
 
         // 映射成数据库的jobType
         jobInfoDto.setJobType(table.get(jobType, syncMode));
+        jobInfoDto.setEditTime(new Date());
+        jobInfoDto.setEditor(OperatorContext.getCurrentOperator().getNickname());
 
         Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
         if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");

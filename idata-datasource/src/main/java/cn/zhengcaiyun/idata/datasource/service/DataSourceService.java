@@ -25,6 +25,8 @@ import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -45,4 +47,6 @@ public interface DataSourceService {
     Boolean testConnection(DataSourceTypeEnum dataSourceType, DbConfigDto dto);
 
     String[] getDBTableColumns(Long id, String tableName);
+
+    List<String> getTopics(Long dataSourceId);
 }

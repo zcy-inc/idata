@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.portal.controller.dev.job.spark;
+package cn.zhengcaiyun.idata.portal.controller.open;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(path = "/p0/dev/spark")
-public class SparkController {
+public class OpenSparkController {
 
     /**
      * 从旧版idata迁移接口

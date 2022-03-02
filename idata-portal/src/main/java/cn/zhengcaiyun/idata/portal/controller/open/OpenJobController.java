@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.portal.controller.dev.job;
+package cn.zhengcaiyun.idata.portal.controller.open;
 
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/p0/job")
-public class JobHtoolController {
+public class OpenJobController {
 
     @Autowired
     private JobInfoService jobInfoService;

@@ -63,11 +63,13 @@ public class JobInfoExecuteDetailDto {
          *   数据去向-目标表
          */
         private String destTable;//带库名 targetTableName
+
         /**
          * 数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
-         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+//         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+         * @see WriteModeEnum.DiEnum
          */
-        private DestWriteModeEnum destWriteMode; // isRecreate
+        private WriteModeEnum.DiEnum destWriteMode; // isRecreate
         /**
          *   数据来源-读取模式，all：全量，incremental：增量
          */
@@ -169,11 +171,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public DestWriteModeEnum getDestWriteMode() {
+        public WriteModeEnum.DiEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(DestWriteModeEnum destWriteMode) {
+        public void setDestWriteMode(WriteModeEnum.DiEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 
@@ -233,7 +235,7 @@ public class JobInfoExecuteDetailDto {
          * 作业sql内容，里面包含srcTable以及逻辑
          */
         private String srcSql;//sourceSql;
-        private JobWriteModeEnum destWriteMode; //DestWriteModeEnum destWriteMode;
+        private WriteModeEnum.BackFlowEnum destWriteMode; //DestWriteModeEnum destWriteMode;
 //        private String sourceTableName;
         private List<DevJobUdf> udfList; // udfs;
         private DriverTypeEnum destDriverType;//;targetDriverType;
@@ -263,12 +265,20 @@ public class JobInfoExecuteDetailDto {
             this.updateKey = updateKey;
         }
 
-        public JobWriteModeEnum getDestWriteMode() {
+        public WriteModeEnum.BackFlowEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
+        public void setDestWriteMode(WriteModeEnum.BackFlowEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
+        }
+
+        public String getDbColumnNames() {
+            return dbColumnNames;
+        }
+
+        public void setDbColumnNames(String dbColumnNames) {
+            this.dbColumnNames = dbColumnNames;
         }
 
         public String getSrcSql() {
@@ -376,7 +386,7 @@ public class JobInfoExecuteDetailDto {
         /**
          *   数据去向-写入模式，overwrite，upsert
          */
-        private JobWriteModeEnum destWriteMode; // saveMode
+        private WriteModeEnum.SqlEnum destWriteMode; // saveMode
 
         /**
          *   数据来源表主键(写入模式为upsert时必填)
@@ -404,11 +414,11 @@ public class JobInfoExecuteDetailDto {
             this.destTable = destTable;
         }
 
-        public JobWriteModeEnum getDestWriteMode() {
+        public WriteModeEnum.SqlEnum getDestWriteMode() {
             return destWriteMode;
         }
 
-        public void setDestWriteMode(JobWriteModeEnum destWriteMode) {
+        public void setDestWriteMode(WriteModeEnum.SqlEnum destWriteMode) {
             this.destWriteMode = destWriteMode;
         }
 

@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiDirectEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
@@ -251,7 +252,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     private void checkJobContent(DIJobContentContentDto contentDto) {
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");
         checkArgument(Objects.nonNull(contentDto.getSrcDataSourceId()), "来源数据源编号为空");
-        checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");
+        if (contentDto.getJobType() == JobTypeEnum.DI_BATCH || contentDto.getJobType() == JobTypeEnum.DI_STREAM) {
+            checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");
+        }
         checkArgument(StringUtils.isNotBlank(contentDto.getDestDataSourceType()), "目标数据源类型为空");
         checkArgument(Objects.nonNull(contentDto.getDestDataSourceId()), "目标数据源编号为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");

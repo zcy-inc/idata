@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.portal.controller;
+package cn.zhengcaiyun.idata.portal.controller.open;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.common.constant.SystemConfigConstant;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping(path = "/p0/quality/")
-public class DataQualityController {
+public class OpenDataQualityController {
 
     /**
      * TODO 目前是空实现，为了适配htool调用

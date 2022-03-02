@@ -59,6 +59,14 @@ public class DataSourceController {
     private final String CONFIG_DATASOURCE_ACCESS_CODE = "F_MENU_DATASOURCE_CENTER";
 
     /**
+     * 加载kafka topic
+     */
+    @GetMapping("/kafka/topics")
+    public RestResult<List<String>> getTopics(@RequestParam("dataSourceId") Long dataSourceId) {
+        return RestResult.success(dataSourceService.getTopics(dataSourceId));
+    }
+
+    /**
      * 获取数据源类型
      *
      * @return
