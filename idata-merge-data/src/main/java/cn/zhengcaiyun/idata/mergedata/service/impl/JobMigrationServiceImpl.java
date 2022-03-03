@@ -393,7 +393,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             JSONArray targetTableJsonArray = jobInfoJson.getJSONArray("target_tables");
             String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
             checkArgument(target_tables != null && target_tables.length > 0, "旧SQL作业[%s]目标表名为空", oldJobId);
-            outputDto.setDestTable(target_tables[0]);
+            outputDto.setDestTable(target_tables[0].trim());
             String save_mode = Strings.emptyToNull(oldJobContent.getString("save_mode"));
             save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
             outputDto.setDestWriteMode(save_mode.toUpperCase());

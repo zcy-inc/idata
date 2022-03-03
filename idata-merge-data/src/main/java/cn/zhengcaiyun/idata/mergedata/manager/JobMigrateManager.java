@@ -238,7 +238,7 @@ public class JobMigrateManager {
                         migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable), oldJobContent.toJSONString()));
             }
         }
-        contentDto.setDestTable(finalDestTable);
+        contentDto.setDestTable(finalDestTable.trim());
 
         // 数据去向-写入模式，init: 重建表，override：覆盖表
         if (Objects.equals(Boolean.TRUE, old_is_recreate)) {
