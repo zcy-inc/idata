@@ -26,6 +26,8 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @description:
@@ -48,5 +50,12 @@ public interface DataSourceService {
 
     String[] getDBTableColumns(Long id, String tableName);
 
-    List<String> getTopics(Long dataSourceId);
+    /**
+     * 根据dataSourceId获取topic列表
+     * @param dataSourceId
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    List<String> getTopics(Long dataSourceId) throws ExecutionException, InterruptedException;
 }

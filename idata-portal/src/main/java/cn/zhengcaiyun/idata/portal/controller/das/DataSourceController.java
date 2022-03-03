@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -62,7 +64,7 @@ public class DataSourceController {
      * 加载kafka topic
      */
     @GetMapping("/kafka/topics")
-    public RestResult<List<String>> getTopics(@RequestParam("dataSourceId") Long dataSourceId) {
+    public RestResult<List<String>> getTopics(@RequestParam("dataSourceId") Long dataSourceId) throws ExecutionException, InterruptedException {
         return RestResult.success(dataSourceService.getTopics(dataSourceId));
     }
 

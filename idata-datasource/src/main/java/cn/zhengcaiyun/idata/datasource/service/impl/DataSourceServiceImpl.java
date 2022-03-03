@@ -37,11 +37,15 @@ import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.clients.admin.KafkaAdminClient;
+import org.apache.kafka.clients.admin.ListTopicsResult;
+import org.apache.kafka.common.KafkaFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -205,9 +209,18 @@ public class DataSourceServiceImpl implements DataSourceService {
     }
 
     @Override
-    public List<String> getTopics(Long dataSourceId) {
+    public List<String> getTopics(Long dataSourceId) throws ExecutionException, InterruptedException {
+        DataSourceDto dataSource = getDataSource(dataSourceId);
+        String host = dataSource.getDbConfigList().get(0).getHost();
+        Integer port = dataSource.getDbConfigList().get(0).getPort();
 
-        return Arrays.asList(new String[]{"topic1", "topic2"});
+        Properties prop = new Properties();
+        prop.put("bootstrap.servers", host + ":" + port);
+        ListTopicsResult result = KafkaAdminClient.create(prop).listTopics();
+        KafkaFuture<Set<String>> set = result.names();
+        return new ArrayList(set.get());
+
+//        return Arrays.asList(new String[]{"topic1", "topic2"});
     }
 
     private boolean supportTestConnection(DataSourceTypeEnum dataSourceType) {
