@@ -196,6 +196,10 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     destDataSourceType,
     destDataSourceId,
     configMode,
+    destTable,
+    scriptSelectColumns,
+    scriptKeyColumns,
+    scriptMergeSqlParamDto,
   } = jobContent;
 
   const handleFormValuesChange = (_: unknown, allValues: Record<string, unknown>) => {
@@ -252,15 +256,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
 
   // 刷新mergeSQL
   const refreshMergeSQL = async () => {
-    const {
-      srcDataSourceType,
-      destTable,
-      srcReadMode,
-      srcTables,
-      scriptSelectColumns,
-      scriptKeyColumns,
-      scriptMergeSqlParamDto,
-    } = jobContent;
     const { data, success } = await genMergeSQL({
       destTable,
       srcReadMode,
@@ -277,8 +272,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
   };
 
-  // 刷新可视化视图
-  const refreshVisualise = async () => {
+  // 刷新来源表可视化视图
+  const refreshSrcVisualise = async () => {
     const tables = srcTables?.split(',') || [];
     if (tables.length === 0) {
       return message.info('请选择表');
@@ -292,6 +287,22 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       message.success('刷新成功');
       setSrcColumns(data);
       setDestColumns([]);
+    }
+  };
+
+  // 刷新去向表可视化视图
+  const refreshDestVisualise = async () => {
+    if (!destTable) {
+      return message.info('请输入表');
+    }
+    const { success, data } = await getTaskTableColumns({
+      tableName: destTable,
+      dataSourceType: destDataSourceType,
+      dataSourceId: destDataSourceId,
+    });
+    if (success) {
+      message.success('刷新成功');
+      setDestColumns(data);
     }
   };
 
@@ -428,7 +439,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         />
       </Item>
       <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
-        <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshVisualise} />
+        <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshSrcVisualise} />
       </Item>
       <Item name="srcReadFilter" label="数据过滤">
         <TextArea style={{ maxWidth, minWidth }} placeholder="请参考相应SQL语法填写where过滤语句" />
@@ -475,8 +486,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   );
   const destTableNode = (
     <Item name="destTable" label="表" rules={ruleText}>
-      {/* TODO: */}
-      <TableInput showRefresh={!isDIType} onRefresh={() => {}} />
+      <TableInput showRefresh={!isDIType} onRefresh={refreshDestVisualise} />
     </Item>
   );
   const backFlowDestWriteModeNode = (
