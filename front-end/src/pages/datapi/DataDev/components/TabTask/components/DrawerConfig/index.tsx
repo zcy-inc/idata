@@ -27,7 +27,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
-import { ExecEngine, SchPriority } from '@/constants/datadev';
+import { SchPriority, execEngineOptions } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -241,11 +241,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   size="large"
                   style={{ width }}
                   placeholder="请选择"
-                  options={[
-                    { label: 'SPARK', value: ExecEngine.SPARK },
-                    { label: 'SQOOP', value: ExecEngine.SQOOP },
-                    { label: 'KYLIN', value: ExecEngine.KYLIN },
-                  ]}
+                  options={execEngineOptions}
                 />
               </Item>
             </Form>
