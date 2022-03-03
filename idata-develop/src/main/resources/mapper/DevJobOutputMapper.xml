@@ -69,10 +69,7 @@
 
     <!--通过实体作为筛选条件查询-->
     <select id="queryOne" resultMap="BaseResultMap">
-        select
-            id, del, creator, create_time, job_id, environment, dest_data_source_type, dest_data_source_id,
-            TRIM(dest_table) as dest_table,
-            dest_write_mode, job_target_table_pk
+        select *
         from idata.dev_job_output
         <where>
             <if test="id != null">
