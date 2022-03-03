@@ -65,7 +65,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-dest`,
         x: 540,
         y: 100 + 40 * i,
-        label: `${_.primaryKey ? '🔑' : ''} ${_.name}`,
+        label: `${_.primaryKey ? '🔑 ' : ''} ${_.name} ${_.dataType || ''}`,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -374,11 +374,11 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       }
       if (model.tableType === 'dest') {
         if (model.data.primaryKey) {
-          graph.updateItem(node, { label: model.data.name, data: { ...data, primaryKey: false } });
+          graph.updateItem(node, { label: `${model.data.name} ${model.data.dataType}`, data: { ...data, primaryKey: false } });
           set(destMap.current, `[${model.id}].primaryKey`, false);
         } else {
           graph.updateItem(node, {
-            label: `🔑 ${model.data.name}`,
+            label: `🔑 ${model.data.name} ${model.data.dataType}`,
             data: { ...data, primaryKey: true },
           });
           set(destMap.current, `[${model.id}].primaryKey`, true);
