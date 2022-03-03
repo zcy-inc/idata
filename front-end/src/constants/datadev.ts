@@ -91,6 +91,18 @@ export enum DestWriteMode {
   APPEND = 'append',
 }
 
+export enum BackFlowDestWriteMode {
+  INSERT = 'INSERT',
+  UPSERT = 'UPSERT',
+  OVERWRITE = 'OVERWRITE',
+}
+
+export const backFlowDestWriteModeOptions = [
+  { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
+  { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
+  { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
+];
+
 export enum VersionStatus {
   EDITING = 0, // 编辑中
   TO_BE_PUBLISHED = 1, // 待发布

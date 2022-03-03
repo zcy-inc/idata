@@ -975,6 +975,16 @@ export async function getDIJobBasicInfo(jobId: number) {
 }
 
 /**
+ * 保存DI作业基础信息
+ */
+export async function saveDIJobBasicInfo(data: unknown) {
+  return request('/api/p1/dev/jobs/di', {
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
  * 获取DI作业内容
  */
 export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
@@ -999,5 +1009,14 @@ export async function genMergeSQL(data: MergeSqlParamDto) {
   return request(`/api/p1/dev/jobs/di/generate/merge-sql`, {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取 kafka topic 下拉列表
+ */
+export async function getKafkaTopics(params: { dataSourceId: number }) {
+  return request<Tresponse<string[]>>('/api/p1/das/kafka/topics', {
+    params,
   });
 }

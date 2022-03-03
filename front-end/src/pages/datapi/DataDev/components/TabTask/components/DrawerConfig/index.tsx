@@ -207,7 +207,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={security.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
                 />
               </Item>
-              <Item name="execDriverMem" label="驱动器内存" rules={ruleSelc}>
+              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -215,7 +215,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execDriverMemOptions}
                 />
               </Item>
-              <Item name="execWorkerMem" label="执行器内存" rules={ruleSelc}>
+              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
