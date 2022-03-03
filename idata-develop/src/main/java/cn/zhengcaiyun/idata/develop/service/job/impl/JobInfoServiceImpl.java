@@ -37,6 +37,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
@@ -77,6 +78,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Autowired
     private DevJobInfoMyDao devJobInfoMyDao;
+
+    @Autowired
+    private JobOutputMyDao jobOutputMyDao;
 
     private final JobInfoRepo jobInfoRepo;
     private final JobOutputRepo jobOutputRepo;
@@ -399,7 +403,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
                 return diResponse;
             case SQL_SPARK:
-                JobOutput jobOutput = jobOutputRepo.query(id, env)
+                JobOutputQuery query = new JobOutputQuery();
+                query.setJobId(id);
+                query.setEnvironment(env);
+                JobOutput jobOutput = Optional.ofNullable(jobOutputMyDao.queryOne(query))
                         .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", id, env)));
 
                 // 封装sql_job_content

@@ -18,7 +18,13 @@
     
     <select id="getPublishedDiJobContent" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent">
         select
-            t2.*
+            t2.id, t2.del, t2.creator, t2.create_time, t2.editor, t2.edit_time, t2.job_id, t2.editable, t2.version,
+            t2.direct, t2.src_data_source_type, t2.src_data_source_id, t2.src_topic, t2.src_tables, t2.src_read_mode,
+            t2.src_columns, t2.src_read_filter, t2.src_query, t2.src_read_shard_key, t2.src_sharding_num, t2.dest_data_source_type,
+            t2.dest_data_source_id, t2.dest_topic,
+            trim(t2.dest_table) as dest_table, t2.dest_write_mode, t2.dest_before_write, t2.dest_after_write, t2.dest_columns,
+            t2.dest_properties, t2.dest_sharding_num, t2.dest_bulk_num, t2.content_hash, t2.merge_sql, t2.script_select_columns,
+            t2.script_key_columns, t2.script_merge_sql_param, t2.script_merge_sql, t2.script_query, t2.config_mode
         from
             (
                 select * from dev_job_publish_record

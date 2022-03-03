@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao">
+
+    <resultMap id="BaseResultMap" type="cn.zhengcaiyun.idata.develop.dal.model.job.JobOutput">
+        <!--@Table dev_job_output-->
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="del" column="del" jdbcType="INTEGER"/>
+        <result property="creator" column="creator" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="jobId" column="job_id" jdbcType="INTEGER"/>
+        <result property="environment" column="environment" jdbcType="VARCHAR"/>
+        <result property="destDataSourceType" column="dest_data_source_type" jdbcType="VARCHAR"/>
+        <result property="destDataSourceId" column="dest_data_source_id" jdbcType="INTEGER"/>
+        <result property="destTable" column="dest_table" jdbcType="VARCHAR"/>
+        <result property="destWriteMode" column="dest_write_mode" jdbcType="VARCHAR"/>
+        <result property="jobTargetTablePk" column="job_target_table_pk" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="BaseResultMap">
+        select
+          id, del, creator, create_time, job_id, environment, dest_data_source_type, dest_data_source_id, dest_table, dest_write_mode, job_target_table_pk
+        from idata.dev_job_output
+        where id = #{id}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        id, del, creator, create_time, job_id, environment, dest_data_source_type, dest_data_source_id, dest_table, dest_write_mode, job_target_table_pk
+        from idata.dev_job_output
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="del != null">
+                and del = #{del}
+            </if>
+            <if test="creator != null and creator != ''">
+                and creator = #{creator}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="jobId != null">
+                and job_id = #{jobId}
+            </if>
+            <if test="environment != null and environment != ''">
+                and environment = #{environment}
+            </if>
+            <if test="destDataSourceType != null and destDataSourceType != ''">
+                and dest_data_source_type = #{destDataSourceType}
+            </if>
+            <if test="destDataSourceId != null">
+                and dest_data_source_id = #{destDataSourceId}
+            </if>
+            <if test="destTable != null and destTable != ''">
+                and dest_table = #{destTable}
+            </if>
+            <if test="destWriteMode != null and destWriteMode != ''">
+                and dest_write_mode = #{destWriteMode}
+            </if>
+            <if test="jobTargetTablePk != null and jobTargetTablePk != ''">
+                and job_target_table_pk = #{jobTargetTablePk}
+            </if>
+        </where>
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryOne" resultMap="BaseResultMap">
+        select
+            id, del, creator, create_time, job_id, environment, dest_data_source_type, dest_data_source_id,
+            TRIM(dest_table) as dest_table,
+            dest_write_mode, job_target_table_pk
+        from idata.dev_job_output
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="del != null">
+                and del = #{del}
+            </if>
+            <if test="creator != null and creator != ''">
+                and creator = #{creator}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="jobId != null">
+                and job_id = #{jobId}
+            </if>
+            <if test="environment != null and environment != ''">
+                and environment = #{environment}
+            </if>
+            <if test="destDataSourceType != null and destDataSourceType != ''">
+                and dest_data_source_type = #{destDataSourceType}
+            </if>
+            <if test="destDataSourceId != null">
+                and dest_data_source_id = #{destDataSourceId}
+            </if>
+            <if test="destTable != null and destTable != ''">
+                and dest_table = #{destTable}
+            </if>
+            <if test="destWriteMode != null and destWriteMode != ''">
+                and dest_write_mode = #{destWriteMode}
+            </if>
+            <if test="jobTargetTablePk != null and jobTargetTablePk != ''">
+                and job_target_table_pk = #{jobTargetTablePk}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into idata.dev_job_output(del, creator, create_time, job_id, environment, dest_data_source_type, dest_data_source_id, dest_table, dest_write_mode, job_target_table_pk)
+        values (#{del}, #{creator}, #{createTime}, #{jobId}, #{environment}, #{destDataSourceType}, #{destDataSourceId}, #{destTable}, #{destWriteMode}, #{jobTargetTablePk})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update idata.dev_job_output
+        <set>
+            <if test="del != null">
+                del = #{del},
+            </if>
+            <if test="creator != null and creator != ''">
+                creator = #{creator},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="jobId != null">
+                job_id = #{jobId},
+            </if>
+            <if test="environment != null and environment != ''">
+                environment = #{environment},
+            </if>
+            <if test="destDataSourceType != null and destDataSourceType != ''">
+                dest_data_source_type = #{destDataSourceType},
+            </if>
+            <if test="destDataSourceId != null">
+                dest_data_source_id = #{destDataSourceId},
+            </if>
+            <if test="destTable != null and destTable != ''">
+                dest_table = #{destTable},
+            </if>
+            <if test="destWriteMode != null and destWriteMode != ''">
+                dest_write_mode = #{destWriteMode},
+            </if>
+            <if test="jobTargetTablePk != null and jobTargetTablePk != ''">
+                job_target_table_pk = #{jobTargetTablePk},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from idata.dev_job_output where id = #{id}
+    </delete>
+
+</mapper>
