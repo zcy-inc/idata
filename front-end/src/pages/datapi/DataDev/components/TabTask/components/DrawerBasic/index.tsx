@@ -5,7 +5,7 @@ import { useRequest } from 'ahooks';
 import _ from 'lodash';
 import Title from '@/components/Title';
 import { DIJobBasicInfo } from '@/types/datadev';
-import { editTask, getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
+import { getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
 
 import styles from './index.less';

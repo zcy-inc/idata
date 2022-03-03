@@ -1011,3 +1011,12 @@ export async function genMergeSQL(data: MergeSqlParamDto) {
     data,
   });
 }
+
+/**
+ * 获取 kafka topic 下拉列表
+ */
+export async function getKafkaTopics(params: { dataSourceId: number }) {
+  return request<Tresponse<string[]>>('/api/p1/das/kafka/topics', {
+    params,
+  });
+}
