@@ -380,23 +380,36 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 BeanUtils.copyProperties(bfJobContent, backFlowResponse);
 
-//                backFlowResponse.setUpdateKey(bfJobOutput.getJobTargetTablePk());
-//                backFlowResponse.setDestWriteMode(JobWriteModeEnum.valueOf(bfJobOutput.getDestWriteMode()));
-//
-//                // 根据回流启用模式，填充数据
-//                if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
-//                    backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
-//                } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
-//                    backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
-//                }
-//                backFlowResponse.setParallelism(bfJobContent.getSrcShardingNum());
-//
-//                // 封装连接信息
-//                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobOutput.getDestDataSourceId());
-//                backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
-//                backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
-//                backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
-//                backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+                backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
+
+                // 根据回流启用模式，填充数据
+                if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
+                    backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
+                    // 抽取关联映射列
+                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
+                    backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
+                    //抽取主键key
+                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toSet());
+                    backFlowResponse.setUpdateKey(StringUtils.join(keyNameSet, ","));
+
+                } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
+                    backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
+                    backFlowResponse.setUpdateKey(bfJobContent.getScriptKeyColumns());
+                }
+                backFlowResponse.setParallelism(bfJobContent.getSrcShardingNum());
+
+                String properties = bfJobContent.getDestProperties();
+                if (StringUtils.isNotBlank(properties)) {
+                    backFlowResponse.setDestPropMap(JSON.parseObject(properties, Map.class));
+                }
+
+                // 封装连接信息
+                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId());
+                backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
+                backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
+                backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
+                backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
                 return backFlowResponse;
             case DI_BATCH:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);

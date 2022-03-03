@@ -139,7 +139,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         JobContentBaseDto content = new JobContentBaseDto();
         content.setJobId(jobId);
         content.setVersion(version);
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType) || JobTypeEnum.BACK_FLOW.getCode().equals(jobType) ) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
             content.setId(jobContentOptional.get().getId());

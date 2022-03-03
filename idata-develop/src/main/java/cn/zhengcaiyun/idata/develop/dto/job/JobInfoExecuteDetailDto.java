@@ -229,23 +229,19 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
-    // web方面接触到
     public static class BackFlowDetailDto extends JobInfoExecuteDetailDto {
         /**
          * 作业sql内容，里面包含srcTable以及逻辑
          */
         private String srcSql;//sourceSql;
         private WriteModeEnum.BackFlowEnum destWriteMode; //DestWriteModeEnum destWriteMode;
-//        private String sourceTableName;
-        private List<DevJobUdf> udfList; // udfs;
+        private List<DevJobUdf> udfList; // udfs; 老版本使用，新版本不会关联
         private DriverTypeEnum destDriverType;//;targetDriverType;
         private String destUrlPath;//targetUrlPath;
         private String destUserName;//username;
         private String destPassword;//password;
         private String destTable;//targetTableName;
-        private String dbColumnNames;
-        private String destBeforeWrite;//targetPrefix; 新版本
-        private String destAfterWrite;//targetPostfix; 新版本
+        private String destColumnNames; // dbColumnNames src数据源的列
         private String updateKey; //新版本
         private Integer parallelism; //新版本
         private Map<String, String> destPropMap; //其余属性定义map
@@ -273,12 +269,12 @@ public class JobInfoExecuteDetailDto {
             this.destWriteMode = destWriteMode;
         }
 
-        public String getDbColumnNames() {
-            return dbColumnNames;
+        public String getDestColumnNames() {
+            return destColumnNames;
         }
 
-        public void setDbColumnNames(String dbColumnNames) {
-            this.dbColumnNames = dbColumnNames;
+        public void setDestColumnNames(String destColumnNames) {
+            this.destColumnNames = destColumnNames;
         }
 
         public String getSrcSql() {
@@ -321,6 +317,7 @@ public class JobInfoExecuteDetailDto {
             this.udfList = udfList;
         }
 
+
         public String getDestUserName() {
             return destUserName;
         }
@@ -335,22 +332,6 @@ public class JobInfoExecuteDetailDto {
 
         public void setDestPassword(String destPassword) {
             this.destPassword = destPassword;
-        }
-
-        public String getDestBeforeWrite() {
-            return destBeforeWrite;
-        }
-
-        public void setDestBeforeWrite(String destBeforeWrite) {
-            this.destBeforeWrite = destBeforeWrite;
-        }
-
-        public String getDestAfterWrite() {
-            return destAfterWrite;
-        }
-
-        public void setDestAfterWrite(String destAfterWrite) {
-            this.destAfterWrite = destAfterWrite;
         }
 
         public Map<String, String> getDestPropMap() {

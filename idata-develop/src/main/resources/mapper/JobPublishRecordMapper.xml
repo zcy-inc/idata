@@ -26,7 +26,7 @@
                       and del = 0
                       and job_id = #{jobId}
                       and environment = #{env}
-                      and (job_type_code = 'DI_BATCH' or job_type_code = 'DI_BATCH')
+                      and (job_type_code = 'DI_BATCH' or job_type_code = 'DI_BATCH' or job_type_code = 'BACK_FLOW')
             ) as t1
         join dev_job_content_di as t2
         on t1.job_content_id = t2.id
