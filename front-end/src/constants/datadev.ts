@@ -167,4 +167,12 @@ export enum ExecEngine {
   SPARK = 'SPARK',
   SQOOP = 'SQOOP',
   KYLIN = 'KYLIN',
+  DORIS = 'DORIS',
 }
+
+export const execEngineOptions = [
+  { label: 'SPARK', value: ExecEngine.SPARK },
+  { label: 'SQOOP', value: ExecEngine.SQOOP },
+  { label: 'KYLIN', value: ExecEngine.KYLIN },
+  { label: 'DORIS', value: ExecEngine.DORIS },
+];

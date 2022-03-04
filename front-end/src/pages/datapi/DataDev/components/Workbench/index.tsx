@@ -30,10 +30,10 @@ const Workbench: FC = ({}) => {
     switch (pane.belong) {
       case FolderBelong.DESIGNTABLE:
         return <TabTable pane={pane} />;
-      case FolderBelong.DESIGNENUM:
-        return <TabEnum pane={pane} />;
-      case FolderBelong.DESIGNLABEL:
-        return <ViewLabel pane={pane} />;
+      // case FolderBelong.DESIGNENUM:
+      //   return <TabEnum pane={pane} />;
+      // case FolderBelong.DESIGNLABEL:
+      //   return <ViewLabel pane={pane} />;
       case FolderBelong.DAG:
         return <TabDAG pane={pane} />;
       case FolderBelong.DI:
