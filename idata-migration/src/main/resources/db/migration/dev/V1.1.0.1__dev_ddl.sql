@@ -1,7 +1,4 @@
 alter table dev_job_content_di
-    add direct varchar(5) null comment '数据流向，IN-数据集成、OUT-数据回流' after version;
-
-alter table dev_job_content_di
     add src_topic varchar(128) null comment '来源为kafka数据类型的topic' after src_data_source_id;
 
 alter table dev_job_content_di modify src_columns text not null comment '数据来源-字段信息，json格式' after src_read_mode;

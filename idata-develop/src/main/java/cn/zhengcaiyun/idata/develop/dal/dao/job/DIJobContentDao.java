@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, direct, srcDataSourceType, srcDataSourceId, srcTopic, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTopic, destTable, destWriteMode, destBeforeWrite, destAfterWrite, destProperties, destShardingNum, destBulkNum, contentHash, mergeSql, scriptSelectColumns, scriptKeyColumns, scriptMergeSqlParam, configMode, srcTables, srcColumns, srcQuery, destColumns, scriptMergeSql, scriptQuery);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcTopic, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTopic, destTable, destWriteMode, destBeforeWrite, destAfterWrite, destProperties, destShardingNum, destBulkNum, contentHash, mergeSql, scriptSelectColumns, scriptKeyColumns, scriptMergeSqlParam, configMode, srcTables, srcColumns, srcQuery, destColumns, scriptMergeSql, scriptQuery);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -66,7 +66,6 @@ public interface DIJobContentDao {
         @Result(column="job_id", property="jobId", jdbcType=JdbcType.BIGINT),
         @Result(column="editable", property="editable", jdbcType=JdbcType.TINYINT),
         @Result(column="version", property="version", jdbcType=JdbcType.INTEGER),
-        @Result(column="direct", property="direct", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_data_source_type", property="srcDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_data_source_id", property="srcDataSourceId", jdbcType=JdbcType.BIGINT),
         @Result(column="src_topic", property="srcTopic", jdbcType=JdbcType.VARCHAR),
@@ -131,7 +130,6 @@ public interface DIJobContentDao {
             .map(jobId).toProperty("jobId")
             .map(editable).toProperty("editable")
             .map(version).toProperty("version")
-            .map(direct).toProperty("direct")
             .map(srcDataSourceType).toProperty("srcDataSourceType")
             .map(srcDataSourceId).toProperty("srcDataSourceId")
             .map(srcTopic).toProperty("srcTopic")
@@ -175,7 +173,6 @@ public interface DIJobContentDao {
             .map(jobId).toPropertyWhenPresent("jobId", record::getJobId)
             .map(editable).toPropertyWhenPresent("editable", record::getEditable)
             .map(version).toPropertyWhenPresent("version", record::getVersion)
-            .map(direct).toPropertyWhenPresent("direct", record::getDirect)
             .map(srcDataSourceType).toPropertyWhenPresent("srcDataSourceType", record::getSrcDataSourceType)
             .map(srcDataSourceId).toPropertyWhenPresent("srcDataSourceId", record::getSrcDataSourceId)
             .map(srcTopic).toPropertyWhenPresent("srcTopic", record::getSrcTopic)
@@ -245,7 +242,6 @@ public interface DIJobContentDao {
                 .set(jobId).equalTo(record::getJobId)
                 .set(editable).equalTo(record::getEditable)
                 .set(version).equalTo(record::getVersion)
-                .set(direct).equalTo(record::getDirect)
                 .set(srcDataSourceType).equalTo(record::getSrcDataSourceType)
                 .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
                 .set(srcTopic).equalTo(record::getSrcTopic)
@@ -287,7 +283,6 @@ public interface DIJobContentDao {
                 .set(jobId).equalToWhenPresent(record::getJobId)
                 .set(editable).equalToWhenPresent(record::getEditable)
                 .set(version).equalToWhenPresent(record::getVersion)
-                .set(direct).equalToWhenPresent(record::getDirect)
                 .set(srcDataSourceType).equalToWhenPresent(record::getSrcDataSourceType)
                 .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
                 .set(srcTopic).equalToWhenPresent(record::getSrcTopic)
@@ -330,7 +325,6 @@ public interface DIJobContentDao {
             .set(jobId).equalTo(record::getJobId)
             .set(editable).equalTo(record::getEditable)
             .set(version).equalTo(record::getVersion)
-            .set(direct).equalTo(record::getDirect)
             .set(srcDataSourceType).equalTo(record::getSrcDataSourceType)
             .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
             .set(srcTopic).equalTo(record::getSrcTopic)
@@ -375,7 +369,6 @@ public interface DIJobContentDao {
             .set(jobId).equalToWhenPresent(record::getJobId)
             .set(editable).equalToWhenPresent(record::getEditable)
             .set(version).equalToWhenPresent(record::getVersion)
-            .set(direct).equalToWhenPresent(record::getDirect)
             .set(srcDataSourceType).equalToWhenPresent(record::getSrcDataSourceType)
             .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
             .set(srcTopic).equalToWhenPresent(record::getSrcTopic)

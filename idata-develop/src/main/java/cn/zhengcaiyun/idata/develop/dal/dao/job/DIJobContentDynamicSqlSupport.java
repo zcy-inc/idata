@@ -75,13 +75,6 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   数据流向，IN-数据集成、OUT-数据回流
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
-    public static final SqlColumn<String> direct = DI_JOB_CONTENT.direct;
-
-    /**
-     * Database Column Remarks:
      *   数据来源-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_type")
@@ -302,8 +295,6 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<Integer> editable = column("editable", JDBCType.TINYINT);
 
         public final SqlColumn<Integer> version = column("version", JDBCType.INTEGER);
-
-        public final SqlColumn<String> direct = column("direct", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcDataSourceType = column("src_data_source_type", JDBCType.VARCHAR);
 

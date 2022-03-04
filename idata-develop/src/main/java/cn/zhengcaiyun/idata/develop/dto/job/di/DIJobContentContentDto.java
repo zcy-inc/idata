@@ -109,11 +109,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
     private String mergeSql;
 
     /**
-     *   数据流向，IN-数据集成、OUT-数据回流
-     */
-    private String direct;
-
-    /**
      *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
      */
     private String srcQuery;
@@ -315,14 +310,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setMergeSql(String mergeSql) {
         this.mergeSql = mergeSql;
-    }
-
-    public String getDirect() {
-        return direct;
-    }
-
-    public void setDirect(String direct) {
-        this.direct = direct;
     }
 
     public String getSrcQuery() {

@@ -74,13 +74,6 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
-     *   数据流向，IN-数据集成、OUT-数据回流
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
-    private String direct;
-
-    /**
-     * Database Column Remarks:
      *   数据来源-数据源类型
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_type")
@@ -370,16 +363,6 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.version")
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
-    public String getDirect() {
-        return direct;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.direct")
-    public void setDirect(String direct) {
-        this.direct = direct;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_data_source_type")

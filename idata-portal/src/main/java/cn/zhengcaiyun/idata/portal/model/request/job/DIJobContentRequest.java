@@ -105,11 +105,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
     private String mergeSql;
 
     /**
-     *   数据流向，IN-数据集成、OUT-数据回流
-     */
-//    private String direct;
-
-    /**
      *   来源为kafka数据类型的topic
      */
     private String srcTopic;
@@ -308,14 +303,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
     public void setMergeSql(String mergeSql) {
         this.mergeSql = mergeSql;
     }
-
-//    public String getDirect() {
-//        return direct;
-//    }
-//
-//    public void setDirect(String direct) {
-//        this.direct = direct;
-//    }
 
     public String getSrcTopic() {
         return srcTopic;
