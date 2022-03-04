@@ -8,8 +8,8 @@ import { IPane } from '@/models/datadev';
 import { FolderBelong } from '@/constants/datadev';
 
 import TabCloseIcon from '@/components/TabCloseIcon';
-import ViewLabel from '../ViewLabel';
-import TabEnum from '../TabEnum';
+// import ViewLabel from '../ViewLabel';
+// import TabEnum from '../TabEnum';
 import TabTable from '../TabTable';
 import TabDAG from '../TabDAG';
 import TabTask from '../TabTask';

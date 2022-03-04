@@ -40,6 +40,7 @@ import {
   diConfigOptions,
   DIConfigMode,
   backFlowDestWriteModeOptions,
+  shardingNumOptions,
 } from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
@@ -185,6 +186,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     srcReadMode: SrcReadMode.ALL,
     destWriteMode: DestWriteMode.INIT,
     configMode: DIConfigMode.VISUALIZATION,
+    srcShardingNum: 1,
+    destShardingNum: 1,
   };
   const [form] = Form.useForm();
   const [jobContent, setJobContent] = useState<Record<string, any>>({});
@@ -458,7 +461,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               size="large"
               style={{ maxWidth, minWidth }}
               placeholder="请选择"
-              options={[1, 2, 4, 8, 16].map((_) => ({ label: _, value: _ }))}
+              options={shardingNumOptions}
             />
           </Item>
           <Item name="srcReadMode" label="读取模式" rules={ruleSlct}>
@@ -480,7 +483,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
       </Item>
       <Item name="destShardingNum" label="批量写入并行度" rules={ruleText}>
-        <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
+        <Select
+          size="large"
+          style={{ maxWidth, minWidth }}
+          placeholder="请选择"
+          options={shardingNumOptions}
+        />
       </Item>
     </Fragment>
   );

@@ -176,3 +176,6 @@ export const execEngineOptions = [
   { label: 'KYLIN', value: ExecEngine.KYLIN },
   { label: 'DORIS', value: ExecEngine.DORIS },
 ];
+
+// 切分键分片数/并行度
+export const shardingNumOptions = [1, 2, 4, 8, 16].map((i) => ({ label: i, value: i }));
