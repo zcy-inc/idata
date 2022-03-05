@@ -458,7 +458,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
                 checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
 
-
                 List<DevJobUdf> udfList = new ArrayList<>();
                 String udfIds = contentSql.getUdfIds();
                 if (StringUtils.isNotBlank(udfIds)) {

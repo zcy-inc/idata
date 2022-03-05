@@ -122,6 +122,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
     /**
      * 封装query和mergesql
+     *
      * @param contentDto
      */
     private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
@@ -180,16 +181,14 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables) {
-        boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
-        if (!generate) {
-            return null;
-        }
-
-        List<String> columns = mappingColumnList.stream().map(e -> {
-            String name = e.getName();
-            String mappingSql = e.getMappingSql();
-            return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
-        }).collect(Collectors.toList());
+        List<String> columns = mappingColumnList
+                .stream()
+                .filter(e -> e.getMappedColumn() != null)
+                .map(e -> {
+                    String name = e.getName();
+                    String mappingSql = e.getMappingSql();
+                    return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
+                }).collect(Collectors.toList());
 
         String selectColumns = StringUtils.join(columns, ",");
         String srcQuery = String.format("select %s from %s ", selectColumns, srcTables);
@@ -211,6 +210,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
     @Override
     public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DriverTypeEnum typeEnum, int days) throws IllegalArgumentException {
+        checkArgument(destTable.split("\\.").length == 2, "生成mergeSql的destTable必须带上库名: " + destTable);
         String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
