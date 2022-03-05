@@ -15,6 +15,20 @@
         <result property="scriptArguments" column="script_arguments" typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler" javaType="java.util.List"/>
         <result property="sourceResource" column="source_resource" javaType="string"/>
     </resultMap>
+    <resultMap id="sparkMap" type="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark">
+        <result property="id" column="id"/>
+        <result property="del" column="del" javaType="Integer"/>
+        <result property="creator" column="creator" javaType="string"/>
+        <result property="createTime" column="create_time" javaType="Date"/>
+        <result property="editor" column="editor" javaType="string"/>
+        <result property="editTime" column="edit_time" javaType="Date"/>
+        <result property="jobId" column="job_id" javaType="Long"/>
+        <result property="editable" column="editable" javaType="Integer"/>
+        <result property="version" column="version" javaType="Integer"/>
+        <result property="resourceHdfsPath" column="resource_hdfs_path" javaType="string"/>
+        <result property="appArguments" column="app_arguments" typeHandler="cn.zhengcaiyun.idata.develop.dal.JsonColumnHandler" javaType="java.util.List"/>
+        <result property="mainClass" column="main_class" javaType="string"/>
+    </resultMap>
     
     <select id="getPublishedDiJobContent" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent">
         select
@@ -48,8 +62,7 @@
         on t1.job_content_id = t2.id
     </select>
 
-    <select id="getPublishedSparkJobContent"
-            resultType="cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark">
+    <select id="getPublishedSparkJobContent" resultMap="sparkMap">
         select t2.*
         from
             (
