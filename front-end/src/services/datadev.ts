@@ -1020,3 +1020,19 @@ export async function getKafkaTopics(params: { dataSourceId: number }) {
     params,
   });
 }
+
+/**
+ * 获取数据源的数据库
+ */
+export async function getDbNames(params: { dataSourceId: number }) {
+  return request<Tresponse<string[]>>('/api/p1/das/dbNames', {
+    params,
+  }).then(({ data }) => data);
+}
+
+/**
+ * 根据数据源和库名查询表名
+ */
+export async function getTableNames(params: { dataSourceId: number; dbName?: string }) {
+  return request<Tresponse<string[]>>('/api/p1/das/tableNames', { params }).then(({ data }) => data);
+}
