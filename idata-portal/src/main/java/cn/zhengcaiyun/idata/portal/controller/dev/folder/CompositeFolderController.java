@@ -121,7 +121,7 @@ public class CompositeFolderController {
      * @param belong 所属功能模块标识
      * @return {@link RestResult}
      */
-    @GetMapping("")
+    @GetMapping("/folders")
     public RestResult<List<CompositeFolderDto>> getFolders(@RequestParam(value = "belong") String belong) {
         return RestResult.success(compositeFolderService.getFolders(belong));
     }
