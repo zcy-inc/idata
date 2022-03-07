@@ -225,9 +225,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         }
 
         // 筛选的列名
-        String columnsParam = StringUtils.join(columnList, "\n,");
+        String columnsParam = StringUtils.join(columnList, ", ");
         // 筛选的带函数的列名
-        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n,");
+        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n\t\t,");
         //生成keyCondition，key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");

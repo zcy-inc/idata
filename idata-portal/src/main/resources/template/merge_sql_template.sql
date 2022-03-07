@@ -9,19 +9,16 @@ select #{#coalesceColumns}
        #{#isMulPartition ? ',coalesce(t1.num, t2.num) num' : ''}
 from  
     (select
-        #{#columns}
-        #{#isMulPartition ? ',num' : ''}
+        #{#columns} #{#isMulPartition ? ',num' : ''}
     from #{#destTable}) t1
     full join
     (select
-        #{#columns}
-        #{#isMulPartition ? ',num' : ''}
+        #{#columns} #{#isMulPartition ? ',num' : ''}
     from #{#tmpTable}
     where pt='${day-1d}') t2
     on #{#keyCondition} #{#isMulPartition ? 'and t1.num=t2.num' : ''};
 
 insert overwrite table #{#destTable} #{#isMulPartition ? 'partition(num)' : ''}
 select
-    #{#columns}
-    #{#isMulPartition ? ',num' : ''}
+    #{#columns} #{#isMulPartition ? ',num' : ''}
 from #{#tmpTable} where pt='${day}';
