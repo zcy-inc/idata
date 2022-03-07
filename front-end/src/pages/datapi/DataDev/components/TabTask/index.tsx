@@ -22,6 +22,8 @@ import {
   getDIJobContent,
   genMergeSQL,
   getKafkaTopics,
+  getDbNames,
+  getTableNames,
 } from '@/services/datadev';
 import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import Title from '@/components/Title';
@@ -158,6 +160,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       manual: true,
     },
   );
+  const { data: dbNames = [], run: fetchDbNames } = useRequest(getDbNames, {
+    manual: true,
+  });
+  const { data: tableNames = [], run: fetchTableNames } = useRequest(getTableNames, {
+    manual: true,
+  });
+  const srcDbOptions = dbNames.map((name) => ({ label: name, value: name }));
+  const hiveTables = tableNames.map((name) => ({ tableName: name }));
   // kafka topic 下拉列表
   const [topicOptions, setTopicOptions] = useState<DefaultOptionType[]>([]);
   const [srcColumns, setSrcColumns] = useState<MappedColumn[]>([]);
@@ -196,6 +206,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     srcDataSourceId,
     srcReadMode,
     srcTables,
+    srcDbName,
     destDataSourceType,
     destDataSourceId,
     configMode,
@@ -222,29 +233,41 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     })();
   }, [jobId, version]);
 
-  // 数据来源-数据源类型改变: 1. 清空`数据源名称` 和 `表`; 2. 刷新`数据源名称`下拉列表
+  // 数据来源-数据源类型改变: 刷新`数据源名称`下拉列表
   useEffect(() => {
     if (srcDataSourceType) {
       getSrcDSOptions(srcDataSourceType);
     }
-  }, [form, srcDataSourceType]);
+  }, [srcDataSourceType]);
 
-  // 数据去向-数据源类型改变: 1. 清空`数据源名称`; 2. 刷新`数据源名称`下拉列表
+  // 数据去向-数据源类型改变: 刷新`数据源名称`下拉列表
   useEffect(() => {
     if (destDataSourceType) {
       getDestDSOptions(destDataSourceType);
     }
-  }, [form, destDataSourceType]);
+  }, [destDataSourceType]);
 
-  // 数据来源-数据源名称改变: 1. 清空`表`; 2. 刷新`表`下拉列表
+  // 数据来源-数据源名称改变: 刷新`表`下拉列表
   useEffect(() => {
-    if (typeof srcDataSourceType !== 'undefined' && typeof srcDataSourceId !== 'undefined') {
-      getSrcTableOptions({
-        dataSourceId: srcDataSourceId,
-        dataSourceType: srcDataSourceType,
-      });
+    if (typeof srcDataSourceType === 'undefined' || typeof srcDataSourceId === 'undefined') {
+      return;
     }
-  }, [form, srcDataSourceId, srcDataSourceType]);
+    if (srcDataSourceType === 'hive') {
+      fetchDbNames({ dataSourceId: srcDataSourceId });
+      return;
+    }
+    getSrcTableOptions({
+      dataSourceId: srcDataSourceId,
+      dataSourceType: srcDataSourceType,
+    });
+  }, [srcDataSourceId, srcDataSourceType]);
+
+  // 数据来源-hive 刷新`表`下拉列表
+  useEffect(() => {
+    if (srcDataSourceType === 'hive' && typeof srcDataSourceId !== 'undefined') {
+      fetchTableNames({ dataSourceId: srcDataSourceId, dbName: srcDbName });
+    }
+  }, [srcDataSourceType, srcDataSourceId, srcDbName]);
 
   // 刷新 topic 下拉列表
   useEffect(() => {
@@ -265,7 +288,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       selectColumns: scriptSelectColumns,
       keyColumns: scriptKeyColumns,
       sourceTable: srcTables,
-      driverType: srcDataSourceType,
+      dataSourceType: srcDataSourceType,
       days: scriptMergeSqlParamDto?.recentDays,
     });
     if (success) {
@@ -438,12 +461,29 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           options={srcDSOptions}
           showSearch
           filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
-          onChange={() => form.resetFields(['srcTables'])}
+          onChange={() => form.resetFields(['srcTables', 'srcDbName'])}
         />
       </Item>
-      <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
-        <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshSrcVisualise} />
-      </Item>
+      {srcDataSourceType === 'hive' ? (
+        <Fragment>
+          <Item name="srcDbName" label="数据库" rules={ruleSlct} style={{ width: '100%' }}>
+            <Select
+              size="large"
+              style={{ maxWidth, minWidth }}
+              placeholder="请选择"
+              options={srcDbOptions}
+              onChange={() => form.resetFields(['srcTables'])}
+            />
+          </Item>
+          <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
+            <TableSelect showRefresh options={hiveTables} onRefresh={refreshSrcVisualise} />
+          </Item>
+        </Fragment>
+      ) : (
+        <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
+          <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshSrcVisualise} />
+        </Item>
+      )}
       <Item name="srcReadFilter" label="数据过滤">
         <TextArea style={{ maxWidth, minWidth }} placeholder="请参考相应SQL语法填写where过滤语句" />
       </Item>

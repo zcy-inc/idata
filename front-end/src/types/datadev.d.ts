@@ -297,7 +297,7 @@ export interface MergeSqlParamDto {
   sourceTable: string;
   destTable: string;
   srcReadMode: string;
-  driverType: string;
+  dataSourceType: string;
   days?: number;
 }
 
