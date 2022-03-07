@@ -39,8 +39,8 @@ public class GenerateMergeSqlRequest {
     /**
      * 数据开源驱动类型mysql/hive2/postgresql
      */
-    @NotEmpty(message = "driverType 不能为空")
-    private String driverType;
+    @NotEmpty(message = "dataSourceType 不能为空")
+    private String dataSourceType;
 
     /**
      * 近天数，默认3
@@ -95,12 +95,12 @@ public class GenerateMergeSqlRequest {
         this.srcReadMode = srcReadMode;
     }
 
-    public String getDriverType() {
-        return driverType;
+    public String getDataSourceType() {
+        return dataSourceType;
     }
 
-    public void setDriverType(String driverType) {
-        this.driverType = driverType;
+    public void setDataSourceType(String dataSourceType) {
+        this.dataSourceType = dataSourceType;
     }
 
     /**

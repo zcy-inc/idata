@@ -89,7 +89,7 @@ public class DIJobContentController {
         BeanUtils.copyProperties(dto, response);
 
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), "\\.")) {
+        if (StringUtils.contains(dto.getSrcTables(), ".")) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }
@@ -112,7 +112,7 @@ public class DIJobContentController {
         BeanUtils.copyProperties(dto, response);
 
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), "\\.")) {
+        if (StringUtils.contains(dto.getSrcTables(), ".")) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }

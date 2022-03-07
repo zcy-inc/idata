@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
@@ -65,11 +66,11 @@ public class DISqlGenerateController {
         // 格式化输入列，为后续处理做准备
         request.formatColumns();
 
-        String driverType = request.getDriverType();
+        String dataSourceType = request.getDataSourceType();
         String sourceTable = request.getSourceTable();
         String keyColumns = request.getKeyColumns();
         List<String> columnList = Arrays.asList(request.getSelectColumns().replaceAll(" ", "").replaceAll("\n", "").split(","));
-        return RestResult.success(diJobContentService.generateMergeSql(columnList, keyColumns, sourceTable, destTable, DriverTypeEnum.of(driverType), request.getDays()));
+        return RestResult.success(diJobContentService.generateMergeSql(columnList, keyColumns, sourceTable, destTable, DataSourceTypeEnum.valueOf(dataSourceType), request.getDays()));
     }
 
 }

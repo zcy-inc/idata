@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
@@ -131,7 +132,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         String destTable = contentDto.getDestTable();
         String srcTables = contentDto.getSrcTables();
         String srcReadFilter = contentDto.getSrcReadFilter();
-        DriverTypeEnum driverTypeEnum = DriverTypeEnum.of(contentDto.getSrcDataSourceType());
+        DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
         switch (DiConfigModeEnum.getByValue(contentDto.getConfigMode())) {
             case VISIBLE:
                 // 设置SrcQuery
@@ -147,7 +148,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                     visKeys = StringUtils.join(visKeyColumnList, ",");
                 }
                 if (buildMergeSql) {
-                    String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, driverTypeEnum, 3);
+                    String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, dataSourceTypeEnum, 3);
                     contentDto.setMergeSql(mergeSql);
                 }
                 break;
@@ -165,7 +166,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                 }
                 if (buildMergeSql && StringUtils.isNotEmpty(scriptSelectColumns)) {
                     List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
-                    String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, driverTypeEnum, days);
+                    String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, dataSourceTypeEnum, days);
                     contentDto.setScriptMergeSql(scriptMergeSql);
                 }
                 break;
@@ -209,7 +210,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     }
 
     @Override
-    public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DriverTypeEnum typeEnum, int days) throws IllegalArgumentException {
+    public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DataSourceTypeEnum typeEnum, int days) throws IllegalArgumentException {
         checkArgument(destTable.split("\\.").length == 2, "生成mergeSql的destTable必须带上库名: " + destTable);
         String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
@@ -219,7 +220,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
         // 是否涉及多张表（分区表）
         boolean isMulPartitionParam = false;
-        if (typeEnum == DriverTypeEnum.MySQL && (ReUtil.isMatch(regex1, sourceTable) || ReUtil.isMatch(regex2, sourceTable))) {
+        if (typeEnum == DataSourceTypeEnum.mysql && (ReUtil.isMatch(regex1, sourceTable) || ReUtil.isMatch(regex2, sourceTable))) {
             isMulPartitionParam = true;
         }
 

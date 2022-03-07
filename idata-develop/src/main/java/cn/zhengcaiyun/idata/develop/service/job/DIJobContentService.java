@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 
@@ -45,5 +46,5 @@ public interface DIJobContentService {
      * @return
      * @throws IllegalArgumentException
      */
-    String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DriverTypeEnum typeEnum, int days) throws IllegalArgumentException;
+    String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DataSourceTypeEnum typeEnum, int days) throws IllegalArgumentException;
 }
