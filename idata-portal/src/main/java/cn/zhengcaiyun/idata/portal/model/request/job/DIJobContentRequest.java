@@ -100,11 +100,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
     private String contentHash;
 
     /**
-     * DI作业增量模式的mergeSql
-     */
-    private String mergeSql;
-
-    /**
      *   来源为kafka数据类型的topic
      */
     private String srcTopic;
@@ -123,16 +118,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
      *   脚本模式，同可视化src_columns中primaryKey字段
      */
     private String scriptKeyColumns;
-
-    /**
-     *   脚本模式，同可视化merge_sql
-     */
-    private String scriptMergeSql;
-
-//    /**
-//     *   脚本模式，同可视化src_query
-//     */
-//    private String scriptQuery;
 
     /**
      *   配置模式，1：可视化模式，2：脚本模式
@@ -296,14 +281,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
         this.srcShardingNum = srcShardingNum;
     }
 
-    public String getMergeSql() {
-        return mergeSql;
-    }
-
-    public void setMergeSql(String mergeSql) {
-        this.mergeSql = mergeSql;
-    }
-
     public String getSrcTopic() {
         return srcTopic;
     }
@@ -335,22 +312,6 @@ public class DIJobContentRequest extends JobContentBaseDto {
     public void setScriptKeyColumns(String scriptKeyColumns) {
         this.scriptKeyColumns = scriptKeyColumns;
     }
-
-    public String getScriptMergeSql() {
-        return scriptMergeSql;
-    }
-
-    public void setScriptMergeSql(String scriptMergeSql) {
-        this.scriptMergeSql = scriptMergeSql;
-    }
-
-//    public String getScriptQuery() {
-//        return scriptQuery;
-//    }
-//
-//    public void setScriptQuery(String scriptQuery) {
-//        this.scriptQuery = scriptQuery;
-//    }
 
     public Integer getConfigMode() {
         return configMode;

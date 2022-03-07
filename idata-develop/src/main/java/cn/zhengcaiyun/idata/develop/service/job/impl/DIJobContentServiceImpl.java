@@ -17,13 +17,11 @@
 
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.DiDirectEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
@@ -46,6 +44,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -231,8 +231,20 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");
 
-        FileReader fileReader = new FileReader("classpath:template/merge_sql_template.sql");
-        String mergeSqlTemplate = fileReader.readString();
+
+        String mergeSqlTemplate = "";
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("sql/merge_sql_template.sql");) {
+            byte[] buff = new byte[1024];
+            int btr = 0;
+            while ((btr = inputStream.read(buff)) != -1) {
+                mergeSqlTemplate += new String(buff, 0, btr, "UTF-8");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new GeneralException("模版文件解析失败");
+        }
+//        FileReader fileReader = new FileReader("classpath:template/merge_sql_template.sql");
+//        String mergeSqlTemplate = fileReader.readString();
 
         // 通过SpEL解析
         ExpressionParser parser = new SpelExpressionParser();
