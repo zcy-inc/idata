@@ -185,6 +185,15 @@ public class DIJobContentResponse {
      */
     private Map<String, String> destPropertyMap;
 
+
+    public String getSrcDbName() {
+        return srcDbName;
+    }
+
+    public void setSrcDbName(String srcDbName) {
+        this.srcDbName = srcDbName;
+    }
+
     public Long getId() {
         return id;
     }

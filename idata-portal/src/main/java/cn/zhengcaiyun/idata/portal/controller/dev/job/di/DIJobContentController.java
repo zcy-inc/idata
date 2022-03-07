@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
@@ -60,10 +59,15 @@ public class DIJobContentController {
      * @return
      */
     @PostMapping("/contents")
-    public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
+    public RestResult<DIJobContentResponse> saveContent(@PathVariable("jobId") Long jobId,
                                                           @RequestBody @Valid DIJobContentRequest contentRequest) {
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
+
+        // 前端的两个字段合并成一个
+        if (StringUtils.isNotEmpty(contentRequest.getSrcDbName())) {
+            contentDto.setSrcTables(contentRequest.getSrcDbName() + "." + contentRequest.getSrcTables());
+        }
 
         // mapping_sql添加AS columnName
         List<MappingColumnDto> destCols = contentDto.getDestCols();
@@ -80,7 +84,16 @@ public class DIJobContentController {
                             && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS "))
                     .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
         }
-        return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
+        DIJobContentContentDto dto = diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator());
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), "\\.")) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+        return RestResult.success(response);
     }
 
     /**
@@ -92,11 +105,17 @@ public class DIJobContentController {
      */
     @GetMapping("/adapt/contents/{version}")
     public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
-                                                       @PathVariable("version") Integer version) {
-        DIJobContentContentDto diJobContentContentDto = diJobContentService.get(jobId, version);
+                                                            @PathVariable("version") Integer version) {
+        DIJobContentContentDto dto = diJobContentService.get(jobId, version);
 
         DIJobContentResponse response = new DIJobContentResponse();
-        BeanUtils.copyProperties(diJobContentContentDto, response);
+        BeanUtils.copyProperties(dto, response);
+
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), "\\.")) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
 
         return RestResult.success(response);
     }
