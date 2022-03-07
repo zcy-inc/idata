@@ -69,6 +69,26 @@ public class DataSourceController {
     }
 
     /**
+     * 加载数据源的数据库
+     */
+    @GetMapping("/dbNames")
+    public RestResult<List<String>> getDbNames(@RequestParam("dataSourceId") Long dataSourceId) {
+        return RestResult.success(dataSourceService.getDbNames(dataSourceId));
+    }
+
+    /**
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     * @param dataSourceId
+     * @param dbName
+     * @return
+     */
+    @GetMapping("/tableNames")
+    public RestResult<List<String>> getTableNames(@RequestParam("dataSourceId") Long dataSourceId,
+                                                  @RequestParam(value = "dbName", required = false) String dbName) {
+        return RestResult.success(dataSourceService.getTableNames(dataSourceId, dbName));
+    }
+
+    /**
      * 获取数据源类型
      *
      * @return

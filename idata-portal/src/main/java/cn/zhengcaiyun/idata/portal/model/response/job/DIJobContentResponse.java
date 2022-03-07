@@ -96,6 +96,11 @@ public class DIJobContentResponse {
     private String destAfterWrite;
 
     /**
+     * 数据来源-database
+     */
+    private String srcDbName;
+
+    /**
      * 数据来源-表
      */
     private String srcTables;

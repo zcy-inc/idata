@@ -20,10 +20,12 @@ package cn.zhengcaiyun.idata.datasource.service.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
-import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.common.factory.JdbcTemplateFactory;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
@@ -37,6 +39,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.common.KafkaFuture;
@@ -223,6 +226,40 @@ public class DataSourceServiceImpl implements DataSourceService {
 //        return Arrays.asList(new String[]{"topic1", "topic2"});
     }
 
+    @Override
+    public List<String> getDbNames(Long id) {
+        Jive jive = null;
+        String jdbcUrl = getJdbcUrl(id);
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc(jdbcUrl);
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            return jive.getDbNameList();
+        } finally {
+            jive.close();
+        }
+    }
+
+    @Override
+    public List<String> getTableNames(Long id, String dbName) {
+        Jive jive = null;
+        String jdbcUrl = getJdbcUrl(id, dbName);
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc(jdbcUrl);
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            return jive.getDbNameList();
+        } finally {
+            jive.close();
+        }
+    }
+
     private boolean supportTestConnection(DataSourceTypeEnum dataSourceType) {
         return DataSourceTypeEnum.mysql == dataSourceType
                 || DataSourceTypeEnum.postgresql == dataSourceType
@@ -259,4 +296,42 @@ public class DataSourceServiceImpl implements DataSourceService {
         });
     }
 
+
+    public String getJdbcUrl(Long id) {
+        return getJdbcUrl(id, null);
+    }
+
+    public String getJdbcUrl(Long id, String dbName) {
+        checkArgument(nonNull(id), "数据源编号为空");
+        Optional<DataSource> optional = dataSourceRepo.queryDataSource(id);
+        checkArgument(optional.isPresent(), "数据源不存在");
+        DataSource source = optional.get();
+        checkState(Objects.equals(DeleteEnum.DEL_NO.val, source.getDel()), "数据源已删除");
+        cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto dataSource = cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto.from(source);
+
+        checkArgument(Objects.nonNull(dataSource), String.format("数据源不存在, DataSourceId:%d", id));
+        checkArgument(CollectionUtils.isNotEmpty(dataSource.getDbConfigList()), String.format("数据源配置缺失, DataSourceId:%d", id));
+        DbConfigDto dbConfigDto = dataSource.getDbConfigList().get(0);
+
+        DataSourceTypeEnum sourceTypeEnum = dataSource.getType();
+        String host = dbConfigDto.getHost();
+        Integer port = dbConfigDto.getPort();
+        String schema = dbConfigDto.getSchema();
+        String protocol = null;
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
+            protocol = "mysql";
+        } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+            protocol = "postgresql";
+        } else if (DataSourceTypeEnum.presto == sourceTypeEnum) {
+            protocol = "presto";
+        } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
+            protocol = "hive2";
+        }
+        if (StringUtils.isEmpty(protocol)) return null;
+
+        if (StringUtils.isNotEmpty(dbName)) {
+            return String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        }
+        return String.format("jdbc:%s://%s:%d/%s", protocol, host, port, schema);
+    }
 }

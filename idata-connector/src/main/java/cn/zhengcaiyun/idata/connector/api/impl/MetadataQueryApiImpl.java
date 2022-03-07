@@ -19,17 +19,20 @@ package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,9 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     private HiveService hiveService;
     @Autowired
     private SysConfigDao sysConfigDao;
+
+    @Autowired
+    private HivePool hivePool;
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {

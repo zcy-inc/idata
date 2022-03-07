@@ -26,7 +26,6 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -52,10 +51,25 @@ public interface DataSourceService {
 
     /**
      * 根据dataSourceId获取topic列表
-     * @param dataSourceId
+     * @param id
      * @return
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    List<String> getTopics(Long dataSourceId) throws ExecutionException, InterruptedException;
+    List<String> getTopics(Long id) throws ExecutionException, InterruptedException;
+
+    /**
+     * 获取该连接的所有的database/schema
+     * @param id
+     * @return
+     */
+    List<String> getDbNames(Long id);
+
+    /**
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     * @param id
+     * @param dbName
+     * @return
+     */
+    List<String> getTableNames(Long id, String dbName);
 }

@@ -1,5 +1,7 @@
-package cn.zhengcaiyun.idata.connector.clients.hive;
+package cn.zhengcaiyun.idata.client.hive;
 
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
@@ -22,7 +24,8 @@ public class Test {
     public static void main(String[] args) throws SQLException {
 //        testRename();
 //        testExist();
-        testCreate();
+//        testCreate();
+        testTables();
     }
 
     private static void testCreate() {
@@ -97,6 +100,21 @@ public class Test {
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
             System.out.println("======" + jive.exist("dws", "tmp_sync_hive"));
+        } finally {
+            jive.close(); // ！重要，使用完后归还
+        }
+    }
+
+    public static void testTables() {
+        Jive jive = null;
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/ads");
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            System.out.println("======" + jive.getTableNameList());
         } finally {
             jive.close(); // ！重要，使用完后归还
         }

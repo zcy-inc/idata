@@ -84,6 +84,11 @@ public class DIJobContentContentDto extends JobContentBaseDto {
     private String destAfterWrite;
 
     /**
+     * 数据来源-database
+     */
+    private String srcDbName;
+
+    /**
      * 数据来源-表
      */
     private String srcTables;
@@ -167,6 +172,14 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      *   目标库中间件的内置属性
      */
     private Map<String, String> destPropertyMap;
+
+    public String getSrcDbName() {
+        return srcDbName;
+    }
+
+    public void setSrcDbName(String srcDbName) {
+        this.srcDbName = srcDbName;
+    }
 
     public String getSrcDataSourceType() {
         return srcDataSourceType;

@@ -6,13 +6,11 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -154,6 +152,34 @@ public class Jive extends BinaryJive {
             throw new GeneralException("changeColumn fail!");
         }
         return success;
+    }
+
+    public List<String> getTableNameList() {
+        List<String> tableList = new ArrayList<>();
+        try (Statement statement = this.getClient().createStatement();
+             ResultSet rs = statement.executeQuery("show tables")) {
+            while (rs.next()){
+                tableList.add(rs.getString("tab_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new GeneralException("changeColumn fail!");
+        }
+        return tableList;
+    }
+
+    public List<String> getDbNameList() {
+        List<String> dbList = new ArrayList<>();
+        try (Statement statement = this.getClient().createStatement();
+             ResultSet rs = statement.executeQuery("show databases")) {
+            while (rs.next()){
+                dbList.add(rs.getString("database_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new GeneralException("changeColumn fail!");
+        }
+        return dbList;
     }
 
     /**

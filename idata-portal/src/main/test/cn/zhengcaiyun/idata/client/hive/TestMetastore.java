@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.connector.clients.hive;
+package cn.zhengcaiyun.idata.client.hive;
 
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
