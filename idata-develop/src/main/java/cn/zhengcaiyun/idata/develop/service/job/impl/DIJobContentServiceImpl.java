@@ -227,14 +227,14 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         // 筛选的列名
         String columnsParam = StringUtils.join(columnList, ", ");
         // 筛选的带函数的列名
-        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n\t\t,");
+        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n\t,");
         //生成keyCondition，key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");
 
 
         String mergeSqlTemplate = "";
-        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("sql/merge_sql_template.sql");) {
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/merge_sql_template.sql");) {
             byte[] buff = new byte[1024];
             int btr = 0;
             while ((btr = inputStream.read(buff)) != -1) {
@@ -257,6 +257,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         context.setVariable("coalesceColumns", coalesceColumnsParam);
         context.setVariable("keyCondition", keyConditionParam);
         context.setVariable("days", days);
+        context.setVariable("br", "\n");
 
         Expression expression = parser.parseExpression(mergeSqlTemplate, new TemplateParserContext());
         return expression.getValue(context, String.class);
