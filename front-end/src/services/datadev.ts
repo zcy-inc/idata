@@ -1034,5 +1034,20 @@ export async function getDbNames(params: { dataSourceId: number }) {
  * 根据数据源和库名查询表名
  */
 export async function getTableNames(params: { dataSourceId: number; dbName?: string }) {
-  return request<Tresponse<string[]>>('/api/p1/das/tableNames', { params }).then(({ data }) => data);
+  return request<Tresponse<string[]>>('/api/p1/das/tableNames', { params }).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取表结构
+ */
+export async function getColumns(params: {
+  dataSourceId: number;
+  dbName?: string;
+  tableName: string;
+}) {
+  return request('/api/p1/das/columns', {
+    params,
+  });
 }

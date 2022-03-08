@@ -179,3 +179,13 @@ export const execEngineOptions = [
 
 // 切分键分片数/并行度
 export const shardingNumOptions = [1, 2, 4, 8, 16].map((i) => ({ label: i, value: i }));
+
+export enum DataSourceType {
+  HIVE = 'hive',
+  KAFKA = 'kafka',
+  MYSQL = 'mysql',
+  POSTGRESQL = 'postgresql',
+  PHOENIX = 'phoenix',
+  DORIS = 'doris',
+  ELASTICSEARCH = 'elasticsearch',
+}

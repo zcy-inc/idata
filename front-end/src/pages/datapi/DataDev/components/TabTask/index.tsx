@@ -24,6 +24,7 @@ import {
   getKafkaTopics,
   getDbNames,
   getTableNames,
+  getColumns,
 } from '@/services/datadev';
 import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import Title from '@/components/Title';
@@ -43,6 +44,7 @@ import {
   DIConfigMode,
   backFlowDestWriteModeOptions,
   shardingNumOptions,
+  DataSourceType,
 } from '@/constants/datadev';
 import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
@@ -252,7 +254,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     if (typeof srcDataSourceType === 'undefined' || typeof srcDataSourceId === 'undefined') {
       return;
     }
-    if (srcDataSourceType === 'hive') {
+    if (srcDataSourceType === DataSourceType.HIVE) {
       fetchDbNames({ dataSourceId: srcDataSourceId });
       return;
     }
@@ -262,9 +264,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     });
   }, [srcDataSourceId, srcDataSourceType]);
 
-  // 数据来源-hive 刷新`表`下拉列表
+  // 数据来源-DataSourceType.HIVE 刷新`表`下拉列表
   useEffect(() => {
-    if (srcDataSourceType === 'hive' && typeof srcDataSourceId !== 'undefined') {
+    if (srcDataSourceType === DataSourceType.HIVE && typeof srcDataSourceId !== 'undefined') {
       fetchTableNames({ dataSourceId: srcDataSourceId, dbName: srcDbName });
     }
   }, [srcDataSourceType, srcDataSourceId, srcDbName]);
@@ -275,7 +277,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       const { data } = await getKafkaTopics({ dataSourceId: destDataSourceId });
       setTopicOptions(data.map((topic) => ({ label: topic, value: topic })));
     };
-    if (destDataSourceType === 'kafka' && typeof destDataSourceId !== 'undefined') {
+    if (destDataSourceType === DataSourceType.KAFKA && typeof destDataSourceId !== 'undefined') {
       fetchData();
     }
   }, [destDataSourceId, destDataSourceType]);
@@ -304,11 +306,25 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     if (tables.length === 0) {
       return message.info('请选择表');
     }
-    const { success, data } = await getTaskTableColumns({
-      tableName: tables[0],
-      dataSourceType: srcDataSourceType,
-      dataSourceId: srcDataSourceId,
-    });
+    let success = false;
+    let data = [];
+    if (srcDataSourceType === DataSourceType.HIVE) {
+      const res1 = await getColumns({
+        dataSourceId: srcDataSourceId,
+        dbName: srcDbName,
+        tableName: tables[0],
+      });
+      success = res1.success;
+      data = res1.data;
+    } else {
+      const res2 = await getTaskTableColumns({
+        tableName: tables[0],
+        dataSourceType: srcDataSourceType,
+        dataSourceId: srcDataSourceId,
+      });
+      success = res2.success;
+      data = res2.data;
+    }
     if (success) {
       message.success('刷新成功');
       setSrcColumns(data);
@@ -321,16 +337,30 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     if (!destTable) {
       return message.info('请输入表');
     }
-    const { success, data } = await getTaskTableColumns({
-      tableName: destTable,
-      dataSourceType: destDataSourceType,
-      dataSourceId: destDataSourceId,
-    });
+    let success = false;
+    let data = [];
+    if (destDataSourceType === DataSourceType.HIVE) {
+      const res1 = await getColumns({
+        dataSourceId: destDataSourceId,
+        tableName: destTable,
+      });
+      success = res1.success;
+      data = res1.data;
+    } else {
+      const res2 = await getTaskTableColumns({
+        tableName: destTable,
+        dataSourceType: destDataSourceType,
+        dataSourceId: destDataSourceId,
+      });
+      success = res2.success;
+      data = res2.data;
+    }
     if (success) {
       message.success('刷新成功');
       setDestColumns(data);
     }
   };
+
 
   /**
    * 暂停、恢复、单次运行任务
@@ -464,7 +494,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           onChange={() => form.resetFields(['srcTables', 'srcDbName'])}
         />
       </Item>
-      {srcDataSourceType === 'hive' ? (
+      {srcDataSourceType === DataSourceType.HIVE ? (
         <Fragment>
           <Item name="srcDbName" label="数据库" rules={ruleSlct} style={{ width: '100%' }}>
             <Select
@@ -473,6 +503,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               placeholder="请选择"
               options={srcDbOptions}
               onChange={() => form.resetFields(['srcTables'])}
+              showSearch
             />
           </Item>
           <Item name="srcTables" label="表" rules={ruleSlct} style={{ width: '100%' }}>
@@ -581,7 +612,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           </Item>
         </Fragment>
       );
-    } else if (['mysql', 'postgresql', 'phoenix'].includes(destDataSourceType)) {
+    } else if (
+      [DataSourceType.MYSQL, DataSourceType.POSTGRESQL, DataSourceType.PHOENIX].includes(
+        destDataSourceType,
+      )
+    ) {
       return (
         <Fragment>
           {destTableNode}
@@ -589,7 +624,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           {batchWriteNode}
         </Fragment>
       );
-    } else if (['kafka'].includes(destDataSourceType)) {
+    } else if ([DataSourceType.KAFKA].includes(destDataSourceType)) {
       return (
         <Fragment>
           {topicNode}
@@ -597,7 +632,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           {customParamsNode}
         </Fragment>
       );
-    } else if (['doris', 'elasticsearch'].includes(destDataSourceType)) {
+    } else if ([DataSourceType.DORIS, DataSourceType.ELASTICSEARCH].includes(destDataSourceType)) {
       return (
         <Fragment>
           {destTableNode}
