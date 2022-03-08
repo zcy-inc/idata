@@ -46,4 +46,10 @@ public class DagTool {
                 .filter(dagInfo -> dagInfo.getDwLayerCode().equals(dwLayerCode))
                 .findFirst();
     }
+
+    public static Optional<DAGInfo> findLayerDagInName(final String layer, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getName().indexOf(layer) > 0)
+                .findFirst();
+    }
 }

@@ -18,8 +18,11 @@
 package cn.zhengcaiyun.idata.mergedata.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
+import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
@@ -37,6 +40,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -64,11 +68,13 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
     private CompositeFolderRepo compositeFolderRepo;
     @Autowired
     private DAGMigrateManager dagMigrateManager;
+    @Autowired
+    private DAGRepo dagRepo;
 
     @Override
     public List<MigrateResultDto> migrateFolder() {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
-        CompositeFolder dagFolder = getDAGFunctionFolder();
+        final CompositeFolder dagFolder = getDAGFunctionFolder();
         Operator operator = new Operator.Builder(0L).nickname("系统迁移").build();
         try {
             CompositeFolderDto folderDto = new CompositeFolderDto();
@@ -81,10 +87,24 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
                 compositeFolderService.addFolder(folderDto, operator);
             }
 
+            existFolderOptional = compositeFolderRepo.queryFolder("DIM", dagFolder.getId());
+            if (existFolderOptional.isEmpty()) {
+                folderDto.setId(null);
+                folderDto.setName("DIM");
+                compositeFolderService.addFolder(folderDto, operator);
+            }
+
             existFolderOptional = compositeFolderRepo.queryFolder("DWD", dagFolder.getId());
             if (existFolderOptional.isEmpty()) {
                 folderDto.setId(null);
                 folderDto.setName("DWD");
+                compositeFolderService.addFolder(folderDto, operator);
+            }
+
+            existFolderOptional = compositeFolderRepo.queryFolder("DWS", dagFolder.getId());
+            if (existFolderOptional.isEmpty()) {
+                folderDto.setId(null);
+                folderDto.setName("DWS");
                 compositeFolderService.addFolder(folderDto, operator);
             }
 
@@ -94,6 +114,13 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
                 folderDto.setName("ADS");
                 compositeFolderService.addFolder(folderDto, operator);
             }
+
+            existFolderOptional = compositeFolderRepo.queryFolder("OTHER", dagFolder.getId());
+            if (existFolderOptional.isEmpty()) {
+                folderDto.setId(null);
+                folderDto.setName("OTHER");
+                compositeFolderService.addFolder(folderDto, operator);
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("无权限新增文件夹");
         }
@@ -101,14 +128,21 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
     }
 
     @Override
-    public List<MigrateResultDto> migrateDAG() {
+    public List<MigrateResultDto> migrateDAG(String cluster) {
+        List<MigrateResultDto> resultDtoList = Lists.newArrayList();
+        resultDtoList.addAll(migrateOriginDAG());
+        resultDtoList.addAll(createStandardDAG(cluster, EnvEnum.prod));
+        return resultDtoList;
+    }
+
+    public List<MigrateResultDto> migrateOriginDAG() {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 查询旧版IData数据
         List<JSONObject> dataJsonList = fetchOldData();
         // 处理旧版数据，组装新版IData数据
         Map<String, List<CompositeFolder>> folderMap = queryFolderMap();
         List<DAGDto> dagDtoList = dataJsonList.stream()
-                .map(jsonObject -> buildDAG(jsonObject, folderMap))
+                .map(jsonObject -> buildDAGFromOrigin(jsonObject, folderMap))
                 .collect(Collectors.toList());
 
         // 调用新版server接口，新增数据
@@ -117,6 +151,29 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
 
         // 返回迁移失败的数据 MigrateResultDto
         return resultDtoList;
+    }
+
+    public List<MigrateResultDto> createStandardDAG(String cluster, EnvEnum env) {
+        List<MigrateResultDto> resultDtoList = Lists.newArrayList();
+        // 处理旧版数据，组装新版IData数据
+        Map<String, List<CompositeFolder>> folderMap = queryFolderMap();
+        List<String> tags = Lists.newArrayList("ODS", "DIM", "DWD", "DWS", "ADS");
+        List<DAGInfo> dagInfoList = dagRepo.queryDAGInfo();
+        List<DAGDto> dagDtoList = tags.stream()
+                .filter(tag -> !isExistDag(tag, dagInfoList))
+                .map(tag -> buildStandardDAG(cluster, env, tag, folderMap))
+                .collect(Collectors.toList());
+
+        // 调用新版server接口，新增数据
+        Operator operator = new Operator.Builder(0L).nickname("系统迁移").build();
+        dagMigrateManager.createDAG(dagDtoList, operator);
+
+        // 返回迁移失败的数据 MigrateResultDto
+        return resultDtoList;
+    }
+
+    private boolean isExistDag(String tag, List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream().anyMatch(dagInfo -> dagInfo.getName().indexOf(tag) > 0);
     }
 
     private CompositeFolder getDAGFunctionFolder() {
@@ -138,7 +195,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         return folders.stream().collect(Collectors.groupingBy(CompositeFolder::getName));
     }
 
-    private DAGDto buildDAG(JSONObject jsonObject, Map<String, List<CompositeFolder>> folderMap) {
+    private DAGDto buildDAGFromOrigin(JSONObject jsonObject, Map<String, List<CompositeFolder>> folderMap) {
         DAGDto dto = new DAGDto();
         DAGInfoDto dagInfoDto = new DAGInfoDto();
         DAGScheduleDto dagScheduleDto = new DAGScheduleDto();
@@ -152,6 +209,32 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         dagInfoDto.setRemark("");
         dagInfoDto.setFolderId(resolveFolder(oldLayer, folderMap));
         dagInfoDto.setEnvironment(resolveEnvironment(jsonObject.getString("status")));
+
+        LocalDate localDate = LocalDate.now();
+        dagScheduleDto.setBeginTime(Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+        dagScheduleDto.setEndTime(Date.from(localDate.plusYears(5).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+        dagScheduleDto.setPeriodRange("day");
+        dagScheduleDto.setTriggerMode("specified");
+        dagScheduleDto.setCronExpression("0 11 11 * * ? *");
+
+        dto.setDagInfoDto(dagInfoDto);
+        dto.setDagScheduleDto(dagScheduleDto);
+        return dto;
+    }
+
+    private DAGDto buildStandardDAG(String cluster, EnvEnum envEnum, String tag, Map<String, List<CompositeFolder>> folderMap) {
+        DAGDto dto = new DAGDto();
+        DAGInfoDto dagInfoDto = new DAGInfoDto();
+        DAGScheduleDto dagScheduleDto = new DAGScheduleDto();
+        String newName = cluster + "-" + envEnum.name() + "-" + tag + "-" + "dag";
+        newName = newName.toUpperCase();
+        dagInfoDto.setName(newName);
+        String oldLayer = resolveLayerCode(newName);
+        dagInfoDto.setDwLayerCode(DWLayerCodeMapTool.getCodeEnum(oldLayer));
+        dagInfoDto.setStatus(0);
+        dagInfoDto.setRemark("");
+        dagInfoDto.setFolderId(resolveFolder(tag, folderMap));
+        dagInfoDto.setEnvironment(envEnum.name());
 
         LocalDate localDate = LocalDate.now();
         dagScheduleDto.setBeginTime(Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
@@ -184,7 +267,11 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
     }
 
     private Long resolveFolder(String oldLayer, Map<String, List<CompositeFolder>> folderMap) {
-        return folderMap.get(oldLayer).get(0).getId();
+        List<CompositeFolder> folders = folderMap.get(oldLayer);
+        if (CollectionUtils.isEmpty(folders)) {
+            folders = folderMap.get("OTHER");
+        }
+        return folders.get(0).getId();
     }
 
 }

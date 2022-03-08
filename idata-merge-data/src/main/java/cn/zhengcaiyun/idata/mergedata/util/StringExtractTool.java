@@ -15,20 +15,28 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.mergedata.service;
+package cn.zhengcaiyun.idata.mergedata.util;
 
-import cn.zhengcaiyun.idata.mergedata.dto.MigrateResultDto;
-
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-01-06 11:45
+ * @create: 2022-03-03 14:00
  **/
-public interface DAGMigrationService {
+public class StringExtractTool {
 
-    List<MigrateResultDto> migrateFolder();
+    public static void main(String[] args) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("");
 
-    List<MigrateResultDto> migrateDAG(String cluster);
+        List<String> words = Arrays.stream(builder.toString().split(" |,|;|--|\n")).filter(t -> t.contains("ods_db_")).distinct()
+                .collect(Collectors.toList());
+        for (String word : words) {
+            System.out.println("'" + word.replace("`", "").trim() + "'" + ",");
+        }
+    }
+
 }
