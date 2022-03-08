@@ -380,6 +380,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 BeanUtils.copyProperties(bfJobContent, backFlowResponse);
 
+                backFlowResponse.setSrcTable(bfJobContent.getSrcTables());
+
                 backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
 
                 // 根据回流启用模式，填充数据
@@ -397,7 +399,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
                     backFlowResponse.setUpdateKey(bfJobContent.getScriptKeyColumns());
                 }
-                backFlowResponse.setParallelism(bfJobContent.getSrcShardingNum());
+                backFlowResponse.setParallelism(bfJobContent.getDestShardingNum());
 
                 String properties = bfJobContent.getDestProperties();
                 if (StringUtils.isNotBlank(properties)) {
@@ -410,6 +412,20 @@ public class JobInfoServiceImpl implements JobInfoService {
                 backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+
+                // TODO 个性化处理返回值
+                // sqoop -> srcSql = null, columnName != null
+                // spark -> columnName = null, srcSql != null
+                // doris -> columnName srcSql 都要有
+                switch (backFlowResponse.getExecEngine()) {
+                    case SQOOP:
+                        backFlowResponse.setSrcSql(null);
+                        break;
+                    case SPARK:
+                        backFlowResponse.setDestColumnNames(null);
+                        break;
+                }
+
                 return backFlowResponse;
             case DI_BATCH:
                 JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);

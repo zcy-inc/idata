@@ -241,6 +241,7 @@ public class JobInfoExecuteDetailDto {
         private String destUserName;//username;
         private String destPassword;//password;
         private String destTable;//targetTableName;
+        private String srcTable;
         private String destColumnNames; // dbColumnNames src数据源的列
         private String updateKey; //新版本
         private Integer parallelism; //新版本
@@ -317,6 +318,13 @@ public class JobInfoExecuteDetailDto {
             this.udfList = udfList;
         }
 
+        public String getSrcTable() {
+            return srcTable;
+        }
+
+        public void setSrcTable(String srcTable) {
+            this.srcTable = srcTable;
+        }
 
         public String getDestUserName() {
             return destUserName;
