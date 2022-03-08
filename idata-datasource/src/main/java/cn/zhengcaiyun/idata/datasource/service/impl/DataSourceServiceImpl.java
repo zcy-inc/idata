@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
@@ -257,6 +258,25 @@ public class DataSourceServiceImpl implements DataSourceService {
             return jive.getTableNameList();
         } finally {
             jive.close();
+        }
+    }
+
+    @Override
+    public List<ColumnInfoDto> getTableColumns(Long id, String dbName, String tableName) {
+        Jive jive = null;
+        HivePool hivePool = null;
+        String jdbcUrl = getJdbcUrl(id, dbName);
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc(jdbcUrl);
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            return jive.getColumnMetaInfo(dbName, tableName);
+        } finally {
+            jive.close();
+            hivePool.close();
         }
     }
 

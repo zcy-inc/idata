@@ -22,10 +22,13 @@ import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.portal.controller.dev.job.JobTableController;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -78,6 +81,7 @@ public class DataSourceController {
 
     /**
      * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     *
      * @param dataSourceId
      * @param dbName
      * @return
@@ -86,6 +90,27 @@ public class DataSourceController {
     public RestResult<List<String>> getTableNames(@RequestParam("dataSourceId") Long dataSourceId,
                                                   @RequestParam(value = "dbName", required = false) String dbName) {
         return RestResult.success(dataSourceService.getTableNames(dataSourceId, dbName));
+    }
+
+    /**
+     * 获取表字段
+     *
+     * @param dataSourceId
+     * @return
+     */
+    @GetMapping("/columns")
+    public RestResult<List<MappingColumnDto>> getTableColumns(@RequestParam("dataSourceId") Long dataSourceId,
+                                                              @RequestParam(value = "dbName", required = false) String dbName,
+                                                              @RequestParam(value = "tableName") String tableName) {
+        List<ColumnInfoDto> tableColumns = dataSourceService.getTableColumns(dataSourceId, dbName, tableName);
+        List<MappingColumnDto> list = tableColumns.stream()
+                .map(e -> {
+                    MappingColumnDto dto = new MappingColumnDto();
+                    dto.setDataType(e.getColumnType());
+                    dto.setName(e.getColumnName());
+                    return dto;
+                }).collect(Collectors.toList());
+        return RestResult.success(list);
     }
 
     /**

@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
@@ -72,4 +73,13 @@ public interface DataSourceService {
      * @return
      */
     List<String> getTableNames(Long id, String dbName);
+
+    /**
+     * 获取列
+     * @param id
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    List<ColumnInfoDto> getTableColumns(Long id, String dbName, String tableName);
 }
