@@ -254,7 +254,7 @@ public class DataSourceServiceImpl implements DataSourceService {
             config.setTestOnBorrow(true);
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
-            return jive.getDbNameList();
+            return jive.getTableNameList();
         } finally {
             jive.close();
         }
