@@ -92,7 +92,7 @@ export enum DestWriteMode {
 }
 
 export enum BackFlowDestWriteMode {
-  INSERT = 'INSERT',
+  // INSERT = 'INSERT',
   UPSERT = 'UPSERT',
   OVERWRITE = 'OVERWRITE',
 }
@@ -100,7 +100,7 @@ export enum BackFlowDestWriteMode {
 export const backFlowDestWriteModeOptions = [
   { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
   { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
-  { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
+  // { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
 ];
 
 export enum VersionStatus {
