@@ -137,7 +137,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     () => getTaskVersions({ jobId: pane.id }).then(({ data }) => data),
     {
       onSuccess: (data) => {
-        if (typeof version === 'undefined' && typeof data[0]?.version !== 'undefined') {
+        if (typeof data[0]?.version !== 'undefined') {
           setVersion(data[0]?.version);
         }
       },
@@ -853,6 +853,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               .then((res) => {
                 if (res.success) {
                   message.success('提交成功');
+                  refreshVersions();
                   setVisible(false);
                   return true;
                 } else {
