@@ -164,7 +164,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         List<MigrateResultDto> resultDtoList = new ArrayList<>();
         JobMigrationDto migrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(oldJobId);
         if (Objects.isNull(migrationDto)) {
-            resultDtoList.add(new MigrateResultDto("fetchMigrateJobData", String.format("确认是否处理：旧作业[%s]数据不合法，如没有配置DAG等。", oldJobId), ""));
+            resultDtoList.add(new MigrateResultDto("fetchMigrateJobData", String.format("确认是否处理：旧作业[%s]数据不合法，如没有配置DAG或者此作业已暂停但被其他作业依赖等。", oldJobId), ""));
             LOGGER.warn("### ### 作业[{}]数据不合法，不迁移", oldJobId);
             return resultDtoList;
         }
@@ -307,19 +307,35 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         String oldType = jobInfoJson.getString("job_type");
         Integer oldDagId = configJson.getInteger("dag_id");
+        String oldLayer = jobInfoJson.getString("layer");
+        if (StringUtils.isBlank(oldLayer)) {
+            resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("无法迁移：旧作业[%s]数仓分层为空，需要先完善数仓分层", oldJobId), configJson.toJSONString()));
+            return Optional.empty();
+        }
         Optional<DAGInfo> dagInfoOptional;
+        DAGInfo dagInfo;
         if (Objects.isNull(oldDagId)) {
             if ("ODS".equalsIgnoreCase(jobInfoJson.getString("layer"))) {
                 dagInfoOptional = DagTool.findLayerDag("DW_LAYER_ODS:ENUM_VALUE", JobMigrationContext.getDAGIfPresent());
+                checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
+                dagInfo = dagInfoOptional.get();
             } else {
                 resultDtoList.add(new MigrateResultDto("buildJobConfig", String.format("无法迁移：旧作业[%s]依赖DAG为空", oldJobId), configJson.toJSONString()));
                 return Optional.empty();
             }
         } else {
             dagInfoOptional = DagTool.findDag(oldDagId, JobMigrationContext.getDAGIfPresent());
+            checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
+            dagInfo = dagInfoOptional.get();
+            if (isRegularDag(dagInfo)) {
+                // 重新根据数仓分层寻找dag
+                dagInfoOptional = DagTool.findLayerDagInName(oldLayer.trim().toUpperCase(), JobMigrationContext.getDAGIfPresent());
+                checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未按作业数仓分层找到迁移后的DAG", oldJobId);
+                dagInfo = dagInfoOptional.get();
+            }
         }
-        checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
-        executeConfigDto.setSchDagId(dagInfoOptional.get().getId());
+
+        executeConfigDto.setSchDagId(dagInfo.getId());
         executeConfigDto.setSchRerunMode("always");
         // 调度配置-超时时间，单位：秒
         executeConfigDto.setSchTimeOut(60 * 60);
@@ -403,6 +419,15 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         }
 
         return Optional.of(combinationDto);
+    }
+
+    private boolean isRegularDag(DAGInfo dagInfo) {
+        String dagName = dagInfo.getName().toUpperCase();
+        return dagName.indexOf("ODS") > 0
+                || dagName.indexOf("DIM") > 0
+                || dagName.indexOf("DWD") > 0
+                || dagName.indexOf("DWS") > 0
+                || dagName.indexOf("ADS") > 0;
     }
 
     private Integer parseExecMem(String men) {
