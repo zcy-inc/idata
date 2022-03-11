@@ -142,7 +142,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
 
                 // 设置MergeSql
                 List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
-                List<String> visKeyColumnList = srcCols.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toList());
+                List<String> visKeyColumnList = srcCols.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toList());
                 String visKeys = "id";
                 if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
                     visKeys = StringUtils.join(visKeyColumnList, ",");
@@ -297,4 +297,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return ObjectUtils.isEmpty(jobIdSet);
     }
 
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        List<String> visKeyColumnList = list.stream().collect(Collectors.toList());
+    }
 }
