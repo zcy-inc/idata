@@ -294,15 +294,17 @@ public class JobMigrateManager {
                 .collect(Collectors.toMap(jobUdf -> jobUdf.getUdfName().split("#_")[0], jobUdf -> jobUdf.getId().toString()));
         // 修改目标表表名
         String oldSourceSql = oldJobContent.getString("source_sql");
-        String echoSourceSql = changeTargetTblNameSql(oldSourceSql);
-        if (echoSourceSql.contains("!ERROR!")) {
-            LOGGER.warn("******SQL作业迁移有误，错误作业ID：" + newJobId);
-            resultDtoList.add(new MigrateResultDto("migrateSqlContent",
-                    String.format("需处理：旧作业[%s]的source_sql改写失败，需要修改后重迁或者迁移完重新修改Sql作业",
-                            migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
-            return null;
-        }
-        contentDto.setSourceSql(echoSourceSql);
+        // 仅岛端需改写ods表名
+//        String echoSourceSql = changeTargetTblNameSql(oldSourceSql);
+//        if (echoSourceSql.contains("!ERROR!")) {
+//            LOGGER.warn("******SQL作业迁移有误，错误作业ID：" + newJobId);
+//            resultDtoList.add(new MigrateResultDto("migrateSqlContent",
+//                    String.format("需处理：旧作业[%s]的source_sql改写失败，需要修改后重迁或者迁移完重新修改Sql作业",
+//                            migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+//            return null;
+//        }
+//        contentDto.setSourceSql(echoSourceSql);
+        contentDto.setSourceSql(oldSourceSql);
         if (oldJobContent.containsKey("udf_ids")) {
             JSONArray udfIdJsonArray = oldJobContent.getJSONArray("udf_ids");
             String[] oldUdfIdArr = Objects.isNull(udfIdJsonArray) ? null : udfIdJsonArray.toArray(new String[0]);
