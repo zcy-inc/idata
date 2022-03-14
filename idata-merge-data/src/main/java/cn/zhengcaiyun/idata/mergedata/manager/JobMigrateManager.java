@@ -25,7 +25,9 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
@@ -97,24 +99,37 @@ public class JobMigrateManager {
     private HdfsService hdfsService;
     @Autowired
     private JobUdfService jobUdfService;
+    @Autowired
+    private JobExecuteConfigRepo jobExecuteConfigRepo;
 
     @Transactional(rollbackFor = Exception.class)
-    public List<MigrateResultDto> migrateJob(JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
+    public List<MigrateResultDto> migrateJob(EnvEnum envEnum, JobInfoDto jobInfoDto, JobConfigCombinationDto configCombinationDto,
                                              Operator jobOperator, JobMigrationDto migrationDto) {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         try {
             // 保存job基本信息
-            Long newJobId = jobInfoService.addJob(jobInfoDto, jobOperator);
+            Long newJobId = jobInfoDto.getId();
+            if (newJobId == null) {
+                newJobId = jobInfoService.addJob(jobInfoDto, jobOperator);
+            }
+
+            // 根据各环境下的配置判断是否已迁移过
+            Optional<JobExecuteConfig> existJobConfigOptional = jobExecuteConfigRepo.query(newJobId, envEnum.name());
+            if (existJobConfigOptional.isPresent()) {
+                LOGGER.warn("### ### 作业[{}]已存在，不需要再次迁移", jobInfoDto.getName());
+                return resultDtoList;
+            }
+
             // 保存job配置信息
-            JobConfigCombinationDto combinationDto = jobExecuteConfigService.save(newJobId, EnvEnum.prod.name(), configCombinationDto, jobOperator);
+            JobConfigCombinationDto combinationDto = jobExecuteConfigService.save(newJobId, envEnum.name(), configCombinationDto, jobOperator);
             // 保存job内容信息
             Operator contentOperator = getContentOperator(migrationDto.getOldJobContent());
             Integer contentVersion = migrateContentInfo(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
             if (Objects.nonNull(contentVersion)) {
                 // 提交作业内容
-                jobContentCommonService.submit(newJobId, contentVersion, EnvEnum.prod.name(), "迁移自动提交", contentOperator);
+                jobContentCommonService.submit(newJobId, contentVersion, envEnum.name(), "迁移自动提交", contentOperator);
                 // 发布作业
-                Optional<JobPublishRecord> publishRecordOptional = jobPublishRecordRepo.query(newJobId, contentVersion, EnvEnum.prod.name());
+                Optional<JobPublishRecord> publishRecordOptional = jobPublishRecordRepo.query(newJobId, contentVersion, envEnum.name());
                 if (publishRecordOptional.isPresent() && publishRecordOptional.get().getPublishStatus().equals(PublishStatusEnum.SUBMITTED.val)) {
                     jobPublishRecordService.approve(publishRecordOptional.get().getId(), "迁移自动发布", contentOperator);
                 }
@@ -483,11 +498,9 @@ public class JobMigrateManager {
                     .collect(Collectors.toList()).stream().map(String::trim).collect(Collectors.toList());
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1));
-            }
-            else if (strSplitList.size() == 3) {
+            } else if (strSplitList.size() == 3) {
                 tblNameMap.put(str, "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1) + "ods_" + strSplitList.get(2));
-            }
-            else {
+            } else {
                 tblNameMap.put(str, "!ERROR!");
             }
         }
@@ -573,8 +586,7 @@ public class JobMigrateManager {
             String newTblName = "ods.ods_" + strSplitList.get(0) + "_" + strSplitList.get(1);
             if (strSplitList.size() == 2) {
                 tblNameMap.put(str, newTblName);
-            }
-            else if (strSplitList.size() == 3) {
+            } else if (strSplitList.size() == 3) {
                 tblNameMap.put(str, newTblName + "ods_" + strSplitList.get(2));
             }
         }

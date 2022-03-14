@@ -27,5 +27,5 @@ import java.util.List;
  * @create: 2022-01-06 11:27
  **/
 public interface JobMigrationService {
-    List<MigrateResultDto> migrate();
+    List<MigrateResultDto> migrate(String env);
 }

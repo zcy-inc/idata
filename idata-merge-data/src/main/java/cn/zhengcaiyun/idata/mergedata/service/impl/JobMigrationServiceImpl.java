@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.mergedata.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
@@ -89,16 +90,17 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     private MigrateResultDao migrateResultDao;
 
     @Override
-    public List<MigrateResultDto> migrate() {
+    public List<MigrateResultDto> migrate(String env) {
         LOGGER.info("*** *** 开始作业数据迁移... ... *** ***");
         // 只迁移真线已发布的版本作业
         // 获取旧版IData所有作业数据
+        EnvEnum envEnum = EnvEnum.valueOf(env);
         List<JobMigrationDto> migrationDtoList = Lists.newArrayList();
         MutableGraph<Long> jobGraph = GraphBuilder.directed()
                 .allowsSelfLoops(false)
                 .expectedNodeCount(5000)
                 .build();
-        fetchOldJobData(migrationDtoList, jobGraph);
+        fetchOldJobData(envEnum, migrationDtoList, jobGraph);
         // 获取已迁移的文件夹、数据源和DAG数据
         List<CompositeFolder> folderList = compositeFolderRepo.queryGeneralFolder();
         List<DataSource> dataSourceList = dataSourceRepo.queryDataSource(new DataSourceCondition(), 10000, 0);
@@ -117,7 +119,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         for (JobMigrationDto migrationDto : migrationDtoList) {
             Long oldJobId = migrationDto.getOldJobId();
-            migrateJobNode(jobGraph, oldJobId, migratedOldJobs);
+            migrateJobNode(envEnum, jobGraph, oldJobId, migratedOldJobs);
         }
 
         LOGGER.info("*** *** 作业迁移结束 *** *** 本次迁移实际处理作业数[{}]，作业[{}]", JobMigrationContext.countHandledJobs(), Joiner.on(',').join(JobMigrationContext.getHandledJobs()));
@@ -125,7 +127,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         return Lists.newArrayList();
     }
 
-    private void migrateJobNode(MutableGraph<Long> jobGraph, Long oldJobId, Set<Long> migratedOldJobs) {
+    private void migrateJobNode(EnvEnum envEnum, MutableGraph<Long> jobGraph,
+                                Long oldJobId, Set<Long> migratedOldJobs) {
         if (migratedOldJobs.contains(oldJobId))
             return;
         // 获取上游节点
@@ -133,14 +136,14 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         if (!CollectionUtils.isEmpty(predecessors)) {
             // 先迁移上游节点
             for (Long prev_job_id : predecessors) {
-                migrateJobNode(jobGraph, prev_job_id, migratedOldJobs);
+                migrateJobNode(envEnum, jobGraph, prev_job_id, migratedOldJobs);
             }
         }
         // 迁移节点
         List<MigrateResultDto> resultDtoList;
         boolean isSuc = true;
         try {
-            resultDtoList = migrateJobData(oldJobId);
+            resultDtoList = migrateJobData(envEnum, oldJobId);
         } catch (Exception ex) {
             resultDtoList = new ArrayList<>();
             resultDtoList.add(new MigrateResultDto("migrateJobNode", String.format("迁移失败：旧作业[%s]迁移失败，原因：%s", oldJobId, ex.getMessage()), ""));
@@ -160,7 +163,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         }
     }
 
-    private List<MigrateResultDto> migrateJobData(Long oldJobId) {
+    private List<MigrateResultDto> migrateJobData(EnvEnum envEnum, Long oldJobId) {
         List<MigrateResultDto> resultDtoList = new ArrayList<>();
         JobMigrationDto migrationDto = JobMigrationContext.getJobMigrationDtoIfPresent(oldJobId);
         if (Objects.isNull(migrationDto)) {
@@ -173,38 +176,46 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         JSONObject oldJobContent = migrationDto.getOldJobContent();
         String jobName = oldJobInfo.getString("job_name");
         JobInfo existJob = JobMigrationContext.getExistJobIfPresent(jobName);
-        if (existJob != null) {
-            LOGGER.warn("### ### 作业[{}]已存在，不需要再迁移", existJob.getName());
-            return resultDtoList;
-        }
+//        if (existJob != null) {
+//            LOGGER.warn("### ### 作业[{}]已存在，不需要再迁移", existJob.getName());
+//            return resultDtoList;
+//        }
 
         LOGGER.info("*** *** 开始迁移作业[{}]#[{}]", oldJobId, jobName);
-        JobInfoDto jobInfoDto = buildJobBaseInfo(oldJobId, oldJobInfo, oldJobContent);
-        String old_owner = oldJobInfo.getString("owner_id");
-        String old_creator = oldJobInfo.getString("creator");
-        String old_editor = oldJobInfo.getString("editor");
-        String nickname = StringUtils.isNotEmpty(old_creator) ? old_creator : StringUtils.isNotEmpty(old_editor) ? old_editor : old_owner;
-        Operator jobOperator = new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
+        JobInfoDto jobInfoDto;
+        Operator jobOperator;
+        if (existJob != null) {
+            jobInfoDto = JobInfoDto.from(existJob);
+            jobOperator = new Operator.Builder(0L).nickname(StringUtils.defaultString(existJob.getCreator())).build();
+        } else {
+            jobInfoDto = buildJobBaseInfo(oldJobId, oldJobInfo, oldJobContent);
+            String old_owner = oldJobInfo.getString("owner_id");
+            String old_creator = oldJobInfo.getString("creator");
+            String old_editor = oldJobInfo.getString("editor");
+            String nickname = StringUtils.isNotEmpty(old_creator) ? old_creator : StringUtils.isNotEmpty(old_editor) ? old_editor : old_owner;
+            jobOperator = new Operator.Builder(0L).nickname(StringUtils.defaultString(nickname)).build();
+        }
 
-        Optional<JobConfigCombinationDto> configCombinationDtoOptional = buildJobConfig(oldJobId, oldJobInfo, oldJobConfig, oldJobContent, resultDtoList);
+        Optional<JobConfigCombinationDto> configCombinationDtoOptional = buildJobConfig(envEnum, oldJobId, oldJobInfo, oldJobConfig, oldJobContent, resultDtoList);
         if (configCombinationDtoOptional.isEmpty()) {
             LOGGER.warn("### ### 作业[{}]配置错误，不能迁移", existJob.getName());
             return resultDtoList;
         }
-        List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(jobInfoDto, configCombinationDtoOptional.get(), jobOperator, migrationDto);
+        List<MigrateResultDto> resultList = jobMigrateManager.migrateJob(envEnum, jobInfoDto, configCombinationDtoOptional.get(), jobOperator, migrationDto);
         resultDtoList.addAll(resultList);
         JobMigrationContext.addHandledJob(jobInfoDto.getName());
         LOGGER.info("### ### 结束迁移作业[{}]#[{}]，本次已处理作业计数：[{}]", oldJobId, jobName, JobMigrationContext.countHandledJobs());
         return resultDtoList;
     }
 
-    private void fetchOldJobData(List<JobMigrationDto> outMigrationDtoList, MutableGraph<Long> outJobGraph) {
+    private void fetchOldJobData(EnvEnum envEnum, List<JobMigrationDto> outMigrationDtoList,
+                                 MutableGraph<Long> outJobGraph) {
         // 获取旧版IData所有作业数据
         List<JSONObject> oldJobInfoList = fetchOldJobInfo();
         // 获取旧版IData所有作业配置
-        List<JSONObject> oldJobConfigList = fetchOldJobConfig();
+        List<JSONObject> oldJobConfigList = fetchOldJobConfig(envEnum);
         // 获取旧版IData所有作业内容
-        List<JSONObject> oldJobContentList = fetchOldJobContent();
+        List<JSONObject> oldJobContentList = fetchOldJobContent(envEnum);
 
         Map<Long, List<JSONObject>> oldJobConfigMap = oldJobConfigList.stream()
                 .collect(Collectors.groupingBy(jsonObject -> jsonObject.getLong("job_id")));
@@ -291,19 +302,20 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         return dto;
     }
 
-    private List<JSONObject> fetchOldJobConfig() {
+    private List<JSONObject> fetchOldJobConfig(EnvEnum envEnum) {
+        String env = EnvEnum.prod == envEnum ? "prod" : "staging";
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id");
 //        String filter = "del = false and sandbox = 'prod' and dag_id is not null";
-        String filter = "del = false and sandbox = 'prod'";
+        String filter = "del = false and sandbox = '" + env + "'";
         return oldIDataDao.queryListWithCustom("metadata.job_config", columns, filter);
     }
 
-    private Optional<JobConfigCombinationDto> buildJobConfig(Long oldJobId, JSONObject jobInfoJson, JSONObject configJson,
+    private Optional<JobConfigCombinationDto> buildJobConfig(EnvEnum envEnum, Long oldJobId, JSONObject jobInfoJson, JSONObject configJson,
                                                              JSONObject oldJobContent, List<MigrateResultDto> resultDtoList) {
         JobConfigCombinationDto combinationDto = new JobConfigCombinationDto();
 
         JobExecuteConfigDto executeConfigDto = new JobExecuteConfigDto();
-        executeConfigDto.setEnvironment(EnvEnum.prod.name());
+        executeConfigDto.setEnvironment(envEnum.name());
 
         String oldType = jobInfoJson.getString("job_type");
         Integer oldDagId = configJson.getInteger("dag_id");
@@ -324,6 +336,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
                 return Optional.empty();
             }
         } else {
+            // todo 是否重新分层
             dagInfoOptional = DagTool.findDag(oldDagId, JobMigrationContext.getDAGIfPresent());
             checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未找到迁移后的DAG", oldJobId);
             dagInfo = dagInfoOptional.get();
@@ -355,11 +368,24 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 4));
         // 作业运行状态（环境级），0：暂停运行；1：恢复运行
         executeConfigDto.setRunningState(RunningStateEnum.pause.val);
-        // todo 云平台需要确定是否这些引擎
+        // todo 设置 executor_cores
+        // 抽数作业，引擎根据di.engine=SPARK判断；SQL作业及SQL回流（非doris）作业，引擎为SPARK；回流Doris，引擎为doris
         if ("DI".equalsIgnoreCase(oldType)) {
-            executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
-        } else {
+            String di_table_info = oldJobContent.getString("di_table_info");
+            if (StringUtils.isNotBlank(di_table_info) && di_table_info.indexOf("di.engine=SPARK") > 0) {
+                executeConfigDto.setExecEngine(EngineTypeEnum.SPARK.name());
+            } else {
+                executeConfigDto.setExecEngine(EngineTypeEnum.SQOOP.name());
+            }
+        } else if ("SQL".equalsIgnoreCase(oldType)) {
             executeConfigDto.setExecEngine(EngineTypeEnum.SPARK.name());
+            // 回流Doris，引擎为doris，放到配置数据输出部分配置
+        } else if ("KYLIN".equalsIgnoreCase(oldType)) {
+            executeConfigDto.setExecEngine(EngineTypeEnum.KYLIN.name());
+        } else if ("SPARK".equalsIgnoreCase(oldType)) {
+            executeConfigDto.setExecEngine(EngineTypeEnum.SPARK.name());
+        } else {
+            executeConfigDto.setExecEngine("");
         }
 
         combinationDto.setExecuteConfig(executeConfigDto);
@@ -384,12 +410,12 @@ public class JobMigrationServiceImpl implements JobMigrationService {
                     JobMigrationContext.putExistJob(prev_job_name, prevJobInfo);
                 }
 
-                Optional<JobExecuteConfig> prevJobConfigOptional = jobExecuteConfigRepo.query(prevJobInfo.getId(), EnvEnum.prod.name());
+                Optional<JobExecuteConfig> prevJobConfigOptional = jobExecuteConfigRepo.query(prevJobInfo.getId(), envEnum.name());
                 checkArgument(prevJobConfigOptional.isPresent() && !Objects.isNull(prevJobConfigOptional.get().getSchDagId()),
                         "旧作业[%s]依赖的迁移后的作业[%s]未配置prod调度配置", oldJobId, prev_job_name);
 
                 JobDependenceDto dependenceDto = new JobDependenceDto();
-                dependenceDto.setEnvironment(EnvEnum.prod.name());
+                dependenceDto.setEnvironment(envEnum.name());
                 dependenceDto.setPrevJobId(prevJobInfo.getId());
                 dependenceDto.setPrevJobDagId(prevJobConfigOptional.get().getSchDagId());
                 dependencies.add(dependenceDto);
@@ -399,23 +425,28 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
         // 只有sql作业需要配置作业输出
         if ("SQL".equalsIgnoreCase(oldType)) {
-            JobOutputDto outputDto = new JobOutputDto();
-            outputDto.setEnvironment(EnvEnum.prod.name());
             Optional<DataSource> dataSourceOptional = DatasourceTool.findDatasource(configJson.getLong("target_id"), JobMigrationContext.getDataSourceListIfPresent());
             checkArgument(dataSourceOptional.isPresent(), "旧作业[%s]未找到迁移后的数据源", oldJobId);
             DataSource dataSource = dataSourceOptional.get();
-            outputDto.setDestDataSourceType(dataSource.getType());
-            outputDto.setDestDataSourceId(dataSource.getId());
-            JSONArray targetTableJsonArray = jobInfoJson.getJSONArray("target_tables");
-            String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
-            checkArgument(target_tables != null && target_tables.length > 0, "旧SQL作业[%s]目标表名为空", oldJobId);
-            outputDto.setDestTable(target_tables[0].trim());
-            String save_mode = Strings.emptyToNull(oldJobContent.getString("save_mode"));
-            save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
-            outputDto.setDestWriteMode(save_mode.toUpperCase());
-            String source_table_pk = oldJobContent.getString("source_table_pk");
-            outputDto.setJobTargetTablePk(source_table_pk);
-            combinationDto.setOutput(outputDto);
+            // 回流doris只需要配置执行引擎，作业输出不配置在配置数据中，改为数据回流类型作业
+            if (DataSourceTypeEnum.doris.name().equalsIgnoreCase(dataSource.getType())) {
+                executeConfigDto.setExecEngine(EngineTypeEnum.DORIS.name());
+            } else {
+                JobOutputDto outputDto = new JobOutputDto();
+                outputDto.setEnvironment(envEnum.name());
+                outputDto.setDestDataSourceType(dataSource.getType());
+                outputDto.setDestDataSourceId(dataSource.getId());
+                JSONArray targetTableJsonArray = jobInfoJson.getJSONArray("target_tables");
+                String[] target_tables = Objects.isNull(targetTableJsonArray) ? null : targetTableJsonArray.toArray(new String[0]);
+                checkArgument(target_tables != null && target_tables.length > 0, "旧SQL作业[%s]目标表名为空", oldJobId);
+                outputDto.setDestTable(target_tables[0].trim());
+                String save_mode = Strings.emptyToNull(oldJobContent.getString("save_mode"));
+                save_mode = StringUtils.defaultString(save_mode, "OVERWRITE");
+                outputDto.setDestWriteMode(save_mode.toUpperCase());
+                String source_table_pk = oldJobContent.getString("source_table_pk");
+                outputDto.setJobTargetTablePk(source_table_pk);
+                combinationDto.setOutput(outputDto);
+            }
         }
 
         return Optional.of(combinationDto);
@@ -451,38 +482,41 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         return "ALARM_LEVEL_MEDIUM:ENUM_VALUE";
     }
 
-    private List<JSONObject> fetchOldJobContent() {
+    private List<JSONObject> fetchOldJobContent(EnvEnum envEnum) {
         List<JSONObject> list = Lists.newArrayList();
-        list.addAll(fetchOldDIAndSQLAndBackFlowJobContent());
-        list.addAll(fetchOldSparkJobContent());
-        list.addAll(fetchOldKylinJobContent());
-        list.addAll(fetchOldScriptJobContent());
+        list.addAll(fetchOldDIAndSQLAndBackFlowJobContent(envEnum));
+        list.addAll(fetchOldSparkJobContent(envEnum));
+        list.addAll(fetchOldKylinJobContent(envEnum));
+        list.addAll(fetchOldScriptJobContent(envEnum));
         return list;
     }
 
-    private List<JSONObject> fetchOldDIAndSQLAndBackFlowJobContent() {
-//        List<String> columns_for_new = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "array_to_json(udf_ids) as udf_ids", "version", "array_to_json(status) as status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col", "di_table_info", "merge_sql", "is_recreate", "version_comment");
-        List<String> columns_for_old = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "udf_ids", "version", "status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
-        return oldIDataDao.queryListWithCustom("metadata.sql_job", columns_for_old, filter);
+    private List<JSONObject> fetchOldDIAndSQLAndBackFlowJobContent(EnvEnum envEnum) {
+        String env = EnvEnum.prod == envEnum ? "prod" : "staging";
+        List<String> columns_for_new = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "udf_ids", "version", "status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col", "di_table_info", "merge_sql", "is_recreate", "version_comment");
+//        List<String> columns_for_old = Lists.newArrayList("id", "creator", "editor", "job_id", "source_id", "source_type", "source_table", "source_table_pk", "source_sql", "external_tables", "udf_ids", "version", "status", "save_mode", "before_sqls", "after_sqls", "source_tbl_time_col");
+        String filter = "del = false and '" + env + "' = any(status)";
+        return oldIDataDao.queryListWithCustom("metadata.sql_job", columns_for_new, filter);
     }
 
-    private List<JSONObject> fetchOldKylinJobContent() {
+    private List<JSONObject> fetchOldKylinJobContent(EnvEnum envEnum) {
+        String env = EnvEnum.prod == envEnum ? "prod" : "staging";
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "cube_name", "start_time", "end_time", "build_type", "status");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
+        String filter = "del = false and '" + env + "' = any(status)";
         return oldIDataDao.queryListWithCustom("metadata.kylin_job", columns, filter);
     }
 
-    private List<JSONObject> fetchOldSparkJobContent() {
+    private List<JSONObject> fetchOldSparkJobContent(EnvEnum envEnum) {
+        String env = EnvEnum.prod == envEnum ? "prod" : "staging";
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "app_type", "resource_id", "main_class", "app_arguments", "dependent_resource_ids", "status");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause,prod}')";
+        String filter = "del = false and '" + env + "' = any(status)";
         return oldIDataDao.queryListWithCustom("metadata.spark_job", columns, filter);
     }
 
-    private List<JSONObject> fetchOldScriptJobContent() {
+    private List<JSONObject> fetchOldScriptJobContent(EnvEnum envEnum) {
+        String env = EnvEnum.prod == envEnum ? "prod" : "staging";
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "resource_id", "script_arguments", "status");
-        String filter = "del = false and (status = '{prod}' or status = '{staging,prod}' or status = '{staging_pause," +
-                "prod}')";
+        String filter = "del = false and '" + env + "' = any(status)";
         return oldIDataDao.queryListWithCustom("metadata.script_job", columns, filter);
     }
 
