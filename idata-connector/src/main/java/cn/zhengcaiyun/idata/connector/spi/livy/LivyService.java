@@ -106,7 +106,7 @@ public class LivyService {
 
         Map<String, Object> body = new HashMap<>();
         String code = LivySessionKindEnum.spark.equals(query.getSessionKind())
-                ? String.format("println(spark.sql(\"\"\"%s\"\"\").toJSON.collect.mkString(\"[\", \",\", \"]\"))", query.getQuerySource())
+                ? String.format("println(spark.sql(\"\"\"%s\"\"\").limit(500).toJSON.collect.mkString(\"[\", \",\", \"]\"))", query.getQuerySource())
                 : query.getQuerySource();
         body.put("kind", query.getSessionKind().name());
         // TODO 这里也可以执行ddl和dml，后续需要增加日志记录和权限控制
