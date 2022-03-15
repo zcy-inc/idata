@@ -227,14 +227,16 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         // 筛选的列名
         String columnsParam = StringUtils.join(columnList, ", ");
         // 筛选的带函数的列名
-        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n\t,");
+        String alisColumns = StringUtils.join(columnList.stream().map(e -> "t1." + e).collect(Collectors.toList()), "\n,");
         //生成keyCondition，key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");
-
+        //生成keyCondition，key连接表，例如"t2.id=null"
+        List<String> whereKeyConditionList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t2." + e + "=null").collect(Collectors.toList());
+        String whereKeyConditionParam = StringUtils.join(keyColumnList, " and ");
 
         String mergeSqlTemplate = "";
-        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/merge_sql_template.sql");) {
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/merge_sql_template2.sql");) {
             byte[] buff = new byte[1024];
             int btr = 0;
             while ((btr = inputStream.read(buff)) != -1) {
@@ -244,8 +246,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
             e.printStackTrace();
             throw new GeneralException("模版文件解析失败");
         }
-//        FileReader fileReader = new FileReader("classpath:template/merge_sql_template.sql");
-//        String mergeSqlTemplate = fileReader.readString();
 
         // 通过SpEL解析
         ExpressionParser parser = new SpelExpressionParser();
@@ -254,8 +254,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         context.setVariable("destTable", destTable);
         context.setVariable("columns", columnsParam);
         context.setVariable("tmpTable", tmpTableParam);
-        context.setVariable("coalesceColumns", coalesceColumnsParam);
+        context.setVariable("alisColumns", alisColumns);
         context.setVariable("keyCondition", keyConditionParam);
+        context.setVariable("whereKeyConditionParam", whereKeyConditionParam);
         context.setVariable("days", days);
         context.setVariable("br", "\n");
 
