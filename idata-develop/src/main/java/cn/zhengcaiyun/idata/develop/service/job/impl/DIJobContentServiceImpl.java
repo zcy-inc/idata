@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
@@ -127,8 +128,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
      * @param contentDto
      */
     private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
-        // 数据回流不拼mergeSql
-        boolean buildMergeSql = StringUtils.containsIgnoreCase(jobType, "DI");
+        // 数据DI并且是增量模式拼mergeSql
+        boolean buildMergeSql = StringUtils.containsIgnoreCase(jobType, "DI") && StringUtils.equalsIgnoreCase(contentDto.getSrcReadMode(), SrcReadModeEnum.INC.value);
         String destTable = contentDto.getDestTable();
         String srcTables = contentDto.getSrcTables();
         String srcReadFilter = contentDto.getSrcReadFilter();
