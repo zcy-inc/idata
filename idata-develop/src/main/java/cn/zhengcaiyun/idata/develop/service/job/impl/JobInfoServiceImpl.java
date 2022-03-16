@@ -392,7 +392,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
                     //抽取主键key
-                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toSet());
+                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setUpdateKey(StringUtils.join(keyNameSet, ","));
 
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {

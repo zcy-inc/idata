@@ -163,7 +163,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("changeColumn fail!");
+            throw new GeneralException("getTableNameList fail!");
         }
         return tableList;
     }
@@ -177,7 +177,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("changeColumn fail!");
+            throw new GeneralException("getDbNameList fail!");
         }
         return dbList;
     }

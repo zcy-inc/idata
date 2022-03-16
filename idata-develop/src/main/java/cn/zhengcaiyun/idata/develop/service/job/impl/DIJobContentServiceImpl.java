@@ -199,6 +199,83 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return DIJobContentContentDto.from(jobContentOptional.get());
     }
 
+    @Override
+    public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DataSourceTypeEnum typeEnum, int days) throws IllegalArgumentException {
+        checkArgument(destTable.split("\\.").length == 2, "生成mergeSql的destTable必须带上库名: " + destTable);
+        String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
+        // 匹配规则：例如 "tableName[1-2]"
+        String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
+        // 匹配规则：例如 "212tableName2,223tableName2"
+        String regex2 = "(\\d+(\\w+)[,]{0,1})+";
+
+        // 是否涉及多张表（分区表）
+        boolean isMulPartitionParam = false;
+        if (typeEnum == DataSourceTypeEnum.mysql && (ReUtil.isMatch(regex1, sourceTable) || ReUtil.isMatch(regex2, sourceTable))) {
+            isMulPartitionParam = true;
+        }
+
+        // 筛选的列名
+        String columnsParam = StringUtils.join(columnList, ", ");
+        // 筛选的带函数的列名
+        String alisColumns = StringUtils.join(columnList.stream().map(e -> "t1." + e).collect(Collectors.toList()), "\n,");
+        //生成keyCondition，key连接表，例如"t1.id=t2.id"
+        List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
+        String keyConditionParam = StringUtils.join(keyColumnList, " and ");
+        //生成keyCondition，key连接表，例如"t2.id=null"
+        List<String> whereKeyConditionList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t2." + e + "=null").collect(Collectors.toList());
+        String whereKeyConditionParam = StringUtils.join(keyColumnList, " and ");
+
+        String mergeSqlTemplate = "";
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/merge_sql_template2.sql");) {
+            byte[] buff = new byte[1024];
+            int btr = 0;
+            while ((btr = inputStream.read(buff)) != -1) {
+                mergeSqlTemplate += new String(buff, 0, btr, "UTF-8");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new GeneralException("模版文件解析失败");
+        }
+
+        // 通过SpEL解析
+        ExpressionParser parser = new SpelExpressionParser();
+        EvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("isMulPartition", isMulPartitionParam);
+        context.setVariable("destTable", destTable);
+        context.setVariable("columns", columnsParam);
+        context.setVariable("tmpTable", tmpTableParam);
+        context.setVariable("alisColumns", alisColumns);
+        context.setVariable("keyCondition", keyConditionParam);
+        context.setVariable("whereKeyConditionParam", whereKeyConditionParam);
+        context.setVariable("days", days);
+        context.setVariable("br", "\n");
+
+        Expression expression = parser.parseExpression(mergeSqlTemplate, new TemplateParserContext());
+        return expression.getValue(context, String.class);
+    }
+
+    private void checkJobContent(DIJobContentContentDto contentDto) {
+        checkArgument(StringUtils.isNotBlank(contentDto.getSrcDataSourceType()), "来源数据源类型为空");
+        checkArgument(Objects.nonNull(contentDto.getSrcDataSourceId()), "来源数据源编号为空");
+        if (contentDto.getJobType() == JobTypeEnum.DI_BATCH || contentDto.getJobType() == JobTypeEnum.DI_STREAM) {
+            checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");
+        }
+        checkArgument(StringUtils.isNotBlank(contentDto.getDestDataSourceType()), "目标数据源类型为空");
+        checkArgument(Objects.nonNull(contentDto.getDestDataSourceId()), "目标数据源编号为空");
+        if (!StringUtils.equalsIgnoreCase(contentDto.getDestDataSourceType(), DriverTypeEnum.Kafka.name())) {
+            checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
+        }
+        checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
+        checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()), "来源数据表为空");
+//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");   数据迁移完后需要取消注释
+//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");  数据迁移完后需要取消注释
+
+        List<MappingColumnDto> mappingColumnDtoList = contentDto.getSrcCols().stream()
+                .filter(columnDto -> Objects.nonNull(columnDto.getMappedColumn()))
+                .collect(Collectors.toList());
+//todo        checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");  数据迁移完后需要取消注释
+    }
+
     private boolean unUsedDestTable(String destTable, Long excludeJobId) {
         List<DIJobContent> diJobContents = diJobContentRepo.queryList(destTable);
         if (ObjectUtils.isEmpty(diJobContents)) return true;

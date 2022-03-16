@@ -10,6 +10,8 @@ import { Form } from 'antd';
 import moment from 'moment';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
+import { Tip } from '@/components';
+import { getDAGStatus } from '@/utils/datadev';
 import styles from './index.less';
 
 import { dayOptions, hourOptions, minuteOptions, monthOptions, weekOptions } from './constants';
@@ -291,6 +293,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
 
   return (
     <div className={styles['edit-dag']}>
+      <Tip label="当前状态" content={getDAGStatus(data?.dagInfoDto.status)} style={{ marginBottom: 20 }} />
       <ProForm
         form={form}
         layout="horizontal"
