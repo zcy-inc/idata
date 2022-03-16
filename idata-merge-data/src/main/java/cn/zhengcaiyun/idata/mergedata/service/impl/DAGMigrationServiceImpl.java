@@ -132,7 +132,7 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         EnvEnum envEnum = EnvEnum.valueOf(env);
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         resultDtoList.addAll(migrateOriginDAG(envEnum));
-        resultDtoList.addAll(createStandardDAG(cluster, envEnum));
+//        resultDtoList.addAll(createStandardDAG(cluster, envEnum));
         return resultDtoList;
     }
 

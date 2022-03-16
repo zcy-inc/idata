@@ -146,7 +146,7 @@ public class MergeDataController {
         }
         if (mergeAll || modules.contains(MigrateItemEnum.job.name())) {
             if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.job)))
-                resultDtoList.addAll(jobMigrationService.migrate());
+                resultDtoList.addAll(jobMigrationService.migrate(env));
         }
         if (modules.contains(MigrateItemEnum.modify_di_job_name.name())) {
             if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.modify_di_job_name)))

@@ -331,33 +331,37 @@ public class JobMigrateManager {
                 contentDto.setScriptSelectColumns(src_columns);
                 contentDto.setScriptKeyColumns("id");
                 ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
-                scriptMergeSqlParamDto.setRecentDays(1);
+                scriptMergeSqlParamDto.setRecentDays(3);
                 contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
                 if (StringUtils.isNotBlank(src_where)) {
                     contentDto.setSrcReadFilter(src_where);
                 }
 
-            } else if (diTableProps.containsKey("di.columns")) {
-                // di.column
-                String di_columns = diTableProps.getProperty("di.columns");
-                String di_condition = diTableProps.getProperty("di.condition");
-                if (StringUtils.isBlank(di_columns) || StringUtils.isBlank(di_condition)) {
-                    resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的di_columns或di_condition 字段不合法",
+            } else {
+                if (diTableProps.containsKey("di.columns")) {
+                    // di.column
+                    String di_columns = diTableProps.getProperty("di.columns");
+                    String di_condition = diTableProps.getProperty("di.condition");
+                    if (StringUtils.isBlank(di_columns) || StringUtils.isBlank(di_condition)) {
+                        resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的di_columns或di_condition 字段不合法",
+                                migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+                        return null;
+                    }
+                    contentDto.setScriptSelectColumns(di_columns.trim());
+                    contentDto.setSrcReadFilter(di_condition.trim());
+
+                    contentDto.setScriptKeyColumns("id");
+                    ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
+                    scriptMergeSqlParamDto.setRecentDays(3);
+                    contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
+                } else {
+                    resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的增量抽数配置不合法",
                             migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
                     return null;
                 }
-                contentDto.setScriptSelectColumns(di_columns.trim());
-                contentDto.setSrcReadFilter(di_condition.trim());
-
-                contentDto.setScriptKeyColumns("id");
-                ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
-                scriptMergeSqlParamDto.setRecentDays(1);
-                contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
-            } else {
-                resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的增量抽数配置不合法",
-                        migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
-                return null;
             }
+            resultDtoList.add(new MigrateResultDto("migrateIncrementDIContent", String.format("迁移增量DI作业：旧DI增量作业[%s]自动生成merge sql，需要确认生成结果是否正确",
+                    migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
         } else {
             // 全量
             if (diTableProps.containsKey("di.columns") || diTableProps.containsKey("di.query")) {
@@ -381,7 +385,7 @@ public class JobMigrateManager {
                     contentDto.setScriptSelectColumns(src_columns);
 //                    contentDto.setScriptKeyColumns("id");
 //                    ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
-//                    scriptMergeSqlParamDto.setRecentDays(1);
+//                    scriptMergeSqlParamDto.setRecentDays(3);
 //                    contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
                     if (StringUtils.isNotBlank(src_where)) {
                         contentDto.setSrcReadFilter(src_where);
@@ -605,13 +609,13 @@ public class JobMigrateManager {
             resultDtoList.add(new MigrateResultDto("migrateDorisContent", String.format("需处理：旧Doris回流作业[%s]的source_sql字段为空", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
-        old_introduce_columns = old_introduce_columns.replace("\\n", " ").trim();
+//        old_introduce_columns = old_introduce_columns.replace("\\n", " ").trim();
         List<String> destCols = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(old_introduce_columns);
 
         List<String> srcCols = Lists.newArrayList();
-        old_source_sql = old_source_sql.trim().replace("\\n", " ");
-        String src_columns_str = old_source_sql.substring(old_source_sql.indexOf("select ") + 6, old_source_sql.indexOf(" from "));
-        src_columns_str = src_columns_str.replace("\\n", " ").trim();
+//        old_source_sql = old_source_sql.trim().replace("\\n", " ");
+        String src_columns_str = old_source_sql.substring(old_source_sql.indexOf("select ") + 6, old_source_sql.indexOf("from "));
+//        src_columns_str = src_columns_str.replace("\\n", " ").trim();
         Splitter.on(",").trimResults().omitEmptyStrings()
                 .splitToList(src_columns_str)
                 .stream().forEach(temp_column -> {
@@ -652,17 +656,17 @@ public class JobMigrateManager {
         contentDto.setDestCols(destColumns);
 
         if (StringUtils.isBlank(old_source_table)) {
-            String old_src_tbl = old_source_sql.substring(old_source_sql.indexOf(" from ") + 5);
-            if (old_src_tbl.indexOf(" where ") > 0) {
-                old_src_tbl = old_src_tbl.substring(0, old_src_tbl.indexOf(" where "));
+            String old_src_tbl = old_source_sql.substring(old_source_sql.indexOf("from ") + 5);
+            if (old_src_tbl.indexOf("where ") > 0) {
+                old_src_tbl = old_src_tbl.substring(0, old_src_tbl.indexOf("where "));
             }
             old_source_table = old_src_tbl.trim();
         }
         // 数据来源-表
         contentDto.setSrcTables(old_source_table);
 
-        if (old_source_sql.indexOf(" where ") > 0) {
-            contentDto.setSrcReadFilter(old_source_sql.substring(old_source_sql.indexOf(" where ") + 6).trim());
+        if (old_source_sql.indexOf("where ") > 0) {
+            contentDto.setSrcReadFilter(old_source_sql.substring(old_source_sql.indexOf("where ") + 6).trim());
         }
 
         DIJobContentContentDto saveContent = diJobContentService.save(newJobId, contentDto, contentOperator);
