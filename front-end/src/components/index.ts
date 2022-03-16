@@ -12,4 +12,6 @@ export { default as MapInput } from './MapInput';
 
 export { default as RadioGroup } from './RadioGroup';
 
+export { default as Tip } from './Tip';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };
