@@ -42,6 +42,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
@@ -381,7 +382,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 BeanUtils.copyProperties(bfJobContent, backFlowResponse);
 
                 backFlowResponse.setSrcTable(bfJobContent.getSrcTables());
-
                 backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
 
                 // 根据回流启用模式，填充数据
@@ -413,17 +413,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
 
-                // TODO 个性化处理返回值
-                // sqoop -> srcSql = null, columnName != null
-                // spark -> columnName = null, srcSql != null
-                // doris -> columnName srcSql 都要有
-                switch (backFlowResponse.getExecEngine()) {
-                    case SQOOP:
-                        backFlowResponse.setSrcSql(null);
-                        break;
-                    case SPARK:
-                        backFlowResponse.setDestColumnNames(null);
-                        break;
+                // 是否支持columns，不支持不返回给htool
+                if (!DIRuleHelper.supportColumns(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                    backFlowResponse.setDestColumnNames(null);
+                }
+                // 是否支持query sql，不支持不返回给htool
+                if (!DIRuleHelper.supportQuerySQL(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                    backFlowResponse.setSrcSql(null);
                 }
 
                 return backFlowResponse;
