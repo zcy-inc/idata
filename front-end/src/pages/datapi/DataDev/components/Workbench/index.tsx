@@ -63,7 +63,7 @@ const Workbench: FC = ({}) => {
           {panes.map((pane) => (
             <TabPane
               className={styles['tab-pane']}
-              tab={pane.title}
+              tab={<span title={pane.title}>{pane.title}</span>}
               key={pane.key}
               closeIcon={<TabCloseIcon />}
               style={{ paddingBottom: pane.belong === FolderBelong.DEVJOB ? 24 : 88 }} // pane类型为作业时没有下面的操作栏，不需要留出高度
