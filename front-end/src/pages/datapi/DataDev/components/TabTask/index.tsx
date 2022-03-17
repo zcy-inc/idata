@@ -902,6 +902,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   if (res.success) {
                     message.success('暂停成功');
                     refreshBasicInfo();
+                    refreshVersions();
                     setVisibleAction(false);
                   }
                 })
@@ -914,6 +915,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                   if (res.success) {
                     message.success('恢复成功');
                     refreshBasicInfo();
+                    refreshVersions();
                     setVisibleAction(false);
                   }
                 })
