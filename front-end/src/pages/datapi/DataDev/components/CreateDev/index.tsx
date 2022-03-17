@@ -108,7 +108,10 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      {(taskType === TaskCategory.SPARK || taskType === TaskCategory.SCRIPT) && (
+      <Item name="name" label="作业名称" rules={rules}>
+        <Input size="large" style={{ width }} placeholder="请输入" />
+      </Item>
+      {taskType && [TaskCategory.SPARK, TaskCategory.SCRIPT, TaskCategory.SQL].includes(taskType) && (
         <Item name="language" label="运行方式" rules={rules}>
           <Select
             size="large"
@@ -120,9 +123,6 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           />
         </Item>
       )}
-      <Item name="name" label="作业名称" rules={rules}>
-        <Input size="large" style={{ width }} placeholder="请输入" />
-      </Item>
       <Item name="dwLayerCode" label="数仓分层" rules={rules}>
         <Select
           size="large"
