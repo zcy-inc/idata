@@ -477,14 +477,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     <IconFont type="icon-tiaoshi" className={styles.icon} onClick={onDebug} />
                   </Tooltip>
                 )}
-                <Tooltip title="运行">
+                <Tooltip title="单次运行">
                   <IconFont
                     type="icon-yunxing"
                     className={styles.icon}
                     onClick={() => onAction('run')}
                   />
                 </Tooltip>
-                <Tooltip title="提交发布">
+                <Tooltip title="提交版本">
                   <IconFont
                     type="icon-tijiaofabu"
                     className={styles.icon}
@@ -497,14 +497,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     }}
                   />
                 </Tooltip>
-                <Tooltip title="恢复">
+                <Tooltip title="上线">
                   <IconFont
                     type="icon-yunxingbaise-copy"
                     className={styles.icon}
                     onClick={() => onAction('resume')}
                   />
                 </Tooltip>
-                <Tooltip title="暂停">
+                <Tooltip title="下线">
                   <IconFont
                     type="icon-zantingbaise-copy"
                     className={styles.icon}
