@@ -345,6 +345,7 @@ public class JobMigrateManager {
 
         JSONObject oldJobContent = migrationDto.getOldJobContent();
         contentDto.setJobId(newJobId);
+        contentDto.setJobType(jobInfoDto.getJobType());
         contentDto.setMainClass(oldJobContent.getString("main_class"));
         String oldFileResourceId = oldJobContent.getString("resource_id");
         String hdfsPath = fetchOldResource(Long.valueOf(oldFileResourceId)).get(0).getString("hdfs_path");
