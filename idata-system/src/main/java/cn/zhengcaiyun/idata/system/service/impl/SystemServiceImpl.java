@@ -173,10 +173,10 @@ public class SystemServiceImpl implements SystemService {
                     && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) != null
                     && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) > 0) {
                 folderTreeNode.setFilePermission(folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()));
-            }
-            else {
+            } else {
                 folderTreeNode.setFilePermission(0);
             }
+
             if (ObjectUtils.isNotEmpty(treeNode.getChildren())) {
                 folderTreeNode.setChildren(changeBaseToFolder(treeNode.getChildren(), folderPermissionMap));
             }

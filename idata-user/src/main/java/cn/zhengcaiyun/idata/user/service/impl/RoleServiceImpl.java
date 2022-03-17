@@ -16,9 +16,16 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
+import cn.hutool.core.lang.tree.TreeNode;
+import cn.hutool.core.util.ReflectUtil;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDao;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDynamicSqlSupport;
+import cn.zhengcaiyun.idata.system.dal.model.SysResource;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.user.dto.RoleDto;
@@ -54,12 +61,18 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private UacRoleDao uacRoleDao;
+
     @Autowired
     private UacUserRoleDao uacUserRoleDao;
+
     @Autowired
     private UacRoleAccessDao uacRoleAccessDao;
+
     @Autowired
     private SystemService systemService;
+
+    @Autowired
+    private SysResourceDao sysResourceDao;
 
     @Override
     public Page<RoleDto> findRoles(Integer limit, Integer offset) {
@@ -116,7 +129,63 @@ public class RoleServiceImpl implements RoleService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        return systemService.getDevFolderTree(folderPermissionMap);
+        List<FolderTreeNodeDto> devFolderTree = systemService.getDevFolderTree(folderPermissionMap);
+
+        // 另个数据源构建树
+        List<SysResource> list = sysResourceDao.select(dsl -> dsl.where(SysResourceDynamicSqlSupport.sysResource.del, isEqualTo(DeleteEnum.DEL_NO.val)));
+        Map<String, Long> map = list.stream().collect(Collectors.toMap(SysResource::getResourceCode, SysResource::getId));
+        List<FolderTreeNodeDto> rawList = list.stream().map(e -> {
+            FolderTreeNodeDto item = new FolderTreeNodeDto();
+            item.setCid("F_" + e.getId());
+            item.setFolderId(String.valueOf(e.getId()));
+            item.setType(e.getResourceType());
+            item.setName(e.getResourceName());
+            Long pId = map.getOrDefault(e.getParentCode(), 0L);
+            if (pId != null) {
+                item.setParentId(String.valueOf(pId));
+            }
+            item.setFeatureCode(e.getResourceCode());
+            item.setParentCode(e.getParentCode());
+            item.setFilePermission(folderPermissionMap.getOrDefault(item.getType() + item.getFolderId(), 0));
+            return item;
+        }).collect(Collectors.toList());
+
+        List<FolderTreeNodeDto> tree = generateTree(rawList);
+        devFolderTree.addAll(tree);
+        return devFolderTree;
+    }
+
+    /**
+     * 生成树
+     * @param list
+     * @return
+     */
+    private List<FolderTreeNodeDto> generateTree(List<FolderTreeNodeDto> list) {
+        //创建一个map用于存放 <类型id，将类型对象封装成的 ModelTypeVo 对象>
+        List<FolderTreeNodeDto> trees = new ArrayList<>();
+        Map<String, FolderTreeNodeDto> map = list.stream().collect(Collectors.toMap(FolderTreeNodeDto::getFolderId, e -> e));
+
+        for (FolderTreeNodeDto dto : list) {
+            String parentId = dto.getParentId();
+
+            // 顶级分类
+            if ("0".equals(parentId)) {
+                trees.add(dto);
+                continue;
+            }
+
+            if (map.containsKey(parentId)) {
+                FolderTreeNodeDto pElem = map.get(parentId);
+                if (pElem.getChildren() != null) {
+                    pElem.getChildren().add(dto);
+                } else {
+                    List<FolderTreeNodeDto> children = new ArrayList<>();
+                    children.add(dto);
+                    pElem.setChildren(children);
+                }
+            }
+        }
+        return trees;
     }
 
     @Override
