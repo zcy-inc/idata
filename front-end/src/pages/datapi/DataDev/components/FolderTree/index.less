@@ -4,6 +4,11 @@
   :global {
     .ant-tree {
       height: calc(100% - 52px) !important;
+      .ant-tree-node-content-wrapper {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
     }
   }
 }

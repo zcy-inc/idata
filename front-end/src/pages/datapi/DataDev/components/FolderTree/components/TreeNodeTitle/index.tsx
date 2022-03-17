@@ -15,8 +15,8 @@ interface TreeNodeTitleProps {
 const MapFolderIcon = {
   [FolderBelong.DESIGN]: 'icon-shujukaifa-shucangsheji',
   [FolderBelong.DESIGNTABLE]: 'icon-shujukaifa-biao',
-  [FolderBelong.DESIGNLABEL]: 'icon-shujukaifa-biaoqian',
-  [FolderBelong.DESIGNENUM]: 'icon-shujukaifa-meijuleixing',
+  // [FolderBelong.DESIGNLABEL]: 'icon-shujukaifa-biaoqian',
+  // [FolderBelong.DESIGNENUM]: 'icon-shujukaifa-meijuleixing',
   [FolderBelong.DAG]: 'icon-shujukaifa-dag',
   [FolderBelong.DI]: 'icon-shujukaifa-shujujicheng',
   [FolderBelong.DEV]: 'icon-shujukaifa-shujukaifa',
@@ -36,10 +36,10 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
     switch (node.belong) {
       case FolderBelong.DESIGNTABLE:
         return <Menu.Item key="CreateTable">新建表</Menu.Item>;
-      case FolderBelong.DESIGNLABEL:
-        return <Menu.Item key="CreateLabel">新建标签</Menu.Item>;
-      case FolderBelong.DESIGNENUM:
-        return <Menu.Item key="CreateEnum">新建枚举</Menu.Item>;
+      // case FolderBelong.DESIGNLABEL:
+      //   return <Menu.Item key="CreateLabel">新建标签</Menu.Item>;
+      // case FolderBelong.DESIGNENUM:
+      //   return <Menu.Item key="CreateEnum">新建枚举</Menu.Item>;
       case FolderBelong.DAG:
         return <Menu.Item key="CreateDAG">新建DAG</Menu.Item>;
       case FolderBelong.DI:
@@ -87,7 +87,14 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
       node.type !== FolderTypes.RECORD;
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
+        <div
+          style={{
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            paddingRight: 6,
+          }}
+        >
           <IconFont
             type={
               MapFolderIcon[node.type === FolderTypes.FOLDER ? FolderTypes.FOLDER : node.belong]
@@ -99,7 +106,11 @@ const TreeNodeTitle: FC<TreeNodeTitleProps> = ({ node, title, onAction }) => {
           <IconFont
             type="icon-gengduo2"
             onClick={() => setCurNode(node)}
-            style={{ visibility: visible ? 'visible' : 'hidden', paddingLeft: 16 }}
+            style={{
+              visibility: visible ? 'visible' : 'hidden',
+              position: 'absolute',
+              right: 0,
+            }}
           />
         </Dropdown>
       </div>
