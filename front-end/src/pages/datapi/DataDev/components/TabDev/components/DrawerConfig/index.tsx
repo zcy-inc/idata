@@ -347,6 +347,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         schPriority: values.schPriority,
         execDriverMem: values.execDriverMem,
         execWorkerMem: values.execWorkerMem,
+        execEngine: values.execEngine,
       },
       dependencies: depData.map((_) => ({
         jobId: data?.id as number,
