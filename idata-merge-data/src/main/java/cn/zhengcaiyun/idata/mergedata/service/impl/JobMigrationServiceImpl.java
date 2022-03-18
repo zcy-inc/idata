@@ -304,7 +304,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
     private List<JSONObject> fetchOldJobConfig(EnvEnum envEnum) {
         String env = EnvEnum.prod == envEnum ? "prod" : "staging";
-        List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id");
+        List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_id", "sandbox", "dependent_job_ids", "alarm_level", "executor_memory", "driver_memory", "executor_cores", "target_id", "dag_id", "introduce_condition", "introduce_columns");
 //        String filter = "del = false and sandbox = 'prod' and dag_id is not null";
         String filter = "del = false and sandbox = '" + env + "'";
         return oldIDataDao.queryListWithCustom("metadata.job_config", columns, filter);
