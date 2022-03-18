@@ -17,8 +17,7 @@ import { get } from 'lodash';
 import type { FC } from 'react';
 import { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
-
-import Title from '@/components/Title';
+import { MapInput, Title } from '@/components';
 import { restartOptions, execDriverMemOptions, execWorkerMemOptions } from './constants';
 import { ConfiguredTaskListItem, DAGListItem, TaskConfig, Task } from '@/types/datadev';
 import {
@@ -30,7 +29,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
-import { ExecEngine, SchPriority, TaskTypes } from '@/constants/datadev';
+import { ExecEngine, SchPriority, TaskTypes, execCoresOptions, defaultExecCores } from '@/constants/datadev';
 import { getDataSourceList } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
 
@@ -430,6 +429,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
+              initialValues={{ execCores: defaultExecCores }}
             >
               <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
@@ -528,6 +528,33 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   placeholder="请选择"
                   options={renderExecEngineOptions()}
                 />
+              </Item>
+              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execDriverMemOptions}
+                />
+              </Item>
+              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execWorkerMemOptions}
+                />
+              </Item>
+              <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execCoresOptions}
+                />
+              </Item>
+              <Item name="extProperties" label="自定义参数">
+                <MapInput style={{ width }} />
               </Item>
               <Title>依赖配置</Title>
               <div style={{ display: 'flex' }}>

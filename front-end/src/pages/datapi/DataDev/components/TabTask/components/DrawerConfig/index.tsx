@@ -14,6 +14,7 @@ import {
 } from 'antd';
 import { get } from 'lodash';
 import type { FC } from 'react';
+import { MapInput } from '@/components';
 import styles from './index.less';
 
 import Title from '@/components/Title';
@@ -27,7 +28,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
-import { SchPriority, execEngineOptions } from '@/constants/datadev';
+import { SchPriority, execEngineOptions, execCoresOptions, defaultExecCores } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -153,6 +154,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
+              initialValues={{ execCores: defaultExecCores }}
             >
               <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
@@ -207,22 +209,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={security.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
                 />
               </Item>
-              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execDriverMemOptions}
-                />
-              </Item>
-              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execWorkerMemOptions}
-                />
-              </Item>
+
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
@@ -243,6 +230,33 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   placeholder="请选择"
                   options={execEngineOptions}
                 />
+              </Item>
+              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execDriverMemOptions}
+                />
+              </Item>
+              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execWorkerMemOptions}
+                />
+              </Item>
+              <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execCoresOptions}
+                />
+              </Item>
+              <Item name="extProperties" label="自定义参数">
+                <MapInput style={{ width }} />
               </Item>
             </Form>
           </TabPane>
