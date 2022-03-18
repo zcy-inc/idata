@@ -209,10 +209,6 @@ public class JobMigrateManager {
             resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧作业[%s]的source_table为空，需要修改后重迁或者迁移完重新配置DI作业", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
             return null;
         }
-//        if (old_source_table.indexOf("[") > 0) {
-//            resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("需处理：旧作业[%s]的source_table为多表格式，暂不支持", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
-//            return null;
-//        }
 
         Optional<DataSource> srcDataSourceOptional = DatasourceTool.findDatasource(old_source_id, JobMigrationContext.getDataSourceListIfPresent());
         if (!srcDataSourceOptional.isPresent()) {
@@ -261,22 +257,6 @@ public class JobMigrateManager {
                     migrationDto.getOldJobId().toString(), jobInfoDto.getName(), contentDto.getDestTable()), oldJobContent.toJSONString()));
         }
 
-        // 未切换新规则表名，迁移逻辑如下，统一使用新命名替换
-//        String newDestTable = parseDestTable(srcDataSource, old_source_table);
-//        String finalDestTable = newDestTable;
-//        if (target_tables != null && target_tables.length > 0 && StringUtils.isNotBlank(target_tables[0])) {
-//            String oldDestTable = target_tables[0];
-//            if (oldDestTable.startsWith("ods_") && oldDestTable.indexOf(".sync_") > 0) {
-//                resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧作业[%s]:[%s]的旧目标表[%s]已自动改为新规则表名[%s]，需确认是否修改正确",
-//                        migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable, newDestTable), oldJobContent.toJSONString()));
-//            } else {
-//                finalDestTable = oldDestTable;
-//                resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移后需确认：旧DI作业[%s]:[%s]延用非常规目标表[%s]，不自动改表名",
-//                        migrationDto.getOldJobId().toString(), jobInfoDto.getName(), oldDestTable), oldJobContent.toJSONString()));
-//            }
-//        }
-//        contentDto.setDestTable(finalDestTable.trim());
-
         // 数据去向-写入模式，init: 重建表，override：覆盖表
         if (Objects.equals(Boolean.TRUE, old_is_recreate)) {
             contentDto.setDestWriteMode("init");
@@ -287,8 +267,6 @@ public class JobMigrateManager {
                 contentDto.setDestWriteMode("overwrite");
             }
         }
-        // 因岛端环境老IData还是旧表名规则，迁移后的数据先将写入模式设置为init，后续作业稳定后统一订正为append，迁移云端数据时注释该代码
-//        contentDto.setDestWriteMode("init");
 
         // 数据去向-写入前语句
         contentDto.setDestBeforeWrite("");
@@ -310,6 +288,13 @@ public class JobMigrateManager {
         }
 
         contentDto.setConfigMode(DiConfigModeEnum.SCRIPT.value);
+
+        contentDto.setScriptSelectColumns("");
+        contentDto.setScriptKeyColumns("");
+        contentDto.setSrcReadFilter("");
+        contentDto.setSrcCols(Lists.newArrayList());
+        contentDto.setDestCols(Lists.newArrayList());
+
         if ("increment".equalsIgnoreCase(old_source_type)) {
             // 增量
             if (diTableProps.containsKey("di.query")) {
