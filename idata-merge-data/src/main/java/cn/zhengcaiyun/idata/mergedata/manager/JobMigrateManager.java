@@ -327,13 +327,19 @@ public class JobMigrateManager {
                     // di.column
                     String di_columns = diTableProps.getProperty("di.columns");
                     String di_condition = diTableProps.getProperty("di.condition");
-                    if (StringUtils.isBlank(di_columns) || StringUtils.isBlank(di_condition)) {
-                        resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的di_columns或di_condition 字段不合法",
+                    if (StringUtils.isBlank(di_columns)) {
+                        resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的di_columns字段不合法",
                                 migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
                         return null;
                     }
+                    if (StringUtils.isBlank(di_condition)) {
+                        resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]是增量抽数，但di.condition配置为空，迁移后需要处理",
+                                migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+                        contentDto.setSrcReadFilter("");
+                    } else {
+                        contentDto.setSrcReadFilter(di_condition.trim());
+                    }
                     contentDto.setScriptSelectColumns(di_columns.trim());
-                    contentDto.setSrcReadFilter(di_condition.trim());
 
                     contentDto.setScriptKeyColumns("id");
                     ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
