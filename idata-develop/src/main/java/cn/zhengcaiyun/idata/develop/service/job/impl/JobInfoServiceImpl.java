@@ -18,7 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -44,7 +44,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
-import cn.zhengcaiyun.idata.develop.helper.rule.StagRuleHelper;
+import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
@@ -425,9 +425,9 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 根据规则定位真正的表
-                backFlowResponse.setDestTable(StagRuleHelper.handlerStagTable(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getSrcTable(), env));
-                String srcBfDsName = dataSourceApi.getDataSourceDetail(bfJobContent.getSrcDataSourceId(), env).getDataSourceTypeEnum().name();
-                backFlowResponse.setSrcTable(StagRuleHelper.handlerStagTable(srcBfDsName, backFlowResponse.getDestTable(), env));
+                backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getSrcTable(), env));
+                DataSourceTypeEnum srcBfDsTypeEnum = dataSourceApi.getDataSourceDetail(bfJobContent.getSrcDataSourceId(), env).getDataSourceTypeEnum();
+                backFlowResponse.setSrcTable(EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, backFlowResponse.getDestTable(), env));
 
                 return backFlowResponse;
             case DI_BATCH:
@@ -469,9 +469,9 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 根据规则定位真正的表
-                diResponse.setSrcTables(StagRuleHelper.handlerStagTable(srcDiDsName, diResponse.getSrcTables(), env));
-                String destDiDsName = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum().name();
-                diResponse.setDestTable(StagRuleHelper.handlerStagTable(destDiDsName, diResponse.getDestTable(), env));
+                diResponse.setSrcTables(EnvRuleHelper.handlerDbTableName(srcDiDsName, diResponse.getSrcTables(), env));
+                DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
+                diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
 
                 return diResponse;
             case SQL_SPARK:
@@ -515,7 +515,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
 
                     // 根据规则定位真正的表
-                    oldBackFlowResponse.setDestTable(StagRuleHelper.handlerStagTable(sqlDsName, oldBackFlowResponse.getDestTable(), env));
+                    oldBackFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, oldBackFlowResponse.getDestTable(), env));
 
                     return oldBackFlowResponse;
                 }
@@ -528,7 +528,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 字段类型转换
                 sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
                 // 根据规则定位真正的表
-                sqlResponse.setDestTable(StagRuleHelper.handlerStagTable(sqlDsName, sqlResponse.getDestTable(), env));
+                sqlResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, sqlResponse.getDestTable(), env));
 
                 return sqlResponse;
             case SPARK_PYTHON:
