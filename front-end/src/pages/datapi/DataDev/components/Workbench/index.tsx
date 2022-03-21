@@ -27,21 +27,22 @@ const Workbench: FC = ({}) => {
   }));
 
   const renderPane = (pane: IPane) => {
+    const paneProps = { key: pane.cid, pane };
     switch (pane.belong) {
       case FolderBelong.DESIGNTABLE:
-        return <TabTable pane={pane} />;
+        return <TabTable {...paneProps} />;
       // case FolderBelong.DESIGNENUM:
       //   return <TabEnum pane={pane} />;
       // case FolderBelong.DESIGNLABEL:
       //   return <ViewLabel pane={pane} />;
       case FolderBelong.DAG:
-        return <TabDAG pane={pane} />;
+        return <TabDAG {...paneProps} />;
       case FolderBelong.DI:
-        return <TabTask pane={pane} />;
+        return <TabTask {...paneProps} />;
       case FolderBelong.DEVJOB:
-        return <TabDev pane={pane} />;
+        return <TabDev {...paneProps} />;
       case FolderBelong.DEVFUN:
-        return <TabFun pane={pane} />;
+        return <TabFun {...paneProps} />;
       default:
         return null;
     }
