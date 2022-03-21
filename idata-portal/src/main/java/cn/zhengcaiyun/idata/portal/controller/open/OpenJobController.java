@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.controller.open;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoExecuteDetailDto;
+import cn.zhengcaiyun.idata.develop.helper.rule.StagRuleHelper;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,8 @@ public class OpenJobController {
         if (EnvEnum.getEnum(env).isEmpty()) {
             return RestResult.error("env is invalid : " + env, "invalid params");
         }
-        return RestResult.success(jobInfoService.getJobInfoExecuteDetail(jobId, env));
+        JobInfoExecuteDetailDto jobInfoExecuteDetail = jobInfoService.getJobInfoExecuteDetail(jobId, env);
+        return RestResult.success(jobInfoExecuteDetail);
     }
 
 
