@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.datasource.api.impl;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.util.DesUtil;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -71,12 +73,25 @@ public class DataSourceApiImpl implements DataSourceApi {
     }
 
     @Override
-    public DataSourceDetailDto getDataSourceDetail(Long id) {
+    public DataSourceDetailDto getDataSourceDetail(Long id, String env) {
         DataSourceDto dataSource = getDataSource(id);
         checkArgument(Objects.nonNull(dataSource), String.format("数据源不存在, DataSourceId:%d", id));
-        checkArgument(CollectionUtils.isNotEmpty(dataSource.getDbConfigList()), String.format("数据源配置缺失, DataSourceId:%d", id));
-        DbConfigDto dbConfigDto = dataSource.getDbConfigList().get(0);
+        List<DbConfigDto> rawDbConfigList = dataSource.getDbConfigList();
+        checkArgument(CollectionUtils.isNotEmpty(rawDbConfigList), String.format("数据源配置缺失, DataSourceId:%d", id));
 
+        List<DbConfigDto> envDbConfigList = rawDbConfigList.stream()
+                .filter(e -> {
+                    if (env != null) {
+                        return e.getEnv().name().equals(env);
+                    }
+                    return true;
+                }).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(envDbConfigList)) {
+            throw new GeneralException("数据源配置为空，id：" + id + ", env：" + env);
+        }
+
+        DbConfigDto dbConfigDto = envDbConfigList.get(0);
         DataSourceDetailDto res = new DataSourceDetailDto();
         res.setDataSourceTypeEnum(dataSource.getType());
 
@@ -109,7 +124,7 @@ public class DataSourceApiImpl implements DataSourceApi {
 
     @Override
     public String getPrimaryKey(Long id, String tableName) {
-        DataSourceDetailDto detail = getDataSourceDetail(id);
+        DataSourceDetailDto detail = getDataSourceDetail(id, null);
 
         List<String> pkList = new ArrayList<>();
         try {
