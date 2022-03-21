@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -41,6 +42,11 @@ public class MetricController {
     private MetricService metricService;
     @Autowired
     private TokenService tokenService;
+
+    @GetMapping("metricFolderTree")
+    public RestResult<List<DevelopFolderTreeNodeDto>> getMetricFolderTree(@RequestParam(value = "treeNodeName", required = false) String treeNodeName) {
+        return RestResult.success();
+    }
 
     @GetMapping("metric")
     public RestResult<MeasureDto> findByCode(@RequestParam("metricCode") String metricCode) {

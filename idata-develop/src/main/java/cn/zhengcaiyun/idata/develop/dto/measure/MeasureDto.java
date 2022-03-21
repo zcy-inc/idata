@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.dto.measure;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class MeasureDto extends LabelDefineDto {
     private String bizTypeValue;
     private String measureId;
     private String measureDefine;
+    private Date measureDeadline;
 
     // GaS
     public List<LabelDto> getMeasureLabels() {
@@ -90,5 +92,13 @@ public class MeasureDto extends LabelDefineDto {
 
     public void setMeasureDefine(String measureDefine) {
         this.measureDefine = measureDefine;
+    }
+
+    public Date getMeasureDeadline() {
+        return measureDeadline;
+    }
+
+    public void setMeasureDeadline(Date measureDeadline) {
+        this.measureDeadline = measureDeadline;
     }
 }

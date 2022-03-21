@@ -36,6 +36,7 @@ public class SpecialAttributeDto {
     private String atomicMetricCode;
     private String atomicMetricName;
     private String complexMetricFormula;
+    private Boolean isCalculable;
     private List<ModifierDto> modifiers;
 
     // GaS
@@ -93,5 +94,13 @@ public class SpecialAttributeDto {
 
     public void setAggregate(String aggregate) {
         this.aggregate = aggregate;
+    }
+
+    public Boolean getCalculable() {
+        return isCalculable;
+    }
+
+    public void setCalculable(Boolean calculable) {
+        isCalculable = calculable;
     }
 }
