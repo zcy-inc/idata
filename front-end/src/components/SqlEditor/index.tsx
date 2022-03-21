@@ -49,7 +49,7 @@ const SqlEditor: FC<
       }}
       editorDidMount={async (editor, monacoInner) => {
         const {
-          basicAutocompletionTips,
+          basicAutocompletionTips = [],
           dbTableNames = [],
           columns = [],
         } = await getWords(props.language?.toUpperCase() as AutoCompletionLangs);
