@@ -413,7 +413,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 
                 Optional<JobExecuteConfig> prevJobConfigOptional = jobExecuteConfigRepo.query(prevJobInfo.getId(), envEnum.name());
                 checkArgument(prevJobConfigOptional.isPresent() && !Objects.isNull(prevJobConfigOptional.get().getSchDagId()),
-                        "旧作业[%s]依赖的迁移后的作业[%s]未配置prod调度配置", oldJobId, prev_job_name);
+                        "旧作业[%s]依赖的迁移后的作业[%s]未配置[%s]调度配置", oldJobId, prev_job_name, envEnum.name());
 
                 JobDependenceDto dependenceDto = new JobDependenceDto();
                 dependenceDto.setEnvironment(envEnum.name());
