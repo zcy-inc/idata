@@ -258,7 +258,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
     private List<JSONObject> fetchOldJobInfo() {
         List<String> columns = Lists.newArrayList("id", "creator", "editor", "job_name", "job_type", "target_tables", "description", "owner_id", "folder_id", "layer");
         String filter = "del = false and job_type in ('SCRIPT', 'SPARK', 'DI', 'KYLIN', 'SQL')";
-//        String filter = "del = false and job_type in ('DI')";
+//        String filter = "del = false and job_type in ('SQL')";
+//        String filter = "del = false and id in (5233, 5206)";
         return oldIDataDao.queryListWithCustom("metadata.job_info", columns, filter);
     }
 

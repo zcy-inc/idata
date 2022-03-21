@@ -574,8 +574,7 @@ public class JobMigrateManager {
         contentDto.setDestBeforeWrite("");
         // 数据去向-写入后语句
         contentDto.setDestAfterWrite("");
-        // todo 具体数据待确定
-        contentDto.setDestBulkNum(1000L);
+        contentDto.setDestBulkNum(200L);
         contentDto.setDestShardingNum(1);
 
         String old_introduce_condition = migrationDto.getOldJobConfig().getString("introduce_condition");
@@ -602,27 +601,35 @@ public class JobMigrateManager {
         }
 //        old_introduce_columns = old_introduce_columns.replace("\\n", " ").trim();
         List<String> destCols = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(old_introduce_columns);
+        old_source_sql = old_source_sql.trim().replace("\\n", " ");
+        old_source_sql = old_source_sql.trim().replace("\n", " ");
+        old_source_sql = old_source_sql.trim().replace("\\t", " ");
+        old_source_sql = old_source_sql.trim().replace("\t", " ");
 
         List<String> srcCols = Lists.newArrayList();
-//        old_source_sql = old_source_sql.trim().replace("\\n", " ");
-        String src_columns_str = old_source_sql.substring(old_source_sql.indexOf("select ") + 6, old_source_sql.indexOf("from "));
+        if (StringUtils.isNotBlank(old_source_table)) {
+            for (String destCol : destCols) {
+                srcCols.add(destCol);
+            }
+        } else {
+            String src_columns_str = old_source_sql.substring(old_source_sql.indexOf("select ") + 6, old_source_sql.indexOf("from "));
 //        src_columns_str = src_columns_str.replace("\\n", " ").trim();
-        Splitter.on(",").trimResults().omitEmptyStrings()
-                .splitToList(src_columns_str)
-                .stream().forEach(temp_column -> {
-                    String column = temp_column;
-                    if (temp_column.indexOf(".") > 0) {
-                        column = column.substring(temp_column.indexOf(".") + 1);
-                    }
-                    if (column.indexOf("--") > 0) {
-                        column = column.substring(0, column.indexOf("--"));
+            Splitter.on(",").trimResults().omitEmptyStrings()
+                    .splitToList(src_columns_str)
+                    .stream().forEach(temp_column -> {
+                        String column = temp_column;
+                        if (temp_column.indexOf(".") > 0) {
+                            column = column.substring(temp_column.indexOf(".") + 1);
+                        }
+                        if (column.indexOf("--") > 0) {
+                            column = column.substring(0, column.indexOf("--"));
+                        }
                         srcCols.add(column.trim());
-                    }
-                });
-
-        if (srcCols.size() != destCols.size()) {
-            resultDtoList.add(new MigrateResultDto("migrateDorisContent", String.format("需处理：旧Doris回流作业[%s]的回流字段解析失败", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
-            return null;
+                    });
+            if (!org.apache.commons.collections.CollectionUtils.isEqualCollection(srcCols, destCols)) {
+                resultDtoList.add(new MigrateResultDto("migrateDorisContent", String.format("需处理：旧Doris回流作业[%s]的回流字段解析失败", migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
+                return null;
+            }
         }
 
         List<MappingColumnDto> srcColumns = new ArrayList<>();
