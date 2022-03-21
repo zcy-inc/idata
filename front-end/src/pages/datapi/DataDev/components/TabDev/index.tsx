@@ -677,7 +677,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             runTask(params)
               .then((res) => {
                 if (res.success) {
-                  message.success('单次运行成功');
+                  message.success('单次运行成功，运行结果在历史标签页内查看。');
                   getTaskWrapped();
                   setVisibleAction(false);
                 }
