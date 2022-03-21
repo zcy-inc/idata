@@ -14,4 +14,8 @@ export { default as RadioGroup } from './RadioGroup';
 
 export { default as Tip } from './Tip';
 
+export { default as TableSelect } from './TableSelect';
+
+export { default as Title } from './Title';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };

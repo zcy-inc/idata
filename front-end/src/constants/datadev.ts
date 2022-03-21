@@ -194,3 +194,10 @@ export enum DAGStatus {
   ON = 1, // 上线
   OFF = 0, // 下线
 }
+
+export const execCoresOptions = new Array(16).fill(0).map((_, index) => ({
+  label: index + 1,
+  value: index + 1,
+}));
+
+export const defaultExecCores = 2;
