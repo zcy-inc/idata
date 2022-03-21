@@ -93,9 +93,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   }));
 
   useEffect(() => {
+    const fetchData = async () => {
+      await getTaskWrapped();
+      await getTaskVersionsWrapped();
+    };
     if (pane) {
-      getTaskWrapped();
-      getTaskVersionsWrapped();
+      fetchData();
     }
   }, [pane.id]);
 
@@ -179,8 +182,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
         getSqlSpark({ jobId: pane.id, version })
-          .then((res) => setContent(res.data))
-          .catch((err) => {});
+          .then((res) => setContent(res.data));
         break;
       case TaskTypes.SPARK_JAR:
       case TaskTypes.SPARK_PYTHON:
@@ -198,9 +200,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         getKylin({ jobId: pane.id, version })
           .then((res) => setContent(res.data))
           .catch((err) => {});
-        break;
-
-      default:
         break;
     }
   };
