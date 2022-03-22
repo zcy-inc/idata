@@ -79,7 +79,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   return (
     <>
       <div style={{ position: 'relative', height: monacoHeight }}>
-        <SplitPane split="horizontal" defaultSize="60%">
+        <SplitPane split="horizontal" defaultSize="60%" pane2Style={{ overflow: 'hidden' }}>
           <SqlEditor
             formRef={monaco}
             height="100%"
@@ -87,7 +87,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
             language="sql"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
-            options={{ automaticLayout: true, quickSuggestions: false }}
+            options={{ automaticLayout: true, quickSuggestions: false, fontSize: 28 }} 
           />
           <Tabs
             className={styles.tabs}
@@ -116,7 +116,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
               <TabPane
                 tab={`结果${i + 1}`}
                 key={i}
-                style={{ height: '100%', backgroundColor: '#2d3956', padding: 16 }}
+                style={{ height: '100%', backgroundColor: '#2d3956', padding: 16, overflowY: 'auto' }}
               >
                 <Table
                   className={styles.table}
