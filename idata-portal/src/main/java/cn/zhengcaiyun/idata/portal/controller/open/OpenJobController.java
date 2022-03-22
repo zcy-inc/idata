@@ -25,7 +25,8 @@ public class OpenJobController {
         if (EnvEnum.getEnum(env).isEmpty()) {
             return RestResult.error("env is invalid : " + env, "invalid params");
         }
-        return RestResult.success(jobInfoService.getJobInfoExecuteDetail(jobId, env));
+        JobInfoExecuteDetailDto jobInfoExecuteDetail = jobInfoService.getJobInfoExecuteDetail(jobId, env);
+        return RestResult.success(jobInfoExecuteDetail);
     }
 
 

@@ -78,7 +78,7 @@ public class MergeDataController {
     public void handleMerge(MergeParam mergeParam,
                             HttpServletResponse response) {
         if ("merge_data".equals(mergeParam.getType())) {
-            mergeData(mergeParam.getMergeModules(), response);
+            mergeData(mergeParam.getMergeModules(), mergeParam.getCluster(), mergeParam.getEnv(), response);
             return;
         }
         if ("change_api".equals(mergeParam.getType())) {
@@ -113,7 +113,7 @@ public class MergeDataController {
         }
     }
 
-    public void mergeData(String mergeModules,
+    public void mergeData(String mergeModules, String cluster, String env,
                           HttpServletResponse response) {
         if (StringUtils.isBlank(mergeModules))
             throw new BizProcessException("需要指定迁移模块：" + Joiner.on(",").join(MigrateItemEnum.values()));
@@ -130,13 +130,14 @@ public class MergeDataController {
                 resultDtoList.addAll(folderMigrationService.migrate());
         }
         if (mergeAll || modules.contains(MigrateItemEnum.model.name())) {
-            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.model)))
-                modelMigrationService.syncModelMigration();
+            if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.model))) {
+//                modelMigrationService.syncModelMigration();
+            }
         }
         if (mergeAll || modules.contains(MigrateItemEnum.dag.name())) {
             if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.dag))) {
                 resultDtoList.addAll(dagMigrationService.migrateFolder());
-                resultDtoList.addAll(dagMigrationService.migrateDAG());
+                resultDtoList.addAll(dagMigrationService.migrateDAG(cluster, env));
             }
         }
         if (mergeAll || modules.contains(MigrateItemEnum.function.name())) {
@@ -145,7 +146,7 @@ public class MergeDataController {
         }
         if (mergeAll || modules.contains(MigrateItemEnum.job.name())) {
             if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.job)))
-                resultDtoList.addAll(jobMigrationService.migrate());
+                resultDtoList.addAll(jobMigrationService.migrate(env));
         }
         if (modules.contains(MigrateItemEnum.modify_di_job_name.name())) {
             if (BooleanUtils.isNotTrue(mergeDataRequestLimiter.exceed(MigrateItemEnum.modify_di_job_name)))
@@ -215,6 +216,8 @@ public class MergeDataController {
     public static class MergeParam {
         // merge_data, change_api
         private String type;
+        private String cluster;
+        private String env;
         private String mergeModules;
         private String datapiIds;
 
@@ -240,6 +243,22 @@ public class MergeDataController {
 
         public void setDatapiIds(String datapiIds) {
             this.datapiIds = datapiIds;
+        }
+
+        public String getCluster() {
+            return cluster;
+        }
+
+        public void setCluster(String cluster) {
+            this.cluster = cluster;
+        }
+
+        public String getEnv() {
+            return env;
+        }
+
+        public void setEnv(String env) {
+            this.env = env;
         }
     }
 

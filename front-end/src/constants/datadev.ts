@@ -189,3 +189,8 @@ export enum DataSourceType {
   DORIS = 'doris',
   ELASTICSEARCH = 'elasticsearch',
 }
+
+export enum DAGStatus {
+  ON = 1, // 上线
+  OFF = 0, // 下线
+}

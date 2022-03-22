@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
@@ -89,7 +90,8 @@ public class DIJobContentController {
         BeanUtils.copyProperties(dto, response);
 
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), ".")) {
+        String srcDataSourceType = response.getSrcDataSourceType();
+        if (StringUtils.contains(dto.getSrcTables(), ".")&& StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }
@@ -111,8 +113,9 @@ public class DIJobContentController {
         DIJobContentResponse response = new DIJobContentResponse();
         BeanUtils.copyProperties(dto, response);
 
+        String srcDataSourceType = response.getSrcDataSourceType();
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), ".")) {
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }

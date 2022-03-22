@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
@@ -32,6 +33,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
+import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -73,7 +75,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
     @Override
     public DIJobContentContentDto save(Long jobId, DIJobContentContentDto contentDto, Operator operator) {
         checkArgument(Objects.nonNull(jobId), "作业编号为空");
-        checkJobContent(contentDto);
+        DIRuleHelper.checkJobContent(contentDto);
+
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
         // 判断目标表是否在其他job中已经存在
@@ -85,7 +88,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         // query/mergeSql封装
         String jobType = jobInfoOptional.get().getJobType();
         assembleQueryAndMergeSql(contentDto, jobType);
-
 
         boolean startNewVersion = true;
         //更新
@@ -127,76 +129,64 @@ public class DIJobContentServiceImpl implements DIJobContentService {
      * @param contentDto
      */
     private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
-        // 数据回流不拼mergeSql
-        boolean buildMergeSql = StringUtils.containsIgnoreCase(jobType, "DI");
+        Integer configMode = contentDto.getConfigMode();
+        String srcReadFilter = contentDto.getSrcReadFilter();
+        List<MappingColumnDto> srcCols = contentDto.getSrcCols();
+        DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
+
+        // 是否设置
+        boolean buildMergeSql = DIRuleHelper.buildMergeSql(jobType, contentDto.getSrcReadMode());
+        boolean buildQuery = DIRuleHelper.buildQuery(jobType, configMode, srcReadFilter, srcCols, dataSourceTypeEnum);
+
         String destTable = contentDto.getDestTable();
         String srcTables = contentDto.getSrcTables();
-        String srcReadFilter = contentDto.getSrcReadFilter();
-        DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
-        switch (DiConfigModeEnum.getByValue(contentDto.getConfigMode())) {
+        switch (DiConfigModeEnum.getByValue(configMode)) {
             case VISIBLE:
+
                 // 设置SrcQuery
-                List<MappingColumnDto> srcCols = contentDto.getSrcCols();
-                String srcQuery = generateSrcQuery(srcCols, srcReadFilter, srcTables);
-                contentDto.setSrcQuery(srcQuery);
+                if (buildQuery) {
+                    String srcQuery = DIRuleHelper.generateSrcQuery(srcCols, srcReadFilter, srcTables);
+                    contentDto.setSrcQuery(srcQuery);
+                }
 
                 // 设置MergeSql
-                List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
-                List<String> visKeyColumnList = srcCols.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toList());
-                String visKeys = "id";
-                if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
-                    visKeys = StringUtils.join(visKeyColumnList, ",");
-                }
                 if (buildMergeSql) {
-                    String mergeSql = generateMergeSql(visColumnList, visKeys, srcTables, destTable, dataSourceTypeEnum, 3);
+                    List<String> visColumnList = srcCols.stream().map(e -> e.getName()).collect(Collectors.toList());
+                    List<String> visKeyColumnList = srcCols.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toList());
+                    String visKeys = "id";
+                    if (CollectionUtils.isNotEmpty(visKeyColumnList)) {
+                        visKeys = StringUtils.join(visKeyColumnList, ",");
+                    }
+                    String mergeSql = DIRuleHelper.generateMergeSql(visColumnList, visKeys, srcTables, destTable, dataSourceTypeEnum, 3);
                     contentDto.setMergeSql(mergeSql);
                 }
                 break;
             case SCRIPT:
-                // 设置SrcQuery
                 String scriptSelectColumns = contentDto.getScriptSelectColumns();
-                String scriptQuery = generateScriptQuery(scriptSelectColumns, srcReadFilter, srcTables);
-                contentDto.setScriptQuery(scriptQuery);
 
-                // 设置ScriptMergeSql
-                ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
-                int days = 3;
-                if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
-                    days = scriptMergeSqlParamDto.getRecentDays();
+                // 设置SrcQuery
+                if (buildQuery) {
+                    String scriptQuery = DIRuleHelper.generateScriptQuery(scriptSelectColumns, srcReadFilter, srcTables);
+                    contentDto.setScriptQuery(scriptQuery);
                 }
+
                 if (buildMergeSql && StringUtils.isNotEmpty(scriptSelectColumns)) {
+                    // 设置ScriptMergeSql
+                    ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
+                    int days = 3;
+                    if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
+                        days = scriptMergeSqlParamDto.getRecentDays();
+                    }
                     List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
-                    String scriptMergeSql = generateMergeSql(scriptColumnList, contentDto.getScriptKeyColumns(), srcTables, destTable, dataSourceTypeEnum, days);
+                    String scriptKeys = "id";
+                    if (StringUtils.isNotEmpty(contentDto.getScriptKeyColumns())) {
+                        scriptKeys = contentDto.getScriptKeyColumns();
+                    }
+                    String scriptMergeSql = DIRuleHelper.generateMergeSql(scriptColumnList, scriptKeys, srcTables, destTable, dataSourceTypeEnum, days);
                     contentDto.setScriptMergeSql(scriptMergeSql);
                 }
                 break;
         }
-    }
-
-    private String generateScriptQuery(String selectColumns, String srcReadFilter, String srcTables) {
-        String scriptQuery = String.format("select %s from %s ", selectColumns, srcTables);
-        if (StringUtils.isNotEmpty(srcReadFilter)) {
-            scriptQuery += (" where " + srcReadFilter);
-        }
-        return scriptQuery;
-    }
-
-    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables) {
-        List<String> columns = mappingColumnList
-                .stream()
-                .filter(e -> e.getMappedColumn() != null)
-                .map(e -> {
-                    String name = e.getName();
-                    String mappingSql = e.getMappingSql();
-                    return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
-                }).collect(Collectors.toList());
-
-        String selectColumns = StringUtils.join(columns, ",");
-        String srcQuery = String.format("select %s from %s ", selectColumns, srcTables);
-        if (StringUtils.isNotEmpty(srcReadFilter)) {
-            srcQuery += (" where " + srcReadFilter);
-        }
-        return srcQuery;
     }
 
     @Override
@@ -207,60 +197,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
         checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
         return DIJobContentContentDto.from(jobContentOptional.get());
-    }
-
-    @Override
-    public String generateMergeSql(List<String> columnList, String keyColumns, String sourceTable, String destTable, DataSourceTypeEnum typeEnum, int days) throws IllegalArgumentException {
-        checkArgument(destTable.split("\\.").length == 2, "生成mergeSql的destTable必须带上库名: " + destTable);
-        String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
-        // 匹配规则：例如 "tableName[1-2]"
-        String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
-        // 匹配规则：例如 "212tableName2,223tableName2"
-        String regex2 = "(\\d+(\\w+)[,]{0,1})+";
-
-        // 是否涉及多张表（分区表）
-        boolean isMulPartitionParam = false;
-        if (typeEnum == DataSourceTypeEnum.mysql && (ReUtil.isMatch(regex1, sourceTable) || ReUtil.isMatch(regex2, sourceTable))) {
-            isMulPartitionParam = true;
-        }
-
-        // 筛选的列名
-        String columnsParam = StringUtils.join(columnList, ", ");
-        // 筛选的带函数的列名
-        String coalesceColumnsParam = StringUtils.join(columnList.stream().map(e -> "coalesce(t1." + e + ", t2." + e + ") " + e).collect(Collectors.toList()), "\n\t,");
-        //生成keyCondition，key连接表，例如"t1.id=t2.id"
-        List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
-        String keyConditionParam = StringUtils.join(keyColumnList, " and ");
-
-
-        String mergeSqlTemplate = "";
-        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("template/merge_sql_template.sql");) {
-            byte[] buff = new byte[1024];
-            int btr = 0;
-            while ((btr = inputStream.read(buff)) != -1) {
-                mergeSqlTemplate += new String(buff, 0, btr, "UTF-8");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new GeneralException("模版文件解析失败");
-        }
-//        FileReader fileReader = new FileReader("classpath:template/merge_sql_template.sql");
-//        String mergeSqlTemplate = fileReader.readString();
-
-        // 通过SpEL解析
-        ExpressionParser parser = new SpelExpressionParser();
-        EvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("isMulPartition", isMulPartitionParam);
-        context.setVariable("destTable", destTable);
-        context.setVariable("columns", columnsParam);
-        context.setVariable("tmpTable", tmpTableParam);
-        context.setVariable("coalesceColumns", coalesceColumnsParam);
-        context.setVariable("keyCondition", keyConditionParam);
-        context.setVariable("days", days);
-        context.setVariable("br", "\n");
-
-        Expression expression = parser.parseExpression(mergeSqlTemplate, new TemplateParserContext());
-        return expression.getValue(context, String.class);
     }
 
     private void checkJobContent(DIJobContentContentDto contentDto) {
@@ -297,8 +233,4 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         return ObjectUtils.isEmpty(jobIdSet);
     }
 
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        List<String> visKeyColumnList = list.stream().collect(Collectors.toList());
-    }
 }

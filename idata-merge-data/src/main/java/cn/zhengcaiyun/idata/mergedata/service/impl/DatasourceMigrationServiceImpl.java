@@ -65,7 +65,8 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
         Set<String> datasourceTypes = getMigrateDatasourceType();
         Map<String, JSONObject> prodMap = Maps.newHashMap();
         Map<String, JSONObject> stagMap = Maps.newHashMap();
-        dataJsonList.stream().filter(jsonObject -> datasourceTypes.contains(jsonObject.getString("type")))
+        dataJsonList.stream()
+                .filter(jsonObject -> datasourceTypes.contains(jsonObject.getString("type")))
                 .filter(jsonObject -> "prod".equals(jsonObject.getString("status")))
                 .forEach(jsonObject -> {
                     String name = jsonObject.getString("name");
@@ -77,7 +78,8 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
                         }
                     }
                 });
-        dataJsonList.stream().filter(jsonObject -> datasourceTypes.contains(jsonObject.getString("type")))
+        dataJsonList.stream()
+                .filter(jsonObject -> datasourceTypes.contains(jsonObject.getString("type")))
                 .filter(jsonObject -> "staging".equals(jsonObject.getString("status")))
                 .forEach(jsonObject -> {
                     String name = jsonObject.getString("name");
@@ -139,7 +141,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
     }
 
     private Set<String> getMigrateDatasourceType() {
-        return Sets.newHashSet("presto", "postgresql", "phoenix", "mysql", "mssql", "kylin", "kafka", "hive", "elasticsearch", "doris");
+        return Sets.newHashSet("presto", "postgresql", "phoenix", "mysql", "mssql", "kylin", "kafka", "hive", "elasticsearch", "Doris");
     }
 
     private DataSourceDto buildDataSource(String name, JSONObject prodJsonObject, JSONObject stagJsonObject) {
@@ -152,7 +154,7 @@ public class DatasourceMigrationServiceImpl implements DatasourceMigrationServic
         dto.setName(newName);
 
         JSONObject mainJsonObject = Objects.isNull(prodJsonObject) ? stagJsonObject : prodJsonObject;
-        DataSourceTypeEnum type = DataSourceTypeEnum.valueOf(mainJsonObject.getString("type"));
+        DataSourceTypeEnum type = DataSourceTypeEnum.valueOf(mainJsonObject.getString("type").toLowerCase());
         dto.setType(type);
         dto.setRemark(mainJsonObject.getString("description"));
 

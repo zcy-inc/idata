@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -42,6 +43,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
+import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
@@ -381,7 +384,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 BeanUtils.copyProperties(bfJobContent, backFlowResponse);
 
                 backFlowResponse.setSrcTable(bfJobContent.getSrcTables());
-
                 backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
 
                 // 根据回流启用模式，填充数据
@@ -407,24 +409,25 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 封装连接信息
-                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId());
+                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId(), env);
                 backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
                 backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
 
-                // TODO 个性化处理返回值
-                // sqoop -> srcSql = null, columnName != null
-                // spark -> columnName = null, srcSql != null
-                // doris -> columnName srcSql 都要有
-                switch (backFlowResponse.getExecEngine()) {
-                    case SQOOP:
-                        backFlowResponse.setSrcSql(null);
-                        break;
-                    case SPARK:
-                        backFlowResponse.setDestColumnNames(null);
-                        break;
+                // 是否支持columns，不支持不返回给htool
+                if (!DIRuleHelper.supportColumns(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                    backFlowResponse.setDestColumnNames(null);
                 }
+                // 是否支持query sql，不支持不返回给htool
+                if (!DIRuleHelper.supportQuerySQL(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                    backFlowResponse.setSrcSql(null);
+                }
+
+                // 根据规则定位真正的表
+                backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getSrcTable(), env));
+                DataSourceTypeEnum srcBfDsTypeEnum = dataSourceApi.getDataSourceDetail(bfJobContent.getSrcDataSourceId(), env).getDataSourceTypeEnum();
+                backFlowResponse.setSrcTable(EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, backFlowResponse.getDestTable(), env));
 
                 return backFlowResponse;
             case DI_BATCH:
@@ -443,9 +446,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                     diResponse.setSrcShardingNum(1);
                 }
 
+                DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId(), env);
+                String srcDiDsName = srcSourceDetail.getDataSourceTypeEnum().name();
+
                 // 封装连接信息
-                DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId());
-                diResponse.setSrcDataType(srcSourceDetail.getDataSourceTypeEnum().name());
+                diResponse.setSrcDataType(srcDiDsName);
                 diResponse.setSrcJdbcUrl(srcSourceDetail.getJdbcUrl());
                 diResponse.setSrcUsername(srcSourceDetail.getUserName());
                 diResponse.setSrcPassword(srcSourceDetail.getPassword());
@@ -462,6 +467,12 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (StringUtils.equalsIgnoreCase(writeMode, WriteModeEnum.SqlEnum.UPSERT.name())) {
                     // TODO 岛端不需要增量逻辑
                 }
+
+                // 根据规则定位真正的表
+                diResponse.setSrcTables(EnvRuleHelper.handlerDbTableName(srcDiDsName, diResponse.getSrcTables(), env));
+                DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
+                diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
+
                 return diResponse;
             case SQL_SPARK:
                 JobOutputQuery query = new JobOutputQuery();
@@ -483,7 +494,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 额外判断：旧版idata中sql作业中涉及回流作业，htool对回流作业处理不一样
                 DataSourceDto dataSource = dataSourceApi.getDataSource(jobOutput.getDestDataSourceId());
-                if (!StringUtils.equalsIgnoreCase(dataSource.getType().name(), "hive")) {
+                String sqlDsName = dataSource.getType().name();
+                if (!StringUtils.equalsIgnoreCase(sqlDsName, "hive")) {
                     JobInfoExecuteDetailDto.BackFlowDetailDto oldBackFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
                     oldBackFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
                     oldBackFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
@@ -493,7 +505,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setUdfList(udfList);
 
                     // 封装连接信息
-                    DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId());
+                    DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId(), env);
                     oldBackFlowResponse.setSrcSql(contentSql.getSourceSql());
                     oldBackFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
                     oldBackFlowResponse.setDestUserName(destSourceDetail.getUserName());
@@ -501,6 +513,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
                     oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+
+                    // 根据规则定位真正的表
+                    oldBackFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, oldBackFlowResponse.getDestTable(), env));
+
                     return oldBackFlowResponse;
                 }
 
@@ -511,6 +527,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 字段类型转换
                 sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
+                // 根据规则定位真正的表
+                sqlResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, sqlResponse.getDestTable(), env));
 
                 return sqlResponse;
             case SPARK_PYTHON:
@@ -564,6 +582,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 return scriptResponse;
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
+
         }
     }
 
