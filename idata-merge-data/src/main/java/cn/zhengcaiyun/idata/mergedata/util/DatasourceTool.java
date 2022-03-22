@@ -31,7 +31,7 @@ public class DatasourceTool {
 
     public static Optional<DataSource> findDatasource(Long oldDatasourceId, List<DataSource> dataSourceList) {
         return dataSourceList.stream()
-                .filter(dataSource -> dataSource.getName().startsWith(IdPadTool.padId(oldDatasourceId.toString()) + "#_"))
+                .filter(dataSource -> dataSource.getName().indexOf(IdPadTool.padId(oldDatasourceId.toString()) + "#_") >= 0)
                 .findFirst();
     }
 
