@@ -88,7 +88,7 @@ public class IndicatorEntitySupplier implements DataEntitySupplier<DataSearchCon
         DataEntityDto entityDto = new DataEntityDto(measureDto.getLabelCode());
         entityDto.setEntityName(measureDto.getLabelName());
         entityDto.setEntityNameEn(measureDto.getEnName());
-        entityDto.setCategoryName(measureDto.getBizTypeValue());
+        entityDto.setCategoryName(measureDto.getBizProcessValue());
         if (StringUtils.isNotEmpty(measureDto.getLabelTag())) {
             entityDto.putMoreAttr(DataEntityDto.more_indicator_type, measureDto.getLabelTag());
         }

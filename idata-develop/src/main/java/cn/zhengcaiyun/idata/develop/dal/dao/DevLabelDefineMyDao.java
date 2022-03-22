@@ -23,6 +23,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,4 +57,23 @@ public interface DevLabelDefineMyDao {
             "ORDER BY dev_label_define.label_index" +
             "</script>")
     List<DevLabelDefine> selectLabelDefinesByLabelCodes(String labelCodes);
+
+    @Result(column = "label_attributes", property = "labelAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "special_attribute", property = "specialAttribute", javaType = SpecialAttributeDto.class, typeHandler = JsonColumnHandler.class)
+    @Result(column = "enum_attributes", property = "enumAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
+    @Select("<script>" +
+            "SELECT label_code " +
+            "FROM dev_label_define " +
+            "WHERE dev_label_define.del != 1 AND dev_label_define.folder_id = #{folderId} " +
+                "AND FIND_IN_SET(dev_label_define.label_code, #{labelCodes}) " +
+            "</script>")
+    List<String> selectLabelDefineCodesByCondition(Long folderId,
+                                                   String measureType,
+                                                   String measureId,
+                                                   String measureName,
+                                                   String bizProcess,
+                                                   String creator,
+                                                   Date measureDeadline,
+                                                   String domain,
+                                                   String belongTblName);
 }

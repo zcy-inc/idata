@@ -368,7 +368,7 @@ public class MetricServiceImpl implements MetricService {
             AttributeDto metricLabelAttribute = deriveMetric.getLabelAttributes().stream()
                     .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(METRIC_BIZ_TYPE))
                     .findAny().get();
-            deriveMetric.setBizTypeValue(enumService.getEnumValue(metricLabelAttribute.getAttributeValue()));
+            deriveMetric.setBizProcessValue(enumService.getEnumValue(metricLabelAttribute.getAttributeValue()));
         }).collect(Collectors.toList());
         Map<String, List<MeasureDto>> relyDriveAndAtomicMap = new HashMap<>();
         deriveMetricList.forEach(metricLabel -> {

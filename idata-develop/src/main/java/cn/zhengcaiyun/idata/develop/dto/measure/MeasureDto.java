@@ -32,10 +32,16 @@ public class MeasureDto extends LabelDefineDto {
     private MeasureDto atomicMetric;
     private List<ModifierDto> modifiers;
     private String enName;
-    private String bizTypeValue;
+    private String bizProcessValue;
     private String measureId;
     private String measureDefine;
-    private Date measureDeadline;
+    private Date metricDeadline;
+    private String metricId;
+    private String modifierId;
+    private String domain;
+    private String belongTblName;
+    private String columnName;
+    private String folderName;
 
     // GaS
     public List<LabelDto> getMeasureLabels() {
@@ -70,12 +76,28 @@ public class MeasureDto extends LabelDefineDto {
         this.enName = enName;
     }
 
-    public String getBizTypeValue() {
-        return bizTypeValue;
+    public String getBizProcessValue() {
+        return bizProcessValue;
     }
 
-    public void setBizTypeValue(String bizTypeValue) {
-        this.bizTypeValue = bizTypeValue;
+    public void setBizProcessValue(String bizProcessValue) {
+        this.bizProcessValue = bizProcessValue;
+    }
+
+    public String getMetricId() {
+        return metricId;
+    }
+
+    public void setMetricId(String metricId) {
+        this.metricId = metricId;
+    }
+
+    public String getModifierId() {
+        return modifierId;
+    }
+
+    public void setModifierId(String modifierId) {
+        this.modifierId = modifierId;
     }
 
     public String getMeasureId() {
@@ -94,11 +116,43 @@ public class MeasureDto extends LabelDefineDto {
         this.measureDefine = measureDefine;
     }
 
-    public Date getMeasureDeadline() {
-        return measureDeadline;
+    public Date getMetricDeadline() {
+        return metricDeadline;
     }
 
-    public void setMeasureDeadline(Date measureDeadline) {
-        this.measureDeadline = measureDeadline;
+    public void setMetricDeadline(Date metricDeadline) {
+        this.metricDeadline = metricDeadline;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getBelongTblName() {
+        return belongTblName;
+    }
+
+    public void setBelongTblName(String belongTblName) {
+        this.belongTblName = belongTblName;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public String getFolderName() {
+        return folderName;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
     }
 }

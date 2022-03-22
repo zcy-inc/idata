@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.service.measure.MeasureService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,8 +38,12 @@ import java.util.List;
 @RequestMapping(path = "/p1/dev")
 public class MeasureController {
 
+    @Autowired
+    private MeasureService measureService;
+
     @GetMapping("measures")
-    public RestResult<List<MeasureDto>> getMetrics(@RequestParam(value = "measureType", required = false) String measureType,
+    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("folderId") Long folderId,
+                                                   @RequestParam("measureType") String measureType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,
                                                    @RequestParam(value = "measureName", required = false) String measureName,
                                                    @RequestParam(value = "bizProcess", required = false) String bizProcess,
@@ -45,7 +51,8 @@ public class MeasureController {
                                                    @RequestParam(value = "creator", required = false) String creator,
                                                    @RequestParam(value = "measureDeadline", required = false) Date measureDeadline,
                                                    @RequestParam(value = "domain", required = false) String domain,
-                                                   @RequestParam(value = "belongTblId", required = false) Long belongTblId) {
-        return RestResult.success();
+                                                   @RequestParam(value = "belongTblName", required = false) String belongTblName) {
+        return RestResult.success(measureService.getMeasures(folderId, measureType, measureId, measureName,
+                bizProcess, enable, creator, measureDeadline, domain, belongTblName));
     }
 }
