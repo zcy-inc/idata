@@ -111,16 +111,6 @@ public class ModifierServiceImpl implements ModifierService {
                 echoModifier.setColumnComment(modifierLabelList.get(0).getColumnComment());
                 echoModifier.setColumnDataType(modifierLabelList.get(0).getColumnDataType());
             }
-//            if (atomicTableId != null) {
-//                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
-//                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->
-//                        modifierLabel.getTableId().equals(atomicTableId)).findAny()
-//                        .orElse(null);
-//                if (echoModifierLabel != null) {
-//                    echoModifier.setTableName(tableMap.get(atomicTableId));
-//                    echoModifier.setColumnName(echoModifierLabel.getColumnName());
-//                }
-//            }
             return echoModifier;
         }).collect(Collectors.toList());
         return echoModifierList;
@@ -137,13 +127,6 @@ public class ModifierServiceImpl implements ModifierService {
                 .build().render(RenderingStrategies.MYBATIS3))
                 .orElse(null);
         if (atomicLabel == null) { return null; }
-//        List<MeasureDto> echoModifierList = PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
-//                        .from(devLabelDefine)
-//                        .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
-//                        .where(devLabelDefine.del, isNotEqualTo(1), and(devLabel.del, isNotEqualTo(1)),
-//                                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
-//                                and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
-//                        .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
         Set<String> modifierCodes = devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
                 .from(devLabelDefine)
                 .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))

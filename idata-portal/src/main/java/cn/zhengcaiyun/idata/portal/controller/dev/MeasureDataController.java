@@ -20,12 +20,13 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.develop.dto.query.MeasureDataQueryDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MeasureDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * develop-data-query-controller
@@ -49,5 +50,11 @@ public class MeasureDataController {
     @PostMapping("/dataQuery")
     RestResult<QueryResultDto> queryMeasureData(@RequestBody MeasureDataQueryDto measureDataQueryDto) {
         return RestResult.success(measureDataService.queryMeasureData(measureDataQueryDto));
+    }
+
+    @PostMapping("/queryModifierValues")
+    RestResult<List<String>> queryModifierValues(@RequestParam("tableId") Long tableId,
+                                                 @RequestParam("columnName") String columnName) throws SQLException {
+        return RestResult.success(measureDataService.queryModifierValues(tableId, columnName));
     }
 }
