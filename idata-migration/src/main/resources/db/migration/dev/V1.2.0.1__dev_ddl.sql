@@ -7,6 +7,9 @@ alter table dev_job_execute_config
 alter table dev_job_content_di
     add src_tables_fashion varchar(10) not null default 'S' comment '来源表方式，S：下拉选择；E：手动编辑' after src_tables;
 
+alter table dev_job_content_sql
+    add extend_configs varchar(1000) null comment '扩展配置' after external_tables;
+
 
 
 

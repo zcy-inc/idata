@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.sql;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,21 +30,26 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping(path = "/p1/dev/jobs/{jobId}/sql")
+@RequestMapping(path = "/p1/dev/jobs")
 public class SqlJobController {
 
     @Autowired
     private SqlJobService sqlJobService;
 
-    @GetMapping("/contents/{version}")
+    @GetMapping("/{jobId}/sql/contents/{version}")
     public RestResult<SqlJobContentDto> find(@PathVariable Long jobId,
                                              @PathVariable Integer version) {
         return RestResult.success(sqlJobService.find(jobId, version));
     }
 
-    @PostMapping("/contents")
+    @PostMapping("/{jobId}/sql/contents")
     public RestResult<SqlJobContentDto> save(@PathVariable Long jobId,
                                              @RequestBody SqlJobContentDto sqlJobDto) {
         return RestResult.success(sqlJobService.save(sqlJobDto, OperatorContext.getCurrentOperator().getNickname()));
+    }
+
+    @PostMapping("/sql/flink/template")
+    public RestResult<String> generateFlinkSqlTemplate(@RequestBody FlinkSqlJobExtendConfigDto configDto) {
+        return RestResult.success(sqlJobService.generateFlinkSqlTemplate(configDto.getFlinkSourceConfigs(), configDto.getFlinkSinkConfigs()));
     }
 }

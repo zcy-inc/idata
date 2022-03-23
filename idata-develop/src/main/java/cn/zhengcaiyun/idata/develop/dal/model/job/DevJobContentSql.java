@@ -88,6 +88,13 @@ public class DevJobContentSql {
 
     /**
      * Database Column Remarks:
+     *   扩展配置
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.extend_configs")
+    private String extendConfigs;
+
+    /**
+     * Database Column Remarks:
      *   数据来源SQL
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.source_sql")
@@ -201,6 +208,16 @@ public class DevJobContentSql {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.external_tables")
     public void setExternalTables(String externalTables) {
         this.externalTables = externalTables;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.extend_configs")
+    public String getExtendConfigs() {
+        return extendConfigs;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.extend_configs")
+    public void setExtendConfigs(String extendConfigs) {
+        this.extendConfigs = extendConfigs;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.source_sql")
