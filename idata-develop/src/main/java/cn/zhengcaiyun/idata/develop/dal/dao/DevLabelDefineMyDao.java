@@ -64,16 +64,49 @@ public interface DevLabelDefineMyDao {
     @Select("<script>" +
             "SELECT label_code " +
             "FROM dev_label_define " +
+            "<if test = 'belongTblName != null'>" +
+                "LEFT JOIN dev_label ON dev_label_define.label_code = dev_label.label_code " +
+                "LEFT JOIN dev_table_info ON dev_label.table_id = dev_table_info.id " +
+            "</if>" +
             "WHERE dev_label_define.del != 1 AND dev_label_define.folder_id = #{folderId} " +
-                "AND FIND_IN_SET(dev_label_define.label_code, #{labelCodes}) " +
+                "AND dev_label_define.label_tag LIKE concat('%', #{measureType}, '%') " +
+                "<if test = 'metricType != null'>" +
+                    "AND dev_label_define.label_tag = #{metricType} " +
+                "</if>" +
+                "<if test = 'measureId != null'>" +
+                    "AND dev_label_define.label_attributes LIKE concat('%', #{measureId}, '%') " +
+                "</if>" +
+                "<if test = 'measureName != null'>" +
+                    "AND dev_label_define.label_name LIKE concat('%', #{measureName}, '%') " +
+                "</if>" +
+                "<if test = 'bizProcess != null'>" +
+                    "AND dev_label_define.label_attributes LIKE concat('%', #{bizProcess}, '%') " +
+                "</if>" +
+                "<if test = 'enable != null'>" +
+                    "AND dev_label_define.label_tag LIKE concat('%', #{measureType}) " +
+                "</if>" +
+                "<if test = 'creator != null'>" +
+                    "AND dev_label_define.creator LIKE concat('%', #{creator}, '%') " +
+                "</if>" +
+                "<if test = 'measureDeadline != null'>" +
+                    "AND dev_label_define.label_attributes LIKE concat('%', #{measureDeadline}, '%') " +
+                "</if>" +
+                "<if test = 'domain != null'>" +
+                    "AND dev_label_define.label_attributes LIKE concat('%', #{domain}, '%') " +
+                "</if>" +
+                "<if test = 'belongTblName != null'>" +
+                    "AND dev_table_info.del = 0 AND dev_table_info.table_name LIKE concat('%', #{belongTblName}, '%') " +
+                "</if>" +
             "</script>")
     List<String> selectLabelDefineCodesByCondition(Long folderId,
                                                    String measureType,
+                                                   String metricType,
                                                    String measureId,
                                                    String measureName,
                                                    String bizProcess,
+                                                   String enable,
                                                    String creator,
-                                                   Date measureDeadline,
+                                                   String measureDeadline,
                                                    String domain,
                                                    String belongTblName);
 }

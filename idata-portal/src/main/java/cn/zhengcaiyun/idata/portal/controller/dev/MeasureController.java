@@ -44,6 +44,7 @@ public class MeasureController {
     @GetMapping("measures")
     public RestResult<List<MeasureDto>> getMetrics(@RequestParam("folderId") Long folderId,
                                                    @RequestParam("measureType") String measureType,
+                                                   @RequestParam(value = "metricType", required = false) String metricType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,
                                                    @RequestParam(value = "measureName", required = false) String measureName,
                                                    @RequestParam(value = "bizProcess", required = false) String bizProcess,
@@ -52,7 +53,7 @@ public class MeasureController {
                                                    @RequestParam(value = "measureDeadline", required = false) Date measureDeadline,
                                                    @RequestParam(value = "domain", required = false) String domain,
                                                    @RequestParam(value = "belongTblName", required = false) String belongTblName) {
-        return RestResult.success(measureService.getMeasures(folderId, measureType, measureId, measureName,
+        return RestResult.success(measureService.getMeasures(folderId, measureType, metricType, measureId, measureName,
                 bizProcess, enable, creator, measureDeadline, domain, belongTblName));
     }
 }

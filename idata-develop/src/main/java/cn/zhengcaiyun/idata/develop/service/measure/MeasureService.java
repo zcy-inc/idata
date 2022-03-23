@@ -29,6 +29,7 @@ import java.util.List;
 
 @Service
 public interface MeasureService {
-    List<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String measureName, String bizProcess,
-                                 Boolean enable, String creator, Date measureDeadline, String domain, String belongTblName);
+    List<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String metricType, String measureName,
+                                 String bizProcess, Boolean enable, String creator, Date measureDeadline, String domain,
+                                 String belongTblName);
 }
