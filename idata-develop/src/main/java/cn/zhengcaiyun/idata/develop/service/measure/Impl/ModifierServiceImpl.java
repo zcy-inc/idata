@@ -33,8 +33,10 @@ import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import scala.reflect.internal.Trees;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
@@ -250,6 +252,30 @@ public class ModifierServiceImpl implements ModifierService {
         return labelService.deleteDefine(modifierCode, operator);
     }
 
+    @Override
+    public int mergeOldModifiers() {
+        // 默认修饰词仅有一张事实表，冗余数据数仓已处理，将存在labelAttribute中的枚举存到label中的labelParam
+        List<LabelDefineDto> existModifierList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isLike("MODIFIER")))),
+                LabelDefineDto.class, "labelCode", "labelAttributes");
+        List<String> modifierCodeList = existModifierList.stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toList());
+        Map<String, String> modifierEnumValueMap = modifierCodeList.stream()
+                .map(this::getModifierByCode)
+                .collect(Collectors.toMap(MeasureDto::getLabelCode, measure -> {
+                    AttributeDto attributeDto = measure.getLabelAttributes().stream()
+                            .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
+                            .findAny().orElse(null);
+                    return attributeDto != null ? attributeDto.getEnumValue() : "";
+                }));
+        for (String modifierCode : modifierCodeList) {
+            LabelDto modifierLabel = labelService.findLabelsByCode(modifierCode).get(0);
+            modifierLabel.setLabelParamValue(modifierEnumValueMap.getOrDefault(modifierCode, ""));
+            devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierCode, DevLabel.class,
+                    "id", "labelParamValue"));
+        }
+        return 0;
+    }
+
     private MeasureDto getModifierByCode(String modifierCode) {
         DevLabelDefine modifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(modifierCode))))
@@ -261,6 +287,9 @@ public class ModifierServiceImpl implements ModifierService {
                 .peek(labelAttribute -> {
                     if (MODIFIER_ENUM.equals(labelAttribute.getAttributeKey())) {
                         labelAttribute.setEnumName(enumService.getEnumName(labelAttribute.getAttributeValue()));
+                        List<String> enumValueList = enumService.getEnumValues(labelAttribute.getAttributeValue())
+                                .stream().map(EnumValueDto::getEnumValue).collect(Collectors.toList());
+                        labelAttribute.setEnumValue(String.join(",", enumValueList));
                     }
                 }).collect(Collectors.toList());
         echoModifier.setMeasureLabels(labelService.findLabelsByCode(modifierCode));

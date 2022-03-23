@@ -34,4 +34,5 @@ public interface ModifierService {
     MeasureDto edit(MeasureDto modifier, String operator);
     MeasureDto disableOrAble(String modifierCode, String labelTag, String operator);
     boolean delete(String modifierCode, String operator);
+    int mergeOldModifiers();
 }
