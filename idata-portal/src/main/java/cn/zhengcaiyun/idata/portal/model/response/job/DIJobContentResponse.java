@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.portal.model.response.job;
 
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
@@ -104,6 +105,11 @@ public class DIJobContentResponse {
      * 数据来源-表
      */
     private String srcTables;
+
+    /**
+     * 数据来源-表模式
+     */
+    private DITableFashionConfig srcTableConfig;
 
     /**
      * 数据来源-字段信息
@@ -480,5 +486,13 @@ public class DIJobContentResponse {
 
     public void setJobTypeCode(String jobTypeCode) {
         this.jobTypeCode = jobTypeCode;
+    }
+
+    public DITableFashionConfig getSrcTableConfig() {
+        return srcTableConfig;
+    }
+
+    public void setSrcTableConfig(DITableFashionConfig srcTableConfig) {
+        this.srcTableConfig = srcTableConfig;
     }
 }
