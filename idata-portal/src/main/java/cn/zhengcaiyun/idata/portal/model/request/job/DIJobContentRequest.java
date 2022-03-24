@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.portal.model.request.job;
 
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 
@@ -88,6 +89,11 @@ public class DIJobContentRequest extends JobContentBaseDto {
      * 数据来源-表
      */
     private String srcTables;
+
+    /**
+     * 数据来源-表模式
+     */
+    private DITableFashionConfig srcTableConfig;
 
     /**
      * 数据来源-字段信息
@@ -372,5 +378,13 @@ public class DIJobContentRequest extends JobContentBaseDto {
 
     public void setDestPropertyMap(Map<String, String> destPropertyMap) {
         this.destPropertyMap = destPropertyMap;
+    }
+
+    public DITableFashionConfig getSrcTableConfig() {
+        return srcTableConfig;
+    }
+
+    public void setSrcTableConfig(DITableFashionConfig srcTableConfig) {
+        this.srcTableConfig = srcTableConfig;
     }
 }

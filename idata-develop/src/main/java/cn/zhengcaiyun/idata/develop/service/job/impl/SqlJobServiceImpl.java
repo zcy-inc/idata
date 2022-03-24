@@ -110,12 +110,12 @@ public class SqlJobServiceImpl implements SqlJobService {
         if (CollectionUtils.isNotEmpty(flinkSourceConfigs)) {
             sqlBuilder.append("-- source table template ").append("\n");
             flinkSourceConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())));
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
         }
         if (CollectionUtils.isNotEmpty(flinkSinkConfigs)) {
             sqlBuilder.append("-- sink table template ").append("\n");
             flinkSinkConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())));
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
         }
         sqlBuilder.append("-- business code ").append("\n");
         return sqlBuilder.toString();
