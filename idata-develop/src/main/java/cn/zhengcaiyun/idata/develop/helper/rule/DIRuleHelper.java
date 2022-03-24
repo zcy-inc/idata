@@ -49,7 +49,7 @@ public class DIRuleHelper {
             checkArgument(StringUtils.isNotBlank(contentDto.getDestTable()), "目标数据表为空");
         }
         checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
-        checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()), "来源数据表为空");
+        checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()) || !Objects.isNull(contentDto.getSrcTableConfig()), "来源数据表为空");
 //todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");   数据迁移完后需要取消注释
 //todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");  数据迁移完后需要取消注释
 
