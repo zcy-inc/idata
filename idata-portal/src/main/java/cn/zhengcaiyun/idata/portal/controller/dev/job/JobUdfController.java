@@ -1,6 +1,5 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
-import cn.hutool.core.io.FileUtil;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
@@ -12,35 +11,26 @@ import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobUdfService;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.udf.UdfUpdateRequest;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.mortbay.util.UrlEncoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 @Api("")
 @RestController
@@ -120,7 +110,6 @@ public class JobUdfController {
 
     /**
      * 文件下载
-     * @param  hdfs://nameservice1/tmp/shiyin/udf/1638185598687_AD密码重置指导.docx
      * @return
      * @throws IOException
      */
