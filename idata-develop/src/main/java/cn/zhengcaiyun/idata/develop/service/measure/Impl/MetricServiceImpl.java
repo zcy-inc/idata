@@ -18,22 +18,23 @@ package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.constant.enums.AggregatorEnum;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineMyDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.*;
+import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
+import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.DimensionService;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
@@ -45,9 +46,12 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.*;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -68,6 +72,10 @@ public class MetricServiceImpl implements MetricService {
     @Autowired
     private DevLabelDao devLabelDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
+    private DevForeignKeyDao devForeignKeyDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private DimensionService dimensionService;
@@ -75,8 +83,10 @@ public class MetricServiceImpl implements MetricService {
     private EnumService enumService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private TableInfoService tableInfoService;
 
-    private String[] metricInfos = new String[]{"enName", "metricId", "bizProcessCode", "metricDefine"};
+    private String[] metricInfos = new String[]{"enName", "metricId", "bizProcessCode", "metricDefine", "domainCode", "metricDeadline"};
     private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
     private final String METRIC_BIZ_TYPE = "bizProcessCode";
@@ -227,50 +237,36 @@ public class MetricServiceImpl implements MetricService {
             metricInfoList.removeAll(metricAttributeKeyList);
             throw new IllegalArgumentException(String.join(",", metricInfoList) + "不能为空");
         }
+        checkArgument(metric.getSpecialAttribute() != null && metric.getSpecialAttribute().getCalculable() != null,
+                "是否可累加不能为空");
+        // 校验指标来源
+        checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "指标来源不能为空");
+        List<LabelDto> metricLabelList = metric.getMeasureLabels();
+        // 校验指标来源来自dws
+        List<Long> dwsTableIdList = tableInfoService.getTablesByDataBase("dws").stream().map(TableInfoDto::getId).collect(Collectors.toList());
+        checkArgument(dwsTableIdList.contains(metricLabelList.get(0).getTableId()), "指标来源有误，请选择dws层表");
 
-        // 校验修饰词枚举值是否属于修饰词
         if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
-            // 数据迁移暂注释
-            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
-            if (metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
-                List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
-                Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
-                checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
-                checkArgument(findErrorModifierNames(relatedModifierList) == null,
-                        findErrorModifierNames(relatedModifierList) + "修饰词有误");
-            }
+            checkArgument(checkMetricBaseInfo(metric), "指标新建失败");
         }
-        MeasureDto echoMetric = PojoUtil.copyOne(labelService.defineLabel(metric, operator), MeasureDto.class);
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metric.getLabelTag())) {
-            // 正常逻辑
-            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "聚合方式不能为空");
-            checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "关联信息不能为空");
-            List<LabelDto> metricLabelList = metric.getMeasureLabels();
+            // 校验可计算方式
+            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "可计算方式不能为空");
+            DevEnumValue checkAggregator = devEnumValueDao.selectOne(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                    and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode()))))
+                    .orElseThrow(() -> new IllegalArgumentException("可计算方式不存在"));
             // 校验关联信息
             metricLabelList.forEach(metricLabel ->
                     checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
                             String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
-
-            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-                metricLabel.setLabelCode(echoMetric.getLabelCode());
-                return labelService.label(metricLabel, operator);
-            }).collect(Collectors.toList());
-            echoMetric.setMeasureLabels(echoMetricLabelList);
-            // 数据迁移相关代码
-//            if (metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0) {
-//                List<LabelDto> metricLabelList = metric.getMeasureLabels();
-//                // 校验关联信息
-//                metricLabelList.forEach(metricLabel ->
-//                        checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
-//                                String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
-//
-//                List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-//                    metricLabel.setLabelCode(echoMetric.getLabelCode());
-//                    return labelService.label(metricLabel, operator);
-//                }).collect(Collectors.toList());
-//                echoMetric.setMeasureLabels(echoMetricLabelList);
-//            }
         }
+
+        MeasureDto echoMetric = PojoUtil.copyOne(labelService.defineLabel(metric, operator), MeasureDto.class);
+        List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
+            metricLabel.setLabelCode(echoMetric.getLabelCode());
+            return labelService.label(metricLabel, operator);
+        }).collect(Collectors.toList());
+        echoMetric.setMeasureLabels(echoMetricLabelList);
         return echoMetric;
     }
 
@@ -281,34 +277,31 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(metric.getLabelCode()), "指标Code不能为空");
         DevLabelDefine existMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metric.getLabelCode())), and(devLabelDefine.labelTag,
-                        isLike("%_METRIC_LABEL"))))
-                .orElse(null);
-        checkArgument(existMetric != null, "指标不存在或未停用");
+                        isLike("%_METRIC_LABEL%"))))
+                .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
+        MeasureDto existMetricDto = PojoUtil.copyOne(existMetric, MeasureDto.class, "labelAttributes", "specialAttribute");
+        AttributeDto existMetricIdAttribute = existMetricDto.getLabelAttributes()
+                .stream().filter(t -> "metricId".equals(t.getAttributeKey())).findFirst().get();
+        List<AttributeDto> labelAttributeList = metric.getLabelAttributes().stream()
+                .filter(t -> !"metricId".equals(t.getAttributeKey())).collect(Collectors.toList());
+        labelAttributeList.add(existMetricIdAttribute);
 
+        metric.setLabelAttributes(labelAttributeList);
         metric.setLabelTag(existMetric.getLabelTag());
-        // 校验修饰词枚举值是否属于修饰词
-        if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())
-                && metric.getSpecialAttribute().getModifiers() != null && metric.getSpecialAttribute().getModifiers().size() > 0) {
-            List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
-            Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
-            checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
-            checkArgument(findErrorModifierNames(relatedModifierList) == null,
-                    findErrorModifierNames(relatedModifierList) + "修饰词有误");
+        if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
+            checkArgument(checkMetricBaseInfo(metric), "指标更新失败");
         }
         MeasureDto echoMetric = PojoUtil.copyOne(labelService.defineLabel(metric, operator), MeasureDto.class);
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metric.getLabelTag()) && metric.getMeasureLabels() != null
                 && metric.getMeasureLabels().size() > 0) {
-            List<LabelDto> metricLabelList = metric.getMeasureLabels();
-            // 校验关联信息
-            metricLabelList.forEach(metricLabel ->
-                    checkArgument(columnInfoService.checkColumn(metricLabel.getColumnName(), metricLabel.getTableId()),
-                            String.format("表%s不含%s字段", metricLabel.getTableId(), metricLabel.getColumnName())));
-            List<LabelDto> echoMetricLabelList = metricLabelList.stream().map(metricLabel -> {
-                metricLabel.setLabelCode(echoMetric.getLabelCode());
-                return labelService.label(metricLabel, operator);
-            }).collect(Collectors.toList());
-            echoMetric.setMeasureLabels(echoMetricLabelList);
+            // 校验可计算方式是否修改
+            if (isNotEmpty(metric.getSpecialAttribute().getAggregatorCode())) {
+                DevEnumValue checkAggregator = devEnumValueDao.selectOne(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                        and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode()))))
+                        .orElseThrow(() -> new IllegalArgumentException("可计算方式不存在"));
+            }
         }
+        echoMetric.setMeasureLabels(metric.getMeasureLabels());
         return echoMetric;
     }
 
@@ -482,5 +475,44 @@ public class MetricServiceImpl implements MetricService {
             aggregateSql = String.format("COUNT(DISTINCT(%s))", columnName);
         }
         return aggregateSql;
+    }
+
+    private Boolean checkMetricBaseInfo(MeasureDto metric) {
+        String metricType = metric.getLabelTag();
+        LabelTagEnum.valueOf(metricType);
+        checkArgument(metricType.contains("_METRIC_LABEL"), "指标类型有误");
+
+        List<LabelDto> metricLabelList = metric.getMeasureLabels();
+        if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
+            checkArgument(isNotEmpty(metric.getSpecialAttribute().getAtomicMetricCode()), "原子指标不能为空");
+            DevLabelDefine checkAtomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())),
+                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
+                    .orElseThrow(() -> new IllegalArgumentException("原子指标不存在或已停用"));
+            // 校验维度
+            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTableIds()), "维度不能为空");
+            List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                    and(devForeignKey.tableId, isEqualTo(metricLabelList.get(0).getTableId()))))
+                    .stream().map(DevForeignKey::getReferTableId).sorted().collect(Collectors.toList());
+            checkArgument(existForeignKeyTblIdList.size() == metric.getSpecialAttribute().getDimTableIds().size() &&
+                    existForeignKeyTblIdList.containsAll(metric.getSpecialAttribute().getDimTableIds()), "请选择正确的维表");
+            // 校验修饰词
+            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getModifiers()), "修饰词不能为空");
+            List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
+            Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
+            checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
+            List<DevLabelDefine> existModifierList = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelCode, isIn(relatedModifierCodes)),
+                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
+            checkArgument(relatedModifierCodes.size() == existModifierList.size(), "修饰词有误，部分修饰词不存在");
+            // 校验修饰词底表属于指标来源表或维表
+            Set<Long> modifierTableIds = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isIn(relatedModifierCodes))))
+                    .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
+            Set<Long> allConfigTblIds = new HashSet<>(metric.getSpecialAttribute().getDimTableIds());
+            allConfigTblIds.add(metricLabelList.get(0).getTableId());
+            checkArgument(allConfigTblIds.containsAll(modifierTableIds), "修饰词有误，请选择来源于指标来源表或维表的修饰词");
+        }
+        return true;
     }
 }

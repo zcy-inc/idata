@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -550,6 +551,11 @@ public class LabelServiceImpl implements LabelService {
                         and(devLabel.columnName, isEqual(labelDto.getColumnName())),
                         and(devLabel.del, isNotEqualTo(1))));
         return true;
+    }
+
+    @Override
+    public List<TimeDimEnum> findTimeDimEnums() {
+        return Arrays.asList(TimeDimEnum.values());
     }
 
     @Override
