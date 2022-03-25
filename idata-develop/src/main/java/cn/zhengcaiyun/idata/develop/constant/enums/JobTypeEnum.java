@@ -32,15 +32,27 @@ import java.util.Optional;
  * @create: 2021-09-23 10:28
  **/
 public enum JobTypeEnum {
-    DI_BATCH("DI_BATCH", "DI", "离线同步", "", ""),
-    DI_STREAM("DI_STREAM", "DI", "实时同步", "", ""),
+    DI_BATCH("DI_BATCH", "DI", "数据抽取-离线", "", ""),
+    DI_STREAM("DI_STREAM", "DI", "数据抽取-实时", "", ""),
+    BACK_FLOW("BACK_FLOW", "DI", "数据回流-离线", "", ""),
+
     SQL_SPARK("SQL_SPARK", "SQL", "Sql作业", "SQL", "SPARK"),
+    SQL_DORIS("SQL_DORIS", "SQL", "Sql作业", "SQL", "DORIS"),
+
     SPARK_PYTHON("SPARK_PYTHON", "SPARK", "Spark作业", "PYTHON", "SPARK"),
     SPARK_JAR("SPARK_JAR", "SPARK", "Spark作业", "JAR", "SPARK"),
+
     SCRIPT_PYTHON("SCRIPT_PYTHON", "SCRIPT", "Script作业", "PYTHON", ""),
     SCRIPT_SHELL("SCRIPT_SHELL", "SCRIPT", "Script作业", "SHELL", ""),
+
     KYLIN("KYLIN", "KYLIN", "Kylin作业", "", "KYLIN"),
     ;
+
+    /**
+     * JobTypeEnum的全部类型的，但是数据集成（DI）里面分为数据抽取（DI）和数据回流（BACK_FLOW）
+     * 此处的枚举是为了针对数据集成单独做聚合
+     */
+
 
     private final String code;
     private final String catalog;

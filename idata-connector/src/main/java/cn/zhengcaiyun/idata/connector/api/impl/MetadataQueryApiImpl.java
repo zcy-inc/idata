@@ -22,21 +22,23 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,10 +62,12 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     @Autowired
     private SysConfigDao sysConfigDao;
 
+    @Autowired
+    private HivePool hivePool;
+
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
-        String jdbcUrl = getConnectionCfg();
-        String tableSize = hiveService.getTableSize(jdbcUrl, db, table);
+        String tableSize = hiveService.getTableSize(db, table);
         TableTechInfoDto techInfoDto = new TableTechInfoDto();
         techInfoDto.setTableSize(tableSize);
         return techInfoDto;
@@ -112,14 +116,14 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
-        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, null);
         if (StringUtils.isBlank(jdbcUrl)) {
             return Lists.newArrayList();
         }
 
         List<ColumnInfoDto> tableColumns = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
+             ResultSet rs = conn.getMetaData().getColumns(dbName, StringUtils.isBlank(schema) ? "%" : schema, tableName, "%")) {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");  //列名
                 String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)
@@ -134,6 +138,16 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
             logger.warn("getTableColumns failed. ex: {}", ex);
         }
         return tableColumns;
+    }
+
+    @Override
+    public List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName) {
+        return hiveService.getHiveTableColumns(dbName, tableName);
+    }
+
+    @Override
+    public MetadataInfo getHiveMetadataInfo(String dbName, String tableName) {
+        return hiveService.getMetadataInfo(dbName, tableName);
     }
 
     @Override
@@ -169,6 +183,11 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
                 .orElse(null);
         checkState(Objects.nonNull(hiveConfig), "数据源连接信息不正确");
         return PojoUtil.copyOne(hiveConfig, ConfigDto.class).getValueOne().get("hive-info").getConfigValue();
+    }
+
+    @Override
+    public boolean existHiveTable(String dbName, String tableName) {
+        return hiveService.existHiveTable(dbName, tableName);
     }
 
     private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {

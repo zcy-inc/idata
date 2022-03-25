@@ -8,8 +8,8 @@ import { IPane } from '@/models/datadev';
 import { FolderBelong } from '@/constants/datadev';
 
 import TabCloseIcon from '@/components/TabCloseIcon';
-import ViewLabel from '../ViewLabel';
-import TabEnum from '../TabEnum';
+// import ViewLabel from '../ViewLabel';
+// import TabEnum from '../TabEnum';
 import TabTable from '../TabTable';
 import TabDAG from '../TabDAG';
 import TabTask from '../TabTask';
@@ -30,10 +30,10 @@ const Workbench: FC = ({}) => {
     switch (pane.belong) {
       case FolderBelong.DESIGNTABLE:
         return <TabTable pane={pane} />;
-      case FolderBelong.DESIGNENUM:
-        return <TabEnum pane={pane} />;
-      case FolderBelong.DESIGNLABEL:
-        return <ViewLabel pane={pane} />;
+      // case FolderBelong.DESIGNENUM:
+      //   return <TabEnum pane={pane} />;
+      // case FolderBelong.DESIGNLABEL:
+      //   return <ViewLabel pane={pane} />;
       case FolderBelong.DAG:
         return <TabDAG pane={pane} />;
       case FolderBelong.DI:

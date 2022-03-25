@@ -5,10 +5,11 @@ import type { FC, CSSProperties } from 'react';
 import { getDWOwner, getTableLabels } from '@/services/datadev';
 import { ColumnLabel, TableLable, User } from '@/types/datapi';
 import { LabelTag } from '@/constants/datapi';
-import { ViewInitialColumns, TransformBoolean } from './constants';
+import { TransformBoolean } from './constants';
 
 import Title from '@/components/Title';
 import ER from './components/ER';
+import { IconFont } from '@/components';
 
 export interface ViewTableProps {
   data: any;
@@ -22,6 +23,19 @@ const ellipsis: CSSProperties = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
 };
+const ViewInitialColumns = [
+  {
+    title: '字段英文名',
+    dataIndex: 'columnName',
+    key: 'columnName',
+    render: (_: string, record: any) => (
+      <div>
+        {record.enableCompare && record.hiveDiff && <IconFont type="icon-baocuo" />}
+        <span>{_}</span>
+      </div>
+    ),
+  },
+];
 
 const ViewTable: FC<ViewTableProps> = ({ data }) => {
   const [columns, setColumns] = useState<any[]>([]);
@@ -48,7 +62,11 @@ const ViewTable: FC<ViewTableProps> = ({ data }) => {
           render: (_: any) => _ || '-',
         }));
         const dt = columnInfos.map((columnInfo: ColumnLabel) => {
-          const tmp = { columnName: columnInfo.columnName };
+          const tmp = {
+            columnName: columnInfo.columnName,
+            enableCompare: columnInfo.enableCompare,
+            hiveDiff: columnInfo.hiveDiff,
+          };
           columnInfo.columnLabels?.forEach(
             (item: TableLable) => (tmp[item.labelCode] = transformLabelValue(item)),
           );

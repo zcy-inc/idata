@@ -7,9 +7,11 @@ import type { FC } from 'react';
 import {
   createTable,
   delTable,
+  getDDL,
   getTable,
   getTableConstruct,
   postSyncMetabase,
+  syncHive,
 } from '@/services/datadev';
 import { Table, ForeignKey } from '@/types/datapi';
 
@@ -95,10 +97,10 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         }
         // 处理columnInfos的入参格式
         for (let [i, _] of stData.entries()) {
-          const item = { columnIndex: i, columnName: _.columnName };
+          const item = { columnIndex: i, columnName: _.columnName, id: _.id };
           const columnLabels = [];
           for (let [key, value] of Object.entries(_)) {
-            if (key === 'key' || key === 'id') {
+            if (key === 'key' || key === 'id' || key === 'enableCompare' || key === 'hiveDiff') {
               continue;
             }
             // 检查表结构的必填项
@@ -188,8 +190,6 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       .then((res) => {
         if (res.success) {
           message.success('同步成功');
-        } else {
-          message.error(`同步失败: ${res.msg || '-'}`);
         }
       })
       .finally(() => {
@@ -214,6 +214,17 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       })
       .catch((err) => {});
 
+  const onSyncHive = () =>
+    syncHive({ tableId: data?.id as number })
+      .then((res) => {
+        if (res.success) {
+          message.success('同步Hive成功');
+        } else {
+          message.error(`同步Hive失败：${res.msg}`);
+        }
+      })
+      .catch((err) => {});
+
   return (
     <Fragment>
       {mode === 'view' && <ViewTable data={data} />}
@@ -223,6 +234,9 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           <Space>
             <Button key="del" size="large" onClick={onDelete}>
               删除
+            </Button>
+            <Button key="hive" size="large" onClick={onSyncHive}>
+              同步Hive
             </Button>
             <Button key="edit" size="large" onClick={() => setVisible(true)}>
               DDL模式

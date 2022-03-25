@@ -6,6 +6,7 @@ import { Folder, UDF } from '@/types/datadev';
 import { FolderBelong } from '@/constants/datadev';
 import Title from '@/components/Title';
 import { getFolders } from '@/services/datadev';
+import { getWorkspacePrefix } from '@/utils/utils';
 
 interface ViewUDFProps {
   data?: UDF;
@@ -20,6 +21,19 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
     getFolders({ belong: FolderBelong.DEVFUN }).then((res) => setFolders(res.data));
   }, []);
 
+  const renderDownload = () => {
+    let workspace = getWorkspacePrefix();
+    if (workspace) {
+      workspace = `/${workspace}`;
+    }
+
+    return (
+      <a href={`${location.origin}${workspace}/api/p1/dev/udf/download/${data?.id}`} download>
+        下载
+      </a>
+    );
+  };
+
   return (
     <div>
       <Title>函数信息</Title>
@@ -28,9 +42,7 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
         <Item label="函数类型">{data?.udfType || '-'}</Item>
         <Item label="函数代码">
           <div style={{ position: 'relative', width: '100%', height: 28 }}>
-            <a href={`/api/p1/dev/udf/download/${data?.id}`} download>
-              下载
-            </a>
+            {renderDownload()}
             <span
               style={{
                 color: 'rgba(0, 0, 0, 0.45)',

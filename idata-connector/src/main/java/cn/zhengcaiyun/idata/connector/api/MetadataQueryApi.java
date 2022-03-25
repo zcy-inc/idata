@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.connector.api;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 
 import java.util.List;
 
@@ -41,6 +42,29 @@ public interface MetadataQueryApi {
     List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
                                         String dbName, String schema, String tableName);
 
+    /**
+     * 根据sys_config表的连接数据获取hive的相关列信息
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    List<ColumnInfoDto> getHiveTableColumns(String dbName, String tableName);
+
+    /**
+     * 根据sys_config表的连接数据获取hive表元数据信息
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    MetadataInfo getHiveMetadataInfo(String dbName, String tableName);
+
     List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password,
                                            String dbName, String schema, String tableName);
+
+    /**
+     * 根据sys_config表的连接信息判断表是否在hive中存在
+     * @param dbName
+     * @param tableName
+     */
+    boolean existHiveTable(String dbName, String tableName);
 }

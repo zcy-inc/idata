@@ -35,6 +35,11 @@ public class MappingColumnDto {
      * 是否主键
      */
     private Boolean primaryKey;
+
+    /**
+     * 字段抽取sql
+     */
+    private String mappingSql;
     /**
      * 映射字段
      */
@@ -70,5 +75,13 @@ public class MappingColumnDto {
 
     public void setMappedColumn(MappingColumnDto mappedColumn) {
         this.mappedColumn = mappedColumn;
+    }
+
+    public String getMappingSql() {
+        return mappingSql;
+    }
+
+    public void setMappingSql(String mappingSql) {
+        this.mappingSql = mappingSql;
     }
 }

@@ -41,5 +41,3 @@ create table dev_job_udf
     constraint dev_job_udf_udf_name_uindex
         unique (udf_name)
 );
-
-

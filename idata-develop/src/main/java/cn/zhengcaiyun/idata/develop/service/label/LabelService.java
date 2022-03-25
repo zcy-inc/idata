@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.label;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 
@@ -40,4 +41,31 @@ public interface LabelService {
     List<LabelDto> findLabelsByCode(String labelCode);
     Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
     boolean removeLabel(LabelDto labelDto, String operator);
+
+    /**
+     * 根据tableId查询
+     * @param tableId
+     * @return
+     */
+    List<DevLabel> findByTableId(Long tableId);
+
+    /**
+     * 获取table表的db库
+     * @param tableId
+     * @return
+     */
+    String getDBName(Long tableId);
+
+    /**
+     * 批量新增（存在则更新）
+     * @param labelList
+     */
+    void batchUpsert(List<DevLabel> labelList);
+
+    /**
+     * 删除hive相关列的过期记录
+     * @param columnId
+     * @param hiveColumnName
+     */
+    void deleteDeprecatedHiveColumn(Long columnId, String hiveColumnName);
 }

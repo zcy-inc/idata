@@ -22,13 +22,19 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
+import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -47,9 +53,14 @@ public class TableInfoController {
     @Autowired
     private ColumnInfoService columnInfoService;
 
+    @Autowired
+    private MetadataFacade metadataFacade;
+
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
-        return RestResult.success(tableInfoService.getTableInfo(tableId));
+        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+//        metadataFacade.markDiff(tableInfo);
+        return RestResult.success(tableInfo);
     }
 
     @GetMapping("referTables")
@@ -85,6 +96,11 @@ public class TableInfoController {
         return RestResult.success(echoTableInfo);
     }
 
+    /**
+     * DDL模式生成表结构
+     * @param tableDdlDto
+     * @return
+     */
     @PostMapping("ddl/syncTableInfo")
     public RestResult<TableInfoDto> syncTableInfo(@RequestBody TableDdlDto tableDdlDto) {
         return RestResult.success(tableInfoService.syncTableInfoByDDL(tableDdlDto));
@@ -106,5 +122,26 @@ public class TableInfoController {
     public RestResult<TableTechInfoDto> getTableTechInfo(@PathVariable("tableId") Long tableId){
         return RestResult.success(tableInfoService.getTableTechInfo(tableId));
     }
+
+    /**
+     * 将表元数据信息同步至HIVE，若是修改则进行增量操作，删减字段不做修改。
+     * 删减字段不做修改原因：删除字段会删除hive表中的数据，风险大
+     */
+    @PostMapping("/syncHiveInfo/{tableId}")
+    public RestResult<SyncHiveDTO> syncHiveInfo(HttpServletRequest request, @PathVariable("tableId") Long tableId) {
+        String nickname = tokenService.getNickname(request);
+        return RestResult.success(metadataFacade.syncMetadataToHive(tableId, nickname));
+    }
+
+    /**
+     * 比较本地表和远端hive表的区别
+     * @param tableId
+     * @return
+     */
+    @PostMapping("/compareHiveInfo/{tableId}")
+    public RestResult<CompareInfoDTO> compareHiveInfo(@PathVariable("tableId") Long tableId) {
+        return RestResult.success(metadataFacade.compareHive(tableId));
+    }
+
 
 }

@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcReadMode, srcReadFilter, srcReadShardKey, destDataSourceType, destDataSourceId, destTable, destWriteMode, destBeforeWrite, destAfterWrite, contentHash, srcTables, srcColumns, destColumns);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcTopic, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTopic, destTable, destWriteMode, destBeforeWrite, destAfterWrite, destProperties, destShardingNum, destBulkNum, contentHash, mergeSql, scriptSelectColumns, scriptKeyColumns, scriptMergeSqlParam, configMode, srcTables, srcColumns, srcQuery, destColumns, scriptMergeSql, scriptQuery);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -68,19 +68,33 @@ public interface DIJobContentDao {
         @Result(column="version", property="version", jdbcType=JdbcType.INTEGER),
         @Result(column="src_data_source_type", property="srcDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_data_source_id", property="srcDataSourceId", jdbcType=JdbcType.BIGINT),
+        @Result(column="src_topic", property="srcTopic", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_read_mode", property="srcReadMode", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_read_filter", property="srcReadFilter", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_read_shard_key", property="srcReadShardKey", jdbcType=JdbcType.VARCHAR),
+        @Result(column="src_sharding_num", property="srcShardingNum", jdbcType=JdbcType.INTEGER),
         @Result(column="dest_data_source_type", property="destDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_id", property="destDataSourceId", jdbcType=JdbcType.BIGINT),
+        @Result(column="dest_topic", property="destTopic", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_table", property="destTable", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_write_mode", property="destWriteMode", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_before_write", property="destBeforeWrite", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_after_write", property="destAfterWrite", jdbcType=JdbcType.VARCHAR),
+        @Result(column="dest_properties", property="destProperties", jdbcType=JdbcType.VARCHAR),
+        @Result(column="dest_sharding_num", property="destShardingNum", jdbcType=JdbcType.INTEGER),
+        @Result(column="dest_bulk_num", property="destBulkNum", jdbcType=JdbcType.BIGINT),
         @Result(column="content_hash", property="contentHash", jdbcType=JdbcType.VARCHAR),
+        @Result(column="merge_sql", property="mergeSql", jdbcType=JdbcType.VARCHAR),
+        @Result(column="script_select_columns", property="scriptSelectColumns", jdbcType=JdbcType.VARCHAR),
+        @Result(column="script_key_columns", property="scriptKeyColumns", jdbcType=JdbcType.VARCHAR),
+        @Result(column="script_merge_sql_param", property="scriptMergeSqlParam", jdbcType=JdbcType.VARCHAR),
+        @Result(column="config_mode", property="configMode", jdbcType=JdbcType.TINYINT),
         @Result(column="src_tables", property="srcTables", jdbcType=JdbcType.LONGVARCHAR),
         @Result(column="src_columns", property="srcColumns", jdbcType=JdbcType.LONGVARCHAR),
-        @Result(column="dest_columns", property="destColumns", jdbcType=JdbcType.LONGVARCHAR)
+        @Result(column="src_query", property="srcQuery", jdbcType=JdbcType.LONGVARCHAR),
+        @Result(column="dest_columns", property="destColumns", jdbcType=JdbcType.LONGVARCHAR),
+        @Result(column="script_merge_sql", property="scriptMergeSql", jdbcType=JdbcType.LONGVARCHAR),
+        @Result(column="script_query", property="scriptQuery", jdbcType=JdbcType.LONGVARCHAR)
     })
     List<DIJobContent> selectMany(SelectStatementProvider selectStatement);
 
@@ -118,19 +132,33 @@ public interface DIJobContentDao {
             .map(version).toProperty("version")
             .map(srcDataSourceType).toProperty("srcDataSourceType")
             .map(srcDataSourceId).toProperty("srcDataSourceId")
+            .map(srcTopic).toProperty("srcTopic")
             .map(srcReadMode).toProperty("srcReadMode")
             .map(srcReadFilter).toProperty("srcReadFilter")
             .map(srcReadShardKey).toProperty("srcReadShardKey")
+            .map(srcShardingNum).toProperty("srcShardingNum")
             .map(destDataSourceType).toProperty("destDataSourceType")
             .map(destDataSourceId).toProperty("destDataSourceId")
+            .map(destTopic).toProperty("destTopic")
             .map(destTable).toProperty("destTable")
             .map(destWriteMode).toProperty("destWriteMode")
             .map(destBeforeWrite).toProperty("destBeforeWrite")
             .map(destAfterWrite).toProperty("destAfterWrite")
+            .map(destProperties).toProperty("destProperties")
+            .map(destShardingNum).toProperty("destShardingNum")
+            .map(destBulkNum).toProperty("destBulkNum")
             .map(contentHash).toProperty("contentHash")
+            .map(mergeSql).toProperty("mergeSql")
+            .map(scriptSelectColumns).toProperty("scriptSelectColumns")
+            .map(scriptKeyColumns).toProperty("scriptKeyColumns")
+            .map(scriptMergeSqlParam).toProperty("scriptMergeSqlParam")
+            .map(configMode).toProperty("configMode")
             .map(srcTables).toProperty("srcTables")
             .map(srcColumns).toProperty("srcColumns")
+            .map(srcQuery).toProperty("srcQuery")
             .map(destColumns).toProperty("destColumns")
+            .map(scriptMergeSql).toProperty("scriptMergeSql")
+            .map(scriptQuery).toProperty("scriptQuery")
         );
     }
 
@@ -147,19 +175,33 @@ public interface DIJobContentDao {
             .map(version).toPropertyWhenPresent("version", record::getVersion)
             .map(srcDataSourceType).toPropertyWhenPresent("srcDataSourceType", record::getSrcDataSourceType)
             .map(srcDataSourceId).toPropertyWhenPresent("srcDataSourceId", record::getSrcDataSourceId)
+            .map(srcTopic).toPropertyWhenPresent("srcTopic", record::getSrcTopic)
             .map(srcReadMode).toPropertyWhenPresent("srcReadMode", record::getSrcReadMode)
             .map(srcReadFilter).toPropertyWhenPresent("srcReadFilter", record::getSrcReadFilter)
             .map(srcReadShardKey).toPropertyWhenPresent("srcReadShardKey", record::getSrcReadShardKey)
+            .map(srcShardingNum).toPropertyWhenPresent("srcShardingNum", record::getSrcShardingNum)
             .map(destDataSourceType).toPropertyWhenPresent("destDataSourceType", record::getDestDataSourceType)
             .map(destDataSourceId).toPropertyWhenPresent("destDataSourceId", record::getDestDataSourceId)
+            .map(destTopic).toPropertyWhenPresent("destTopic", record::getDestTopic)
             .map(destTable).toPropertyWhenPresent("destTable", record::getDestTable)
             .map(destWriteMode).toPropertyWhenPresent("destWriteMode", record::getDestWriteMode)
             .map(destBeforeWrite).toPropertyWhenPresent("destBeforeWrite", record::getDestBeforeWrite)
             .map(destAfterWrite).toPropertyWhenPresent("destAfterWrite", record::getDestAfterWrite)
+            .map(destProperties).toPropertyWhenPresent("destProperties", record::getDestProperties)
+            .map(destShardingNum).toPropertyWhenPresent("destShardingNum", record::getDestShardingNum)
+            .map(destBulkNum).toPropertyWhenPresent("destBulkNum", record::getDestBulkNum)
             .map(contentHash).toPropertyWhenPresent("contentHash", record::getContentHash)
+            .map(mergeSql).toPropertyWhenPresent("mergeSql", record::getMergeSql)
+            .map(scriptSelectColumns).toPropertyWhenPresent("scriptSelectColumns", record::getScriptSelectColumns)
+            .map(scriptKeyColumns).toPropertyWhenPresent("scriptKeyColumns", record::getScriptKeyColumns)
+            .map(scriptMergeSqlParam).toPropertyWhenPresent("scriptMergeSqlParam", record::getScriptMergeSqlParam)
+            .map(configMode).toPropertyWhenPresent("configMode", record::getConfigMode)
             .map(srcTables).toPropertyWhenPresent("srcTables", record::getSrcTables)
             .map(srcColumns).toPropertyWhenPresent("srcColumns", record::getSrcColumns)
+            .map(srcQuery).toPropertyWhenPresent("srcQuery", record::getSrcQuery)
             .map(destColumns).toPropertyWhenPresent("destColumns", record::getDestColumns)
+            .map(scriptMergeSql).toPropertyWhenPresent("scriptMergeSql", record::getScriptMergeSql)
+            .map(scriptQuery).toPropertyWhenPresent("scriptQuery", record::getScriptQuery)
         );
     }
 
@@ -202,19 +244,33 @@ public interface DIJobContentDao {
                 .set(version).equalTo(record::getVersion)
                 .set(srcDataSourceType).equalTo(record::getSrcDataSourceType)
                 .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
+                .set(srcTopic).equalTo(record::getSrcTopic)
                 .set(srcReadMode).equalTo(record::getSrcReadMode)
                 .set(srcReadFilter).equalTo(record::getSrcReadFilter)
                 .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
+                .set(srcShardingNum).equalTo(record::getSrcShardingNum)
                 .set(destDataSourceType).equalTo(record::getDestDataSourceType)
                 .set(destDataSourceId).equalTo(record::getDestDataSourceId)
+                .set(destTopic).equalTo(record::getDestTopic)
                 .set(destTable).equalTo(record::getDestTable)
                 .set(destWriteMode).equalTo(record::getDestWriteMode)
                 .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalTo(record::getDestAfterWrite)
+                .set(destProperties).equalTo(record::getDestProperties)
+                .set(destShardingNum).equalTo(record::getDestShardingNum)
+                .set(destBulkNum).equalTo(record::getDestBulkNum)
                 .set(contentHash).equalTo(record::getContentHash)
+                .set(mergeSql).equalTo(record::getMergeSql)
+                .set(scriptSelectColumns).equalTo(record::getScriptSelectColumns)
+                .set(scriptKeyColumns).equalTo(record::getScriptKeyColumns)
+                .set(scriptMergeSqlParam).equalTo(record::getScriptMergeSqlParam)
+                .set(configMode).equalTo(record::getConfigMode)
                 .set(srcTables).equalTo(record::getSrcTables)
                 .set(srcColumns).equalTo(record::getSrcColumns)
-                .set(destColumns).equalTo(record::getDestColumns);
+                .set(srcQuery).equalTo(record::getSrcQuery)
+                .set(destColumns).equalTo(record::getDestColumns)
+                .set(scriptMergeSql).equalTo(record::getScriptMergeSql)
+                .set(scriptQuery).equalTo(record::getScriptQuery);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -229,19 +285,33 @@ public interface DIJobContentDao {
                 .set(version).equalToWhenPresent(record::getVersion)
                 .set(srcDataSourceType).equalToWhenPresent(record::getSrcDataSourceType)
                 .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
+                .set(srcTopic).equalToWhenPresent(record::getSrcTopic)
                 .set(srcReadMode).equalToWhenPresent(record::getSrcReadMode)
                 .set(srcReadFilter).equalToWhenPresent(record::getSrcReadFilter)
                 .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
+                .set(srcShardingNum).equalToWhenPresent(record::getSrcShardingNum)
                 .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
                 .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
+                .set(destTopic).equalToWhenPresent(record::getDestTopic)
                 .set(destTable).equalToWhenPresent(record::getDestTable)
                 .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
                 .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
                 .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)
+                .set(destProperties).equalToWhenPresent(record::getDestProperties)
+                .set(destShardingNum).equalToWhenPresent(record::getDestShardingNum)
+                .set(destBulkNum).equalToWhenPresent(record::getDestBulkNum)
                 .set(contentHash).equalToWhenPresent(record::getContentHash)
+                .set(mergeSql).equalToWhenPresent(record::getMergeSql)
+                .set(scriptSelectColumns).equalToWhenPresent(record::getScriptSelectColumns)
+                .set(scriptKeyColumns).equalToWhenPresent(record::getScriptKeyColumns)
+                .set(scriptMergeSqlParam).equalToWhenPresent(record::getScriptMergeSqlParam)
+                .set(configMode).equalToWhenPresent(record::getConfigMode)
                 .set(srcTables).equalToWhenPresent(record::getSrcTables)
                 .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
-                .set(destColumns).equalToWhenPresent(record::getDestColumns);
+                .set(srcQuery).equalToWhenPresent(record::getSrcQuery)
+                .set(destColumns).equalToWhenPresent(record::getDestColumns)
+                .set(scriptMergeSql).equalToWhenPresent(record::getScriptMergeSql)
+                .set(scriptQuery).equalToWhenPresent(record::getScriptQuery);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
@@ -257,19 +327,33 @@ public interface DIJobContentDao {
             .set(version).equalTo(record::getVersion)
             .set(srcDataSourceType).equalTo(record::getSrcDataSourceType)
             .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
+            .set(srcTopic).equalTo(record::getSrcTopic)
             .set(srcReadMode).equalTo(record::getSrcReadMode)
             .set(srcReadFilter).equalTo(record::getSrcReadFilter)
             .set(srcReadShardKey).equalTo(record::getSrcReadShardKey)
+            .set(srcShardingNum).equalTo(record::getSrcShardingNum)
             .set(destDataSourceType).equalTo(record::getDestDataSourceType)
             .set(destDataSourceId).equalTo(record::getDestDataSourceId)
+            .set(destTopic).equalTo(record::getDestTopic)
             .set(destTable).equalTo(record::getDestTable)
             .set(destWriteMode).equalTo(record::getDestWriteMode)
             .set(destBeforeWrite).equalTo(record::getDestBeforeWrite)
             .set(destAfterWrite).equalTo(record::getDestAfterWrite)
+            .set(destProperties).equalTo(record::getDestProperties)
+            .set(destShardingNum).equalTo(record::getDestShardingNum)
+            .set(destBulkNum).equalTo(record::getDestBulkNum)
             .set(contentHash).equalTo(record::getContentHash)
+            .set(mergeSql).equalTo(record::getMergeSql)
+            .set(scriptSelectColumns).equalTo(record::getScriptSelectColumns)
+            .set(scriptKeyColumns).equalTo(record::getScriptKeyColumns)
+            .set(scriptMergeSqlParam).equalTo(record::getScriptMergeSqlParam)
+            .set(configMode).equalTo(record::getConfigMode)
             .set(srcTables).equalTo(record::getSrcTables)
             .set(srcColumns).equalTo(record::getSrcColumns)
+            .set(srcQuery).equalTo(record::getSrcQuery)
             .set(destColumns).equalTo(record::getDestColumns)
+            .set(scriptMergeSql).equalTo(record::getScriptMergeSql)
+            .set(scriptQuery).equalTo(record::getScriptQuery)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -287,19 +371,33 @@ public interface DIJobContentDao {
             .set(version).equalToWhenPresent(record::getVersion)
             .set(srcDataSourceType).equalToWhenPresent(record::getSrcDataSourceType)
             .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
+            .set(srcTopic).equalToWhenPresent(record::getSrcTopic)
             .set(srcReadMode).equalToWhenPresent(record::getSrcReadMode)
             .set(srcReadFilter).equalToWhenPresent(record::getSrcReadFilter)
             .set(srcReadShardKey).equalToWhenPresent(record::getSrcReadShardKey)
+            .set(srcShardingNum).equalToWhenPresent(record::getSrcShardingNum)
             .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
             .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
+            .set(destTopic).equalToWhenPresent(record::getDestTopic)
             .set(destTable).equalToWhenPresent(record::getDestTable)
             .set(destWriteMode).equalToWhenPresent(record::getDestWriteMode)
             .set(destBeforeWrite).equalToWhenPresent(record::getDestBeforeWrite)
             .set(destAfterWrite).equalToWhenPresent(record::getDestAfterWrite)
+            .set(destProperties).equalToWhenPresent(record::getDestProperties)
+            .set(destShardingNum).equalToWhenPresent(record::getDestShardingNum)
+            .set(destBulkNum).equalToWhenPresent(record::getDestBulkNum)
             .set(contentHash).equalToWhenPresent(record::getContentHash)
+            .set(mergeSql).equalToWhenPresent(record::getMergeSql)
+            .set(scriptSelectColumns).equalToWhenPresent(record::getScriptSelectColumns)
+            .set(scriptKeyColumns).equalToWhenPresent(record::getScriptKeyColumns)
+            .set(scriptMergeSqlParam).equalToWhenPresent(record::getScriptMergeSqlParam)
+            .set(configMode).equalToWhenPresent(record::getConfigMode)
             .set(srcTables).equalToWhenPresent(record::getSrcTables)
             .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
+            .set(srcQuery).equalToWhenPresent(record::getSrcQuery)
             .set(destColumns).equalToWhenPresent(record::getDestColumns)
+            .set(scriptMergeSql).equalToWhenPresent(record::getScriptMergeSql)
+            .set(scriptQuery).equalToWhenPresent(record::getScriptQuery)
             .where(id, isEqualTo(record::getId))
         );
     }

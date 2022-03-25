@@ -59,7 +59,7 @@ export default defineConfig({
     basePath: '/',
   },
   // https://github.com/zthxxx/react-dev-inspector
-  plugins: ['react-dev-inspector/plugins/umi/react-inspector', '@zcy-data/plugin-proxy'],
+  plugins: ['react-dev-inspector/plugins/umi/react-inspector'],
   inspectorConfig: {
     // loader options type and docs see below
     exclude: [],
@@ -70,9 +70,8 @@ export default defineConfig({
     includes: ['src/components'],
   },
   chainWebpack(config, { webpack }) {
-    config
-      .plugin('monaco')
-      .use(MonacoWebpackPlugin, [{
+    config.plugin('monaco').use(MonacoWebpackPlugin, [
+      {
         languages: ['sql', 'python', 'java', 'shell'],
         features: [
           'comment',
@@ -89,6 +88,7 @@ export default defineConfig({
           'find',
           'linesOperations', // cmd + del 等快捷键操作
         ],
-      }]);
+      },
+    ]);
   },
 });

@@ -4,12 +4,12 @@ import { Drawer, Table } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
 import { getTaskHistory } from '@/services/datadev';
-import { Task, TaskHistoryItem } from '@/types/datadev';
+import { DIJobBasicInfo, TaskHistoryItem } from '@/types/datadev';
 
 interface DrawerHistoryProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
 }
 const fmt = 'YYYY-MM-DD HH:mm:ss';
 

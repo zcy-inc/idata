@@ -122,8 +122,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
                   title: res.data.dagInfoDto.name,
                   pane: { ...pane, id: res.data.dagInfoDto.id },
                 });
-              } else {
-                message.error('创建DAG失败');
               }
             })
             .catch((err) => {})
@@ -143,8 +141,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
                 });
                 getDAGWrapped().then(() => setMode('view'));
                 getTreeWrapped();
-              } else {
-                message.error('编辑DAG失败');
               }
             })
             .catch((err) => {})
@@ -166,8 +162,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
               message.success('删除DAG成功');
               onRemovePane(pane.cid);
               getTreeWrapped();
-            } else {
-              message.error(`删除DAG失败：${res.msg}`);
             }
           })
           .catch((err) => {}),
@@ -183,8 +177,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
           if (res.success) {
             message.success('上线DAG成功');
             getDAGWrapped();
-          } else {
-            message.error(`上线DAG失败：${res.msg}`);
           }
         }),
     });
@@ -199,8 +191,6 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
           if (res.success) {
             message.success('下线DAG成功');
             getDAGWrapped();
-          } else {
-            message.error(`下线DAG失败：${res.msg}`);
           }
         }),
     });

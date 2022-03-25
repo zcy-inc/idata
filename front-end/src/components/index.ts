@@ -5,5 +5,11 @@ import TiledTable from './TiledTable';
 import RightContent from './RightContent';
 
 export * from './Hn';
+
 export { default as PageContainer } from './PageContainer';
+
+export { default as MapInput } from './MapInput';
+
+export { default as RadioGroup } from './RadioGroup';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };

@@ -14,6 +14,8 @@ import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 
 import IconFont from '@/components/IconFont';
 import { IMenuItem } from './types/common';
+import { message } from 'antd';
+import { getRequestUrl } from './utils/utils';
 
 const fetchCurrentUser = async () => {
   try {
@@ -148,9 +150,31 @@ const middleware = async (ctx: Context, next: () => void) => {
     history.replace('/');
     return;
   }
+  if (!ctx.res.success) {
+    message.error(`出错了: ${ctx.res.msg}`);
+  }
 };
 
+const whiteList = [
+  // /^\/api\/v1\/idata\/auth/,
+  // /^\/api\/v1\/idata\/users/,
+  // /^\/api\/v1\/idata\/user/,
+  /^\/api\/p1\/workspaces/,
+  // /^\/api\/p1/,
+  // /^\/api\/p0/,
+];
+
 export const request: RequestConfig = {
+  requestInterceptors: [
+    (url, options) => {
+      if (whiteList.find((url) => url.test(options.url))) {
+        return { url, options };
+      }
+      options.url = getRequestUrl(options.url);
+      const newUrl = getRequestUrl(url);
+      return { url: newUrl, options };
+    },
+  ],
   errorConfig: {
     adaptor: (resData) => {
       return {

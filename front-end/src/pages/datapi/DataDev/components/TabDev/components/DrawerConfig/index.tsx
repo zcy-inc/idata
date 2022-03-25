@@ -19,12 +19,7 @@ import { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
 
 import Title from '@/components/Title';
-import {
-  restartOptions,
-  concurrentOptions,
-  execDriverMemOptions,
-  execWorkerMemOptions,
-} from './constants';
+import { restartOptions, execDriverMemOptions, execWorkerMemOptions } from './constants';
 import { ConfiguredTaskListItem, DAGListItem, TaskConfig, Task } from '@/types/datadev';
 import {
   getConfiguredTaskList,
@@ -35,7 +30,7 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
-import { SchPriority } from '@/constants/datadev';
+import { ExecEngine, SchPriority, TaskTypes } from '@/constants/datadev';
 import { getDataSourceList } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
 
@@ -78,7 +73,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         .then((res) => setExecuteQueues(res.data))
         .catch((err) => {});
       getConfiguredTaskListWrapped(Environments.STAG);
-      getDataSourceList({ type: DataSourceTypes.HIVE, limit: 999, offset: 0 })
+      getDataSourceList({ limit: 999, offset: 0 })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
     }
@@ -192,7 +187,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
@@ -254,13 +250,17 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         message.info('输出表只能存在一张');
         return;
       }
+
       const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
+      const destDataSourceType =
+        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
       const destTable = stagForm.getFieldValue('destTable');
+      const destWriteMode = stagForm.getFieldValue('destWriteMode');
       const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.STAG,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType,
         destDataSourceId,
         destTable,
         destWriteMode,
@@ -287,12 +287,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return;
       }
       const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
+      const destDataSourceType =
+        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
       const destTable = prodForm.getFieldValue('destTable');
-      const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
+      const destWriteMode = prodForm.getFieldValue('destWriteMode');
+      const jobTargetTablePk = prodForm.getFieldValue('jobTargetTablePk');
       const outData = {
         jobId: data?.id,
         environment: Environments.PROD,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType,
         destDataSourceId,
         destTable,
         destWriteMode,
@@ -328,6 +331,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
+
     const params = {
       executeConfig: {
         jobId: data?.id as number,
@@ -343,6 +347,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         schPriority: values.schPriority,
         execDriverMem: values.execDriverMem,
         execWorkerMem: values.execWorkerMem,
+        execEngine: values.execEngine,
       },
       dependencies: depData.map((_) => ({
         jobId: data?.id as number,
@@ -353,7 +358,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       output: {
         jobId: data?.id as number,
         environment: activeKey,
-        destDataSourceType: DataSourceTypes.HIVE,
+        destDataSourceType: outData.destDataSourceType,
         destDataSourceId: outData.destDataSourceId,
         destTable: outData.destTable,
         destWriteMode: outData.destWriteMode,
@@ -365,11 +370,29 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
           onClose();
-        } else {
-          message.error(`保存${environment}失败：${res.msg}`);
         }
       })
       .catch((err) => {});
+  };
+
+  const renderExecEngineOptions = () => {
+    switch (data?.jobType) {
+      case TaskTypes.SQL_SPARK:
+      case TaskTypes.SCRIPT_PYTHON:
+      case TaskTypes.SCRIPT_SHELL:
+        return [
+          { label: 'SPARK', value: ExecEngine.SPARK },
+          { label: 'SQOOP', value: ExecEngine.SQOOP },
+          { label: 'KYLIN', value: ExecEngine.KYLIN },
+        ];
+      case TaskTypes.SPARK_PYTHON:
+      case TaskTypes.SPARK_JAR:
+        return [{ label: 'SPARK', value: ExecEngine.SPARK }];
+      case TaskTypes.KYLIN:
+        return [{ label: 'KYLIN', value: ExecEngine.KYLIN }];
+      default:
+        return [];
+    }
   };
 
   return (
@@ -485,14 +508,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execWorkerMemOptions}
                 />
               </Item>
-              <Item name="execMaxParallelism" label="任务期望最大并发数" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={concurrentOptions}
-                />
-              </Item>
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
@@ -503,6 +518,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                     { label: '中', value: SchPriority.MIDDLE },
                     { label: '高', value: SchPriority.HIGH },
                   ]}
+                />
+              </Item>
+              <Title>运行配置</Title>
+              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={renderExecEngineOptions()}
                 />
               </Item>
               <Title>依赖配置</Title>
@@ -525,6 +549,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </a>
               </div>
               <Table<ConfiguredTaskListItem>
+                rowKey="jobName"
                 columns={columnsDependence}
                 dataSource={activeKey === Environments.STAG ? depDataStag : depDataProd}
                 pagination={false}
@@ -596,6 +621,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 </Col>
               </Row>
               <Table
+                rowKey="destTable"
                 columns={columnsOutput}
                 dataSource={activeKey === Environments.STAG ? outDataStag : outDataProd}
                 pagination={false}

@@ -92,6 +92,11 @@ public class QueryServiceImpl implements QueryService {
         AutocompletionTipDto echo = new AutocompletionTipDto();
 
         ConfigDto baseAutocompletionTimConfig = systemConfigApi.getSystemConfigByKeyAndType(AUTOCOMPLETION_KEY, autocompletionType);
+        if (baseAutocompletionTimConfig.getValueOne() == null
+                || baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY) == null
+                || baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY).getConfigValue() == null) {
+            return echo;
+        }
         String baseAutocompletionTimValue = baseAutocompletionTimConfig.getValueOne().get(AUTOCOMPLETION_KEY).getConfigValue();
         List<String> dbNameList = tableInfoService.getDbNames().stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
         List<TableInfoDto> tableList = new ArrayList<>();

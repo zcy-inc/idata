@@ -103,13 +103,6 @@ public final class JobExecuteConfigDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   运行配置-作业最大并发数，配置为0时表示使用默认并发数
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_max_parallelism")
-    public static final SqlColumn<Integer> execMaxParallelism = jobExecuteConfig.execMaxParallelism;
-
-    /**
-     * Database Column Remarks:
      *   运行配置-告警等级
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
@@ -150,6 +143,13 @@ public final class JobExecuteConfigDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
     public static final SqlColumn<Integer> runningState = jobExecuteConfig.runningState;
 
+    /**
+     * Database Column Remarks:
+     *   执行引擎
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public static final SqlColumn<String> execEngine = jobExecuteConfig.execEngine;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     public static final class JobExecuteConfig extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -178,8 +178,6 @@ public final class JobExecuteConfigDynamicSqlSupport {
 
         public final SqlColumn<String> execQueue = column("exec_queue", JDBCType.VARCHAR);
 
-        public final SqlColumn<Integer> execMaxParallelism = column("exec_max_parallelism", JDBCType.INTEGER);
-
         public final SqlColumn<String> execWarnLevel = column("exec_warn_level", JDBCType.VARCHAR);
 
         public final SqlColumn<String> schTimeOutStrategy = column("sch_time_out_strategy", JDBCType.VARCHAR);
@@ -191,6 +189,8 @@ public final class JobExecuteConfigDynamicSqlSupport {
         public final SqlColumn<Integer> execWorkerMem = column("exec_worker_mem", JDBCType.INTEGER);
 
         public final SqlColumn<Integer> runningState = column("running_state", JDBCType.INTEGER);
+
+        public final SqlColumn<String> execEngine = column("exec_engine", JDBCType.VARCHAR);
 
         public JobExecuteConfig() {
             super("dev_job_execute_config");

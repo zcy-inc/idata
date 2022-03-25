@@ -21,6 +21,9 @@ import type {
   DependenceTreeNode,
   TaskHistoryItem,
   UDF,
+  CreateDIJobDto,
+  DIJobBasicInfo,
+  MergeSqlParamDto,
 } from '@/types/datadev';
 import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
@@ -58,7 +61,10 @@ export async function getEnumNames() {
  * 枚举 获取values
  */
 export async function getEnumValues(params: { enumCode: string }) {
-  return request('/api/p1/dev/enumValues', { method: 'GET', params });
+  return request<Tresponse<{ enumValue: string; valueCode: string }[]>>('/api/p1/dev/enumValues', {
+    method: 'GET',
+    params,
+  });
 }
 
 /**
@@ -170,6 +176,13 @@ export async function postSyncMetabase(params: { tableId: any }) {
  */
 export async function getTableConstruct(data: { tableDdl: string; tableId: number }) {
   return request('/api/p1/dev/ddl/syncTableInfo', { method: 'POST', data });
+}
+// 表 同步Hive
+export async function syncHive(data: { tableId: number }) {
+  return request<DefaultResponse>(`/api/p1/dev/syncHiveInfo/${data.tableId}`, {
+    method: 'POST',
+    data,
+  });
 }
 
 /* ==================== DataDev ==================== */
@@ -461,7 +474,7 @@ export async function submitTask(
 /**
  * 获取DAG列表
  */
-export async function getDAGList(params: { dwLayerCode: string; environment: Environments }) {
+export async function getDAGList(params: { environment: Environments; dwLayerCode?: string }) {
   return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
     method: 'GET',
     params,
@@ -917,5 +930,124 @@ export async function getUDFCodeFile(params: { id: number }) {
 export async function getUDFList() {
   return request<DefaultResponse & { data: UDF[] }>('/api/p1/dev/udfs', {
     method: 'GET',
+  });
+}
+
+/**
+ * 获取DI任务类型下拉列表
+ */
+export async function getDIJobTypes() {
+  return request<Tresponse<{ name: string; value: string }[]>>(
+    '/api/p1/dev/jobs/di/meta/job-type',
+    {
+      method: 'GET',
+    },
+  ).then(({ data = [] }) => data.map(({ name, value }) => ({ label: name, value })));
+}
+
+/**
+ * 获取DI同步类型下拉列表
+ */
+export async function getDISyncMode(params: { jobType: string }) {
+  return request<Tresponse<{ name: string; value: string }[]>>(
+    '/api/p1/dev/jobs/di/meta/sync-mode',
+    {
+      method: 'GET',
+      params,
+    },
+  ).then(({ data = [] }) => data.map(({ name, value }) => ({ label: name, value })));
+}
+
+/**
+ * 新增DI
+ */
+export async function createDIJob(data: CreateDIJobDto) {
+  return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
+}
+
+/**
+ * 获取DI基础信息
+ */
+export async function getDIJobBasicInfo(jobId: number) {
+  return request<Tresponse<DIJobBasicInfo>>(`/api/p1/dev/jobs/di/${jobId}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 保存DI作业基础信息
+ */
+export async function saveDIJobBasicInfo(data: unknown) {
+  return request('/api/p1/dev/jobs/di', {
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
+ * 获取DI作业内容
+ */
+export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
+  return request(`/api/p1/dev/jobs/${jobId}/di/adapt/contents/${version}`);
+}
+
+/**
+ * 保存DI作业内容
+ */
+export async function saveDIJobContent(data: any) {
+  const { jobId } = data;
+  return request(`/api/p1/dev/jobs/${jobId}/di/contents`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 自动生成mergeSql
+ */
+export async function genMergeSQL(data: MergeSqlParamDto) {
+  return request(`/api/p1/dev/jobs/di/generate/merge-sql`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 获取 kafka topic 下拉列表
+ */
+export async function getKafkaTopics(params: { dataSourceId: number }) {
+  return request<Tresponse<string[]>>('/api/p1/das/kafka/topics', {
+    params,
+  });
+}
+
+/**
+ * 获取数据源的数据库
+ */
+export async function getDbNames(params: { dataSourceId: number }) {
+  return request<Tresponse<string[]>>('/api/p1/das/dbNames', {
+    params,
+  }).then(({ data }) => data);
+}
+
+/**
+ * 根据数据源和库名查询表名
+ */
+export async function getTableNames(params: { dataSourceId: number; dbName?: string }) {
+  return request<Tresponse<string[]>>('/api/p1/das/tableNames', { params }).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取表结构
+ */
+export async function getColumns(params: {
+  dataSourceId: number;
+  dbName?: string;
+  tableName: string;
+}) {
+  return request('/api/p1/das/columns', {
+    params,
   });
 }

@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, FC } from 'react';
 import { Button, Drawer, Form, Input, message, Select } from 'antd';
 import { useModel } from 'umi';
-import type { FC } from 'react';
-import styles from './index.less';
-
+import { useRequest } from 'ahooks';
+import _ from 'lodash';
 import Title from '@/components/Title';
-import { Task, TaskType } from '@/types/datadev';
-import { editTask, getEnumValues, getTaskTypes } from '@/services/datadev';
-import { TaskCategory } from '@/constants/datadev';
+import { DIJobBasicInfo } from '@/types/datadev';
+import { getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
+
+import styles from './index.less';
 
 interface DrawerBasicProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
   pane: IPane;
-  getTaskWrapped: () => Promise<void>;
+  refreshBasicInfo: () => Promise<unknown>;
 }
 
 const { Item } = Form;
@@ -24,36 +24,30 @@ const widthL = 400;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSelc = [{ required: true, message: '请选择' }];
 
-const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTaskWrapped }) => {
-  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
-  const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
+const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refreshBasicInfo }) => {
   const [form] = Form.useForm();
-
+  const { data: jobTypeOptions } = useRequest(getDIJobTypes);
+  const { data: syncModeOptions = [], run: getSyncModeOptions } = useRequest(getDISyncMode, {
+    manual: true,
+  });
+  const { data: layersRes } = useRequest(() => getEnumValues({ enumCode: 'dwLayerEnum:ENUM' }));
+  const layerOption =
+    layersRes?.data.map(({ enumValue, valueCode }) => ({
+      label: enumValue,
+      value: valueCode,
+    })) || [];
   const { replaceTab, getTreeWrapped } = useModel('datadev', (_) => ({
     replaceTab: _.replaceTab,
     getTreeWrapped: _.getTreeWrapped,
   }));
 
   useEffect(() => {
-    getTaskTypes({ catalog: TaskCategory.DI })
-      .then((res) => setTaskTypes(res.data))
-      .catch((err) => {});
-    getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
-      .then((res) => setLayers(res.data))
-      .catch((err) => {});
-  }, []);
-
-  useEffect(() => {
-    if (visible && data) {
-      const values = {
-        name: data.name,
-        dwLayerCode: data.dwLayerCode,
-        jobType: data.jobType,
-        creator: data.creator,
-        remark: data.remark,
-      };
-      form.setFieldsValue(values);
-    }
+    (async () => {
+      if (visible && data) {
+        await getSyncModeOptions({ jobType: data.jobType });
+        form.setFieldsValue(data);
+      }
+    })();
   }, [visible, data]);
 
   const onSave = () => {
@@ -62,7 +56,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
       ...data,
       ...values,
     };
-    editTask(params)
+    saveDIJobBasicInfo(params)
       .then((res) => {
         if (res.success) {
           message.success('保存成功');
@@ -74,9 +68,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
             pane,
           });
           onClose();
-          getTaskWrapped();
-        } else {
-          message.error(`保存失败: ${res.msg}`);
+          refreshBasicInfo();
         }
       })
       .catch((err) => {});
@@ -112,7 +104,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
             size="large"
             style={{ width: widthL }}
             placeholder="请选择"
-            options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
+            options={layerOption}
             disabled
           />
         </Item>
@@ -121,7 +113,16 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
             size="large"
             style={{ width: widthL }}
             placeholder="请输入"
-            options={taskTypes.map((_) => ({ label: _.name, value: _.code }))}
+            options={jobTypeOptions}
+            disabled
+          />
+        </Item>
+        <Item name="syncMode" label="同步类型" rules={ruleText}>
+          <Select
+            size="large"
+            style={{ width: widthL }}
+            placeholder="请选择"
+            options={syncModeOptions}
             disabled
           />
         </Item>

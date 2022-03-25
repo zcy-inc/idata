@@ -71,6 +71,11 @@
         <pagehelper.version>1.3.0</pagehelper.version>
         <validation.version>2.0.7.RELEASE</validation.version>
         <testcontainers.version>1.16.2</testcontainers.version>
+        <mail.version>1.4.1</mail.version>
+        <commons-pool2.version>2.10.0</commons-pool2.version>
+        <hutool-all.version>5.3.5</hutool-all.version>
+        <spring-boot-starter-actuator.version>3.0.3-RELEASE</spring-boot-starter-actuator.version>
+        <expression.version>5.3.14</expression.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -157,6 +162,11 @@
                 <version>${postgresql.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons-pool2.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
@@ -207,7 +217,22 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${mail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.gov.zcy.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot-starter-actuator.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.validator</groupId>
+                        <artifactId>hibernate-validator</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

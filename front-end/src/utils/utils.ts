@@ -240,3 +240,32 @@ export const getAllParentsKey = <T extends TreeNode>(
   }
   return arr;
 };
+
+export const getWorkspacePrefix = () => {
+  const workspaceString = sessionStorage.getItem('workspace');
+  let workspace = '';
+  if (workspaceString) {
+    try {
+      const workspaceJson = JSON.parse(workspaceString);
+      workspace = workspaceJson.urlPath || '';
+      if (workspaceJson.urlPath === 'zcy') {
+        workspace = '';
+      }
+    } catch (e) {
+      workspace = '';
+    }
+  }
+
+  return workspace;
+};
+
+/**
+ * combine request url
+ */
+export const getRequestUrl = (url: string) => {
+  const workspace = getWorkspacePrefix();
+  if (workspace) {
+    return `/${workspace}${url}`;
+  }
+  return url;
+};
