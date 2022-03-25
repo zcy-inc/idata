@@ -445,9 +445,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 // 根据规则定位真正的表
-                backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getSrcTable(), env));
                 DataSourceTypeEnum srcBfDsTypeEnum = dataSourceApi.getDataSourceDetail(bfJobContent.getSrcDataSourceId(), env).getDataSourceTypeEnum();
-                backFlowResponse.setSrcTable(EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, backFlowResponse.getDestTable(), env));
+                String bfSrcRawTable = backFlowResponse.getSrcTable();
+                String bfSrcTables = EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, bfSrcRawTable, env);
+                backFlowResponse.setSrcTable(bfSrcTables);
+                backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getDestTable(), env));
+                // 改写sql里的表
+                backFlowResponse.setSrcSql(backFlowResponse.getSrcSql().replaceAll(bfSrcRawTable, bfSrcTables));
 
                 return backFlowResponse;
             case DI_BATCH:
@@ -482,16 +486,20 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 是否支持query sql，不支持不返回给htool
                 DIRuleHelper.SupportQuerySqlParam diParam = new DIRuleHelper.SupportQuerySqlParam();
                 diParam.setDiJobContent(diJobContent);
-                diParam.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                diParam.setJobTypeEnum(JobTypeEnum.DI_BATCH);
                 diParam.setEngineTypeEnum(diResponse.getExecEngine());
                 if (!DIRuleHelper.supportQuerySQL(diParam)) {
                     diResponse.setDiQuery(null);
                 }
 
                 // 根据规则定位真正的表
-                diResponse.setSrcTables(EnvRuleHelper.handlerDbTableName(srcDiDsName, diResponse.getSrcTables(), env));
+                String diSrcRawTable = diResponse.getSrcTables();
+                String diSrcTables = EnvRuleHelper.handlerDbTableName(srcDiDsName, diSrcRawTable, env);
+                diResponse.setSrcTables(diSrcTables);
                 DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
                 diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
+                // 改写sql里的表
+                diResponse.setDiQuery(diResponse.getDiQuery().replaceAll(diSrcRawTable, diSrcTables));
 
                 return diResponse;
             case SQL_SPARK:
