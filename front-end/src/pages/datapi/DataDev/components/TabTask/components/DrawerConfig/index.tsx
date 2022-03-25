@@ -255,7 +255,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execCoresOptions}
                 />
               </Item>
-              <Item name="extProperties" label="自定义参数">
+              <Item name="extendProperties" label="自定义参数">
                 <MapInput style={{ width }} />
               </Item>
             </Form>
