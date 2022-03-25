@@ -44,34 +44,14 @@ mybatis:
 
 auth:
   jwt:
-    security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
+    security:
 
-pg:
-  datasource:
-    jdbcUrl: jdbc:postgresql://pgm-9dpnl7hlk20gh0hp1o.pg.rds.aliyuncs.com:3433/db_datapi?currentSchema=idata
-    username: staging
-    password: userOFstaging0726
-
-
-#livy:
-##  baseUrl: http://cdh4.cai-inc.com:8998
-#  baseUrl: http://172.29.108.194:8998
-#  sessionMax: 10
-#  dryRunPyFile: /tmp/shiyin/sqljob_dryrun.py
-
-#dolphin:
-#  baseUrl: http://ds.bigdata.cai-inc.com/dolphinscheduler
-#  token: ed3ed02005c030e955a76f7672747715
 
 hdfs:
-#  nameservices: nameservice1
-#  nn1: 172.29.108.184:8020
-#  nn2: 172.29.108.185:8020
   basePath: /tmp/shiyin/
-#  user: hdfs
 
-#yarn:
-#  resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
+
+
 
 dev:
   job:
@@ -90,7 +70,5 @@ pagehelper:
 zcy:
   is-cloud: ture # 是否是云端，ture：云端，false：本地化
 
-idataEtl:
-  checkToken: 89f30cec4f8fbc0ccdca079d025be0d4
 
 
