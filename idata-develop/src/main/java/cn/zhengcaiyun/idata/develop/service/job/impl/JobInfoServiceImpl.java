@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
@@ -34,7 +35,10 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
@@ -42,6 +46,8 @@ import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
@@ -49,7 +55,10 @@ import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,12 +87,8 @@ import static com.google.common.base.Preconditions.checkState;
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
 
-    @Autowired
     private DevJobInfoMyDao devJobInfoMyDao;
-
-    @Autowired
     private JobOutputMyDao jobOutputMyDao;
-
     private final JobInfoRepo jobInfoRepo;
     private final JobOutputRepo jobOutputRepo;
     private final DevJobUdfMyDao devJobUdfMyDao;
@@ -91,6 +96,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobDependenceRepo jobDependenceRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
+    private final SqlJobRepo sqlJobRepo;
     private final DAGRepo dagRepo;
     private final JobManager jobManager;
     private final JobScheduleManager jobScheduleManager;
@@ -101,14 +107,14 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DataSourceApi dataSourceApi;
 
     @Autowired
-    public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
+    public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao, JobOutputMyDao jobOutputMyDao, JobInfoRepo jobInfoRepo,
                               JobOutputRepo jobOutputRepo,
                               DevJobUdfMyDao devJobUdfMyDao,
                               JobPublishRecordMyDao jobPublishRecordMyDao,
                               JobDependenceRepo jobDependenceRepo,
                               JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobPublishRecordRepo jobPublishRecordRepo,
-                              DAGRepo dagRepo,
+                              SqlJobRepo sqlJobRepo, DAGRepo dagRepo,
                               JobManager jobManager,
                               JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
@@ -116,12 +122,15 @@ public class JobInfoServiceImpl implements JobInfoService {
                               OverhangJobLocalCache overhangJobLocalCache,
                               DevAccessService devAccessService,
                               DataSourceApi dataSourceApi) {
+        this.devJobInfoMyDao = devJobInfoMyDao;
+        this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
         this.jobOutputRepo = jobOutputRepo;
         this.devJobUdfMyDao = devJobUdfMyDao;
         this.jobPublishRecordMyDao = jobPublishRecordMyDao;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
+        this.sqlJobRepo = sqlJobRepo;
         this.dagRepo = dagRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
@@ -463,11 +472,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setDestWriteMode(WriteModeEnum.DiEnum.valueOf(diJobContent.getDestWriteMode()));
                 diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
 
-                String writeMode = diJobContent.getDestWriteMode();
-                if (StringUtils.equalsIgnoreCase(writeMode, WriteModeEnum.SqlEnum.UPSERT.name())) {
-                    // TODO 岛端不需要增量逻辑
-                }
-
                 // 根据规则定位真正的表
                 diResponse.setSrcTables(EnvRuleHelper.handlerDbTableName(srcDiDsName, diResponse.getSrcTables(), env));
                 DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
@@ -580,10 +584,65 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 return scriptResponse;
+            case SQL_FLINK:
+                return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
         }
+    }
+
+    private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto) {
+        // 封装sql_job_content
+        DevJobContentSql flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
+        boolean published = true;
+        if (Objects.isNull(flinkSqlContent)) {
+            // 没有发布版本，走调试逻辑，取最新一个版本
+            flinkSqlContent = sqlJobRepo.queryLatest(jobId).orElse(null);
+            published = false;
+        }
+        checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%d，环境:%s", jobId, env));
+        String jobExtendConfigs = flinkSqlContent.getExtendConfigs();
+        checkArgument(StringUtils.isNotBlank(jobExtendConfigs), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        SqlJobExtendConfigDto extendConfigDto = new Gson().fromJson(jobExtendConfigs, SqlJobExtendConfigDto.class);
+        FlinkSqlJobExtendConfigDto flinkExtConfig = extendConfigDto.getFlinkExtConfig();
+        checkArgument(Objects.nonNull(flinkExtConfig), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        checkArgument(!CollectionUtils.isEmpty(flinkExtConfig.getFlinkSinkConfigs()) && !CollectionUtils.isEmpty(flinkExtConfig.getFlinkSourceConfigs()), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+
+        List<DevJobUdf> udfList = new ArrayList<>();
+        String udfIds = flinkSqlContent.getUdfIds();
+        if (StringUtils.isNotBlank(udfIds)) {
+            List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
+            udfList = devJobUdfMyDao.getByIds(idList);
+        }
+
+        Map<String, String> privacyProps = Maps.newHashMap();
+        flinkExtConfig.getFlinkSourceConfigs().stream().forEach(dataSourceConfigDto -> {
+            DataSourceDto dataSourceDto = dataSourceApi.getDataSource(dataSourceConfigDto.getDataSourceId());
+            DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
+                    .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
+                    .findFirst().orElse(null);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+                    dataSourceDto.getType(), dbConfigDto));
+        });
+
+        flinkExtConfig.getFlinkSinkConfigs().stream().forEach(dataSourceConfigDto -> {
+            DataSourceDto dataSourceDto = dataSourceApi.getDataSource(dataSourceConfigDto.getDataSourceId());
+            DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
+                    .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
+                    .findFirst().orElse(null);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+                    dataSourceDto.getType(), dbConfigDto));
+        });
+
+        JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto flinkSqlResponse = new JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto(baseJobDetailDto);
+        flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
+        flinkSqlResponse.setUdfList(udfList);
+        flinkSqlResponse.setJobPrivacyProperties(privacyProps);
+        flinkSqlResponse.setPublished(published);
+        return flinkSqlResponse;
     }
 
     /**

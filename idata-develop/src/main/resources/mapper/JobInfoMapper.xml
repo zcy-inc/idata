@@ -17,7 +17,8 @@
                CONCAT(t2.exec_worker_mem, 'G') as executorMemory,
                t2.running_state as runningState,
                t2.exec_engine as execEngine,
-               0 as executeCore,
+               t2.exec_cores as executeCore,
+               t2.ext_properties as extProperties,
                t3.dest_table as targetTableName
         from
             (select * from dev_job_info where id = #{id}) as t1

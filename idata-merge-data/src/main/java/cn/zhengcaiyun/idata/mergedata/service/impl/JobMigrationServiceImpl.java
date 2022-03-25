@@ -369,7 +369,9 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         executeConfigDto.setExecWorkerMem(MoreObjects.firstNonNull(parseExecMem(configJson.getString("executor_memory")), 4));
         // 作业运行状态（环境级），0：暂停运行；1：恢复运行
         executeConfigDto.setRunningState(RunningStateEnum.pause.val);
-        // todo 设置 executor_cores
+        // 设置 executor_cores
+        executeConfigDto.setExecCores(configJson.getInteger("executor_cores"));
+
         // 抽数作业，引擎根据di.engine=SPARK判断；SQL作业及SQL回流（非doris）作业，引擎为SPARK；回流Doris，引擎为doris
         if ("DI".equalsIgnoreCase(oldType)) {
             String di_table_info = oldJobContent.getString("di_table_info");

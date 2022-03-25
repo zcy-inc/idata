@@ -18,6 +18,13 @@
 package cn.zhengcaiyun.idata.develop.util;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.util.DesUtil;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * @description:
@@ -70,6 +77,19 @@ public class FlinkSqlUtil {
         return "do not support " + dataSourceType + " now.\n";
     }
 
+    public static Map<String, String> generateProperties(String dataSourceType, String dataSourceUDCode,
+                                                         DataSourceTypeEnum sourceTypeEnum, DbConfigDto dbConfigDto) {
+        if (DataSourceTypeEnum.mysql.name().equals(dataSourceType)
+                || DataSourceTypeEnum.postgresql.name().equals(dataSourceType)) {
+            return generateJDBCProperties(dataSourceType, dataSourceUDCode, sourceTypeEnum, dbConfigDto);
+        }
+
+        if (DataSourceTypeEnum.kafka.name().equals(dataSourceType)) {
+            return generateKafkaProperties(dataSourceType, dataSourceUDCode, sourceTypeEnum, dbConfigDto);
+        }
+        throw new GeneralException("Flink do not support dataSourceType: " + dataSourceType);
+    }
+
     public static String generateJDBCTemplate(String dataSourceType, String dataSourceUDCode) {
         return String.format(MYSQL_TEMPLATE, generateJDBCKeyWord(dataSourceType, dataSourceUDCode));
     }
@@ -82,6 +102,19 @@ public class FlinkSqlUtil {
         return keywords;
     }
 
+    public static Map<String, String> generateJDBCProperties(String dataSourceType, String dataSourceUDCode,
+                                                             DataSourceTypeEnum sourceTypeEnum, DbConfigDto dbConfigDto) {
+        Map<String, String> props = Maps.newHashMap();
+        String urlKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "url" + "}";
+        String jdbcUrlVal = String.format("jdbc:%s://%s:%d/%s", sourceTypeEnum.name(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbConfigDto.getDbName());
+        props.put(urlKey, DesUtil.encrypt(jdbcUrlVal));
+        String nameKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "username" + "}";
+        props.put(nameKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getUsername())));
+        String pwdKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "password" + "}";
+        props.put(pwdKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getPassword())));
+        return props;
+    }
+
     public static String generateKafkaTemplate(String dataSourceType, String dataSourceUDCode) {
         return String.format(KAFKA_TEMPLATE, generateKafkaKeyWord(dataSourceType, dataSourceUDCode));
     }
@@ -90,5 +123,14 @@ public class FlinkSqlUtil {
         String[] keywords = new String[1];
         keywords[0] = dataSourceType + "." + dataSourceUDCode + "." + "servers";
         return keywords;
+    }
+
+    public static Map<String, String> generateKafkaProperties(String dataSourceType, String dataSourceUDCode,
+                                                              DataSourceTypeEnum sourceTypeEnum, DbConfigDto dbConfigDto) {
+        Map<String, String> props = Maps.newHashMap();
+        String serversKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "servers" + "}";
+        String serversVal = dbConfigDto.getHost();
+        props.put(serversKey, DesUtil.encrypt(serversVal));
+        return props;
     }
 }
