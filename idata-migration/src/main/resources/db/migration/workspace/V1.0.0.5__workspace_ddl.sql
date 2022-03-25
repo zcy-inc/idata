@@ -1,5 +1,5 @@
 -- auto-generated definition
-create table workspace
+create table if not exists workspace
 (
     id          bigint auto_increment
         primary key,
