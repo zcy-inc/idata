@@ -46,17 +46,8 @@ auth:
   jwt:
     security:
 
-
 hdfs:
   basePath: /tmp/shiyin/
-
-
-
-
-dev:
-  job:
-    publish:
-      whitelist: 熠然,大时
 
 pagehelper:
   helperDialect: mysql
