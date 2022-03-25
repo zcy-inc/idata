@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.mergedata.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
@@ -583,14 +584,19 @@ public class JobMigrateManager {
             return null;
         }
 
+        List<KeyValuePair<String, String>> destPropertyMap = Lists.newArrayList();
         Map<String, String> destPropMap = Maps.newHashMap();
         Splitter.on(",").trimResults().omitEmptyStrings()
                 .splitToList(old_introduce_condition)
                 .stream().forEach(temp_condition -> {
                     List<String> cond_array = Splitter.on("=").trimResults().omitEmptyStrings().splitToList(temp_condition);
                     destPropMap.put(cond_array.get(0), cond_array.get(1));
+                    KeyValuePair<String, String> keyValuePair = new KeyValuePair<>();
+                    keyValuePair.setKey(cond_array.get(0));
+                    keyValuePair.setValue(cond_array.get(1));
+                    destPropertyMap.add(keyValuePair);
                 });
-        contentDto.setDestPropertyMap(destPropMap);
+        contentDto.setDestPropertyMap(destPropertyMap);
 
         String old_source_table = destPropMap.get("sourceTable");
         String old_introduce_columns = migrationDto.getOldJobConfig().getString("introduce_columns");
