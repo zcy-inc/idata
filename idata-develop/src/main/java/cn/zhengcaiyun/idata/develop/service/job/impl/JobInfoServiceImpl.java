@@ -57,6 +57,7 @@ import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -438,8 +439,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                     backFlowResponse.setDestColumnNames(null);
                 }
                 // 是否支持query sql，不支持不返回给htool
-                DataSourceTypeEnum srcDataSourceTypeEnum = DataSourceTypeEnum.valueOf(bfJobContent.getSrcDataSourceType());
-                if (!DIRuleHelper.supportQuerySQL(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine(), srcDataSourceTypeEnum)) {
+                DIRuleHelper.SupportQuerySqlParam bfParam = new DIRuleHelper.SupportQuerySqlParam();
+                bfParam.setDiJobContent(bfJobContent);
+                bfParam.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                bfParam.setEngineTypeEnum(backFlowResponse.getExecEngine());
+                if (!DIRuleHelper.supportQuerySQL(bfParam)) {
                     backFlowResponse.setSrcSql(null);
                 }
 
@@ -455,10 +459,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 封装di_job_content
                 DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
                 checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
-                BeanUtils.copyProperties(diJobContent, diResponse);
-                if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
-                    diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
-                }
+
+                MyBeanUtils.copyProperties(diJobContent, diResponse);
 
                 //兼容数据库数据错误
                 if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
@@ -476,11 +478,18 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcDbName(srcSourceDetail.getDbName());
                 diResponse.setSrcDriverType(srcSourceDetail.getDriverTypeEnum());
 
-                diResponse.setDiQuery(generateSrcQuery(diResponse.getSrcCols(), diResponse.getSrcReadFilter(), diResponse.getSrcTables(), diResponse.getSrcDbName()));
-
                 // 字段类型转换
                 diResponse.setDestWriteMode(WriteModeEnum.DiEnum.valueOf(diJobContent.getDestWriteMode()));
                 diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
+
+                // 是否支持query sql，不支持不返回给htool
+                DIRuleHelper.SupportQuerySqlParam diParam = new DIRuleHelper.SupportQuerySqlParam();
+                diParam.setDiJobContent(diJobContent);
+                diParam.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                diParam.setEngineTypeEnum(diResponse.getExecEngine());
+                if (!DIRuleHelper.supportQuerySQL(diParam)) {
+                    diResponse.setDiQuery(null);
+                }
 
                 // 根据规则定位真正的表
                 diResponse.setSrcTables(EnvRuleHelper.handlerDbTableName(srcDiDsName, diResponse.getSrcTables(), env));

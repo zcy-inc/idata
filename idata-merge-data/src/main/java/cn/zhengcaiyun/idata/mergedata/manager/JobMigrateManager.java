@@ -590,7 +590,7 @@ public class JobMigrateManager {
                     List<String> cond_array = Splitter.on("=").trimResults().omitEmptyStrings().splitToList(temp_condition);
                     destPropMap.put(cond_array.get(0), cond_array.get(1));
                 });
-        contentDto.setDestPropertyMap(destPropMap);
+//        contentDto.setDestPropertyMap(destPropMap);
 
         String old_source_table = destPropMap.get("sourceTable");
         String old_introduce_columns = migrationDto.getOldJobConfig().getString("introduce_columns");

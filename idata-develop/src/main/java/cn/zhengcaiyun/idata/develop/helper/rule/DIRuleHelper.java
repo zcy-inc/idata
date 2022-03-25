@@ -8,8 +8,10 @@ import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.BACK_FLOW;
+import static cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum.DI_BATCH;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -39,7 +43,7 @@ public class DIRuleHelper {
         checkArgument(Objects.nonNull(contentDto.getSrcDataSourceId()), "来源数据源编号为空");
         JobTypeEnum jobType = contentDto.getJobType();
 
-        if (jobType == JobTypeEnum.DI_BATCH || jobType == JobTypeEnum.DI_STREAM) {
+        if (jobType == DI_BATCH || jobType == JobTypeEnum.DI_STREAM) {
             checkArgument(StringUtils.isNotBlank(contentDto.getSrcReadMode()), "读取模式为空");
         }
         String destDataSourceType = contentDto.getDestDataSourceType();
@@ -61,7 +65,7 @@ public class DIRuleHelper {
 
         DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
         // 回流 + 目标源为doris 不构建sql
-        if (JobTypeEnum.BACK_FLOW == jobType && DataSourceTypeEnum.doris == dataSourceTypeEnum) {
+        if (BACK_FLOW == jobType && DataSourceTypeEnum.doris == dataSourceTypeEnum) {
             if (StringUtils.isNotEmpty(contentDto.getSrcReadFilter())) {
                 throw new GeneralException("回流到doris，不支持过滤条件");
             }
@@ -100,19 +104,6 @@ public class DIRuleHelper {
             return false;
         }
 
-        // 设置了过滤条件
-        if (StringUtils.isNotEmpty(srcReadFilter)) {
-            return true;
-        }
-
-        switch (DiConfigModeEnum.getByValue(configMode)) {
-            case SCRIPT:
-                break;
-            case VISIBLE:
-                // 是否设置了mappingSql
-                long mappingCount = srcCols.stream().filter(e -> StringUtils.isNotEmpty(e.getMappingSql())).count();
-                return mappingCount > 0;
-        }
         return true;
     }
 
@@ -223,11 +214,24 @@ public class DIRuleHelper {
 
     /**
      * 作业类型和执行引擎组合是否支持query sql方式
-     * @param jobTypeEnum 任务类型
-     * @param engineTypeEnum 执行引擎
      * @return
      */
-    public static boolean supportQuerySQL(JobTypeEnum jobTypeEnum, EngineTypeEnum engineTypeEnum, DataSourceTypeEnum srcDataSourceTypeEnum) {
+    public static boolean supportQuerySQL(SupportQuerySqlParam param) {
+        JobTypeEnum jobTypeEnum = param.getJobTypeEnum();
+        EngineTypeEnum engineTypeEnum = param.getEngineTypeEnum();
+
+        DataSourceTypeEnum srcDataSourceTypeEnum = null;
+        String srcReadFilter = null;
+        Integer configMode = null;
+        String srcColumns = null;
+        DIJobContent diJobContent = param.getDiJobContent();
+        if (diJobContent != null) {
+            srcDataSourceTypeEnum = DataSourceTypeEnum.valueOf(diJobContent.getSrcDataSourceType());
+            srcReadFilter = diJobContent.getSrcReadFilter();
+            configMode = diJobContent.getConfigMode();
+            srcColumns = diJobContent.getSrcColumns();
+        }
+
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 if (EngineTypeEnum.SQOOP == engineTypeEnum) {
@@ -236,6 +240,27 @@ public class DIRuleHelper {
                 if (srcDataSourceTypeEnum == DataSourceTypeEnum.doris) {
                     return false;
                 }
+                break;
+            case DI_BATCH:
+            case DI_STREAM:
+                if (EngineTypeEnum.SQOOP == engineTypeEnum) {
+                    // 设置了过滤条件
+                    if (StringUtils.isNotEmpty(srcReadFilter)) {
+                        return true;
+                    }
+
+                    switch (DiConfigModeEnum.getByValue(configMode)) {
+                        case SCRIPT:
+                            return true;
+                        case VISIBLE:
+                            // 是否设置了mappingSql
+                            List<MappingColumnDto> srcCols = JSON.parseArray(srcColumns, MappingColumnDto.class);
+                            long aliasMappingCount = srcCols.stream().filter(e -> StringUtils.isNotEmpty(e.getMappingSql())).count();
+                            return aliasMappingCount > 0;
+                    }
+                    return false;
+                }
+            default:
                 break;
         }
         return true;
@@ -274,5 +299,38 @@ public class DIRuleHelper {
                 return true;
         }
         return true;
+    }
+
+    public static class SupportQuerySqlParam {
+        // 任务类型
+        private JobTypeEnum jobTypeEnum;
+        // 执行引擎
+        private EngineTypeEnum engineTypeEnum;
+        // 集成/回流实体数据
+        DIJobContent diJobContent;
+
+        public JobTypeEnum getJobTypeEnum() {
+            return jobTypeEnum;
+        }
+
+        public void setJobTypeEnum(JobTypeEnum jobTypeEnum) {
+            this.jobTypeEnum = jobTypeEnum;
+        }
+
+        public EngineTypeEnum getEngineTypeEnum() {
+            return engineTypeEnum;
+        }
+
+        public void setEngineTypeEnum(EngineTypeEnum engineTypeEnum) {
+            this.engineTypeEnum = engineTypeEnum;
+        }
+
+        public DIJobContent getDiJobContent() {
+            return diJobContent;
+        }
+
+        public void setDiJobContent(DIJobContent diJobContent) {
+            this.diJobContent = diJobContent;
+        }
     }
 }
