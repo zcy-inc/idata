@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.portal.model.response.job;
 
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
@@ -189,7 +190,7 @@ public class DIJobContentResponse {
     /**
      *   目标库中间件的内置属性
      */
-    private Map<String, String> destPropertyMap;
+    private List<KeyValuePair<String, String>> destPropertyMap;
 
 
     public String getSrcDbName() {
@@ -464,11 +465,11 @@ public class DIJobContentResponse {
         this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
     }
 
-    public Map<String, String> getDestPropertyMap() {
+    public List<KeyValuePair<String, String>> getDestPropertyMap() {
         return destPropertyMap;
     }
 
-    public void setDestPropertyMap(Map<String, String> destPropertyMap) {
+    public void setDestPropertyMap(List<KeyValuePair<String, String>> destPropertyMap) {
         this.destPropertyMap = destPropertyMap;
     }
 

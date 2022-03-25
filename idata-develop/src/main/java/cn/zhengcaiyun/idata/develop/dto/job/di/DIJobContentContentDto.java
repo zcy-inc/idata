@@ -1,10 +1,16 @@
 package cn.zhengcaiyun.idata.develop.dto.job.di;
 
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Splitter;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -175,9 +181,9 @@ public class DIJobContentContentDto extends JobContentBaseDto {
     private ScriptMergeSqlParamDto scriptMergeSqlParamDto;
 
     /**
-     * 目标库中间件的内置属性
+     *   目标库中间件的内置属性
      */
-    private Map<String, String> destPropertyMap;
+    private List<KeyValuePair<String, String>> destPropertyMap;
 
     public String getSrcDbName() {
         return srcDbName;
@@ -419,11 +425,11 @@ public class DIJobContentContentDto extends JobContentBaseDto {
         this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
     }
 
-    public Map<String, String> getDestPropertyMap() {
+    public List<KeyValuePair<String, String>> getDestPropertyMap() {
         return destPropertyMap;
     }
 
-    public void setDestPropertyMap(Map<String, String> destPropertyMap) {
+    public void setDestPropertyMap(List<KeyValuePair<String, String>> destPropertyMap) {
         this.destPropertyMap = destPropertyMap;
     }
 
@@ -449,7 +455,9 @@ public class DIJobContentContentDto extends JobContentBaseDto {
             dto.setScriptMergeSqlParamDto(JSON.parseObject(content.getScriptMergeSqlParam(), ScriptMergeSqlParamDto.class));
         }
         if (StringUtils.isNotEmpty(content.getDestProperties())) {
-            dto.setDestPropertyMap(JSON.parseObject(content.getDestProperties(), Map.class));
+            List<KeyValuePair<String, String>> mapList = new Gson().fromJson(content.getDestProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            dto.setDestPropertyMap(mapList);
         }
         dto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
 

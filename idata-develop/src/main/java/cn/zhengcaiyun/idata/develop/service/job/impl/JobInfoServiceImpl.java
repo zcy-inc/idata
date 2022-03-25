@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
@@ -59,6 +60,10 @@ import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -414,7 +419,11 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 String properties = bfJobContent.getDestProperties();
                 if (StringUtils.isNotBlank(properties)) {
-                    backFlowResponse.setDestPropMap(JSON.parseObject(properties, Map.class));
+                    List<KeyValuePair<String, String>> mapList = new Gson().fromJson(properties, new TypeToken<List<KeyValuePair<String, String>>>() {
+                    }.getType());
+                    Map<String, String> map = new HashMap<>();
+                    mapList.forEach(e -> map.put(e.getKey(), e.getValue()));
+                    backFlowResponse.setDestPropMap(map);
                 }
 
                 // 封装连接信息
@@ -429,7 +438,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                     backFlowResponse.setDestColumnNames(null);
                 }
                 // 是否支持query sql，不支持不返回给htool
-                if (!DIRuleHelper.supportQuerySQL(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                DataSourceTypeEnum srcDataSourceTypeEnum = DataSourceTypeEnum.valueOf(bfJobContent.getSrcDataSourceType());
+                if (!DIRuleHelper.supportQuerySQL(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine(), srcDataSourceTypeEnum)) {
                     backFlowResponse.setSrcSql(null);
                 }
 

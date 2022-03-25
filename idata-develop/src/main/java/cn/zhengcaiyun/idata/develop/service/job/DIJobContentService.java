@@ -35,4 +35,11 @@ public interface DIJobContentService {
 
     DIJobContentContentDto get(Long jobId, Integer version);
 
+    /**
+     * 封装query和mergesql
+     * @param contentDto
+     * @param jobType
+     */
+    void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType);
+
 }

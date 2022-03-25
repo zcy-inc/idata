@@ -113,7 +113,7 @@ public class DIRuleHelper {
                 long mappingCount = srcCols.stream().filter(e -> StringUtils.isNotEmpty(e.getMappingSql())).count();
                 return mappingCount > 0;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -227,15 +227,36 @@ public class DIRuleHelper {
      * @param engineTypeEnum 执行引擎
      * @return
      */
-    public static boolean supportQuerySQL(JobTypeEnum jobTypeEnum, EngineTypeEnum engineTypeEnum) {
+    public static boolean supportQuerySQL(JobTypeEnum jobTypeEnum, EngineTypeEnum engineTypeEnum, DataSourceTypeEnum srcDataSourceTypeEnum) {
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 if (EngineTypeEnum.SQOOP == engineTypeEnum) {
                     return false;
                 }
-                return true;
+                if (srcDataSourceTypeEnum == DataSourceTypeEnum.doris) {
+                    return false;
+                }
+                break;
         }
         return true;
+    }
+
+    /**
+     * 作业类型和执行引擎组合是否必须带有query
+     * @param jobTypeEnum 任务类型
+     * @param engineTypeEnum 执行引擎
+     * @return
+     */
+    public static boolean mustQuerySQL(JobTypeEnum jobTypeEnum, EngineTypeEnum engineTypeEnum) {
+        switch (jobTypeEnum) {
+            case DI_BATCH:
+            case DI_STREAM:
+                if (EngineTypeEnum.SPARK == engineTypeEnum) {
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     /**

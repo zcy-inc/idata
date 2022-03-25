@@ -128,7 +128,8 @@ public class DIJobContentServiceImpl implements DIJobContentService {
      *
      * @param contentDto
      */
-    private void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
+    @Override
+    public void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType) {
         Integer configMode = contentDto.getConfigMode();
         String srcReadFilter = contentDto.getSrcReadFilter();
         List<MappingColumnDto> srcCols = contentDto.getSrcCols();
@@ -142,7 +143,6 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         String srcTables = contentDto.getSrcTables();
         switch (DiConfigModeEnum.getByValue(configMode)) {
             case VISIBLE:
-
                 // 设置SrcQuery
                 if (buildQuery) {
                     String srcQuery = DIRuleHelper.generateSrcQuery(srcCols, srcReadFilter, srcTables);
