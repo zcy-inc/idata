@@ -97,6 +97,13 @@ public class DevJobUdf {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.udf_sample")
     private String udfSample;
 
+    /**
+     * Database Column Remarks:
+     *   java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）|沐泽|2019-12-19
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
+    private String sourceName;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.id")
     public Long getId() {
         return id;
@@ -255,5 +262,15 @@ public class DevJobUdf {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.udf_sample")
     public void setUdfSample(String udfSample) {
         this.udfSample = udfSample;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
     }
 }

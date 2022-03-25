@@ -23,10 +23,10 @@ public class EnvRuleHelper {
         }
 
         if (StringUtils.equalsIgnoreCase(dataSourceName, DataSourceTypeEnum.doris.name())) {
-            return env + rawTable;
+            return env + "_" + rawTable;
         }
         if (StringUtils.equalsIgnoreCase(dataSourceName, DataSourceTypeEnum.hive.name())) {
-            return env + rawTable;
+            return env + "_" + rawTable;
         }
         return rawTable;
     }
