@@ -61,9 +61,6 @@ import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -659,8 +656,18 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto flinkSqlResponse = new JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto(baseJobDetailDto);
         flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
         flinkSqlResponse.setUdfList(udfList);
-        flinkSqlResponse.setJobPrivacyProperties(privacyProps);
+        flinkSqlResponse.setJobPrivacyProp(privacyProps);
+        Map<String, String> confProp = Maps.newHashMap();
+        if (StringUtils.isNotBlank(baseJobDetailDto.getExtProperties())) {
+            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(baseJobDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            extendProperties.stream()
+                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
+        }
+        flinkSqlResponse.setConfProp(confProp);
         flinkSqlResponse.setPublished(published);
+        flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
+        flinkSqlResponse.setFlinkVersion(confProp.getOrDefault("Flink-version", "flink-1.10"));
         return flinkSqlResponse;
     }
 
