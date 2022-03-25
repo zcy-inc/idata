@@ -156,6 +156,11 @@ public class MergeDataController {
         if (CollectionUtils.isEmpty(resultDtoList))
             return;
 
+        if (StringUtils.isNotBlank(env)) {
+            resultDtoList.stream()
+                    .forEach(migrateResultDto -> migrateResultDto.setMigrateType(env + "-" + migrateResultDto.getMigrateType()));
+        }
+
         SXSSFWorkbook workbook = downloadAsExcel(resultDtoList);
         String fileName = "merge_failed_data_" + System.currentTimeMillis();
         try {
