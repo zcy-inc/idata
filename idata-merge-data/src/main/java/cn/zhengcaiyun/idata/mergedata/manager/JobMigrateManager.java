@@ -36,6 +36,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
@@ -275,6 +276,12 @@ public class JobMigrateManager {
         contentDto.setDestAfterWrite("");
         // 数据来源-表
         contentDto.setSrcTables(old_source_table);
+        if (old_source_table.indexOf("[") > 0
+                || old_source_table.indexOf(".") > 0) {
+            DITableFashionConfig tableFashionConfig = new DITableFashionConfig();
+            tableFashionConfig.setInputMode("E");
+            contentDto.setSrcTableConfig(tableFashionConfig);
+        }
 
         // 根据旧数据确定使用 可视化 或 脚本模式
         String di_table_info = oldJobContent.getString("di_table_info");
