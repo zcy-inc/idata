@@ -5,11 +5,11 @@ import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @description:
@@ -252,7 +252,7 @@ public class JobExecuteConfigDto extends BaseDto {
         JobExecuteConfig config = new JobExecuteConfig();
         BeanUtils.copyProperties(this, config);
 
-        if (ObjectUtils.isNotEmpty(this.extendProperties)) {
+        if (!Objects.isNull(this.extendProperties)) {
             config.setExtProperties(new Gson().toJson(this.extendProperties));
         }
         return config;
