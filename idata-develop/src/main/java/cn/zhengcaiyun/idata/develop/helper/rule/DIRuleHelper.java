@@ -221,15 +221,15 @@ public class DIRuleHelper {
         EngineTypeEnum engineTypeEnum = param.getEngineTypeEnum();
 
         DataSourceTypeEnum srcDataSourceTypeEnum = null;
-        String srcReadFilter = null;
         Integer configMode = null;
         String srcColumns = null;
+        String scriptSelectColumns = null;
         DIJobContent diJobContent = param.getDiJobContent();
         if (diJobContent != null) {
             srcDataSourceTypeEnum = DataSourceTypeEnum.valueOf(diJobContent.getSrcDataSourceType());
-            srcReadFilter = diJobContent.getSrcReadFilter();
             configMode = diJobContent.getConfigMode();
             srcColumns = diJobContent.getSrcColumns();
+            scriptSelectColumns = diJobContent.getScriptSelectColumns();
         }
 
         switch (jobTypeEnum) {
@@ -244,19 +244,20 @@ public class DIRuleHelper {
             case DI_BATCH:
             case DI_STREAM:
                 if (EngineTypeEnum.SQOOP == engineTypeEnum) {
-                    // 设置了过滤条件
-                    if (StringUtils.isNotEmpty(srcReadFilter)) {
-                        return true;
-                    }
-
                     switch (DiConfigModeEnum.getByValue(configMode)) {
                         case SCRIPT:
-                            return true;
+                            if (StringUtils.isNotEmpty(scriptSelectColumns)) {
+                                // 是否带函数，用括号判断
+                                long aliseCount =  Arrays.stream(scriptSelectColumns.split(",")).filter(e -> StringUtils.isNotEmpty(e) && e.contains("(") && e.contains(")")).count();
+                                return aliseCount > 0;
+                            }
                         case VISIBLE:
-                            // 是否设置了mappingSql
-                            List<MappingColumnDto> srcCols = JSON.parseArray(srcColumns, MappingColumnDto.class);
-                            long aliasMappingCount = srcCols.stream().filter(e -> StringUtils.isNotEmpty(e.getMappingSql())).count();
-                            return aliasMappingCount > 0;
+                            if (StringUtils.isNotEmpty(srcColumns)) {
+                                // 是否设置了mappingSql
+                                List<MappingColumnDto> srcCols = JSON.parseArray(srcColumns, MappingColumnDto.class);
+                                long aliasMappingCount = srcCols.stream().filter(e -> StringUtils.isNotEmpty(e.getMappingSql())).count();
+                                return aliasMappingCount > 0;
+                            }
                     }
                     return false;
                 }
