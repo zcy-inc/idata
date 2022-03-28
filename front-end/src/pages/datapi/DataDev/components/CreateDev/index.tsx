@@ -100,7 +100,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           options={taskTypes.map((_) => ({ label: _, value: _ }))}
           onChange={(v) => {
             setTaskType(v);
-            if (v === TaskCategory.SPARK || v === TaskCategory.SCRIPT) {
+            if ([TaskCategory.SCRIPT, TaskCategory.SPARK, TaskCategory.SQL].includes(v)) {
               getDataDevTypesWrapped(v);
             }
           }}
@@ -117,7 +117,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
             size="large"
             style={{ width }}
             placeholder="请选择"
-            options={languages.map((_) => ({ label: _.language, value: _.code }))}
+            options={languages.map((_) => ({ label: _.code, value: _.code }))}
             showSearch
             filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
           />
