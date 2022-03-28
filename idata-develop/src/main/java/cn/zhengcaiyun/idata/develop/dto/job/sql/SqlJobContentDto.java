@@ -16,11 +16,11 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job.sql;
 
-import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Objects;
 
@@ -69,15 +69,17 @@ public class SqlJobContentDto extends JobContentBaseDto {
     }
 
     public DevJobContentSql toModel() {
-        DevJobContentSql jobContentSql = PojoUtil.copyOne(this, DevJobContentSql.class);
+        DevJobContentSql contentSql = new DevJobContentSql();
+        BeanUtils.copyProperties(this, contentSql);
         if (!Objects.isNull(this.extConfig)) {
-            jobContentSql.setExtendConfigs(new Gson().toJson(this.extConfig));
+            contentSql.setExtendConfigs(new Gson().toJson(this.extConfig));
         }
-        return jobContentSql;
+        return contentSql;
     }
 
     public static SqlJobContentDto from(DevJobContentSql contentSql) {
-        SqlJobContentDto contentDto = PojoUtil.copyOne(contentSql, SqlJobContentDto.class);
+        SqlJobContentDto contentDto = new SqlJobContentDto();
+        BeanUtils.copyProperties(contentSql, contentDto);
         if (StringUtils.isNotBlank(contentSql.getExtendConfigs())) {
             contentDto.setExtConfig(new Gson().fromJson(contentSql.getExtendConfigs(), SqlJobExtendConfigDto.class));
         }

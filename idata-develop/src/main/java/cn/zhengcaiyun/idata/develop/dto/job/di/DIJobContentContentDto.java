@@ -3,11 +3,8 @@ package cn.zhengcaiyun.idata.develop.dto.job.di;
 import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Splitter;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -181,7 +177,7 @@ public class DIJobContentContentDto extends JobContentBaseDto {
     private ScriptMergeSqlParamDto scriptMergeSqlParamDto;
 
     /**
-     *   目标库中间件的内置属性
+     * 目标库中间件的内置属性
      */
     private List<KeyValuePair<String, String>> destPropertyMap;
 
@@ -509,17 +505,18 @@ public class DIJobContentContentDto extends JobContentBaseDto {
             content.setDestProperties("");
         }
 
-        if (Objects.isNull(this.srcTableConfig)
-                || !Objects.equals("E", this.srcTableConfig.getInputMode())
-                || Objects.isNull(this.srcTableConfig.getTableIdxBegin())
-                || Objects.isNull(this.srcTableConfig.getTableIdxEnd())) {
-            if (StringUtils.isBlank(content.getSrcTables())) {
-                content.setSrcTables(this.srcTableConfig.getRawTable());
+        if (!Objects.isNull(this.srcTableConfig)) {
+            if (!Objects.equals("E", this.srcTableConfig.getInputMode())
+                    || Objects.isNull(this.srcTableConfig.getTableIdxBegin())
+                    || Objects.isNull(this.srcTableConfig.getTableIdxEnd())) {
+                if (StringUtils.isBlank(content.getSrcTables())) {
+                    content.setSrcTables(this.srcTableConfig.getRawTable());
+                }
+            } else {
+                content.setSrcTables(this.srcTableConfig.getRawTable() + "[" + this.srcTableConfig.getTableIdxBegin() + "-" + this.srcTableConfig.getTableIdxEnd() + "]");
             }
-        } else {
-            content.setSrcTables(this.srcTableConfig.getRawTable() + "[" + this.srcTableConfig.getTableIdxBegin() + "-" + this.srcTableConfig.getTableIdxEnd() + "]");
+            content.setSrcTablesFashion(this.srcTableConfig.getInputMode());
         }
-        content.setSrcTablesFashion(this.srcTableConfig.getInputMode());
 
         return content;
     }
