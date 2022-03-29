@@ -25,7 +25,10 @@ import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
-import cn.zhengcaiyun.idata.develop.constant.enums.*;
+import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.WriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -204,7 +207,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private void changeDag(Long jobId, JobExecuteConfig executeConfig, JobExecuteConfig existExecuteConfig, String environment, Operator operator) {
         unbindDag(jobId, existExecuteConfig.getSchDagId(), environment, operator);
-        bindDag(jobId, executeConfig.getSchDagId(), environment, false, operator);
+        Boolean isFirstBind = Boolean.FALSE;
+        if (Objects.isNull(existExecuteConfig.getSchDagId()) || existExecuteConfig.getSchDagId() <= 0) {
+            // 作业数据迁移时，dag id 默认为0，此时切换DAG需要新建DS任务
+            isFirstBind = Boolean.TRUE;
+        }
+        bindDag(jobId, executeConfig.getSchDagId(), environment, isFirstBind, operator);
     }
 
     private void bindDag(Long jobId, Long bindDagId, String environment, Boolean isFirstBind, Operator operator) {
@@ -214,6 +222,10 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     private void unbindDag(Long jobId, Long unbindDagId, String environment, Operator operator) {
+        if (Objects.isNull(unbindDagId) || unbindDagId <= 0) {
+            // 作业数据迁移时，dag id 默认为0，此时切换DAG不需要解绑
+            return;
+        }
         // 发布job解绑DAG事件
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_UNBIND_DAG, environment, "{\"unbindDagId\":" + unbindDagId + "}", operator);
         jobEventPublisher.whenUnBindDag(eventLog, unbindDagId);
