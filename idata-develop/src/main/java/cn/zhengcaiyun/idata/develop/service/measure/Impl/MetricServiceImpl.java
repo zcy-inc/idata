@@ -237,8 +237,8 @@ public class MetricServiceImpl implements MetricService {
             metricInfoList.removeAll(metricAttributeKeyList);
             throw new IllegalArgumentException(String.join(",", metricInfoList) + "不能为空");
         }
-        checkArgument(metric.getSpecialAttribute() != null && metric.getSpecialAttribute().getCalculable() != null,
-                "是否可累加不能为空");
+        checkArgument(StringUtils.isNotEmpty(metric.getSpecialAttribute().getCalculableType()), "是否可累加不能为空");
+        CalculableTypeEnum.valueOf(metric.getSpecialAttribute().getCalculableType());
         // 校验指标来源
         checkArgument(metric.getMeasureLabels() != null && metric.getMeasureLabels().size() > 0, "指标来源不能为空");
         List<LabelDto> metricLabelList = metric.getMeasureLabels();

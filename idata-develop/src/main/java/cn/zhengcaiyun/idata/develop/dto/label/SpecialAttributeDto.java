@@ -36,7 +36,8 @@ public class SpecialAttributeDto {
     private String atomicMetricCode;
     private String atomicMetricName;
     private String complexMetricFormula;
-    private Boolean isCalculable;
+    @ApiModelProperty(value = "ACCUMULATE | HALF_ACCUMULATE | NON_ACCUMULATE")
+    private String CalculableType;
     private List<ModifierDto> modifiers;
     private List<Long> dimTableIds;
 
@@ -97,12 +98,12 @@ public class SpecialAttributeDto {
         this.aggregate = aggregate;
     }
 
-    public Boolean getCalculable() {
-        return isCalculable;
+    public String getCalculableType() {
+        return CalculableType;
     }
 
-    public void setCalculable(Boolean calculable) {
-        isCalculable = calculable;
+    public void setCalculableType(String calculableType) {
+        CalculableType = calculableType;
     }
 
     public List<Long> getDimTableIds() {
