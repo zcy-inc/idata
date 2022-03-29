@@ -25,9 +25,7 @@ import com.alibaba.fastjson.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,18 +37,19 @@ import java.util.stream.Collectors;
 @Service
 public class ZcyService {
 
-//    @Value("${zcy.idata.baseUri}")
-//    private String ZCY_IDATA_BASE_URI;
-//
-//    public List<FolderTreeNodeDto> getFolders(ResourceTypeEnum resourceType) {
-//        Map<String, String> queryParamMap = new HashMap<>();
-//        queryParamMap.put("resourceType", resourceType.name());
-//        return HttpClientUtil.executeHttpRequest(new HttpInput().setMethod("GET").setServerName("ZCY IData")
-//                        .setQueryParamMap(queryParamMap)
-//                        .setUri(ZCY_IDATA_BASE_URI + "/outbound/folders"),
-//                new TypeReference<RestResult<List<FolderTreeNodeDto>>>(){}).getData()
-//                .stream().peek(folderTreeNode -> folderTreeNode.setType(resourceType.name()))
-//                .collect(Collectors.toList());
-//    }
+    @Value("${zcy.idata.baseUri:#{null}}")
+    private String ZCY_IDATA_BASE_URI;
+
+    public List<FolderTreeNodeDto> getFolders(ResourceTypeEnum resourceType) {
+        if (ZCY_IDATA_BASE_URI == null) return new ArrayList<>();
+        Map<String, String> queryParamMap = new HashMap<>();
+        queryParamMap.put("resourceType", resourceType.name());
+        return HttpClientUtil.executeHttpRequest(new HttpInput().setMethod("GET").setServerName("ZCY IData")
+                        .setQueryParamMap(queryParamMap)
+                        .setUri(ZCY_IDATA_BASE_URI + "/outbound/folders"),
+                new TypeReference<RestResult<List<FolderTreeNodeDto>>>(){}).getData()
+                .stream().peek(folderTreeNode -> folderTreeNode.setType(resourceType.name()))
+                .collect(Collectors.toList());
+    }
 
 }

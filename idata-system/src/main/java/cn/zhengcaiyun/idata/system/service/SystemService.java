@@ -43,5 +43,5 @@ public interface SystemService {
     /**
      * @param folderPermissionMap key：resource type + access key; value: filePermission
      */
-    List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap);
+    List<FolderTreeNodeDto> getFolderTree(Map<String, Integer> folderPermissionMap);
 }

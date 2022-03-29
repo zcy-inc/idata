@@ -70,7 +70,7 @@ public class SystemController {
 
     @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success(systemService.getDevFolderTree(new HashMap<>()));
+        return RestResult.success(systemService.getFolderTree(new HashMap<>()));
     }
 
     @GetMapping("/p1/sys/configTypes")
