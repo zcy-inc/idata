@@ -98,6 +98,13 @@ public final class DevJobUdfDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.udf_sample")
     public static final SqlColumn<String> udfSample = devJobUdf.udfSample;
 
+    /**
+     * Database Column Remarks:
+     *   java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）|沐泽|2019-12-19
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
+    public static final SqlColumn<String> sourceName = devJobUdf.sourceName;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_udf")
     public static final class DevJobUdf extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -131,6 +138,8 @@ public final class DevJobUdfDynamicSqlSupport {
         public final SqlColumn<String> commandFormat = column("command_format", JDBCType.VARCHAR);
 
         public final SqlColumn<String> udfSample = column("udf_sample", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> sourceName = column("source_name", JDBCType.VARCHAR);
 
         public DevJobUdf() {
             super("dev_job_udf");

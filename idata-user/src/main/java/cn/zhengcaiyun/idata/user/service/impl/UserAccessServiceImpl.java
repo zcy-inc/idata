@@ -18,12 +18,17 @@ package cn.zhengcaiyun.idata.user.service.impl;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoader;
 import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoaders;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDao;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDynamicSqlSupport;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
+import cn.zhengcaiyun.idata.system.dal.model.SysResource;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.system.service.SysResourceService;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
@@ -74,6 +79,11 @@ public class UserAccessServiceImpl implements UserAccessService {
     private UacRoleAccessDao uacRoleAccessDao;
     @Autowired
     private ServiceProvidersLoader serviceProvidersLoader;
+    @Autowired
+    private SysResourceDao sysResourceDao;
+
+    @Autowired
+    private SysResourceService sysResourceService;
 
     @Override
     public List<FeatureTreeNodeDto> getUserFeatureTree(Long userId) {
@@ -132,7 +142,9 @@ public class UserAccessServiceImpl implements UserAccessService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        return systemService.getDevFolderTree(folderPermissionMap);
+        List<FolderTreeNodeDto> devFolderTree = systemService.getDevFolderTree(folderPermissionMap);
+
+        return devFolderTree;
     }
 
     @Override

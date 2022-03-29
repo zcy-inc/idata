@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Descriptions } from 'antd';
 import { get } from 'lodash';
 import type { FC } from 'react';
+import { getDAGStatus } from '@/utils/datadev';
 
 import { DAG, Folder } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
@@ -105,6 +106,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
     <div>
       <Title>DAG信息</Title>
       <Descriptions colon={false} column={1}>
+        <Item label="当前状态">{getDAGStatus(data?.dagInfoDto?.status)}</Item>
         <Item label="DAG名称">{data?.dagInfoDto.name || '-'}</Item>
         <Item label="环境">{data?.dagInfoDto.environment || '-'}</Item>
         <Item label="数仓分层">

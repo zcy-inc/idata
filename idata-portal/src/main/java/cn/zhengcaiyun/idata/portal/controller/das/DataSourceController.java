@@ -30,9 +30,11 @@ import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.portal.controller.dev.job.JobTableController;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -88,6 +90,10 @@ public class DataSourceController {
     @GetMapping("/tableNames")
     public RestResult<List<String>> getTableNames(@RequestParam("dataSourceId") Long dataSourceId,
                                                   @RequestParam(value = "dbName", required = false) String dbName) {
+        DataSourceDto dataSource = dataSourceService.getDataSource(dataSourceId);
+        if (dataSource.getType() == DataSourceTypeEnum.hive && StringUtils.isEmpty(dbName)) {
+            return RestResult.success(new ArrayList<>());
+        }
         return RestResult.success(dataSourceService.getTableNames(dataSourceId, dbName));
     }
 
@@ -101,6 +107,11 @@ public class DataSourceController {
     public RestResult<List<MappingColumnDto>> getTableColumns(@RequestParam("dataSourceId") Long dataSourceId,
                                                               @RequestParam(value = "dbName", required = false) String dbName,
                                                               @RequestParam(value = "tableName") String tableName) {
+        DataSourceDto dataSource = dataSourceService.getDataSource(dataSourceId);
+        if (dataSource.getType() == DataSourceTypeEnum.hive && StringUtils.isEmpty(dbName)) {
+            return RestResult.success(new ArrayList<>());
+        }
+
         List<ColumnInfoDto> tableColumns = dataSourceService.getTableColumns(dataSourceId, dbName, tableName);
         List<MappingColumnDto> list = tableColumns.stream()
                 .map(e -> {

@@ -39,6 +39,10 @@ public class JobInfoExecuteDetailDto {
      * 作业执行引擎，可传SPARK/SQOOP/KYLIN
      */
     private EngineTypeEnum execEngine;
+    /**
+     * 扩展配置参数
+     */
+    private String extProperties;
 
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
@@ -545,6 +549,101 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
+    public static class FlinkSqlJobDetailsDto extends JobInfoExecuteDetailDto {
+
+        public FlinkSqlJobDetailsDto() {
+
+        }
+        public FlinkSqlJobDetailsDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        /**
+         * 作业版本
+         */
+        private String jobVersion;
+        /**
+         * 数据来源SQL
+         */
+        private String sourceSql; // sourceSql
+        /**
+         * 函数
+         */
+        private List<DevJobUdf> udfList; // udfs
+        /**
+         * 作业私有信息
+         */
+        private Map<String,String> jobPrivacyProp;
+        /**
+         * 扩展参数配置
+         */
+        private Map<String, String> confProp;
+        /**
+         * 是否已发布作业，未发布作业走调试流程
+         */
+        private Boolean published;
+        /**
+         * flink版本
+         */
+        private String flinkVersion;
+
+        public String getJobVersion() {
+            return jobVersion;
+        }
+
+        public void setJobVersion(String jobVersion) {
+            this.jobVersion = jobVersion;
+        }
+
+        public String getSourceSql() {
+            return sourceSql;
+        }
+
+        public void setSourceSql(String sourceSql) {
+            this.sourceSql = sourceSql;
+        }
+
+        public List<DevJobUdf> getUdfList() {
+            return udfList;
+        }
+
+        public void setUdfList(List<DevJobUdf> udfList) {
+            this.udfList = udfList;
+        }
+
+        public Map<String, String> getJobPrivacyProp() {
+            return jobPrivacyProp;
+        }
+
+        public void setJobPrivacyProp(Map<String, String> jobPrivacyProp) {
+            this.jobPrivacyProp = jobPrivacyProp;
+        }
+
+        public Map<String, String> getConfProp() {
+            return confProp;
+        }
+
+        public void setConfProp(Map<String, String> confProp) {
+            this.confProp = confProp;
+        }
+
+        public Boolean getPublished() {
+            return published;
+        }
+
+        public void setPublished(Boolean published) {
+            this.published = published;
+        }
+
+        public String getFlinkVersion() {
+            return flinkVersion;
+        }
+
+        public void setFlinkVersion(String flinkVersion) {
+            this.flinkVersion = flinkVersion;
+        }
+    }
+
     public String getJobType() {
         return jobType;
     }
@@ -601,5 +700,11 @@ public class JobInfoExecuteDetailDto {
         this.execEngine = execEngine;
     }
 
+    public String getExtProperties() {
+        return extProperties;
+    }
 
+    public void setExtProperties(String extProperties) {
+        this.extProperties = extProperties;
+    }
 }

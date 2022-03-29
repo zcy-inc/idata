@@ -128,17 +128,18 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
     }
 
     @Override
-    public List<MigrateResultDto> migrateDAG(String cluster) {
+    public List<MigrateResultDto> migrateDAG(String cluster, String env) {
+        EnvEnum envEnum = EnvEnum.valueOf(env);
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
-        resultDtoList.addAll(migrateOriginDAG());
-        resultDtoList.addAll(createStandardDAG(cluster, EnvEnum.prod));
+        resultDtoList.addAll(migrateOriginDAG(envEnum));
+//        resultDtoList.addAll(createStandardDAG(cluster, envEnum));
         return resultDtoList;
     }
 
-    public List<MigrateResultDto> migrateOriginDAG() {
+    public List<MigrateResultDto> migrateOriginDAG(EnvEnum envEnum) {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 查询旧版IData数据
-        List<JSONObject> dataJsonList = fetchOldData();
+        List<JSONObject> dataJsonList = fetchOldData(envEnum.name());
         // 处理旧版数据，组装新版IData数据
         Map<String, List<CompositeFolder>> folderMap = queryFolderMap();
         List<DAGDto> dagDtoList = dataJsonList.stream()
@@ -184,9 +185,9 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         return folderOptional.get();
     }
 
-    private List<JSONObject> fetchOldData() {
+    private List<JSONObject> fetchOldData(String env) {
         List<String> columns = Lists.newArrayList("id", "dag_name", "dag_interval", "operator", "status");
-        String filter = "is_del = false";
+        String filter = "is_del = false and status like '" + env + "%'";
         return oldIDataDao.queryList("metadata.dag_info", columns, filter);
     }
 

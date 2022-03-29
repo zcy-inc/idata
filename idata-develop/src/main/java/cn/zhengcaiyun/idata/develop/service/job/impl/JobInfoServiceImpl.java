@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -26,6 +28,7 @@ import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
+import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
@@ -33,7 +36,10 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
@@ -41,12 +47,21 @@ import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
+import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,12 +90,8 @@ import static com.google.common.base.Preconditions.checkState;
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
 
-    @Autowired
     private DevJobInfoMyDao devJobInfoMyDao;
-
-    @Autowired
     private JobOutputMyDao jobOutputMyDao;
-
     private final JobInfoRepo jobInfoRepo;
     private final JobOutputRepo jobOutputRepo;
     private final DevJobUdfMyDao devJobUdfMyDao;
@@ -88,6 +99,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobDependenceRepo jobDependenceRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
+    private final SqlJobRepo sqlJobRepo;
     private final DAGRepo dagRepo;
     private final JobManager jobManager;
     private final JobScheduleManager jobScheduleManager;
@@ -98,14 +110,14 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DataSourceApi dataSourceApi;
 
     @Autowired
-    public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
+    public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao, JobOutputMyDao jobOutputMyDao, JobInfoRepo jobInfoRepo,
                               JobOutputRepo jobOutputRepo,
                               DevJobUdfMyDao devJobUdfMyDao,
                               JobPublishRecordMyDao jobPublishRecordMyDao,
                               JobDependenceRepo jobDependenceRepo,
                               JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobPublishRecordRepo jobPublishRecordRepo,
-                              DAGRepo dagRepo,
+                              SqlJobRepo sqlJobRepo, DAGRepo dagRepo,
                               JobManager jobManager,
                               JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
@@ -113,12 +125,15 @@ public class JobInfoServiceImpl implements JobInfoService {
                               OverhangJobLocalCache overhangJobLocalCache,
                               DevAccessService devAccessService,
                               DataSourceApi dataSourceApi) {
+        this.devJobInfoMyDao = devJobInfoMyDao;
+        this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
         this.jobOutputRepo = jobOutputRepo;
         this.devJobUdfMyDao = devJobUdfMyDao;
         this.jobPublishRecordMyDao = jobPublishRecordMyDao;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
+        this.sqlJobRepo = sqlJobRepo;
         this.dagRepo = dagRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
@@ -381,7 +396,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 BeanUtils.copyProperties(bfJobContent, backFlowResponse);
 
                 backFlowResponse.setSrcTable(bfJobContent.getSrcTables());
-
                 backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
 
                 // 根据回流启用模式，填充数据
@@ -392,7 +406,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
                     //抽取主键key
-                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> e.getPrimaryKey()).map(e -> e.getName()).collect(Collectors.toSet());
+                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setUpdateKey(StringUtils.join(keyNameSet, ","));
 
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
@@ -403,27 +417,42 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 String properties = bfJobContent.getDestProperties();
                 if (StringUtils.isNotBlank(properties)) {
-                    backFlowResponse.setDestPropMap(JSON.parseObject(properties, Map.class));
+                    List<KeyValuePair<String, String>> mapList = new Gson().fromJson(properties, new TypeToken<List<KeyValuePair<String, String>>>() {
+                    }.getType());
+                    Map<String, String> map = new HashMap<>();
+                    mapList.forEach(e -> map.put(e.getKey(), e.getValue()));
+                    backFlowResponse.setDestPropMap(map);
                 }
 
                 // 封装连接信息
-                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId());
+                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId(), env);
                 backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
                 backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
 
-                // TODO 个性化处理返回值
-                // sqoop -> srcSql = null, columnName != null
-                // spark -> columnName = null, srcSql != null
-                // doris -> columnName srcSql 都要有
-                switch (backFlowResponse.getExecEngine()) {
-                    case SQOOP:
-                        backFlowResponse.setSrcSql(null);
-                        break;
-                    case SPARK:
-                        backFlowResponse.setDestColumnNames(null);
-                        break;
+                // 是否支持columns，不支持不返回给htool
+                if (!DIRuleHelper.supportColumns(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
+                    backFlowResponse.setDestColumnNames(null);
+                }
+                // 是否支持query sql，不支持不返回给htool
+                DIRuleHelper.SupportQuerySqlParam bfParam = new DIRuleHelper.SupportQuerySqlParam();
+                bfParam.setDiJobContent(bfJobContent);
+                bfParam.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                bfParam.setEngineTypeEnum(backFlowResponse.getExecEngine());
+                if (!DIRuleHelper.supportQuerySQL(bfParam)) {
+                    backFlowResponse.setSrcSql(null);
+                }
+
+                // 根据规则定位真正的表
+                DataSourceTypeEnum srcBfDsTypeEnum = dataSourceApi.getDataSourceDetail(bfJobContent.getSrcDataSourceId(), env).getDataSourceTypeEnum();
+                String bfSrcRawTable = backFlowResponse.getSrcTable();
+                String bfSrcTables = EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, bfSrcRawTable, env);
+                backFlowResponse.setSrcTable(bfSrcTables);
+                backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getDestTable(), env));
+                // 改写sql里的表
+                if (StringUtils.isNotEmpty(backFlowResponse.getSrcSql())) {
+                    backFlowResponse.setSrcSql(backFlowResponse.getSrcSql().replaceAll(bfSrcRawTable, bfSrcTables));
                 }
 
                 return backFlowResponse;
@@ -433,35 +462,49 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 封装di_job_content
                 DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
                 checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
-                BeanUtils.copyProperties(diJobContent, diResponse);
-                if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
-                    diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
-                }
+
+                MyBeanUtils.copyProperties(diJobContent, diResponse);
 
                 //兼容数据库数据错误
                 if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
                     diResponse.setSrcShardingNum(1);
                 }
 
+                DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId(), env);
+                String srcDiDsName = srcSourceDetail.getDataSourceTypeEnum().name();
+
                 // 封装连接信息
-                DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId());
-                diResponse.setSrcDataType(srcSourceDetail.getDataSourceTypeEnum().name());
+                diResponse.setSrcDataType(srcDiDsName);
                 diResponse.setSrcJdbcUrl(srcSourceDetail.getJdbcUrl());
                 diResponse.setSrcUsername(srcSourceDetail.getUserName());
                 diResponse.setSrcPassword(srcSourceDetail.getPassword());
                 diResponse.setSrcDbName(srcSourceDetail.getDbName());
                 diResponse.setSrcDriverType(srcSourceDetail.getDriverTypeEnum());
 
-                diResponse.setDiQuery(generateSrcQuery(diResponse.getSrcCols(), diResponse.getSrcReadFilter(), diResponse.getSrcTables(), diResponse.getSrcDbName()));
-
                 // 字段类型转换
                 diResponse.setDestWriteMode(WriteModeEnum.DiEnum.valueOf(diJobContent.getDestWriteMode()));
                 diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
 
-                String writeMode = diJobContent.getDestWriteMode();
-                if (StringUtils.equalsIgnoreCase(writeMode, WriteModeEnum.SqlEnum.UPSERT.name())) {
-                    // TODO 岛端不需要增量逻辑
+                // 是否支持query sql，不支持不返回给htool
+                DIRuleHelper.SupportQuerySqlParam diParam = new DIRuleHelper.SupportQuerySqlParam();
+                diParam.setDiJobContent(diJobContent);
+                diParam.setJobTypeEnum(JobTypeEnum.DI_BATCH);
+                diParam.setEngineTypeEnum(diResponse.getExecEngine());
+                if (!DIRuleHelper.supportQuerySQL(diParam)) {
+                    diResponse.setDiQuery(null);
                 }
+
+                // 根据规则定位真正的表
+                String diSrcRawTable = diResponse.getSrcTables();
+                String diSrcTables = EnvRuleHelper.handlerDbTableName(srcDiDsName, diSrcRawTable, env);
+                diResponse.setSrcTables(diSrcTables);
+                DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
+                diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
+                // 改写sql里的表
+                if (StringUtils.isNotEmpty(diResponse.getDiQuery())) {
+                    diResponse.setDiQuery(diResponse.getDiQuery().replaceAll(diSrcRawTable, diSrcTables));
+                }
+
                 return diResponse;
             case SQL_SPARK:
                 JobOutputQuery query = new JobOutputQuery();
@@ -483,7 +526,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 额外判断：旧版idata中sql作业中涉及回流作业，htool对回流作业处理不一样
                 DataSourceDto dataSource = dataSourceApi.getDataSource(jobOutput.getDestDataSourceId());
-                if (!StringUtils.equalsIgnoreCase(dataSource.getType().name(), "hive")) {
+                String sqlDsName = dataSource.getType().name();
+                if (!StringUtils.equalsIgnoreCase(sqlDsName, "hive")) {
                     JobInfoExecuteDetailDto.BackFlowDetailDto oldBackFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
                     oldBackFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
                     oldBackFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
@@ -493,7 +537,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setUdfList(udfList);
 
                     // 封装连接信息
-                    DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId());
+                    DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId(), env);
                     oldBackFlowResponse.setSrcSql(contentSql.getSourceSql());
                     oldBackFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
                     oldBackFlowResponse.setDestUserName(destSourceDetail.getUserName());
@@ -501,6 +545,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
                     oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+
+                    // 根据规则定位真正的表
+                    oldBackFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, oldBackFlowResponse.getDestTable(), env));
+
                     return oldBackFlowResponse;
                 }
 
@@ -511,6 +559,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 // 字段类型转换
                 sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
+                // 根据规则定位真正的表
+                sqlResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, sqlResponse.getDestTable(), env));
 
                 return sqlResponse;
             case SPARK_PYTHON:
@@ -562,9 +612,75 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
 
                 return scriptResponse;
+            case SQL_FLINK:
+                return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
+
         }
+    }
+
+    private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto) {
+        // 封装sql_job_content
+        DevJobContentSql flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
+        boolean published = true;
+        if (Objects.isNull(flinkSqlContent)) {
+            // 没有发布版本，走调试逻辑，取最新一个版本
+            flinkSqlContent = sqlJobRepo.queryLatest(jobId).orElse(null);
+            published = false;
+        }
+        checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%d，环境:%s", jobId, env));
+        String jobExtendConfigs = flinkSqlContent.getExtendConfigs();
+        checkArgument(StringUtils.isNotBlank(jobExtendConfigs), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        SqlJobExtendConfigDto extendConfigDto = new Gson().fromJson(jobExtendConfigs, SqlJobExtendConfigDto.class);
+        FlinkSqlJobExtendConfigDto flinkExtConfig = extendConfigDto.getFlinkExtConfig();
+        checkArgument(Objects.nonNull(flinkExtConfig), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        checkArgument(!CollectionUtils.isEmpty(flinkExtConfig.getFlinkSinkConfigs()) && !CollectionUtils.isEmpty(flinkExtConfig.getFlinkSourceConfigs()), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+
+        List<DevJobUdf> udfList = new ArrayList<>();
+        String udfIds = flinkSqlContent.getUdfIds();
+        if (StringUtils.isNotBlank(udfIds)) {
+            List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
+            udfList = devJobUdfMyDao.getByIds(idList);
+        }
+
+        Map<String, String> privacyProps = Maps.newHashMap();
+        flinkExtConfig.getFlinkSourceConfigs().stream().forEach(dataSourceConfigDto -> {
+            DataSourceDto dataSourceDto = dataSourceApi.getDataSource(dataSourceConfigDto.getDataSourceId());
+            DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
+                    .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
+                    .findFirst().orElse(null);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+                    dataSourceDto.getType(), dbConfigDto));
+        });
+
+        flinkExtConfig.getFlinkSinkConfigs().stream().forEach(dataSourceConfigDto -> {
+            DataSourceDto dataSourceDto = dataSourceApi.getDataSource(dataSourceConfigDto.getDataSourceId());
+            DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
+                    .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
+                    .findFirst().orElse(null);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+                    dataSourceDto.getType(), dbConfigDto));
+        });
+
+        JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto flinkSqlResponse = new JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto(baseJobDetailDto);
+        flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
+        flinkSqlResponse.setUdfList(udfList);
+        flinkSqlResponse.setJobPrivacyProp(privacyProps);
+        Map<String, String> confProp = Maps.newHashMap();
+        if (StringUtils.isNotBlank(baseJobDetailDto.getExtProperties())) {
+            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(baseJobDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            extendProperties.stream()
+                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
+        }
+        flinkSqlResponse.setConfProp(confProp);
+        flinkSqlResponse.setPublished(published);
+        flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
+        flinkSqlResponse.setFlinkVersion(confProp.getOrDefault("Flink-version", "flink-1.10"));
+        return flinkSqlResponse;
     }
 
     /**

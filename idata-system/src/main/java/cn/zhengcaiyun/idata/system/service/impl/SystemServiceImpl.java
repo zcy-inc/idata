@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.*;
+import cn.zhengcaiyun.idata.system.service.SysResourceService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
 import com.alibaba.fastjson.TypeReference;
@@ -55,6 +56,9 @@ public class SystemServiceImpl implements SystemService {
     private SysFeatureDao sysFeatureDao;
     @Autowired
     private ServiceProvidersLoader serviceProvidersLoader;
+
+    @Autowired
+    private SysResourceService sysResourceService;
 
     @Override
     public SystemStateDto getSystemState() {
@@ -156,6 +160,11 @@ public class SystemServiceImpl implements SystemService {
             }
             return folderTreeNode;
         }).collect(Collectors.toList());
+
+        // 新增sys_resource来源数据权限
+        List<FolderTreeNodeDto> tree = sysResourceService.generateFolderTreeNode(folderPermissionMap);
+        echo.addAll(tree);
+
         return echo;
     }
 
@@ -173,10 +182,10 @@ public class SystemServiceImpl implements SystemService {
                     && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) != null
                     && folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()) > 0) {
                 folderTreeNode.setFilePermission(folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId()));
-            }
-            else {
+            } else {
                 folderTreeNode.setFilePermission(0);
             }
+
             if (ObjectUtils.isNotEmpty(treeNode.getChildren())) {
                 folderTreeNode.setChildren(changeBaseToFolder(treeNode.getChildren(), folderPermissionMap));
             }

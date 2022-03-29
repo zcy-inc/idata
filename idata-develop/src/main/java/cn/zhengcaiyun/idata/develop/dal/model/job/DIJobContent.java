@@ -95,6 +95,13 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   来源表方式，S：下拉选择；E：手动编辑
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    private String srcTablesFashion;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-读取模式，all：全量，incremental：增量
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
@@ -200,13 +207,6 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
-     *   DI作业增量模式的mergeSql
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
-    private String mergeSql;
-
-    /**
-     * Database Column Remarks:
      *   脚本模式，作用同可视化src_columns
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
@@ -260,6 +260,13 @@ public class DIJobContent {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     private String destColumns;
+
+    /**
+     * Database Column Remarks:
+     *   DI作业增量模式的mergeSql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    private String mergeSql;
 
     /**
      * Database Column Remarks:
@@ -393,6 +400,16 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
     public void setSrcTopic(String srcTopic) {
         this.srcTopic = srcTopic;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    public String getSrcTablesFashion() {
+        return srcTablesFashion;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    public void setSrcTablesFashion(String srcTablesFashion) {
+        this.srcTablesFashion = srcTablesFashion;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
@@ -545,16 +562,6 @@ public class DIJobContent {
         this.contentHash = contentHash;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
-    public String getMergeSql() {
-        return mergeSql;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
-    public void setMergeSql(String mergeSql) {
-        this.mergeSql = mergeSql;
-    }
-
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
     public String getScriptSelectColumns() {
         return scriptSelectColumns;
@@ -633,6 +640,16 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     public void setDestColumns(String destColumns) {
         this.destColumns = destColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public String getMergeSql() {
+        return mergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public void setMergeSql(String mergeSql) {
+        this.mergeSql = mergeSql;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")

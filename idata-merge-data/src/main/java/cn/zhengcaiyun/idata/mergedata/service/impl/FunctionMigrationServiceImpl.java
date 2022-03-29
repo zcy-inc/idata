@@ -49,6 +49,8 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
                 "       t2.hdfs_path as hdfsPath, " +
                 "       t1.return_type as returnType, " +
                 "       t1.folder_id as folderId, " +
+                "       t1.folder_id as folderId, " +
+                "       t1.source_name as source_name, " +
                 "       t1.description as description " +
                 "from metadata.spark_udf t1 left join metadata.file_resource t2 on t1.resource_id = t2.id;";
         List<Map<String, Object>> list = oldIDataDao.selectList(sql);

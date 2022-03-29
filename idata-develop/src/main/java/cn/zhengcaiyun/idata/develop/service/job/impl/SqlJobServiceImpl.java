@@ -22,12 +22,17 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
+import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import com.google.gson.Gson;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,28 +63,29 @@ public class SqlJobServiceImpl implements SqlJobService {
         if (Objects.nonNull(version)) {
             DevJobContentSql existJobContentSql = sqlJobRepo.query(sqlJobDto.getJobId(), version);
             checkArgument(existJobContentSql != null, "作业不存在或已删除");
-            SqlJobContentDto existSqlJob = PojoUtil.copyOne(existJobContentSql, SqlJobContentDto.class);
+            SqlJobContentDto existSqlJob = SqlJobContentDto.from(existJobContentSql);
 
             // 不可修改且跟当前版本不一致才新生成版本
             if (existSqlJob.getEditable().equals(EditableEnum.NO.val) && !sqlJobDto.equals(existSqlJob)) {
                 startNewVersion = true;
-            }
-            else {
+            } else {
                 if (existJobContentSql.getEditable().equals(EditableEnum.YES.val)) {
-                    DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class);
+                    DevJobContentSql jobContentSql = sqlJobDto.toModel();
                     jobContentSql.setId(existJobContentSql.getId());
                     jobContentSql.setEditor(operator);
                     sqlJobRepo.update(jobContentSql);
                 }
             }
-        }
-        else {
+        } else {
             startNewVersion = true;
         }
 
         if (startNewVersion) {
             DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class,
                     "jobId", "sourceSql", "udfIds", "externalTables");
+            if (!Objects.isNull(sqlJobDto.getExtConfig())) {
+                jobContentSql.setExtendConfigs(new Gson().toJson(sqlJobDto.getExtConfig()));
+            }
             version = sqlJobRepo.newVersion(sqlJobDto.getJobId());
             jobContentSql.setVersion(version);
             jobContentSql.setEditable(EditableEnum.YES.val);
@@ -94,7 +100,25 @@ public class SqlJobServiceImpl implements SqlJobService {
     public SqlJobContentDto find(Long jobId, Integer version) {
         DevJobContentSql jobContentSql = sqlJobRepo.query(jobId, version);
         checkArgument(jobContentSql != null, "作业不存在");
-        return PojoUtil.copyOne(jobContentSql, SqlJobContentDto.class);
+        return SqlJobContentDto.from(jobContentSql);
+    }
+
+    @Override
+    public String generateFlinkSqlTemplate(List<FlinkSqlJobExtendConfigDto.FlinkDataSourceConfigDto> flinkSourceConfigs,
+                                           List<FlinkSqlJobExtendConfigDto.FlinkDataSourceConfigDto> flinkSinkConfigs) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        if (CollectionUtils.isNotEmpty(flinkSourceConfigs)) {
+            sqlBuilder.append("-- source table template ").append("\n");
+            flinkSourceConfigs.stream()
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
+        }
+        if (CollectionUtils.isNotEmpty(flinkSinkConfigs)) {
+            sqlBuilder.append("-- sink table template ").append("\n");
+            flinkSinkConfigs.stream()
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
+        }
+        sqlBuilder.append("-- business code ").append("\n");
+        return sqlBuilder.toString();
     }
 
 }

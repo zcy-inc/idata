@@ -38,7 +38,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamic
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.JOB_EXECUTE_CONFIG;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDynamicSqlSupport.jobInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputDynamicSqlSupport.JOB_OUTPUT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
@@ -122,9 +122,9 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .set(jobInfo.editor).equalTo(operator)
                 .where(jobInfo.id, isEqualTo(jobId)));
 
-        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.del).equalTo(DeleteEnum.DEL_YES.val)
-                .set(jobExecuteConfig.editor).equalTo(operator)
-                .where(jobExecuteConfig.jobId, isEqualTo(jobId)));
+        jobExecuteConfigDao.update(dsl -> dsl.set(JOB_EXECUTE_CONFIG.del).equalTo(DeleteEnum.DEL_YES.val)
+                .set(JOB_EXECUTE_CONFIG.editor).equalTo(operator)
+                .where(JOB_EXECUTE_CONFIG.jobId, isEqualTo(jobId)));
 
         jobPublishRecordDao.update(dsl -> dsl.set(jobPublishRecord.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobPublishRecord.editor).equalTo(operator)

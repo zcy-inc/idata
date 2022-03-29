@@ -28,6 +28,7 @@ import {
 } from '@/services/datadev';
 import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import Title from '@/components/Title';
+import Tip from '@/components/Tip';
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
@@ -360,7 +361,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       setDestColumns(data);
     }
   };
-
 
   /**
    * 暂停、恢复、单次运行任务
@@ -730,10 +730,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   return (
     <Skeleton loading={basicInfoLoading}>
       <div className={styles.task}>
-        <div className={styles.toolbar}>
-          <div className={styles.version}>
-            <span>当前版本: </span>
-            {versions.length === 0 ? (
+        <Tip
+          label="当前版本"
+          className={styles.toolbar}
+          content={
+            versions.length === 0 ? (
               '-'
             ) : (
               <Select
@@ -751,16 +752,18 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 showSearch
                 filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
               />
-            )}
-          </div>
-          <Space size={16}>
-            <a onClick={() => onAction('run')}>单次运行</a>
-            <a onClick={() => setVisibleBasic(true)}>基本信息</a>
-            <a onClick={() => setVisibleConfig(true)}>配置</a>
-            <a onClick={() => setVisibleVersion(true)}>版本</a>
-            <a onClick={() => setVisibleHistory(true)}>历史</a>
-          </Space>
-        </div>
+            )
+          }
+          extra={
+            <Space size={16}>
+              <a onClick={() => onAction('run')}>单次运行</a>
+              <a onClick={() => setVisibleBasic(true)}>基本信息</a>
+              <a onClick={() => setVisibleConfig(true)}>配置</a>
+              <a onClick={() => setVisibleVersion(true)}>版本</a>
+              <a onClick={() => setVisibleHistory(true)}>历史</a>
+            </Space>
+          }
+        />
         <Form
           form={form}
           layout="horizontal"

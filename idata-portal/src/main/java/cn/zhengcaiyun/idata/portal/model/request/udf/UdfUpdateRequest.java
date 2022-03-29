@@ -86,6 +86,9 @@ public class UdfUpdateRequest {
     @ApiModelProperty("示例")
     private String udfSample;
 
+    @ApiModelProperty("java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）")
+    private String sourceName;
+
     public Long getId() {
         return id;
     }
@@ -172,5 +175,13 @@ public class UdfUpdateRequest {
 
     public void setUdfSample(String udfSample) {
         this.udfSample = udfSample;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
     }
 }

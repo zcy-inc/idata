@@ -98,9 +98,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         JobExecuteConfigDto executeConfigDto = dto.getExecuteConfig();
         List<JobDependenceDto> dependenceDtoList = dto.getDependencies();
         JobOutputDto outputDto = dto.getOutput();
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+
         checkExecuteConfig(executeConfigDto);
         checkDependConfig(jobId, dependenceDtoList);
-        checkOutputConfig(outputDto);
+        checkOutputConfig(jobInfoOptional.get(), outputDto);
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
         if (configCombinationOptional.isEmpty()) {
@@ -433,8 +436,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         }
     }
 
-    private void checkOutputConfig(JobOutputDto outputDto) {
+    private void checkOutputConfig(JobInfo jobInfo, JobOutputDto outputDto) {
         if (Objects.isNull(outputDto)) return;
+
+        if (!JobTypeEnum.SQL_SPARK.name().equals(jobInfo.getJobType())
+                && !JobTypeEnum.SQL_DORIS.name().equals(jobInfo.getJobType()))
+            return;
 
         checkArgument(Objects.nonNull(outputDto.getDestDataSourceId()), "作业输出数据源为空");
         checkArgument(StringUtils.isNotBlank(outputDto.getDestDataSourceType()), "作业输出数据源类型为空");

@@ -17,13 +17,14 @@
                CONCAT(t2.exec_worker_mem, 'G') as executorMemory,
                t2.running_state as runningState,
                t2.exec_engine as execEngine,
-               0 as executeCore,
+               t2.exec_cores as executeCore,
+               t2.ext_properties as extProperties,
                t3.dest_table as targetTableName
         from
             (select * from dev_job_info where id = #{id}) as t1
             join (select * from dev_job_execute_config where environment = #{env}) t2
             on t1.id = t2.job_id
-            left join (select * from dev_job_output where job_id = #{id}) t3
+            left join (select * from dev_job_output where job_id = #{id} and environment = #{env}) t3
             on t1.id = t3.job_id
     </select>
 
