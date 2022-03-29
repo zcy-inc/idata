@@ -204,7 +204,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private void changeDag(Long jobId, JobExecuteConfig executeConfig, JobExecuteConfig existExecuteConfig, String environment, Operator operator) {
         unbindDag(jobId, existExecuteConfig.getSchDagId(), environment, operator);
-        bindDag(jobId, executeConfig.getSchDagId(), environment, false, operator);
+        Boolean isFirstBind = Boolean.FALSE;
+        if (Objects.isNull(existExecuteConfig.getSchDagId()) || existExecuteConfig.getSchDagId() <= 0) {
+            // 作业数据迁移时，dag id 默认为0，此时切换DAG需要新建DS任务
+            isFirstBind = Boolean.TRUE;
+        }
+        bindDag(jobId, executeConfig.getSchDagId(), environment, isFirstBind, operator);
     }
 
     private void bindDag(Long jobId, Long bindDagId, String environment, Boolean isFirstBind, Operator operator) {
