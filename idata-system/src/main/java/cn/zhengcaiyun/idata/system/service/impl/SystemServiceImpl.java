@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SysResourceService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
+import cn.zhengcaiyun.idata.system.zcy.ZcyService;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,8 @@ public class SystemServiceImpl implements SystemService {
     private SysFeatureDao sysFeatureDao;
     @Autowired
     private ServiceProvidersLoader serviceProvidersLoader;
+    @Autowired
+    private ZcyService zcyService;
 
     @Autowired
     private SysResourceService sysResourceService;
