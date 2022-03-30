@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.service.measure;
 
 import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
 

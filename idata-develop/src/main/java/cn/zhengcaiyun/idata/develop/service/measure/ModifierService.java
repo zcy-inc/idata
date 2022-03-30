@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure;
 
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 
@@ -35,4 +36,5 @@ public interface ModifierService {
     MeasureDto disableOrAble(String modifierCode, String labelTag, String operator);
     boolean delete(String modifierCode, String operator);
     int mergeOldModifiers();
+    List<DevLabelDefine> findModifiersByIds(List<Long> tableIds);
 }

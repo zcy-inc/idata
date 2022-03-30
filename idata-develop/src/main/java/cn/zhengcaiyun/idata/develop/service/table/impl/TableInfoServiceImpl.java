@@ -149,6 +149,15 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
+    public List<DevTableInfo> getForeignKeyTables(Long tableId) {
+        List<DevForeignKey> foreignKeyList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                and(devForeignKey.tableId, isEqualTo(tableId))));
+        if (foreignKeyList.size() == 0) return new ArrayList<>();
+        List<Long> referTableIdList = foreignKeyList.stream().map(DevForeignKey::getReferTableId).collect(Collectors.toList());
+        return devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isIn(referTableIdList))));
+    }
+
+    @Override
     public String getTableDDL(Long tableId) {
         StringBuilder ddl = new StringBuilder("");
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),

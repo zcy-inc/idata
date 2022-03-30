@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
@@ -71,6 +72,11 @@ public class TableInfoController {
     @GetMapping("dbNames")
     public RestResult<List<LabelDto>> getDbNames() {
         return RestResult.success(tableInfoService.getDbNames());
+    }
+
+    @GetMapping("foreignKeyTables")
+    public RestResult<List<DevTableInfo>> getForeignKeyTables(@RequestParam("tableId") Long tableId) {
+        return RestResult.success(tableInfoService.getForeignKeyTables(tableId));
     }
 
     @GetMapping("columnInfos/{tableId}")
