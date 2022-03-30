@@ -54,6 +54,18 @@ export interface TabTaskProps {
   pane: IPane;
 }
 
+enum Btns {
+  SAVE,
+  DEBUG,
+  RUN_ONCE,
+  SUBMIT,
+  ONLINE, // 上线
+  OFFLINE, // 下线
+  DELETE, // 删除
+  DIVIDER,
+  JOB_CONFIG,
+}
+
 const { Item } = Form;
 const { confirm } = Modal;
 const { TextArea } = Input;
@@ -116,42 +128,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     setResults([...results]);
   };
 
-  const componentMap = {
-    [TaskTypes.SQL_SPARK]: (
-      <SparkSql
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log, res: results }}
-        removeResult={removeResult}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.SPARK_JAR]: (
-      <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />
-    ),
-    [TaskTypes.SPARK_PYTHON]: (
-      <SparkPython
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log }}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.SCRIPT_SHELL]: <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />,
-    [TaskTypes.SCRIPT_PYTHON]: (
-      <ScriptPython
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log }}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.KYLIN]: <Kylin ref={formRef} data={content} />,
-  };
-
   /**
    * 获取作业配置
    */
@@ -181,8 +157,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getTaskContent = (version: number) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
-        getSqlSpark({ jobId: pane.id, version })
-          .then((res) => setContent(res.data));
+        getSqlSpark({ jobId: pane.id, version }).then((res) => setContent(res.data));
         break;
       case TaskTypes.SPARK_JAR:
       case TaskTypes.SPARK_PYTHON:
@@ -478,92 +453,182 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
+  const btnMap = new Map([
+    [
+      Btns.SAVE,
+      <Tooltip title="保存">
+        <Button className={styles.btn} icon={<IconFont type="icon-baocun" />} onClick={onSave} />
+      </Tooltip>,
+    ],
+    [
+      Btns.DEBUG,
+      <Tooltip title="调试">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-tiaoshi" />}
+          onClick={onDebug}
+          loading={debugLoading}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.RUN_ONCE,
+      <Tooltip title="单次运行">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-yunxing" />}
+          onClick={() => onAction('run')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.SUBMIT,
+      <Tooltip title="提交版本">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-tijiaofabu" />}
+          onClick={() => {
+            if (!versions.length) {
+              message.info('没有版本无法提交，请先保存以创建版本');
+              return;
+            }
+            setVisibleSubmit(true);
+          }}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.ONLINE,
+      <Tooltip title="上线">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-yunxingbaise-copy" />}
+          onClick={() => onAction('resume')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.OFFLINE,
+      <Tooltip title="下线">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-zantingbaise-copy" />}
+          onClick={() => onAction('pause')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.DELETE,
+      <Tooltip title="删除">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-shanchubaise-copy" />}
+          onClick={onDelete}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.DIVIDER,
+      <Divider type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
+    ],
+    [
+      Btns.JOB_CONFIG,
+      <Tooltip title="作业配置">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-peizhiguanli" />}
+          onClick={() => setVisibleJobConfig(true)}
+        />
+      </Tooltip>,
+    ],
+  ]);
+
+  const getBtnNames = () => {
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK:
+      case TaskTypes.SPARK_PYTHON:
+      case TaskTypes.SCRIPT_PYTHON:
+        return [
+          Btns.SAVE,
+          Btns.DEBUG,
+          Btns.RUN_ONCE,
+          Btns.SUBMIT,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+          Btns.DIVIDER,
+          Btns.JOB_CONFIG,
+        ];
+      case TaskTypes.KYLIN:
+        return [
+          Btns.SAVE,
+          Btns.DEBUG,
+          Btns.RUN_ONCE,
+          Btns.SUBMIT,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+        ];
+      case TaskTypes.SQL_FLINK:
+        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE];
+      default:
+        return [Btns.SAVE, Btns.RUN_ONCE, Btns.SUBMIT, Btns.ONLINE, Btns.OFFLINE, Btns.DELETE];
+    }
+  };
+
+  const getBtns = () => getBtnNames().map((name) => btnMap.get(name));
+
+  const getContent = () => {
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK:
+        return (
+          <SparkSql
+            ref={formRef}
+            monaco={monaco}
+            data={{ content, log, res: results }}
+            removeResult={removeResult}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.SPARK_JAR:
+        return <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />;
+      case TaskTypes.SPARK_PYTHON:
+        return (
+          <SparkPython
+            ref={formRef}
+            monaco={monaco}
+            data={{ content, log }}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.SCRIPT_SHELL:
+        return <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />;
+      case TaskTypes.SCRIPT_PYTHON:
+        return (
+          <ScriptPython
+            ref={formRef}
+            monaco={monaco}
+            data={{ content, log }}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.KYLIN:
+        return <Kylin ref={formRef} data={content} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className={styles.task}>
         <div className={styles.box}>
           <div className={styles.content}>
             <div className={styles.header}>
-              <div className={styles.btns}>
-                <Tooltip title="保存">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-baocun" />}
-                    onClick={onSave}
-                  />
-                </Tooltip>
-                {(task?.jobType === TaskTypes.SQL_SPARK ||
-                  task?.jobType === TaskTypes.SPARK_PYTHON ||
-                  task?.jobType === TaskTypes.SCRIPT_PYTHON ||
-                  task?.jobType === TaskTypes.KYLIN) && (
-                  <Tooltip title="调试">
-                    <Button
-                      className={styles.btn}
-                      icon={<IconFont type="icon-tiaoshi" />}
-                      onClick={onDebug}
-                      loading={debugLoading}
-                    />
-                  </Tooltip>
-                )}
-                <Tooltip title="单次运行">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-yunxing" />}
-                    onClick={() => onAction('run')}
-                  />
-                </Tooltip>
-                <Tooltip title="提交版本">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-tijiaofabu" />}
-                    onClick={() => {
-                      if (!versions.length) {
-                        message.info('没有版本无法提交，请先保存以创建版本');
-                        return;
-                      }
-                      setVisibleSubmit(true);
-                    }}
-                  />
-                </Tooltip>
-                <Tooltip title="上线">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-yunxingbaise-copy" />}
-                    onClick={() => onAction('resume')}
-                  />
-                </Tooltip>
-                <Tooltip title="下线">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-zantingbaise-copy" />}
-                    onClick={() => onAction('pause')}
-                  />
-                </Tooltip>
-                <Tooltip title="删除">
-                  <Button
-                    className={styles.btn}
-                    icon={<IconFont type="icon-shanchubaise-copy" />}
-                    onClick={onDelete}
-                  />
-                </Tooltip>
-                {(task?.jobType === TaskTypes.SQL_SPARK ||
-                  task?.jobType === TaskTypes.SPARK_PYTHON ||
-                  task?.jobType === TaskTypes.SCRIPT_PYTHON) && (
-                  <>
-                    <Divider
-                      type="vertical"
-                      style={{ margin: '0 16px', backgroundColor: '#545c75' }}
-                    />
-                    <Tooltip title="作业配置">
-                      <Button
-                        className={styles.btn}
-                        icon={<IconFont type="icon-peizhiguanli" />}
-                        onClick={() => setVisibleJobConfig(true)}
-                      />
-                    </Tooltip>
-                  </>
-                )}
-              </div>
+              <div className={styles.btns}>{getBtns()}</div>
               <div className={styles.version}>
                 <span>当前版本:</span>
                 {versions.length === 0 ? (
@@ -585,7 +650,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 )}
               </div>
             </div>
-            {componentMap[task?.jobType as TaskTypes]}
+            {getContent()}
           </div>
           <div className={styles.sideMenu}>
             <div className={styles.sideMenuItem} onClick={() => setVisibleBasic(true)}>
