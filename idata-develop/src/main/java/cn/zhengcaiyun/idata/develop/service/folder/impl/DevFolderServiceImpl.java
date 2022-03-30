@@ -277,7 +277,8 @@ public class DevFolderServiceImpl implements DevFolderService {
         return echoList;
     }
 
-    private Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType) {
+    @Override
+    public Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType) {
         Set<Long> childFolderIdList = devFolderDao.selectMany(select(devFolder.allColumns())
                 .from(devFolder)
                 .where(devFolder.del, isNotEqualTo(1), and(devFolder.parentId, isIn(folderIds)),

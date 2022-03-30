@@ -166,60 +166,6 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public String getMetricSql(String metricCode) {
-        DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
-                .orElse(null);
-        if (metric == null) {
-            return null;
-        }
-
-        String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
-        String metricSql;
-        List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
-        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
-        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
-            if (ObjectUtils.isEmpty(metricLabelList)) {
-                return null;
-            }
-            String selectColSql = StringUtils.isEmpty(metric.getSpecialAttribute().getAggregatorCode())
-                    ? metricLabelList.get(0).getColumnName()
-                    : changeAggregate(metricLabelList.get(0).getColumnName(),
-                    metric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
-                    metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
-        }
-        else if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
-            DevLabelDefine atomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get();
-            List<LabelDto> atomicLabelList = labelService.findLabelsByCode(metric.getSpecialAttribute().getAtomicMetricCode());
-            List<ModifierDto> modifierList = modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId());
-            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
-                    ? atomicLabelList.get(0).getColumnName()
-                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
-                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
-                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
-            if (modifierList != null && modifierList.size() > 0) {
-                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
-                        modifierList.get(0).getColumnName(),
-                        String.join(",", modifierList.get(0).getEnumValues())));
-                if (modifierList.size() > 1) {
-                    for (int i = 1; i < modifierList.size(); i++) {
-                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
-                                String.join(",", modifierList.get(i).getEnumValues())));
-                    }
-                }
-                metricSql += modifierSql;
-            }
-        }
-        else {
-            metricSql = metric.getSpecialAttribute().getComplexMetricFormula();
-        }
-        return metricSql;
-    }
-
-    @Override
     @Transactional(rollbackFor = Throwable.class)
     public MeasureDto create(MeasureDto metric, String operator) {
         checkArgument(isNotEmpty(operator), "创建者不能为空");
@@ -494,5 +440,116 @@ public class MetricServiceImpl implements MetricService {
             checkArgument(allConfigTblIds.containsAll(modifierTableIds), "修饰词有误，请选择来源于指标来源表或维表的修饰词");
         }
         return true;
+    }
+
+    @Override
+    public String getMetricDimSql(String metricCode) {
+        DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElse(null);
+        if (metric == null) {
+            return null;
+        }
+
+        String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
+        String metricSql;
+        List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
+        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
+        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
+            if (ObjectUtils.isEmpty(metricLabelList)) {
+                return null;
+            }
+            String selectColSql = StringUtils.isEmpty(metric.getSpecialAttribute().getAggregatorCode())
+                    ? metricLabelList.get(0).getColumnName()
+                    : changeAggregate(metricLabelList.get(0).getColumnName(),
+                    metric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
+                    metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
+        }
+        else if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
+            DevLabelDefine atomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get();
+            List<LabelDto> atomicLabelList = labelService.findLabelsByCode(metric.getSpecialAttribute().getAtomicMetricCode());
+            List<ModifierDto> modifierList = modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId());
+            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
+                    ? atomicLabelList.get(0).getColumnName()
+                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
+                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
+                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
+            if (modifierList != null && modifierList.size() > 0) {
+                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
+                        modifierList.get(0).getColumnName(),
+                        String.join(",", modifierList.get(0).getEnumValues())));
+                if (modifierList.size() > 1) {
+                    for (int i = 1; i < modifierList.size(); i++) {
+                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
+                                String.join(",", modifierList.get(i).getEnumValues())));
+                    }
+                }
+                metricSql += modifierSql;
+            }
+        }
+        else {
+            metricSql = metric.getSpecialAttribute().getComplexMetricFormula();
+        }
+        return metricSql;
+    }
+
+    private String getMetricSql(String metricCode) {
+        DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElse(null);
+        if (metric == null) {
+            return null;
+        }
+
+        String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
+        String metricSql;
+        List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
+        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
+        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
+            if (ObjectUtils.isEmpty(metricLabelList)) {
+                return null;
+            }
+            String selectColSql = StringUtils.isEmpty(metric.getSpecialAttribute().getAggregatorCode())
+                    ? metricLabelList.get(0).getColumnName()
+                    : changeAggregate(metricLabelList.get(0).getColumnName(),
+                    metric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
+                    metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
+        }
+        else if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
+            DevLabelDefine atomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get();
+            List<LabelDto> atomicLabelList = labelService.findLabelsByCode(metric.getSpecialAttribute().getAtomicMetricCode());
+            List<ModifierDto> modifierList = modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId());
+            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
+                    ? atomicLabelList.get(0).getColumnName()
+                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
+                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
+            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
+                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
+            if (modifierList != null && modifierList.size() > 0) {
+                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
+                        modifierList.get(0).getColumnName(),
+                        String.join(",", modifierList.get(0).getEnumValues())));
+                if (modifierList.size() > 1) {
+                    for (int i = 1; i < modifierList.size(); i++) {
+                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
+                                String.join(",", modifierList.get(i).getEnumValues())));
+                    }
+                }
+                metricSql += modifierSql;
+            }
+        }
+        else {
+            metricSql = metric.getSpecialAttribute().getComplexMetricFormula();
+        }
+        return metricSql;
+    }
+
+    private String changeTimeDimSql(String timeDim) {
+        return null;
     }
 }

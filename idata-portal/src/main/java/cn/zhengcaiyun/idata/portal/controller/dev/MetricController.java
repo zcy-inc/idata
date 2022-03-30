@@ -67,7 +67,7 @@ public class MetricController {
 
     @GetMapping("metricSql")
     public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getMetricSql(metricCode));
+        return RestResult.success(metricService.getMetricDimSql(metricCode));
     }
 
     @PostMapping("metric")
