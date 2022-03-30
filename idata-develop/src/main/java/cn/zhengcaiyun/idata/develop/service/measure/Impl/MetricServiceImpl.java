@@ -90,6 +90,7 @@ public class MetricServiceImpl implements MetricService {
     private final String MODIFIER_ENUM = "modifierEnum";
     private final String METRIC_LABEL = "METRIC_LABEL";
     private final String METRIC_BIZ_TYPE = "bizProcessCode";
+    private String[] metricEnumInfos = new String[]{"bizProcessCode", "domainCode"};
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -417,39 +418,12 @@ public class MetricServiceImpl implements MetricService {
         MetricDto echoMetric = PojoUtil.copyOne(metric, MetricDto.class);
         echoMetric.getLabelAttributes().stream()
                 .peek(labelAttribute -> {
-                    if (METRIC_BIZ_TYPE.equals(labelAttribute.getAttributeKey())) {
+                    if (Arrays.asList(metricEnumInfos).contains(labelAttribute.getAttributeKey())) {
                         labelAttribute.setEnumValue(enumService.getEnumValue(labelAttribute.getAttributeValue()));
                     }
                 }).collect(Collectors.toList());
         echoMetric.setMeasureLabels(labelService.findLabelsByCode(metricCode));
-        // 反查维度和派生指标
-        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())
-                || metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
-            List<MeasureDto> dimensionList = dimensionService.findDimensionsByMetricCode(metricCode);
-            echoMetric.setDimensions(dimensionList);
-            SpecialAttributeDto metricSpecialAttribute = metric.getSpecialAttribute();
-            String aggregate = StringUtils.isNotBlank(metricSpecialAttribute.getAggregatorCode())
-                    ? metricSpecialAttribute.getAggregatorCode().split(":")[0].split("_")[1] : null;
-            metricSpecialAttribute.setAggregate(aggregate);
-            metric.setSpecialAttribute(metricSpecialAttribute);
-            if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
-                List<MeasureDto> deriveMetricList = getMetricByAtomic(metricCode);
-                echoMetric.setDeriveMetrics(deriveMetricList);
-            }
-            else {
-                MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
-                // 派生指标表名和字段名
-                echoMetric.setMeasureLabels(labelService.findLabelsByCode(atomicMetric.getLabelCode()));
-                SpecialAttributeDto echoSpecialAttribute = atomicMetric.getSpecialAttribute();
-                echoSpecialAttribute.setAtomicMetricCode(atomicMetric.getLabelCode());
-                echoSpecialAttribute.setAtomicMetricName(atomicMetric.getLabelName());
-                echoMetric.setSpecialAttribute(echoSpecialAttribute);
-                List<LabelDto> atomicLabelList = labelService.findLabelsByCode(atomicMetric.getLabelCode());
-                if (atomicLabelList.size() > 0) {
-                    echoMetric.setModifiers(modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId()));
-                }
-            }
-        }
+        echoMetric.setMetricSql(getMetricSql(metricCode));
         return echoMetric;
     }
 
@@ -489,6 +463,12 @@ public class MetricServiceImpl implements MetricService {
                     and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())),
                     and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.ATOMIC_METRIC_LABEL.name()))))
                     .orElseThrow(() -> new IllegalArgumentException("原子指标不存在或已停用"));
+            // 校验时间周期
+            checkArgument(metric.getSpecialAttribute().getTimeAttribute() != null, "时间周期不能为空");
+            checkArgument(metric.getSpecialAttribute().getTimeAttribute().getTableId() != null
+                    && metric.getSpecialAttribute().getTimeAttribute().getColumnId() != null
+                    && StringUtils.isNotEmpty(metric.getSpecialAttribute().getTimeAttribute().getTimeDim()), "时间周期有误");
+            TimeDimEnum.valueOf(metric.getSpecialAttribute().getTimeAttribute().getTimeDim());
             // 校验维度
             checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTableIds()), "维度不能为空");
             List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),

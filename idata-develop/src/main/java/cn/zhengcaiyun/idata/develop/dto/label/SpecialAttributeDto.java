@@ -40,6 +40,7 @@ public class SpecialAttributeDto {
     private String CalculableType;
     private List<ModifierDto> modifiers;
     private List<Long> dimTableIds;
+    private TimeAttributeDto timeAttribute;
 
     // GaS
     public String getAggregatorCode() {
@@ -112,5 +113,13 @@ public class SpecialAttributeDto {
 
     public void setDimTableIds(List<Long> dimTableIds) {
         this.dimTableIds = dimTableIds;
+    }
+
+    public TimeAttributeDto getTimeAttribute() {
+        return timeAttribute;
+    }
+
+    public void setTimeAttribute(TimeAttributeDto timeAttribute) {
+        this.timeAttribute = timeAttribute;
     }
 }
