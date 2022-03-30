@@ -988,7 +988,7 @@ export async function saveDIJobBasicInfo(data: unknown) {
  * 获取DI作业内容
  */
 export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
-  return request(`/api/p1/dev/jobs/${jobId}/di/adapt/contents/${version}`);
+  return request(`/api/p1/dev/jobs/${jobId}/di/contents/${version}`);
 }
 
 /**
