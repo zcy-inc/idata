@@ -36,5 +36,7 @@ public enum FeatureCodeEnum {
     F_ICON_DATA_DEVELOP_ROOT_DIR,
     F_ICON_RELEASE_DATA_JOB,
 
-    F_MENU_LABEL_MANAGE;
+    F_MENU_LABEL_MANAGE,
+
+    F_MENU_DATAPI;
 }
