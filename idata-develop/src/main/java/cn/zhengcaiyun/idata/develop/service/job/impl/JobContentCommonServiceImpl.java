@@ -170,7 +170,9 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)|| JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_DORIS.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
