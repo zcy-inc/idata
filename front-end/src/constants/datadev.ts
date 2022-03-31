@@ -73,6 +73,7 @@ export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步
   SQL_SPARK = 'SQL_SPARK',
+  SQL_FLINK = 'SQL_FLINK',
   SPARK_PYTHON = 'SPARK_PYTHON',
   SPARK_JAR = 'SPARK_JAR',
   SCRIPT_PYTHON = 'SCRIPT_PYTHON',
