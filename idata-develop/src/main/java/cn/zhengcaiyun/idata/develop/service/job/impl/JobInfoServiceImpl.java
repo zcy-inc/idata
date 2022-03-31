@@ -629,12 +629,12 @@ public class JobInfoServiceImpl implements JobInfoService {
             flinkSqlContent = sqlJobRepo.queryLatest(jobId).orElse(null);
             published = false;
         }
-        checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%d，环境:%s", jobId, env));
+        checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%s，环境:%s", jobId, env));
         String jobExtendConfigs = flinkSqlContent.getExtendConfigs();
-        checkArgument(StringUtils.isNotBlank(jobExtendConfigs), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        checkArgument(StringUtils.isNotBlank(jobExtendConfigs), "Flink作业数据源配置为空, jobId:%s，环境:%s", jobId, env);
         SqlJobExtendConfigDto extendConfigDto = new Gson().fromJson(jobExtendConfigs, SqlJobExtendConfigDto.class);
         FlinkSqlJobExtendConfigDto flinkExtConfig = extendConfigDto.getFlinkExtConfig();
-        checkArgument(Objects.nonNull(flinkExtConfig), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
+        checkArgument(Objects.nonNull(flinkExtConfig), "Flink作业数据源配置为空, jobId:%s，环境:%s", jobId, env);
         checkArgument(!CollectionUtils.isEmpty(flinkExtConfig.getFlinkSinkConfigs()) && !CollectionUtils.isEmpty(flinkExtConfig.getFlinkSourceConfigs()), "Flink作业数据源配置为空, jobId:%d，环境:%s", jobId, env);
 
         List<DevJobUdf> udfList = new ArrayList<>();
@@ -650,7 +650,7 @@ public class JobInfoServiceImpl implements JobInfoService {
             DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
-            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
             privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });
@@ -660,7 +660,7 @@ public class JobInfoServiceImpl implements JobInfoService {
             DbConfigDto dbConfigDto = dataSourceDto.getDbConfigList().stream()
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
-            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%d，环境:%s", jobId, env);
+            checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
             privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });

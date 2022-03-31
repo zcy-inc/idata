@@ -105,12 +105,12 @@ public class FlinkSqlUtil {
     public static Map<String, String> generateJDBCProperties(String dataSourceType, String dataSourceUDCode,
                                                              DataSourceTypeEnum sourceTypeEnum, DbConfigDto dbConfigDto) {
         Map<String, String> props = Maps.newHashMap();
-        String urlKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "url" + "}";
+        String urlKey = dataSourceType + "." + dataSourceUDCode + "." + "url";
         String jdbcUrlVal = String.format("jdbc:%s://%s:%d/%s", sourceTypeEnum.name(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbConfigDto.getDbName());
         props.put(urlKey, DesUtil.encrypt(jdbcUrlVal));
-        String nameKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "username" + "}";
+        String nameKey = dataSourceType + "." + dataSourceUDCode + "." + "username";
         props.put(nameKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getUsername())));
-        String pwdKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "password" + "}";
+        String pwdKey = dataSourceType + "." + dataSourceUDCode + "." + "password";
         props.put(pwdKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getPassword())));
         return props;
     }
@@ -128,7 +128,7 @@ public class FlinkSqlUtil {
     public static Map<String, String> generateKafkaProperties(String dataSourceType, String dataSourceUDCode,
                                                               DataSourceTypeEnum sourceTypeEnum, DbConfigDto dbConfigDto) {
         Map<String, String> props = Maps.newHashMap();
-        String serversKey = "${" + dataSourceType + "." + dataSourceUDCode + "." + "servers" + "}";
+        String serversKey = dataSourceType + "." + dataSourceUDCode + "." + "servers";
         String serversVal = dbConfigDto.getHost();
         props.put(serversKey, DesUtil.encrypt(serversVal));
         return props;

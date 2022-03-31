@@ -129,7 +129,7 @@ public class RoleServiceImpl implements RoleService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        List<FolderTreeNodeDto> devFolderTree = systemService.getDevFolderTree(folderPermissionMap);
+        List<FolderTreeNodeDto> devFolderTree = systemService.getFolderTree(folderPermissionMap);
         return devFolderTree;
     }
 

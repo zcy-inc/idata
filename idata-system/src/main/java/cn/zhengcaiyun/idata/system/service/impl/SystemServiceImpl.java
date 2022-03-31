@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.system.service.impl;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.TreeNodeTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.core.spi.loader.ServiceProvidersLoader;
@@ -30,6 +31,7 @@ import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SysResourceService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
 import cn.zhengcaiyun.idata.system.spi.BaseTreeNodeService;
+import cn.zhengcaiyun.idata.system.zcy.ZcyService;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,8 @@ public class SystemServiceImpl implements SystemService {
     private SysFeatureDao sysFeatureDao;
     @Autowired
     private ServiceProvidersLoader serviceProvidersLoader;
+    @Autowired
+    private ZcyService zcyService;
 
     @Autowired
     private SysResourceService sysResourceService;
@@ -97,6 +101,13 @@ public class SystemServiceImpl implements SystemService {
         return getFeatureChildren(null, sysFeatures, enableFeatureCodes, mode);
     }
 
+    @Override
+    public List<FolderTreeNodeDto> getFolderTree(Map<String, Integer> folderPermissionMap) {
+        List<FolderTreeNodeDto> echo = getDevFolderTree(folderPermissionMap);
+        echo.add(getDatapiFolderTree(folderPermissionMap));
+        return echo;
+    }
+
     private List<FeatureTreeNodeDto> getFeatureChildren(String parentCode,
                                                         List<SysFeature> sysFeatures,
                                                         Set<String> enableFeatureCodes,
@@ -134,8 +145,7 @@ public class SystemServiceImpl implements SystemService {
         }
     }
 
-    @Override
-    public List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap) {
+    private List<FolderTreeNodeDto> getDevFolderTree(Map<String, Integer> folderPermissionMap) {
         BaseTreeNodeService devBaseTreeNode = ServiceProvidersLoaders.loadProviderIfPresent(serviceProvidersLoader,
                 BaseTreeNodeService.class, "devTree");
         List<BaseTreeNodeDto> devBaseTreeNodeList = devBaseTreeNode.getBaseTree();
@@ -220,7 +230,40 @@ public class SystemServiceImpl implements SystemService {
             else if (resourceCode.contains("_DATA_LABEL_")) {
                 featureCode = FeatureCodeEnum.F_MENU_LABEL_MANAGE.name();
             }
+            else if (resourceCode.contains("_API_DEVELOP_")) {
+                featureCode = FeatureCodeEnum.F_MENU_DATAPI.name();
+            }
             return featureCode;
         }).collect(Collectors.toList());
     }
+
+    private FolderTreeNodeDto getDatapiFolderTree(Map<String, Integer> folderPermissionMap) {
+        SysFeature featureNode = sysFeatureDao.selectOne(c -> c.where(sysFeature.del, isNotEqualTo(1),
+                and(sysFeature.featureCode, isEqualTo(FeatureCodeEnum.F_MENU_DATAPI.name())))).orElse(null);
+        if (featureNode == null) return new FolderTreeNodeDto();
+
+        FolderTreeNodeDto echo = PojoUtil.copyOne(featureNode, FolderTreeNodeDto.class, "featureCode");
+        echo.setType(featureNode.getFeatureType());
+        echo.setName(featureNode.getFeatureName());
+        echo.setCid(featureNode.getFeatureCode());
+        List<FolderTreeNodeDto> folderTree = zcyService.getFolders(ResourceTypeEnum.R_API_DEVELOP_DIR).stream().peek(folderTreeNode -> {
+            Integer folderPermission = folderPermissionMap.get(folderTreeNode.getType() + folderTreeNode.getFolderId());
+            if (folderPermission != null && folderPermission > 0) {
+                folderTreeNode.setFilePermission(folderPermission);
+            }
+            else {
+                folderTreeNode.setFilePermission(0);
+            }
+        }).collect(Collectors.toList());
+        echo.setChildren(getFolderChildren("-1", folderTree));
+        return echo;
+
+    }
+
+    private List<FolderTreeNodeDto> getFolderChildren(String parentId, List<FolderTreeNodeDto> folderTreeNodes) {
+        return folderTreeNodes.stream().filter(f -> (f.getParentId() != null && f.getParentId().equals(parentId)))
+                .peek(folderTreeNode -> folderTreeNode.setChildren(getFolderChildren(folderTreeNode.getFolderId(), folderTreeNodes)))
+                .collect(Collectors.toList());
+    }
+
 }

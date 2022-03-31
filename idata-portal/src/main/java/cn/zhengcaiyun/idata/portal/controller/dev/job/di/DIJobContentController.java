@@ -25,9 +25,9 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentRequest;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobContentResponse;
-import org.springframework.beans.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,13 +55,13 @@ public class DIJobContentController {
     /**
      * 保存DI作业内容
      *
-     * @param jobId      作业id
+     * @param jobId          作业id
      * @param contentRequest 作业内容信息
      * @return
      */
     @PostMapping("/contents")
     public RestResult<DIJobContentResponse> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody @Valid DIJobContentRequest contentRequest) {
+                                                        @RequestBody @Valid DIJobContentRequest contentRequest) {
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
 
@@ -91,7 +91,7 @@ public class DIJobContentController {
 
         // 1个字段拆成2个返回
         String srcDataSourceType = response.getSrcDataSourceType();
-        if (StringUtils.contains(dto.getSrcTables(), ".")&& StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }
@@ -105,9 +105,9 @@ public class DIJobContentController {
      * @param version 作业版本号
      * @return
      */
-    @GetMapping("/adapt/contents/{version}")
-    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
-                                                            @PathVariable("version") Integer version) {
+    @GetMapping("/contents/{version}")
+    public RestResult<DIJobContentResponse> getContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
         DIJobContentContentDto dto = diJobContentService.get(jobId, version);
 
         DIJobContentResponse response = new DIJobContentResponse();
