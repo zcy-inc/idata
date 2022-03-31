@@ -14,7 +14,7 @@ export { default as RadioGroup } from './RadioGroup';
 
 export { default as Tip } from './Tip';
 
-export { default as TableSelect } from './TableSelect';
+export { default as TableSelectInput } from './TableSelectInput';
 
 export { default as Title } from './Title';
 
