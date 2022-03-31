@@ -84,6 +84,11 @@ public class TableInfoController {
         return RestResult.success(columnInfoService.getColumnDetails(tableId));
     }
 
+    @GetMapping("tables")
+    public RestResult<List<DevTableInfo>> getTables(@RequestParam(value = "tableName", required = false) String tableName) {
+        return RestResult.success(tableInfoService.getTablesByCondition(tableName));
+    }
+
     @GetMapping("tableDdl/{tableId}")
     public RestResult<String> getTableDDL(@PathVariable("tableId") Long tableId) {
         return RestResult.success(tableInfoService.getTableDDL(tableId));

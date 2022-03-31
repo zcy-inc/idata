@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
@@ -69,11 +70,11 @@ public class MeasureDataServiceImpl implements MeasureDataService {
 
     @Override
     public List<String> queryModifierValues(Long tableId, String columnName) throws SQLException {
-        String selectSql = "SELECT %s FROM %s.%s GROUP BY %s";
+        String selectSql = "SELECT %s FROM %s.%s GROUP BY %s LIMIT 10";
         TableInfoDto tableInfoDto = tableInfoService.getTableInfo(tableId);
         ConnectionCfg connectionDto = tableQueryManager.getConnectionInfo();
         QueryResultDto resultDto = query.query(connectionDto, String.format(selectSql, columnName,
                 tableInfoDto.getDbName(), tableInfoDto.getTableName(), columnName));
-        return resultDto.getData().get(0);
+        return resultDto.getData().stream().map(data -> data.get(0)).collect(Collectors.toList());
     }
 }

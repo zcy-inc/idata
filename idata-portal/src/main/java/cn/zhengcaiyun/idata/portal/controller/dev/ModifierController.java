@@ -56,7 +56,7 @@ public class ModifierController {
 
     @GetMapping("modifiers")
     public RestResult<List<DevLabelDefine>> findByTableIds(@RequestParam("modifierTableIds") String modifierTableIds) {
-        return RestResult.success(modifierService.findModifiersByIds(modifierTableIds));
+        return RestResult.success(modifierService.findModifiersByTableIds(modifierTableIds));
     }
 
     @GetMapping("mergeOldModifiers")

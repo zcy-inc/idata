@@ -291,7 +291,7 @@ public class ModifierServiceImpl implements ModifierService {
     }
 
     @Override
-    public List<DevLabelDefine> findModifiersByIds(String tableIds) {
+    public List<DevLabelDefine> findModifiersByTableIds(String tableIds) {
         List<Long> tableIdList = new ArrayList<>(Arrays.asList(tableIds.split(",")))
                 .stream().map(Long::valueOf).collect(Collectors.toList());
         List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
