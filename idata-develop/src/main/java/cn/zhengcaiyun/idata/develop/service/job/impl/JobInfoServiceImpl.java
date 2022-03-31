@@ -676,6 +676,10 @@ public class JobInfoServiceImpl implements JobInfoService {
             extendProperties.stream()
                     .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
         }
+        if (!confProp.containsKey("logLevel")) {
+            // 给个默认值
+            confProp.put("logLevel", "warn");
+        }
         flinkSqlResponse.setConfProp(confProp);
         flinkSqlResponse.setPublished(published);
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
