@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
@@ -71,7 +72,9 @@ public class MeasureServiceImpl implements MeasureService {
     @Override
     public List<MeasureDto> getMeasures(Long folderId, String measureType, String metricType, String measureId,
                                         String measureName, String bizProcess, Boolean enable, String creator, Date measureDeadline,
-                                        String domain, String belongTblName) {
+                                        String domain, String belongTblName, Long limit, Integer offset) {
+        offset = offset != null ? offset : 0;
+        limit = limit != null ? limit : PageParam.MAX_LIMIT;
         String isEnable = null;
         String measureDeadlineStr = null;
         if (enable != null) {
@@ -91,7 +94,7 @@ public class MeasureServiceImpl implements MeasureService {
         List<String> folderIdStrList = folderIds.stream().map(String::valueOf).collect(Collectors.toList());
         List<String> measureCodeList = devLabelDefineMyDao.selectLabelDefineCodesByCondition(
                 String.join(",", folderIdStrList), measureType, metricType, measureId, measureName,
-                bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName)
+                bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName, limit, offset)
                 .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
         return getMeasureDetails(measureCodeList, measureType);
     }

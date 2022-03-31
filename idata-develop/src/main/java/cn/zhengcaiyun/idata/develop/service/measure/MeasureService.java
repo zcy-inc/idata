@@ -31,5 +31,5 @@ import java.util.List;
 public interface MeasureService {
     List<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String metricType, String measureName,
                                  String bizProcess, Boolean enable, String creator, Date measureDeadline, String domain,
-                                 String belongTblName);
+                                 String belongTblName, Long limit, Integer offset);
 }

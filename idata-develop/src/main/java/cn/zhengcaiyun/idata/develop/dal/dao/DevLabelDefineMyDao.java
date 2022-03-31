@@ -99,6 +99,7 @@ public interface DevLabelDefineMyDao {
                 "<if test = 'belongTblName != null'>" +
                     "AND dev_table_info.del = 0 AND dev_table_info.table_name LIKE concat('%', #{belongTblName}, '%') " +
                 "</if>" +
+            "LIMIT #{limit} OFFSET #{offset} " +
             "</script>")
     List<DevLabelDefine> selectLabelDefineCodesByCondition(String folderIds,
                                                            String measureType,
@@ -110,5 +111,7 @@ public interface DevLabelDefineMyDao {
                                                            String creator,
                                                            String measureDeadline,
                                                            String domain,
-                                                           String belongTblName);
+                                                           String belongTblName,
+                                                           Long limit,
+                                                           Integer offset);
 }
