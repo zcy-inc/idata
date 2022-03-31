@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
@@ -42,7 +43,7 @@ public class MeasureController {
     private MeasureService measureService;
 
     @GetMapping("measures")
-    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("measureType") String measureType,
+    public RestResult<Page<MeasureDto>> getMetrics(@RequestParam("measureType") String measureType,
                                                    @RequestParam(value = "folderId", required = false) Long folderId,
                                                    @RequestParam(value = "metricType", required = false) String metricType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,

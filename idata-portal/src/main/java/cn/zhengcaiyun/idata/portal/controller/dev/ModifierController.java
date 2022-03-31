@@ -59,6 +59,11 @@ public class ModifierController {
         return RestResult.success(modifierService.findModifiersByIds(modifierTableIds));
     }
 
+    @GetMapping("mergeOldModifiers")
+    public int mergeOldModifiers() {
+        return modifierService.mergeOldModifiers();
+    }
+
     @PostMapping("modifier")
     public RestResult<MeasureDto> addOrUpdateModifier(@RequestBody MeasureDto modifier,
                                                       HttpServletRequest request) {

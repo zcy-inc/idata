@@ -60,6 +60,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSuppor
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -155,6 +156,15 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (foreignKeyList.size() == 0) return new ArrayList<>();
         List<Long> referTableIdList = foreignKeyList.stream().map(DevForeignKey::getReferTableId).collect(Collectors.toList());
         return devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isIn(referTableIdList))));
+    }
+
+    @Override
+    public List<DevTableInfo> getTablesByCondition(String tableName) {
+        var builder = select(devTableInfo.allColumns()).from(devTableInfo).where(devTableInfo.del, isNotEqualTo(1));
+        if (StringUtils.isNotEmpty(tableName)) {
+            builder.and(devTableInfo.tableName, isLike(tableName));
+        }
+        return devTableInfoDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
     }
 
     @Override

@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure;
 
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ import java.util.List;
 
 @Service
 public interface MeasureService {
-    List<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String metricType, String measureName,
+    Page<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String metricType, String measureName,
                                  String bizProcess, Boolean enable, String creator, Date measureDeadline, String domain,
                                  String belongTblName, Long limit, Integer offset);
 }

@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
@@ -39,6 +40,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
@@ -60,6 +62,8 @@ public class ModifierServiceImpl implements ModifierService {
     private DevLabelDao devLabelDao;
     @Autowired
     private DevTableInfoDao devTableInfoDao;
+    @Autowired
+    private DevEnumValueDao devEnumValueDao;
     @Autowired
     private LabelService labelService;
     @Autowired
@@ -259,21 +263,31 @@ public class ModifierServiceImpl implements ModifierService {
                 c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isLike("MODIFIER")))),
                 LabelDefineDto.class, "labelCode", "labelAttributes");
         List<String> modifierCodeList = existModifierList.stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toList());
+        List<String> enumCodeList = enumService.getEnums().stream().map(EnumDto::getEnumCode).collect(Collectors.toList());
+        Map<String, List<DevEnumValue>> enumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isIn(enumCodeList))))
+                .stream().collect(Collectors.groupingBy(DevEnumValue::getEnumCode));
         Map<String, String> modifierEnumValueMap = modifierCodeList.stream()
                 .map(this::getModifierByCode)
                 .collect(Collectors.toMap(MeasureDto::getLabelCode, measure -> {
                     AttributeDto attributeDto = measure.getLabelAttributes().stream()
                             .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
                             .findAny().orElse(null);
-                    return attributeDto != null ? attributeDto.getEnumValue() : "";
+                    if (attributeDto != null) {
+                        List<String> enumValueList = enumMap.get(attributeDto.getEnumValue())
+                                .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
+                        return String.join(",", enumValueList);
+                    }
+                    return "";
                 }));
+        int total = 0;
         for (String modifierCode : modifierCodeList) {
             LabelDto modifierLabel = labelService.findLabelsByCode(modifierCode).get(0);
             modifierLabel.setLabelParamValue(modifierEnumValueMap.getOrDefault(modifierCode, ""));
-            devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierCode, DevLabel.class,
+            total += devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierCode, DevLabel.class,
                     "id", "labelParamValue"));
         }
-        return 0;
+        return total;
     }
 
     @Override
