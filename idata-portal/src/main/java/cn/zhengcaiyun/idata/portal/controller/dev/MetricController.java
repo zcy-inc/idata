@@ -60,7 +60,7 @@ public class MetricController {
         return RestResult.success(metricService.findMetrics(labelTag));
     }
 
-    @GetMapping("tableInfo")
+    @GetMapping("tableDateColumns")
     public RestResult<TableInfoDto> getTableDateColumns(@RequestParam("metricCode") String metricCode) {
         return RestResult.success(metricService.getTableDateColumns(metricCode));
     }
