@@ -28,7 +28,7 @@ public class TimeAttributeDto {
     private Long tableName;
     private Long columnId;
     private String columnName;
-    @ApiModelProperty(value = "SEVEN_DAYS | THIRTY_DAS | ONE_MONTH | THREE_MONTHS | SIX_MONTHS |ONE_YEAR")
+    @ApiModelProperty(value = "SEVEN_DAYS | THIRTY_DAS | ONE_MONTH | THREE_MONTHS | SIX_MONTHS | ONE_YEAR")
     private String timeDim;
 
     // GaS

@@ -42,8 +42,8 @@ public class MeasureController {
     private MeasureService measureService;
 
     @GetMapping("measures")
-    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("folderId") Long folderId,
-                                                   @RequestParam("measureType") String measureType,
+    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("measureType") String measureType,
+                                                   @RequestParam(value = "folderId", required = false) Long folderId,
                                                    @RequestParam(value = "metricType", required = false) String metricType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,
                                                    @RequestParam(value = "measureName", required = false) String measureName,

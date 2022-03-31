@@ -89,11 +89,15 @@ public class MeasureServiceImpl implements MeasureService {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             measureDeadlineStr = sdf.format(measureDeadline);
         }
-        Set<Long> folderIds = new HashSet<>(Collections.singletonList(folderId));
-        folderIds = devFolderService.getChildFolderIds(folderIds, measureType.split("_")[0]);
-        List<String> folderIdStrList = folderIds.stream().map(String::valueOf).collect(Collectors.toList());
+        String folderIdsStr = null;
+        if (folderId != null) {
+            Set<Long> folderIds = new HashSet<>(Collections.singletonList(folderId));
+            folderIds = devFolderService.getChildFolderIds(folderIds, measureType.split("_")[0]);
+            List<String> folderIdStrList = folderIds.stream().map(String::valueOf).collect(Collectors.toList());
+            folderIdsStr = String.join(",", folderIdStrList);
+        }
         List<String> measureCodeList = devLabelDefineMyDao.selectLabelDefineCodesByCondition(
-                String.join(",", folderIdStrList), measureType, metricType, measureId, measureName,
+                folderIdsStr, measureType, metricType, measureId, measureName,
                 bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName, limit, offset)
                 .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
         return getMeasureDetails(measureCodeList, measureType);

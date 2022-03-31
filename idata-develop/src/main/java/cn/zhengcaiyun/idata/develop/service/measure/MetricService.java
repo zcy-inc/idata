@@ -36,4 +36,5 @@ public interface MetricService {
     MeasureDto edit(MeasureDto metric, String operator);
     MeasureDto disableOrAble(String metricCode, String labelTag, String operator);
     boolean delete(String metricCode, String operator);
+    TableInfoDto getTableDateColumns(String metricCode);
 }

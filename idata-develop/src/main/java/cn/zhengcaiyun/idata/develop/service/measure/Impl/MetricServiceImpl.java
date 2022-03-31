@@ -27,6 +27,8 @@ import cn.zhengcaiyun.idata.develop.dto.label.*;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
@@ -91,6 +93,7 @@ public class MetricServiceImpl implements MetricService {
     private final String METRIC_LABEL = "METRIC_LABEL";
     private final String METRIC_BIZ_TYPE = "bizProcessCode";
     private String[] metricEnumInfos = new String[]{"bizProcessCode", "domainCode"};
+    private String[] columnTypes = new String[]{"TIMESTAMP", "DATE", "ARRAY<TIMESTAMP>", "ARRAY<DATE>"};
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -294,6 +297,21 @@ public class MetricServiceImpl implements MetricService {
         }
 
         return labelService.deleteDefine(metricCode, operator);
+    }
+
+    @Override
+    public TableInfoDto getTableDateColumns(String metricCode) {
+        DevLabelDefine checkMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
+        List<DevLabel> metricLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(metricCode))));
+        if (metricLabelList.size() == 0) return new TableInfoDto();
+        TableInfoDto tableInfo = tableInfoService.getTableInfo(metricLabelList.get(0).getTableId());
+        List<ColumnDetailsDto> dateColumnList = columnInfoService.getColumnDetails(metricLabelList.get(0).getTableId())
+                .stream().filter(column -> Arrays.asList(columnTypes).contains(column.getColumnType())).collect(Collectors.toList());
+        tableInfo.setColumnInfos(PojoUtil.copyList(dateColumnList, ColumnInfoDto.class, "id", "columnName", "columnType"));
+        return tableInfo;
     }
 
     // 查询被原子指标依赖的派生指标

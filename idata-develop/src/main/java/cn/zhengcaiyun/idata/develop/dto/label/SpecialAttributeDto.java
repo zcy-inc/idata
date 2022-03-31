@@ -37,7 +37,7 @@ public class SpecialAttributeDto {
     private String atomicMetricName;
     private String complexMetricFormula;
     @ApiModelProperty(value = "ACCUMULATE | HALF_ACCUMULATE | NON_ACCUMULATE")
-    private String CalculableType;
+    private String calculableType;
     private List<ModifierDto> modifiers;
     private List<Long> dimTableIds;
     private TimeAttributeDto timeAttribute;
@@ -100,11 +100,11 @@ public class SpecialAttributeDto {
     }
 
     public String getCalculableType() {
-        return CalculableType;
+        return calculableType;
     }
 
     public void setCalculableType(String calculableType) {
-        CalculableType = calculableType;
+        calculableType = calculableType;
     }
 
     public List<Long> getDimTableIds() {

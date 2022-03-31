@@ -68,10 +68,12 @@ public interface DevLabelDefineMyDao {
                 "LEFT JOIN dev_label ON dev_label_define.label_code = dev_label.label_code " +
                 "LEFT JOIN dev_table_info ON dev_label.table_id = dev_table_info.id " +
             "</if>" +
-            "WHERE dev_label_define.del != 1 AND dev_label_define.folder_id in (${folderIds}) " +
-                "AND dev_label_define.label_tag LIKE concat('%', #{measureType}, '%') " +
+            "WHERE dev_label_define.del != 1 AND dev_label_define.label_tag LIKE concat('%', #{measureType}, '%') " +
                 // 暂过滤复合指标
                 "AND dev_label_define.label_tag NOT LIKE 'COMPLEX_METRIC_LABEL%' " +
+                "<if test = 'folderIds != null'>" +
+                    "AND dev_label_define.folder_id in (${folderIds}) " +
+                "</if>" +
                 "<if test = 'metricType != null'>" +
                     "AND dev_label_define.label_tag = #{metricType} " +
                 "</if>" +
