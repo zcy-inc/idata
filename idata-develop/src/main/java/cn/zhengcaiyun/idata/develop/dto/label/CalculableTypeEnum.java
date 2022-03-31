@@ -14,22 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.service.measure;
-
-import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
+package cn.zhengcaiyun.idata.develop.dto.label;
 
 /**
  * @author caizhedong
- * @date 2022-03-22 下午2:33
+ * @date 2022-03-30 上午11:35
  */
 
-@Service
-public interface MeasureService {
-    List<MeasureDto> getMeasures(Long folderId, String measureType, String measureId, String metricType, String measureName,
-                                 String bizProcess, Boolean enable, String creator, Date measureDeadline, String domain,
-                                 String belongTblName, Long limit, Integer offset);
+public enum CalculableTypeEnum {
+    ACCUMULATE,
+    HALF_ACCUMULATE,
+    NON_ACCUMULATE;
 }

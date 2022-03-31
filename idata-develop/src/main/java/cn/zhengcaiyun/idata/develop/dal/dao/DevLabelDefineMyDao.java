@@ -62,14 +62,18 @@ public interface DevLabelDefineMyDao {
     @Result(column = "special_attribute", property = "specialAttribute", javaType = SpecialAttributeDto.class, typeHandler = JsonColumnHandler.class)
     @Result(column = "enum_attributes", property = "enumAttributes", javaType = List.class, typeHandler = JsonColumnHandler.class)
     @Select("<script>" +
-            "SELECT label_code " +
+            "SELECT dev_label_define.label_code " +
             "FROM dev_label_define " +
             "<if test = 'belongTblName != null'>" +
                 "LEFT JOIN dev_label ON dev_label_define.label_code = dev_label.label_code " +
                 "LEFT JOIN dev_table_info ON dev_label.table_id = dev_table_info.id " +
             "</if>" +
-            "WHERE dev_label_define.del != 1 AND dev_label_define.folder_id = #{folderId} " +
-                "AND dev_label_define.label_tag LIKE concat('%', #{measureType}, '%') " +
+            "WHERE dev_label_define.del != 1 AND dev_label_define.label_tag LIKE concat('%', #{measureType}, '%') " +
+                // 暂过滤复合指标
+                "AND dev_label_define.label_tag NOT LIKE 'COMPLEX_METRIC_LABEL%' " +
+                "<if test = 'folderIds != null'>" +
+                    "AND dev_label_define.folder_id in (${folderIds}) " +
+                "</if>" +
                 "<if test = 'metricType != null'>" +
                     "AND dev_label_define.label_tag = #{metricType} " +
                 "</if>" +
@@ -97,16 +101,19 @@ public interface DevLabelDefineMyDao {
                 "<if test = 'belongTblName != null'>" +
                     "AND dev_table_info.del = 0 AND dev_table_info.table_name LIKE concat('%', #{belongTblName}, '%') " +
                 "</if>" +
+            "LIMIT #{limit} OFFSET #{offset} " +
             "</script>")
-    List<String> selectLabelDefineCodesByCondition(Long folderId,
-                                                   String measureType,
-                                                   String metricType,
-                                                   String measureId,
-                                                   String measureName,
-                                                   String bizProcess,
-                                                   String enable,
-                                                   String creator,
-                                                   String measureDeadline,
-                                                   String domain,
-                                                   String belongTblName);
+    List<DevLabelDefine> selectLabelDefineCodesByCondition(String folderIds,
+                                                           String measureType,
+                                                           String metricType,
+                                                           String measureId,
+                                                           String measureName,
+                                                           String bizProcess,
+                                                           String enable,
+                                                           String creator,
+                                                           String measureDeadline,
+                                                           String domain,
+                                                           String belongTblName,
+                                                           Long limit,
+                                                           Integer offset);
 }

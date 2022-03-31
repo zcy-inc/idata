@@ -37,4 +37,5 @@ public interface DevFolderService {
     Set<Long> getUserMeasureFolderIds(Long userId, String folderType);
     boolean delete(Long devFolderId, String operator);
     boolean checkMeasureResAccess(Long userId, String folderId, String accessType);
+    Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType);
 }

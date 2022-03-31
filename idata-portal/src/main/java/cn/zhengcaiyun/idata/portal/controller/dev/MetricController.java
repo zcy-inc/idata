@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,13 @@ public class MetricController {
 
     @GetMapping("metrics")
     public RestResult<List<MeasureDto>> getMetrics(@RequestParam("labelTag") String labelTag,
-                                                    @RequestParam(value = "labelCode", required = false) String labelCode) {
+                                                   @RequestParam(value = "labelCode", required = false) String labelCode) {
         return RestResult.success(metricService.findMetrics(labelTag));
+    }
+
+    @GetMapping("tableDateColumns")
+    public RestResult<TableInfoDto> getTableDateColumns(@RequestParam("metricCode") String metricCode) {
+        return RestResult.success(metricService.getTableDateColumns(metricCode));
     }
 
     @GetMapping("metricsOrDimensions")
@@ -67,7 +73,7 @@ public class MetricController {
 
     @GetMapping("metricSql")
     public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getMetricSql(metricCode));
+        return RestResult.success(metricService.getMetricDimSql(metricCode));
     }
 
     @PostMapping("metric")

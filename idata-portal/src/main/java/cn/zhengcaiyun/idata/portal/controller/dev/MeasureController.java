@@ -42,8 +42,8 @@ public class MeasureController {
     private MeasureService measureService;
 
     @GetMapping("measures")
-    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("folderId") Long folderId,
-                                                   @RequestParam("measureType") String measureType,
+    public RestResult<List<MeasureDto>> getMetrics(@RequestParam("measureType") String measureType,
+                                                   @RequestParam(value = "folderId", required = false) Long folderId,
                                                    @RequestParam(value = "metricType", required = false) String metricType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,
                                                    @RequestParam(value = "measureName", required = false) String measureName,
@@ -52,8 +52,10 @@ public class MeasureController {
                                                    @RequestParam(value = "creator", required = false) String creator,
                                                    @RequestParam(value = "measureDeadline", required = false) Date measureDeadline,
                                                    @RequestParam(value = "domain", required = false) String domain,
-                                                   @RequestParam(value = "belongTblName", required = false) String belongTblName) {
+                                                   @RequestParam(value = "belongTblName", required = false) String belongTblName,
+                                                   @RequestParam(value = "limit", required = false) Long limit,
+                                                   @RequestParam(value = "offset", required = false) Integer offset) {
         return RestResult.success(measureService.getMeasures(folderId, measureType, metricType, measureId, measureName,
-                bizProcess, enable, creator, measureDeadline, domain, belongTblName));
+                bizProcess, enable, creator, measureDeadline, domain, belongTblName, limit, offset));
     }
 }

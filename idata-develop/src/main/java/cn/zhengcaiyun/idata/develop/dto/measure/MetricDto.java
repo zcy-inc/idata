@@ -28,6 +28,7 @@ import java.util.List;
 public class MetricDto extends MeasureDto {
     private List<MeasureDto> dimensions;
     private List<MeasureDto> deriveMetrics;
+    private String metricSql;
 
     // GaS
     public List<MeasureDto> getDimensions() {
@@ -44,5 +45,13 @@ public class MetricDto extends MeasureDto {
 
     public void setDeriveMetrics(List<MeasureDto> deriveMetrics) {
         this.deriveMetrics = deriveMetrics;
+    }
+
+    public String getMetricSql() {
+        return metricSql;
+    }
+
+    public void setMetricSql(String metricSql) {
+        this.metricSql = metricSql;
     }
 }

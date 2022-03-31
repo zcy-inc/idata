@@ -16,6 +16,8 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.label;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author caizhedong
  * @date 2022-03-24 下午4:58
@@ -26,7 +28,8 @@ public class TimeAttributeDto {
     private Long tableName;
     private Long columnId;
     private String columnName;
-    private TimeDimEnum timeDim;
+    @ApiModelProperty(value = "SEVEN_DAYS | THIRTY_DAS | ONE_MONTH | THREE_MONTHS | SIX_MONTHS | ONE_YEAR")
+    private String timeDim;
 
     // GaS
     public Long getTableId() {
@@ -61,11 +64,11 @@ public class TimeAttributeDto {
         this.columnName = columnName;
     }
 
-    public TimeDimEnum getTimeDim() {
+    public String getTimeDim() {
         return timeDim;
     }
 
-    public void setTimeDim(TimeDimEnum timeDim) {
+    public void setTimeDim(String timeDim) {
         this.timeDim = timeDim;
     }
 }

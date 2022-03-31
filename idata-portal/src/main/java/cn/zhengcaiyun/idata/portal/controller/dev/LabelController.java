@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -70,6 +71,11 @@ public class LabelController {
             throw new IllegalAccessException("没有元数据标签配置权限");
         }
         return RestResult.success(labelService.findDefines(subjectType, labelTag));
+    }
+
+    @GetMapping("labels")
+    public RestResult<List<LabelDto>> findLabelsByCode(@RequestParam("labelCode") String labelCode) {
+        return RestResult.success(labelService.findLabelsByCode(labelCode));
     }
 
     @PostMapping("labelDefine")

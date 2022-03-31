@@ -16,27 +16,28 @@
  */
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.AttributeDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.measure.MeasureService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevFolderDynamicSqlSupport.devFolder;
@@ -65,11 +66,15 @@ public class MeasureServiceImpl implements MeasureService {
     private DevLabelDefineMyDao devLabelDefineMyDao;
     @Autowired
     private EnumService enumService;
+    @Autowired
+    private DevFolderService devFolderService;
 
     @Override
     public List<MeasureDto> getMeasures(Long folderId, String measureType, String metricType, String measureId,
                                         String measureName, String bizProcess, Boolean enable, String creator, Date measureDeadline,
-                                        String domain, String belongTblName) {
+                                        String domain, String belongTblName, Long limit, Integer offset) {
+        offset = offset != null ? offset : 0;
+        limit = limit != null ? limit : PageParam.MAX_LIMIT;
         String isEnable = null;
         String measureDeadlineStr = null;
         if (enable != null) {
@@ -84,8 +89,17 @@ public class MeasureServiceImpl implements MeasureService {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             measureDeadlineStr = sdf.format(measureDeadline);
         }
-        List<String> measureCodeList = devLabelDefineMyDao.selectLabelDefineCodesByCondition(folderId, measureType, metricType,
-                measureId, measureName, bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName);
+        String folderIdsStr = null;
+        if (folderId != null) {
+            Set<Long> folderIds = new HashSet<>(Collections.singletonList(folderId));
+            folderIds = devFolderService.getChildFolderIds(folderIds, measureType.split("_")[0]);
+            List<String> folderIdStrList = folderIds.stream().map(String::valueOf).collect(Collectors.toList());
+            folderIdsStr = String.join(",", folderIdStrList);
+        }
+        List<String> measureCodeList = devLabelDefineMyDao.selectLabelDefineCodesByCondition(
+                folderIdsStr, measureType, metricType, measureId, measureName,
+                bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName, limit, offset)
+                .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
         return getMeasureDetails(measureCodeList, measureType);
     }
 
@@ -109,7 +123,7 @@ public class MeasureServiceImpl implements MeasureService {
     private List<MeasureDto> getMetricDetails(List<MeasureDto> metrics) {
         List<MeasureDto> echoMetricList =  metrics.stream().map(metric -> {
                     MeasureDto echo = PojoUtil.copyOne(metric,
-                    "id", "creatTime", "editTime", "creator", "editor", "labelName", "labelTag", "folderName");
+                    "id", "createTime", "editTime", "creator", "editor", "labelName", "labelTag", "folderName");
                     List<AttributeDto> labelAttributeList = metric.getLabelAttributes();
                     labelAttributeList.forEach(labelAttribute -> {
                         if ("metricId".equals(labelAttribute.getAttributeKey())) {
