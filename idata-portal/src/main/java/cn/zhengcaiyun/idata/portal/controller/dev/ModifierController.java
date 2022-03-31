@@ -55,7 +55,7 @@ public class ModifierController {
     }
 
     @GetMapping("modifiers")
-    public RestResult<List<DevLabelDefine>> findByTableIds(@RequestParam("modifierTableIds") List<Long> modifierTableIds) {
+    public RestResult<List<DevLabelDefine>> findByTableIds(@RequestParam("modifierTableIds") String modifierTableIds) {
         return RestResult.success(modifierService.findModifiersByIds(modifierTableIds));
     }
 

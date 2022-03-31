@@ -36,5 +36,5 @@ public interface ModifierService {
     MeasureDto disableOrAble(String modifierCode, String labelTag, String operator);
     boolean delete(String modifierCode, String operator);
     int mergeOldModifiers();
-    List<DevLabelDefine> findModifiersByIds(List<Long> tableIds);
+    List<DevLabelDefine> findModifiersByIds(String tableIds);
 }
