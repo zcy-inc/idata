@@ -534,7 +534,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                     BeanUtils.copyProperties(contentSql, oldBackFlowResponse);
                     BeanUtils.copyProperties(jobOutput, oldBackFlowResponse);
-                    oldBackFlowResponse.setUdfList(udfList);
+                    oldBackFlowResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
 
                     // 封装连接信息
                     DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId(), env);
@@ -555,7 +555,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 JobInfoExecuteDetailDto.SqlJobDetailsDto sqlResponse = new JobInfoExecuteDetailDto.SqlJobDetailsDto(jobInfoExecuteDetailDto);
                 BeanUtils.copyProperties(contentSql, sqlResponse);
                 BeanUtils.copyProperties(jobOutput, sqlResponse);
-                sqlResponse.setUdfList(udfList);
+                sqlResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
 
                 // 字段类型转换
                 sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
@@ -584,7 +584,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 return sparkResponse;
             case KYLIN:
-                JobInfoExecuteDetailDto.KylinDetailJob kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJob(jobInfoExecuteDetailDto);
+                JobInfoExecuteDetailDto.KylinDetailJobDto kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJobDto(jobInfoExecuteDetailDto);
 
                 // 封装kylin_job_content
                 DevJobContentKylin contentKylin = jobPublishRecordMyDao.getPublishedKylinJobContent(id, env);
@@ -667,7 +667,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto flinkSqlResponse = new JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto(baseJobDetailDto);
         flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
-        flinkSqlResponse.setUdfList(udfList);
+        flinkSqlResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
         flinkSqlResponse.setJobPrivacyProp(privacyProps);
         Map<String, String> confProp = Maps.newHashMap();
         if (StringUtils.isNotBlank(baseJobDetailDto.getExtProperties())) {

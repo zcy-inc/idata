@@ -104,6 +104,13 @@ public class DevJobUdf {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
     private String sourceName;
 
+    /**
+     * Database Column Remarks:
+     *   是否是全局类型函数，1：是，0：否
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.global_fun")
+    private Integer globalFun;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.id")
     public Long getId() {
         return id;
@@ -272,5 +279,15 @@ public class DevJobUdf {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.source_name")
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.global_fun")
+    public Integer getGlobalFun() {
+        return globalFun;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_udf.global_fun")
+    public void setGlobalFun(Integer globalFun) {
+        this.globalFun = globalFun;
     }
 }

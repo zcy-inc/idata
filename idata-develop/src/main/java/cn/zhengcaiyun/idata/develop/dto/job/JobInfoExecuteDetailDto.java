@@ -2,7 +2,6 @@ package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
@@ -239,7 +238,7 @@ public class JobInfoExecuteDetailDto {
          */
         private String srcSql;//sourceSql;
         private WriteModeEnum.BackFlowEnum destWriteMode; //DestWriteModeEnum destWriteMode;
-        private List<DevJobUdf> udfList; // udfs; 老版本使用，新版本不会关联
+        private List<JobUdfDto> udfList; // udfs; 老版本使用，新版本不会关联
         private DriverTypeEnum destDriverType;//;targetDriverType;
         private String destUrlPath;//targetUrlPath;
         private String destUserName;//username;
@@ -314,11 +313,11 @@ public class JobInfoExecuteDetailDto {
             this.destDriverType = destDriverType;
         }
 
-        public List<DevJobUdf> getUdfList() {
+        public List<JobUdfDto> getUdfList() {
             return udfList;
         }
 
-        public void setUdfList(List<DevJobUdf> udfList) {
+        public void setUdfList(List<JobUdfDto> udfList) {
             this.udfList = udfList;
         }
 
@@ -397,7 +396,7 @@ public class JobInfoExecuteDetailDto {
         /**
          * 函数
          */
-        private List<DevJobUdf> udfList; // udfs
+        private List<JobUdfDto> udfList; // udfs
 
         public String getDestTable() {
             return destTable;
@@ -431,11 +430,11 @@ public class JobInfoExecuteDetailDto {
             isOpenMergeFile = openMergeFile;
         }
 
-        public List<DevJobUdf> getUdfList() {
+        public List<JobUdfDto> getUdfList() {
             return udfList;
         }
 
-        public void setUdfList(List<DevJobUdf> udfList) {
+        public void setUdfList(List<JobUdfDto> udfList) {
             this.udfList = udfList;
         }
 
@@ -487,11 +486,11 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
-    public static class KylinDetailJob extends JobInfoExecuteDetailDto {
-        public KylinDetailJob() {
+    public static class KylinDetailJobDto extends JobInfoExecuteDetailDto {
+        public KylinDetailJobDto() {
 
         }
-        public KylinDetailJob(JobInfoExecuteDetailDto parent) {
+        public KylinDetailJobDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
         private String cubeName;
@@ -569,7 +568,7 @@ public class JobInfoExecuteDetailDto {
         /**
          * 函数
          */
-        private List<DevJobUdf> udfList; // udfs
+        private List<JobUdfDto> udfList; // udfs
         /**
          * 作业私有信息
          */
@@ -603,11 +602,11 @@ public class JobInfoExecuteDetailDto {
             this.sourceSql = sourceSql;
         }
 
-        public List<DevJobUdf> getUdfList() {
+        public List<JobUdfDto> getUdfList() {
             return udfList;
         }
 
-        public void setUdfList(List<DevJobUdf> udfList) {
+        public void setUdfList(List<JobUdfDto> udfList) {
             this.udfList = udfList;
         }
 
