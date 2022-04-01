@@ -71,7 +71,7 @@ public class ModifierServiceImpl implements ModifierService {
     @Autowired
     private EnumService enumService;
 
-    private String[] modifierInfos = new String[]{"enName", "modifierDefine"};
+    private String[] modifierInfos = new String[]{"modifierDefine"};
     private final String MODIFIER_ENUM = "modifierEnum";
 
     @Override
@@ -152,9 +152,11 @@ public class ModifierServiceImpl implements ModifierService {
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(modifier.getLabelName()), "修饰词名称不能为空");
         modifier.setLabelTag(LabelTagEnum.MODIFIER_LABEL.name());
+        modifier.setSubjectType(SubjectTypeEnum.COLUMN.name());
         modifier.setFolderId(0L);
         DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelName, isEqualTo(modifier.getLabelName()))))
+                and(devLabelDefine.labelName, isEqualTo(modifier.getLabelName())),
+                and(devLabelDefine.labelTag, isLike(LabelTagEnum.MODIFIER_LABEL.name()))))
                 .orElse(null);
         checkArgument(checkModifier == null, "修饰词已存在");
         checkArgument(modifier.getLabelAttributes() != null && modifier.getLabelAttributes().size() > 0, "基本信息不能为空");

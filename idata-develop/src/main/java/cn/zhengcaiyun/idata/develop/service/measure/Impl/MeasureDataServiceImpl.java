@@ -70,7 +70,7 @@ public class MeasureDataServiceImpl implements MeasureDataService {
 
     @Override
     public List<String> queryModifierValues(Long tableId, String columnName) throws SQLException {
-        String selectSql = "SELECT %s FROM %s.%s GROUP BY %s LIMIT 10";
+        String selectSql = "SELECT %s FROM %s.%s GROUP BY %s";
         TableInfoDto tableInfoDto = tableInfoService.getTableInfo(tableId);
         ConnectionCfg connectionDto = tableQueryManager.getConnectionInfo();
         QueryResultDto resultDto = query.query(connectionDto, String.format(selectSql, columnName,

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -73,7 +74,7 @@ public class MetricController {
 
     @GetMapping("metricSql")
     public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getMetricDimSql(metricCode));
+        return RestResult.success(metricService.getMetricDimSql(metricCode, new ArrayList<>()));
     }
 
     @PostMapping("metric")

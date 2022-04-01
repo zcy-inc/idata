@@ -19,11 +19,10 @@ package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.constant.enums.AggregatorEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.*;
-import cn.zhengcaiyun.idata.develop.dal.model.DevEnumValue;
-import cn.zhengcaiyun.idata.develop.dal.model.DevForeignKey;
-import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
+import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.label.*;
+import cn.zhengcaiyun.idata.develop.dto.measure.DimTableDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MetricDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
@@ -52,6 +51,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.*;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isAlphanumeric;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -78,6 +78,8 @@ public class MetricServiceImpl implements MetricService {
     @Autowired
     private DevForeignKeyDao devForeignKeyDao;
     @Autowired
+    private DevTableInfoDao devTableInfoDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private DimensionService dimensionService;
@@ -94,6 +96,7 @@ public class MetricServiceImpl implements MetricService {
     private final String METRIC_BIZ_TYPE = "bizProcessCode";
     private String[] metricEnumInfos = new String[]{"bizProcessCode", "domainCode"};
     private String[] columnTypes = new String[]{"TIMESTAMP", "DATE", "ARRAY<TIMESTAMP>", "ARRAY<DATE>"};
+    private final String DB_NAME_LABEL = "dbName:LABEL";
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -461,65 +464,68 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public String getMetricDimSql(String metricCode) {
+    public String getMetricDimSql(String metricCode, List<DimTableDto> dimTables) {
         DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metricCode))))
-                .orElse(null);
-        if (metric == null) {
-            return null;
-        }
+                .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
+        checkArgument(!metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name()), "请选择派生指标");
 
-        String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
-        String metricSql;
+        String metricBaseSql = "SELECT t.%s AS %s FROM %s.%s t";
         List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
-        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
-        if (metric.getLabelTag().contains(LabelTagEnum.ATOMIC_METRIC_LABEL.name())) {
-            if (ObjectUtils.isEmpty(metricLabelList)) {
-                return null;
+        if (ObjectUtils.isEmpty(metricLabelList)) return null;
+
+        LabelDto metricLabel = metricLabelList.get(0);
+        List<Long> modifierTableIdList = new ArrayList<>();
+        modifierTableIdList.add(metricLabel.getTableId());
+        String metricSql = String.format(metricBaseSql, metricLabel.getColumnName(), metric.getLabelName(),
+                metricLabel.getDbName(), metricLabel.getTableName());
+        List<String> modifierCodeList = metric.getSpecialAttribute().getModifiers()
+                .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+        // 维度关联
+        if (dimTables.size() > 0) {
+            List<Long> dimTableIdList = dimTables.stream().map(DimTableDto::getTableId).collect(Collectors.toList());
+            modifierTableIdList.addAll(dimTableIdList);
+            List<DevForeignKey> foreignKeyList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                    and(devForeignKey.tableId, isEqualTo(metricLabel.getTableId())),
+                    and(devForeignKey.referTableId, isIn(dimTableIdList))));
+            checkArgument(dimTableIdList.size() == foreignKeyList.size(), "请选择正确的维度");
+            Map<Long, String> referTblIdAndColumns = foreignKeyList
+                    .stream().collect(Collectors.toMap(DevForeignKey::getReferTableId, DevForeignKey::getColumnNames));
+            Map<Long, String> tableIdNameMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                    and(devTableInfo.id, isIn(dimTableIdList))))
+                    .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+            Map<Long, String> tableIdDbnameMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.tableId, isIn(dimTableIdList)), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL))))
+                    .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+            // TODO 拼接sql
+//            String dimSql = "\n LEFT JOIN %s.%s t1 ON t.%s = t1.%s "
+//            for (int i = 1; i< dimTables.size(); i++) {
+//                String
+//            }
+        }
+        // 已有指标存在修饰词为空
+        if (modifierCodeList.size() == 0) return metricSql;
+        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isIn(modifierCodeList)),
+                and(devLabel.tableId, isIn(modifierTableIdList))));
+        StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN ('%s')",
+                modifierLabelList.get(0).getColumnName(), modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
+        if (modifierLabelList.size() > 1) {
+            for (int i = 1; i < modifierLabelList.size(); i++) {
+                modifierSql.append(String.format(" AND %s IS IN ('%s')", modifierLabelList.get(i).getColumnName(),
+                        modifierLabelList.get(i).getLabelParamValue().replaceAll(",", "','")));
             }
-            String selectColSql = StringUtils.isEmpty(metric.getSpecialAttribute().getAggregatorCode())
-                    ? metricLabelList.get(0).getColumnName()
-                    : changeAggregate(metricLabelList.get(0).getColumnName(),
-                    metric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
-                    metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
         }
-        else if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
-            DevLabelDefine atomicMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                    and(devLabelDefine.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get();
-            List<LabelDto> atomicLabelList = labelService.findLabelsByCode(metric.getSpecialAttribute().getAtomicMetricCode());
-            List<ModifierDto> modifierList = modifierService.findModifiers(metricCode, atomicLabelList.get(0).getTableId());
-            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
-                    ? atomicLabelList.get(0).getColumnName()
-                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
-                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
-                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
-            if (modifierList != null && modifierList.size() > 0) {
-                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
-                        modifierList.get(0).getColumnName(),
-                        String.join(",", modifierList.get(0).getEnumValues())));
-                if (modifierList.size() > 1) {
-                    for (int i = 1; i < modifierList.size(); i++) {
-                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
-                                String.join(",", modifierList.get(i).getEnumValues())));
-                    }
-                }
-                metricSql += modifierSql;
-            }
-        }
-        else {
-            metricSql = metric.getSpecialAttribute().getComplexMetricFormula();
-        }
+        metricSql += modifierSql;
         return metricSql;
     }
 
     private String getMetricSql(String metricCode) {
         DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metricCode))))
-                .orElse(null);
-        if (metric == null) {
-            return null;
+                .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
+        if (metric.getLabelTag().contains(LabelTagEnum.COMPLEX_METRIC_LABEL.name())) {
+            return metric.getSpecialAttribute().getComplexMetricFormula();
         }
 
         String metricBaseSql = "SELECT %s AS %s FROM %s.%s";
@@ -528,34 +534,23 @@ public class MetricServiceImpl implements MetricService {
 
         String metricSql = String.format(metricBaseSql, metricLabelList.get(0).getColumnName(), metric.getLabelName(),
                 metricLabelList.get(0).getDbName(), metricLabelList.get(0).getTableName());
-        // 暂只提供原子指标和派生指标，修饰词只能取到定义值
         if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
             List<String> modifierCodeList = metric.getSpecialAttribute().getModifiers()
                     .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+            // 已有指标存在修饰词为空
+            if (modifierCodeList.size() == 0) return metricSql;
             List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                     and(devLabel.labelCode, isIn(modifierCodeList)),
                     and(devLabel.tableId, isEqualTo(metricLabelList.get(0).getTableId()))));
-//            String selectColSql = StringUtils.isEmpty(atomicMetric.getSpecialAttribute().getAggregatorCode())
-//                    ? atomicLabelList.get(0).getColumnName()
-//                    : changeAggregate(atomicLabelList.get(0).getColumnName(),
-//                    atomicMetric.getSpecialAttribute().getAggregatorCode().split(":")[0].split("_")[1]);
-//            metricSql = String.format(metricBaseSql, selectColSql, metric.getLabelName(),
-//                    atomicLabelList.get(0).getDbName(), atomicLabelList.get(0).getTableName());
-//            if (modifierList != null && modifierList.size() > 0) {
-//                StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN (%s)",
-//                        modifierList.get(0).getColumnName(),
-//                        String.join(",", modifierList.get(0).getEnumValues())));
-//                if (modifierList.size() > 1) {
-//                    for (int i = 1; i < modifierList.size(); i++) {
-//                        modifierSql.append(String.format(" AND %s IS IN (%s)", modifierList.get(i).getColumnName(),
-//                                String.join(",", modifierList.get(i).getEnumValues())));
-//                    }
-//                }
-//                metricSql += modifierSql;
-//            }
-        }
-        else {
-            metricSql = "";
+            StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN ('%s')",
+                    modifierLabelList.get(0).getColumnName(), modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
+            if (modifierLabelList.size() > 1) {
+                for (int i = 1; i < modifierLabelList.size(); i++) {
+                    modifierSql.append(String.format(" AND %s IS IN ('%s')", modifierLabelList.get(i).getColumnName(),
+                            modifierLabelList.get(i).getLabelParamValue().replaceAll(",", "','")));
+                }
+            }
+            metricSql += modifierSql;
         }
         return metricSql;
     }
