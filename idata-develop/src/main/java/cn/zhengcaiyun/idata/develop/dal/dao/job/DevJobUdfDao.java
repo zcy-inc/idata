@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevJobUdfDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_udf")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, editor, createTime, editTime, udfName, udfType, fileName, hdfsPath, returnType, returnSample, folderId, description, commandFormat, udfSample, sourceName);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, editor, createTime, editTime, udfName, udfType, fileName, hdfsPath, returnType, returnSample, folderId, description, commandFormat, udfSample, sourceName, globalFun);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_udf")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -73,7 +73,8 @@ public interface DevJobUdfDao {
         @Result(column="description", property="description", jdbcType=JdbcType.VARCHAR),
         @Result(column="command_format", property="commandFormat", jdbcType=JdbcType.VARCHAR),
         @Result(column="udf_sample", property="udfSample", jdbcType=JdbcType.VARCHAR),
-        @Result(column="source_name", property="sourceName", jdbcType=JdbcType.VARCHAR)
+        @Result(column="source_name", property="sourceName", jdbcType=JdbcType.VARCHAR),
+        @Result(column="global_fun", property="globalFun", jdbcType=JdbcType.TINYINT)
     })
     List<DevJobUdf> selectMany(SelectStatementProvider selectStatement);
 
@@ -117,6 +118,7 @@ public interface DevJobUdfDao {
             .map(commandFormat).toProperty("commandFormat")
             .map(udfSample).toProperty("udfSample")
             .map(sourceName).toProperty("sourceName")
+            .map(globalFun).toProperty("globalFun")
         );
     }
 
@@ -139,6 +141,7 @@ public interface DevJobUdfDao {
             .map(commandFormat).toPropertyWhenPresent("commandFormat", record::getCommandFormat)
             .map(udfSample).toPropertyWhenPresent("udfSample", record::getUdfSample)
             .map(sourceName).toPropertyWhenPresent("sourceName", record::getSourceName)
+            .map(globalFun).toPropertyWhenPresent("globalFun", record::getGlobalFun)
         );
     }
 
@@ -186,7 +189,8 @@ public interface DevJobUdfDao {
                 .set(description).equalTo(record::getDescription)
                 .set(commandFormat).equalTo(record::getCommandFormat)
                 .set(udfSample).equalTo(record::getUdfSample)
-                .set(sourceName).equalTo(record::getSourceName);
+                .set(sourceName).equalTo(record::getSourceName)
+                .set(globalFun).equalTo(record::getGlobalFun);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_udf")
@@ -206,7 +210,8 @@ public interface DevJobUdfDao {
                 .set(description).equalToWhenPresent(record::getDescription)
                 .set(commandFormat).equalToWhenPresent(record::getCommandFormat)
                 .set(udfSample).equalToWhenPresent(record::getUdfSample)
-                .set(sourceName).equalToWhenPresent(record::getSourceName);
+                .set(sourceName).equalToWhenPresent(record::getSourceName)
+                .set(globalFun).equalToWhenPresent(record::getGlobalFun);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_udf")
@@ -228,6 +233,7 @@ public interface DevJobUdfDao {
             .set(commandFormat).equalTo(record::getCommandFormat)
             .set(udfSample).equalTo(record::getUdfSample)
             .set(sourceName).equalTo(record::getSourceName)
+            .set(globalFun).equalTo(record::getGlobalFun)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -251,6 +257,7 @@ public interface DevJobUdfDao {
             .set(commandFormat).equalToWhenPresent(record::getCommandFormat)
             .set(udfSample).equalToWhenPresent(record::getUdfSample)
             .set(sourceName).equalToWhenPresent(record::getSourceName)
+            .set(globalFun).equalToWhenPresent(record::getGlobalFun)
             .where(id, isEqualTo(record::getId))
         );
     }

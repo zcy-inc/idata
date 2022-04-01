@@ -1,101 +1,78 @@
-package cn.zhengcaiyun.idata.portal.model.request.udf;
+package cn.zhengcaiyun.idata.develop.dto.job;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
-import javax.annotation.Generated;
-import javax.validation.constraints.NotEmpty;
-import java.util.Date;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
+import org.springframework.beans.BeanUtils;
 
-@ApiModel("udf更新请求")
-public class UdfUpdateRequest {
-    
-    @ApiModelProperty("主键id")
+/**
+ * @author zhanqian
+ * @date 2022/4/1 3:50 PM
+ * @description
+ */
+public class JobUdfDto {
+
     private Long id;
+
     /**
-     * Database Column Remarks:
      *   '函数名称'
      */
-    @ApiModelProperty("函数名称")
-    @NotEmpty(message = "udfName 不能为空")
     private String udfName;
 
     /**
-     * Database Column Remarks:
      *   函数类型
      */
-    @ApiModelProperty("函数类型")
-    @NotEmpty(message = "udfType 不能为空")
     private String udfType;
 
     /**
-     * Database Column Remarks:
      *   文件名称
      */
-    @ApiModelProperty("文件名称")
-    @NotEmpty(message = "fileName 不能为空")
     private String fileName;
 
     /**
-     * Database Column Remarks:
      *   hdfs文件路径
      */
-    @ApiModelProperty("hdfs文件路径")
-    @NotEmpty(message = "hdfsPath 不能为空")
     private String hdfsPath;
 
     /**
-     * Database Column Remarks:
      *   返回类型
      */
-    @ApiModelProperty("返回类型")
-    @NotEmpty(message = "returnType 不能为空")
     private String returnType;
 
     /**
-     * Database Column Remarks:
      *   返回值
      */
-    @ApiModelProperty("返回值")
     private String returnSample;
 
     /**
-     * Database Column Remarks:
      *   目标文件夹
      */
-    @ApiModelProperty("目标文件夹")
     private Long folderId;
 
     /**
-     * Database Column Remarks:
-     *   描述
-     */
-    @ApiModelProperty("描述")
-    private String description;
-
-    /**
-     * Database Column Remarks:
      *   命令格式
      */
-    @ApiModelProperty("命令格式")
     private String commandFormat;
 
     /**
-     * Database Column Remarks:
-     *   示例
-     */
-    @ApiModelProperty("示例")
-    private String udfSample;
-
-    /**
-     * "java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）"
+     *   java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）|沐泽|2019-12-19
      */
     private String sourceName;
 
     /**
      *   是否是全局类型函数，1：是，0：否
      */
-    private Integer globalFun;
+    private Boolean globalFun;
+
+    public static JobUdfDto fromModel(DevJobUdf devJobUdf) {
+        JobUdfDto dto = new JobUdfDto();
+        BeanUtils.copyProperties(devJobUdf, dto);
+        if (devJobUdf.getGlobalFun() == 0) {
+            dto.setGlobalFun(false);
+        } else {
+            dto.setGlobalFun(true);
+        }
+        return dto;
+    }
 
     public Long getId() {
         return id;
@@ -161,28 +138,12 @@ public class UdfUpdateRequest {
         this.folderId = folderId;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getCommandFormat() {
         return commandFormat;
     }
 
     public void setCommandFormat(String commandFormat) {
         this.commandFormat = commandFormat;
-    }
-
-    public String getUdfSample() {
-        return udfSample;
-    }
-
-    public void setUdfSample(String udfSample) {
-        this.udfSample = udfSample;
     }
 
     public String getSourceName() {
@@ -193,11 +154,11 @@ public class UdfUpdateRequest {
         this.sourceName = sourceName;
     }
 
-    public Integer getGlobalFun() {
+    public Boolean getGlobalFun() {
         return globalFun;
     }
 
-    public void setGlobalFun(Integer globalFun) {
+    public void setGlobalFun(Boolean globalFun) {
         this.globalFun = globalFun;
     }
 }

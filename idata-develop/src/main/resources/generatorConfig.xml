@@ -121,10 +121,11 @@
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
-<!--        <table tableName="dev_job_udf" mapperName="DevJobUdfDao">-->
-<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
-<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
-<!--        </table>-->
+        <table tableName="dev_job_udf" mapperName="DevJobUdfDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+            <columnOverride column="global_fun" javaType="java.lang.Integer"/>
+        </table>
 <!--        <table tableName="dev_job_history" mapperName="DevJobHistoryDao">-->
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--        </table>-->
