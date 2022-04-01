@@ -481,6 +481,9 @@ public class MetricServiceImpl implements MetricService {
                 metricLabel.getDbName(), metricLabel.getTableName());
         List<String> modifierCodeList = metric.getSpecialAttribute().getModifiers()
                 .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+        // 表别名map
+        Map<Long, String> tableAliasMap = new HashMap<>();
+        tableAliasMap.put(metricLabel.getTableId(), "t");
         // 维度关联
         if (dimTables.size() > 0) {
             List<Long> dimTableIdList = dimTables.stream().map(DimTableDto::getTableId).collect(Collectors.toList());
@@ -489,7 +492,7 @@ public class MetricServiceImpl implements MetricService {
                     and(devForeignKey.tableId, isEqualTo(metricLabel.getTableId())),
                     and(devForeignKey.referTableId, isIn(dimTableIdList))));
             checkArgument(dimTableIdList.size() == foreignKeyList.size(), "请选择正确的维度");
-            Map<Long, String> referTblIdAndColumns = foreignKeyList
+            Map<Long, String> referTblIdAndColumnMap = foreignKeyList
                     .stream().collect(Collectors.toMap(DevForeignKey::getReferTableId, DevForeignKey::getColumnNames));
             Map<Long, String> tableIdNameMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1),
                     and(devTableInfo.id, isIn(dimTableIdList))))
@@ -497,22 +500,37 @@ public class MetricServiceImpl implements MetricService {
             Map<Long, String> tableIdDbnameMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                     and(devLabel.tableId, isIn(dimTableIdList)), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL))))
                     .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
-            // TODO 拼接sql
-//            String dimSql = "\n LEFT JOIN %s.%s t1 ON t.%s = t1.%s "
-//            for (int i = 1; i< dimTables.size(); i++) {
-//                String
-//            }
+            // 拼接维度sql
+            String dimBaseSql = "\n LEFT JOIN %s.%s %s ON t.%s = %s.%s ";
+            StringBuilder dimSql = new StringBuilder(String.format(dimBaseSql, tableIdDbnameMap.get(dimTables.get(0).getTableId()),
+                    tableIdNameMap.get(dimTables.get(0).getTableId()), "t1", referTblIdAndColumnMap.get(dimTables.get(0).getTableId()),
+                    "t1", dimTables.get(0).getColumnName()));
+            tableAliasMap.put(dimTables.get(0).getTableId(), "t1");
+            if (dimTables.size() > 1) {
+                for (int i = 1; i < dimTables.size(); i++) {
+                    Long dimTableId = dimTables.get(i).getTableId();
+                    String dimColumnName = dimTables.get(i).getColumnName();
+                    String tableAlias = "t" + i + 1;
+                    dimSql.append(String.format(dimBaseSql, tableIdDbnameMap.get(dimTableId), tableIdNameMap.get(dimTableId),
+                            tableAlias, referTblIdAndColumnMap.get(dimTableId), tableAlias, dimColumnName));
+                    tableAliasMap.put(dimTableId, tableAlias);
+                }
+            }
+            metricSql += dimSql;
         }
         // 已有指标存在修饰词为空
         if (modifierCodeList.size() == 0) return metricSql;
         List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                 and(devLabel.labelCode, isIn(modifierCodeList)),
                 and(devLabel.tableId, isIn(modifierTableIdList))));
-        StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN ('%s')",
-                modifierLabelList.get(0).getColumnName(), modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
+        // 修饰词sql
+        StringBuilder modifierSql = new StringBuilder(String.format("\n WHERE %s.%s IS IN ('%s')",
+                tableAliasMap.get(modifierLabelList.get(0).getTableId()), modifierLabelList.get(0).getColumnName(),
+                modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
         if (modifierLabelList.size() > 1) {
             for (int i = 1; i < modifierLabelList.size(); i++) {
-                modifierSql.append(String.format(" AND %s IS IN ('%s')", modifierLabelList.get(i).getColumnName(),
+                modifierSql.append(String.format(" AND %s.%s IS IN ('%s')", modifierLabelList.get(i).getColumnName(),
+                        tableAliasMap.get(modifierLabelList.get(i).getTableId()),
                         modifierLabelList.get(i).getLabelParamValue().replaceAll(",", "','")));
             }
         }

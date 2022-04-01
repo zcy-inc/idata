@@ -104,7 +104,7 @@ public class SpecialAttributeDto {
     }
 
     public void setCalculableType(String calculableType) {
-        calculableType = calculableType;
+        this.calculableType = calculableType;
     }
 
     public List<Long> getDimTableIds() {

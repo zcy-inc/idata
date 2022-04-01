@@ -101,6 +101,7 @@ public class MeasureServiceImpl implements MeasureService {
                 folderIdsStr, measureType, metricType, measureId, measureName,
                 bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName, limit, offset)
                 .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
+        if (measureCodeList.size() == 0) return Page.newOne(new ArrayList<>(), 0);
         return Page.newOne(getMeasureDetails(measureCodeList, measureType),
                 devLabelDefineMyDao.countLabelDefinesByCondition(folderIdsStr, measureType, metricType, measureId, measureName,
                         bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName).get());
