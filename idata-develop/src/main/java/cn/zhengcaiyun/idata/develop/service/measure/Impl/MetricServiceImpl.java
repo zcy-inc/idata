@@ -47,6 +47,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSupport.devColumnInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.*;
@@ -79,6 +80,8 @@ public class MetricServiceImpl implements MetricService {
     private DevForeignKeyDao devForeignKeyDao;
     @Autowired
     private DevTableInfoDao devTableInfoDao;
+    @Autowired
+    private DevColumnInfoDao devColumnInfoDao;
     @Autowired
     private LabelService labelService;
     @Autowired
@@ -432,10 +435,19 @@ public class MetricServiceImpl implements MetricService {
                     .orElseThrow(() -> new IllegalArgumentException("原子指标不存在或已停用"));
             // 校验时间周期
             checkArgument(metric.getSpecialAttribute().getTimeAttribute() != null, "时间周期不能为空");
-            checkArgument(metric.getSpecialAttribute().getTimeAttribute().getTableId() != null
-                    && metric.getSpecialAttribute().getTimeAttribute().getColumnId() != null
-                    && StringUtils.isNotEmpty(metric.getSpecialAttribute().getTimeAttribute().getTimeDim()), "时间周期有误");
-            TimeDimEnum.valueOf(metric.getSpecialAttribute().getTimeAttribute().getTimeDim());
+            TimeAttributeDto timeAttribute = metric.getSpecialAttribute().getTimeAttribute();
+            checkArgument(StringUtils.isNotEmpty(timeAttribute.getColumnName()) && StringUtils.isNotEmpty(timeAttribute.getTimeDim()),
+                    "时间周期有误");
+            TimeDimEnum.valueOf(timeAttribute.getTimeDim());
+            DevLabel atomicLabel = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode())))).get(0);
+            // 校验字段属于该表
+            List<String> atomicTableColumnList = devColumnInfoDao.select(c -> c.where(devColumnInfo.del, isNotEqualTo(1),
+                    and(devColumnInfo.tableId, isEqualTo(atomicLabel.getTableId()))))
+                    .stream().map(DevColumnInfo::getColumnName).collect(Collectors.toList());
+            checkArgument(atomicTableColumnList.contains(timeAttribute.getColumnName()), "时间字段有误，请选择原子指标来源表的字段");
+            timeAttribute.setTableId(atomicLabel.getTableId());
+            metric.getSpecialAttribute().setTimeAttribute(timeAttribute);
             // 校验维度
             checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTableIds()), "维度不能为空");
             List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
