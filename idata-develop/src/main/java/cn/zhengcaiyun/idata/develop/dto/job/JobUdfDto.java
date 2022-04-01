@@ -44,11 +44,6 @@ public class JobUdfDto {
     private String returnSample;
 
     /**
-     *   目标文件夹
-     */
-    private Long folderId;
-
-    /**
      *   命令格式
      */
     private String commandFormat;
@@ -128,14 +123,6 @@ public class JobUdfDto {
 
     public void setReturnSample(String returnSample) {
         this.returnSample = returnSample;
-    }
-
-    public Long getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(Long folderId) {
-        this.folderId = folderId;
     }
 
     public String getCommandFormat() {
