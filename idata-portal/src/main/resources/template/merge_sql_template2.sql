@@ -13,7 +13,7 @@ left join
 select #{#columns} #{#isMulPartition ? ' ,num' : ''}
 from #{#destTable}
 ) t2
-on #{#keyCondition} #{#isMulPartition ? 'and t1.num=t2.num' : ''};
+on #{#keyCondition} #{#isMulPartition ? 'and t1.num=t2.num' : ''}
 where #{#whereKeyConditionParam}
 union all
 select #{#columns}
