@@ -127,7 +127,7 @@ public class MeasureServiceImpl implements MeasureService {
     private List<MeasureDto> getMetricDetails(List<MeasureDto> metrics) {
         List<MeasureDto> echoMetricList =  metrics.stream().map(metric -> {
                     MeasureDto echo = PojoUtil.copyOne(metric,
-                    "id", "createTime", "editTime", "creator", "editor", "labelName", "labelTag", "folderName");
+                    "id", "createTime", "editTime", "creator", "editor", "labelCode", "labelName", "labelTag", "folderName");
                     List<AttributeDto> labelAttributeList = metric.getLabelAttributes();
                     labelAttributeList.forEach(labelAttribute -> {
                         if ("metricId".equals(labelAttribute.getAttributeKey())) {
@@ -162,7 +162,7 @@ public class MeasureServiceImpl implements MeasureService {
                 .collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
         List<MeasureDto> echoModifierList =  modifiers.stream().map(modifier -> {
             MeasureDto echo = PojoUtil.copyOne(modifier,
-                    "id", "creatTime", "editTime", "creator", "editor", "labelName", "labelTag", "folderName");
+                    "id", "creatTime", "editTime", "creator", "editor", "labelCode", "labelName", "labelTag", "folderName");
             List<AttributeDto> labelAttributeList = modifier.getLabelAttributes();
             labelAttributeList.forEach(labelAttribute -> {
                 if ("modifierId".equals(labelAttribute.getAttributeKey())) {
