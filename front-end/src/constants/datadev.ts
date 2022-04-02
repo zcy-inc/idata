@@ -98,11 +98,6 @@ export enum BackFlowDestWriteMode {
   OVERWRITE = 'OVERWRITE',
 }
 
-export const backFlowDestWriteModeOptions = [
-  { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
-  { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
-  // { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
-];
 
 export enum VersionStatus {
   EDITING = 0, // 编辑中

@@ -4,8 +4,7 @@ import { cloneDeep, omit } from 'lodash';
 import type { TreeNode } from '@/interfaces/global';
 
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
-const reg =
-  /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
 
 export const isUrl = (path: string): boolean => reg.test(path);
 
@@ -55,14 +54,15 @@ export const getDeleteFn = <T = any>(
     });
 };
 
-export const getSuccessReqFn =
-  (msg: string) =>
-  async <R>(service: () => Promise<Tresponse<R>>, cb?: (result?: Tresponse<R>) => void) => {
-    const res = await service();
-    message.success(msg);
-    cb?.(res);
-    return res;
-  };
+export const getSuccessReqFn = (msg: string) => async <R>(
+  service: () => Promise<Tresponse<R>>,
+  cb?: (result?: Tresponse<R>) => void,
+) => {
+  const res = await service();
+  message.success(msg);
+  cb?.(res);
+  return res;
+};
 
 // 从本地存储获取当前工作区
 export const getCachedWs = () => {
@@ -268,4 +268,23 @@ export const getRequestUrl = (url: string) => {
     return `/${workspace}${url}`;
   }
   return url;
+};
+
+/**
+ * 复制指定文本到粘贴板
+ * @param text 
+ */
+export const copy = (text: string) => {
+  const textarea = document.createElement('textarea');
+  // 选中
+  textarea.style.position = 'absolute';
+  textarea.style.clipPath = 'polygon(0px 0px,0px 0px,0px 0px,0px 0px)';
+  // 赋值
+  textarea.value = text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  // 复制
+  document.execCommand('copy', true);
+
+  document.body.removeChild(textarea);
 };

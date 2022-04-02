@@ -26,6 +26,7 @@ import {
   getDbNames,
   getTableNames,
   getColumns,
+  getWriteModeEnum,
 } from '@/services/datadev';
 import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import DrawerBasic from './components/DrawerBasic';
@@ -42,7 +43,7 @@ import {
   DIJobType,
   diConfigOptions,
   DIConfigMode,
-  backFlowDestWriteModeOptions,
+  // backFlowDestWriteModeOptions,
   shardingNumOptions,
   DataSourceType,
 } from '@/constants/datadev';
@@ -54,6 +55,11 @@ import { DefaultOptionType } from 'antd/lib/select';
 
 export interface TabTaskProps {
   pane: IPane;
+}
+
+enum DataSources {
+  SRC = 1,
+  DEST,
 }
 
 const { confirm } = Modal;
@@ -116,6 +122,18 @@ const TableInput: FC<{
 
 const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const { id: jobId } = pane;
+  const { data: { data: diWriteModes } = {} } = useRequest(() =>
+    getWriteModeEnum({ writeMode: 'DiEnum' }),
+  );
+  const diWriteModeOptions = diWriteModes?.map((mode) => ({ label: mode, value: mode }));
+  const { data: { data: backFlowWriteModes } = {} } = useRequest(() =>
+    getWriteModeEnum({ writeMode: 'BackFlowEnum' }),
+  );
+  const backflowWriteModeOptions = backFlowWriteModes?.map((mode) => ({
+    label: mode,
+    value: mode,
+  }));
+  // const;
   // 获取DI基础信息
   const { data: basicInfo, refresh: refreshBasicInfo, loading: basicInfoLoading } = useRequest(() =>
     getDIJobBasicInfo(jobId),
@@ -134,12 +152,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     },
   );
   // 数据来源-数据源
-  const {
-    typeOptions: dataSourceOptions,
-    sourceOptions: srcDSOptions,
-    onTypeChange: getSrcDSOptions,
-  } = useDataSource();
-  const { sourceOptions: destDSOptions, onTypeChange: getDestDSOptions } = useDataSource();
+  const { typeOptions: dataSourceOptions, getSourceOptions, fetchSourceList } = useDataSource();
+  const getSrcDSOptions = (type: string) => fetchSourceList(DataSources.SRC, type);
+  const getDestDSOptions = (type: string) => fetchSourceList(DataSources.DEST, type);
+  const srcDSOptions = getSourceOptions(DataSources.SRC);
+  const destDSOptions = getSourceOptions(DataSources.DEST);
+
   // 数据来源-表 下拉列表
   const { data: { data: srcTableOptions = [] } = {}, run: getSrcTableOptions } = useRequest(
     getTaskTables,
@@ -201,7 +219,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     scriptSelectColumns,
     scriptKeyColumns,
     scriptMergeSqlParamDto,
-    srcTableConfig
+    srcTableConfig,
   } = jobContent;
 
   const handleFormValuesChange = (_: unknown, allValues: Record<string, unknown>) => {
@@ -347,7 +365,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       setSrcColumns(data);
       setDestColumns([]);
     }
-  }
+  };
 
   // 刷新去向表可视化视图
   const refreshDestVisualise = async () => {
@@ -521,7 +539,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
         <Item label="表" name="srcTableConfig" rules={ruleSlct}>
-          <TableSelectInput options={options} style={{ maxWidth, minWidth }} onRefresh={refreshDiSrcVisualise} />
+          <TableSelectInput
+            options={options}
+            style={{ maxWidth, minWidth }}
+            onRefresh={refreshDiSrcVisualise}
+          />
         </Item>,
       );
     } else if (srcDataSourceType === DataSourceType.HIVE) {
@@ -638,7 +660,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     );
     const backFlowDestWriteModeNode = (
       <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
-        <Radio.Group options={backFlowDestWriteModeOptions} />
+        <Radio.Group options={backflowWriteModeOptions} />
       </Item>
     );
     const topicNode = (
@@ -669,13 +691,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据后执行的SQL脚本" />
           </Item>
           <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
-            <Radio.Group
-              options={[
-                { label: '新建表', value: DestWriteMode.INIT },
-                { label: '覆盖表', value: DestWriteMode.OVERWRITE },
-                { label: '追加表', value: DestWriteMode.APPEND },
-              ]}
-            />
+            <Radio.Group options={diWriteModeOptions} />
           </Item>
         </Fragment>,
       );

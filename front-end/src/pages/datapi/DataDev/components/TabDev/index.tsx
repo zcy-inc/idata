@@ -43,7 +43,7 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import DrawerDependence from './components/DrawerDependence';
-import SparkSql from './components/Content/SparkSql';
+import SqlContent from './components/Content/SqlContent';
 import SparkJava from './components/Content/SparkJava';
 import SparkPython from './components/Content/SparkPython';
 import ScriptShell from './components/Content/ScriptShell';
@@ -157,6 +157,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getTaskContent = (version: number) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_FLINK:
         getSqlSpark({ jobId: pane.id, version }).then((res) => setContent(res.data));
         break;
       case TaskTypes.SPARK_JAR:
@@ -217,9 +218,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
 
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_FLINK:
         const dataSql = {
+          ...values,
           jobId: pane.id,
-          jobType: TaskTypes.SQL_SPARK,
+          jobType: task?.jobType,
           sourceSql: monacoValue,
           externalTables: values.externalTables,
           udfIds: values.udfIds.join(','),
@@ -559,6 +562,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           Btns.DIVIDER,
           Btns.JOB_CONFIG,
         ];
+      case TaskTypes.SQL_FLINK:
+        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,
@@ -569,8 +574,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           Btns.OFFLINE,
           Btns.DELETE,
         ];
-      case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE];
       default:
         return [Btns.SAVE, Btns.RUN_ONCE, Btns.SUBMIT, Btns.ONLINE, Btns.OFFLINE, Btns.DELETE];
     }
@@ -581,11 +584,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getContent = () => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_FLINK:
         return (
-          <SparkSql
+          <SqlContent
             ref={formRef}
             monaco={monaco}
-            data={{ content, log, res: results }}
+            data={{ task, content, log, res: results }}
             removeResult={removeResult}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}

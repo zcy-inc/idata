@@ -10,6 +10,8 @@ export { default as PageContainer } from './PageContainer';
 
 export { default as MapInput } from './MapInput';
 
+export { default as ListSelect } from './ListSelect';
+
 export { default as RadioGroup } from './RadioGroup';
 
 export { default as Tip } from './Tip';

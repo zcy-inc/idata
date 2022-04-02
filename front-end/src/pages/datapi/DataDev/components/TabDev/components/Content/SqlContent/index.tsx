@@ -1,18 +1,24 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import type { ForwardRefRenderFunction } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import SplitPane from 'react-split-pane';
-import { Form, Input, Modal, Select, Table, Tabs } from 'antd';
-import type { ForwardRefRenderFunction } from 'react';
+import { Form, Input, Modal, Select, Table, Tabs, Button, message } from 'antd';
+import DataSourceSelect from '@/components/DSSelect';
 import type { IDisposable } from 'monaco-editor';
 import styles from './index.less';
-import { getUDFList } from '@/services/datadev';
-import type { UDF } from '@/types/datadev';
-
+import { getUDFList, genFlinkTemplate } from '@/services/datadev';
+import type { UDF, Task } from '@/types/datadev';
+import { TaskTypes } from '@/constants/datadev';
 import SqlEditor from '@/components/SqlEditor';
+
+const { confirm } = Modal;
+const { TabPane } = Tabs;
+const { Item } = Form;
 
 interface SparkSqlProps {
   monaco: any;
   data: {
+    task: Task;
     content: any;
     log: any;
     res: any[];
@@ -22,12 +28,8 @@ interface SparkSqlProps {
   onCancel: () => void;
 }
 
-const { TabPane } = Tabs;
-const { Item } = Form;
-const width = 200;
-
-const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
-  { monaco, data: { content, log, res }, removeResult, visible, onCancel },
+const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
+  { monaco, data: { content, log, res, task }, removeResult, visible, onCancel },
   ref,
 ) => {
   const [monacoValue, setMonacoValue] = useState('');
@@ -62,6 +64,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
       setMonacoValue(content.sourceSql);
       const udfIds = content.udfIds?.split(',') || [];
       form.setFieldsValue({
+        ...content,
         externalTables: content.externalTables,
         udfIds,
       });
@@ -76,6 +79,30 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
       .finally(() => setLoading(false));
   };
 
+  const fetchSrcTemplate = (value: unknown[]) => genFlinkTemplate({ flinkSourceConfigs: value });
+  const fetchDestTemplate = (value: unknown[]) => genFlinkTemplate({ flinkSinkConfigs: value });
+  const genEditorTemplate = () => {
+    const flinkExtConfig = form.getFieldValue(['extConfig', 'flinkExtConfig']);
+    if (flinkExtConfig) {
+      confirm({
+        title: '提示',
+        content: '生成模板会覆盖原有编辑内容',
+        onOk: async () => {
+          const temp = await genFlinkTemplate(flinkExtConfig);
+          setMonacoValue(temp);
+        },
+      });
+    } else {
+      message.warning('请先选择数据源');
+    }
+  };
+  const footer =
+    task.jobType === TaskTypes.SQL_FLINK ? (
+      <Button type="primary" onClick={genEditorTemplate}>
+        生成模板
+      </Button>
+    ) : null;
+
   return (
     <>
       <div style={{ position: 'relative', height: monacoHeight }}>
@@ -87,7 +114,7 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
             language="sql"
             value={monacoValue}
             onChange={(v) => setMonacoValue(v)}
-            options={{ automaticLayout: true, quickSuggestions: false, fontSize: 28 }} 
+            options={{ automaticLayout: true, quickSuggestions: false, fontSize: 28 }}
           />
           <Tabs
             className={styles.tabs}
@@ -116,7 +143,12 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
               <TabPane
                 tab={`结果${i + 1}`}
                 key={i}
-                style={{ height: '100%', backgroundColor: '#2d3956', padding: 16, overflowY: 'auto' }}
+                style={{
+                  height: '100%',
+                  backgroundColor: '#2d3956',
+                  padding: 16,
+                  overflowY: 'auto',
+                }}
               >
                 <Table
                   className={styles.table}
@@ -136,10 +168,16 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
           </Tabs>
         </SplitPane>
       </div>
-      <Modal title="作业配置" visible={visible} onCancel={onCancel} footer={null} forceRender>
-        <Form form={form} colon={false}>
+      <Modal title="作业配置" visible={visible} onCancel={onCancel} footer={footer} forceRender>
+        <Form
+          layout="horizontal"
+          form={form}
+          colon={false}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 16 }}
+        >
           <Item name="externalTables" label="外部表">
-            <Input placeholder="请输入" style={{ width }} />
+            <Input placeholder="请输入" />
           </Item>
           <Item name="udfIds" label="自定义函数">
             <Select
@@ -150,13 +188,22 @@ const SparkSql: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                 label: _.udfName,
                 value: `${_.id}`,
               }))}
-              style={{ width }}
             />
           </Item>
+          {task.jobType === TaskTypes.SQL_FLINK && (
+            <>
+              <Item label="来源数据源" name={['extConfig', 'flinkExtConfig', 'flinkSourceConfigs']}>
+                <DataSourceSelect quantityCustom fetchTemplate={fetchSrcTemplate} />
+              </Item>
+              <Item label="目标数据源" name={['extConfig', 'flinkExtConfig', 'flinkSinkConfigs']}>
+                <DataSourceSelect fetchTemplate={fetchDestTemplate} />
+              </Item>
+            </>
+          )}
         </Form>
       </Modal>
     </>
   );
 };
 
-export default forwardRef(SparkSql);
+export default forwardRef(SqlContent);

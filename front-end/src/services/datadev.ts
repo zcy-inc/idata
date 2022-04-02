@@ -1051,3 +1051,26 @@ export async function getColumns(params: {
     params,
   });
 }
+
+/**
+ * 生成 SQL_FLINK 模板
+ * @param params
+ * @returns
+ */
+export async function genFlinkTemplate(data: {
+  flinkSourceConfigs?: unknown[];
+  flinkSinkConfigs?: unknown[];
+}) {
+  return request('/api/p1/dev/jobs/sql/flink/template', {
+    method: 'POST',
+    data,
+  }).then(({ data }) => data);
+}
+
+export async function getWriteModeEnum(params: {
+  writeMode: 'DiEnum' | 'BackFlowEnum' | 'SqlEnum';
+}) {
+  return request<Tresponse<string[]>>('/api/p1/dictionary/enum/writeMode', {
+    params,
+  });
+}

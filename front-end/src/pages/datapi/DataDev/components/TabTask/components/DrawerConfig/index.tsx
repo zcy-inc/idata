@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import { get } from 'lodash';
 import type { FC } from 'react';
-import { MapInput } from '@/components';
+import { MapInput, ListSelect } from '@/components';
 import styles from './index.less';
 
 import Title from '@/components/Title';
@@ -26,9 +26,15 @@ import {
   getEnumValues,
   getExecuteQueues,
   saveTaskConfig,
+  getConfiguredTaskList,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
-import { SchPriority, execEngineOptions, execCoresOptions, defaultExecCores } from '@/constants/datadev';
+import {
+  SchPriority,
+  execEngineOptions,
+  execCoresOptions,
+  defaultExecCores,
+} from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -39,7 +45,7 @@ interface DrawerConfigProps {
 const { Item } = Form;
 const { TabPane } = Tabs;
 const width = 200;
-const env = Object.values(Environments).map((_) => _);
+const envs = Object.values(Environments).map((_) => _);
 const ruleSelc = [{ required: true, message: '请选择' }];
 
 const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
@@ -120,6 +126,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
   };
 
+  const columns = [
+    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '30%' },
+    { title: '所属DAG', dataIndex: 'dagName', key: 'dagName' },
+  ];
+
   return (
     <Drawer
       className={styles['drawer-config']}
@@ -148,13 +159,14 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           getDAGListWrapped(k as Environments);
         }}
       >
-        {env.map((_) => (
-          <TabPane tab={_} key={_}>
+        {envs.map((env) => (
+          <TabPane tab={env} key={env}>
             <Form
-              form={_ === Environments.STAG ? stagForm : prodForm}
+              form={env === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
               initialValues={{ execCores: defaultExecCores }}
+              wrapperCol={{ span: 16 }}
             >
               <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
@@ -257,6 +269,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               </Item>
               <Item name="extendProperties" label="自定义参数">
                 <MapInput style={{ width }} />
+              </Item>
+              <Title>依赖配置</Title>
+              <Item name="dependencies" label="依赖的上游任务">
+                <ListSelect
+                  fetchData={() => getConfiguredTaskList({ environment: env })}
+                  labelField="jobName"
+                  valueField="jobId"
+                  columns={columns}
+                />
               </Item>
             </Form>
           </TabPane>

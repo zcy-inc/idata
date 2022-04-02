@@ -5,3 +5,5 @@ import useUpdateEffect from './useUpdateEffect';
 import useSave from './useSave';
 
 export { usePaginated, usePersistFn, useProfile, useUpdateEffect, useSave };
+
+export { default as useDataSource } from './useDataSource';
