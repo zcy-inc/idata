@@ -169,6 +169,7 @@ export enum ExecEngine {
   SQOOP = 'SQOOP',
   KYLIN = 'KYLIN',
   DORIS = 'DORIS',
+  FLINK = 'FLINK',
 }
 
 export const execEngineOptions = [

@@ -389,6 +389,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         return [{ label: 'SPARK', value: ExecEngine.SPARK }];
       case TaskTypes.KYLIN:
         return [{ label: 'KYLIN', value: ExecEngine.KYLIN }];
+      case TaskTypes.SQL_FLINK:
+        return [{ label: 'FLINK', value: ExecEngine.FLINK }];
       default:
         return [];
     }
