@@ -139,8 +139,8 @@ public class DIRuleHelper {
         //生成keyCondition，key连接表，例如"t1.id=t2.id"
         List<String> keyColumnList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t1." + e + "=t2." + e).collect(Collectors.toList());
         String keyConditionParam = StringUtils.join(keyColumnList, " and ");
-        //生成keyCondition，key连接表，例如"t2.id=null"
-        List<String> whereKeyConditionList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t2." + e + "=null").collect(Collectors.toList());
+        //生成keyCondition，key连接表，例如"t2.id is null"
+        List<String> whereKeyConditionList = Arrays.asList(keyColumns.split(",")).stream().map(e -> "t2." + e + " is null").collect(Collectors.toList());
         String whereKeyConditionParam = StringUtils.join(whereKeyConditionList, " and ");
 
         String mergeSqlTemplate = "";
