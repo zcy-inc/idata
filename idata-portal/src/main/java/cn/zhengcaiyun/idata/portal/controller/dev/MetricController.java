@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.DimTableDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
@@ -72,9 +73,10 @@ public class MetricController {
         return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 
-    @GetMapping("metricSql")
-    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getMetricDimSql(metricCode, new ArrayList<>()));
+    @PostMapping("metricSql")
+    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode,
+                                            @RequestBody List<DimTableDto> dimTables) {
+        return RestResult.success(metricService.getMetricDimSql(metricCode, dimTables));
     }
 
     @PostMapping("metric")

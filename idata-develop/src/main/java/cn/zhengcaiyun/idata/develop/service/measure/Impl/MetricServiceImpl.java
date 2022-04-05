@@ -38,6 +38,7 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -394,6 +395,26 @@ public class MetricServiceImpl implements MetricService {
                 }).collect(Collectors.toList());
         echoMetric.setMeasureLabels(labelService.findLabelsByCode(metricCode));
         echoMetric.setMetricSql(getMetricSql(metricCode));
+        SpecialAttributeDto specialAttributeDto = echoMetric.getSpecialAttribute();
+        if (echoMetric.getLabelTag().startsWith(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
+            Map<Long, String> tableIdNameMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
+                    .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+            MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
+            specialAttributeDto.setAtomicMetricName(atomicMetric.getLabelName());
+            specialAttributeDto.setAggregate(atomicMetric.getSpecialAttribute().getAggregate());
+            List<DimTableDto> dimTableList = specialAttributeDto.getDimTables();
+            dimTableList = dimTableList.stream().peek(dimTable -> dimTable.setTableName(tableIdNameMap.get(dimTable.getTableId())))
+                    .collect(Collectors.toList());
+            specialAttributeDto.setDimTables(dimTableList);
+            List<ModifierDto> modifierList = specialAttributeDto.getModifiers();
+            Map<String, String> modifierCodeNameMap = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))))
+                    .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, DevLabelDefine::getLabelName));
+            modifierList = modifierList.stream().peek(modifier -> modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode())))
+                            .collect(Collectors.toList());
+            specialAttributeDto.setModifiers(modifierList);
+            echoMetric.setSpecialAttribute(specialAttributeDto);
+        }
         return echoMetric;
     }
 
@@ -449,12 +470,12 @@ public class MetricServiceImpl implements MetricService {
             timeAttribute.setTableId(atomicLabel.getTableId());
             metric.getSpecialAttribute().setTimeAttribute(timeAttribute);
             // 校验维度
-            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTableIds()), "维度不能为空");
+            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTables()), "维度不能为空");
             List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
                     and(devForeignKey.tableId, isEqualTo(metricLabelList.get(0).getTableId()))))
                     .stream().map(DevForeignKey::getReferTableId).sorted().collect(Collectors.toList());
-            checkArgument(existForeignKeyTblIdList.size() == metric.getSpecialAttribute().getDimTableIds().size() &&
-                    existForeignKeyTblIdList.containsAll(metric.getSpecialAttribute().getDimTableIds()), "请选择正确的维表");
+            checkArgument(existForeignKeyTblIdList.containsAll(metric.getSpecialAttribute().getDimTables()
+                            .stream().map(DimTableDto::getTableId).collect(Collectors.toSet())), "请选择正确的维表");
             // 校验修饰词
             checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getModifiers()), "修饰词不能为空");
             List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
@@ -468,7 +489,8 @@ public class MetricServiceImpl implements MetricService {
             Set<Long> modifierTableIds = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                     and(devLabel.labelCode, isIn(relatedModifierCodes))))
                     .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            Set<Long> allConfigTblIds = new HashSet<>(metric.getSpecialAttribute().getDimTableIds());
+            Set<Long> allConfigTblIds = metric.getSpecialAttribute().getDimTables()
+                    .stream().map(DimTableDto::getTableId).collect(Collectors.toSet());
             allConfigTblIds.add(metricLabelList.get(0).getTableId());
             checkArgument(allConfigTblIds.containsAll(modifierTableIds), "修饰词有误，请选择来源于指标来源表或维表的修饰词");
         }
@@ -583,9 +605,5 @@ public class MetricServiceImpl implements MetricService {
             metricSql += modifierSql;
         }
         return metricSql;
-    }
-
-    private String changeTimeDimSql(String timeDim) {
-        return null;
     }
 }

@@ -417,7 +417,8 @@ public class LabelServiceImpl implements LabelService {
                 || LabelTagEnum.USER_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.ENUM_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())
-                || LabelTagEnum.DIMENSION_LABEL.name().equals(labelDefine.getLabelTag())) {
+                || LabelTagEnum.DIMENSION_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.MODIFIER_LABEL.name().equals(labelDefine.getLabelTag())) {
                 checkArgument(labelDto.getLabelParamValue() != null, "labelParamValue不能为空");
         }
         else {

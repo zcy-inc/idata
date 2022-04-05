@@ -262,7 +262,7 @@ public class ModifierServiceImpl implements ModifierService {
     public int mergeOldModifiers() {
         // 默认修饰词仅有一张事实表，冗余数据数仓已处理，将存在labelAttribute中的枚举存到label中的labelParam
         List<LabelDefineDto> existModifierList = PojoUtil.copyList(devLabelDefineDao.select(c ->
-                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isLike("MODIFIER")))),
+                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isLike("%MODIFIER%")))),
                 LabelDefineDto.class, "labelCode", "labelAttributes");
         List<String> modifierCodeList = existModifierList.stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toList());
         List<String> enumCodeList = enumService.getEnums().stream().map(EnumDto::getEnumCode).collect(Collectors.toList());
@@ -275,12 +275,7 @@ public class ModifierServiceImpl implements ModifierService {
                     AttributeDto attributeDto = measure.getLabelAttributes().stream()
                             .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
                             .findAny().orElse(null);
-                    if (attributeDto != null) {
-                        List<String> enumValueList = enumMap.get(attributeDto.getEnumValue())
-                                .stream().map(DevEnumValue::getEnumValue).collect(Collectors.toList());
-                        return String.join(",", enumValueList);
-                    }
-                    return "";
+                    return StringUtils.isNotEmpty(attributeDto.getEnumName()) ? attributeDto.getEnumName() : "";
                 }));
         int total = 0;
         for (String modifierCode : modifierCodeList) {
