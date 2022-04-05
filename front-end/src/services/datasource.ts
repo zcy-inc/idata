@@ -32,7 +32,7 @@ export async function deleteDataSource(params: { id: number }) {
  * 获取数据源列表
  */
 export async function getDataSourceList(params: {
-  type?: DataSourceTypes;
+  type?: string;
   name?: string;
   env?: Environments;
   limit: number;

@@ -73,6 +73,7 @@ export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步
   SQL_SPARK = 'SQL_SPARK',
+  SQL_FLINK = 'SQL_FLINK',
   SPARK_PYTHON = 'SPARK_PYTHON',
   SPARK_JAR = 'SPARK_JAR',
   SCRIPT_PYTHON = 'SCRIPT_PYTHON',
@@ -97,11 +98,6 @@ export enum BackFlowDestWriteMode {
   OVERWRITE = 'OVERWRITE',
 }
 
-export const backFlowDestWriteModeOptions = [
-  { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
-  { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
-  // { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
-];
 
 export enum VersionStatus {
   EDITING = 0, // 编辑中
@@ -168,6 +164,7 @@ export enum ExecEngine {
   SQOOP = 'SQOOP',
   KYLIN = 'KYLIN',
   DORIS = 'DORIS',
+  FLINK = 'FLINK',
 }
 
 export const execEngineOptions = [
@@ -194,3 +191,10 @@ export enum DAGStatus {
   ON = 1, // 上线
   OFF = 0, // 下线
 }
+
+export const execCoresOptions = new Array(16).fill(0).map((_, index) => ({
+  label: index + 1,
+  value: index + 1,
+}));
+
+export const defaultExecCores = 2;
