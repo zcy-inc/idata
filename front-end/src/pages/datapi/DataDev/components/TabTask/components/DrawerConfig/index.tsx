@@ -269,7 +269,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execCoresOptions}
                 />
               </Item>
-              <Item name={['executeConfig', 'extendProperties']} label="自定义参数">
+              <Item name={['executeConfig', 'extProperties']} label="自定义参数">
                 <MapInput style={{ width }} />
               </Item>
               {jobType === DIJobType.BACK_FLOW && <>
