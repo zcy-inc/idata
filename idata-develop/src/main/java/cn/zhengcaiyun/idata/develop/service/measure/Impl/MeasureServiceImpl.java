@@ -72,12 +72,11 @@ public class MeasureServiceImpl implements MeasureService {
 
     @Override
     public Page<MeasureDto> getMeasures(Long folderId, String measureType, String metricType, String measureId,
-                                        String measureName, String bizProcess, Boolean enable, String creator, Date measureDeadline,
-                                        String domain, String belongTblName, Long limit, Integer offset) {
+                                        String measureName, String bizProcess, Boolean enable, String creator,
+                                        String measureDeadline, String domain, String belongTblName, Long limit, Integer offset) {
         offset = offset != null ? offset : 0;
         limit = limit != null ? limit : PageParam.MAX_LIMIT;
         String isEnable = null;
-        String measureDeadlineStr = null;
         if (enable != null) {
             if (enable) {
                 isEnable = "_METRIC_LABEL";
@@ -85,10 +84,6 @@ public class MeasureServiceImpl implements MeasureService {
             else {
                 isEnable = "_METRIC_LABEL_DISABLE";
             }
-        }
-        if (measureDeadline != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            measureDeadlineStr = sdf.format(measureDeadline);
         }
         String folderIdsStr = null;
         if (folderId != null) {
@@ -99,12 +94,12 @@ public class MeasureServiceImpl implements MeasureService {
         }
         List<String> measureCodeList = devLabelDefineMyDao.selectLabelDefineCodesByCondition(
                 folderIdsStr, measureType, metricType, measureId, measureName,
-                bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName, limit, offset)
+                bizProcess, isEnable, creator, measureDeadline, domain, belongTblName, limit, offset)
                 .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
         if (measureCodeList.size() == 0) return Page.newOne(new ArrayList<>(), 0);
         return Page.newOne(getMeasureDetails(measureCodeList, measureType),
                 devLabelDefineMyDao.countLabelDefinesByCondition(folderIdsStr, measureType, metricType, measureId, measureName,
-                        bizProcess, isEnable, creator, measureDeadlineStr, domain, belongTblName).get());
+                        bizProcess, isEnable, creator, measureDeadline, domain, belongTblName).get());
     }
 
     private List<MeasureDto> getMeasureDetails(List<String> labelCodes, String measureType) {
