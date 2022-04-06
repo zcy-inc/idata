@@ -123,6 +123,8 @@ public class DevFolderServiceImpl implements DevFolderService {
                     }
                     return echoFolderTreeNode;
                 }).collect(Collectors.toList());
+        if (echo.size() == 0) return null;
+
         if (StringUtils.isEmpty(treeNodeName)) {
             return echo;
         }

@@ -51,7 +51,7 @@ public class MeasureController {
                                                    @RequestParam(value = "bizProcess", required = false) String bizProcess,
                                                    @RequestParam(value = "enable", required = false) Boolean enable,
                                                    @RequestParam(value = "creator", required = false) String creator,
-                                                   @RequestParam(value = "measureDeadline", required = false) Date measureDeadline,
+                                                   @RequestParam(value = "measureDeadline", required = false) String measureDeadline,
                                                    @RequestParam(value = "domain", required = false) String domain,
                                                    @RequestParam(value = "belongTblName", required = false) String belongTblName,
                                                    @RequestParam(value = "limit", required = false) Long limit,

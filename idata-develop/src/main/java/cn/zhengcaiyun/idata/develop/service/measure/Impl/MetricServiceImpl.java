@@ -409,7 +409,7 @@ public class MetricServiceImpl implements MetricService {
                 atomicMetric.setColumnName(atomicMetric.getMeasureLabels().get(0).getColumnName());
             }
             echoMetric.setAtomicMetric(atomicMetric);
-            specialAttributeDto.setAggregate(atomicMetric.getSpecialAttribute().getAggregate());
+            specialAttributeDto.setAggregatorCode(atomicMetric.getSpecialAttribute().getAggregatorCode());
             if (ObjectUtils.isNotEmpty(specialAttributeDto.getDimTables())) {
                 List<DimTableDto> dimTableList = specialAttributeDto.getDimTables();
                 dimTableList = dimTableList.stream().peek(dimTable -> dimTable.setTableName(tableIdNameMap.get(dimTable.getTableId())))
@@ -427,6 +427,7 @@ public class MetricServiceImpl implements MetricService {
                     .peek(modifier -> {
                         modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode()));
                         modifier.setColumnName(modifierLabelMap.get(modifier.getModifierCode()).get(0).getColumnName());
+                        modifier.setModifierValue(modifierLabelMap.get(modifier.getModifierCode()).get(0).getLabelParamValue());
                     }).collect(Collectors.toList());
             specialAttributeDto.setModifiers(modifierList);
             echoMetric.setSpecialAttribute(specialAttributeDto);
