@@ -1,14 +1,11 @@
 import React, { useRef } from 'react';
 import { message, Select, Table } from 'antd';
 import { TableProps } from 'antd/es/table';
-// import { DefaultOptionType } from 'antd/es/select';
-// import { usePersistFn } from '@/hooks';
 import { useRequest } from 'ahooks';
 
 interface ListSelectProps<RecordType> {
-  //   tableProps: TableProps<RecordType>;
   value?: RecordType[];
-  fetchData: () => Promise<Tresponse<RecordType[]>>;
+  fetchData: () => Promise<RecordType[]>;
   labelField?: string;
   valueField?: string;
   columns?: TableProps<RecordType>['columns'];
@@ -24,7 +21,7 @@ function ListSelect<RecordType extends object = any>({
   onChange,
 }: ListSelectProps<RecordType>) {
   const selectItem = useRef<RecordType>();
-  let { data: { data = [] } = {} } = useRequest(fetchData);
+  let { data = []  } = useRequest(fetchData);
   const options = data.map((item) => {
     const option = { ...item };
     if (labelField) {
@@ -55,6 +52,7 @@ function ListSelect<RecordType extends object = any>({
     if (Array.isArray(value)) {
       const newVal = [...value];
       newVal.splice(index, 1);
+      onChange?.(newVal);
     }
   };
   const combinedColumns = [

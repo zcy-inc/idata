@@ -134,7 +134,7 @@ export interface TaskConfig {
     schDagId: number; // 调度配置-dag编号
     schRerunMode: SchRerunMode; // 调度配置-重跑配置
     schTimeOut: number; // 调度配置-超时时间
-    schDryRun: number; // 调度配置-是否空跑
+    schDryRun: number | string[]; // 调度配置-是否空跑
     execQueue: string; // 运行配置-队列
     execMaxParallelism: number; // 运行配置-作业最大并发数，配置为0时表示使用默认并发数
     execWarnLevel: string; // 运行配置-告警等级 时光的接口获取

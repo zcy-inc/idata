@@ -330,9 +330,9 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
-
     const params = {
       executeConfig: {
+        ...values,
         jobId: data?.id as number,
         environment: activeKey,
         schDagId: values.schDagId,
@@ -492,22 +492,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   style={{ width }}
                   placeholder="请选择"
                   options={security.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
-                />
-              </Item>
-              <Item name="execDriverMem" label="驱动器内存" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execDriverMemOptions}
-                />
-              </Item>
-              <Item name="execWorkerMem" label="执行器内存" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execWorkerMemOptions}
                 />
               </Item>
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>

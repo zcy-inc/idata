@@ -12,9 +12,9 @@ import {
   Select,
   Tabs,
 } from 'antd';
-import { get } from 'lodash';
 import type { FC } from 'react';
 import { MapInput, ListSelect } from '@/components';
+import { DIJobType } from '@/constants/datadev';
 import styles from './index.less';
 
 import Title from '@/components/Title';
@@ -27,6 +27,7 @@ import {
   getExecuteQueues,
   saveTaskConfig,
   getConfiguredTaskList,
+  getDependenceTaskList,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
 import {
@@ -57,6 +58,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [stagForm] = Form.useForm();
   const [prodForm] = Form.useForm();
 
+  const jobType = data?.jobType;
+
   useEffect(() => {
     if (visible) {
       getTaskConfigsWrapped(Environments.STAG);
@@ -73,16 +76,16 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const getTaskConfigsWrapped = (environment: Environments) =>
     getDataDevConfig({ jobId: data?.id as number, environment })
       .then((res) => {
-        const config = get(res, 'data.executeConfig', {});
-        if (config.schTimeOut) {
-          config.schTimeOut = config.schTimeOut / 60;
+        const config = res.data;
+        if (config.executeConfig.schTimeOut) {
+          config.executeConfig.schTimeOut = config.executeConfig.schTimeOut / 60;
         } else {
-          config.schTimeOut = 0;
+          config.executeConfig.schTimeOut = 0;
         }
-        if (config.schDryRun === 1) {
-          config.schDryRun = ['schDryRun'];
+        if (config.executeConfig.schDryRun === 1) {
+          config.executeConfig.schDryRun = ['schDryRun'];
         } else {
-          config.schDryRun = [];
+          config.executeConfig.schDryRun = [];
         }
         if (environment === Environments.STAG) {
           stagForm.setFieldsValue(config);
@@ -94,7 +97,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
     getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
@@ -107,16 +109,16 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.PROD) {
       values = prodForm.getFieldsValue();
     }
-    if (!values.schDryRun) {
-      values.schDryRun = 0;
+    if (!values.executeConfig.schDryRun) {
+      values.executeConfig.schDryRun = 0;
     }
-    if (values.schDryRun && Array.isArray(values.schDryRun)) {
-      values.schDryRun = values.schDryRun.length > 0 ? 1 : 0;
+    if (values.executeConfig.schDryRun && Array.isArray(values.executeConfig.schDryRun)) {
+      values.executeConfig.schDryRun = values.executeConfig.schDryRun.length > 0 ? 1 : 0;
     }
-    if (!Number.isNaN(values.schTimeOut)) {
-      values.schTimeOut = values.schTimeOut * 60;
+    if (!Number.isNaN(values.executeConfig.schTimeOut)) {
+      values.executeConfig.schTimeOut = values.executeConfig.schTimeOut * 60;
     }
-    saveTaskConfig({ jobId: data?.id as number, environment }, { executeConfig: values })
+    saveTaskConfig({ jobId: data?.id as number, environment }, values)
       .then((res) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
@@ -169,14 +171,14 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               wrapperCol={{ span: 16 }}
             >
               <Title>调度配置</Title>
-              <Item name="schDryRun" label="空跑调度">
+              <Item name={['executeConfig', 'schDryRun']} label="空跑调度">
                 <Checkbox.Group>
                   <Checkbox value="schDryRun" />
                 </Checkbox.Group>
               </Item>
               <Row>
                 <Col span={12}>
-                  <Item name="schDagId" label="DAG" rules={ruleSelc}>
+                  <Item name={['executeConfig', 'schDagId']} label="DAG" rules={ruleSelc}>
                     <Select
                       size="large"
                       style={{ width }}
@@ -186,7 +188,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   </Item>
                 </Col>
                 <Col span={12}>
-                  <Item name="execQueue" label="队列" rules={ruleSelc}>
+                  <Item name={['executeConfig', 'execQueue']} label="队列" rules={ruleSelc}>
                     <Select
                       size="large"
                       style={{ width }}
@@ -196,16 +198,16 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   </Item>
                 </Col>
               </Row>
-              <Item name="schTimeOut" label="超时时间" rules={ruleSelc}>
+              <Item name={['executeConfig', 'schTimeOut']} label="超时时间" rules={ruleSelc}>
                 <Input size="large" style={{ width }} placeholder="请输入" suffix="分" />
               </Item>
-              <Item name="schTimeOutStrategy" label="超时策略">
+              <Item name={['executeConfig', 'schTimeOutStrategy']} label="超时策略">
                 <Radio.Group>
                   <Radio value="alarm">超时告警</Radio>
                   <Radio value="fail">超时失败</Radio>
                 </Radio.Group>
               </Item>
-              <Item name="schRerunMode" label="重跑属性" rules={ruleSelc}>
+              <Item name={['executeConfig', 'schRerunMode']} label="重跑属性" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -213,7 +215,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={restartOptions}
                 />
               </Item>
-              <Item name="execWarnLevel" label="报警等级" rules={ruleSelc}>
+              <Item name={['executeConfig', 'execWarnLevel']} label="报警等级" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -222,7 +224,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 />
               </Item>
 
-              <Item name="schPriority" label="优先等级" rules={ruleSelc}>
+              <Item name={['executeConfig', 'schPriority']} label="优先等级" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -235,7 +237,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 />
               </Item>
               <Title>运行配置</Title>
-              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+              <Item name={['executeConfig', 'execEngine']} label="执行引擎" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -243,7 +245,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execEngineOptions}
                 />
               </Item>
-              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
+              <Item name={['executeConfig', 'execDriverMem']} label="Driver Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -251,7 +253,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execDriverMemOptions}
                 />
               </Item>
-              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
+              <Item name={['executeConfig', 'execWorkerMem']} label="Executor Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -259,7 +261,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execWorkerMemOptions}
                 />
               </Item>
-              <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
+              <Item name={['executeConfig', 'execCores']} label="Executor Cores" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -267,18 +269,20 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execCoresOptions}
                 />
               </Item>
-              <Item name="extendProperties" label="自定义参数">
+              <Item name={['executeConfig', 'extendProperties']} label="自定义参数">
                 <MapInput style={{ width }} />
               </Item>
-              <Title>依赖配置</Title>
-              <Item name="dependencies" label="依赖的上游任务">
-                <ListSelect
-                  fetchData={() => getConfiguredTaskList({ environment: env })}
-                  labelField="jobName"
-                  valueField="jobId"
-                  columns={columns}
-                />
-              </Item>
+              {jobType === DIJobType.BACK_FLOW && <>
+                <Title>依赖配置</Title>
+                <Item name="dependencies" label="依赖的上游任务">
+                  <ListSelect
+                    fetchData={() => getDependenceTaskList({ environment: env })}
+                    labelField="prevJobName"
+                    valueField="prevJobId"
+                    columns={columns}
+                  />
+                </Item>
+              </>}
             </Form>
           </TabPane>
         ))}

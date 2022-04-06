@@ -504,7 +504,7 @@ export async function getDataDevTypes() {
 }
 
 /**
- * 获取已配置的作业列表（依赖的上游任务）
+ * 获取已配置的作业列表
  */
 export async function getConfiguredTaskList(params: { environment: Environments }) {
   return request<DefaultResponse & { data: ConfiguredTaskListItem[] }>(
@@ -513,6 +513,24 @@ export async function getConfiguredTaskList(params: { environment: Environments 
       method: 'GET',
     },
   );
+}
+
+// 获取已配置的作业列表（依赖的上游任务）
+export async function getDependenceTaskList(params: { environment: Environments }) {
+  return request<Tresponse<ConfiguredTaskListItem[]>>(
+    `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
+    {
+      method: 'GET',
+    },
+  ).then(({ data }) => {
+    return data.map((item) => ({
+      ...item,
+      prevJobId: item.jobId,
+      prevJobName: item.jobName,
+      prevJobDagName: item.dagName,
+      prevJobDagId: item.dagId,
+    }));
+  });
 }
 
 /**
