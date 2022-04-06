@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
-import { Select } from 'antd';
+import React, { ChangeEvent, FC } from 'react';
 import { RetweetOutlined } from '@ant-design/icons';
 import { DefaultOptionType } from 'antd/es/select';
+import JoinSelect from '../JoinSelect';
 import styles from './index.less';
 
 enum Mode {
@@ -31,7 +31,7 @@ const TableSelectInput: FC<{
       const newValue = { inputMode: Mode.SELECT };
       onChange?.(newValue);
     } else {
-      const newValue = { ...value, inputMode: Mode.INPUT };
+      const newValue = { inputMode: Mode.INPUT };
       onChange?.(newValue);
     }
   };
@@ -46,8 +46,13 @@ const TableSelectInput: FC<{
     onChange?.(newValue);
   };
 
-  const onSelect = (v: string) => {
+  const onSelect = (v?: string) => {
     const newValue: TableSelectInputValue = { inputMode: Mode.SELECT, rawTable: v };
+    onChange?.(newValue);
+  };
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue: TableSelectInputValue = { ...value, rawTable: e.target.value };
     onChange?.(newValue);
   };
 
@@ -55,7 +60,12 @@ const TableSelectInput: FC<{
     <div className={styles.wp} style={style}>
       {inputMode === Mode.INPUT && (
         <div className={styles.inpWp}>
-          <input value={value?.rawTable} className={styles.inp} type="text" />
+          <input
+            value={value?.rawTable}
+            className={styles.inp}
+            type="text"
+            onChange={handleInput}
+          />
           <div className={styles.numWp}>
             [
             <input
@@ -76,7 +86,7 @@ const TableSelectInput: FC<{
         </div>
       )}
       {inputMode === Mode.SELECT && (
-        <Select size="large" options={options} value={value?.rawTable} onChange={onSelect} />
+        <JoinSelect size="large" options={options} value={value?.rawTable} onChange={onSelect} />
       )}
       <div className={styles.extra}>
         <RetweetOutlined onClick={changeMode} style={{ marginRight: 8 }} />
