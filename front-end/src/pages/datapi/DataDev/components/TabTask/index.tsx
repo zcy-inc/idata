@@ -43,7 +43,6 @@ import {
   DIJobType,
   diConfigOptions,
   DIConfigMode,
-  // backFlowDestWriteModeOptions,
   shardingNumOptions,
   DataSourceType,
 } from '@/constants/datadev';
@@ -133,7 +132,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     label: mode,
     value: mode,
   }));
-  // const;
   // 获取DI基础信息
   const { data: basicInfo, refresh: refreshBasicInfo, loading: basicInfoLoading } = useRequest(() =>
     getDIJobBasicInfo(jobId),
