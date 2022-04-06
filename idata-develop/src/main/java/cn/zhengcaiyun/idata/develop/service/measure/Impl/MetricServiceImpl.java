@@ -101,6 +101,7 @@ public class MetricServiceImpl implements MetricService {
     private String[] metricEnumInfos = new String[]{"bizProcessCode", "domainCode"};
     private String[] columnTypes = new String[]{"TIMESTAMP", "DATE", "ARRAY<TIMESTAMP>", "ARRAY<DATE>"};
     private final String DB_NAME_LABEL = "dbName:LABEL";
+    private final String METRIC_ID = "metricId";
 
     @Override
     public MetricDto findMetric(String metricCode) {
@@ -394,24 +395,39 @@ public class MetricServiceImpl implements MetricService {
                     }
                 }).collect(Collectors.toList());
         echoMetric.setMeasureLabels(labelService.findLabelsByCode(metricCode));
+
         echoMetric.setMetricSql(getMetricSql(metricCode));
         SpecialAttributeDto specialAttributeDto = echoMetric.getSpecialAttribute();
         if (echoMetric.getLabelTag().startsWith(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
             Map<Long, String> tableIdNameMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1)))
                     .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
             MeasureDto atomicMetric = getMetricByCode(echoMetric.getSpecialAttribute().getAtomicMetricCode());
-            specialAttributeDto.setAtomicMetricName(atomicMetric.getLabelName());
+            String metricId = atomicMetric.getLabelAttributes().stream()
+                    .filter(attribute -> METRIC_ID.equals(attribute.getAttributeKey())).findFirst().get().getAttributeValue();
+            atomicMetric.setMetricId(metricId);
+            if (ObjectUtils.isNotEmpty(atomicMetric.getMeasureLabels())) {
+                atomicMetric.setColumnName(atomicMetric.getMeasureLabels().get(0).getColumnName());
+            }
+            echoMetric.setAtomicMetric(atomicMetric);
             specialAttributeDto.setAggregate(atomicMetric.getSpecialAttribute().getAggregate());
-            List<DimTableDto> dimTableList = specialAttributeDto.getDimTables();
-            dimTableList = dimTableList.stream().peek(dimTable -> dimTable.setTableName(tableIdNameMap.get(dimTable.getTableId())))
-                    .collect(Collectors.toList());
-            specialAttributeDto.setDimTables(dimTableList);
+            if (ObjectUtils.isNotEmpty(specialAttributeDto.getDimTables())) {
+                List<DimTableDto> dimTableList = specialAttributeDto.getDimTables();
+                dimTableList = dimTableList.stream().peek(dimTable -> dimTable.setTableName(tableIdNameMap.get(dimTable.getTableId())))
+                        .collect(Collectors.toList());
+                specialAttributeDto.setDimTables(dimTableList);
+            }
             List<ModifierDto> modifierList = specialAttributeDto.getModifiers();
+            List<String> modifierCodeList = modifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
             Map<String, String> modifierCodeNameMap = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))))
+                    and(devLabelDefine.labelCode, isIn(modifierCodeList))))
                     .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, DevLabelDefine::getLabelName));
-            modifierList = modifierList.stream().peek(modifier -> modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode())))
-                            .collect(Collectors.toList());
+            Map<String, List<DevLabel>> modifierLabelMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isIn(modifierCodeList)))).stream().collect(Collectors.groupingBy(DevLabel::getLabelCode));
+            modifierList = modifierList.stream()
+                    .peek(modifier -> {
+                        modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode()));
+                        modifier.setColumnName(modifierLabelMap.get(modifier.getModifierCode()).get(0).getColumnName());
+                    }).collect(Collectors.toList());
             specialAttributeDto.setModifiers(modifierList);
             echoMetric.setSpecialAttribute(specialAttributeDto);
         }
@@ -502,7 +518,7 @@ public class MetricServiceImpl implements MetricService {
         DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metricCode))))
                 .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
-        checkArgument(!metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name()), "请选择派生指标");
+        checkArgument(metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name()), "请选择派生指标");
 
         String metricBaseSql = "SELECT t.%s AS %s FROM %s.%s t";
         List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
