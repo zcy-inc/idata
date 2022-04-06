@@ -182,13 +182,13 @@ export default [
       {
         path: '/measure/edit/:id?',
         name: '编辑指标详情',
-        component: './Measure/Edit/TabMetric/EditMetric',
+        component: './Measure/Edit/EditMetric',
         hideInMenu: true
       },
       {
         path: '/measure/view/:id',
         name: '查看指标详情',
-        component: './Measure/Edit/TabMetric/ViewMetric',
+        component: './Measure/Edit/ViewMetric',
         hideInMenu: true
       },
       {
