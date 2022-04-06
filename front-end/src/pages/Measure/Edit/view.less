@@ -1,0 +1,77 @@
+.view-wrap {
+  background-color: #fff;
+  padding: 20px;
+ 
+  .part-title {
+    font-weight: 500;
+    margin: 16px 0 12px;
+    line-height: 20px;
+    .btn-list {
+      float: right;
+    }
+    &::after {
+      clear: both;
+      content: '';
+      display: block;
+    }
+  }
+  .status-enable {
+    :global {
+      .ant-descriptions-item-content {
+        color: #05CC87;
+        padding-left: 6px;
+        display: flex;
+        align-items: center;
+        &::before {
+          display: inline-block;
+          background-color: #05CC87;
+          transform: translateX(-6px);
+          content: '';
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+  .status-disable {
+    :global {
+      .ant-descriptions-item-content {
+        color: #ff4d4f;
+        padding-left: 6px;
+        display: flex;
+        align-items: center;
+        &::before {
+          display: inline-block;
+          background-color: #ff4d4f;
+          transform: translateX(-6px);
+          content: '';
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+}
+
+.edit-wrap {
+  background-color: #fff;
+  padding: 20px;
+}
+
+.btn-list {
+  text-align: right;
+  margin-top: 12px;
+}
+
+.plain-default-btn {
+  background: #F1F3FF;
+  border-radius: 4px;
+  display: inline-block;
+  color: #2D3956;
+  margin-right: 12px;
+  font-weight: normal;
+  padding: 0 20px;
+  line-height: 32px;
+}

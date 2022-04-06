@@ -27,12 +27,6 @@ export default [
         featureCode: 'F_MENU_DATA_DEVELOP',
       },
       {
-        path: '/datapi/measure',
-        name: '指标库',
-        component: './datapi/Measures',
-        featureCode: 'F_MENU_MEASURE_MANAGE',
-      },
-      {
         path: '/datapi/datasource',
         name: '数据源管理',
         component: './datapi/DataSource',
@@ -171,6 +165,39 @@ export default [
         featureCode: 'F_MENU_JOB_MONITORING',
       },
     ],
+  },
+  {
+    path: '/measure',
+    name: '数据指标',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_BIGDATA_RD',
+    routes: [
+      {
+        path: '/measure/list',
+        name: '指标列表',
+        component: './Measure/List',
+        featureCode: 'F_MENU_DATA_DEVELOP',
+      },
+      {
+        path: '/measure/edit/:id?',
+        name: '编辑指标详情',
+        component: './Measure/Edit/TabMetric/EditMetric',
+        hideInMenu: true
+      },
+      {
+        path: '/measure/view/:id',
+        name: '查看指标详情',
+        component: './Measure/Edit/TabMetric/ViewMetric',
+        hideInMenu: true
+      },
+      {
+        path: '/measure/modifier',
+        name: '修饰词',
+        component: './Measure/Modifier',
+        featureCode: 'F_MENU_DATA_DEVELOP',
+      },
+    ]
   },
   {
     component: './404',
