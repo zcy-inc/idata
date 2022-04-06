@@ -162,7 +162,7 @@ public class MeasureServiceImpl implements MeasureService {
                 .collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
         List<MeasureDto> echoModifierList =  modifiers.stream().map(modifier -> {
             MeasureDto echo = PojoUtil.copyOne(modifier,
-                    "id", "creatTime", "editTime", "creator", "editor", "labelCode", "labelName", "labelTag", "folderName");
+                    "id", "createTime", "editTime", "creator", "editor", "labelCode", "labelName", "labelTag", "folderName");
             List<AttributeDto> labelAttributeList = modifier.getLabelAttributes();
             labelAttributeList.forEach(labelAttribute -> {
                 if ("modifierId".equals(labelAttribute.getAttributeKey())) {
@@ -172,8 +172,10 @@ public class MeasureServiceImpl implements MeasureService {
                     echo.setMeasureDefine(labelAttribute.getAttributeValue());
                 }
             });
-            echo.setBelongTblName(tableMap.get(modifierLabelMap.get(modifier.getLabelCode()).get(0).getTableId()));
-            echo.setColumnName(modifierLabelMap.get(modifier.getLabelCode()).get(0).getColumnName());
+            if (modifierLabelMap.containsKey(modifier.getLabelCode()) && tableMap.containsKey(modifierLabelMap.get(modifier.getLabelCode()).get(0).getTableId())) {
+                echo.setBelongTblName(tableMap.get(modifierLabelMap.get(modifier.getLabelCode()).get(0).getTableId()));
+                echo.setColumnName(modifierLabelMap.get(modifier.getLabelCode()).get(0).getColumnName());
+            }
             return echo;
         }).collect(Collectors.toList());
         return echoModifierList;

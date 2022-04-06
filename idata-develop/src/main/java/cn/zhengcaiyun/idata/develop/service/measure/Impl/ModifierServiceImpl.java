@@ -29,6 +29,7 @@ import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,14 +276,16 @@ public class ModifierServiceImpl implements ModifierService {
                     AttributeDto attributeDto = measure.getLabelAttributes().stream()
                             .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
                             .findAny().orElse(null);
-                    return StringUtils.isNotEmpty(attributeDto.getEnumName()) ? attributeDto.getEnumName() : "";
+                    return StringUtils.isNotEmpty(attributeDto.getEnumValue()) ? attributeDto.getEnumValue() : "";
                 }));
         int total = 0;
         for (String modifierCode : modifierCodeList) {
-            LabelDto modifierLabel = labelService.findLabelsByCode(modifierCode).get(0);
-            modifierLabel.setLabelParamValue(modifierEnumValueMap.getOrDefault(modifierCode, ""));
-            total += devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierCode, DevLabel.class,
-                    "id", "labelParamValue"));
+            if (ObjectUtils.isNotEmpty(labelService.findLabelsByCode(modifierCode))) {
+                LabelDto modifierLabel = labelService.findLabelsByCode(modifierCode).get(0);
+                modifierLabel.setLabelParamValue(modifierEnumValueMap.getOrDefault(modifierCode, ""));
+                total += devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierLabel, DevLabel.class,
+                        "id", "labelParamValue"));
+            }
         }
         return total;
     }

@@ -35,6 +35,7 @@ public class ModifierDto {
     private List<String> enumValueCodes;
     private List<String> enumValues;
     private AttributeDto modifierAttribute;
+    private String modifierValue;
 
     // GaS
     public String getModifierCode() {
@@ -107,5 +108,13 @@ public class ModifierDto {
 
     public void setColumnDataType(DataTypeEnum columnDataType) {
         this.columnDataType = columnDataType;
+    }
+
+    public String getModifierValue() {
+        return modifierValue;
+    }
+
+    public void setModifierValue(String modifierValue) {
+        this.modifierValue = modifierValue;
     }
 }
