@@ -140,7 +140,7 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         boolean buildQuery = DIRuleHelper.buildQuery(jobType, configMode, srcReadFilter, srcCols, dataSourceTypeEnum);
 
         String destTable = contentDto.getDestTable();
-        String srcTables = contentDto.getSrcTables();
+        String srcTables = contentDto.toModel().getSrcTables();
         switch (DiConfigModeEnum.getByValue(configMode)) {
             case VISIBLE:
                 // 设置SrcQuery
@@ -170,21 +170,21 @@ public class DIJobContentServiceImpl implements DIJobContentService {
                     contentDto.setScriptQuery(scriptQuery);
                 }
 
-                if (buildMergeSql && StringUtils.isNotEmpty(scriptSelectColumns)) {
-                    // 设置ScriptMergeSql
-                    ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
-                    int days = 3;
-                    if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
-                        days = scriptMergeSqlParamDto.getRecentDays();
-                    }
-                    List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
-                    String scriptKeys = "id";
-                    if (StringUtils.isNotEmpty(contentDto.getScriptKeyColumns())) {
-                        scriptKeys = contentDto.getScriptKeyColumns();
-                    }
-                    String scriptMergeSql = DIRuleHelper.generateMergeSql(scriptColumnList, scriptKeys, srcTables, destTable, dataSourceTypeEnum, days);
-                    contentDto.setScriptMergeSql(scriptMergeSql);
-                }
+//                if (buildMergeSql && StringUtils.isNotEmpty(scriptSelectColumns)) {
+//                    // 设置ScriptMergeSql
+//                    ScriptMergeSqlParamDto scriptMergeSqlParamDto = contentDto.getScriptMergeSqlParamDto();
+//                    int days = 3;
+//                    if (scriptMergeSqlParamDto != null && scriptMergeSqlParamDto.getRecentDays() != null) {
+//                        days = scriptMergeSqlParamDto.getRecentDays();
+//                    }
+//                    List<String> scriptColumnList = Arrays.asList(scriptSelectColumns.split(","));
+//                    String scriptKeys = "id";
+//                    if (StringUtils.isNotEmpty(contentDto.getScriptKeyColumns())) {
+//                        scriptKeys = contentDto.getScriptKeyColumns();
+//                    }
+//                    String scriptMergeSql = DIRuleHelper.generateMergeSql(scriptColumnList, scriptKeys, srcTables, destTable, dataSourceTypeEnum, days);
+//                    contentDto.setScriptMergeSql(scriptMergeSql);
+//                }
                 break;
         }
     }
