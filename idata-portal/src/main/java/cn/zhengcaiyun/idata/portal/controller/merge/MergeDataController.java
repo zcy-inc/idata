@@ -73,6 +73,8 @@ public class MergeDataController {
     private MergeDataRequestLimiter mergeDataRequestLimiter;
     @Autowired
     private DatapiSQLChangeService datapiSQLChangeService;
+    @Autowired
+    private MergeDataCommonService mergeDataCommonService;
 
     @GetMapping("/data")
     public void handleMerge(MergeParam mergeParam,
@@ -85,7 +87,36 @@ public class MergeDataController {
             changeDatapiSql(mergeParam.getDatapiIds(), response);
             return;
         }
+        if ("offline_jobs".equals(mergeParam.getType())) {
+            offlineJobs(mergeParam.getJobIds(), response);
+            return;
+        }
         throw new BizProcessException("需要指定必要参数");
+    }
+
+    public void offlineJobs(String jobIds,
+                            HttpServletResponse response) {
+        if (StringUtils.isBlank(jobIds))
+            throw new BizProcessException("需要指定作业id");
+        List<MigrateResultDto> resultDtoList = mergeDataCommonService.offlineJobs(jobIds);
+        if (CollectionUtils.isEmpty(resultDtoList))
+            return;
+
+        SXSSFWorkbook workbook = downloadAsExcel(resultDtoList);
+        String fileName = "offline_jobs_data_" + System.currentTimeMillis();
+        try {
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-disposition", String.format("attachment;filename=%s.xlsx",
+                    new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1)));
+            ServletOutputStream sos = response.getOutputStream();
+            workbook.write(sos);
+            sos.flush();
+            sos.close();
+            response.flushBuffer();
+            workbook.dispose();
+        } catch (IOException ex) {
+            LOGGER.warn("exportLabelResultData failed. ex: {}.", ex);
+        }
     }
 
     public void changeDatapiSql(String datapiIds,
@@ -219,12 +250,13 @@ public class MergeDataController {
     }
 
     public static class MergeParam {
-        // merge_data, change_api
+        // merge_data, change_api, offline_jobs
         private String type;
         private String cluster;
         private String env;
         private String mergeModules;
         private String datapiIds;
+        private String jobIds;
 
         public String getType() {
             return type;
@@ -264,6 +296,14 @@ public class MergeDataController {
 
         public void setEnv(String env) {
             this.env = env;
+        }
+
+        public String getJobIds() {
+            return jobIds;
+        }
+
+        public void setJobIds(String jobIds) {
+            this.jobIds = jobIds;
         }
     }
 
