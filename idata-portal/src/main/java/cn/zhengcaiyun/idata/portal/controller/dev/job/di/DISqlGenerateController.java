@@ -70,6 +70,9 @@ public class DISqlGenerateController {
         String dataSourceType = request.getDataSourceType();
         String sourceTable = request.getSourceTable();
         String keyColumns = request.getKeyColumns();
+        if (StringUtils.isEmpty(keyColumns)) {
+            keyColumns = "id";
+        }
         List<String> columnList = Arrays.asList(request.getSelectColumns().replaceAll(" ", "").replaceAll("\n", "").split(","));
         return RestResult.success(DIRuleHelper.generateMergeSql(columnList, keyColumns, sourceTable, destTable, DataSourceTypeEnum.valueOf(dataSourceType), request.getDays()));
     }

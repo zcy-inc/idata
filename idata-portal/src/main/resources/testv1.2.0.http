@@ -1,3 +1,9 @@
+POST http://localhost:8080/api/p1/dev/jobs/di/generate/merge-sql
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQ5MzEzMTg4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.G9ZkPNlV25GwUe7Xjl1AC0vXSGE0pgHTw7r2doySLmmRW4DSwrG9UEDJNAc6mqL009CEgV7nGlARFGd1HJ9VYw
+
+{"destTable":"ads.target_table","srcReadMode":"incremental","selectColumns":"id,name","keyColumns":"","sourceTable":"admin_department_purchaser_organization[1-2]","dataSourceType":"mysql"}
+###
 POST http://localhost:8080/api/p1/dev/jobs/5/di/contents
 Content-Type: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQ5MzEzMTg4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.G9ZkPNlV25GwUe7Xjl1AC0vXSGE0pgHTw7r2doySLmmRW4DSwrG9UEDJNAc6mqL009CEgV7nGlARFGd1HJ9VYw
