@@ -34,7 +34,7 @@ public class Test {
         // 通过SpEL解析
         ExpressionParser parser = new SpelExpressionParser();
         EvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("isMulPartition", false);
+        context.setVariable("isMulPartition", true);
         context.setVariable("destTable", "ods.ods_db_item_parana_skus");
         context.setVariable("columns", " id\n" +
                 ",sku_code\n" +

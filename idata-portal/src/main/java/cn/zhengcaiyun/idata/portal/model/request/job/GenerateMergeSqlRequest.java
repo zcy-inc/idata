@@ -13,7 +13,6 @@ public class GenerateMergeSqlRequest {
     /**
      * 主键id，支持组合，逗号分隔
      */
-    @NotEmpty(message = "keyColumns 不能为空")
     private String keyColumns;
 
     /**

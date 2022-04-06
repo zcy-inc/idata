@@ -123,7 +123,7 @@ public class DIRuleHelper {
         String tmpTableParam = "src." + destTable.split("\\.")[1] + "_pt";
         // 匹配规则：例如 "tableName[1-2]"
         String regex1 = "(\\w+)\\[(\\d+-\\d+)\\]";
-        // 匹配规则：例如 "212tableName2,223tableName2"
+        // 匹配规则：例如 "tableName2,tableName2"
         String regex2 = "(\\d+(\\w+)[,]{0,1})+";
 
         // 是否涉及多张表（分区表）
