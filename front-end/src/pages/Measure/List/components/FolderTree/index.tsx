@@ -1,17 +1,18 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { Dropdown, Input, Menu, message, Tabs, Tree, Modal } from 'antd';
-import { useModel } from 'umi';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dropdown, Input, Menu, message, Tree, Modal } from 'antd';
 import { debounce } from 'lodash';
 import type { FC, ChangeEvent, Key } from 'react';
 
 import IconFont from '@/components/IconFont';
 import CreateFolder from './components/CreateFolder';
 
-import { deleteFolder } from '@/services/measure';
+import { deleteFolder, getFolderTree } from '@/services/measure';
 import { TreeNodeType } from '@/constants/datapi';
 import { TreeNode as ITreeNode } from '@/types/datapi';
-
-export interface FolderTreeProps {}
+import showDialog from '@/utils/showDialog';
+export interface FolderTreeProps {
+  onChange: (node: any) => void
+}
 interface SearchTreeNode {
   key: string;
   name: string;
@@ -19,7 +20,6 @@ interface SearchTreeNode {
 }
 
 const { TreeNode } = Tree;
-const { TabPane } = Tabs;
 const { confirm } = Modal;
 const NodeTypeIcon = {
   FOLDER: <IconFont type="icon-wenjianjia" key="folder" />,
@@ -29,90 +29,73 @@ const NodeTypeIcon = {
   TABLE: <IconFont type="icon-biao" key="metric" />,
 };
 
-const FolderTree: FC<FolderTreeProps> = ({}) => {
+const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
   const [expandedKeys, setExpandedKeys] = useState<Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(true);
   const flatTree = useRef<SearchTreeNode[]>([]);
-
-  const [visible, setVisible] = useState(false);
-
-  const { tree, getTree, treeType, curNode, setCurNode, setFolderMode, viewTab, createTab } =
-    useModel('measure', (_) => ({
-      tree: _.tree,
-      getTree: _.getTree,
-      treeType: _.treeType,
-      curNode: _.curNode,
-      setCurNode: _.setCurNode,
-      setFolderMode: _.setFolderMode,
-      viewTab: _.viewTab,
-      createTab: _.createTab,
-    }));
+  const [tree, setTree] = useState([]);
+  const [curNode, setCurNode] = useState<any>(null);
+  const [selectedKeys, setSelectedKeys] = useState<React.Key []>([]);
 
   useEffect(() => {
-    getTree(TreeNodeType.DIMENSION_LABEL);
+    getTreeData();
   }, []);
 
   useEffect(() => {
     flat(tree);
   }, [tree]);
 
-  const menu = (
-    <Menu onClick={({ key }) => onMenuActions(key)}>
-      <Menu.Item key="folder">新建文件夹</Menu.Item>
-      <Menu.Item key="dimension">新建维度</Menu.Item>
-      <Menu.Item key="modifier">新建修饰词</Menu.Item>
-      <Menu.Item key="metric">新建指标</Menu.Item>
-    </Menu>
-  );
-
-  const renderTypeMenu = () => {
-    switch (treeType) {
-      case TreeNodeType.DIMENSION_LABEL:
-        return <Menu.Item key="dimension">新建维度</Menu.Item>;
-      case TreeNodeType.MODIFIER_LABEL:
-        return <Menu.Item key="modifier">新建修饰词</Menu.Item>;
-      case TreeNodeType.METRIC_LABEL:
-      default:
-        return <Menu.Item key="metric">新建指标</Menu.Item>;
-    }
-  };
-
   const treeMenu = (
     <Menu onClick={({ key }) => onMenuActions(key)}>
-      {curNode?.type === 'FOLDER' ? (
-        <Fragment>
-          {renderTypeMenu()}
-          <Menu.Divider />
-          <Menu.Item key="folder">新建文件夹</Menu.Item>
-          <Menu.Item key="edit">编辑文件夹</Menu.Item>
-          <Menu.Item key="delete">删除文件夹</Menu.Item>
-        </Fragment>
-      ) : null}
+      <Menu.Divider />
+      <Menu.Item key="folder">新建文件夹</Menu.Item>
+      <Menu.Item key="edit">编辑文件夹</Menu.Item>
+      <Menu.Item key="delete">删除文件夹</Menu.Item>
     </Menu>
   );
+
+  const getTreeData = (treeNodeName?: string) => {
+    getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL, treeNodeName }).then((res) => {
+      setTree(res.data);
+      if(res.data.length) {
+        setSelectedKeys([res.data[0].cid]);
+      }
+    });
+  }
+
+  const editTreeItem = (node = { folderId: ''}) => {
+    const isEdit = !!node.folderId;
+    showDialog(`${isEdit ? '编辑文件夹' : '新建文件夹'}`, {
+      modalProps: {
+        width: 540
+      },
+      formProps: {
+        node
+      },
+      beforeConfirm: (dialog, form, done) => {
+        dialog.showLoading();
+        form.handleSubmit().then(() => {
+          message.success(`文件夹${isEdit ? '编辑': '新建'}成功`);
+          getTreeData();
+          done();
+        }).finally(() => {
+          dialog.hideLoading();
+        })
+      },
+    }, CreateFolder)
+  }
 
   // 新建文件夹/维度/修饰词/指标
   const onMenuActions = (key: Key) => {
     switch (key) {
       case 'folder':
-        setFolderMode('create');
-        setVisible(true);
+        editTreeItem();
         break;
       case 'edit':
-        setFolderMode('edit');
-        setVisible(true);
+        editTreeItem(curNode);
         break;
       case 'delete':
         onDeleteFolder();
-        break;
-      case 'dimension':
-        createTab(TreeNodeType.DIMENSION_LABEL);
-        break;
-      case 'modifier':
-        createTab(TreeNodeType.MODIFIER_LABEL);
-        break;
-      case 'metric':
-        createTab(TreeNodeType.METRIC_LABEL);
         break;
       default:
         break;
@@ -128,11 +111,11 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           .then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
-              getTree(treeType);
+              getTreeData();
             }
           })
           .catch((err) => {}),
-    });
+  });
 
   // 组装数据，并高亮检索结果
   const loop = (data: ITreeNode[], parentId?: string): any => {
@@ -157,9 +140,9 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
       parentId && (node.parentId = parentId);
 
       return _.children ? (
-        <TreeNode {...node}>{loop(_.children, cid)}</TreeNode>
+        <TreeNode key={_.folderId} {...node}>{loop(_.children, cid)}</TreeNode>
       ) : (
-        <TreeNode {...node} />
+        <TreeNode key={_.folderId} {...node} />
       );
     });
   };
@@ -169,6 +152,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     for (let i = 0; i < data.length; i++) {
       const node = data[i];
       const { name, cid } = node;
+      // flatTree暂时不知道做什么用途
       flatTree.current.push({ name, key: cid, parentId: parentId });
       if (node.children) {
         flat(node.children, node.cid);
@@ -178,7 +162,7 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
 
   // 检索树
   const onFilterTree = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-    getTree(treeType, value);
+    getTreeData(value);
   };
 
   const deFilterTree = debounce(onFilterTree, 500);
@@ -188,6 +172,13 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
     setAutoExpandParent(false);
   };
 
+  const handleSelect = (selectedKes: React.Key[], info: any) => {
+    console.log('onChange',info);
+    setSelectedKeys(selectedKes);
+    if(info.node.props.type === 'FOLDER') {
+      onChange && onChange(info.node.props);
+    }
+  }
   return (
     <div className="folder-tree">
       <div className="search">
@@ -197,15 +188,12 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
           prefix={<IconFont type="icon-sousuo" />}
           onChange={deFilterTree}
         />
-        <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconFont type="icon-xinjian1" className="icon-plus" onClick={() => setCurNode({})} />
-        </Dropdown>
+        <IconFont
+          type="icon-xinjian1"
+          className="icon-plus"
+          onClick={() => editTreeItem()}
+        />
       </div>
-      <Tabs activeKey={treeType} onChange={(key) => getTree(key as TreeNodeType)}>
-        <TabPane tab="维度" key={TreeNodeType.DIMENSION_LABEL} />
-        <TabPane tab="修饰词" key={TreeNodeType.MODIFIER_LABEL} />
-        <TabPane tab="指标" key={TreeNodeType.METRIC_LABEL} />
-      </Tabs>
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
           blockNode
@@ -217,12 +205,12 @@ const FolderTree: FC<FolderTreeProps> = ({}) => {
             const folderId = `${node.folderId}`;
             setCurNode({ ...node, folderId, parentId });
           }}
-          onSelect={(selectedKeys, { node }: any) => node.type !== 'FOLDER' && viewTab(node)}
+          selectedKeys={selectedKeys}
+          onSelect={handleSelect}
         >
           {loop(tree)}
         </Tree>
       </Dropdown>
-      {visible && <CreateFolder visible={visible} onCancel={() => setVisible(false)} />}
     </div>
   );
 };
