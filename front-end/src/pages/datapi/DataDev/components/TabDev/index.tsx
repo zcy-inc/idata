@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Form, FormInstance, Input, message, Modal, Select, Tooltip } from 'antd';
+import { Form, FormInstance, Input, message, Modal, Select, Tooltip, Button, Divider } from 'antd';
 import { ModalForm } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import { get } from 'lodash';
 import type { FC } from 'react';
 import type { IRange } from 'monaco-editor';
 import styles from './index.less';
-
 import { IPane } from '@/models/datadev';
 import { Task, TaskVersion } from '@/types/datadev';
 import {
@@ -44,7 +43,7 @@ import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from './components/DrawerHistory';
 import DrawerDependence from './components/DrawerDependence';
-import SparkSql from './components/Content/SparkSql';
+import SqlContent from './components/Content/SqlContent';
 import SparkJava from './components/Content/SparkJava';
 import SparkPython from './components/Content/SparkPython';
 import ScriptShell from './components/Content/ScriptShell';
@@ -53,6 +52,18 @@ import Kylin from './components/Content/Kylin';
 
 export interface TabTaskProps {
   pane: IPane;
+}
+
+enum Btns {
+  SAVE,
+  DEBUG,
+  RUN_ONCE,
+  SUBMIT,
+  ONLINE, // 上线
+  OFFLINE, // 下线
+  DELETE, // 删除
+  DIVIDER,
+  JOB_CONFIG,
 }
 
 const { Item } = Form;
@@ -77,6 +88,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [debugLoading, setDebugLoading] = useState(false);
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -93,9 +105,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   }));
 
   useEffect(() => {
+    const fetchData = async () => {
+      await getTaskWrapped();
+      await getTaskVersionsWrapped();
+    };
     if (pane) {
-      getTaskWrapped();
-      getTaskVersionsWrapped();
+      fetchData();
     }
   }, [pane.id]);
 
@@ -111,42 +126,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const removeResult = (i: number) => {
     results.splice(i, 1);
     setResults([...results]);
-  };
-
-  const componentMap = {
-    [TaskTypes.SQL_SPARK]: (
-      <SparkSql
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log, res: results }}
-        removeResult={removeResult}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.SPARK_JAR]: (
-      <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />
-    ),
-    [TaskTypes.SPARK_PYTHON]: (
-      <SparkPython
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log }}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.SCRIPT_SHELL]: <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />,
-    [TaskTypes.SCRIPT_PYTHON]: (
-      <ScriptPython
-        ref={formRef}
-        monaco={monaco}
-        data={{ content, log }}
-        visible={visibleJobConfig}
-        onCancel={() => setVisibleJobConfig(false)}
-      />
-    ),
-    [TaskTypes.KYLIN]: <Kylin ref={formRef} data={content} />,
   };
 
   /**
@@ -178,9 +157,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getTaskContent = (version: number) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
-        getSqlSpark({ jobId: pane.id, version })
-          .then((res) => setContent(res.data))
-          .catch((err) => {});
+      case TaskTypes.SQL_FLINK:
+        getSqlSpark({ jobId: pane.id, version }).then((res) => setContent(res.data));
         break;
       case TaskTypes.SPARK_JAR:
       case TaskTypes.SPARK_PYTHON:
@@ -198,9 +176,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         getKylin({ jobId: pane.id, version })
           .then((res) => setContent(res.data))
           .catch((err) => {});
-        break;
-
-      default:
         break;
     }
   };
@@ -243,9 +218,11 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
 
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_FLINK:
         const dataSql = {
+          ...values,
           jobId: pane.id,
-          jobType: TaskTypes.SQL_SPARK,
+          jobType: task?.jobType,
           sourceSql: monacoValue,
           externalTables: values.externalTables,
           udfIds: values.udfIds.join(','),
@@ -361,89 +338,109 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
   };
 
-  /**
-   * 调试选中代码段
-   */
-  const onDebug = () => {
+  // 获取调试代码
+  const getDebugCode = () => {
     const editor = monaco.current?.editor;
     const range = editor?.getSelection() as IRange;
     let value = editor?.getModel()?.getValueInRange(range);
     if (!value) {
       value = editor?.getValue();
     }
-    if (task?.jobType === TaskTypes.SQL_SPARK) {
-      runQuery({ querySource: value as string, sessionKind: 'spark' })
-        .then((res) => {
-          if (!res.data) {
-            message.error('请选择代码');
-            return;
-          }
-          const { sessionId, statementId } = res.data;
-          const runQueryResultWrapped = () => {
-            runQueryResult({
+    return value;
+  };
+
+  // 轮询 pyspark 调试结果
+  const fetchPysparkQueryResult = ({
+    sessionId,
+    statementId,
+  }: {
+    sessionId: number;
+    statementId: number;
+  }) => {
+    runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
+      .then((res) => {
+        if (
+          res.data.statementState !== StatementState.AVAILABLE &&
+          res.data.statementState !== StatementState.CANCELED
+        ) {
+          setTimeout(() => {
+            fetchPysparkQueryResult({
               sessionId,
-              sessionKind: 'spark',
               statementId,
-              from: pollingFrom.current,
-              size: 10,
-            })
-              .then((res) => {
-                if (
-                  res.data.statementState !== StatementState.AVAILABLE &&
-                  res.data.statementState !== StatementState.CANCELED
-                ) {
-                  pollingFrom.current = pollingFrom.current + 10;
-                  const logs = get(res, 'data.queryRunLog.log', []);
-                  setLog((pre) => [...pre, ...logs]);
-                  setTimeout(() => {
-                    runQueryResultWrapped();
-                  }, 2000);
-                } else {
-                  pollingFrom.current = 0;
-                  const columns: any[] = [];
-                  const dataSource = res.data.resultSet;
-                  const record = dataSource[0] || {};
-                  Object.keys(record).forEach((_) =>
-                    columns.push({ title: _, dataIndex: _, key: _ }),
-                  );
-                  setResults((pre) => [...pre, { columns, dataSource }]);
-                }
-              })
-              .catch((err) => {});
-          };
-          runQueryResultWrapped();
-        })
-        .catch((err) => {});
+            });
+          }, 2000);
+        } else {
+          const logs = get(res, 'data.pythonResults', '');
+          setLog([logs]);
+        }
+      })
+      .catch((err) => {});
+  };
+
+  // 轮询 spark 调试结果
+  const fetchSparkQueryResult = ({
+    sessionId,
+    statementId,
+  }: {
+    sessionId: number;
+    statementId: number;
+  }) => {
+    runQueryResult({
+      sessionId,
+      sessionKind: 'spark',
+      statementId,
+      from: pollingFrom.current,
+      size: 10,
+    })
+      .then((res) => {
+        if (
+          res.data.statementState !== StatementState.AVAILABLE &&
+          res.data.statementState !== StatementState.CANCELED
+        ) {
+          pollingFrom.current = pollingFrom.current + 10;
+          const logs = get(res, 'data.queryRunLog.log', []);
+          setLog((pre) => [...pre, ...logs]);
+          setTimeout(() => {
+            fetchSparkQueryResult({
+              sessionId,
+              statementId,
+            });
+          }, 2000);
+        } else {
+          pollingFrom.current = 0;
+          const columns: any[] = [];
+          const dataSource = res.data.resultSet;
+          const record = dataSource[0] || {};
+          Object.keys(record).forEach((_) => columns.push({ title: _, dataIndex: _, key: _ }));
+          setResults((pre) => [...pre, { columns, dataSource }]);
+        }
+      })
+      .catch((err) => {});
+  };
+
+  /**
+   * 调试选中代码段
+   */
+  const onDebug = async () => {
+    const value = getDebugCode();
+    if (typeof value !== 'string') {
+      return message.error('请选择代码');
     }
-    if (task?.jobType === TaskTypes.SPARK_PYTHON || task?.jobType === TaskTypes.SCRIPT_PYTHON) {
-      runQuery({ querySource: value as string, sessionKind: 'pyspark' })
-        .then((res) => {
-          if (!res.data) {
-            message.error('请选择代码');
-            return;
-          }
-          const { sessionId, statementId } = res.data;
-          const runQueryResultWrapped = () => {
-            runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
-              .then((res) => {
-                if (
-                  res.data.statementState !== StatementState.AVAILABLE &&
-                  res.data.statementState !== StatementState.CANCELED
-                ) {
-                  setTimeout(() => {
-                    runQueryResultWrapped();
-                  }, 2000);
-                } else {
-                  const logs = get(res, 'data.pythonResults', '');
-                  setLog([logs]);
-                }
-              })
-              .catch((err) => {});
-          };
-          runQueryResultWrapped();
-        })
-        .catch((err) => {});
+    setDebugLoading(true);
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK: {
+        const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
+        fetchSparkQueryResult(data);
+        break;
+      }
+      case TaskTypes.SPARK_PYTHON:
+      case TaskTypes.SCRIPT_PYTHON: {
+        const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
+        fetchPysparkQueryResult(data);
+        break;
+      }
     }
+    setDebugLoading(false);
   };
 
   const renderVersionLabel = (_: TaskVersion) => {
@@ -459,80 +456,183 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
+  const btnMap = new Map([
+    [
+      Btns.SAVE,
+      <Tooltip title="保存">
+        <Button className={styles.btn} icon={<IconFont type="icon-baocun" />} onClick={onSave} />
+      </Tooltip>,
+    ],
+    [
+      Btns.DEBUG,
+      <Tooltip title="调试">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-tiaoshi" />}
+          onClick={onDebug}
+          loading={debugLoading}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.RUN_ONCE,
+      <Tooltip title="单次运行">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-yunxing" />}
+          onClick={() => onAction('run')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.SUBMIT,
+      <Tooltip title="提交版本">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-tijiaofabu" />}
+          onClick={() => {
+            if (!versions.length) {
+              message.info('没有版本无法提交，请先保存以创建版本');
+              return;
+            }
+            setVisibleSubmit(true);
+          }}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.ONLINE,
+      <Tooltip title="上线">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-yunxingbaise-copy" />}
+          onClick={() => onAction('resume')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.OFFLINE,
+      <Tooltip title="下线">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-zantingbaise-copy" />}
+          onClick={() => onAction('pause')}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.DELETE,
+      <Tooltip title="删除">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-shanchubaise-copy" />}
+          onClick={onDelete}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.DIVIDER,
+      <Divider type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
+    ],
+    [
+      Btns.JOB_CONFIG,
+      <Tooltip title="作业配置">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-peizhiguanli" />}
+          onClick={() => setVisibleJobConfig(true)}
+        />
+      </Tooltip>,
+    ],
+  ]);
+
+  const getBtnNames = () => {
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK:
+      case TaskTypes.SPARK_PYTHON:
+      case TaskTypes.SCRIPT_PYTHON:
+        return [
+          Btns.SAVE,
+          Btns.DEBUG,
+          Btns.RUN_ONCE,
+          Btns.SUBMIT,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+          Btns.DIVIDER,
+          Btns.JOB_CONFIG,
+        ];
+      case TaskTypes.SQL_FLINK:
+        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
+      case TaskTypes.KYLIN:
+        return [
+          Btns.SAVE,
+          Btns.DEBUG,
+          Btns.RUN_ONCE,
+          Btns.SUBMIT,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+        ];
+      default:
+        return [Btns.SAVE, Btns.RUN_ONCE, Btns.SUBMIT, Btns.ONLINE, Btns.OFFLINE, Btns.DELETE];
+    }
+  };
+
+  const getBtns = () => getBtnNames().map((name) => btnMap.get(name));
+
+  const getContent = () => {
+    switch (task?.jobType) {
+      case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_FLINK:
+        return (
+          <SqlContent
+            ref={formRef}
+            monaco={monaco}
+            data={{ task, content, log, res: results }}
+            removeResult={removeResult}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.SPARK_JAR:
+        return <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />;
+      case TaskTypes.SPARK_PYTHON:
+        return (
+          <SparkPython
+            ref={formRef}
+            monaco={monaco}
+            data={{ content, log }}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.SCRIPT_SHELL:
+        return <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />;
+      case TaskTypes.SCRIPT_PYTHON:
+        return (
+          <ScriptPython
+            ref={formRef}
+            monaco={monaco}
+            data={{ content, log }}
+            visible={visibleJobConfig}
+            onCancel={() => setVisibleJobConfig(false)}
+          />
+        );
+      case TaskTypes.KYLIN:
+        return <Kylin ref={formRef} data={content} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className={styles.task}>
         <div className={styles.box}>
           <div className={styles.content}>
             <div className={styles.header}>
-              <div className={styles.icons}>
-                <Tooltip title="保存">
-                  <IconFont type="icon-baocun" className={styles.icon} onClick={onSave} />
-                </Tooltip>
-                {(task?.jobType === TaskTypes.SQL_SPARK ||
-                  task?.jobType === TaskTypes.SPARK_PYTHON ||
-                  task?.jobType === TaskTypes.SCRIPT_PYTHON ||
-                  task?.jobType === TaskTypes.KYLIN) && (
-                  <Tooltip title="调试">
-                    <IconFont type="icon-tiaoshi" className={styles.icon} onClick={onDebug} />
-                  </Tooltip>
-                )}
-                <Tooltip title="运行">
-                  <IconFont
-                    type="icon-yunxing"
-                    className={styles.icon}
-                    onClick={() => onAction('run')}
-                  />
-                </Tooltip>
-                <Tooltip title="提交发布">
-                  <IconFont
-                    type="icon-tijiaofabu"
-                    className={styles.icon}
-                    onClick={() => {
-                      if (!versions.length) {
-                        message.info('没有版本无法提交，请先保存以创建版本');
-                        return;
-                      }
-                      setVisibleSubmit(true);
-                    }}
-                  />
-                </Tooltip>
-                <Tooltip title="恢复">
-                  <IconFont
-                    type="icon-yunxingbaise-copy"
-                    className={styles.icon}
-                    onClick={() => onAction('resume')}
-                  />
-                </Tooltip>
-                <Tooltip title="暂停">
-                  <IconFont
-                    type="icon-zantingbaise-copy"
-                    className={styles.icon}
-                    onClick={() => onAction('pause')}
-                  />
-                </Tooltip>
-                <Tooltip title="删除">
-                  <IconFont
-                    type="icon-shanchubaise-copy"
-                    className={styles.icon}
-                    onClick={onDelete}
-                  />
-                </Tooltip>
-                {(task?.jobType === TaskTypes.SQL_SPARK ||
-                  task?.jobType === TaskTypes.SPARK_PYTHON ||
-                  task?.jobType === TaskTypes.SCRIPT_PYTHON) && (
-                  <>
-                    <div className={styles.divider} />
-                    <Tooltip title="作业配置">
-                      <IconFont
-                        type="icon-peizhiguanli"
-                        className={styles.icon}
-                        onClick={() => setVisibleJobConfig(true)}
-                      />
-                    </Tooltip>
-                  </>
-                )}
-              </div>
+              <div className={styles.btns}>{getBtns()}</div>
               <div className={styles.version}>
                 <span>当前版本:</span>
                 {versions.length === 0 ? (
@@ -554,7 +654,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 )}
               </div>
             </div>
-            {componentMap[task?.jobType as TaskTypes]}
+            {getContent()}
           </div>
           <div className={styles.sideMenu}>
             <div className={styles.sideMenuItem} onClick={() => setVisibleBasic(true)}>
@@ -574,39 +674,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             </div>
           </div>
         </div>
-        {/* <div className="workbench-submit">
-          <Space>
-            <IconRun onClick={() => onAction('resume')} />
-            <IconPause onClick={() => onAction('pause')} />
-            <Button key="delete" size="large" className="normal" onClick={onDelete}>
-              删除
-            </Button>
-            <Button key="save" size="large" onClick={onSave}>
-              保存
-            </Button>
-            {(task?.jobType === TaskTypes.SQL_SPARK ||
-              task?.jobType === TaskTypes.SPARK_PYTHON ||
-              task?.jobType === TaskTypes.SCRIPT_PYTHON ||
-              task?.jobType === TaskTypes.KYLIN) && (
-              <Button key="debug" size="large" type="primary" onClick={onDebug}>
-                调试
-              </Button>
-            )}
-            {task?.jobType === TaskTypes.SQL_SPARK && (
-              <Button key="test" size="large" type="primary" onClick={onTest}>
-                测试
-              </Button>
-            )}
-            <Button
-              key="publish"
-              size="large"
-              type="primary"
-              onClick={() => setVisibleSubmit(true)}
-            >
-              申请发布
-            </Button>
-          </Space>
-        </div> */}
       </div>
       <DrawerBasic
         visible={visibleBasic}
@@ -678,7 +745,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
             runTask(params)
               .then((res) => {
                 if (res.success) {
-                  message.success('单次运行成功');
+                  message.success('单次运行成功，运行结果在历史标签页内查看。');
                   getTaskWrapped();
                   setVisibleAction(false);
                 }

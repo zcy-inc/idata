@@ -1,0 +1,26 @@
+.DSSelect {
+    display: grid;
+    grid-row-gap: 8px;
+    grid-template-rows: repeat(auto-fill, 32px);
+}
+
+.DSSelectItem {
+  position: relative;
+  display: grid;
+  grid-row-gap: 8px;
+  grid-column-gap: 4px;
+  grid-template-columns: repeat(2, 50%);
+  .btns {
+    position: absolute;
+    top: 6px;
+    right: -62px;
+    width: 52px;
+    height: 24px;
+    :global {
+      .anticon {
+        cursor: pointer;
+      }
+    }
+  }
+}
+

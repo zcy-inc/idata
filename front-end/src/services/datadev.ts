@@ -504,7 +504,7 @@ export async function getDataDevTypes() {
 }
 
 /**
- * 获取已配置的作业列表（依赖的上游任务）
+ * 获取已配置的作业列表
  */
 export async function getConfiguredTaskList(params: { environment: Environments }) {
   return request<DefaultResponse & { data: ConfiguredTaskListItem[] }>(
@@ -513,6 +513,24 @@ export async function getConfiguredTaskList(params: { environment: Environments 
       method: 'GET',
     },
   );
+}
+
+// 获取已配置的作业列表（依赖的上游任务）
+export async function getDependenceTaskList(params: { environment: Environments }) {
+  return request<Tresponse<ConfiguredTaskListItem[]>>(
+    `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
+    {
+      method: 'GET',
+    },
+  ).then(({ data }) => {
+    return data.map((item) => ({
+      ...item,
+      prevJobId: item.jobId,
+      prevJobName: item.jobName,
+      prevJobDagName: item.dagName,
+      prevJobDagId: item.dagId,
+    }));
+  });
 }
 
 /**
@@ -988,7 +1006,7 @@ export async function saveDIJobBasicInfo(data: unknown) {
  * 获取DI作业内容
  */
 export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
-  return request(`/api/p1/dev/jobs/${jobId}/di/adapt/contents/${version}`);
+  return request(`/api/p1/dev/jobs/${jobId}/di/contents/${version}`);
 }
 
 /**
@@ -1048,6 +1066,29 @@ export async function getColumns(params: {
   tableName: string;
 }) {
   return request('/api/p1/das/columns', {
+    params,
+  });
+}
+
+/**
+ * 生成 SQL_FLINK 模板
+ * @param params
+ * @returns
+ */
+export async function genFlinkTemplate(data: {
+  flinkSourceConfigs?: unknown[];
+  flinkSinkConfigs?: unknown[];
+}) {
+  return request('/api/p1/dev/jobs/sql/flink/template', {
+    method: 'POST',
+    data,
+  }).then(({ data }) => data);
+}
+
+export async function getWriteModeEnum(params: {
+  writeMode: 'DiEnum' | 'BackFlowEnum' | 'SqlEnum';
+}) {
+  return request<Tresponse<string[]>>('/api/p1/dictionary/enum/writeMode', {
     params,
   });
 }

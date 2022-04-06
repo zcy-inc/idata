@@ -97,7 +97,7 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     private String execEngine;
 
-    private List<KeyValuePair<String, String>> extendProperties;
+    private List<KeyValuePair<String, String>> extProperties;
 
     public Long getId() {
         return id;
@@ -219,12 +219,12 @@ public class JobExecuteConfigDto extends BaseDto {
         this.execEngine = execEngine;
     }
 
-    public List<KeyValuePair<String, String>> getExtendProperties() {
-        return extendProperties;
+    public List<KeyValuePair<String, String>> getExtProperties() {
+        return extProperties;
     }
 
-    public void setExtendProperties(List<KeyValuePair<String, String>> extendProperties) {
-        this.extendProperties = extendProperties;
+    public void setExtProperties(List<KeyValuePair<String, String>> extProperties) {
+        this.extProperties = extProperties;
     }
 
     public Integer getExecCores() {
@@ -242,7 +242,7 @@ public class JobExecuteConfigDto extends BaseDto {
         if (dto.getSchTimeOut() <= 0) dto.setSchTimeOut(null);
 
         if (StringUtils.isNotBlank(config.getExtProperties())) {
-            dto.setExtendProperties(new Gson().fromJson(config.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            dto.setExtProperties(new Gson().fromJson(config.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
             }.getType()));
         }
         return dto;
@@ -252,8 +252,8 @@ public class JobExecuteConfigDto extends BaseDto {
         JobExecuteConfig config = new JobExecuteConfig();
         BeanUtils.copyProperties(this, config);
 
-        if (!Objects.isNull(this.extendProperties)) {
-            config.setExtProperties(new Gson().toJson(this.extendProperties));
+        if (!Objects.isNull(this.extProperties)) {
+            config.setExtProperties(new Gson().toJson(this.extProperties));
         }
         return config;
     }
