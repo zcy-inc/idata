@@ -13,8 +13,7 @@ public class GenerateMergeSqlRequest {
     /**
      * 主键id，支持组合，逗号分隔
      */
-    @NotEmpty(message = "keyColumns 不能为空")
-    private String keyColumns = "id";
+    private String keyColumns;
 
     /**
      * 数据源抽取table名字，支持多表，格式如下
