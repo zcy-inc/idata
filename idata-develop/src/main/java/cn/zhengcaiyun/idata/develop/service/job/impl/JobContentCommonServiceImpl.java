@@ -19,8 +19,8 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
@@ -28,7 +28,6 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
@@ -39,14 +38,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
-import static cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceFileDynamicSqlSupport.dataSourceFile;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -139,22 +138,32 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         JobContentBaseDto content = new JobContentBaseDto();
         content.setJobId(jobId);
         content.setVersion(version);
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType) || JobTypeEnum.BACK_FLOW.getCode().equals(jobType) ) {
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
+                || JobTypeEnum.DI_STREAM.getCode().equals(jobType)
+                || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
             content.setId(jobContentOptional.get().getId());
-        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
-            checkArgument(sqlJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(sqlJobRepo.query(jobId, version).getId());
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_DORIS.getCode().equals(jobType)) {
+            DevJobContentSql contentSql = sqlJobRepo.query(jobId, version);
+            checkArgument(contentSql != null, "作业版本不存在");
+            content.setId(contentSql.getId());
         } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
-            checkArgument(sparkJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(sparkJobRepo.query(jobId, version).getId());
+            DevJobContentSpark contentSpark = sparkJobRepo.query(jobId, version);
+            checkArgument(contentSpark != null, "作业版本不存在");
+            content.setId(contentSpark.getId());
         } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
-            checkArgument(scriptJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(scriptJobRepo.query(jobId, version).getId());
+            DevJobContentScript contentScript = scriptJobRepo.query(jobId, version);
+            checkArgument(contentScript != null, "作业版本不存在");
+            content.setId(contentScript.getId());
+        } else if (JobTypeEnum.KYLIN.getCode().equals(jobType)) {
+            DevJobContentKylin contentKylin = kylinJobRepo.query(jobId, version);
+            checkArgument(contentKylin != null, "作业版本不存在");
+            content.setId(contentKylin.getId());
         } else {
-            checkArgument(kylinJobRepo.query(jobId, version) != null, "作业版本不存在");
-            content.setId(kylinJobRepo.query(jobId, version).getId());
+            throw new BizProcessException("作业类型不正确");
         }
         return content;
     }
@@ -167,7 +176,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         } catch (Exception e) {
             throw new IllegalArgumentException("作业类型有误");
         }
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType)|| JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType) || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)

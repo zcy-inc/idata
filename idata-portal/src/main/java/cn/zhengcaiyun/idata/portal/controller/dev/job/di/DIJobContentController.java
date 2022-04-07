@@ -123,5 +123,23 @@ public class DIJobContentController {
         return RestResult.success(response);
     }
 
+    @GetMapping("/adapt/contents/{version}")
+    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
+        DIJobContentContentDto dto = diJobContentService.get(jobId, version);
+
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        String srcDataSourceType = response.getSrcDataSourceType();
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+
+        return RestResult.success(response);
+    }
+
 
 }

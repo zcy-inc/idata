@@ -185,8 +185,10 @@ public class JobMigrateManager {
                 break;
             case BACK_FLOW:
                 contentVersion = migrateDorisBackFlowContent(newJobId, jobInfoDto, migrationDto, contentOperator, resultDtoList);
+                break;
             default:
                 contentVersion = null;
+                break;
         }
         return contentVersion;
     }
