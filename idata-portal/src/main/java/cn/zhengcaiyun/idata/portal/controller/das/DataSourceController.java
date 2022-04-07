@@ -73,7 +73,7 @@ public class DataSourceController {
     }
 
     /**
-     * 加载数据源的数据库
+     * 加载数据源的数据库 目前仅hive
      */
     @GetMapping("/dbNames")
     public RestResult<List<String>> getDbNames(@RequestParam("dataSourceId") Long dataSourceId) {
@@ -81,7 +81,7 @@ public class DataSourceController {
     }
 
     /**
-     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName  目前仅hive
      *
      * @param dataSourceId
      * @param dbName
@@ -98,7 +98,7 @@ public class DataSourceController {
     }
 
     /**
-     * 获取表字段
+     * 获取表字段  目前仅hive
      *
      * @param dataSourceId
      * @return
