@@ -37,15 +37,6 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
         parentId: node.parentId
       })
     }
-    // getFolders()
-    //   .then((res) => {
-    //     const fd = res.data?.map((_: any) => ({
-    //       label: _.folderName,
-    //       value: `${_.id}`,
-    //     }));
-    //     setFolders(fd);
-    //   })
-    //   .catch((err) => {});
       getTreeData();
   }, []);
 

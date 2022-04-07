@@ -67,7 +67,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       .finally(() => setLoading(false));
   };
 
-
   const onFinish = async (values: any) => {
     setCurrent(1)
     getTableData(0);

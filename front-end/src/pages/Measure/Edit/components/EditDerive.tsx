@@ -12,9 +12,8 @@ import {
 import type { ForwardRefRenderFunction } from 'react';
 import { getTableInfo, getMeasures, getForeignKeyTables, getModifiers } from '@/services/measure';
 import { rules, timeDimOptions } from '@/constants/datapi';
-import { Metric } from '@/types/datapi';
 export interface ViewModifierProps {
-  initial?: Metric;
+  form: any;
 }
 
 interface TableOptions {
@@ -30,7 +29,7 @@ interface TempFormTypes {
   tableId: string
 }
 
-const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ initial }, ref) => {
+const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form }, ref) => {
   const [metricList, setMetricList] = useState<TableOptions []>([]);
   const [labelList, setLabelList] = useState<TableOptions []>([]);
   const [dimensionList, setDimensionList] = useState<TableOptions []>([]);
@@ -64,6 +63,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     });
     // 根据原子指标获取时间周期
     if(values.atomicMetricCode) {
+      form.setFieldsValue({columnId: undefined});
       getTableInfo({metricCode: values.atomicMetricCode}).then(res => {
         const labelList = res.data?.columnInfos?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setLabelList(labelList);
@@ -74,6 +74,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
     if(values.tableId) {
       let p1 = getForeignKeyTables({ tableId: values.tableId });
       let p2 = getModifiers({modifierTableIds: [...tempForm.dimTableIds, values.tableId].join()});
+      form.setFieldsValue({dimTableIds: [], modifiers: []});
       Promise.all([p1, p2]).then(([res1, res2]) => {
         const dimensionList = res1.data?.map((_: any) => ({ label: _.tableName, value: _.id }));
         const modifierList = res2.data?.map((_: any) => ({ label: _.labelName, value: _.labelCode }));
@@ -84,6 +85,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ in
 
     // 根据维度获取修饰词
     if(values.dimTableIds) {
+      form.setFieldsValue({ modifiers: []});
       getModifiers({modifierTableIds: [...values.dimTableIds, tempForm.tableId].join()}).then((res) => {
         const modifierList = res.data?.map((_: any) => ({ label: _.labelName, value: _.labelCode }));
         setModifierList(modifierList);

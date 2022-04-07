@@ -143,8 +143,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
         labelParams[key] = specialAttribute[key];
       }
     });
-    labelParams.tableId = measureLabels[0].tableId;
-    labelParams.columnName = measureLabels[0].columnName;
+    labelParams.tableId = measureLabels[0] && measureLabels[0]?.tableId;
+    labelParams.columnName = measureLabels[0] && measureLabels[0]?.columnName;
     return {
       metricId,
       labelName,
@@ -181,6 +181,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     }
     // 获取字段列表
     if(values.tableId) {
+      form.setFieldsValue({columnName: undefined});
       getTableReferStr({ tableId: values.tableId }).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setKeyList(strs)
@@ -294,7 +295,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
           </ProFormGroup>
           {
             metricType === 'DERIVE_METRIC_LABEL' ?
-            <EditDerive ref={refDerive} /> :
+            <EditDerive ref={refDerive} form={form} /> :
             <ProFormGroup>
               <ProFormSelect
                 name="aggregatorCode"
