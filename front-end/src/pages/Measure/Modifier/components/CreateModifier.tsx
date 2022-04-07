@@ -38,7 +38,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
       .then((res) => {
         const list = res.data?.map((_: any) => ({
           label: _.tableName,
-          value: `${_.id}`,
+          value: _.id,
         }));
         setTables(list);
       })

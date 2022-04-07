@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ProFormSelect, ProFormText, ProFormDatePicker, QueryFilter } from '@ant-design/pro-form';
+import { ProFormSelect, ProFormText, QueryFilter } from '@ant-design/pro-form';
 import { Form, Space, Table, Button, message, Modal } from 'antd';
 import type { FC } from 'react';
-import { history, Link } from 'umi';
+import { PageContainer } from '@/components';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import type  { MetricFloderItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
 import { MetricListItem } from '@/types/measure';
 import { getMeasures, deleteMetric, getTables } from '@/services/measure';
-import { getEnumValues } from '@/services/datadev';
 import CreateModifier from './components/CreateModifier';
 
 
@@ -20,19 +19,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [bizProcessEnum, setBizProcessEnum] = useState<{label: string; value: string} []>([]);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getEnumValues({ enumCode: 'bizProcessEnum:ENUM' })
-      .then((res) => {
-        const options = res.data?.map((enumValue) => ({
-          label: enumValue.enumValue,
-          value: enumValue.valueCode,
-        }));
-        setBizProcessEnum(options);
-      })
-      .catch((err) => {});
 
       getTables()
       .then((res) => {
@@ -135,7 +124,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   }
 
   return (
-    <div className={styles.container}>
+    <PageContainer contentClassName={styles.container}>
       <QueryFilter
         form={form}
         className='meaure-list-wrap'
@@ -192,7 +181,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           onChange: (page) =>setCurrent(page),
         }}
       />
-    </div>
+    </PageContainer>
   );
 };
 
