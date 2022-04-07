@@ -402,7 +402,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
                     backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
                     // 抽取关联映射列
-                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getSrcColumns(), MappingColumnDto.class);
                     Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
                     //抽取主键key
