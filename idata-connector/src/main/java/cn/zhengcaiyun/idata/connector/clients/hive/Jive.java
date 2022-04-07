@@ -154,13 +154,15 @@ public class Jive extends BinaryJive {
         return success;
     }
 
-    public List<String> getTableNameList() {
+    public List<String> getTableNameList(String dbName) {
         List<String> tableList = new ArrayList<>();
-        try (Statement statement = this.getClient().createStatement();
-             ResultSet rs = statement.executeQuery("show tables")) {
-            while (rs.next()){
-                tableList.add(rs.getString("tab_name"));
-            }
+        try (Statement statement = this.getClient().createStatement()) {
+             statement.execute("use " + dbName);
+             try (ResultSet rs = statement.executeQuery("show tables")) {
+                 while (rs.next()){
+                     tableList.add(rs.getString("tab_name"));
+                 }
+             }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new GeneralException("getTableNameList fail!");
