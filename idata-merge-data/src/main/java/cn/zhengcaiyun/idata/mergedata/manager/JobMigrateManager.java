@@ -610,7 +610,9 @@ public class JobMigrateManager {
                     KeyValuePair<String, String> keyValuePair = new KeyValuePair<>();
                     keyValuePair.setKey(cond_array.get(0));
                     keyValuePair.setValue(cond_array.get(1));
-                    destPropertyMap.add(keyValuePair);
+                    if (!"sourceTable".equalsIgnoreCase(cond_array.get(0))) {
+                        destPropertyMap.add(keyValuePair);
+                    }
                 });
         contentDto.setDestPropertyMap(destPropertyMap);
 
