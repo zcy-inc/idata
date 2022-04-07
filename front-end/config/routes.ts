@@ -171,13 +171,13 @@ export default [
     name: '数据指标',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
-    featureCode: 'F_MENU_BIGDATA_RD',
+    featureCode: 'F_MENU_MEASURE_MANAGE',
     routes: [
       {
         path: '/measure/list',
         name: '指标列表',
         component: './Measure/List',
-        featureCode: 'F_MENU_DATA_DEVELOP',
+        featureCode: 'F_MENU_MEASURE_METRIC',
       },
       {
         path: '/measure/edit/:id?',
@@ -195,7 +195,7 @@ export default [
         path: '/measure/modifier',
         name: '修饰词',
         component: './Measure/Modifier',
-        featureCode: 'F_MENU_DATA_DEVELOP',
+        featureCode: 'F_MENU_MEASURE_MODIFIER',
       },
     ]
   },
