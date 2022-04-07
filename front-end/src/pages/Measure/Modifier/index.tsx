@@ -145,9 +145,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         labelCol={{span: 6}}
         labelWidth={96}
         submitter={{
-          render: (props, doms) => {
+          render: (props) => {
             return [
-              ...doms,
+              <Button key="search" type="primary" onClick={props?.form?.submit}>
+                查询
+              </Button>,
               <Button key="edit" onClick={() => addTreeItem()}>
                 新增
               </Button>,
