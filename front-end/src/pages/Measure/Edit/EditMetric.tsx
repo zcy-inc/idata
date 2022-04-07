@@ -88,29 +88,30 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       setBizProcessEnum(bizProcessEnum);
       setDWDTables(DWDTables);
       setDataSetOptions(dataSetOptions);
+
+      if(isEdit) {
+        getMetricInfo(params.id, folderOps);
+      }
     })
 
     if(!isEdit && !location.state?.labelTag) {
-      // history.push('/measure/list');
+      history.push('/measure/list');
     }
     if(location.state) {
       form.setFieldsValue(location.state);
       setMetricType(location.state.labelTag);
     }
-    if(isEdit) {
-      getMetricInfo(params.id);
-    }
+   
   }, []);
 
-  const getMetricInfo = (metricCode: string) => {
+  const getMetricInfo = (metricCode: string, folderOps: any[]) => {
     setLoading(true);
     getMetric({ metricCode })
       .then((res) => {
-        const transformedData = transformOriginData(res.data);
+        const transformedData = transformOriginData(res.data, folderOps);
         form.setFieldsValue(transformedData);
         setMetricType(transformedData.labelTag);
         setData(transformedData);
-        console.log(transformedData);
         Object.keys(transformedData).forEach(k => {
           handleValueChange({[k]: transformedData[k]});
         });
@@ -120,8 +121,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       });
   };
 
-  const transformOriginData = (data: { labelCode:string; metricId: string; labelName: string; labelTag: string; labelAttributes: any; measureLabels: any; specialAttribute: any; }) => {
-    const { metricId, labelName, labelCode, labelTag,labelAttributes, measureLabels,  specialAttribute} = data;
+  const transformOriginData = (data: {folderId: string; labelCode:string; metricId: string; labelName: string; labelTag: string; labelAttributes: any; measureLabels: any; specialAttribute: any; }, folderOps: any[]) => {
+    const { metricId, folderId, labelName, labelCode, labelTag,labelAttributes, measureLabels,  specialAttribute} = data;
     const labelParams: {
       metricId?: string;
       enName?: string;
@@ -149,10 +150,28 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       labelName,
       labelTag,
       labelCode,
+      folderId: getFolderRelation(folderOps, folderId),
       ...labelParams,
       measureLabels,
       specialAttribute
     }
+  }
+
+  const getFolderRelation = (list: any[], folderId: string) => {
+    let relationList: any[] = [];
+    for(let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if(item.folderId === folderId) {
+        relationList = [item.folderId];
+        break;
+      } else if(item.children?.length) {
+        const arr = getFolderRelation(item.children, folderId);
+        if(arr) {
+          relationList = [item.folderId, ...arr];
+        }
+      } 
+    }
+    return relationList;
   }
 
   const handleValueChange = (values: Record<string, any>) => {
@@ -197,7 +216,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       }
       const params = {
         labelName: form.labelName,
-        folderId: form.folderId || 0,
+        folderId: form.folderId?.length ? form.folderId[form.folderId.length -1 ] : 0,
         labelTag: form.labelTag,
         subjectType: 'COLUMN',
         labelAttributes,
@@ -409,16 +428,18 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
             <ProFormDatePicker
               name="metricDeadline"
               label="截止生效日期"
+              rules={require}
               width="sm"
             />
             <ProFormCascader
-              name="parentId"
+              name="folderId"
               width="sm"
               label="所属文件夹"
+              rules={require}
               fieldProps={{
                 options: folderOps,
                 changeOnSelect: true,
-                fieldNames: { label: 'name', value: 'cid', children: 'children' }
+                fieldNames: { label: 'name', value: 'folderId', children: 'children' }
               }}
             />
           </ProFormGroup>

@@ -47,7 +47,20 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
 
   const getData = (node: { labelCode: string; }) => {
     setLoading(true);
-    getModifier({modifierCode: node.labelCode }).finally(()=> {
+    getModifier({modifierCode: node.labelCode }).then(res => {
+      const data = {
+        labelName: res.data?.labelName,
+        tableId: res.data?.measureLabels[0]?.tableId,
+        columnName: res.data?.measureLabels[0]?.columnName,
+        labelParamValue: res.data?.measureLabels[0]?.labelParamValue,
+        modifierDefine: res.data?.labelAttributes.find((item: { attributeKey: string; }) => item.attributeKey === 'modifierDefine')?.attributeValue
+      }
+      form.setFieldsValue(data);
+      Object.keys(data).forEach((k) => {
+        const value = data[k];
+        onValuesChange({[k] : value});
+      });
+    }).finally(()=> {
       setLoading(false);
     })
   }
@@ -70,7 +83,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
    
   }
 
-  const onValuesChange = (values: { tableId: string;columnName:string; }) => {
+  const onValuesChange = (values: any) => {
     if(values.tableId) {
       form.setFieldsValue({
         columnName: undefined,
@@ -88,7 +101,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
       });
       getTableEnums({tableId: form.getFieldValue('tableId'), columnName: values.columnName}).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _, value: _ }));
-        setEnums(strs)
+        setEnums(strs);
       })
     }
   }

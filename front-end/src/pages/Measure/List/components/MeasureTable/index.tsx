@@ -10,6 +10,7 @@ import styles from './index.less';
 import { getMeasures } from '@/services/measure';
 import { getEnumValues } from '@/services/datadev';
 import CreateMeasure from './components/CreateMeasure';
+import moment from 'moment';
 const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
@@ -20,6 +21,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
   const [bizProcessEnum, setBizProcessEnum] = useState<{label: string; value: string} []>([]);
+  const [dataSetOptions, setDataSetOptions] = useState<{label: string; value: string} []>([]);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -32,6 +34,14 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         setBizProcessEnum(options);
       })
       .catch((err) => {});
+
+      getEnumValues({ enumCode: 'domainIdEnum:ENUM' }).then(res => {
+        const dataSetOptions = res.data?.map((enumValue: {enumValue: string; valueCode: string}) => ({
+          label: enumValue.enumValue,
+          value: enumValue.valueCode,
+        }));
+        setDataSetOptions(dataSetOptions);
+      })
   }, []);
 
   useEffect(() => {
@@ -39,10 +49,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   }, [currentNode, current])
 
   const getTableData = (offset: number) => {
-    const params = form.getFieldsValue();
+    const {measureDeadline, ...params} = form.getFieldsValue();
     setLoading(true);
     getMeasures({
       ...params,
+      measureDeadline: measureDeadline ? moment(measureDeadline).format('YYYY-MM-DD') : undefined,
       limit: 10,
       offset,
       folderId: currentNode.folderId,
@@ -56,30 +67,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       .finally(() => setLoading(false));
   };
 
-  const columns: ColumnsType<MetricListItem> = [
-    { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
-    { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
-    { title: '指标类型', key: 'labelTag', dataIndex: 'labelTag' },
-    { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
-    { title: '指标状态', key: 'labelTag', dataIndex: 'labelTag' },
-    { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
-    { title: '创建人', key: 'creator', dataIndex: 'creator' },
-    { title: '更新人', key: 'editor', dataIndex: 'editor' },
-    { title: '最近更新时间', key: 'editTime', dataIndex: 'editTime' },
-    { title: '所属文件夹', key: 'folderName', dataIndex: 'folderName' },
-    {
-      title: '操作',
-      key: 'ops',
-      dataIndex: 'ops',
-      fixed: 'right',
-      render: (value, record) => (
-        <Space size={16}>
-          <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
-          <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
-        </Space>
-      ),
-    },
-  ];
 
   const onFinish = async (values: any) => {
     setCurrent(1)
@@ -111,6 +98,31 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     }, CreateMeasure)
   }
 
+  const columns: ColumnsType<MetricListItem> = [
+    { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
+    { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
+    { title: '指标类型', key: 'labelTag', dataIndex: 'labelTag' },
+    { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
+    { title: '指标状态', key: 'labelTag', dataIndex: 'labelTag' },
+    { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
+    { title: '创建人', key: 'creator', dataIndex: 'creator' },
+    { title: '更新人', key: 'editor', dataIndex: 'editor' },
+    { title: '最近更新时间', key: 'editTime', dataIndex: 'editTime' },
+    { title: '所属文件夹', key: 'folderName', dataIndex: 'folderName' },
+    {
+      title: '操作',
+      key: 'ops',
+      dataIndex: 'ops',
+      fixed: 'right',
+      render: (value, record) => (
+        <Space size={16}>
+          <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+          <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <div className={styles.container}>
       <QueryFilter
@@ -122,9 +134,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         labelCol={{span: 6}}
         labelWidth={96}
         submitter={{
-          render: (props, doms) => {
+          render: (props) => {
             return [
-              ...doms,
+              <Button key="search" type="primary" onClick={props?.form?.submit}>
+                查询
+              </Button>,
               <Button key="edit" onClick={() => addTreeItem()}>
                 新增
               </Button>,
@@ -173,7 +187,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           name="domain"
           label="主题域"
           placeholder="请选择"
-          options={[{label: '停用', value: 0},{label: '启用', value: 1}]}
+          options={dataSetOptions}
         />
       </QueryFilter>
       <Table<MetricListItem>
