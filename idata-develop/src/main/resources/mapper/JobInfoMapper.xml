@@ -17,7 +17,7 @@
                CONCAT(t2.exec_worker_mem, 'G') as executorMemory,
                t2.running_state as runningState,
                t2.exec_engine as execEngine,
-               t2.exec_cores as executeCore,
+               t2.exec_cores as executorCores,
                t2.ext_properties as extProperties,
                t3.dest_table as targetTableName
         from
