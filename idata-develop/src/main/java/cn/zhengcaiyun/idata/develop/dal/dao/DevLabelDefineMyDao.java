@@ -103,7 +103,7 @@ public interface DevLabelDefineMyDao {
                 "<if test = 'belongTblName != null'>" +
                     "AND dev_table_info.del = 0 AND dev_table_info.table_name LIKE concat('%', #{belongTblName}, '%') " +
                 "</if>" +
-            "LIMIT #{limit} OFFSET #{offset} " +
+            "ORDER BY edit_time DESC LIMIT #{limit} OFFSET #{offset} " +
             "</script>")
     List<DevLabelDefine> selectLabelDefineCodesByCondition(String folderIds,
                                                            String measureType,
