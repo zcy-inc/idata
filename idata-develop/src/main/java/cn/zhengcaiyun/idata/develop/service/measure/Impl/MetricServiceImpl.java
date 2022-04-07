@@ -255,7 +255,7 @@ public class MetricServiceImpl implements MetricService {
             // 校验可计算方式是否修改
             if (isNotEmpty(metric.getSpecialAttribute().getAggregatorCode())) {
                 DevEnumValue checkAggregator = devEnumValueDao.selectOne(c -> c.where(devEnumValue.del, isNotEqualTo(1),
-                        and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode()))))
+                        and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAggregatorCode()))))
                         .orElseThrow(() -> new IllegalArgumentException("可计算方式不存在"));
             }
         }

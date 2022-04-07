@@ -67,7 +67,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
   const update = (form: { folderName: string; parentId: string; }) => {
     const params = {
       folderName: form.folderName,
-      parentId: form.parentId,
+      parentId: form.parentId[form.parentId.length - 1],
       id: node.folderId
     };
     return updateFolder(params);
@@ -76,7 +76,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
   const create = (form: { folderName: string; parentId: string; }) => {
     const params = {
       folderName: form.folderName,
-      parentId: form.parentId,
+      parentId: form.parentId[form.parentId.length - 1],
       folderType: TreeNodeType.METRIC_LABEL
     };
     return createFolder(params);
@@ -99,7 +99,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
         fieldProps={{
           options: folders,
           changeOnSelect: true,
-          fieldNames: { label: 'name', value: 'cid', children: 'children' }
+          fieldNames: { label: 'name', value: 'folderId', children: 'children' }
         }} />
     </ProForm>
   );

@@ -81,6 +81,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       atomicMetric: [atomicMetric],
       modifiers: specialAttribute.modifiers,
       dimTables: specialAttribute.dimTables,
+      aggregatorCode: specialAttribute.aggregatorCode,
       timeAttribute: [specialAttribute.timeAttribute],
       calculableType: specialAttribute.calculableType
     }
@@ -286,7 +287,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         <p className={style['part-title']}>其他信息</p>
         <Descriptions column={2} colon={false} style={{ margin: '16px 0' }}>
           <Item label="计算方式">
-            {AggregatorCodeOptions.find(item => item.value === data?.calculableType)?.label}
+            {AggregatorCodeOptions.find(item => item.value === data?.aggregatorCode)?.label}
           </Item>
           <Item label="是否可累加">
             {degradeDimOptions.find(item => item.value === data?.calculableType)?.label}
@@ -315,7 +316,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             className={style['plain-default-btn']}
             onClick={() => history.push(`/measure/edit/${params.id}`)}
           >编 辑</a>
-          <Button onClick={switchStatus} danger ghost={!data?.labelTag.endsWith('DISABLE')}>停用</Button>
+          <Button onClick={switchStatus} danger ghost={!data?.labelTag.endsWith('DISABLE')}>
+            {data?.labelTag.endsWith('DISABLE') ? '启用' : '停用'}
+          </Button>
         </div>
       </Spin>
     </PageContainer>
