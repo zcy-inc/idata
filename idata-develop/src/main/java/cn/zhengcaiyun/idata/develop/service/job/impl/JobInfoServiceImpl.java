@@ -608,7 +608,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                         JobArgumentDto dto = (JobArgumentDto)script;
                         shellArgs.append(dto.getArgumentValue() + " ");
                     }
-                    scriptResponse.setSourceResource(shellArgs.toString());
+                    scriptResponse.setScriptArguments(shellArgs.toString());
                 }
 
                 return scriptResponse;
