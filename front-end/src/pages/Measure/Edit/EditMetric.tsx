@@ -57,7 +57,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
   const [data, setData] = useState<Record<string, any>>({});
   const [metricType, setMetricType] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
-  const refDerive = useRef<{onValuesChage: (T: Record<string, any>) => void}>(null);
+  const refDerive = useRef<{onValuesChage: (T: Record<string, any>, P: boolean) => void}>(null);
 
   useEffect(() => {
     let p1 = getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL });  // 获取文件夹
@@ -113,7 +113,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
         setMetricType(transformedData.labelTag);
         setData(transformedData);
         Object.keys(transformedData).forEach(k => {
-          handleValueChange({[k]: transformedData[k]});
+          handleValueChange({[k]: transformedData[k]}, true);
         });
       })
       .finally(() => {
@@ -174,14 +174,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     return relationList;
   }
 
-  const handleValueChange = (values: Record<string, any>) => {
-    refDerive.current?.onValuesChage(values);
+  const handleValueChange = (values: Record<string, any>, init = false) => {
+    refDerive.current?.onValuesChage(values, init);
     if(values.labelTag) {
       setMetricType(values.labelTag);
     }
     // 获取字段列表
     if(values.tableId) {
-      form.setFieldsValue({columnName: undefined});
+      !init && form.setFieldsValue({columnName: undefined});
       getTableReferStr({ tableId: values.tableId }).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setKeyList(strs)
@@ -291,6 +291,10 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               placeholder="请选择"
               rules={require}
               options={keyList}
+              fieldProps={{
+                showSearch: true,
+                filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+              }}
             />
           </ProFormGroup>
           {
