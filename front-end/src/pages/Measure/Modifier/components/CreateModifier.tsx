@@ -33,7 +33,9 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
     handleSubmit
   }));
   useEffect(() => {
-    getData(node);
+    if(node.labelCode) {
+      getData(node);
+    }
     getTables()
       .then((res) => {
         const list = res.data?.map((_: any) => ({

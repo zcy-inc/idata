@@ -175,7 +175,7 @@ export default [
     routes: [
       {
         path: '/measure/list',
-        name: '指标列表',
+        name: '指标',
         component: './Measure/List',
         featureCode: 'F_MENU_MEASURE_METRIC',
       },
