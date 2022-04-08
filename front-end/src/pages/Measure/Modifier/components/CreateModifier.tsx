@@ -17,17 +17,16 @@ interface FlatTreeNodeOption extends TreeNodeOption {
 
 const rules = [{ required: true, message: '必填' }];
 
-const genRules = (name:string) => {
-  return [{
-    validator: (_: any, value: any) => value ? Promise.resolve() : Promise.reject(new Error(`请输入${name}`)),
-  }]
-}
+const genRules = [{
+  validator: (_: any, value: any) => value ? Promise.resolve() : Promise.reject(new Error('必填')),
+}]
 
 const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
   const [tables, setTables] = useState<FlatTreeNodeOption[]>([]);
   const [keyList, setKeyList] = useState<FlatTreeNodeOption[]>([]);
   const [enums, setEnums] = useState<FlatTreeNodeOption[]>([]);
   const [form] = Form.useForm();
+  const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   useImperativeHandle(ref, () => ({
     handleSubmit
@@ -53,14 +52,16 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
       const data = {
         labelName: res.data?.labelName,
         tableId: res.data?.measureLabels[0]?.tableId,
+        labelCode: res.data?.labelCode,
         columnName: res.data?.measureLabels[0]?.columnName,
-        labelParamValue: res.data?.measureLabels[0]?.labelParamValue,
+        labelParamValue: res.data?.measureLabels[0]?.labelParamValue?.split(',') || [],
         modifierDefine: res.data?.labelAttributes.find((item: { attributeKey: string; }) => item.attributeKey === 'modifierDefine')?.attributeValue
       }
+      setData(data);
       form.setFieldsValue(data);
       Object.keys(data).forEach((k) => {
         const value = data[k];
-        onValuesChange({[k] : value});
+        onValuesChange({[k] : value}, true);
       });
     }).finally(()=> {
       setLoading(false);
@@ -69,25 +70,28 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
 
   const handleSubmit = () => {
     return form.validateFields().then(values => {
-      const params = {
+      let params: any = {
         labelName: values.labelName,
         measureLabels: [{
           tableId: values.tableId,
           columnName: values.columnName,
-          labelParamValue: values.labelParamValue
+          labelParamValue: values.labelParamValue.join(',')
         }],
         labelAttributes: [
           {attributeKey: 'modifierDefine', attributeType: 'STRING', attributeValue: values.modifierDefine}
         ]
+      }
+      if(node.labelCode) {
+        params.labelCode = data.labelCode;
       }
       return createModifier(params);
     });
    
   }
 
-  const onValuesChange = (values: any) => {
+  const onValuesChange = (values: any, init = false) => {
     if(values.tableId) {
-      form.setFieldsValue({
+      !init && form.setFieldsValue({
         columnName: undefined,
         labelParamValue: undefined
       });
@@ -98,7 +102,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
     }
 
     if(values.columnName) {
-      form.setFieldsValue({
+      !init && form.setFieldsValue({
         labelParamValue: undefined
       });
       getTableEnums({tableId: form.getFieldValue('tableId'), columnName: values.columnName}).then(res => {
@@ -133,7 +137,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
         <ProFormSelect
           name="columnName"
           label=" "
-          rules={genRules('字段')}
+          rules={genRules}
           options={keyList}
           fieldProps={{
             showSearch: true,
@@ -143,11 +147,12 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
         <ProFormSelect
           name="labelParamValue"
           label=" "
-          rules={genRules('枚举值')}
+          rules={genRules}
           options={enums}
           fieldProps={{
             showSearch: true,
             filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+            mode: 'multiple'
           }}
         />
         <ProFormText
