@@ -302,7 +302,10 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         <p className={style['part-title']} style={{lineHeight: '32px'}}>
           SQL界面
           <span className={style['btn-list']}>
-            <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a>
+          {data?.labelTag === LabelTag.DERIVE_METRIC_LABEL ?
+            <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a> : null  
+          }
+            
             <Button type="primary" onClick={copy}>复制内容</Button>
           </span>
         </p>

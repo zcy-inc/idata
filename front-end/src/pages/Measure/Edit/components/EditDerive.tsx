@@ -47,6 +47,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
   useEffect(() => {
     getMeasures({
       measureType: 'METRIC_LABEL',
+      enable: true,
+      metricType: 'ATOMIC_METRIC_LABEL'
     }).then(res => {  // 获取原子指标列表
       const metricList = res.data?.content.map((_: any) => ({
         label: _.labelName,
