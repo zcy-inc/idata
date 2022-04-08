@@ -148,7 +148,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     return {
       metricId,
       labelName,
-      labelTag,
+      labelTag: labelTag.indexOf('ATOMIC_METRIC_LABEL') > -1 ? 'ATOMIC_METRIC_LABEL' : 'DERIVE_METRIC_LABEL',
       labelCode,
       folderId: getFolderRelation(folderOps, folderId),
       ...labelParams,

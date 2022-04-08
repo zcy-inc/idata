@@ -58,12 +58,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const columns: ColumnsType<MetricListItem> = [
     { title: '修饰词名称', key: 'labelName', dataIndex: 'labelName' },
     { title: '字段名', key: 'columnName', dataIndex: 'columnName' },
-    { title: '所属表', key: 'tableId', dataIndex: 'tableId' },
+    { title: '所属表', key: 'belongTblName', dataIndex: 'belongTblName' },
     { title: '业务口径', key: 'measureDefine', dataIndex: 'measureDefine' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
     { title: '更新人', key: 'editor', dataIndex: 'editor' },
     { title: '最近更新时间', key: 'editTime', dataIndex: 'editTime' },
-    { title: '所属文件夹', key: 'folderName', dataIndex: 'folderName' },
     {
       title: '操作',
       key: 'ops',
@@ -104,7 +103,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
 
   const addTreeItem = (node: any = {}) => {
     const isEdit = !!node.id;
-    showDialog(`${isEdit ? '编辑' : '新建'}指标`, {
+    showDialog(`${isEdit ? '编辑' : '新建'}修饰词`, {
       modalProps: {
         width: 540
       },

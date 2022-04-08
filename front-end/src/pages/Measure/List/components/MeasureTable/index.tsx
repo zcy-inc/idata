@@ -64,11 +64,15 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   };
 
   const getTableData = (offset: number) => {
-    const {measureDeadline, enable, ...params} = form.getFieldsValue();
+    const {measureDeadline, ...params} = form.getFieldsValue();
+    if(params.enable === 0) {
+      params.enable = false;
+    } else if(params.enable === 1) {
+      params.enable = true;
+    }
     setLoading(true);
     getMeasures({
       ...params,
-      enable: !!enable,
       measureDeadline: measureDeadline ? moment(measureDeadline).format('YYYY-MM-DD') : undefined,
       limit: 10,
       offset,
