@@ -220,13 +220,13 @@ public class DIRuleHelper {
         JobTypeEnum jobTypeEnum = param.getJobTypeEnum();
         EngineTypeEnum engineTypeEnum = param.getEngineTypeEnum();
 
-        DataSourceTypeEnum srcDataSourceTypeEnum = null;
+        DataSourceTypeEnum destDataSourceTypeEnum = null;
         Integer configMode = null;
         String srcColumns = null;
         String scriptSelectColumns = null;
         DIJobContent diJobContent = param.getDiJobContent();
         if (diJobContent != null) {
-            srcDataSourceTypeEnum = DataSourceTypeEnum.valueOf(diJobContent.getSrcDataSourceType());
+            destDataSourceTypeEnum = DataSourceTypeEnum.valueOf(diJobContent.getDestDataSourceType());
             configMode = diJobContent.getConfigMode();
             srcColumns = diJobContent.getSrcColumns();
             scriptSelectColumns = diJobContent.getScriptSelectColumns();
@@ -237,7 +237,7 @@ public class DIRuleHelper {
                 if (EngineTypeEnum.SQOOP == engineTypeEnum) {
                     return false;
                 }
-                if (srcDataSourceTypeEnum == DataSourceTypeEnum.doris) {
+                if (destDataSourceTypeEnum == DataSourceTypeEnum.doris) {
                     return false;
                 }
                 break;

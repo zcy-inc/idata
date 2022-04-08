@@ -211,7 +211,7 @@ public class MetricServiceImpl implements MetricService {
             // 校验可计算方式
             checkArgument(isNotEmpty(metric.getSpecialAttribute().getAggregatorCode()), "可计算方式不能为空");
             DevEnumValue checkAggregator = devEnumValueDao.selectOne(c -> c.where(devEnumValue.del, isNotEqualTo(1),
-                    and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAtomicMetricCode()))))
+                    and(devEnumValue.valueCode, isEqualTo(metric.getSpecialAttribute().getAggregatorCode()))))
                     .orElseThrow(() -> new IllegalArgumentException("可计算方式不存在"));
             // 校验关联信息
             metricLabelList.forEach(metricLabel ->

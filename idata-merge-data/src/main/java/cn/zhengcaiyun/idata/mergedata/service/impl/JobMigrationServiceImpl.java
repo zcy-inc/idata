@@ -388,7 +388,7 @@ public class JobMigrationServiceImpl implements JobMigrationService {
         } else if ("SPARK".equalsIgnoreCase(oldType)) {
             executeConfigDto.setExecEngine(EngineTypeEnum.SPARK.name());
         } else {
-            executeConfigDto.setExecEngine("");
+            executeConfigDto.setExecEngine(null);
         }
 
         combinationDto.setExecuteConfig(executeConfigDto);

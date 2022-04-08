@@ -289,7 +289,7 @@ public class DevFolderServiceImpl implements DevFolderService {
                 .stream().map(DevFolder::getId).collect(Collectors.toSet());
         folderIds.addAll(childFolderIdList);
         if (childFolderIdList.size() > 0) {
-            return getChildFolderIds(childFolderIdList, folderType);
+            folderIds.addAll(getChildFolderIds(childFolderIdList, folderType));
         }
         return folderIds;
     }
