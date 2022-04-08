@@ -56,14 +56,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
     }); 
   }, []);
 
-  const handleValueChange = (values:TempFormTypes) => {
+  const handleValueChange = (values:TempFormTypes, init = false) => {
     setTempForm({
       ...tempForm,
       ...values
     });
     // 根据原子指标获取时间周期
     if(values.atomicMetricCode) {
-      form.setFieldsValue({columnId: undefined});
+      !init && form.setFieldsValue({columnId: undefined});
       getTableInfo({metricCode: values.atomicMetricCode}).then(res => {
         const labelList = res.data?.columnInfos?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setLabelList(labelList);
@@ -74,7 +74,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
     if(values.tableId) {
       let p1 = getForeignKeyTables({ tableId: values.tableId });
       let p2 = getModifiers({modifierTableIds: [...tempForm.dimTableIds, values.tableId].join()});
-      form.setFieldsValue({dimTableIds: [], modifiers: []});
+      !init && form.setFieldsValue({dimTableIds: [], modifiers: []});
       Promise.all([p1, p2]).then(([res1, res2]) => {
         const dimensionList = res1.data?.map((_: any) => ({ label: _.tableName, value: _.id }));
         const modifierList = res2.data?.map((_: any) => ({ label: _.labelName, value: _.labelCode }));
@@ -85,7 +85,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
 
     // 根据维度获取修饰词
     if(values.dimTableIds) {
-      form.setFieldsValue({ modifiers: []});
+      !init && form.setFieldsValue({ modifiers: []});
       getModifiers({modifierTableIds: [...values.dimTableIds, tempForm.tableId].join()}).then((res) => {
         const modifierList = res.data?.map((_: any) => ({ label: _.labelName, value: _.labelCode }));
         setModifierList(modifierList);
