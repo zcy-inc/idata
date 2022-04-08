@@ -10,6 +10,8 @@ import styles from './index.less';
 import { getMeasures } from '@/services/measure';
 import { getEnumValues } from '@/services/datadev';
 import CreateMeasure from './components/CreateMeasure';
+import { LabelTag } from '@/constants/datapi';
+
 import moment from 'moment';
 const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
@@ -48,11 +50,25 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     getTableData(10 * (current - 1));
   }, [currentNode, current])
 
+  const TagMap = (labelTag: LabelTag) => {
+    switch (labelTag) {
+      case LabelTag.ATOMIC_METRIC_LABEL:
+      case LabelTag.ATOMIC_METRIC_LABEL_DISABLE:
+        return '原子指标';
+      case LabelTag.DERIVE_METRIC_LABEL:
+      case LabelTag.DERIVE_METRIC_LABEL_DISABLE:
+        return '派生指标';
+      default:
+        return '';
+    }
+  };
+
   const getTableData = (offset: number) => {
-    const {measureDeadline, ...params} = form.getFieldsValue();
+    const {measureDeadline, enable, ...params} = form.getFieldsValue();
     setLoading(true);
     getMeasures({
       ...params,
+      enable: !!enable,
       measureDeadline: measureDeadline ? moment(measureDeadline).format('YYYY-MM-DD') : undefined,
       limit: 10,
       offset,
@@ -100,9 +116,19 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const columns: ColumnsType<MetricListItem> = [
     { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
     { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
-    { title: '指标类型', key: 'labelTag', dataIndex: 'labelTag' },
+    { 
+      title: '指标类型',
+      key: 'labelTag',
+      dataIndex: 'labelTag',
+      render: (t) => TagMap(t)
+    },
     { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
-    { title: '指标状态', key: 'labelTag', dataIndex: 'labelTag' },
+    { 
+      title: '指标类型',
+      key: 'labelTag',
+      dataIndex: 'labelTag',
+      render: (t) => t.endsWith('DISABLE') ? '停用' : '启用'
+    },
     { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
     { title: '更新人', key: 'editor', dataIndex: 'editor' },
