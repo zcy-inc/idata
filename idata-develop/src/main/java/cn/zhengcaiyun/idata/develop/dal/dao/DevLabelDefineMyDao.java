@@ -89,7 +89,7 @@ public interface DevLabelDefineMyDao {
                     "AND dev_label_define.label_attributes LIKE concat('%', #{bizProcess}, '%') " +
                 "</if>" +
                 "<if test = 'enable != null'>" +
-                    "AND dev_label_define.label_tag LIKE concat('%', #{measureType}) " +
+                    "AND dev_label_define.label_tag LIKE concat('%', #{enable}) " +
                 "</if>" +
                 "<if test = 'creator != null'>" +
                     "AND dev_label_define.creator LIKE concat('%', #{creator}, '%') " +
