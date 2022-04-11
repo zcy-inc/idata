@@ -128,7 +128,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     },
     { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
     { 
-      title: '指标类型',
+      title: '指标状态',
       key: 'labelTag',
       dataIndex: 'labelTag',
       render: (t) => t.endsWith('DISABLE') ? '停用' : '启用'
