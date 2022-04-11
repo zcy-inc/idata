@@ -23,37 +23,34 @@ import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
+import cn.zhengcaiyun.idata.datasource.api.DataSourceApi;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.job.OverhangJobLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
-import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobEventLog;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobDependenceRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,7 +75,16 @@ import static com.google.common.base.Preconditions.checkState;
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
 
+    @Autowired
+    private DevJobInfoMyDao devJobInfoMyDao;
+
+    @Autowired
+    private JobOutputMyDao jobOutputMyDao;
+
     private final JobInfoRepo jobInfoRepo;
+    private final JobOutputRepo jobOutputRepo;
+    private final DevJobUdfMyDao devJobUdfMyDao;
+    private final JobPublishRecordMyDao jobPublishRecordMyDao;
     private final JobDependenceRepo jobDependenceRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
@@ -89,9 +95,13 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final OverhangJobLocalCache overhangJobLocalCache;
     private final DevAccessService devAccessService;
+    private final DataSourceApi dataSourceApi;
 
     @Autowired
     public JobInfoServiceImpl(JobInfoRepo jobInfoRepo,
+                              JobOutputRepo jobOutputRepo,
+                              DevJobUdfMyDao devJobUdfMyDao,
+                              JobPublishRecordMyDao jobPublishRecordMyDao,
                               JobDependenceRepo jobDependenceRepo,
                               JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobPublishRecordRepo jobPublishRecordRepo,
@@ -101,8 +111,12 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobEventPublisher jobEventPublisher,
                               DevTreeNodeLocalCache devTreeNodeLocalCache,
                               OverhangJobLocalCache overhangJobLocalCache,
-                              DevAccessService devAccessService) {
+                              DevAccessService devAccessService,
+                              DataSourceApi dataSourceApi) {
         this.jobInfoRepo = jobInfoRepo;
+        this.jobOutputRepo = jobOutputRepo;
+        this.devJobUdfMyDao = devJobUdfMyDao;
+        this.jobPublishRecordMyDao = jobPublishRecordMyDao;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.dagRepo = dagRepo;
@@ -113,6 +127,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.overhangJobLocalCache = overhangJobLocalCache;
         this.devAccessService = devAccessService;
+        this.dataSourceApi = dataSourceApi;
     }
 
     @Override
@@ -132,7 +147,11 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.CREATED, operator);
         jobEventPublisher.whenCreated(eventLog);
 
-        devTreeNodeLocalCache.invalidate(dto.getJobType().belong());
+        FunctionModuleEnum belong = dto.getJobType().belong();
+        if (belong == null && dto.getJobType() == JobTypeEnum.BACK_FLOW) {
+            belong = FunctionModuleEnum.DI;
+        }
+        devTreeNodeLocalCache.invalidate(belong);
         return jobId;
     }
 
@@ -337,6 +356,245 @@ public class JobInfoServiceImpl implements JobInfoService {
                 introspectionException.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env) {
+        JobInfoExecuteDetailDto jobInfoExecuteDetailDto = devJobInfoMyDao.selectJobInfoExecuteDetail(id, env);
+        checkArgument(jobInfoExecuteDetailDto != null, String.format("任务不存在或配置不存在, jobId:%d，环境:%s", id, env));
+
+        String jobType = jobInfoExecuteDetailDto.getJobType();
+        checkArgument(JobTypeEnum.getEnum(jobType).isPresent(), String.format("任务类型未匹配, jobType:%s", jobType));
+
+        JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
+        jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
+        switch (jobTypeEnum) {
+            case BACK_FLOW:
+                JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
+                backFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                backFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
+
+                // 封装di_job_content
+                DIJobContent bfJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
+                checkArgument(Objects.nonNull(bfJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
+
+                BeanUtils.copyProperties(bfJobContent, backFlowResponse);
+
+                backFlowResponse.setSrcTable(bfJobContent.getSrcTables());
+
+                backFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(bfJobContent.getDestWriteMode()));
+
+                // 根据回流启用模式，填充数据
+                if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
+                    backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
+                    // 抽取关联映射列
+                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
+                    backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
+                    //抽取主键key
+                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toSet());
+                    backFlowResponse.setUpdateKey(StringUtils.join(keyNameSet, ","));
+
+                } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
+                    backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
+                    backFlowResponse.setUpdateKey(bfJobContent.getScriptKeyColumns());
+                }
+                backFlowResponse.setParallelism(bfJobContent.getDestShardingNum());
+
+                String properties = bfJobContent.getDestProperties();
+                if (StringUtils.isNotBlank(properties)) {
+                    backFlowResponse.setDestPropMap(JSON.parseObject(properties, Map.class));
+                }
+
+                // 封装连接信息
+                DataSourceDetailDto bfSourceDetail = dataSourceApi.getDataSourceDetail(bfJobContent.getDestDataSourceId());
+                backFlowResponse.setDestUrlPath(bfSourceDetail.getJdbcUrl());
+                backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
+                backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
+                backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+
+                // TODO 个性化处理返回值
+                // sqoop -> srcSql = null, columnName != null
+                // spark -> columnName = null, srcSql != null
+                // doris -> columnName srcSql 都要有
+                switch (backFlowResponse.getExecEngine()) {
+                    case SQOOP:
+                        backFlowResponse.setSrcSql(null);
+                        break;
+                    case SPARK:
+                        backFlowResponse.setDestColumnNames(null);
+                        break;
+                }
+
+                return backFlowResponse;
+            case DI_BATCH:
+                JobInfoExecuteDetailDto.DiJobDetailsDto diResponse = new JobInfoExecuteDetailDto.DiJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装di_job_content
+                DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
+                checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(diJobContent, diResponse);
+                if (StringUtils.isNotBlank(diJobContent.getSrcColumns())) {
+                    diResponse.setSrcCols(JSON.parseArray(diJobContent.getSrcColumns(), MappingColumnDto.class));
+                }
+
+                //兼容数据库数据错误
+                if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
+                    diResponse.setSrcShardingNum(1);
+                }
+
+                // 封装连接信息
+                DataSourceDetailDto srcSourceDetail = dataSourceApi.getDataSourceDetail(diJobContent.getSrcDataSourceId());
+                diResponse.setSrcDataType(srcSourceDetail.getDataSourceTypeEnum().name());
+                diResponse.setSrcJdbcUrl(srcSourceDetail.getJdbcUrl());
+                diResponse.setSrcUsername(srcSourceDetail.getUserName());
+                diResponse.setSrcPassword(srcSourceDetail.getPassword());
+                diResponse.setSrcDbName(srcSourceDetail.getDbName());
+                diResponse.setSrcDriverType(srcSourceDetail.getDriverTypeEnum());
+
+                diResponse.setDiQuery(generateSrcQuery(diResponse.getSrcCols(), diResponse.getSrcReadFilter(), diResponse.getSrcTables(), diResponse.getSrcDbName()));
+
+                // 字段类型转换
+                diResponse.setDestWriteMode(WriteModeEnum.DiEnum.valueOf(diJobContent.getDestWriteMode()));
+                diResponse.setSrcReadMode(SrcReadModeEnum.getByValue(diJobContent.getSrcReadMode()));
+
+                String writeMode = diJobContent.getDestWriteMode();
+                if (StringUtils.equalsIgnoreCase(writeMode, WriteModeEnum.SqlEnum.UPSERT.name())) {
+                    // TODO 岛端不需要增量逻辑
+                }
+                return diResponse;
+            case SQL_SPARK:
+                JobOutputQuery query = new JobOutputQuery();
+                query.setJobId(id);
+                query.setEnvironment(env);
+                JobOutput jobOutput = Optional.ofNullable(jobOutputMyDao.queryOne(query))
+                        .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", id, env)));
+
+                // 封装sql_job_content
+                DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
+                checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+
+                List<DevJobUdf> udfList = new ArrayList<>();
+                String udfIds = contentSql.getUdfIds();
+                if (StringUtils.isNotBlank(udfIds)) {
+                    List<Long> idList = Arrays.stream(udfIds.split(",")).map(e -> Long.parseLong(e)).collect(Collectors.toList());
+                    udfList = devJobUdfMyDao.getByIds(idList);
+                }
+
+                // 额外判断：旧版idata中sql作业中涉及回流作业，htool对回流作业处理不一样
+                DataSourceDto dataSource = dataSourceApi.getDataSource(jobOutput.getDestDataSourceId());
+                if (!StringUtils.equalsIgnoreCase(dataSource.getType().name(), "hive")) {
+                    JobInfoExecuteDetailDto.BackFlowDetailDto oldBackFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
+                    oldBackFlowResponse.setJobTypeEnum(JobTypeEnum.BACK_FLOW);
+                    oldBackFlowResponse.setJobType(JobTypeEnum.BACK_FLOW.getCode());
+
+                    BeanUtils.copyProperties(contentSql, oldBackFlowResponse);
+                    BeanUtils.copyProperties(jobOutput, oldBackFlowResponse);
+                    oldBackFlowResponse.setUdfList(udfList);
+
+                    // 封装连接信息
+                    DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId());
+                    oldBackFlowResponse.setSrcSql(contentSql.getSourceSql());
+                    oldBackFlowResponse.setDestUrlPath(destSourceDetail.getJdbcUrl());
+                    oldBackFlowResponse.setDestUserName(destSourceDetail.getUserName());
+                    oldBackFlowResponse.setDestPassword(destSourceDetail.getPassword());
+                    oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
+                    oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
+                    oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+                    return oldBackFlowResponse;
+                }
+
+                JobInfoExecuteDetailDto.SqlJobDetailsDto sqlResponse = new JobInfoExecuteDetailDto.SqlJobDetailsDto(jobInfoExecuteDetailDto);
+                BeanUtils.copyProperties(contentSql, sqlResponse);
+                BeanUtils.copyProperties(jobOutput, sqlResponse);
+                sqlResponse.setUdfList(udfList);
+
+                // 字段类型转换
+                sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
+
+                return sqlResponse;
+            case SPARK_PYTHON:
+            case SPARK_JAR:
+                JobInfoExecuteDetailDto.SparkJobDetailsDto sparkResponse = new JobInfoExecuteDetailDto.SparkJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装spark_job_content
+                DevJobContentSpark contentSpark = jobPublishRecordMyDao.getPublishedSparkJobContent(id, env);
+                checkArgument(Objects.nonNull(contentSpark), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentSpark, sparkResponse);
+
+                // 封装shell参数　
+                StringBuffer jarArgs = new StringBuffer("");
+                if (!CollectionUtils.isEmpty(contentSpark.getAppArguments())) {
+                    for (Object script : contentSpark.getAppArguments()) {
+                        JobArgumentDto dto = (JobArgumentDto)script;
+                        jarArgs.append(dto.getArgumentValue() + " ");
+                    }
+                    sparkResponse.setAppArguments(jarArgs.toString());
+                }
+
+                return sparkResponse;
+            case KYLIN:
+                JobInfoExecuteDetailDto.KylinDetailJob kylinResponse = new JobInfoExecuteDetailDto.KylinDetailJob(jobInfoExecuteDetailDto);
+
+                // 封装kylin_job_content
+                DevJobContentKylin contentKylin = jobPublishRecordMyDao.getPublishedKylinJobContent(id, env);
+                checkArgument(Objects.nonNull(contentKylin), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentKylin, kylinResponse);
+
+                return kylinResponse;
+            case SCRIPT_SHELL:
+            case SCRIPT_PYTHON:
+                JobInfoExecuteDetailDto.ScriptJobDetailsDto scriptResponse = new JobInfoExecuteDetailDto.ScriptJobDetailsDto(jobInfoExecuteDetailDto);
+
+                // 封装script_job_content
+                DevJobContentScript contentScript = jobPublishRecordMyDao.getPublishedScriptJobContent(id, env);
+                checkArgument(Objects.nonNull(contentScript), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                BeanUtils.copyProperties(contentScript, scriptResponse);
+
+                // 封装shell参数　
+                StringBuffer shellArgs = new StringBuffer("");
+                if (!CollectionUtils.isEmpty(contentScript.getScriptArguments())) {
+                    for (Object script : contentScript.getScriptArguments()) {
+                        JobArgumentDto dto = (JobArgumentDto)script;
+                        shellArgs.append(dto.getArgumentValue() + " ");
+                    }
+                    scriptResponse.setSourceResource(shellArgs.toString());
+                }
+
+                return scriptResponse;
+            default:
+                throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
+        }
+    }
+
+    /**
+     * 生成src query
+     * @param mappingColumnList
+     * @param srcReadFilter
+     * @param srcTables
+     * @return
+     */
+    private String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables, String srcDbName) {
+        if (CollectionUtils.isEmpty(mappingColumnList)) {
+            return null;
+        }
+        boolean generate = mappingColumnList.stream().anyMatch(e -> StringUtils.isNotEmpty(e.getMappingSql()));
+        if (!generate) {
+            return null;
+        }
+
+        List<String> columns = mappingColumnList.stream().map(e -> {
+            String name = e.getName();
+            String mappingSql = e.getMappingSql();
+            return StringUtils.isNotEmpty(mappingSql) ? mappingSql : name;
+        }).collect(Collectors.toList());
+
+        String selectColumns = StringUtils.join(columns, ",");
+        String srcQuery = String.format("select %s from %s.%s ", selectColumns, srcDbName, srcTables);
+        if (StringUtils.isNotEmpty(srcReadFilter)) {
+            srcQuery += (" where " + srcReadFilter);
+        }
+        return srcQuery;
     }
 
     private JobInfo tryFetchJobInfo(Long id) {

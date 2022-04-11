@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, message, Select, Upload } from 'antd';
+import { Button, Form, Input, Select, Upload } from 'antd';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
 import styles from './index.less';
@@ -89,8 +89,6 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                       hdfsPath: res.data.relativePath,
                     });
                     setHdfsPath(res.data.relativePath);
-                  } else {
-                    message.error(`上传失败: ${res.msg}`);
                   }
                 })
                 .catch((err) => {

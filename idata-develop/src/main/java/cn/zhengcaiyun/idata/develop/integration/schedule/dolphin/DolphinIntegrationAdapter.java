@@ -50,6 +50,9 @@ public abstract class DolphinIntegrationAdapter {
     public static final String ENTITY_TYPE_TASK = "task";
     public static final String NAME_DELIMITER = "__";
 
+    // 调用DS接口锁
+    private static final Object dsLock = new Object();
+
     protected final DSEntityMappingRepo dsEntityMappingRepo;
     protected final DSDependenceNodeRepo dsDependenceNodeRepo;
     protected final SystemConfigService systemConfigService;
@@ -122,14 +125,20 @@ public abstract class DolphinIntegrationAdapter {
     }
 
     protected ResultDto<JSONObject> sendReq(HttpInput req_input) {
-        ResultDto<JSONObject> resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
-        });
+        ResultDto<JSONObject> resultDto;
+        synchronized (dsLock) {
+            resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<JSONObject>>() {
+            });
+        }
         return resultDto;
     }
 
     protected ResultDto<Object> simpleSendReq(HttpInput req_input) {
-        ResultDto<Object> resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<Object>>() {
-        });
+        ResultDto<Object> resultDto;
+        synchronized (dsLock) {
+            resultDto = HttpClientUtil.executeHttpRequest(req_input, new TypeReference<ResultDto<Object>>() {
+            });
+        }
         return resultDto;
     }
 

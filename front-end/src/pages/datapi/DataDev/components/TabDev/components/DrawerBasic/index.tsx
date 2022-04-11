@@ -92,8 +92,6 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
             pane,
           });
           onClose();
-        } else {
-          message.error(`保存失败: ${res.msg}`);
         }
       })
       .catch((err) => {});

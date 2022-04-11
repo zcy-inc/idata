@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Drawer, Table } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
-import { Task } from '@/types/datadev';
+import { DIJobBasicInfo } from '@/types/datadev';
 import { getTasks } from '@/services/task';
 import { TaskListItem } from '@/types/tasks';
 import moment from 'moment';
@@ -11,7 +11,7 @@ import { VersionStatusDisplayMap } from '@/constants/datadev';
 interface DrawerConfigProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
 }
 
 const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {

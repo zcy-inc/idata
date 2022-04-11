@@ -50,6 +50,4 @@ public interface CompositeFolderRepo {
 
     Optional<CompositeFolder> queryFolder(String name, Long parentId);
 
-    Optional<CompositeFolder> queryFolder(String name, FunctionModuleEnum moduleEnum);
-
 }

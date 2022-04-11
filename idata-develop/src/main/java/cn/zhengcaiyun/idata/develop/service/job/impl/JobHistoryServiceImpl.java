@@ -14,6 +14,8 @@ import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
+import cn.zhengcaiyun.idata.system.common.constant.SystemConfigConstant;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,8 +34,8 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 @Service
 public class JobHistoryServiceImpl implements JobHistoryService {
 
-    @Value("${yarn.resourceManagerUri}")
-    private String YARN_RM_URI;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     @Autowired
     private DevJobHistoryDao devJobHistoryDao;
@@ -136,6 +138,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
     @Override
     public String getBusinessLogUrl(String applicationId, String finalStatus, String state) {
+        String yarnRmURI = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_HTOOL_CONFIG, SystemConfigConstant.HTOOL_CONFIG_YARN_ADDR);
         if (StringUtils.isEmpty(applicationId)) {
             return null;
         }
@@ -147,7 +150,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
             enumCode = YarnJobStatusEnum.getByFinalStatus(finalStatus);
         }
 
-        String defaultUrl = YARN_RM_URI + "/cluster/app/" + applicationId;
+        String defaultUrl = yarnRmURI + "/cluster/app/" + applicationId;
         if (enumCode == null) {
             return defaultUrl;
         }
@@ -170,7 +173,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
             case FAIL:
                 return defaultUrl;
             case RUNNING:
-                return YARN_RM_URI + "/proxy/" + applicationId;
+                return yarnRmURI + "/proxy/" + applicationId;
             case OTHER:
             case PENDING:
                 return "";

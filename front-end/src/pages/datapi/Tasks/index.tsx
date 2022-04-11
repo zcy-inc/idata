@@ -106,8 +106,6 @@ const DataSource: FC = () => {
         if (res.success) {
           message.success('发布成功');
           getTasksWrapped(0);
-        } else {
-          message.error(`发布失败：${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -121,8 +119,6 @@ const DataSource: FC = () => {
         if (res.success) {
           message.success('驳回成功');
           getTasksWrapped(0);
-        } else {
-          message.error(`驳回失败：${res.msg}`);
         }
       })
       .catch((err) => {});

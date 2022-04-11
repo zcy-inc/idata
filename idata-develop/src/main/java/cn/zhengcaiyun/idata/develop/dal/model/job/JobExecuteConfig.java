@@ -102,13 +102,6 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
-     *   运行配置-作业最大并发数，配置为0时表示使用默认并发数
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_max_parallelism")
-    private Integer execMaxParallelism;
-
-    /**
-     * Database Column Remarks:
      *   运行配置-告警等级
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
@@ -148,6 +141,13 @@ public class JobExecuteConfig {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
     private Integer runningState;
+
+    /**
+     * Database Column Remarks:
+     *   执行引擎
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    private String execEngine;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
@@ -279,16 +279,6 @@ public class JobExecuteConfig {
         this.execQueue = execQueue;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_max_parallelism")
-    public Integer getExecMaxParallelism() {
-        return execMaxParallelism;
-    }
-
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_max_parallelism")
-    public void setExecMaxParallelism(Integer execMaxParallelism) {
-        this.execMaxParallelism = execMaxParallelism;
-    }
-
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_warn_level")
     public String getExecWarnLevel() {
         return execWarnLevel;
@@ -347,5 +337,15 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
     public void setRunningState(Integer runningState) {
         this.runningState = runningState;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public String getExecEngine() {
+        return execEngine;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
+    public void setExecEngine(String execEngine) {
+        this.execEngine = execEngine;
     }
 }

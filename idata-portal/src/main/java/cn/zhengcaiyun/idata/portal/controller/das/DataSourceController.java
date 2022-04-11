@@ -22,19 +22,25 @@ import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
+import cn.zhengcaiyun.idata.portal.controller.dev.job.JobTableController;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * data-source-controller
@@ -57,6 +63,65 @@ public class DataSourceController {
     }
 
     private final String CONFIG_DATASOURCE_ACCESS_CODE = "F_MENU_DATASOURCE_CENTER";
+
+    /**
+     * 加载kafka topic
+     */
+    @GetMapping("/kafka/topics")
+    public RestResult<List<String>> getTopics(@RequestParam("dataSourceId") Long dataSourceId) throws ExecutionException, InterruptedException {
+        return RestResult.success(dataSourceService.getTopics(dataSourceId));
+    }
+
+    /**
+     * 加载数据源的数据库
+     */
+    @GetMapping("/dbNames")
+    public RestResult<List<String>> getDbNames(@RequestParam("dataSourceId") Long dataSourceId) {
+        return RestResult.success(dataSourceService.getDbNames(dataSourceId));
+    }
+
+    /**
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     *
+     * @param dataSourceId
+     * @param dbName
+     * @return
+     */
+    @GetMapping("/tableNames")
+    public RestResult<List<String>> getTableNames(@RequestParam("dataSourceId") Long dataSourceId,
+                                                  @RequestParam(value = "dbName", required = false) String dbName) {
+        DataSourceDto dataSource = dataSourceService.getDataSource(dataSourceId);
+        if (dataSource.getType() == DataSourceTypeEnum.hive && StringUtils.isEmpty(dbName)) {
+            return RestResult.success(new ArrayList<>());
+        }
+        return RestResult.success(dataSourceService.getTableNames(dataSourceId, dbName));
+    }
+
+    /**
+     * 获取表字段
+     *
+     * @param dataSourceId
+     * @return
+     */
+    @GetMapping("/columns")
+    public RestResult<List<MappingColumnDto>> getTableColumns(@RequestParam("dataSourceId") Long dataSourceId,
+                                                              @RequestParam(value = "dbName", required = false) String dbName,
+                                                              @RequestParam(value = "tableName") String tableName) {
+        DataSourceDto dataSource = dataSourceService.getDataSource(dataSourceId);
+        if (dataSource.getType() == DataSourceTypeEnum.hive && StringUtils.isEmpty(dbName)) {
+            return RestResult.success(new ArrayList<>());
+        }
+
+        List<ColumnInfoDto> tableColumns = dataSourceService.getTableColumns(dataSourceId, dbName, tableName);
+        List<MappingColumnDto> list = tableColumns.stream()
+                .map(e -> {
+                    MappingColumnDto dto = new MappingColumnDto();
+                    dto.setDataType(e.getColumnType());
+                    dto.setName(e.getColumnName());
+                    return dto;
+                }).collect(Collectors.toList());
+        return RestResult.success(list);
+    }
 
     /**
      * 获取数据源类型

@@ -38,6 +38,9 @@ public enum DataSourceTypeEnum {
     kylin,
     phoenix,
     elasticsearch,
+    mssql,
+    kafka,
+    doris,
     csv,
     ;
 

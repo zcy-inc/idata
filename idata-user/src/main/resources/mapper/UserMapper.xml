@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.user.dal.dao.UacUserMyDao">
+
+    <insert id="insertIgnore">
+        insert ignore into uac_user(id, del, creator, create_time, editor, edit_time, username, sys_admin, auth_type,
+            password, nickname, employee_id, department, real_name, avatar, email, mobile)
+        values (#{id}, #{del}, #{creator}, #{createTime}, #{editor}, #{editTime}, #{username}, #{sysAdmin}, #{authType},
+            #{password}, #{nickname}, #{employeeId}, #{department}, #{realName}, #{avatar}, #{email}, #{mobile})
+    </insert>
+    <select id="findOneByUsername" resultType="cn.zhengcaiyun.idata.user.dal.model.UacUser">
+        select * from uac_user where username = #{username} limit 1
+    </select>
+
+</mapper>

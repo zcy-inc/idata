@@ -1,0 +1,125 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package cn.zhengcaiyun.idata.portal.controller.lab;
+
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.label.dto.LabFolderDto;
+import cn.zhengcaiyun.idata.label.dto.LabFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.label.service.LabFolderService;
+import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * lab-folder-api
+ * 文件夹接口
+ *
+ * @description: 提供文件夹crud接口，文件树查询接口
+ * @author: yangjianhua
+ * @create: 2021-06-22 14:34
+ **/
+@RestController
+@RequestMapping(path = "/p1/lab")
+public class LabFolderController {
+
+    private final TokenService tokenService;
+    private final LabFolderService folderService;
+
+    @Autowired
+    public LabFolderController(TokenService tokenService, LabFolderService folderService) {
+        checkNotNull(tokenService, "tokenService must not be null.");
+        checkNotNull(folderService, "folderService must not be null.");
+        this.tokenService = tokenService;
+        this.folderService = folderService;
+    }
+
+    /**
+     * 创建文件夹
+     *
+     * @param labFolderDto 文件夹dto
+     * @param request
+     * @return {@link RestResult}
+     */
+    @PostMapping("/labFolder")
+    public RestResult<Long> createFolder(@RequestBody LabFolderDto labFolderDto, HttpServletRequest request) {
+        return RestResult.success(folderService.createFolder(labFolderDto, tokenService.getNickname(request)));
+    }
+
+    /**
+     * 编辑文件夹
+     *
+     * @param labFolderDto 文件夹dto
+     * @param request
+     * @return {@link RestResult}
+     */
+    @PutMapping("/labFolder")
+    public RestResult<Long> editFolder(@RequestBody LabFolderDto labFolderDto, HttpServletRequest request) {
+        return RestResult.success(folderService.editFolder(labFolderDto, tokenService.getNickname(request)));
+    }
+
+    /**
+     * 查询文件夹
+     *
+     * @param id 文件夹id
+     * @return {@link RestResult}
+     */
+    @GetMapping("/labFolder/{id}")
+    public RestResult<LabFolderDto> getFolder(@PathVariable Long id) {
+        return RestResult.success(folderService.getFolder(id));
+    }
+
+    /**
+     * 删除文件夹
+     *
+     * @param id      文件夹id
+     * @param request
+     * @return {@link RestResult}
+     */
+    @DeleteMapping("/labFolder/{id}")
+    public RestResult<Boolean> deleteFolder(@PathVariable("id") Long id, HttpServletRequest request) {
+        return RestResult.success(folderService.deleteFolder(id, tokenService.getNickname(request)));
+    }
+
+    /**
+     * 查询文件夹列表
+     *
+     * @param belong 所属业务标识，如：数据标签为lab
+     * @return {@link RestResult}
+     */
+    @GetMapping("/labFolders")
+    public RestResult<List<LabFolderDto>> getFolders(@RequestParam(value = "belong") String belong) {
+        return RestResult.success(folderService.getFolders(belong));
+    }
+
+    /**
+     * 查询文件树
+     *
+     * @param belong 所属业务标识，如：数据标签为lab
+     * @return {@link RestResult}
+     */
+    @GetMapping("/labFolder/tree")
+    public RestResult<List<LabFolderTreeNodeDto>> getFolderTree(@RequestParam(value = "belong") String belong) {
+        return RestResult.success(folderService.getFolderTree(belong, OperatorContext.getCurrentOperator().getId()));
+    }
+
+}

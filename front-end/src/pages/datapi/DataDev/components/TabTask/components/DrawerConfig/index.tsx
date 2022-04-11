@@ -17,13 +17,8 @@ import type { FC } from 'react';
 import styles from './index.less';
 
 import Title from '@/components/Title';
-import {
-  concurrentOptions,
-  execDriverMemOptions,
-  execWorkerMemOptions,
-  restartOptions,
-} from './constants';
-import { DAGListItem, Task } from '@/types/datadev';
+import { execDriverMemOptions, execWorkerMemOptions, restartOptions } from './constants';
+import { DAGListItem, DIJobBasicInfo } from '@/types/datadev';
 import {
   getDAGList,
   getDataDevConfig,
@@ -32,12 +27,12 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
-import { SchPriority } from '@/constants/datadev';
+import { SchPriority, execEngineOptions } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
 }
 
 const { Item } = Form;
@@ -92,7 +87,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
+    getDAGList({ environment })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
@@ -118,8 +114,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         if (res.success) {
           message.success(`保存${environment}成功`);
           onClose();
-        } else {
-          message.error(`保存${environment}失败：${res.msg}`);
         }
       })
       .catch((err) => {});
@@ -155,12 +149,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       >
         {env.map((_) => (
           <TabPane tab={_} key={_}>
-            <Title>调度配置</Title>
             <Form
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
             >
+              <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
                 <Checkbox.Group>
                   <Checkbox value="schDryRun" />
@@ -213,7 +207,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={security.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
                 />
               </Item>
-              <Item name="execDriverMem" label="驱动器内存" rules={ruleSelc}>
+              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
@@ -221,20 +215,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execDriverMemOptions}
                 />
               </Item>
-              <Item name="execWorkerMem" label="执行器内存" rules={ruleSelc}>
+              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
                 <Select
                   size="large"
                   style={{ width }}
                   placeholder="请选择"
                   options={execWorkerMemOptions}
-                />
-              </Item>
-              <Item name="execMaxParallelism" label="任务期望最大并发数" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={concurrentOptions}
                 />
               </Item>
               <Item name="schPriority" label="优先等级" rules={ruleSelc}>
@@ -247,6 +233,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                     { label: '中', value: SchPriority.MIDDLE },
                     { label: '高', value: SchPriority.HIGH },
                   ]}
+                />
+              </Item>
+              <Title>运行配置</Title>
+              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                <Select
+                  size="large"
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={execEngineOptions}
                 />
               </Item>
             </Form>

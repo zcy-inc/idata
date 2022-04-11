@@ -88,35 +88,4 @@ export default {
       phone: '0752-268888888',
     });
   },
-  'GET /api/p1/uc/userInfo': (req: Request, res: Response) => {
-    res.send({
-      success: true,
-      code: '',
-      msg: '',
-      data: {
-        id: 76,
-        createTime: '2020-12-18 19:29:16',
-        updateTime: '2020-12-18 19:29:16',
-        del: false,
-        userName: 'dengjiajie',
-        nickname: '百里',
-        employeeId: 'C00640',
-        realName: '邓佳杰',
-        avatar: 'https://static-legacy.dingtalk.com/media/lADPD3Irse4l4lnNAlnNAlk_601_601.jpg',
-        mail: 'dengjiajie@cai-inc.com',
-        mobile: '18758266953',
-        roles: [
-          {
-            id: 1,
-            createAt: '2019-08-11 23:30:14',
-            updateAt: '2019-08-11 23:30:14',
-            del: false,
-            code: 'admin',
-            name: '系统管理员',
-            permissions: ['datapi'],
-          },
-        ],
-      },
-    });
-  },
 };

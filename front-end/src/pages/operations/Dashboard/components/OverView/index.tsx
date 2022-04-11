@@ -39,7 +39,7 @@ const iconSchedule =
 const iconCluster =
   'https://sitecdn.zcycdn.com/f2e-assets/76fedc86-0c46-4478-8102-c35bcffc07fb.png?x-oss-process=image/quality,Q_75/format,jpg';
 
-const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
+const Overview: FC<OverviewProps> = ({ schedule = {}, cluster = {} }) => {
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState<Type>('schedule');
   const [activeKey, setActiveKey] = useState<OverViewTabKey>('success');
@@ -92,7 +92,7 @@ const Overview: FC<OverviewProps> = ({ schedule, cluster }) => {
       .finally(() => setLoading(false));
   };
 
-  const renderLocaleString = (n: number) => n.toLocaleString();
+  const renderLocaleString = (n: number = 0) => n.toLocaleString();
 
   const Statistic: FC<{
     color: string;

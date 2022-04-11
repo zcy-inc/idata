@@ -38,6 +38,7 @@ import cn.zhengcaiyun.idata.user.spi.DevFolderService;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -57,6 +58,10 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
  */
 @Service
 public class UserAccessServiceImpl implements UserAccessService {
+
+    @Value("${access.mode:#{null}}")
+    private String ACCESS_MODE;
+
     @Autowired
     private SystemService systemService;
     @Autowired
@@ -149,6 +154,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkAccess(Long userId, String accessCode) {
+        // 迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
@@ -168,6 +175,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkAccess(Long userId, List<String> accessTypes, String accessKey) {
+        // 数据迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
@@ -220,6 +229,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkResAccess(Long userId, List<String> accessTypes, String accessKey) {
+        // 数据迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1))))
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
@@ -251,6 +262,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkAddAccess(Long userId, Long parentId, String featureType, String resourceType) {
+        // 数据迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         Boolean checkAccess = checkResAccess(userId, Arrays.asList(resourceType + "_W"), String.valueOf(parentId));
         // 若为0 同时校验功能权限
         if (checkAccess && parentId == 0L) {
@@ -262,6 +275,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkUpdateAccess(Long userId, Long originalParentId, Long removeParentId, String resourceType) {
+        // 数据迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         Boolean checkAccess = checkResAccess(userId, Arrays.asList(resourceType + "_W"), String.valueOf(originalParentId));
         // 校验拖拽，最外层不可拖拽
         if (checkAccess && removeParentId != null) {
@@ -273,6 +288,8 @@ public class UserAccessServiceImpl implements UserAccessService {
 
     @Override
     public boolean checkDeleteAccess(Long userId, Long parentId, String resourceType) {
+        // 数据迁移不校验权限
+        if ("idata-merge".equals(ACCESS_MODE)) return true;
         return checkResAccess(userId, Arrays.asList(resourceType + "_D"), String.valueOf(parentId));
     }
 }

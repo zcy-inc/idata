@@ -57,7 +57,7 @@ public class DITreeNodeSupplier implements BizTreeNodeSupplier<JobInfo> {
     @Override
     public List<DevTreeNodeDto> supply(FunctionModuleEnum moduleEnum) {
         JobInfoCondition condition = new JobInfoCondition();
-        condition.setJobTypeCodes(Lists.newArrayList(JobTypeEnum.DI_BATCH.getCode(), JobTypeEnum.DI_STREAM.getCode()));
+        condition.setJobTypeCodes(Lists.newArrayList(JobTypeEnum.DI_BATCH.getCode(), JobTypeEnum.DI_STREAM.getCode(), JobTypeEnum.BACK_FLOW.getCode()));
         List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(condition);
         return jobInfoList.stream()
                 .map(jobInfo -> assemble(moduleEnum, jobInfo))

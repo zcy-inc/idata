@@ -41,6 +41,8 @@ public class ColumnInfoDto {
     private String columnComment;
     private String columnType;
     private String partitionedColumn;
+    private boolean enableCompare;// 当此字段为ture时，isDiff字段有效
+    private boolean isHiveDiff; // 字段和hive表是否存在不同
 
     // GaS
     public Long getId() {
@@ -153,5 +155,21 @@ public class ColumnInfoDto {
 
     public void setPartitionedColumn(String partitionedColumn) {
         this.partitionedColumn = partitionedColumn;
+    }
+
+    public boolean isEnableCompare() {
+        return enableCompare;
+    }
+
+    public void setEnableCompare(boolean enableCompare) {
+        this.enableCompare = enableCompare;
+    }
+
+    public boolean isHiveDiff() {
+        return isHiveDiff;
+    }
+
+    public void setHiveDiff(boolean hiveDiff) {
+        isHiveDiff = hiveDiff;
     }
 }

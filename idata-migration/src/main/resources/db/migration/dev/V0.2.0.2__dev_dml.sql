@@ -1,4 +1,24 @@
 -- ### 新表预置数据：
+-- dev_folder
+-- 系统文件夹
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (1, '系统管理员', 'LabelSystemFolder', 'LABEL');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (2, '系统管理员', 'EnumSystemFolder', 'ENUM');
+
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (3, '系统管理员', 'ODS', 'TABLE');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (4, '系统管理员', 'DWD', 'TABLE');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (5, '系统管理员', 'DWS', 'TABLE');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (6, '系统管理员', 'DIM', 'TABLE');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (7, '系统管理员', 'ADS', 'TABLE');
+
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (8, '系统管理员', 'DimensionFolder',
+'DIMENSION');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (9, '系统管理员', 'ModifierFolder', 'MODIFIER');
+insert into idata.dev_folder (id, creator, folder_name, folder_type) values (10, '系统管理员', 'MetricFolder', 'METRIC');
+insert into idata.dev_folder (id, creator, folder_name, parent_id, folder_type) values (11, '系统管理员', 'AtomicMetricFolder', 10, 'METRIC');
+insert into idata.dev_folder (id, creator, folder_name, parent_id, folder_type) values (12, '系统管理员', 'DeriveMetricFolder', 10, 'METRIC');
+insert into idata.dev_folder (id, creator, folder_name, parent_id, folder_type) values (13, '系统管理员', 'ComplexMetricFolder', 10, 'METRIC');
+
+--
 -- dev_label_define
 -- 表：数据库名称、是否分区表、安全等级、数仓分层、表中文名称、数仓所属人、业务方所属人、数据资产、数据域、metabase地址、描述、业务过程
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
@@ -115,6 +135,33 @@ values ('系统管理员', 'dwLayerEnum:ENUM', 'DW_LAYER_ODS:ENUM_VALUE', 'ODS')
 -- 安全等级
 insert into idata.dev_enum (creator, enum_code, enum_name, folder_id) values ('系统管理员', 'securityLevelEnum:ENUM', '安全等级', 2);
 insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_C1:ENUM_VALUE', '客户可公开数据(C1)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_C2:ENUM_VALUE', '客户可共享数据(C2)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_C3:ENUM_VALUE', '客户隐私数据(C3)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_C4:ENUM_VALUE', '客户机密数据(C4)');
+
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_S1:ENUM_VALUE', '业务可公开数据(S1)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_S2:ENUM_VALUE', '业务内部数据(S2)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_S3:ENUM_VALUE', '业务保密数据(S3)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_S4:ENUM_VALUE', '业务机密数据(S4)');
+
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_B1:ENUM_VALUE', '政采云可公开数据(B1)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_B2:ENUM_VALUE', '政采云内部数据(B2)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_B3:ENUM_VALUE', '政采云保密数据(B3)');
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
+values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_B4:ENUM_VALUE', '政采云机密数据(B4)');
+
+insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_LOW:ENUM_VALUE', '低');
 insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'securityLevelEnum:ENUM', 'SECURITY_LEVEL_MEDIUM:ENUM_VALUE', '中');
@@ -159,6 +206,10 @@ values ('系统管理员', 'aggregatorEnum:ENUM', 'AGGREGATOR_CNT:ENUM_VALUE', '
 insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'aggregatorEnum:ENUM', 'AGGREGATOR_CNTD:ENUM_VALUE', '去重计数');
 
+insert into idata.dev_enum (creator, enum_code, enum_name, folder_id) values ('系统管理员', 'assetCatalogueEnum:ENUM', '数据资产', 2);
+--
+-- dev_enum_value
+-- 同dev_enum
 
 -- 告警等级
 insert into idata.dev_label_define (creator, label_code, label_name, label_tag, label_param_type, subject_type,
@@ -172,6 +223,3 @@ insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'alarmLayerEnum:ENUM', 'ALARM_LEVEL_MEDIUM:ENUM_VALUE', '中');
 insert into idata.dev_enum_value (creator, enum_code, value_code, enum_value)
 values ('系统管理员', 'alarmLayerEnum:ENUM', 'ALARM_LEVEL_LOW:ENUM_VALUE', '低');
-
-insert into idata.dev_enum (creator, enum_code, enum_name, folder_id) values ('系统管理员', 'assetCatalogueEnum:ENUM',
-'数据资产', 2);

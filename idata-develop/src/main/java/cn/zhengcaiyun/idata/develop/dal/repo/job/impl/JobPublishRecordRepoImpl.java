@@ -27,7 +27,6 @@ import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDao;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import com.google.common.base.Strings;
@@ -170,19 +169,15 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
             if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
                     || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
                 diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
-            }
-            else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+            } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
                 sqlJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
-            }
-            else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
+            } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
                     || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
                 sparkJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
-            }
-            else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
+            } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
                     || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
                 scriptJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
-            }
-            else {
+            } else {
                 kylinJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
             }
             record.setPublishStatus(PublishStatusEnum.SUBMITTED.val);
@@ -209,8 +204,8 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
 
         // 修改配置运行状态
         jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.runningState).equalTo(RunningStateEnum.resume.val)
-                .where(jobExecuteConfig.jobId, isEqualTo(jobPublishRecord.jobId),
-                        and(jobExecuteConfig.environment, isEqualTo(jobPublishRecord.environment))));
+                .where(jobExecuteConfig.jobId, isEqualTo(record.getJobId()),
+                        and(jobExecuteConfig.environment, isEqualTo(record.getEnvironment()))));
 
         //更新状态为发布
         JobPublishRecord publishedRecord = new JobPublishRecord();

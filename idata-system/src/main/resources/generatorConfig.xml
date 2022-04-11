@@ -15,15 +15,23 @@
         <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.system.dal.model" targetProject="src/main/java"/>
         <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.system.dal.dao" targetProject="src/main/java"/>
 
-        <table tableName="sys_config" mapperName="SysConfigDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="value_one" javaType="java.util.Map"
-                            typeHandler="cn.zhengcaiyun.idata.system.dal.JsonColumnHandler"/>
-        </table>
-        <table tableName="sys_feature" mapperName="SysFeatureDao">
-            <generatedKey column="id" sqlStatement="MySql" identity="true" />
-            <columnOverride column="del" javaType="java.lang.Integer"/>
-        </table>
+<!--        <table tableName="sys_config" mapperName="SysConfigDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="value_one" javaType="java.util.Map"-->
+<!--                            typeHandler="cn.zhengcaiyun.idata.system.dal.JsonColumnHandler"/>-->
+<!--        </table>-->
+<!--        <table tableName="sys_feature" mapperName="SysFeatureDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="sys_duty_info" mapperName="SysDutyInfoDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+            <table tableName="workspace" mapperName="WorkspaceDao">
+                <generatedKey column="id" sqlStatement="MySql" identity="true" />
+                <columnOverride column="del" javaType="java.lang.Integer"/>
+            </table>
     </context>
 </generatorConfiguration>

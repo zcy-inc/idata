@@ -38,6 +38,37 @@ export enum TaskCategory {
   SQL = 'SQL',
 }
 
+export enum DIJobType {
+  DI = 'DI', // 数据抽取（集成）
+  BACK_FLOW = 'BACK_FLOW', // 数据回流
+}
+
+export enum DISyncMode {
+  BATCH = 'BATCH',
+  STREAM = 'STREAM',
+}
+
+export enum DIConfigMode {
+  VISUALIZATION = 1,
+  SCRIPT,
+}
+
+export enum DIConfigModeLable {
+  VISUALIZATION = '可视化模式',
+  SCRIPT = '脚本模式',
+}
+
+export const diConfigOptions = [
+  {
+    label: DIConfigModeLable.VISUALIZATION,
+    value: DIConfigMode.VISUALIZATION,
+  },
+  {
+    label: DIConfigModeLable.SCRIPT,
+    value: DIConfigMode.SCRIPT,
+  },
+];
+
 export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步
@@ -59,6 +90,18 @@ export enum DestWriteMode {
   OVERWRITE = 'overwrite', // 覆盖表
   APPEND = 'append',
 }
+
+export enum BackFlowDestWriteMode {
+  // INSERT = 'INSERT',
+  UPSERT = 'UPSERT',
+  OVERWRITE = 'OVERWRITE',
+}
+
+export const backFlowDestWriteModeOptions = [
+  { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
+  { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
+  // { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
+];
 
 export enum VersionStatus {
   EDITING = 0, // 编辑中
@@ -118,4 +161,31 @@ export enum JobStatus {
 export enum AutoCompletionLangs {
   SQL = 'SQL',
   PYTHON = 'PYTHON',
+}
+
+export enum ExecEngine {
+  SPARK = 'SPARK',
+  SQOOP = 'SQOOP',
+  KYLIN = 'KYLIN',
+  DORIS = 'DORIS',
+}
+
+export const execEngineOptions = [
+  { label: 'SPARK', value: ExecEngine.SPARK },
+  { label: 'SQOOP', value: ExecEngine.SQOOP },
+  { label: 'KYLIN', value: ExecEngine.KYLIN },
+  { label: 'DORIS', value: ExecEngine.DORIS },
+];
+
+// 切分键分片数/并行度
+export const shardingNumOptions = [1, 2, 4, 8, 16].map((i) => ({ label: i, value: i }));
+
+export enum DataSourceType {
+  HIVE = 'hive',
+  KAFKA = 'kafka',
+  MYSQL = 'mysql',
+  POSTGRESQL = 'postgresql',
+  PHOENIX = 'phoenix',
+  DORIS = 'doris',
+  ELASTICSEARCH = 'elasticsearch',
 }

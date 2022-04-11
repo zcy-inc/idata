@@ -102,6 +102,7 @@ public class TreeNodeAccessFilter<N extends TreeNodeDto> {
             // 重新设置经过过滤的子节点
             node.setChildren(filteredChildrenNodes);
         }
-        return ObjectUtils.isNotEmpty(node.getChildren()) ? node : null;
+//        return ObjectUtils.isNotEmpty(node.getChildren()) ? node : null;
+        return node;
     }
 }

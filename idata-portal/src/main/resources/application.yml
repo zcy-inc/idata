@@ -1,5 +1,5 @@
 server:
-  port: 9527
+  port: 8080
   servlet:
     context-path: /api
 
@@ -14,9 +14,9 @@ spring:
     name: idata-portal-server
   datasource:
     hikari.poolName: HikariPool-portal-mysql
-    url:
-    username:
-    password:
+    url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    username: root
+    password: 123456
   jackson:
     default-property-inclusion: non_null
     deserialization:
@@ -24,37 +24,42 @@ spring:
       FAIL_ON_UNKNOWN_PROPERTIES: false
     date-format: yyyy-MM-dd HH:mm:ss.SSS
     time-zone: Asia/Shanghai
+  flyway:
+    enabled: false
 
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info, metrics, threaddump
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  mapper-locations: classpath*:mapper/*.xml # 配置 Mapper XML 地址
 
 auth:
   jwt:
-    security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
-
-livy:
-  baseUrl:
-  sessionMax:
-
-dolphin:
-  baseUrl:
-  token:
+    security:
 
 hdfs:
-  nameservices:
-  nn1:
-  nn2:
-  basePath:
-  user:
-
-yarn:
-  resourceManagerUri:
+  basePath: /tmp/shiyin/
 
 pagehelper:
   helperDialect: mysql
   reasonable: true
   supportMethodsArguments: true
   params: count=countSql
+
+#access:
+#  mode : idata-merge
+
+zcy:
+  is-cloud: ture # 是否是云端，ture：云端，false：本地化
+
+
 

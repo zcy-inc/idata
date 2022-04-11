@@ -17,6 +17,10 @@
 package cn.zhengcaiyun.idata.user.service;
 
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserMyDao;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserTokenDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacUserToken;
@@ -26,6 +30,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,9 +52,17 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
  */
 @Service
 public class TokenService {
+
+
     @Value("${auth.jwt.security}")
     private String jwtSecurity;
     private final int TOKEN_TTL_SECOND = 3600 * 24;
+
+    @Value("${zcy.is-cloud:true}")
+    private String isCloud;
+
+    @Autowired
+    private UacUserMyDao uacUserMyDao;
 
     @Autowired
     private UacUserTokenDao uacUserTokenDao;
@@ -82,36 +95,70 @@ public class TokenService {
     }
 
     public boolean checkToken(String token) {
-        UacUserToken userToken = findByToken(token);
-        if (userToken == null) {
-            return false;
-        }
-        boolean isExpired;
-        try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecurity)
-                    .parseClaimsJws(token)
-                    .getBody();
-            isExpired = new Date().after(claims.getExpiration());
-        } catch (Exception e) {
-            // expired token
-            isExpired = true;
-        }
-        if (!isExpired) {
+        if (StringUtils.equalsIgnoreCase(isCloud, "true")) {
+            // 云端验证
+            UacUserToken userToken = findByToken(token);
+            if (userToken == null) {
+                return false;
+            }
+            boolean isExpired;
+            try {
+                Claims claims = Jwts.parser()
+                        .setSigningKey(jwtSecurity)
+                        .parseClaimsJws(token)
+                        .getBody();
+                isExpired = new Date().after(claims.getExpiration());
+            } catch (Exception e) {
+                // expired token
+                isExpired = true;
+            }
+            if (!isExpired) {
+                return true;
+            }
+            // 防止一直在使用，token过期的问题
+            if (System.currentTimeMillis() - userToken.getEditTime().getTime() < 6 * 3600 * 1000) {
+                return true;
+            }
+            else if (System.currentTimeMillis() - userToken.getEditTime().getTime() >= 6 * 3600 * 1000
+                    && System.currentTimeMillis() - userToken.getEditTime().getTime() <= 12 * 3600 * 1000) {
+                uacUserTokenDao.update(c -> c.set(uacUserToken.editTime).equalTo(new Date())
+                        .where(uacUserToken.id, isEqualTo(userToken.getId())));
+                return true;
+            }
+            else {
+                return false;
+            }
+        } else {
+            // 本地验证
+            try {
+                Claims claims = Jwts.parser()
+                        .setSigningKey(jwtSecurity)
+                        .parseClaimsJws(token)
+                        .getBody();
+                boolean isExpired = new Date().after(claims.getExpiration());
+                if (isExpired) {
+                    return false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            // 用户insertIgnore操作
+            JSONObject payload = getPayload(token);
+            UacUser uacUser = JSON.parseObject(JSON.toJSONString(payload), UacUser.class);
+
+            // 用户不存在，则新建
+            if (uacUserMyDao.findOneByUsername(uacUser.getUsername()) == null) {
+                uacUser.setDel(DeleteEnum.DEL_NO.val);
+                uacUser.setCreateTime(new Date());
+                uacUser.setEditTime(new Date());
+                uacUser.setCreator(uacUser.getNickname());
+                uacUser.setEditor(uacUser.getNickname());
+                uacUserMyDao.insertIgnore(uacUser);
+            }
+
             return true;
-        }
-        // 防止一直在使用，token过期的问题
-        if (System.currentTimeMillis() - userToken.getEditTime().getTime() < 6 * 3600 * 1000) {
-            return true;
-        }
-        else if (System.currentTimeMillis() - userToken.getEditTime().getTime() >= 6 * 3600 * 1000
-                && System.currentTimeMillis() - userToken.getEditTime().getTime() <= 12 * 3600 * 1000) {
-            uacUserTokenDao.update(c -> c.set(uacUserToken.editTime).equalTo(new Date())
-                    .where(uacUserToken.id, isEqualTo(userToken.getId())));
-            return true;
-        }
-        else {
-            return false;
         }
     }
 

@@ -12,6 +12,8 @@ import {
   SchTimeOutStrategy,
   SchPriority,
   JobStatus,
+  DIJobType,
+  DISyncMode,
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -99,6 +101,7 @@ export interface TaskContent {
   srcTables: string; // 数据来源-表
   srcReadFilter: string; // 数据来源-过滤条件
   srcReadShardKey: string; // 数据来源-切分键
+  srcShardingNum: number; // 数据来源-分片数量（并行度）
   srcReadMode: SrcReadMode; // 数据来源-读取模式
   destDataSourceType: DataSourceTypes; // 数据去向-数据源类型
   destDataSourceId: number; // 数据去向-数据源id
@@ -113,8 +116,9 @@ export interface TaskContent {
 
 export interface MappedColumn {
   name: string;
-  dataType?: string;
   primaryKey: boolean;
+  dataType?: string;
+  mappingSql?: string;
   mappedColumn?: MappedColumn;
 }
 
@@ -264,4 +268,39 @@ export interface UDF {
   udfSample: string;
   udfType: string;
   id?: number;
+}
+
+export interface CreateDIJobDto {
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  remark?: string;
+}
+
+export interface DIJobBasicInfo {
+  id: number;
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  creator: string;
+  status: 0 | 1; // 0 停用，1 启用
+  remark?: string;
+}
+
+export interface MergeSqlParamDto {
+  selectColumns: string;
+  keyColumns: string;
+  sourceTable: string;
+  destTable: string;
+  srcReadMode: string;
+  dataSourceType: string;
+  days?: number;
+}
+
+export interface DIJobContent {
+  id: save;
 }
