@@ -611,6 +611,7 @@ public class MetricServiceImpl implements MetricService {
             List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
                     and(devLabel.labelCode, isIn(modifierCodeList)),
                     and(devLabel.tableId, isEqualTo(metricLabelList.get(0).getTableId()))));
+            if (modifierLabelList.size() == 0) return metricSql;
             StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN ('%s')",
                     modifierLabelList.get(0).getColumnName(), modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
             if (modifierLabelList.size() > 1) {
