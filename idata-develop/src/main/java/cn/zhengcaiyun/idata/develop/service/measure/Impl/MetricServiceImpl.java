@@ -575,7 +575,7 @@ public class MetricServiceImpl implements MetricService {
                 and(devLabel.labelCode, isIn(modifierCodeList)),
                 and(devLabel.tableId, isIn(modifierTableIdList))));
         // 修饰词sql
-        StringBuilder modifierSql = new StringBuilder(String.format("\n WHERE %s.%s IS IN ('%s')",
+        StringBuilder modifierSql = new StringBuilder(String.format("\n WHERE %s.%s IN ('%s')",
                 tableAliasMap.get(modifierLabelList.get(0).getTableId()), modifierLabelList.get(0).getColumnName(),
                 modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
         if (modifierLabelList.size() > 1) {
