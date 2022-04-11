@@ -150,10 +150,12 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     private List<MeasureDto> getModifierDetails(List<MeasureDto> modifiers, List<String> labelCodes) {
-        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.labelCode, isIn(labelCodes)));
+        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.labelCode, isIn(labelCodes),
+                and(devLabel.del, isNotEqualTo(1))));
         Map<String, List<DevLabel>> modifierLabelMap = modifierLabelList.stream().collect(Collectors.groupingBy(DevLabel::getLabelCode));
         Set<Long> tableIdList = modifierLabelList.stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.id, isIn(tableIdList))).stream()
+        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.id, isIn(tableIdList),
+                and(devTableInfo.del, isNotEqualTo(1)))).stream()
                 .collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
         List<MeasureDto> echoModifierList =  modifiers.stream().map(modifier -> {
             MeasureDto echo = PojoUtil.copyOne(modifier,
