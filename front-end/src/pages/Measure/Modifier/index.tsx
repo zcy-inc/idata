@@ -26,7 +26,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       .then((res) => {
         const list = res.data?.map((_: any) => ({
           label: _.tableName,
-          value: `${_.id}`,
+          value: _.tableName,
         }));
         setTables(list);
       })
