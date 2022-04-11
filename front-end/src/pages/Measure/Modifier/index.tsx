@@ -22,7 +22,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-
       getTables()
       .then((res) => {
         const list = res.data?.map((_: any) => ({
@@ -114,7 +113,8 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         dialog.showLoading();
         form.handleSubmit().then(() => {
           done();
-          message.success(`${isEdit ? '编辑' : '新建'}修饰词成功！`)
+          message.success(`${isEdit ? '编辑' : '新建'}修饰词成功！`);
+          getTableData(10 * (current - 1));
         }).finally(() => {
           dialog.hideLoading();
         })
