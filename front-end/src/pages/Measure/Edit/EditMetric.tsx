@@ -131,6 +131,10 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       comment?: string;
       aggregatorCode?: string;
       tableId?: string;
+      columnId?: string;
+      timeDim?: string;
+      dimTableIds?: string [];
+      modifiers?: string [];
       columnName?: string;
     } = {};
     labelAttributes.forEach((attribute: { attributeKey: string; attributeValue: string | number; }) => {
@@ -139,6 +143,11 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     Object.keys(specialAttribute).forEach(key => {
       if(key === 'modifiers') {
         labelParams[key] = specialAttribute[key]?.map((item: { modifierCode: any; }) => item.modifierCode);
+      } else if(key === 'timeAttribute') {
+        labelParams.columnId = specialAttribute[key].columnName;
+        labelParams.timeDim = specialAttribute[key].timeDim;
+      }else if(key === 'dimTables') {
+        labelParams.dimTableIds = specialAttribute[key]?.map((item: { tableId: any; }) => item.tableId);
       } else {
         labelParams[key] = specialAttribute[key];
       }

@@ -281,8 +281,8 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
                   key: 'columnName'
                 }, {
                   title: '内容',
-                  dataIndex: '',
-                  key: ''
+                  dataIndex: 'modifierValue',
+                  key: 'modifierValue'
                 }
               ]}
             />
