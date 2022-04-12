@@ -25,7 +25,8 @@ public class Test {
 //        testRename();
 //        testExist();
 //        testCreate();
-        testTables();
+//        testTables();
+        testDbName();
     }
 
     private static void testCreate() {
@@ -105,16 +106,32 @@ public class Test {
         }
     }
 
-    public static void testTables() {
+    public static void testDbName() {
+
         Jive jive = null;
         try {
             ConnectInfo connectInfo = new ConnectInfo();
-            connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/ads");
+            connectInfo.setJdbc("jdbc:hive2://bigdata-master3.cai-inc.com:10000/default");
             GenericObjectPoolConfig config = new GenericObjectPoolConfig();
             config.setTestOnBorrow(true);
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
-            System.out.println("======" + jive.getTableNameList());
+            System.out.println("======" + jive.getDbNameList());
+        } finally {
+            jive.close(); // ！重要，使用完后归还
+        }
+    }
+
+    public static void testTables() {
+        Jive jive = null;
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            HivePool hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            System.out.println("======" + jive.getTableNameList("tmp"));
         } finally {
             jive.close(); // ！重要，使用完后归还
         }

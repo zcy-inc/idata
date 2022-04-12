@@ -96,7 +96,7 @@ public class DataSourceApiImpl implements DataSourceApi {
         res.setDataSourceTypeEnum(dataSource.getType());
 
         String dbName = dbConfigDto.getDbName();
-        res.setJdbcUrl(getJdbcUrl(dataSource.getType(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbName, dbConfigDto.getSchema()));
+        res.setJdbcUrl(getJdbcUrl(dataSource.getType(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbName));
         res.setUserName(dbConfigDto.getUsername());
         res.setPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
         res.setDbName(dbName);
@@ -105,9 +105,9 @@ public class DataSourceApiImpl implements DataSourceApi {
         return res;
     }
 
-    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
+    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName) {
         String protocol = null;
-        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum || DataSourceTypeEnum.doris == sourceTypeEnum) {
             protocol = "mysql";
         } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
             protocol = "postgresql";
@@ -118,7 +118,12 @@ public class DataSourceApiImpl implements DataSourceApi {
         }
         if (StringUtils.isEmpty(protocol)) return null;
 
-        String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        String jdbcUrl;
+        if (StringUtils.isNotEmpty(dbName)) {
+            jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        } else {
+            jdbcUrl = String.format("jdbc:%s://%s:%d", protocol, host, port);
+        }
         return jdbcUrl;
     }
 
