@@ -48,7 +48,7 @@ public class MeasureController {
                                                    @RequestParam(value = "metricType", required = false) String metricType,
                                                    @RequestParam(value = "measureId", required = false) String measureId,
                                                    @RequestParam(value = "measureName", required = false) String measureName,
-                                                   @RequestParam(value = "bizProcess", required = false) String bizProcess,
+                                                   @RequestParam(value = "bizProcessCode", required = false) String bizProcessCode,
                                                    @RequestParam(value = "enable", required = false) Boolean enable,
                                                    @RequestParam(value = "creator", required = false) String creator,
                                                    @RequestParam(value = "measureDeadline", required = false) String measureDeadline,
@@ -57,6 +57,6 @@ public class MeasureController {
                                                    @RequestParam(value = "limit", required = false) Long limit,
                                                    @RequestParam(value = "offset", required = false) Integer offset) {
         return RestResult.success(measureService.getMeasures(folderId, measureType, metricType, measureId, measureName,
-                bizProcess, enable, creator, measureDeadline, domain, belongTblName, limit, offset));
+                bizProcessCode, enable, creator, measureDeadline, domain, belongTblName, limit, offset));
     }
 }

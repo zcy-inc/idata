@@ -35,7 +35,7 @@ public class MeasureDto extends LabelDefineDto {
     private String bizProcessValue;
     private String measureId;
     private String measureDefine;
-    private Date metricDeadline;
+    private String metricDeadline;
     private String metricId;
     private String modifierId;
     private String domain;
@@ -116,11 +116,11 @@ public class MeasureDto extends LabelDefineDto {
         this.measureDefine = measureDefine;
     }
 
-    public Date getMetricDeadline() {
+    public String getMetricDeadline() {
         return metricDeadline;
     }
 
-    public void setMetricDeadline(Date metricDeadline) {
+    public void setMetricDeadline(String metricDeadline) {
         this.metricDeadline = metricDeadline;
     }
 

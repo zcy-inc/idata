@@ -138,10 +138,7 @@ public class MeasureServiceImpl implements MeasureService {
                             echo.setBizProcessValue(enumService.getEnumValue(labelAttribute.getAttributeValue()));
                         }
                         if ("metricDeadline".equals(labelAttribute.getAttributeKey())) {
-                            DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                            try {
-                                echo.setMetricDeadline(fmt.parse(labelAttribute.getAttributeValue()));
-                            } catch (ParseException ignore) {}
+                            echo.setMetricDeadline(labelAttribute.getAttributeValue());
                         }
                     });
             return echo;
