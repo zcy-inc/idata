@@ -11,21 +11,21 @@ IData的目标是提高数据研发的效率，降低数据研发的门槛，让
 ## 3. 搭建部署
 前端启动脚本：/bin/frontend_build.sh
 
-// step1:打包成镜像
+step1:打包成镜像
 apple@localhost bin % ./frontend_build.sh
 
 
-// step2:推送镜像
+step2:推送镜像
 apple@localhost bin % docker push yourDockerImage.repo.com
 
 
 后端启动脚本：/bin/backend_build.sh
 
-// step1:打包成镜像
+step1:打包成镜像
 apple@localhost bin % ./backend_build.sh
 
 
-// step2:推送镜像
+step2:推送镜像
 apple@localhost bin % docker push yourDockerImage.repo.com
 
 
