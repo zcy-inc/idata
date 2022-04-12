@@ -105,7 +105,8 @@ public class MeasureServiceImpl implements MeasureService {
     private List<MeasureDto> getMeasureDetails(List<String> labelCodes, String measureType) {
         List<MeasureDto> measureList = PojoUtil.copyList(devLabelDefineDao.select(c -> c.where(devLabelDefine.del,
                 isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isIn(labelCodes)))), MeasureDto.class);
+                and(devLabelDefine.labelCode, isIn(labelCodes))).orderBy(devLabelDefine.editTime.descending())),
+                MeasureDto.class);
         List<Long> folderIdList = measureList.stream().map(MeasureDto::getFolderId).collect(Collectors.toList());
         Map<Long, String> folderMap = devFolderDao.select(c -> c.where(devFolder.id, isIn(folderIdList))).stream()
                 .collect(Collectors.toMap(DevFolder::getId, DevFolder::getFolderName));
