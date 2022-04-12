@@ -59,6 +59,7 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
       setTree(res.data);
       if(res.data.length) {
         setSelectedKeys([res.data[0].cid]);
+        onChange && onChange(res.data[0]);
       }
     });
   }
@@ -173,7 +174,6 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
   };
 
   const handleSelect = (selectedKes: React.Key[], info: any) => {
-    console.log('onChange',info);
     setSelectedKeys(selectedKes);
     if(info.node.props.type === 'FOLDER') {
       onChange && onChange(info.node.props);

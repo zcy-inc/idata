@@ -9,7 +9,6 @@ const measure: FC = () => {
 
   const [currentNode, setCurrentNode] = useState<MetricFloderItem>({folderId: '' })
   const handleChange = (node: React.SetStateAction<MetricFloderItem>) => {
-    console.log(node);
     setCurrentNode(node)
   }
 
