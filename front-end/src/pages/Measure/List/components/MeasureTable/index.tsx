@@ -47,7 +47,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   }, []);
 
   useEffect(() => {
-    getTableData(10 * (current - 1));
+    if(currentNode.folderId) {
+      getTableData(10 * (current - 1));
+    }
   }, [currentNode, current])
 
   const TagMap = (labelTag: LabelTag) => {
@@ -126,6 +128,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       dataIndex: 'labelTag',
       render: (t) => TagMap(t)
     },
+    { title: '主题域', key: 'domain', dataIndex: 'domain' },
     { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
     { 
       title: '指标状态',
