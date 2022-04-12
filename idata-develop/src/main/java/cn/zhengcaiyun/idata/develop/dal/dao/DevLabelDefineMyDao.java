@@ -101,9 +101,9 @@ public interface DevLabelDefineMyDao {
                     "AND dev_label_define.label_attributes LIKE concat('%', #{domain}, '%') " +
                 "</if>" +
                 "<if test = 'belongTblName != null'>" +
-                    "AND dev_table_info.del = 0 AND dev_table_info.table_name LIKE concat('%', #{belongTblName}, '%') " +
+                    "AND dev_table_info.del = 0 AND dev_table_info.table_name = #{belongTblName} " +
                 "</if>" +
-            "ORDER BY edit_time DESC LIMIT #{limit} OFFSET #{offset} " +
+            "ORDER BY dev_label_define.edit_time DESC LIMIT #{limit} OFFSET #{offset} " +
             "</script>")
     List<DevLabelDefine> selectLabelDefineCodesByCondition(String folderIds,
                                                            String measureType,
