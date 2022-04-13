@@ -347,6 +347,14 @@ public class JobMigrationServiceImpl implements JobMigrationService {
 //                checkArgument(dagInfoOptional.isPresent(), "旧作业[%s]未按作业数仓分层找到迁移后的DAG", oldJobId);
 //                dagInfo = dagInfoOptional.get();
 //            }
+
+            // 云端dwd作业分层处理
+            if (EnvEnum.prod == envEnum && dagInfo.getName().indexOf("ZCY-PROD-DWDAG-1D") > 0) {
+                String shortLayerCode = DWLayerCodeMapTool.getShortCode(jobInfoDto.getDwLayerCode());
+                dagInfoOptional = DagTool.findDWDLayerDag(shortLayerCode, JobMigrationContext.getDAGIfPresent());
+                checkArgument(dagInfoOptional.isPresent(), "旧DWD作业[%s]未按作业数仓分层找到迁移后的DAG", oldJobId);
+                dagInfo = dagInfoOptional.get();
+            }
         }
 
         executeConfigDto.setSchDagId(dagInfo.getId());

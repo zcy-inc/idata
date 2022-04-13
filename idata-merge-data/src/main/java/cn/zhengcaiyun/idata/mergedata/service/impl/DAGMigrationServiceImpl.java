@@ -132,7 +132,10 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         EnvEnum envEnum = EnvEnum.valueOf(env);
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         resultDtoList.addAll(migrateOriginDAG(envEnum));
-//        resultDtoList.addAll(createStandardDAG(cluster, envEnum));
+//        resultDtoList.addAll(createStandardDAG(cluster, envEnum, Lists.newArrayList("ODS", "DIM", "DWD", "DWS", "ADS")));
+        if (EnvEnum.prod == envEnum) {
+            resultDtoList.addAll(createStandardDAG(cluster, envEnum, Lists.newArrayList("DWD-1D-SUB-DIM", "DWD-1D-SUB-DWD", "DWD-1D-SUB-DWS", "DWD-1D-SUB-ADS")));
+        }
         return resultDtoList;
     }
 
@@ -154,11 +157,10 @@ public class DAGMigrationServiceImpl implements DAGMigrationService {
         return resultDtoList;
     }
 
-    public List<MigrateResultDto> createStandardDAG(String cluster, EnvEnum env) {
+    public List<MigrateResultDto> createStandardDAG(String cluster, EnvEnum env, List<String> tags) {
         List<MigrateResultDto> resultDtoList = Lists.newArrayList();
         // 处理旧版数据，组装新版IData数据
         Map<String, List<CompositeFolder>> folderMap = queryFolderMap();
-        List<String> tags = Lists.newArrayList("ODS", "DIM", "DWD", "DWS", "ADS");
         List<DAGInfo> dagInfoList = dagRepo.queryDAGInfo();
         List<DAGDto> dagDtoList = tags.stream()
                 .filter(tag -> !isExistDag(tag, dagInfoList))
