@@ -17,6 +17,9 @@ const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
 ];
+let measureForm = {
+  current: 1
+}
 const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [data, setData] = useState<MetricListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -44,6 +47,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         }));
         setDataSetOptions(dataSetOptions);
       })
+      const {current, ...formParmas} = measureForm;
+      form.setFieldsValue(formParmas);
+      setCurrent(current);
   }, []);
 
   useEffect(() => {
@@ -119,6 +125,13 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     }, CreateMeasure)
   }
 
+  const onValuesChange = (values: { measureId: string; measureName: string; bizProcessCode: string; metricType: string; enable: string; creator: string; measureDeadline: string; domain: string; }) => {
+    measureForm = {
+      ...measureForm,
+      ...values
+    }
+  }
+
   const columns: ColumnsType<MetricListItem> = [
     { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
     { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
@@ -167,6 +180,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         onReset={onReset}
         labelCol={{span: 6}}
         labelWidth={96}
+        onValuesChange={onValuesChange}
       >
         <ProFormText
           name="measureId"
@@ -228,7 +242,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           total,
           current,
           showTotal: (t) => `共${t}条`,
-          onChange: (page) =>setCurrent(page),
+          onChange: (page) => {setCurrent(page); measureForm.current = page;},
         }}
       />
     </div>
