@@ -69,7 +69,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       fixed: 'right',
       render: (value, record) => (
         <Space size={16}>
-          <a onClick={() => addTreeItem(record)}>编辑</a>
+          <a onClick={() => addModifierItem(record)}>编辑</a>
           <a onClick={() => onDelete(record)}>删除</a>
         </Space>
       ),
