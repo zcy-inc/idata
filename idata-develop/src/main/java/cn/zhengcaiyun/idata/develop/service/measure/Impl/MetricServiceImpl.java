@@ -182,11 +182,11 @@ public class MetricServiceImpl implements MetricService {
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(metric.getLabelName()), "指标名称不能为空");
         checkArgument(isNotEmpty(metric.getLabelTag()), "类型不能为空");
-        DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+        DevLabelDefine checkMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelName, isEqualTo(metric.getLabelName())),
                 and(devLabelDefine.labelTag, isEqualTo(metric.getLabelTag()))))
                 .orElse(null);
-        checkArgument(checkModifier == null, "指标已存在");
+        checkArgument(checkMetric == null, "指标已存在");
         checkArgument(metric.getLabelAttributes() != null && metric.getLabelAttributes().size() > 0, "基本信息不能为空");
         List<String> metricInfoList = new ArrayList<>(Arrays.asList(metricInfos));
         List<String> metricAttributeKeyList = metric.getLabelAttributes().stream().map(AttributeDto::getAttributeKey)
@@ -206,6 +206,7 @@ public class MetricServiceImpl implements MetricService {
 
         if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(metric.getLabelTag())) {
             checkArgument(checkMetricBaseInfo(metric), "指标新建失败");
+
         }
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(metric.getLabelTag())) {
             // 校验可计算方式
@@ -416,20 +417,22 @@ public class MetricServiceImpl implements MetricService {
                         .collect(Collectors.toList());
                 specialAttributeDto.setDimTables(dimTableList);
             }
-            List<ModifierDto> modifierList = specialAttributeDto.getModifiers();
-            List<String> modifierCodeList = modifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
-            Map<String, String> modifierCodeNameMap = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                    and(devLabelDefine.labelCode, isIn(modifierCodeList))))
-                    .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, DevLabelDefine::getLabelName));
-            Map<String, List<DevLabel>> modifierLabelMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
-                    and(devLabel.labelCode, isIn(modifierCodeList)))).stream().collect(Collectors.groupingBy(DevLabel::getLabelCode));
-            modifierList = modifierList.stream()
-                    .peek(modifier -> {
-                        modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode()));
-                        modifier.setColumnName(modifierLabelMap.get(modifier.getModifierCode()).get(0).getColumnName());
-                        modifier.setModifierValue(modifierLabelMap.get(modifier.getModifierCode()).get(0).getLabelParamValue());
-                    }).collect(Collectors.toList());
-            specialAttributeDto.setModifiers(modifierList);
+            if (ObjectUtils.isNotEmpty(specialAttributeDto.getModifiers())) {
+                List<ModifierDto> modifierList = specialAttributeDto.getModifiers();
+                List<String> modifierCodeList = modifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+                Map<String, String> modifierCodeNameMap = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.labelCode, isIn(modifierCodeList))))
+                        .stream().collect(Collectors.toMap(DevLabelDefine::getLabelCode, DevLabelDefine::getLabelName));
+                Map<String, List<DevLabel>> modifierLabelMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                        and(devLabel.labelCode, isIn(modifierCodeList)))).stream().collect(Collectors.groupingBy(DevLabel::getLabelCode));
+                modifierList = modifierList.stream()
+                        .peek(modifier -> {
+                            modifier.setModifierName(modifierCodeNameMap.get(modifier.getModifierCode()));
+                            modifier.setColumnName(modifierLabelMap.get(modifier.getModifierCode()).get(0).getColumnName());
+                            modifier.setModifierValue(modifierLabelMap.get(modifier.getModifierCode()).get(0).getLabelParamValue());
+                        }).collect(Collectors.toList());
+                specialAttributeDto.setModifiers(modifierList);
+            }
             echoMetric.setSpecialAttribute(specialAttributeDto);
         }
         return echoMetric;
@@ -487,29 +490,31 @@ public class MetricServiceImpl implements MetricService {
             timeAttribute.setTableId(atomicLabel.getTableId());
             metric.getSpecialAttribute().setTimeAttribute(timeAttribute);
             // 校验维度
-            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTables()), "维度不能为空");
-            List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
-                    and(devForeignKey.tableId, isEqualTo(metricLabelList.get(0).getTableId()))))
-                    .stream().map(DevForeignKey::getReferTableId).sorted().collect(Collectors.toList());
-            checkArgument(existForeignKeyTblIdList.containsAll(metric.getSpecialAttribute().getDimTables()
-                            .stream().map(DimTableDto::getTableId).collect(Collectors.toSet())), "请选择正确的维表");
+            if (ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getDimTables())) {
+                List<Long> existForeignKeyTblIdList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                        and(devForeignKey.tableId, isEqualTo(metricLabelList.get(0).getTableId()))))
+                        .stream().map(DevForeignKey::getReferTableId).sorted().collect(Collectors.toList());
+                checkArgument(existForeignKeyTblIdList.containsAll(metric.getSpecialAttribute().getDimTables()
+                        .stream().map(DimTableDto::getTableId).collect(Collectors.toSet())), "请选择正确的维表");
+            }
             // 校验修饰词
-            checkArgument(ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getModifiers()), "修饰词不能为空");
-            List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
-            Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
-            checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
-            List<DevLabelDefine> existModifierList = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                    and(devLabelDefine.labelCode, isIn(relatedModifierCodes)),
-                    and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
-            checkArgument(relatedModifierCodes.size() == existModifierList.size(), "修饰词有误，部分修饰词不存在");
-            // 校验修饰词底表属于指标来源表或维表
-            Set<Long> modifierTableIds = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
-                    and(devLabel.labelCode, isIn(relatedModifierCodes))))
-                    .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-            Set<Long> allConfigTblIds = metric.getSpecialAttribute().getDimTables()
-                    .stream().map(DimTableDto::getTableId).collect(Collectors.toSet());
-            allConfigTblIds.add(metricLabelList.get(0).getTableId());
-            checkArgument(allConfigTblIds.containsAll(modifierTableIds), "修饰词有误，请选择来源于指标来源表或维表的修饰词");
+            if (ObjectUtils.isNotEmpty(metric.getSpecialAttribute().getModifiers())) {
+                List<ModifierDto> relatedModifierList = metric.getSpecialAttribute().getModifiers();
+                Set<String> relatedModifierCodes = relatedModifierList.stream().map(ModifierDto::getModifierCode).collect(Collectors.toSet());
+                checkArgument(relatedModifierList.size() == relatedModifierCodes.size(), "修饰词不能重复");
+                List<DevLabelDefine> existModifierList = devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                        and(devLabelDefine.labelCode, isIn(relatedModifierCodes)),
+                        and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
+                checkArgument(relatedModifierCodes.size() == existModifierList.size(), "修饰词有误，部分修饰词不存在");
+                // 校验修饰词底表属于指标来源表或维表
+                Set<Long> modifierTableIds = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                        and(devLabel.labelCode, isIn(relatedModifierCodes))))
+                        .stream().map(DevLabel::getTableId).collect(Collectors.toSet());
+                Set<Long> allConfigTblIds = metric.getSpecialAttribute().getDimTables()
+                        .stream().map(DimTableDto::getTableId).collect(Collectors.toSet());
+                allConfigTblIds.add(metricLabelList.get(0).getTableId());
+                checkArgument(allConfigTblIds.containsAll(modifierTableIds), "修饰词有误，请选择来源于指标来源表或维表的修饰词");
+            }
         }
         return true;
     }
