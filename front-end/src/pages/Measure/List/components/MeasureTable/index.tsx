@@ -134,7 +134,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       title: '指标状态',
       key: 'labelTag',
       dataIndex: 'labelTag',
-      render: (t) => t.endsWith('DISABLE') ? '停用' : '启用'
+      render: (t) => t.endsWith('DISABLE') ?
+      <span className={styles.disabled}>停用</span> :
+      <span className={styles.enabled}>启用</span>
     },
     { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
@@ -165,18 +167,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         onReset={onReset}
         labelCol={{span: 6}}
         labelWidth={96}
-        submitter={{
-          render: (props) => {
-            return [
-              <Button key="search" type="primary" onClick={props?.form?.submit}>
-                查询
-              </Button>,
-              <Button key="edit" onClick={() => addTreeItem()}>
-                新增
-              </Button>,
-            ];
-          },
-        }}
       >
         <ProFormText
           name="measureId"
@@ -222,6 +212,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           options={dataSetOptions}
         />
       </QueryFilter>
+      <div style={{textAlign: 'right'}}>
+        <Button key="edit" onClick={() => addTreeItem()}>
+          新增
+        </Button>
+      </div>
       <Table<MetricListItem>
         rowKey="id"
         columns={columns}

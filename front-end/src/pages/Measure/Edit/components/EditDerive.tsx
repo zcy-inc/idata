@@ -144,7 +144,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           label="维度"
           width="md"
           placeholder="请选择"
-          rules={require}
           mode="multiple"
           options={dimensionList}
           fieldProps={{
@@ -160,7 +159,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           mode="multiple"
           width="md"
           placeholder="请选择"
-          rules={require}
           options={modifierList}
           fieldProps={{
             showSearch: true,

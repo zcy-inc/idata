@@ -24,7 +24,6 @@ const formItemLayoutWithOutLabel = {
 const rules = [{ required: true, message: '必填' }];
 const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined) => {
   const [keyList, setKeyList] = useState<FlatTreeNodeOption[]>([]);
-  const [columnMap, setColumnMap] = useState({})
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -79,8 +78,11 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
                 {index === 0 ? null : <MinusCircleOutlined onClick={() => remove(name)} />}
               </Space>
             ))}
-            <Form.Item>
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+            <Form.Item style={{padding: '0 34px 0 80px'}}>
+              <Button
+                type="dashed"
+                style={{borderColor: '#dce1ef'}}
+                onClick={() => add()} block icon={<PlusOutlined />}>
                 添加维度
               </Button>
             </Form.Item>

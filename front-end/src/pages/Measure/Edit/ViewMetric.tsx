@@ -45,7 +45,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
     getMetric({ metricCode: params.id })
       .then((res) => {
         const transformedData = transformOriginData(res.data);
-        setSql(res.data.metricSql);
+        setSql('');
         setData(transformedData);
       })
       .finally(() => {
@@ -82,7 +82,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       modifiers: specialAttribute.modifiers,
       dimTables: specialAttribute.dimTables,
       aggregatorCode: specialAttribute.aggregatorCode,
-      timeAttribute: [specialAttribute.timeAttribute],
+      timeAttribute:
+      (!specialAttribute.timeAttribute?.columnName && !specialAttribute.timeAttribute?.timeDim) ?
+      [] : [specialAttribute.timeAttribute],
       calculableType: specialAttribute.calculableType
     }
   }
@@ -104,6 +106,11 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       },
       formProps: {
         dimTables: (data?.dimTables || []).map(item => ({label: item.tableName, value: item.tableId}))
+      },
+      btns: {
+        positive: '保存并生成',
+        negetive: '取消',
+        other: []
       },
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
@@ -184,7 +191,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         </Descriptions>
         <Title>指标定义</Title>
         <p>{data?.metricDefine}</p>
-        <Title>技术口径</Title>
+        <Title style={{marginTop: 32}}>技术口径</Title>
         <p className={style['part-title']}>指标来源</p>
         <Table
           bordered
@@ -293,10 +300,10 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         <p className={style['part-title']}>其他信息</p>
         <Descriptions column={2} colon={false} style={{ margin: '16px 0' }}>
           <Item label="计算方式">
-            {AggregatorCodeOptions.find(item => item.value === data?.aggregatorCode)?.label}
+            {AggregatorCodeOptions.find(item => item.value === data?.aggregatorCode)?.label || '-'}
           </Item>
           <Item label="是否可累加">
-            {degradeDimOptions.find(item => item.value === data?.calculableType)?.label}
+            {degradeDimOptions.find(item => item.value === data?.calculableType)?.label || '-'}
           </Item>
         </Descriptions>
         <p className={style['part-title']} style={{lineHeight: '32px'}}>

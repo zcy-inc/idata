@@ -100,7 +100,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           .catch((err) => {}),
   });
 
-  const addTreeItem = (node: any = {}) => {
+  const addModifierItem = (node: any = {}) => {
     const isEdit = !!node.id;
     showDialog(`${isEdit ? '编辑' : '新建'}修饰词`, {
       modalProps: {
@@ -132,18 +132,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         onReset={onReset}
         labelCol={{span: 6}}
         labelWidth={96}
-        submitter={{
-          render: (props) => {
-            return [
-              <Button key="search" type="primary" onClick={props?.form?.submit}>
-                查询
-              </Button>,
-              <Button key="edit" onClick={() => addTreeItem()}>
-                新增
-              </Button>,
-            ];
-          },
-        }}
       >
         <ProFormText
           name="measureName"
@@ -166,6 +154,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           placeholder="请输入"
         />
       </QueryFilter>
+      <div style={{textAlign: 'right'}}>
+        <Button key="edit" onClick={() => addModifierItem()}>
+          新增
+        </Button>
+      </div>
       <Table<MetricListItem>
         rowKey="id"
         columns={columns}

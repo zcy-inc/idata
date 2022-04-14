@@ -179,6 +179,7 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
       onChange && onChange(info.node.props);
     }
   }
+  
   return (
     <div className="folder-tree">
       <div className="search">
@@ -197,6 +198,7 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
           blockNode
+          style={{ marginTop: 12 }}
           onExpand={(keys) => onExpand(keys)}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}

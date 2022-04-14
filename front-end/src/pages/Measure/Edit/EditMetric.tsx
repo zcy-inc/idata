@@ -279,7 +279,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     if(metricType) {
       return (
         <Fragment>
-          <Title>技术口径</Title>
+          <Title style={{marginTop: 8}}>技术口径</Title>
           <ProFormGroup>
             <ProFormSelect
               name="tableId"
@@ -457,7 +457,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               }}
             />
           </ProFormGroup>
-          <Title>指标定义</Title>
+          <Title style={{marginTop: 8}}>指标定义</Title>
           <ProFormGroup>
             <ProFormTextArea
               name="metricDefine"
