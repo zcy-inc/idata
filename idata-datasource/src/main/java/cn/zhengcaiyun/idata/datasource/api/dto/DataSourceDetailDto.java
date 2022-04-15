@@ -8,6 +8,8 @@ public class DataSourceDetailDto {
 
     private DataSourceTypeEnum dataSourceTypeEnum;
 
+    private String name; //数据源名称
+
     private String dbName;
 
     private String jdbcUrl;
@@ -24,6 +26,14 @@ public class DataSourceDetailDto {
 
     public void setDataSourceTypeEnum(DataSourceTypeEnum dataSourceTypeEnum) {
         this.dataSourceTypeEnum = dataSourceTypeEnum;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDbName() {

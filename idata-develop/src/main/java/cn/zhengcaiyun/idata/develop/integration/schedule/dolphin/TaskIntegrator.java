@@ -503,7 +503,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     private Map<String, String> buildRunningParam(Long workflowCode, Long taskCode, JobExecuteConfig executeConfig, boolean runPost) {
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("processDefinitionCode", workflowCode.toString());
-//        paramMap.put("scheduleTime", null);
+//        paramMap.put("scheduleTime", null); // scheduleTime: 2022-04-14 00:00:00,2022-04-14 00:00:00
         paramMap.put("failureStrategy", "END");
         paramMap.put("warningType", "NONE");
         paramMap.put("warningGroupId", "0");
