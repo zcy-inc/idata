@@ -93,6 +93,7 @@ public class DataSourceApiImpl implements DataSourceApi {
 
         DbConfigDto dbConfigDto = envDbConfigList.get(0);
         DataSourceDetailDto res = new DataSourceDetailDto();
+        res.setName(dataSource.getName());
         res.setDataSourceTypeEnum(dataSource.getType());
 
         String dbName = dbConfigDto.getDbName();
@@ -115,6 +116,15 @@ public class DataSourceApiImpl implements DataSourceApi {
             protocol = "presto";
         } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
             protocol = "hive2";
+        }  else if (DataSourceTypeEnum.elasticsearch == sourceTypeEnum) {
+            // es直接返回ip+port，不拼接jdbc，用于给htool
+            return host + ":" + port;
+        }  else if (DataSourceTypeEnum.kafka == sourceTypeEnum) {
+            // kafka直接返回ip+port，不拼接jdbc，用于给htool
+            return host + ":" + port;
+        }  else if (DataSourceTypeEnum.mssql == sourceTypeEnum) {
+            // es直接返回ip+port，不拼接jdbc，用于给htool
+            return String.format("jdbc:sqlserver://%s:%d;databasename=%s", host, port, dbName);
         }
         if (StringUtils.isEmpty(protocol)) return null;
 

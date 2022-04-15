@@ -244,6 +244,7 @@ public class JobInfoExecuteDetailDto {
         private String destUserName;//username;
         private String destPassword;//password;
         private String destTable;//targetTableName;
+        private boolean destDRDS = false; // 是否是分布式数据库
         private String srcTable;
         private String destColumnNames; // dbColumnNames src数据源的列
         private String updateKey; //新版本
@@ -255,6 +256,14 @@ public class JobInfoExecuteDetailDto {
 
         public BackFlowDetailDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
+        }
+
+        public boolean isDestDRDS() {
+            return destDRDS;
+        }
+
+        public void setDestDRDS(boolean destDRDS) {
+            this.destDRDS = destDRDS;
         }
 
         public String getUpdateKey() {
