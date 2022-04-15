@@ -31,13 +31,11 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
     handleSubmit
   }));
   useEffect(() => {
-    if(node.folderId) {
-      form.setFieldsValue({
-        folderName: node.name,
-        parentId: node.parentId
-      })
-    }
-      getTreeData();
+    form.setFieldsValue({
+      folderName: node.name,
+      parentId: node.parentId
+    });
+    getTreeData();
   }, []);
 
   const getTreeData = (treeNodeName?: string) => {

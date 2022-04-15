@@ -308,7 +308,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
           </ProFormGroup>
           {
             metricType === 'DERIVE_METRIC_LABEL' ?
-            <EditDerive ref={refDerive} form={form} /> :
+            <EditDerive ref={refDerive} form={form} originValue={data} /> :
             <ProFormGroup>
               <ProFormSelect
                 name="aggregatorCode"

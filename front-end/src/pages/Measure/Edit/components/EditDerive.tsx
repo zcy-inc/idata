@@ -14,6 +14,7 @@ import { getTableInfo, getMeasures, getForeignKeyTables, getModifiers } from '@/
 import { rules, timeDimOptions } from '@/constants/datapi';
 export interface ViewModifierProps {
   form: any;
+  originValue: any;
 }
 
 interface TableOptions {
@@ -26,10 +27,10 @@ const { require } = rules;
 interface TempFormTypes {
   dimTableIds: string [],
   atomicMetricCode: string,
-  tableId: string
+  tableId: string;
 }
 
-const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form }, ref) => {
+const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form, originValue }, ref) => {
   const [metricList, setMetricList] = useState<TableOptions []>([]);
   const [labelList, setLabelList] = useState<TableOptions []>([]);
   const [dimensionList, setDimensionList] = useState<TableOptions []>([]);
@@ -55,8 +56,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
         value: _.labelCode,
       }));
       setMetricList(metricList);
-    }); 
+    });
   }, []);
+
+  useEffect(() => {
+    if(originValue) {
+      setTempForm(originValue);
+    }
+  }, [originValue])
 
   const handleValueChange = (values:TempFormTypes, init = false) => {
     setTempForm({
@@ -118,7 +125,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           label="时间周期"
           width="md"
           placeholder="请选择"
-          rules={require}
           options={labelList}
           fieldProps={{
             showSearch: true,
@@ -130,7 +136,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           label=""
           width="md"
           placeholder="请选择"
-          rules={require}
           options={timeDimOptions}
           fieldProps={{
             showSearch: true,

@@ -75,7 +75,10 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
         width: 540
       },
       formProps: {
-        node
+        node: {
+          ...node,
+          parentId: curNode.pos
+        }
       },
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
@@ -177,9 +180,8 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     setAutoExpandParent(false);
   };
 
-  const handleSelect = (selectedKes: React.Key[], info: any, list = tree) => {
-    setSelectedKeys(selectedKes);
-    const position = info.node.pos.split('-').slice(1);
+  const getValueList = (positionString: string, list = tree) => {
+    const position = positionString.split('-').slice(1);
     let pos: any[] = [];
     const getFolderValue = (index: string | number) => {
       const folderId = list[index].folderId;
@@ -189,8 +191,14 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     position.forEach((index: string | number) => {
       pos.push(getFolderValue(index))
     });
-    console.log(pos);
+    return pos;
+  }
+
+  const handleSelect = (selectedKes: React.Key[], info: any, list = tree) => {
+    setSelectedKeys(selectedKes);
+    let pos: any[] = getValueList(info.node.pos, list);
     if(info.node.props.type === 'FOLDER') {
+      setCurNode({...info.node.props, pos});
       onChange && onChange({...info.node.props, pos});
     }
   }
@@ -218,9 +226,8 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
           onRightClick={({ node }: any) => {
-            const parentId = node.parentId?.split('_')[1] || null;
             const folderId = `${node.folderId}`;
-            setCurNode({ ...node, folderId, parentId });
+            setCurNode({ ...node, folderId, pos: getValueList(node.pos) });
           }}
           selectedKeys={selectedKeys}
           onSelect={handleSelect}
