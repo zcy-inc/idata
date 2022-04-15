@@ -287,6 +287,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               width="md"
               placeholder="请选择"
               rules={require}
+              tooltip="选择dws表确定指标字段（单选）"
               options={DWDTables}
               fieldProps={{
                 showSearch: true,
