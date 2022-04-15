@@ -58,8 +58,12 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL, treeNodeName }).then((res) => {
       setTree(res.data);
       if(res.data.length) {
-        setSelectedKeys([res.data[0].cid]);
-        onChange && onChange(res.data[0]);
+        handleSelect([res.data[0].cid], {
+          node: {
+            props: res.data[0],
+            pos: '0-0'
+          }
+        }, res.data)
       }
     });
   }
@@ -173,10 +177,21 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     setAutoExpandParent(false);
   };
 
-  const handleSelect = (selectedKes: React.Key[], info: any) => {
+  const handleSelect = (selectedKes: React.Key[], info: any, list = tree) => {
     setSelectedKeys(selectedKes);
+    const position = info.node.pos.split('-').slice(1);
+    let pos: any[] = [];
+    const getFolderValue = (index: string | number) => {
+      const folderId = list[index].folderId;
+      list = list[index].children || [];
+      return folderId;
+    }
+    position.forEach((index: string | number) => {
+      pos.push(getFolderValue(index))
+    });
+    console.log(pos);
     if(info.node.props.type === 'FOLDER') {
-      onChange && onChange(info.node.props);
+      onChange && onChange({...info.node.props, pos});
     }
   }
   

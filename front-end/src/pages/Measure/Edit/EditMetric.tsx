@@ -248,8 +248,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
             columnName: columnId,
             timeDim,
           },
-          dimTables: dimTableIds.map((item: any) => ({tableId: item})),
-          modifiers: modifiers.map((item: any) => ({modifierCode: item}))
+          dimTables: dimTableIds?.map((item: any) => ({tableId: item})) || [],
+          modifiers: modifiers?.map((item: any) => ({modifierCode: item})) || []
         }
       } else {
         specialAttribute =  { aggregatorCode, calculableType }

@@ -34,6 +34,9 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
     handleSubmit
   }));
   useEffect(() => {
+    if(node) {
+      form.setFieldsValue(node)
+    }
     getTreeData();
   }, []);
 

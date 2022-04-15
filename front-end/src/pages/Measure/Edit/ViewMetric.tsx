@@ -45,7 +45,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
     getMetric({ metricCode: params.id })
       .then((res) => {
         const transformedData = transformOriginData(res.data);
-        setSql('');
+        setSql(res.data.metricSql);
         setData(transformedData);
       })
       .finally(() => {

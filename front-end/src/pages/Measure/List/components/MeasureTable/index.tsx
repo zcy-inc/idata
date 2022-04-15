@@ -111,7 +111,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         width: 540
       },
       formProps: {
-        node
+         node: {
+          folderId: currentNode.pos
+         }
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((values: any) => {

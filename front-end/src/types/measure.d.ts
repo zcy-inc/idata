@@ -16,6 +16,7 @@ export interface MetricListItem {
 
 export interface MetricFloderItem {
   folderId: string;
+  pos: number [];
 }
 
 export interface MetricDetail {
