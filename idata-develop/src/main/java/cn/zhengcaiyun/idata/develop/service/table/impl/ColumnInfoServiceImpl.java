@@ -107,9 +107,13 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             for (int i = 0; i < columnIndexMap.size(); i++) {
                 indexColumnList.add(columnIndexMap.get(i));
             }
-            echoList = indexColumnList.stream().peek(columnInfoDto ->
-                    columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
-            ).collect(Collectors.toList());
+            echoList = indexColumnList.stream().peek(columnInfoDto -> {
+                List<LabelDto> columnLabelList = columnInfoMap.get(columnInfoDto.getColumnName());
+                columnInfoDto.setColumnLabels(columnLabelList);
+                String isPk = columnLabelList.stream().filter(columnLabel -> COLUMN_PK_LABEL.equals(columnLabel.getLabelCode()))
+                        .findFirst().get().getLabelParamValue();
+                columnInfoDto.setPk(Boolean.valueOf(isPk));
+            }).collect(Collectors.toList());
         }
 
         return echoList;

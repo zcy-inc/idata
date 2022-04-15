@@ -63,6 +63,12 @@ public class TableInfoController {
         return RestResult.success(tableInfo);
     }
 
+    @GetMapping("tableInfo/tableName")
+    public RestResult<TableInfoDto> findByName(@RequestParam("tableName") String tableName) {
+        TableInfoDto tableInfo = tableInfoService.getTableInfoByName(tableName);
+        return RestResult.success(tableInfo);
+    }
+
     @GetMapping("referTables")
     public RestResult<List<TableInfoDto>> getReferTables(@RequestParam("labelValue") String labelValue) {
         return RestResult.success(tableInfoService.getTablesByDataBase(labelValue));

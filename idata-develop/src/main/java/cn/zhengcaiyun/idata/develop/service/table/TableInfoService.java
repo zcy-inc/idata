@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDdlDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public interface TableInfoService {
     TableInfoDto getTableInfo(Long tableId);
     List<TableInfoDto> getTablesByDataBase(String database);
     List<LabelDto> getDbNames();
+    TableInfoDto getTableInfoByName(String tableName);
 
     /**
      * 获取table的创建语句DDL

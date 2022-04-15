@@ -149,6 +149,15 @@ public class TableInfoServiceImpl implements TableInfoService {
     }
 
     @Override
+    public TableInfoDto getTableInfoByName(String tableName) {
+        DevTableInfo existTableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.tableName, isEqualTo(tableName)))).orElse(null);
+        if (existTableInfo == null) return new TableInfoDto();
+
+        return getTableInfoById(existTableInfo.getId());
+    }
+
+    @Override
     public String getTableDDL(Long tableId) {
         StringBuilder ddl = new StringBuilder("");
         DevTableInfo tableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
@@ -527,6 +536,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         }).collect(Collectors.toList());
         List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
+        List<String> pkColumnNameList = columnInfoDtoList.stream()
+                .filter(columnInfoDto -> columnInfoDto.getPk() != null && columnInfoDto.getPk()).collect(Collectors.toList())
+                .stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
 
         echoTableInfo.setTableLabels(tableLabelList);
         echoTableInfo.setColumnInfos(columnInfoDtoList);
@@ -534,6 +546,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         echoTableInfo.setDbName(tableLabelList
                 .stream().filter(tableLabel -> DB_NAME_LABEL.equals(tableLabel.getLabelCode()))
                 .findAny().get().getLabelParamValue());
+        echoTableInfo.setPkColumnNames(pkColumnNameList.size() > 0 ? String.join(",", pkColumnNameList) : "");
         return echoTableInfo;
     }
 
