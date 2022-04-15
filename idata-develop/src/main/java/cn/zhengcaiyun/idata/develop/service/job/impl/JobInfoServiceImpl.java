@@ -546,6 +546,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
                     oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+                    oldBackFlowResponse.setDestDRDS(StringUtils.startsWithIgnoreCase(destSourceDetail.getName(), "drds"));
 
                     // 根据规则定位真正的表
                     oldBackFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, oldBackFlowResponse.getDestTable(), env));
