@@ -527,13 +527,16 @@ public class LabelServiceImpl implements LabelService {
     public Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames) {
         checkArgument(columnNames != null && columnNames.size() > 0, "columnNames不能为空");
         List<LabelDto> columnLabelList = devLabelMyDao.selectLabelsBySubject(tableId, String.join(",", columnNames));
-        List<String> columnEnumValueCodeList = columnLabelList.stream().filter(columnLabel ->
-                columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE")).collect(Collectors.toList())
+        List<LabelDto> t = columnLabelList.stream().filter(columnLabel ->
+                columnLabel.getLabelParamValue() != null && columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE"))
+                .collect(Collectors.toList());
+        List<String> columnEnumValueCodeList = t
                 .stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
         Map<String, String> columnEnumMap = enumService.getEnumValues(columnEnumValueCodeList)
                 .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
         columnLabelList.forEach(columnLabel -> {
-            if (columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE") && columnEnumMap.containsKey(columnLabel.getLabelParamValue())) {
+            if (columnLabel.getLabelParamValue() != null && columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE")
+                    && columnEnumMap.containsKey(columnLabel.getLabelParamValue())) {
                 columnLabel.setEnumNameOrValue(columnEnumMap.get(columnLabel.getLabelParamValue()));
             }
         });
