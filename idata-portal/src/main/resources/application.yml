@@ -14,9 +14,9 @@ spring:
     name: idata-portal-server
   datasource:
     hikari.poolName: HikariPool-portal-mysql
-    url: jdbc:mysql://172.29.108.184:30474/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
     username: root
-    password: O7cBceTlQphbCYyW
+    password: 123456
   jackson:
     default-property-inclusion: non_null
     deserialization:
@@ -64,9 +64,9 @@ pg:
 #  token: ed3ed02005c030e955a76f7672747715
 
 hdfs:
-#  nameservices: nameservice1
-#  nn1: 172.29.108.184:8020
-#  nn2: 172.29.108.185:8020
+  #  nameservices: nameservice1
+  #  nn1: 172.29.108.184:8020
+  #  nn2: 172.29.108.185:8020
   basePath: /tmp/shiyin/
 #  user: hdfs
 

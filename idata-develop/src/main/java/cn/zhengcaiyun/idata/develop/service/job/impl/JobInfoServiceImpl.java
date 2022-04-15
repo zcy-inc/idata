@@ -430,6 +430,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+                backFlowResponse.setDestDRDS(StringUtils.startsWithIgnoreCase(bfSourceDetail.getName(), "drds"));
 
                 // 是否支持columns，不支持不返回给htool
                 if (!DIRuleHelper.supportColumns(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {

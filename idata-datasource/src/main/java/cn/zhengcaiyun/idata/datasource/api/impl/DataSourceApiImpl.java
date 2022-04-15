@@ -93,6 +93,7 @@ public class DataSourceApiImpl implements DataSourceApi {
 
         DbConfigDto dbConfigDto = envDbConfigList.get(0);
         DataSourceDetailDto res = new DataSourceDetailDto();
+        res.setName(dataSource.getName());
         res.setDataSourceTypeEnum(dataSource.getType());
 
         String dbName = dbConfigDto.getDbName();
