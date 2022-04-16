@@ -14,7 +14,6 @@ import { getTableInfo, getMeasures, getForeignKeyTables, getModifiers } from '@/
 import { rules, timeDimOptions } from '@/constants/datapi';
 export interface ViewModifierProps {
   form: any;
-  originValue: any;
 }
 
 interface TableOptions {
@@ -30,7 +29,7 @@ interface TempFormTypes {
   tableId: string;
 }
 
-const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form, originValue }, ref) => {
+const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form }, ref) => {
   const [metricList, setMetricList] = useState<TableOptions []>([]);
   const [labelList, setLabelList] = useState<TableOptions []>([]);
   const [dimensionList, setDimensionList] = useState<TableOptions []>([]);
@@ -58,12 +57,6 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
       setMetricList(metricList);
     });
   }, []);
-
-  useEffect(() => {
-    if(originValue) {
-      setTempForm(originValue);
-    }
-  }, [originValue])
 
   const handleValueChange = (values:TempFormTypes, init = false) => {
     setTempForm({
@@ -93,7 +86,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
     }
 
     // 根据维度获取修饰词
-    if(values.dimTableIds) {
+    if(values.dimTableIds?.length) {
       !init && form.setFieldsValue({ modifiers: []});
       getModifiers({modifierTableIds: [...values.dimTableIds, tempForm.tableId].join()}).then((res) => {
         const modifierList = res.data?.map((_: any) => ({ label: _.labelName, value: _.labelCode }));

@@ -8,7 +8,7 @@ import type  { MetricFloderItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
 import { MetricListItem } from '@/types/measure';
-import { getMeasures, deleteMetric, getTables } from '@/services/measure';
+import { getMeasures, deleteModifier, getTables } from '@/services/measure';
 import CreateModifier from './components/CreateModifier';
 
 
@@ -91,7 +91,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       content: '您确认要删除该修饰词吗？',
       autoFocusButton: null,
       onOk: () =>
-        deleteMetric({ modifierCode: record.labelCode })
+      deleteModifier({ modifierCode: record.labelCode })
           .then((res) => {
             if (res.success) {
               message.success('删除成功');
