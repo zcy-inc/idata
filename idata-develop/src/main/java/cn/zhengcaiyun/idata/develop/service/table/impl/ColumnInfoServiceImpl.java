@@ -78,6 +78,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
+    private String[] measureLabelFields = {"DIMENSION_LABEL" ,"ATOMIC_METRIC_LABEL,DERIVE_METRIC_LABEL",
+            "COMPLEX_METRIC_LABEL", "MODIFIER_LABEL", "DIMENSION_LABEL_DISABLE", "ATOMIC_METRIC_LABEL_DISABLE",
+            "DERIVE_METRIC_LABEL_DISABLE", "COMPLEX_METRIC_LABEL_DISABLE", "MODIFIER_LABEL_DISABLE"};
     private final String COLUMN_SUBJECT = "COLUMN";
     private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
@@ -310,10 +313,12 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             if (columnLabelList != null) {
                 List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                         .from(devLabel)
+                        .leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
                         .where(devLabel.del, isNotEqualTo(1),
                                 and(devLabel.hidden, isEqualTo(0)),
                                 and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
-                                and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())))
+                                and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())),
+                                and(devLabelDefine.labelCode, isNotIn(Arrays.asList(measureLabelFields))))
                         .build().render(RenderingStrategies.MYBATIS3)),
                         LabelDto.class, "id", "tableId", "labelCode", "columnName");
                 List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
