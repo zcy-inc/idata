@@ -32,7 +32,7 @@ public interface MetricService {
     MetricDto findMetric(String metricCode);
     List<MeasureDto> findMetrics(String labelTag);
     List<MeasureDto> findMetricsOrDimensions(List<String> labelCodes, String labelTag);
-    String getMetricDimSql(String metricCode, List<DimTableDto> dimTables);
+    String getMetricSql(String metricCode, List<DimTableDto> dimTables);
     MeasureDto create(MeasureDto metric, String operator);
     MeasureDto edit(MeasureDto metric, String operator);
     MeasureDto disableOrAble(String metricCode, String labelTag, String operator);
