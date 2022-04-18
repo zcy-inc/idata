@@ -120,6 +120,12 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           width="md"
           placeholder="请选择"
           tooltip="来自原子指标所对应的表上的时间格式字段（单选）"
+          rules={[{validator: (_rule: any, _value: any, cb: (arg0: string) => any) => {
+            const timeDim = form.getFieldsValue(['timeDim']);
+            if(timeDim && !_value) {
+              return cb('请选择时间周期！')
+            }
+          }}]}
           options={labelList}
           fieldProps={{
             showSearch: true,
@@ -132,6 +138,12 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
           width="md"
           placeholder="请选择"
           options={timeDimOptions}
+          rules={[{validator: (_rule: any, _value: any, cb: (arg0: string) => any) => {
+            const columnId = form.getFieldsValue(['columnId']);
+            if(columnId && !_value) {
+              return cb('请选择时间范围！')
+            }
+          }}]}
           fieldProps={{
             showSearch: true,
             filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
