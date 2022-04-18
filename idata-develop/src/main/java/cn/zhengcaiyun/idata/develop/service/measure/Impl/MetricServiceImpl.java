@@ -677,4 +677,86 @@ public class MetricServiceImpl implements MetricService {
         }
         return metricSql;
     }
+
+    private String metricBaseSql(String metricCode) {
+        DevLabelDefine metric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isEqualTo(metricCode))))
+                .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
+        if (metric.getLabelTag().contains(LabelTagEnum.COMPLEX_METRIC_LABEL.name())) {
+            return metric.getSpecialAttribute().getComplexMetricFormula();
+        }
+
+        String metricBaseSql = "SELECT %s FROM %s.%s t ";
+        List<LabelDto> metricLabelList = labelService.findLabelsByCode(metricCode);
+        if (ObjectUtils.isEmpty(metricLabelList)) return null;
+
+        LabelDto metricLabel = metricLabelList.get(0);
+        List<Long> modifierTableIdList = new ArrayList<>();
+        modifierTableIdList.add(metricLabel.getTableId());
+        String selectColumnNames = "t." + metricLabel.getColumnName() + " AS " + metric.getLabelName();
+        String metricSql = String.format(metricBaseSql, selectColumnNames, metricLabel.getDbName(), metricLabel.getTableName());
+        // 表别名map
+        Map<Long, String> tableAliasMap = new HashMap<>();
+        tableAliasMap.put(metricLabel.getTableId(), "t");
+        // 维表管理
+        if (metric.getSpecialAttribute().getDimTables().size() > 0) {
+            List<Long> dimTableIdList = metric.getSpecialAttribute().getDimTables().stream().map(DimTableDto::getTableId).collect(Collectors.toList());
+            List<DevForeignKey> foreignKeyList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                    and(devForeignKey.tableId, isEqualTo(metricLabel.getTableId())),
+                    and(devForeignKey.referTableId, isIn(dimTableIdList))));
+            Map<Long, String> tableIdNameMap = devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                    and(devTableInfo.id, isIn(dimTableIdList))))
+                    .stream().collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
+            // join sql
+            Map<Long, String> joinSqlMap = new HashMap<>();
+            for (int i = 0; i < foreignKeyList.size(); i++) {
+                DevForeignKey foreignKey = foreignKeyList.get(i);
+                List<String> columnNameList = Arrays.asList(foreignKey.getColumnNames().split(","));
+                List<String> referColumnNameList = Arrays.asList(foreignKey.getReferColumnNames().split(","));
+                String joinSql = columnNameList.get(0) + " = t" + i +"." + referColumnNameList.get(0);
+                if (columnNameList.size() > 1) {
+                    for (int j = 1; j < columnNameList.size(); j++) {
+                        joinSql += " AND t." + columnNameList.get(j) + " = t" + i +"." + referColumnNameList.get(j);
+                    }
+                }
+                joinSqlMap.put(foreignKey.getReferTableId(), joinSql);
+                tableAliasMap.put(foreignKey.getReferTableId(), "t" + i);
+            }
+            Map<Long, String> tblIdAndColumnMap = foreignKeyList
+                    .stream().collect(Collectors.toMap(DevForeignKey::getTableId, DevForeignKey::getColumnNames));
+            Map<Long, String> referTblIdAndColumnMap = foreignKeyList
+                    .stream().collect(Collectors.toMap(DevForeignKey::getReferTableId, DevForeignKey::getReferColumnNames));
+            Map<Long, String> tableIdDbnameMap = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.tableId, isIn(dimTableIdList)), and(devLabel.labelCode, isEqualTo(DB_NAME_LABEL))))
+                    .stream().collect(Collectors.toMap(DevLabel::getTableId, DevLabel::getLabelParamValue));
+            String dimBaseSql = "\n LEFT JOIN %s.%s %s ON t.%s ";
+            String dimSql = "";
+            tableAliasMap.put(dimTableIdList.get(0), "t1");
+            for (Map.Entry<Long, String> entrySet : joinSqlMap.entrySet()) {
+                dimSql += String.format(dimBaseSql, tableIdDbnameMap.get(entrySet.getKey()),
+                        tableIdNameMap.get(entrySet.getKey()), tableAliasMap.get(entrySet.getKey()), entrySet.getValue());
+            }
+        }
+        // 修饰词
+        if (metric.getLabelTag().contains(LabelTagEnum.DERIVE_METRIC_LABEL.name())) {
+            List<String> modifierCodeList = metric.getSpecialAttribute().getModifiers()
+                    .stream().map(ModifierDto::getModifierCode).collect(Collectors.toList());
+            // 已有指标存在修饰词为空
+            if (modifierCodeList.size() == 0) return metricSql;
+            List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                    and(devLabel.labelCode, isIn(modifierCodeList)),
+                    and(devLabel.tableId, isEqualTo(metricLabelList.get(0).getTableId()))));
+            if (modifierLabelList.size() == 0) return metricSql;
+            StringBuilder modifierSql = new StringBuilder(String.format(" WHERE %s IS IN ('%s')",
+                    modifierLabelList.get(0).getColumnName(), modifierLabelList.get(0).getLabelParamValue().replaceAll(",", "','")));
+            if (modifierLabelList.size() > 1) {
+                for (int i = 1; i < modifierLabelList.size(); i++) {
+                    modifierSql.append(String.format(" AND %s IS IN ('%s')", modifierLabelList.get(i).getColumnName(),
+                            modifierLabelList.get(i).getLabelParamValue().replaceAll(",", "','")));
+                }
+            }
+            metricSql += modifierSql;
+        }
+        return metricSql;
+    }
 }

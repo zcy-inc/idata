@@ -24,7 +24,7 @@ package cn.zhengcaiyun.idata.develop.dto.measure;
 public class DimTableDto {
     private Long tableId;
     private String tableName;
-    private String columnNames;
+    private String columnName;
 
     // GaS
     public Long getTableId() {
@@ -43,11 +43,11 @@ public class DimTableDto {
         this.tableName = tableName;
     }
 
-    public String getColumnNames() {
-        return columnNames;
+    public String getColumnName() {
+        return columnName;
     }
 
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 }
