@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useImperativeHandle } from 'react';
+import React, { useState, useImperativeHandle } from 'react';
 import { Form, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { TreeNodeOption } from '@/types/datapi';
@@ -72,6 +72,7 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
                 >
                    <Select
                     options={keyList}
+                    mode="multiple"
                     placeholder="请选择字段"
                   />
                 </Form.Item>

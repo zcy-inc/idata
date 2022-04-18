@@ -244,12 +244,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
           aggregatorCode,
           calculableType,
           atomicMetricCode,
-          timeAttribute: {
-            columnName: columnId,
-            timeDim,
-          },
           dimTables: dimTableIds?.map((item: any) => ({tableId: item})) || [],
           modifiers: modifiers?.map((item: any) => ({modifierCode: item})) || []
+        }
+        if(columnId && timeDim) {
+          specialAttribute.timeAttribute = {
+            columnName: columnId,
+            timeDim,
+          }
         }
       } else {
         specialAttribute =  { aggregatorCode, calculableType }

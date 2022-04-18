@@ -115,7 +115,11 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
         form.handleSubmit().then((values: { dimTables: any; }) => {
-          generateSQL({metricCode: params.id}, values.dimTables).then(res => {
+          const dimTables = values.dimTables.map((item: { columnName: string[]; }) => ({
+            ...item,
+            columnName: item.columnName.join()
+          }))
+          generateSQL({metricCode: params.id}, dimTables).then(res => {
             setSql(res.data);
             done();
           }).catch(() => {
