@@ -383,7 +383,7 @@ public class LabelServiceImpl implements LabelService {
 
         checkArgument(!checkSysLabelCode(labelCode), "系统依赖的标签不能删除");
         // 查表若被引用则不准被删
-        if (!checkSysLabelCode(labelCode)) {
+        if (!checkSysLabelCode(labelCode) && !checkMeasureLabel(labelDefine.getLabelTag())) {
             List<DevLabel> existLabelList = devLabelDao.select(c -> c.where(devLabel.del ,isNotEqualTo(1),
                     and(devLabel.labelCode, isEqualTo(labelCode))));
             checkArgument(ObjectUtils.isEmpty(existLabelList), "标签被依赖，不能删除");
@@ -395,9 +395,6 @@ public class LabelServiceImpl implements LabelService {
         devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
                 .where(devLabel.labelCode, isEqualTo(labelCode),
                         and(devLabel.del, isNotEqualTo(1))));
-        // clear cache
-//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
-
         return true;
     }
 
@@ -587,5 +584,11 @@ public class LabelServiceImpl implements LabelService {
     @Override
     public void deleteDeprecatedHiveColumn(Long columnId, String hiveColumnName) {
         devLabelMyDao.deleteDeprecatedHiveColumn(columnId, hiveColumnName);
+    }
+
+    private Boolean checkMeasureLabel(String labelTag) {
+        LabelTagEnum.valueOf(labelTag);
+        return labelTag.equals(LabelTagEnum.MODIFIER_LABEL.name()) || labelTag.equals(LabelTagEnum.MODIFIER_LABEL_DISABLE.name())
+                || labelTag.contains("_METRIC_LABEL_");
     }
 }
