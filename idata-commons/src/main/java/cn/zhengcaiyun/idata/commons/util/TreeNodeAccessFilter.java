@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -102,7 +103,10 @@ public class TreeNodeAccessFilter<N extends TreeNodeDto> {
             // 重新设置经过过滤的子节点
             node.setChildren(filteredChildrenNodes);
         }
-//        return ObjectUtils.isNotEmpty(node.getChildren()) ? node : null;
-        return node;
+        String[] cids = node.getCid().split("_");
+        String folderId = cids[cids.length -1];
+        return ObjectUtils.isNotEmpty(node.getChildren()) || condition.folderIds.contains(folderId)
+                ? node : null;
+//        return node;
     }
 }

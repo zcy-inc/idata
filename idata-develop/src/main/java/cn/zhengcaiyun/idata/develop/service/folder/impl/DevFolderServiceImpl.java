@@ -225,7 +225,7 @@ public class DevFolderServiceImpl implements DevFolderService {
     }
 
     @Override
-    public Set<String> getUserTableFolderIds(Long userId) {
+    public Set<Long> getUserTableFolderIds(Long userId) {
         UserInfoDto user = userManagerService.getUserInfo(userId);
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllTableFolderIds();
 
@@ -236,7 +236,8 @@ public class DevFolderServiceImpl implements DevFolderService {
         folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
                 ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() + "_D"));
         if (folderIdList.size() == 0) return new HashSet<>();
-        return new HashSet<>(folderIdList);
+
+        return folderIdList.stream().map(Long::valueOf).collect(Collectors.toSet());
     }
 
     @Override
@@ -253,9 +254,9 @@ public class DevFolderServiceImpl implements DevFolderService {
         return getSubMeasureFolderIds(new HashSet<>(folderIdList), folderType);
     }
 
-    private Set<String> getAllTableFolderIds() {
+    private Set<Long> getAllTableFolderIds() {
         return compositeFolderRepo.queryAllFolder()
-                .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
+                .stream().map(CompositeFolder::getId).collect(Collectors.toSet());
     }
 
     private Set<Long> getAllMeasureFolderIds(String folderType) {
