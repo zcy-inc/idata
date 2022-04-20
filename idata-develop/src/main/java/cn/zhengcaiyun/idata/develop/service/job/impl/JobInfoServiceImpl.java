@@ -451,10 +451,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                 String bfSrcTables = EnvRuleHelper.handlerDbTableName(srcBfDsTypeEnum, bfSrcRawTable, env);
                 backFlowResponse.setSrcTable(bfSrcTables);
                 backFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(bfSourceDetail.getDataSourceTypeEnum(), backFlowResponse.getDestTable(), env));
-                // 改写sql里的表
-                if (StringUtils.isNotEmpty(backFlowResponse.getSrcSql())) {
-                    backFlowResponse.setSrcSql(backFlowResponse.getSrcSql().replaceAll(bfSrcRawTable, bfSrcTables));
-                }
 
                 return backFlowResponse;
             case DI_BATCH:
@@ -501,10 +497,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 diResponse.setSrcTables(diSrcTables);
                 DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
                 diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
-                // 改写sql里的表
-                if (StringUtils.isNotEmpty(diResponse.getDiQuery())) {
-                    diResponse.setDiQuery(diResponse.getDiQuery().replaceAll(diSrcRawTable, diSrcTables));
-                }
+
 
                 return diResponse;
             case SQL_SPARK:
