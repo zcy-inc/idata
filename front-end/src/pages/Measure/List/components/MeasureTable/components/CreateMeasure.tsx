@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useImperativeHandle, useRef } from 'react';
-import ProForm, { ProFormSelect } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormCascader } from '@ant-design/pro-form';
 import type { ProFormInstance } from '@ant-design/pro-form';
 import { Form } from 'antd';
 
-import { getFolders } from '@/services/measure';
+import { getFolderTree } from '@/services/measure';
 import { TreeNodeOption } from '@/types/datapi';
-
+import { TreeNodeType } from '@/constants/datapi';
 export interface CreateFolderProps {
   visible: boolean;
   onCancel: () => void;
@@ -26,7 +26,7 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
   const formRef = useRef<
     ProFormInstance<{
       folderName: string;
-      parentId: string;
+      folderId: string;
     }>
   >();
   const [form] = Form.useForm();
@@ -34,22 +34,17 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
     handleSubmit
   }));
   useEffect(() => {
-    if(node.folderId) {
-      form.setFieldsValue({
-        folderName: node.name,
-        parentId: node.parentId
-      })
+    if(node) {
+      form.setFieldsValue(node)
     }
-    getFolders()
-      .then((res) => {
-        const fd = res.data?.map((_: any) => ({
-          label: _.folderName,
-          value: `${_.id}`,
-        }));
-        setFolders(fd);
-      })
-      .catch((err) => {});
+    getTreeData();
   }, []);
+
+  const getTreeData = (treeNodeName?: string) => {
+    getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL, treeNodeName }).then((res) => {
+      setFolders(res.data);
+    });
+  }
 
   const handleSubmit = () => {
     return form.validateFields();
@@ -65,13 +60,15 @@ const CreateFolder = ({ node }: any, ref: React.Ref<unknown> | undefined) => {
       submitter={false}
     >
       <ProFormSelect name="labelTag" label="指标类型" rules={rules} options={MetricTypeOps} />
-      <ProFormSelect
-        name="parentId"
+      <ProFormCascader
+        name="folderId"
         label="位置"
         placeholder="根目录"
-        options={folders}
-        rules={rules}
-      />
+        fieldProps={{
+          options: folders,
+          changeOnSelect: true,
+          fieldNames: { label: 'name', value: 'folderId', children: 'children' }
+        }} />
     </ProForm>
   );
 };

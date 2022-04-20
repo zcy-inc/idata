@@ -7,9 +7,8 @@ import FolderTree from './components/FolderTree';
 import List from './components/MeasureTable'
 const measure: FC = () => {
 
-  const [currentNode, setCurrentNode] = useState<MetricFloderItem>({folderId: '' })
+  const [currentNode, setCurrentNode] = useState<MetricFloderItem>({folderId: '', pos: [] })
   const handleChange = (node: React.SetStateAction<MetricFloderItem>) => {
-    console.log(node);
     setCurrentNode(node)
   }
 

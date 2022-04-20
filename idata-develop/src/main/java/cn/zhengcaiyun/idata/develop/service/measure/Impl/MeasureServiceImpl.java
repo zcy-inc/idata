@@ -105,7 +105,8 @@ public class MeasureServiceImpl implements MeasureService {
     private List<MeasureDto> getMeasureDetails(List<String> labelCodes, String measureType) {
         List<MeasureDto> measureList = PojoUtil.copyList(devLabelDefineDao.select(c -> c.where(devLabelDefine.del,
                 isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isIn(labelCodes)))), MeasureDto.class);
+                and(devLabelDefine.labelCode, isIn(labelCodes))).orderBy(devLabelDefine.editTime.descending())),
+                MeasureDto.class);
         List<Long> folderIdList = measureList.stream().map(MeasureDto::getFolderId).collect(Collectors.toList());
         Map<Long, String> folderMap = devFolderDao.select(c -> c.where(devFolder.id, isIn(folderIdList))).stream()
                 .collect(Collectors.toMap(DevFolder::getId, DevFolder::getFolderName));
@@ -138,10 +139,7 @@ public class MeasureServiceImpl implements MeasureService {
                             echo.setBizProcessValue(enumService.getEnumValue(labelAttribute.getAttributeValue()));
                         }
                         if ("metricDeadline".equals(labelAttribute.getAttributeKey())) {
-                            DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-                            try {
-                                echo.setMetricDeadline(fmt.parse(labelAttribute.getAttributeValue()));
-                            } catch (ParseException ignore) {}
+                            echo.setMetricDeadline(labelAttribute.getAttributeValue());
                         }
                     });
             return echo;
@@ -150,10 +148,12 @@ public class MeasureServiceImpl implements MeasureService {
     }
 
     private List<MeasureDto> getModifierDetails(List<MeasureDto> modifiers, List<String> labelCodes) {
-        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.labelCode, isIn(labelCodes)));
+        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.labelCode, isIn(labelCodes),
+                and(devLabel.del, isNotEqualTo(1))));
         Map<String, List<DevLabel>> modifierLabelMap = modifierLabelList.stream().collect(Collectors.groupingBy(DevLabel::getLabelCode));
         Set<Long> tableIdList = modifierLabelList.stream().map(DevLabel::getTableId).collect(Collectors.toSet());
-        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.id, isIn(tableIdList))).stream()
+        Map<Long, String> tableMap = devTableInfoDao.select(c -> c.where(devTableInfo.id, isIn(tableIdList),
+                and(devTableInfo.del, isNotEqualTo(1)))).stream()
                 .collect(Collectors.toMap(DevTableInfo::getId, DevTableInfo::getTableName));
         List<MeasureDto> echoModifierList =  modifiers.stream().map(modifier -> {
             MeasureDto echo = PojoUtil.copyOne(modifier,

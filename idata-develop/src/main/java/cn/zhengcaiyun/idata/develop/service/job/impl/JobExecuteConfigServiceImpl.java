@@ -162,7 +162,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         // 更新作业输出
         jobOutputRepo.delete(jobId, environment);
         JobOutput output;
-        if (Objects.nonNull(outputDto)) {
+        if (Objects.nonNull(outputDto)
+                && Objects.nonNull(outputDto.getDestDataSourceId())
+                && StringUtils.isNotBlank(outputDto.getDestTable())) {
             output = buildOutputConfig(jobId, environment, outputDto, operator);
             jobOutputRepo.save(output);
         }
@@ -193,7 +195,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             jobDependenceRepo.addDependence(dependenceList);
         }
         JobOutput output;
-        if (Objects.nonNull(outputDto)) {
+        if (Objects.nonNull(outputDto)
+                && Objects.nonNull(outputDto.getDestDataSourceId())
+                && StringUtils.isNotBlank(outputDto.getDestTable())) {
             output = buildOutputConfig(jobId, environment, outputDto, operator);
             jobOutputRepo.save(output);
         }

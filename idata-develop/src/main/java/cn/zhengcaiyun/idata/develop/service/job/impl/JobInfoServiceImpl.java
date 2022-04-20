@@ -402,7 +402,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (DiConfigModeEnum.VISIBLE.value.equals(bfJobContent.getConfigMode())) {
                     backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
                     // 抽取关联映射列
-                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getSrcColumns(), MappingColumnDto.class);
                     Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
                     //抽取主键key
@@ -430,6 +430,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 backFlowResponse.setDestUserName(bfSourceDetail.getUserName());
                 backFlowResponse.setDestPassword(bfSourceDetail.getPassword());
                 backFlowResponse.setDestDriverType(bfSourceDetail.getDriverTypeEnum());
+                backFlowResponse.setDestDRDS(StringUtils.startsWithIgnoreCase(bfSourceDetail.getName(), "drds"));
 
                 // 是否支持columns，不支持不返回给htool
                 if (!DIRuleHelper.supportColumns(JobTypeEnum.BACK_FLOW, backFlowResponse.getExecEngine())) {
@@ -538,6 +539,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     oldBackFlowResponse.setDestWriteMode(WriteModeEnum.BackFlowEnum.valueOf(jobOutput.getDestWriteMode()));
                     oldBackFlowResponse.setDestDriverType(destSourceDetail.getDriverTypeEnum());
                     oldBackFlowResponse.setUpdateKey(jobOutput.getJobTargetTablePk());
+                    oldBackFlowResponse.setDestDRDS(StringUtils.startsWithIgnoreCase(destSourceDetail.getName(), "drds"));
 
                     // 根据规则定位真正的表
                     oldBackFlowResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, oldBackFlowResponse.getDestTable(), env));
@@ -601,7 +603,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                         JobArgumentDto dto = (JobArgumentDto)script;
                         shellArgs.append(dto.getArgumentValue() + " ");
                     }
-                    scriptResponse.setSourceResource(shellArgs.toString());
+                    scriptResponse.setScriptArguments(shellArgs.toString());
                 }
 
                 return scriptResponse;

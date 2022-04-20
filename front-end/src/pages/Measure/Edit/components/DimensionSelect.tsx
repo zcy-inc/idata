@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useImperativeHandle } from 'react';
+import React, { useState, useImperativeHandle } from 'react';
 import { Form, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { TreeNodeOption } from '@/types/datapi';
@@ -24,7 +24,6 @@ const formItemLayoutWithOutLabel = {
 const rules = [{ required: true, message: '必填' }];
 const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined) => {
   const [keyList, setKeyList] = useState<FlatTreeNodeOption[]>([]);
-  const [columnMap, setColumnMap] = useState({})
   const [form] = Form.useForm();
 
   useImperativeHandle(ref, () => ({
@@ -73,14 +72,18 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
                 >
                    <Select
                     options={keyList}
+                    mode="multiple"
                     placeholder="请选择字段"
                   />
                 </Form.Item>
                 {index === 0 ? null : <MinusCircleOutlined onClick={() => remove(name)} />}
               </Space>
             ))}
-            <Form.Item>
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+            <Form.Item style={{padding: '0 34px 0 80px'}}>
+              <Button
+                type="dashed"
+                style={{borderColor: '#dce1ef'}}
+                onClick={() => add()} block icon={<PlusOutlined />}>
                 添加维度
               </Button>
             </Form.Item>

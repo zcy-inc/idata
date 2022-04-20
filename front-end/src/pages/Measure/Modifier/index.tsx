@@ -8,7 +8,7 @@ import type  { MetricFloderItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
 import { MetricListItem } from '@/types/measure';
-import { getMeasures, deleteMetric, getTables } from '@/services/measure';
+import { getMeasures, deleteModifier, getTables } from '@/services/measure';
 import CreateModifier from './components/CreateModifier';
 
 
@@ -22,12 +22,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-
       getTables()
       .then((res) => {
         const list = res.data?.map((_: any) => ({
           label: _.tableName,
-          value: `${_.id}`,
+          value: _.tableName,
         }));
         setTables(list);
       })
@@ -58,12 +57,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const columns: ColumnsType<MetricListItem> = [
     { title: '修饰词名称', key: 'labelName', dataIndex: 'labelName' },
     { title: '字段名', key: 'columnName', dataIndex: 'columnName' },
-    { title: '所属表', key: 'tableId', dataIndex: 'tableId' },
+    { title: '所属表', key: 'belongTblName', dataIndex: 'belongTblName' },
     { title: '业务口径', key: 'measureDefine', dataIndex: 'measureDefine' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
     { title: '更新人', key: 'editor', dataIndex: 'editor' },
     { title: '最近更新时间', key: 'editTime', dataIndex: 'editTime' },
-    { title: '所属文件夹', key: 'folderName', dataIndex: 'folderName' },
     {
       title: '操作',
       key: 'ops',
@@ -71,7 +69,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       fixed: 'right',
       render: (value, record) => (
         <Space size={16}>
-          <a onClick={() => addTreeItem(record)}>编辑</a>
+          <a onClick={() => addModifierItem(record)}>编辑</a>
           <a onClick={() => onDelete(record)}>删除</a>
         </Space>
       ),
@@ -93,7 +91,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       content: '您确认要删除该修饰词吗？',
       autoFocusButton: null,
       onOk: () =>
-        deleteMetric({ modifierCode: record.labelCode })
+      deleteModifier({ modifierCode: record.labelCode })
           .then((res) => {
             if (res.success) {
               message.success('删除成功');
@@ -102,9 +100,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           .catch((err) => {}),
   });
 
-  const addTreeItem = (node: any = {}) => {
+  const addModifierItem = (node: any = {}) => {
     const isEdit = !!node.id;
-    showDialog(`${isEdit ? '编辑' : '新建'}指标`, {
+    showDialog(`${isEdit ? '编辑' : '新建'}修饰词`, {
       modalProps: {
         width: 540
       },
@@ -115,7 +113,8 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         dialog.showLoading();
         form.handleSubmit().then(() => {
           done();
-          message.success(`${isEdit ? '编辑' : '新建'}修饰词成功！`)
+          message.success(`${isEdit ? '编辑' : '新建'}修饰词成功！`);
+          getTableData(10 * (current - 1));
         }).finally(() => {
           dialog.hideLoading();
         })
@@ -133,18 +132,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         onReset={onReset}
         labelCol={{span: 6}}
         labelWidth={96}
-        submitter={{
-          render: (props) => {
-            return [
-              <Button key="search" type="primary" onClick={props?.form?.submit}>
-                查询
-              </Button>,
-              <Button key="edit" onClick={() => addTreeItem()}>
-                新增
-              </Button>,
-            ];
-          },
-        }}
       >
         <ProFormText
           name="measureName"
@@ -167,6 +154,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           placeholder="请输入"
         />
       </QueryFilter>
+      <div style={{textAlign: 'right'}}>
+        <Button key="edit" onClick={() => addModifierItem()}>
+          新增
+        </Button>
+      </div>
       <Table<MetricListItem>
         rowKey="id"
         columns={columns}

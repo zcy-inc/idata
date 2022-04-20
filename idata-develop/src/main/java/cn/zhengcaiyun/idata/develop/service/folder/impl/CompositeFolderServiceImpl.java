@@ -101,8 +101,8 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         List<DevTreeNodeDto> treeNodeDtoList = TreeNodeGenerator.withExpandedNodes(expandedNodeDtoList).makeTree(() -> "0");
         List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
         if (userId != null) {
-            Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId);
-            return filterAccessTreeNodes(teList, folderIdList);
+            Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId).stream().map(String::valueOf).collect(Collectors.toSet());
+            return filterAccessTreeNodes(treeNodeDtoList, folderIdList);
         }
         return teList;
     }

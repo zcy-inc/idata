@@ -57,7 +57,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
   const [data, setData] = useState<Record<string, any>>({});
   const [metricType, setMetricType] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
-  const refDerive = useRef<{onValuesChage: (T: Record<string, any>) => void}>(null);
+  const refDerive = useRef<{onValuesChage: (T: Record<string, any>, P: boolean) => void}>(null);
 
   useEffect(() => {
     let p1 = getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL });  // 获取文件夹
@@ -113,7 +113,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
         setMetricType(transformedData.labelTag);
         setData(transformedData);
         Object.keys(transformedData).forEach(k => {
-          handleValueChange({[k]: transformedData[k]});
+          handleValueChange({[k]: transformedData[k]}, true);
         });
       })
       .finally(() => {
@@ -131,6 +131,10 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
       comment?: string;
       aggregatorCode?: string;
       tableId?: string;
+      columnId?: string;
+      timeDim?: string;
+      dimTableIds?: string [];
+      modifiers?: string [];
       columnName?: string;
     } = {};
     labelAttributes.forEach((attribute: { attributeKey: string; attributeValue: string | number; }) => {
@@ -139,16 +143,21 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     Object.keys(specialAttribute).forEach(key => {
       if(key === 'modifiers') {
         labelParams[key] = specialAttribute[key]?.map((item: { modifierCode: any; }) => item.modifierCode);
+      } else if(key === 'timeAttribute') {
+        labelParams.columnId = specialAttribute[key].columnName;
+        labelParams.timeDim = specialAttribute[key].timeDim;
+      }else if(key === 'dimTables') {
+        labelParams.dimTableIds = specialAttribute[key]?.map((item: { tableId: any; }) => item.tableId);
       } else {
         labelParams[key] = specialAttribute[key];
       }
     });
-    labelParams.tableId = measureLabels[0].tableId;
-    labelParams.columnName = measureLabels[0].columnName;
+    labelParams.tableId = measureLabels[0] && measureLabels[0]?.tableId;
+    labelParams.columnName = measureLabels[0] && measureLabels[0]?.columnName;
     return {
       metricId,
       labelName,
-      labelTag,
+      labelTag: labelTag.indexOf('ATOMIC_METRIC_LABEL') > -1 ? 'ATOMIC_METRIC_LABEL' : 'DERIVE_METRIC_LABEL',
       labelCode,
       folderId: getFolderRelation(folderOps, folderId),
       ...labelParams,
@@ -174,13 +183,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     return relationList;
   }
 
-  const handleValueChange = (values: Record<string, any>) => {
-    refDerive.current?.onValuesChage(values);
+  const handleValueChange = (values: Record<string, any>, init = false) => {
+    refDerive.current?.onValuesChage(values, init);
     if(values.labelTag) {
       setMetricType(values.labelTag);
     }
     // 获取字段列表
     if(values.tableId) {
+      !init && form.setFieldsValue({columnName: undefined});
       getTableReferStr({ tableId: values.tableId }).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setKeyList(strs)
@@ -234,12 +244,14 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
           aggregatorCode,
           calculableType,
           atomicMetricCode,
-          timeAttribute: {
+          dimTables: dimTableIds?.map((item: any) => ({tableId: item})) || [],
+          modifiers: modifiers?.map((item: any) => ({modifierCode: item})) || []
+        }
+        if(columnId && timeDim) {
+          specialAttribute.timeAttribute = {
             columnName: columnId,
             timeDim,
-          },
-          dimTables: dimTableIds.map((item: any) => ({tableId: item})),
-          modifiers: modifiers.map((item: any) => ({modifierCode: item}))
+          }
         }
       } else {
         specialAttribute =  { aggregatorCode, calculableType }
@@ -269,7 +281,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
     if(metricType) {
       return (
         <Fragment>
-          <Title>技术口径</Title>
+          <Title style={{marginTop: 8}}>技术口径</Title>
           <ProFormGroup>
             <ProFormSelect
               name="tableId"
@@ -277,6 +289,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               width="md"
               placeholder="请选择"
               rules={require}
+              tooltip="选择dws表确定指标字段（单选）"
               options={DWDTables}
               fieldProps={{
                 showSearch: true,
@@ -290,11 +303,15 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               placeholder="请选择"
               rules={require}
               options={keyList}
+              fieldProps={{
+                showSearch: true,
+                filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
+              }}
             />
           </ProFormGroup>
           {
             metricType === 'DERIVE_METRIC_LABEL' ?
-            <EditDerive ref={refDerive} /> :
+            <EditDerive ref={refDerive} form={form} /> :
             <ProFormGroup>
               <ProFormSelect
                 name="aggregatorCode"
@@ -443,7 +460,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ lo
               }}
             />
           </ProFormGroup>
-          <Title>指标定义</Title>
+          <Title style={{marginTop: 8}}>指标定义</Title>
           <ProFormGroup>
             <ProFormTextArea
               name="metricDefine"

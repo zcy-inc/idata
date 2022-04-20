@@ -58,7 +58,12 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     getFolderTree({ devTreeType: TreeNodeType.METRIC_LABEL, treeNodeName }).then((res) => {
       setTree(res.data);
       if(res.data.length) {
-        setSelectedKeys([res.data[0].cid]);
+        handleSelect([res.data[0].cid], {
+          node: {
+            props: res.data[0],
+            pos: '0-0'
+          }
+        }, res.data)
       }
     });
   }
@@ -70,7 +75,10 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
         width: 540
       },
       formProps: {
-        node
+        node: {
+          ...node,
+          parentId: curNode.pos
+        }
       },
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
@@ -172,13 +180,29 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
     setAutoExpandParent(false);
   };
 
-  const handleSelect = (selectedKes: React.Key[], info: any) => {
-    console.log('onChange',info);
+  const getValueList = (positionString: string, list = tree) => {
+    const position = positionString.split('-').slice(1);
+    let pos: any[] = [];
+    const getFolderValue = (index: string | number) => {
+      const folderId = list[index].folderId;
+      list = list[index].children || [];
+      return folderId;
+    }
+    position.forEach((index: string | number) => {
+      pos.push(getFolderValue(index))
+    });
+    return pos;
+  }
+
+  const handleSelect = (selectedKes: React.Key[], info: any, list = tree) => {
     setSelectedKeys(selectedKes);
+    let pos: any[] = getValueList(info.node.pos, list);
     if(info.node.props.type === 'FOLDER') {
-      onChange && onChange(info.node.props);
+      setCurNode({...info.node.props, pos});
+      onChange && onChange({...info.node.props, pos});
     }
   }
+  
   return (
     <div className="folder-tree">
       <div className="search">
@@ -197,13 +221,13 @@ const FolderTree: FC<FolderTreeProps> = ({onChange}) => {
       <Dropdown overlay={treeMenu} placement="bottomLeft" trigger={['contextMenu']}>
         <Tree
           blockNode
+          style={{ marginTop: 12 }}
           onExpand={(keys) => onExpand(keys)}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
           onRightClick={({ node }: any) => {
-            const parentId = node.parentId?.split('_')[1] || null;
             const folderId = `${node.folderId}`;
-            setCurNode({ ...node, folderId, parentId });
+            setCurNode({ ...node, folderId, pos: getValueList(node.pos) });
           }}
           selectedKeys={selectedKeys}
           onSelect={handleSelect}

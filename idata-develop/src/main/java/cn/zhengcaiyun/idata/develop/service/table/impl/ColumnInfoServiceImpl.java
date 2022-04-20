@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.*;
 import cn.zhengcaiyun.idata.develop.dal.model.*;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
+import cn.zhengcaiyun.idata.develop.dto.label.SubjectTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
@@ -69,6 +70,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     @Autowired
     private DevEnumValueDao devEnumValueDao;
     @Autowired
+    private DevLabelDefineDao devLabelDefineDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private TableInfoService tableInfoService;
@@ -78,6 +81,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
+    private final String measureLabelFields = "DIMENSION_LABEL,ATOMIC_METRIC_LABEL,DERIVE_METRIC_LABEL," +
+            "COMPLEX_METRIC_LABEL,MODIFIER_LABEL,DIMENSION_LABEL_DISABLE,ATOMIC_METRIC_LABEL_DISABLE," +
+            "DERIVE_METRIC_LABEL_DISABLE,COMPLEX_METRIC_LABEL_DISABLE,MODIFIER_LABEL_DISABLE";
     private final String COLUMN_SUBJECT = "COLUMN";
     private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
@@ -107,9 +113,13 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             for (int i = 0; i < columnIndexMap.size(); i++) {
                 indexColumnList.add(columnIndexMap.get(i));
             }
-            echoList = indexColumnList.stream().peek(columnInfoDto ->
-                    columnInfoDto.setColumnLabels(columnInfoMap.get(columnInfoDto.getColumnName()))
-            ).collect(Collectors.toList());
+            echoList = indexColumnList.stream().peek(columnInfoDto -> {
+                List<LabelDto> columnLabelList = columnInfoMap.get(columnInfoDto.getColumnName());
+                columnInfoDto.setColumnLabels(columnLabelList);
+                String isPk = columnLabelList.stream().filter(columnLabel -> COLUMN_PK_LABEL.equals(columnLabel.getLabelCode()))
+                        .findFirst().get().getLabelParamValue();
+                columnInfoDto.setPk(Boolean.valueOf(isPk));
+            }).collect(Collectors.toList());
         }
 
         return echoList;
@@ -304,12 +314,17 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             columnLabelList = columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0
                     ? columnInfoDto.getColumnLabels() : null;
             if (columnLabelList != null) {
+//                List<String> columnLabelDefineCodeList = devLabelDefineDao.select(c ->
+//                        c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isNotIn("DERIVE_METRIC_LABEL")),
+//                                and(devLabelDefine.subjectType, isEqualTo(SubjectTypeEnum.COLUMN.name()))))
+//                        .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
                 List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
-                        .from(devLabel)
+                        .from(devLabel).leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
                         .where(devLabel.del, isNotEqualTo(1),
                                 and(devLabel.hidden, isEqualTo(0)),
                                 and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
-                                and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())))
+                                and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())),
+                                and(devLabelDefine.labelCode, isNotIn(measureLabelFields)))
                         .build().render(RenderingStrategies.MYBATIS3)),
                         LabelDto.class, "id", "tableId", "labelCode", "columnName");
                 List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());

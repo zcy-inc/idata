@@ -33,7 +33,7 @@ public interface DevFolderService {
     List<DevelopFolderDto> getDevelopFolders(String folderName);
     DevelopFolderDto create(DevelopFolderDto developFolderDto, String operator);
     DevelopFolderDto edit(DevelopFolderDto developFolderDto, String operator);
-    Set<String> getUserTableFolderIds(Long userId);
+    Set<Long> getUserTableFolderIds(Long userId);
     Set<Long> getUserMeasureFolderIds(Long userId, String folderType);
     boolean delete(Long devFolderId, String operator);
     boolean checkMeasureResAccess(Long userId, String folderId, String accessType);

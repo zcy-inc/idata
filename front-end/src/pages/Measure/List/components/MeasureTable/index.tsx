@@ -10,11 +10,16 @@ import styles from './index.less';
 import { getMeasures } from '@/services/measure';
 import { getEnumValues } from '@/services/datadev';
 import CreateMeasure from './components/CreateMeasure';
+import { LabelTag } from '@/constants/datapi';
+
 import moment from 'moment';
 const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
 ];
+let measureForm = {
+  current: 1
+}
 const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   const [data, setData] = useState<MetricListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -42,14 +47,37 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         }));
         setDataSetOptions(dataSetOptions);
       })
+      const {current, ...formParmas} = measureForm;
+      form.setFieldsValue(formParmas);
+      setCurrent(current);
   }, []);
 
   useEffect(() => {
-    getTableData(10 * (current - 1));
+    if(currentNode.folderId) {
+      getTableData(10 * (current - 1));
+    }
   }, [currentNode, current])
+
+  const TagMap = (labelTag: LabelTag) => {
+    switch (labelTag) {
+      case LabelTag.ATOMIC_METRIC_LABEL:
+      case LabelTag.ATOMIC_METRIC_LABEL_DISABLE:
+        return '原子指标';
+      case LabelTag.DERIVE_METRIC_LABEL:
+      case LabelTag.DERIVE_METRIC_LABEL_DISABLE:
+        return '派生指标';
+      default:
+        return '';
+    }
+  };
 
   const getTableData = (offset: number) => {
     const {measureDeadline, ...params} = form.getFieldsValue();
+    if(params.enable === 0) {
+      params.enable = false;
+    } else if(params.enable === 1) {
+      params.enable = true;
+    }
     setLoading(true);
     getMeasures({
       ...params,
@@ -67,7 +95,6 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       .finally(() => setLoading(false));
   };
 
-
   const onFinish = async (values: any) => {
     setCurrent(1)
     getTableData(0);
@@ -84,7 +111,9 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         width: 540
       },
       formProps: {
-        node
+         node: {
+          folderId: currentNode.pos
+         }
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((values: any) => {
@@ -98,12 +127,32 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     }, CreateMeasure)
   }
 
+  const onValuesChange = (values: { measureId: string; measureName: string; bizProcessCode: string; metricType: string; enable: string; creator: string; measureDeadline: string; domain: string; }) => {
+    measureForm = {
+      ...measureForm,
+      ...values
+    }
+  }
+
   const columns: ColumnsType<MetricListItem> = [
     { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
     { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
-    { title: '指标类型', key: 'labelTag', dataIndex: 'labelTag' },
+    { 
+      title: '指标类型',
+      key: 'labelTag',
+      dataIndex: 'labelTag',
+      render: (t) => TagMap(t)
+    },
+    { title: '主题域', key: 'domain', dataIndex: 'domain' },
     { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
-    { title: '指标状态', key: 'labelTag', dataIndex: 'labelTag' },
+    { 
+      title: '指标状态',
+      key: 'labelTag',
+      dataIndex: 'labelTag',
+      render: (t) => t.endsWith('DISABLE') ?
+      <span className={styles.disabled}>停用</span> :
+      <span className={styles.enabled}>启用</span>
+    },
     { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
     { title: '更新人', key: 'editor', dataIndex: 'editor' },
@@ -133,18 +182,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         onReset={onReset}
         labelCol={{span: 6}}
         labelWidth={96}
-        submitter={{
-          render: (props) => {
-            return [
-              <Button key="search" type="primary" onClick={props?.form?.submit}>
-                查询
-              </Button>,
-              <Button key="edit" onClick={() => addTreeItem()}>
-                新增
-              </Button>,
-            ];
-          },
-        }}
+        onValuesChange={onValuesChange}
       >
         <ProFormText
           name="measureId"
@@ -190,6 +228,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           options={dataSetOptions}
         />
       </QueryFilter>
+      <div style={{textAlign: 'right'}}>
+        <Button key="edit" onClick={() => addTreeItem()}>
+          新增
+        </Button>
+      </div>
       <Table<MetricListItem>
         rowKey="id"
         columns={columns}
@@ -201,7 +244,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           total,
           current,
           showTotal: (t) => `共${t}条`,
-          onChange: (page) =>setCurrent(page),
+          onChange: (page) => {setCurrent(page); measureForm.current = page;},
         }}
       />
     </div>

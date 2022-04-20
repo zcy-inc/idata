@@ -82,7 +82,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       modifiers: specialAttribute.modifiers,
       dimTables: specialAttribute.dimTables,
       aggregatorCode: specialAttribute.aggregatorCode,
-      timeAttribute: [specialAttribute.timeAttribute],
+      timeAttribute:
+      (!specialAttribute.timeAttribute?.columnName && !specialAttribute.timeAttribute?.timeDim) ?
+      [] : [specialAttribute.timeAttribute],
       calculableType: specialAttribute.calculableType
     }
   }
@@ -105,10 +107,19 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       formProps: {
         dimTables: (data?.dimTables || []).map(item => ({label: item.tableName, value: item.tableId}))
       },
+      btns: {
+        positive: '保存并生成',
+        negetive: '取消',
+        other: []
+      },
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
         form.handleSubmit().then((values: { dimTables: any; }) => {
-          generateSQL({metricCode: params.id}, values.dimTables).then(res => {
+          const dimTables = values.dimTables.map((item: { columnName: string[]; }) => ({
+            ...item,
+            columnName: item.columnName.join()
+          }))
+          generateSQL({metricCode: params.id}, dimTables).then(res => {
             setSql(res.data);
             done();
           }).catch(() => {
@@ -184,7 +195,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         </Descriptions>
         <Title>指标定义</Title>
         <p>{data?.metricDefine}</p>
-        <Title>技术口径</Title>
+        <Title style={{marginTop: 32}}>技术口径</Title>
         <p className={style['part-title']}>指标来源</p>
         <Table
           bordered
@@ -207,96 +218,105 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             },
           ]}
         />
-        <p className={style['part-title']}>原子指标</p>
-        <Table
-          bordered
-          size="small"
-          pagination={false}
-          dataSource={data?.atomicMetric || []}
-          columns={[
-            {
-              title: '指标ID',
-              dataIndex: 'metricId',
-              key: 'metricId'
-            }, {
-              title: '指标名称',
-              dataIndex: 'labelName',
-              key: 'labelName'
-            }, {
-              title: '字段英文名称',
-              dataIndex: 'columnName',
-              key: 'columnName'
-            },
-          ]}
-        />
-        <p className={style['part-title']}>时间周期</p>
-        <Table
-          bordered
-          size="small"
-          pagination={false}
-          dataSource={data?.timeAttribute || []}
-          columns={[
-            {
-              title: '字段',
-              dataIndex: 'columnName',
-              key: 'columnName'
-            }, {
-              title: '时间周期',
-              dataIndex: 'timeDim',
-              key: 'timeDim',
-              render: (t) => timeDimOptions.find(item => item.value === t)?.label
-            }
-          ]}
-        />
-        <p className={style['part-title']}>维度</p>
-        <Table
-          bordered
-          pagination={false}
-          dataSource={data?.dimTables || []}
-          size="small"
-          columns={[
-            {
-              title: '维度表',
-              dataIndex: 'tableName',
-              key: 'tableName'
-            }
-          ]}
-        />
-        <p className={style['part-title']}>修饰词</p>
-        <Table
-          bordered
-          pagination={false}
-          dataSource={data?.modifiers || []}
-          size="small"
-          columns={[
-            {
-              title: '修饰词',
-              dataIndex: 'modifierName',
-              key: 'modifierName'
-            }, {
-              title: '字段英文名称',
-              dataIndex: 'columnName',
-              key: 'columnName'
-            }, {
-              title: '内容',
-              dataIndex: '',
-              key: ''
-            }
-          ]}
-        />
+        {data?.labelTag === LabelTag.DERIVE_METRIC_LABEL ?
+          <>
+            <p className={style['part-title']}>原子指标</p>
+            <Table
+              bordered
+              size="small"
+              pagination={false}
+              dataSource={data?.atomicMetric || []}
+              columns={[
+                {
+                  title: '指标ID',
+                  dataIndex: 'metricId',
+                  key: 'metricId'
+                }, {
+                  title: '指标名称',
+                  dataIndex: 'labelName',
+                  key: 'labelName'
+                }, {
+                  title: '字段英文名称',
+                  dataIndex: 'columnName',
+                  key: 'columnName'
+                },
+              ]}
+            />
+            <p className={style['part-title']}>时间周期</p>
+            <Table
+              bordered
+              size="small"
+              pagination={false}
+              dataSource={data?.timeAttribute || []}
+              columns={[
+                {
+                  title: '字段',
+                  dataIndex: 'columnName',
+                  key: 'columnName'
+                }, {
+                  title: '时间周期',
+                  dataIndex: 'timeDim',
+                  key: 'timeDim',
+                  render: (t) => timeDimOptions.find(item => item.value === t)?.label
+                }
+              ]}
+            />
+            <p className={style['part-title']}>维度</p>
+            <Table
+              bordered
+              pagination={false}
+              dataSource={data?.dimTables || []}
+              size="small"
+              columns={[
+                {
+                  title: '维度表',
+                  dataIndex: 'tableName',
+                  key: 'tableName'
+                }
+              ]}
+            />
+            <p className={style['part-title']}>修饰词</p>
+            <Table
+              bordered
+              pagination={false}
+              dataSource={data?.modifiers || []}
+              size="small"
+              columns={[
+                {
+                  title: '修饰词',
+                  dataIndex: 'modifierName',
+                  key: 'modifierName'
+                }, {
+                  title: '字段英文名称',
+                  dataIndex: 'columnName',
+                  key: 'columnName'
+                }, {
+                  title: '内容',
+                  dataIndex: 'modifierValue',
+                  key: 'modifierValue'
+                }
+              ]}
+            />
+          </> :
+        null}
+       
+       
         <p className={style['part-title']}>其他信息</p>
         <Descriptions column={2} colon={false} style={{ margin: '16px 0' }}>
           <Item label="计算方式">
-            {AggregatorCodeOptions.find(item => item.value === data?.aggregatorCode)?.label}
+            {AggregatorCodeOptions.find(item => item.value === data?.aggregatorCode)?.label || '-'}
           </Item>
           <Item label="是否可累加">
-            {degradeDimOptions.find(item => item.value === data?.calculableType)?.label}
+            {degradeDimOptions.find(item => item.value === data?.calculableType)?.label || '-'}
           </Item>
         </Descriptions>
         <p className={style['part-title']} style={{lineHeight: '32px'}}>
           SQL界面
           <span className={style['btn-list']}>
-            <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a>
+          {data?.labelTag === LabelTag.DERIVE_METRIC_LABEL ?
+            <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a> : null  
+          }
+            
             <Button type="primary" onClick={copy}>复制内容</Button>
           </span>
         </p>

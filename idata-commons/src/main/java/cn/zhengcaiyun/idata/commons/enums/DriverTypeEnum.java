@@ -9,7 +9,8 @@ public enum DriverTypeEnum {
     Postgres("postgresql","org.postgresql.Driver", DataSourceTypeEnum.postgresql),
     Phoenix("phoenix","", DataSourceTypeEnum.phoenix),
     Kafka("kafka","", DataSourceTypeEnum.kafka),
-    Elasticsearch("elasticsearch","", DataSourceTypeEnum.elasticsearch);
+    Elasticsearch("elasticsearch","", DataSourceTypeEnum.elasticsearch),
+    MSSQL("mssql","com.microsoft.sqlserver.jdbc.SQLServerDriver", DataSourceTypeEnum.mssql);
 
     public String urlType;
     public String driverName;

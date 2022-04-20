@@ -324,14 +324,16 @@ public class JobMigrateManager {
                 }
 
                 contentDto.setScriptSelectColumns(src_columns);
-                contentDto.setScriptKeyColumns("id");
+//                contentDto.setScriptKeyColumns("id");
+                contentDto.setScriptKeyColumns(StringUtils.isBlank(contentDto.getSrcReadShardKey()) ? "id" : contentDto.getSrcReadShardKey());
                 ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
                 scriptMergeSqlParamDto.setRecentDays(3);
                 contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
                 if (StringUtils.isNotBlank(src_where)) {
                     contentDto.setSrcReadFilter(src_where);
                 }
-
+                String merge_sql = oldJobContent.getString("merge_sql");
+                contentDto.setScriptMergeSql(merge_sql);
             } else {
                 if (diTableProps.containsKey("di.columns")) {
                     // di.column
@@ -351,10 +353,15 @@ public class JobMigrateManager {
                     }
                     contentDto.setScriptSelectColumns(di_columns.trim());
 
-                    contentDto.setScriptKeyColumns("id");
+//                    contentDto.setScriptKeyColumns("id");
+                    contentDto.setScriptKeyColumns(StringUtils.isBlank(contentDto.getSrcReadShardKey()) ? "id" : contentDto.getSrcReadShardKey());
                     ScriptMergeSqlParamDto scriptMergeSqlParamDto = new ScriptMergeSqlParamDto();
                     scriptMergeSqlParamDto.setRecentDays(3);
                     contentDto.setScriptMergeSqlParamDto(scriptMergeSqlParamDto);
+
+                    String merge_sql = oldJobContent.getString("merge_sql");
+                    contentDto.setScriptMergeSql(merge_sql);
+
                 } else {
                     resultDtoList.add(new MigrateResultDto("migrateDIContent", String.format("迁移DI作业内容报错：旧DI作业[%s]的增量抽数配置不合法",
                             migrationDto.getOldJobId().toString()), oldJobContent.toJSONString()));
@@ -603,7 +610,9 @@ public class JobMigrateManager {
                     KeyValuePair<String, String> keyValuePair = new KeyValuePair<>();
                     keyValuePair.setKey(cond_array.get(0));
                     keyValuePair.setValue(cond_array.get(1));
-                    destPropertyMap.add(keyValuePair);
+                    if (!"sourceTable".equalsIgnoreCase(cond_array.get(0))) {
+                        destPropertyMap.add(keyValuePair);
+                    }
                 });
         contentDto.setDestPropertyMap(destPropertyMap);
 

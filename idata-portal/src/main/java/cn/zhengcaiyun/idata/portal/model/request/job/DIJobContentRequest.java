@@ -132,6 +132,11 @@ public class DIJobContentRequest extends JobContentBaseDto {
     private String scriptKeyColumns;
 
     /**
+     *   脚本模式，同可视化merge_sql
+     */
+    private String scriptMergeSql;
+
+    /**
      *   配置模式，1：可视化模式，2：脚本模式
      */
    @NotNull(message = "配置模式不能为空")
@@ -387,5 +392,13 @@ public class DIJobContentRequest extends JobContentBaseDto {
 
     public void setSrcTableConfig(DITableFashionConfig srcTableConfig) {
         this.srcTableConfig = srcTableConfig;
+    }
+
+    public String getScriptMergeSql() {
+        return scriptMergeSql;
+    }
+
+    public void setScriptMergeSql(String scriptMergeSql) {
+        this.scriptMergeSql = scriptMergeSql;
     }
 }

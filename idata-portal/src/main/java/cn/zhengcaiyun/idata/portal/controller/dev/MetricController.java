@@ -76,7 +76,7 @@ public class MetricController {
     @PostMapping("metricSql")
     public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode,
                                             @RequestBody List<DimTableDto> dimTables) {
-        return RestResult.success(metricService.getMetricDimSql(metricCode, dimTables));
+        return RestResult.success(metricService.getMetricSql(metricCode, dimTables));
     }
 
     @PostMapping("metric")

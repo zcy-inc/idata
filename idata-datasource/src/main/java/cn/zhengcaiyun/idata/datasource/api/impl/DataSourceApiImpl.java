@@ -93,10 +93,11 @@ public class DataSourceApiImpl implements DataSourceApi {
 
         DbConfigDto dbConfigDto = envDbConfigList.get(0);
         DataSourceDetailDto res = new DataSourceDetailDto();
+        res.setName(dataSource.getName());
         res.setDataSourceTypeEnum(dataSource.getType());
 
         String dbName = dbConfigDto.getDbName();
-        res.setJdbcUrl(getJdbcUrl(dataSource.getType(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbName, dbConfigDto.getSchema()));
+        res.setJdbcUrl(getJdbcUrl(dataSource.getType(), dbConfigDto.getHost(), dbConfigDto.getPort(), dbName));
         res.setUserName(dbConfigDto.getUsername());
         res.setPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
         res.setDbName(dbName);
@@ -105,9 +106,9 @@ public class DataSourceApiImpl implements DataSourceApi {
         return res;
     }
 
-    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName, String schema) {
+    private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName) {
         String protocol = null;
-        if (DataSourceTypeEnum.mysql == sourceTypeEnum) {
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum || DataSourceTypeEnum.doris == sourceTypeEnum) {
             protocol = "mysql";
         } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
             protocol = "postgresql";
@@ -115,10 +116,24 @@ public class DataSourceApiImpl implements DataSourceApi {
             protocol = "presto";
         } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
             protocol = "hive2";
+        }  else if (DataSourceTypeEnum.elasticsearch == sourceTypeEnum) {
+            // es直接返回ip+port，不拼接jdbc，用于给htool
+            return host + ":" + port;
+        }  else if (DataSourceTypeEnum.kafka == sourceTypeEnum) {
+            // kafka直接返回ip+port，不拼接jdbc，用于给htool
+            return host + ":" + port;
+        }  else if (DataSourceTypeEnum.mssql == sourceTypeEnum) {
+            // es直接返回ip+port，不拼接jdbc，用于给htool
+            return String.format("jdbc:sqlserver://%s:%d;databasename=%s", host, port, dbName);
         }
         if (StringUtils.isEmpty(protocol)) return null;
 
-        String jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        String jdbcUrl;
+        if (StringUtils.isNotEmpty(dbName)) {
+            jdbcUrl = String.format("jdbc:%s://%s:%d/%s", protocol, host, port, dbName);
+        } else {
+            jdbcUrl = String.format("jdbc:%s://%s:%d", protocol, host, port);
+        }
         return jdbcUrl;
     }
 
