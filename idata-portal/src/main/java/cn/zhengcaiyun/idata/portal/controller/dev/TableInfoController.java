@@ -90,6 +90,12 @@ public class TableInfoController {
         return RestResult.success(columnInfoService.getColumnDetails(tableId));
     }
 
+    @GetMapping("dimensionColumnInfos/{tableId}")
+    public RestResult<List<ColumnInfoDto>> getDimensionColumns(@PathVariable("tableId") Long tableId,
+                                                                  @RequestParam(value = "metricCode", required = false) String metricCode) {
+        return RestResult.success(columnInfoService.getDimensionColumns(metricCode, tableId));
+    }
+
     @GetMapping("tables")
     public RestResult<List<DevTableInfo>> getTables(@RequestParam(value = "tableName", required = false) String tableName) {
         return RestResult.success(tableInfoService.getTablesByCondition(tableName));

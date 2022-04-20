@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import jdk.jfr.Label;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
     private final String COLUMN_ATTRIBUTE = "columnAttribute:LABEL";
-    private final String COLUMN_ATTRIBUTE_ENUM = "columnAttributeEnum:ENUM";
+    private final String COLUMN_DIMENSION = "DIMENSION:ENUM_VALUE";
     private final String COLUMN_SUBJECT = "COLUMN";
     private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
@@ -120,6 +121,9 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 String isPk = columnLabelList.stream().filter(columnLabel -> COLUMN_PK_LABEL.equals(columnLabel.getLabelCode()))
                         .findFirst().get().getLabelParamValue();
                 columnInfoDto.setPk(Boolean.valueOf(isPk));
+                String columnAttributeCode = columnLabelList.stream().filter(columnLabel -> COLUMN_ATTRIBUTE.equals(columnLabel.getLabelCode()))
+                        .findFirst().get().getLabelParamValue();
+                columnInfoDto.setColumnAttributeCode(columnAttributeCode);
             }).collect(Collectors.toList());
         }
 
@@ -127,8 +131,15 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
     }
 
     @Override
-    public List<ColumnInfoDto> getDimensionColumns(String labelCode, Long tableId) {
-        return null;
+    public List<ColumnInfoDto> getDimensionColumns(String metricCode, Long tableId) {
+        List<DevLabel> existLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.labelCode, isEqualTo(metricCode))));
+        if (existLabelList.size() == 0) return new ArrayList<>();
+        List<ColumnInfoDto> columnList = getColumns(tableId);
+        if (!existLabelList.get(0).getTableId().equals(tableId)) return columnList;
+
+        return columnList.stream().filter(column -> StringUtils.isNotEmpty(column.getColumnAttributeCode())
+                && COLUMN_ATTRIBUTE.equals(column.getColumnAttributeCode())).collect(Collectors.toList());
     }
 
 //    @Override
