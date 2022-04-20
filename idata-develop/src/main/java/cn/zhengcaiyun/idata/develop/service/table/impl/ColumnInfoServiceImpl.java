@@ -30,6 +30,7 @@ import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import jdk.jfr.Label;
 import org.mybatis.dynamic.sql.VisitableCondition;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDynamicSqlSuppor
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSupport.devForeignKey;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.labelTag;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.tableId;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
@@ -314,17 +316,15 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
             columnLabelList = columnInfoDto.getColumnLabels() != null && columnInfoDto.getColumnLabels().size() > 0
                     ? columnInfoDto.getColumnLabels() : null;
             if (columnLabelList != null) {
-//                List<String> columnLabelDefineCodeList = devLabelDefineDao.select(c ->
-//                        c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isNotIn("DERIVE_METRIC_LABEL")),
-//                                and(devLabelDefine.subjectType, isEqualTo(SubjectTypeEnum.COLUMN.name()))))
-//                        .stream().map(DevLabelDefine::getLabelCode).collect(Collectors.toList());
+                List<String> columnLabelDefineCodeList = labelService.findDefines(SubjectTypeEnum.COLUMN.name(), null)
+                        .stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toList());
                 List<LabelDto> existColumnLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
-                        .from(devLabel).leftJoin(devLabelDefine).on(devLabel.labelCode, equalTo(devLabelDefine.labelCode))
+                        .from(devLabel)
                         .where(devLabel.del, isNotEqualTo(1),
                                 and(devLabel.hidden, isEqualTo(0)),
                                 and(devLabel.tableId, isEqualTo(columnInfoDto.getTableId())),
                                 and(devLabel.columnName, isEqualTo(columnInfoDto.getColumnName())),
-                                and(devLabelDefine.labelCode, isNotIn(measureLabelFields)))
+                                and(devLabel.labelCode, isIn(columnLabelDefineCodeList)))
                         .build().render(RenderingStrategies.MYBATIS3)),
                         LabelDto.class, "id", "tableId", "labelCode", "columnName");
                 List<String> columnLabelCodeList = columnLabelList.stream().map(LabelDto::getLabelCode).collect(Collectors.toList());
