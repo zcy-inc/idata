@@ -83,9 +83,8 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
 
     private final String[] columnInfoFields = {"id", "del", "creator", "createTime", "editor", "editTime",
             "columnName", "tableId", "columnIndex"};
-    private final String measureLabelFields = "DIMENSION_LABEL,ATOMIC_METRIC_LABEL,DERIVE_METRIC_LABEL," +
-            "COMPLEX_METRIC_LABEL,MODIFIER_LABEL,DIMENSION_LABEL_DISABLE,ATOMIC_METRIC_LABEL_DISABLE," +
-            "DERIVE_METRIC_LABEL_DISABLE,COMPLEX_METRIC_LABEL_DISABLE,MODIFIER_LABEL_DISABLE";
+    private final String COLUMN_ATTRIBUTE = "columnAttribute:LABEL";
+    private final String COLUMN_ATTRIBUTE_ENUM = "columnAttributeEnum:ENUM";
     private final String COLUMN_SUBJECT = "COLUMN";
     private final String COLUMN_TYPE_ENUM = "hiveColTypeEnum:ENUM";
     private final String COLUMN_COMMENT_LABEL = "columnComment:LABEL";
@@ -125,6 +124,11 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         }
 
         return echoList;
+    }
+
+    @Override
+    public List<ColumnInfoDto> getDimensionColumns(String labelCode, Long tableId) {
+        return null;
     }
 
 //    @Override

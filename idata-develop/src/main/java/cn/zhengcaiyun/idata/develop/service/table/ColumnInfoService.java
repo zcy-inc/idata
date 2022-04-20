@@ -30,6 +30,7 @@ import java.util.List;
 
 public interface ColumnInfoService {
     List<ColumnInfoDto> getColumns(Long tableId);
+    List<ColumnInfoDto> getDimensionColumns(String labelCode, Long tableId);
 
     /**
      * 和远端（hive）表进x行列比较，差异信息封装在tableInfo字段中
