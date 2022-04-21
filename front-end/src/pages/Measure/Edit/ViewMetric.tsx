@@ -101,16 +101,18 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
   }
 
   const showDimensionSelect = () => {
+    const dimTables = data?.dimTables || [];
+    const measureLabels = data?.measureLabels || [];
+    const tableList = dimTables.concat(measureLabels);
     showDialog('维度选择', {
       modalProps: {
       },
       formProps: {
-        dimTables: (data?.dimTables || []).map(item => ({label: item.tableName, value: item.tableId}))
+        dimTables: tableList.map(item => ({label: item.tableName, value: item.tableId}))
       },
       btns: {
         positive: '保存并生成',
         negetive: '取消',
-        other: []
       },
       beforeConfirm: (dialog, form, done) => {
         dialog.showLoading();
@@ -119,16 +121,14 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             ...item,
             columnName: item.columnName.join()
           }))
-          generateSQL({metricCode: params.id}, dimTables).then(res => {
+          return generateSQL({metricCode: params.id}, dimTables).then(res => {
             setSql(res.data);
             done();
-          }).catch(() => {
-            dialog.hideLoading();
           })
         }).finally(() => {
           dialog.hideLoading();
         })
-      }
+      },
     }, DimensionSelect)
   }
 

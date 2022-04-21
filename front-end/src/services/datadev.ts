@@ -123,9 +123,16 @@ export async function getTableReferTbs(params: { labelValue?: string }) {
 }
 
 /**
+ * 表 维度选择 获取字段
+ */
+export async function getDimensionColumnInfos(params: any) {
+  return request(`/api/p1/dev/dimensionColumnInfos/${params.tableId}`, { method: 'GET' });
+}
+
+/**
  * 表 获取参考字段
  */
-export async function getTableReferStr(params: any) {
+ export async function getTableReferStr(params: any) {
   return request(`/api/p1/dev/columnInfos/${params.tableId}`, { method: 'GET', params });
 }
 
