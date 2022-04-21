@@ -2,7 +2,7 @@ import React, { useState, useImperativeHandle } from 'react';
 import { Form, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { TreeNodeOption } from '@/types/datapi';
-import { getTableReferStr } from '@/services/datadev';
+import { getDimensionColumnInfos } from '@/services/datadev';
 import { SelectValue } from 'antd/lib/select';
 
 export interface CreateFolderProps {
@@ -39,7 +39,7 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
       form.setFieldsValue({
         columnName: undefined
       });
-      getTableReferStr({ tableId: val }).then(res => {
+      getDimensionColumnInfos({ tableId: val }).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setKeyList(strs)
       });
