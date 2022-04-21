@@ -121,9 +121,11 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
                 String isPk = columnLabelList.stream().filter(columnLabel -> COLUMN_PK_LABEL.equals(columnLabel.getLabelCode()))
                         .findFirst().get().getLabelParamValue();
                 columnInfoDto.setPk(Boolean.valueOf(isPk));
-                String columnAttributeCode = columnLabelList.stream().filter(columnLabel -> COLUMN_ATTRIBUTE.equals(columnLabel.getLabelCode()))
-                        .findFirst().get().getLabelParamValue();
-                columnInfoDto.setColumnAttributeCode(columnAttributeCode);
+                LabelDto columnAttributeLabel = columnLabelList.stream().filter(columnLabel -> COLUMN_ATTRIBUTE.equals(columnLabel.getLabelCode()))
+                        .findFirst().orElse(null);
+                if (columnAttributeLabel != null) {
+                    columnInfoDto.setColumnAttributeCode(columnAttributeLabel.getLabelParamValue());
+                }
             }).collect(Collectors.toList());
         }
 
