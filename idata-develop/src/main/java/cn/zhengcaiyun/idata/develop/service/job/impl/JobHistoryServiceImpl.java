@@ -57,7 +57,10 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Override
     public PageInfo<DevJobHistory> pagingJobHistoryByJobId(Long jobId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isEqualTo(jobId));
+        var builder = select(devJobHistory.allColumns())
+                .from(devJobHistory)
+                .where(devJobHistory.jobId, isEqualTo(jobId))
+                .orderBy(devJobHistory.startTime.descending());
         List<DevJobHistory> list = devJobHistoryDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
         PageInfo<DevJobHistory> pageInfo = new PageInfo<>(list);
         return pageInfo;

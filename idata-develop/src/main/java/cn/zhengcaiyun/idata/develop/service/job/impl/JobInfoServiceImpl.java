@@ -188,6 +188,9 @@ public class JobInfoServiceImpl implements JobInfoService {
         Boolean ret = jobInfoRepo.updateJobInfo(newJobInfo);
         if (BooleanUtils.isTrue(ret)) {
             if (checkJobInfoUpdated(newJobInfo, oldJobInfo)) {
+                List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(dto.getId(), new JobExecuteConfigCondition());
+                // 检查是否已停用，只有停用后才能更改
+                checkArgument(!isRunning(executeConfigs), "先在所有环境下暂停作业，再修改作业名称");
                 // 保存后发布job更新事件
                 JobEventLog eventLog = jobManager.logEvent(newJobInfo.getId(), EventTypeEnum.UPDATED, operator);
                 jobEventPublisher.whenUpdated(eventLog);

@@ -19,9 +19,9 @@ package cn.zhengcaiyun.idata.develop.service.folder.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeAccessFilter;
 import cn.zhengcaiyun.idata.commons.util.TreeNodeFilter;
 import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
-import cn.zhengcaiyun.idata.commons.util.TreeNodeAccessFilter;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
@@ -35,8 +35,6 @@ import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
 import cn.zhengcaiyun.idata.develop.service.folder.DevFolderService;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
@@ -102,6 +100,23 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
         if (userId != null) {
             Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId).stream().map(String::valueOf).collect(Collectors.toSet());
+            return filterAccessTreeNodes(treeNodeDtoList, folderIdList);
+        }
+        return teList;
+    }
+
+    @Override
+    public List<DevTreeNodeDto> searchFolderTree(DevTreeCondition condition, Long userId) {
+        // 获取选择的功能模块，未选择则默认所有功能模块
+        List<FunctionModuleEnum> moduleEnumList = getSelectModuleOrAll(condition.getBelongFunctions());
+        // 生成文件树
+        List<DevTreeNodeDto> treeNodeDtoList = buildFolderTreeNodes(moduleEnumList);
+        List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
+        if (userId != null) {
+            Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId)
+                    .stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.toSet());
             return filterAccessTreeNodes(treeNodeDtoList, folderIdList);
         }
         return teList;
@@ -244,6 +259,32 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
             }
         }
         return nodeDtoList;
+    }
+
+    private List<DevTreeNodeDto> buildFolderTreeNodes(List<FunctionModuleEnum> moduleEnumList) {
+        if (ObjectUtils.isEmpty(moduleEnumList)) return Lists.newArrayList();
+
+        List<DevTreeNodeDto> expandedNodeDtoList = Lists.newArrayList();
+        List<CompositeFolder> funcFolders = Lists.newArrayList();
+        for (FunctionModuleEnum moduleEnum : moduleEnumList) {
+            List<CompositeFolder> folderList = compositeFolderRepo.queryFolder(moduleEnum);
+            if (ObjectUtils.isNotEmpty(folderList)) {
+                expandedNodeDtoList.addAll(folderList.stream()
+                        .filter(compositeFolder -> {
+                            boolean idFolder = FolderTypeEnum.FOLDER.name().equals(compositeFolder.getType());
+                            if (!idFolder) {
+                                funcFolders.add(compositeFolder);
+                            }
+                            return idFolder;
+                        })
+                        .map(DevTreeNodeDto::from)
+                        .collect(Collectors.toList()));
+            }
+        }
+
+        final String treeTopId = funcFolders.size() == 1 ? funcFolders.get(0).getId().toString() : "0";
+        // 生成文件树
+        return TreeNodeGenerator.withExpandedNodes(expandedNodeDtoList).makeTree(() -> treeTopId);
     }
 
     private List<DevTreeNodeDto> filterTreeNodes(List<DevTreeNodeDto> treeNodeDtoList, String keyWord) {

@@ -35,6 +35,8 @@ public interface CompositeFolderService {
 
     List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition, Long userId);
 
+    List<DevTreeNodeDto> searchFolderTree(DevTreeCondition condition, Long userId);
+
     Long addFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException;
 
     Boolean editFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException;

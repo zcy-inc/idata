@@ -111,7 +111,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             addConfig(jobId, environment, executeConfigDto, dependenceDtoList, outputDto, operator);
         } else {
             JobConfigCombination configCombination = configCombinationOptional.get();
-            checkState(Objects.equals(RunningStateEnum.pause.val, configCombination.getExecuteConfig().getRunningState()), "作业在%s环境未暂停，不能修改配置", environment);
             updateConfig(jobId, environment, configCombination, executeConfigDto, dependenceDtoList, outputDto, operator);
         }
 
@@ -170,17 +169,22 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         }
 
         if (isDagChanged(executeConfig, existExecuteConfig)) {
+            checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改DAG配置", environment);
             if (hasPrevOrPostRelation(jobId, environment, dependenceList, existDependenceList)) {
-                throw new BizProcessException("作业存在上下游依赖关系，不能修改DAG");
+                throw new BizProcessException("作业存在上下游依赖关系，请先去除依赖再修改DAG");
             }
             changeDag(jobId, executeConfig, existExecuteConfig, environment, operator);
         } else {
             // dag不变，只变更作业依赖
-            updatePrevJobDependency(jobId, environment, dependenceList, existDependenceList, operator);
+            if (isChangePrevRelation(dependenceList, existDependenceList)) {
+                checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改依赖配置", environment);
+                updatePrevJobDependency(jobId, environment, dependenceList, existDependenceList, operator);
+            }
         }
 
         // 修改调度配置
         if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
+            checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改调度配置", environment);
             changeSchedule(jobId, environment, operator);
         }
     }
@@ -239,8 +243,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     private void updatePrevJobDependency(Long jobId, String environment, List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList, Operator operator) {
-        if (!isChangePrevRelation(newDependenceList, oldDependenceList)) return;  // 依赖关系未变
-
         List<DagJobPair> addingPrevJobs = null;
         List<DagJobPair> removingPrevJobs = null;
         if (isOnlyAddingPrevRelation(newDependenceList, oldDependenceList)) {
