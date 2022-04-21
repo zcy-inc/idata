@@ -141,7 +141,7 @@ public class ColumnInfoServiceImpl implements ColumnInfoService {
         if (!existLabelList.get(0).getTableId().equals(tableId)) return columnList;
 
         return columnList.stream().filter(column -> StringUtils.isNotEmpty(column.getColumnAttributeCode())
-                && COLUMN_ATTRIBUTE.equals(column.getColumnAttributeCode())).collect(Collectors.toList());
+                && COLUMN_DIMENSION.equals(column.getColumnAttributeCode())).collect(Collectors.toList());
     }
 
 //    @Override

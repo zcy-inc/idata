@@ -92,7 +92,7 @@ public class TableInfoController {
 
     @GetMapping("dimensionColumnInfos/{tableId}")
     public RestResult<List<ColumnInfoDto>> getDimensionColumns(@PathVariable("tableId") Long tableId,
-                                                                  @RequestParam(value = "metricCode", required = false) String metricCode) {
+                                                               @RequestParam("metricCode") String metricCode) {
         return RestResult.success(columnInfoService.getDimensionColumns(metricCode, tableId));
     }
 
