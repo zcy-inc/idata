@@ -311,6 +311,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
                   </Item>
                 </>
               )}
+              
             </TabPane>
           ))}
         </Tabs>
@@ -328,7 +329,8 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
             customRequest={({ file, onSuccess, onError }) => {
               setShowUpload(false);
               const destTableName = form.getFieldValue('name');
-              const environments = form.getFieldValue('environments');
+              const envList = form.getFieldValue('envList') || [];
+              const environments = envList.join(',');
               const data = new FormData();
               data.append('file', file);
               postCSV({ destTableName, environments }, data)
@@ -338,7 +340,7 @@ const CreateModal: FC<CreateModalProps> = ({ visible, onCancel, initial, refresh
                     getCSVPreview({
                       type: form.getFieldValue('type'),
                       name: form.getFieldValue('name'),
-                      envList: [environments],
+                      envList,
                       fileName: form.getFieldValue('name'),
                     }).then((resP) => {
                       const keys: string[] = [];
