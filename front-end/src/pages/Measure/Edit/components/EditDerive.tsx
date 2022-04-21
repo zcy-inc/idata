@@ -8,10 +8,12 @@ import React, {
 import {
   ProFormSelect,
   ProFormGroup,
+  ProFormCheckbox
 } from '@ant-design/pro-form';
 import type { ForwardRefRenderFunction } from 'react';
 import { getTableInfo, getMeasures, getForeignKeyTables, getModifiers } from '@/services/measure';
 import { rules, timeDimOptions } from '@/constants/datapi';
+import { isBoolean } from 'lodash';
 export interface ViewModifierProps {
   form: any;
 }
@@ -27,6 +29,7 @@ interface TempFormTypes {
   dimTableIds: string [],
   atomicMetricCode: string,
   tableId: string;
+  allColumns: boolean;
 }
 
 const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ form }, ref) => {
@@ -37,7 +40,8 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
   const [tempForm, setTempForm] = useState<TempFormTypes>({
     dimTableIds: [],
     atomicMetricCode: '',
-    tableId: ''
+    tableId: '',
+    allColumns: false
   });
 
   useImperativeHandle(ref, () => ({
@@ -66,11 +70,18 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
     // 根据原子指标获取时间周期
     if(values.atomicMetricCode) {
       !init && form.setFieldsValue({columnId: undefined});
-      getTableInfo({metricCode: values.atomicMetricCode}).then(res => {
+      getTableInfo({metricCode: values.atomicMetricCode, isAllColumns: tempForm.allColumns}).then(res => {
         const labelList = res.data?.columnInfos?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setLabelList(labelList);
       });
-     
+    }
+    // 根据是否勾选全部获取时间周期
+    if(isBoolean(values.allColumns)) {
+      !init && form.setFieldsValue({columnId: undefined});
+      getTableInfo({metricCode: tempForm.atomicMetricCode, isAllColumns: values.allColumns}).then(res => {
+        const labelList = res.data?.columnInfos?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
+        setLabelList(labelList);
+      });
     }
     // 根据指标来源获取维度和修饰词
     if(values.tableId) {
@@ -134,6 +145,7 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
             filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
           }}
         />
+       
         <ProFormSelect
           name="timeDim"
           label=""
@@ -152,6 +164,9 @@ const ViewModifier: ForwardRefRenderFunction<unknown, ViewModifierProps> = ({ fo
             filterOption: (v: string, option: any) => option.label.indexOf(v) >= 0,
           }}
         />
+         <ProFormCheckbox
+          name="allColumns"
+        >展示全部</ProFormCheckbox>
       </ProFormGroup>
       <ProFormGroup>
         <ProFormSelect
