@@ -108,7 +108,8 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       modalProps: {
       },
       formProps: {
-        dimTables: tableList.map(item => ({label: item.tableName, value: item.tableId}))
+        dimTables: tableList.map(item => ({label: item.tableName, value: item.tableId})),
+        metricCode: params.id
       },
       btns: {
         positive: '保存并生成',
