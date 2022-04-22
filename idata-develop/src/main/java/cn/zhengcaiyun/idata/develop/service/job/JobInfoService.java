@@ -66,7 +66,7 @@ public interface JobInfoService {
      * @param accessIdSet
      * @return
      */
-    Map<Long, String> getNameMapByIds(Set<Long> accessIdSet);
+    Map<Long, String> getNameMapByIds(List<Long> accessIdSet);
 
     OverhangJobWrapperDto pagingOverhangJob(JobInfoCondition condition, PageParam pageParam);
 

@@ -301,11 +301,11 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public Map<Long, String> getNameMapByIds(Set<Long> ids) {
+    public Map<Long, String> getNameMapByIds(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return new HashMap<>();
         }
-        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfoByIds(ids);
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(ids);
         Map<Long, String> map = new HashMap<>();
         jobInfoList.forEach(e -> map.put(e.getId(), e.getName()));
         return map;

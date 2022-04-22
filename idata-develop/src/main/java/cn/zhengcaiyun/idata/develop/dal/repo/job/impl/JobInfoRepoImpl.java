@@ -228,9 +228,4 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .orderBy(jobInfo.id.descending())
                 .limit(limit).offset(offset));
     }
-
-    @Override
-    public List<JobInfo> queryJobInfoByIds(Set<Long> accessIdSet) {
-        return jobInfoDao.select(dsl -> dsl.where(jobInfo.id, isIn(accessIdSet)));
-    }
 }
