@@ -46,7 +46,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Set<Long> accessIdSet = new HashSet<>();
         // 获取相关id
         getAccessJobDependency(env, jobId, accessIdSet);
-        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(accessIdSet);
+        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(new ArrayList<>(accessIdSet));
 
         List<JobInfo> list = Lists.newArrayList();
         nameMap.forEach((k, v) -> {
@@ -66,7 +66,7 @@ public class JobDependencyServiceImpl implements JobDependencyService {
         Set<Long> accessIdSet = new HashSet<>();
         List<JobDependencyDto> list = getAccessJobDependency(env, jobId, accessIdSet);
         // 封装相关的nameMap
-        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(accessIdSet);
+        Map<Long, String> nameMap = jobInfoService.getNameMapByIds(new ArrayList<>(accessIdSet));
 
         Multimap<Long, Long> nextMap = ArrayListMultimap.create();
         Multimap<Long, Long> prevMap = ArrayListMultimap.create();

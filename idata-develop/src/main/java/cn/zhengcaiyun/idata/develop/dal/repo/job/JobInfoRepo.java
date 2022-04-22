@@ -53,5 +53,4 @@ public interface JobInfoRepo {
 
     List<JobInfo> queryList(JobInfoCondition condition, long limit, long offset);
 
-    List<JobInfo> queryJobInfoByIds(Set<Long> accessIdSet);
 }
