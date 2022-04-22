@@ -30,6 +30,7 @@ public class TimeAttributeDto {
     private String columnName;
     @ApiModelProperty(value = "SEVEN_DAYS | THIRTY_DAS | ONE_MONTH | THREE_MONTHS | SIX_MONTHS | ONE_YEAR")
     private String timeDim;
+    private Boolean allColumns;
 
     // GaS
     public Long getTableId() {
@@ -70,5 +71,13 @@ public class TimeAttributeDto {
 
     public void setTimeDim(String timeDim) {
         this.timeDim = timeDim;
+    }
+
+    public Boolean getAllColumns() {
+        return allColumns;
+    }
+
+    public void setAllColumns(Boolean allColumns) {
+        this.allColumns = allColumns;
     }
 }
