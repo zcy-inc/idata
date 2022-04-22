@@ -17,39 +17,30 @@
 
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
-import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.develop.constant.enums.DiConfigModeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
-import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.common.TemplateParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;

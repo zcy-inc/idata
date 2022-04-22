@@ -83,6 +83,14 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
     }
 
     @Override
+    public Optional<DIJobContent> queryLatest(Long jobId) {
+        return diJobContentDao.selectOne(dsl -> dsl.where(DI_JOB_CONTENT.jobId, isEqualTo(jobId),
+                        and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(DI_JOB_CONTENT.version.descending())
+                .limit(1));
+    }
+
+    @Override
     public List<DIJobContent> queryList(Long jobId) {
         return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.jobId, isEqualTo(jobId),
                         and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
@@ -92,6 +100,13 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
     @Override
     public List<DIJobContent> queryList(String destTable) {
         return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.destTable, isEqualTo(destTable),
+                        and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(DI_JOB_CONTENT.version));
+    }
+
+    @Override
+    public List<DIJobContent> queryListByDestTable(List<String> destTable) {
+        return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.destTable, isInCaseInsensitive(destTable),
                         and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(DI_JOB_CONTENT.version));
     }

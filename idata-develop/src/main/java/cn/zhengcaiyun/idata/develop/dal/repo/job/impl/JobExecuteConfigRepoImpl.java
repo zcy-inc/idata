@@ -101,4 +101,11 @@ public class JobExecuteConfigRepoImpl implements JobExecuteConfigRepo {
                 and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
+    @Override
+    public List<JobExecuteConfig> queryList(List<Long> jobIds, String environment) {
+        return jobExecuteConfigDao.select(dsl -> dsl.where(JOB_EXECUTE_CONFIG.jobId, isIn(jobIds),
+                and(JOB_EXECUTE_CONFIG.environment, isEqualTo(environment)),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
 }

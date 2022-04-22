@@ -20,9 +20,12 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobDependenceDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * job-config-controller
@@ -68,6 +71,21 @@ public class JobExecuteConfigController {
     public RestResult<JobConfigCombinationDto> getJobConfig(@PathVariable("jobId") Long jobId,
                                                             @PathVariable("environment") String environment) {
         return RestResult.success(jobExecuteConfigService.getCombineConfig(jobId, environment));
+    }
+
+    /**
+     * 自动推荐依赖
+     *
+     * @param jobId       作业id
+     * @param environment 环境
+     * @param version     作业版本（非必填）
+     * @return
+     */
+    @GetMapping("/environments/{environment}/dependencies/derive")
+    public RestResult<List<JobDependenceDto>> deriveDependencies(@PathVariable("jobId") Long jobId,
+                                                                 @PathVariable("environment") String environment,
+                                                                 @RequestParam Integer version) {
+        return RestResult.success(jobExecuteConfigService.deriveDependencies(jobId, environment, version));
     }
 
 }

@@ -4,13 +4,11 @@ import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlBaseListener;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
-import com.alibaba.fastjson.JSON;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -42,6 +40,25 @@ public class SparkSqlUtil {
             result.put("ptColumns", listener.ptColumns);
         }
         return result;
+    }
+
+    public static List<String> getFromTables(String sql, Set<String> tableSet) {
+        SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(sql), true));
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        SparkSqlParser parser = new SparkSqlParser(tokenStream);
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SelectTableListener listener = new SelectTableListener(tokenStream);
+        walker.walk(listener, parser.statement());
+        String parseSql = listener.rewriter.getText();
+        if (tableSet == null) {
+            tableSet = new HashSet<>(listener.tableList);
+        } else {
+            tableSet.addAll(listener.tableList);
+        }
+        if (sql.length() > parseSql.length()) {
+            getFromTables(sql.substring(parseSql.length()), tableSet);
+        }
+        return new ArrayList(tableSet);
     }
 
     public static class AddDatabaseEnvListener extends SparkSqlBaseListener {
@@ -86,7 +103,8 @@ public class SparkSqlUtil {
             }
         }
 
-        @Override public void enterPartitionVal(SparkSqlParser.PartitionValContext ctx) {
+        @Override
+        public void enterPartitionVal(SparkSqlParser.PartitionValContext ctx) {
             String text = ctx.getText().toLowerCase();
             if (StringUtils.isEmpty(text)) {
                 return;

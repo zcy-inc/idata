@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputDynamicSqlSupport.JOB_OUTPUT;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -65,5 +64,11 @@ public class JobOutputRepoImpl implements JobOutputRepo {
     public Boolean delete(Long jobId, String environment) {
         return jobOutputDao.delete(dsl -> dsl.where(JOB_OUTPUT.jobId, isEqualTo(jobId),
                 and(JOB_OUTPUT.environment, isEqualTo(environment)))) > 0;
+    }
+
+    @Override
+    public List<JobOutput> queryByDestTable(List<String> descTables, String environment) {
+        return jobOutputDao.select(dsl -> dsl.where(JOB_OUTPUT.destTable, isInCaseInsensitive(descTables),
+                and(JOB_OUTPUT.environment, isEqualToWhenPresent(environment))));
     }
 }
