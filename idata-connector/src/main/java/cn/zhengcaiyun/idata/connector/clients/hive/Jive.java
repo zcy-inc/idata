@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 /**
  * Jive是模仿Jedis写的，在维护此类时；
  * 1. 在管理可close类资源的时候，请注意不要写以下方式：此方式会释放connection（调用connection的close()），导致connection不可复用
- *      try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
- *          ResultSet res = statement.executeQuery(String.format("show create table `%s`.%s", dbName, tableName)))
+ * try (Connection connection = this.getClient(); Statement statement = connection.createStatement();
+ * ResultSet res = statement.executeQuery(String.format("show create table `%s`.%s", dbName, tableName)))
  */
 public class Jive extends BinaryJive {
 
@@ -35,6 +35,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 判断表是否存在
+     *
      * @param dbName
      * @param tableName
      * @return
@@ -55,7 +56,8 @@ public class Jive extends BinaryJive {
 
     /**
      * 重命名
-     * @param dbName 库名
+     *
+     * @param dbName     库名
      * @param sourceName 原表名
      * @param targetName 目标表名
      * @return
@@ -72,6 +74,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 新建表
+     *
      * @param ddl
      * @return
      */
@@ -88,6 +91,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 获取创建表DDL
+     *
      * @param dbName
      * @param tableName
      * @return
@@ -108,6 +112,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 新增列
+     *
      * @param dbName
      * @param tableName
      * @param addColumns
@@ -133,12 +138,13 @@ public class Jive extends BinaryJive {
 
     /**
      * 修改列属性
+     *
      * @param dbName
      * @param tableName
      * @param sourceColumnName 原列名
      * @param targetColumnName 修改后列名
-     * @param columnType 列类型
-     * @param columnComment 列描述
+     * @param columnType       列类型
+     * @param columnComment    列描述
      * @return
      */
     public boolean changeColumn(String dbName, String tableName, String sourceColumnName, String targetColumnName, String columnType, String columnComment) {
@@ -157,12 +163,12 @@ public class Jive extends BinaryJive {
     public List<String> getTableNameList(String dbName) {
         List<String> tableList = new ArrayList<>();
         try (Statement statement = this.getClient().createStatement()) {
-             statement.execute("use " + dbName);
-             try (ResultSet rs = statement.executeQuery("show tables")) {
-                 while (rs.next()){
-                     tableList.add(rs.getString("tab_name"));
-                 }
-             }
+            statement.execute("use " + dbName);
+            try (ResultSet rs = statement.executeQuery("show tables")) {
+                while (rs.next()) {
+                    tableList.add(rs.getString("tab_name"));
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new GeneralException("getTableNameList fail!");
@@ -174,7 +180,7 @@ public class Jive extends BinaryJive {
         List<String> dbList = new ArrayList<>();
         try (Statement statement = this.getClient().createStatement();
              ResultSet rs = statement.executeQuery("show databases")) {
-            while (rs.next()){
+            while (rs.next()) {
                 dbList.add(rs.getString("database_name"));
             }
         } catch (SQLException e) {
@@ -184,8 +190,19 @@ public class Jive extends BinaryJive {
         return dbList;
     }
 
+    public Boolean testConnection() {
+        try (Statement statement = this.getClient().createStatement();
+             ResultSet rs = statement.executeQuery("select 1")) {
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * 获取元数据信息
+     *
      * @param dbName
      * @param tableName
      * @return
@@ -197,6 +214,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 获取普通列（非分区列）的元数据信息
+     *
      * @param dbName
      * @param tableName
      * @return
@@ -216,6 +234,7 @@ public class Jive extends BinaryJive {
 
     /**
      * 获取表大小
+     *
      * @param dbName
      * @param tableName
      * @return

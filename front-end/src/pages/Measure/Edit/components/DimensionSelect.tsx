@@ -2,7 +2,7 @@ import React, { useState, useImperativeHandle } from 'react';
 import { Form, Select, Button, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { TreeNodeOption } from '@/types/datapi';
-import { getTableReferStr } from '@/services/datadev';
+import { getDimensionColumnInfos } from '@/services/datadev';
 import { SelectValue } from 'antd/lib/select';
 
 export interface CreateFolderProps {
@@ -22,7 +22,7 @@ const formItemLayoutWithOutLabel = {
 };
 
 const rules = [{ required: true, message: '必填' }];
-const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined) => {
+const DimensionSelect = ({ dimTables, metricCode }: any, ref: React.Ref<unknown> | undefined) => {
   const [keyList, setKeyList] = useState<FlatTreeNodeOption[]>([]);
   const [form] = Form.useForm();
 
@@ -34,12 +34,12 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
     return form.validateFields();
   }
 
-  const onTableIdChange = (val: SelectValue, index: number) => {
+  const onTableIdChange = (val: SelectValue) => {
     if(val) {
       form.setFieldsValue({
         columnName: undefined
       });
-      getTableReferStr({ tableId: val }).then(res => {
+      getDimensionColumnInfos(val, { metricCode }).then(res => {
         const strs = res.data?.map((_: any) => ({ label: _.columnName, value: _.columnName }));
         setKeyList(strs)
       });
@@ -61,7 +61,7 @@ const DimensionSelect = ({ dimTables }: any, ref: React.Ref<unknown> | undefined
                 >
                   <Select
                     options={dimTables}
-                    onChange={val => onTableIdChange(val, index)}
+                    onChange={onTableIdChange}
                     placeholder="请选择表"
                   />
                 </Form.Item>

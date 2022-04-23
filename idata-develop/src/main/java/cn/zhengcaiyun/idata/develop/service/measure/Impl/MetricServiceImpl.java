@@ -309,7 +309,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public TableInfoDto getTableDateColumns(String metricCode) {
+    public TableInfoDto getTableDateColumns(String metricCode, Boolean isAllColumns) {
         DevLabelDefine checkMetric = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
                 and(devLabelDefine.labelCode, isEqualTo(metricCode))))
                 .orElseThrow(() -> new IllegalArgumentException("指标不存在"));
@@ -317,6 +317,10 @@ public class MetricServiceImpl implements MetricService {
                 and(devLabel.labelCode, isEqualTo(metricCode))));
         if (metricLabelList.size() == 0) return new TableInfoDto();
         TableInfoDto tableInfo = tableInfoService.getTableInfo(metricLabelList.get(0).getTableId());
+        // get all columns
+        if (isAllColumns != null && isAllColumns) {
+            return tableInfo;
+        }
         List<ColumnDetailsDto> dateColumnList = columnInfoService.getColumnDetails(metricLabelList.get(0).getTableId())
                 .stream().filter(column -> Arrays.asList(columnTypes).contains(column.getColumnType())).collect(Collectors.toList());
         tableInfo.setColumnInfos(PojoUtil.copyList(dateColumnList, ColumnInfoDto.class, "id", "columnName", "columnType"));

@@ -23,6 +23,7 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import javolution.io.Struct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,8 +64,9 @@ public class MetricController {
     }
 
     @GetMapping("tableDateColumns")
-    public RestResult<TableInfoDto> getTableDateColumns(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getTableDateColumns(metricCode));
+    public RestResult<TableInfoDto> getTableDateColumns(@RequestParam("metricCode") String metricCode,
+                                                        @RequestParam(value = "isAllColumns", required = false) Boolean isAllColumns) {
+        return RestResult.success(metricService.getTableDateColumns(metricCode, isAllColumns));
     }
 
     @GetMapping("metricsOrDimensions")

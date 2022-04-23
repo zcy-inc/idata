@@ -116,7 +116,7 @@ public class Test {
             config.setTestOnBorrow(true);
             HivePool hivePool = new HivePool(config, connectInfo);
             jive = hivePool.getResource();
-            System.out.println("======" + jive.getDbNameList());
+            System.out.println("======" + jive.testConnection());
         } finally {
             jive.close(); // ！重要，使用完后归还
         }
@@ -163,7 +163,7 @@ public class Test {
     public void testPoolSize() {
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setJdbc("jdbc:hive2://172.29.108.184:10000/default");
-        HivePool hivePool = new HivePool(connectInfo);
+        HivePool hivePool = new HivePool(connectInfo, new GenericObjectPoolConfig());
         for (int i = 0; i < 100; i++) {
             final int j = i;
             new Thread(() -> {

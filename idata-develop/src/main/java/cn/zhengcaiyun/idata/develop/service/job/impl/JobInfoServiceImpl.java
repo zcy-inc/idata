@@ -406,11 +406,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                     backFlowResponse.setSrcSql(bfJobContent.getSrcQuery());
                     // 抽取关联映射列
                     List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getSrcColumns(), MappingColumnDto.class);
-                    Set<String> columnNameSet = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toSet());
-                    backFlowResponse.setDestColumnNames(StringUtils.join(columnNameSet, ","));
+                    List<String> columnNameList = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toList());
+                    backFlowResponse.setDestColumnNames(StringUtils.join(columnNameList, ","));
                     //抽取主键key
-                    Set<String> keyNameSet = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toSet());
-                    backFlowResponse.setUpdateKey(StringUtils.join(keyNameSet, ","));
+                    List<String> keyNameList = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toList());
+                    backFlowResponse.setUpdateKey(StringUtils.join(keyNameList, ","));
 
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
                     backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
