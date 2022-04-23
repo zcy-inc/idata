@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobOutput;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,4 +34,6 @@ public interface JobOutputRepo {
     Optional<JobOutput> query(Long jobId, String environment);
 
     Boolean delete(Long jobId, String environment);
+
+    List<JobOutput> queryByDestTable(List<String> descTables, String environment);
 }

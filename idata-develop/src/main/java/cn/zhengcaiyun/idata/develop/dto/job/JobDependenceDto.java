@@ -67,6 +67,11 @@ public class JobDependenceDto extends BaseDto {
      */
     private String prevJobDagName;
 
+    /**
+     * 新添加的依赖
+     */
+    private Boolean fresh = Boolean.FALSE;
+
 
     public Long getId() {
         return id;
@@ -130,6 +135,14 @@ public class JobDependenceDto extends BaseDto {
 
     public void setPrevJobDagName(String prevJobDagName) {
         this.prevJobDagName = prevJobDagName;
+    }
+
+    public Boolean getFresh() {
+        return fresh;
+    }
+
+    public void setFresh(Boolean fresh) {
+        this.fresh = fresh;
     }
 
     public static JobDependenceDto from(JobDependence model) {

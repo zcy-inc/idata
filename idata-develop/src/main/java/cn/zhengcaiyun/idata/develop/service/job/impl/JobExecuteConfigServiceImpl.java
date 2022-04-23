@@ -132,6 +132,22 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     @Override
+    public List<JobDependenceDto> deriveDependencies(Long jobId, String environment, Integer version) {
+        checkArgument(Objects.nonNull(jobId), "作业编号为空");
+        checkArgument(StringUtils.isNotBlank(environment), "环境参数为空");
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+        JobInfo jobInfo = jobInfoOptional.get();
+        if (JobTypeEnum.SQL_SPARK.getCode().equals(jobInfo.getJobType())) {
+            return fillDependenceInfo(jobManager.deriveDependenciesForSparkSql(jobInfo, environment, version));
+        } else if (JobTypeEnum.BACK_FLOW.getCode().equals(jobInfo.getJobType())) {
+            return fillDependenceInfo(jobManager.deriveDependenciesForBackFlow(jobInfo, environment, version));
+        } else {
+            throw new IllegalArgumentException("当前支持Spark Sql和数据回流作业自动获取依赖");
+        }
+    }
+
+    @Override
     public List<JobAndDagDto> getConfiguredJobList(String environment) {
         JobExecuteConfigCondition condition = new JobExecuteConfigCondition();
         condition.setEnvironment(environment);
@@ -470,8 +486,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         config.setExecQueue(Strings.nullToEmpty(config.getExecQueue()));
         config.setExecWarnLevel(Strings.nullToEmpty(config.getExecWarnLevel()));
         config.setSchTimeOutStrategy(Strings.nullToEmpty(config.getSchTimeOutStrategy()));
-        config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 2));
-        config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 2));
+        config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 3));
+        config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 4));
+        config.setExecCores(MoreObjects.firstNonNull(config.getExecCores(), 2));
         config.setSchPriority(MoreObjects.firstNonNull(config.getSchPriority(), JobPriorityEnum.middle.val));
     }
 }

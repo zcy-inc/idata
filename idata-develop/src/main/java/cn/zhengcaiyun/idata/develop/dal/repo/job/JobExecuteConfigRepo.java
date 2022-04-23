@@ -46,4 +46,6 @@ public interface JobExecuteConfigRepo {
     List<JobExecuteConfig> queryDagJobList(Long dagId, JobExecuteConfigCondition condition);
 
     List<JobExecuteConfig> queryList(JobExecuteConfigCondition condition);
+
+    List<JobExecuteConfig> queryList(List<Long> jobIds, String environment);
 }
