@@ -4,6 +4,8 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
+import java.util.List;
+
 public class HiveFactory implements PooledObjectFactory<Jive> {
 
     private ConnectInfo connectInfo;
@@ -15,8 +17,8 @@ public class HiveFactory implements PooledObjectFactory<Jive> {
     @Override
     public void activateObject(PooledObject<Jive> pooledJedis) throws Exception {
         // 根据功能描述加了如下功能，但是会拖累整个接口速度。本地测试占用160ms左右
-//        BinaryJive jedis = pooledJedis.getObject();
-//        jedis.reconnect();
+        BinaryJive jedis = pooledJedis.getObject();
+        jedis.reconnect();
     }
 
     @Override
@@ -37,9 +39,10 @@ public class HiveFactory implements PooledObjectFactory<Jive> {
 
     @Override
     public boolean validateObject(PooledObject<Jive> pooledJedis) {
-        final BinaryJive jedis = pooledJedis.getObject();
+        Jive jive = pooledJedis.getObject();
         try {
-            return jedis.isValid(10);
+            jive.testConnection();
+            return true;
         } catch (final Exception e) {
             return false;
         }

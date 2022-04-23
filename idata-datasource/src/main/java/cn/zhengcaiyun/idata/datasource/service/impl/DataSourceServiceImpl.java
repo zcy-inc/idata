@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
@@ -50,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -57,6 +59,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.nonNull;
+import static org.apache.hadoop.yarn.webapp.hamlet.HamletSpec.InputType.password;
 
 /**
  * @description:
@@ -235,45 +238,46 @@ public class DataSourceServiceImpl implements DataSourceService {
     }
 
     @Override
-    public List<String> getDbNames(Long id) {
-        // hive数据源唯一 + 当前接口仅给hive使用
-        try (Jive jive = hivePool.getResource()) {
-            return jive.getDbNameList();
+    public List<String> getHiveDbNames(Long id) {
+        // 目前hive数据源因为权限不完善不暴露jdbc，数据源中都是0.0.0.0 实际jdbc在集成配置中
+        ConfigDto systemConfigByKey = systemConfigApi.getSystemConfigByKey("hive-info");
+        String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
+
+        List<String> dbList = new ArrayList<>();
+        try(Connection client = DriverManager.getConnection(jdbcUrl, null, null);
+            Statement statement = client.createStatement();
+            ResultSet rs = statement.executeQuery("show databases")) {
+            while (rs.next()) {
+                dbList.add(rs.getString("database_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new GeneralException("getHiveDbNames fail!");
         }
-//        Jive jive = null;
-//        String jdbcUrl = getJdbcUrl(id);
-//        try {
-//            ConnectInfo connectInfo = new ConnectInfo();
-//            connectInfo.setJdbc(jdbcUrl);
-//            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-//            config.setTestOnBorrow(true);
-//            HivePool hivePool = new HivePool(config, connectInfo);
-//            jive = hivePool.getResource();
-//            return jive.getDbNameList();
-//        } finally {
-//            jive.close();
-//        }
+
+        return dbList;
     }
 
     @Override
-    public List<String> getTableNames(Long id, String dbName) {
-        // hive数据源唯一 + 当前接口仅给hive使用
-        try (Jive jive = hivePool.getResource()) {
-            return jive.getTableNameList(dbName);
+    public List<String> getHiveTableNames(Long id, String dbName) {
+        // 目前hive数据源因为权限不完善不暴露jdbc，数据源中都是0.0.0.0 实际jdbc在集成配置中
+        ConfigDto systemConfigByKey = systemConfigApi.getSystemConfigByKey("hive-info");
+        String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
+
+        List<String> tableList = new ArrayList<>();
+        try (Connection client = DriverManager.getConnection(jdbcUrl, null, null);
+             Statement statement = client.createStatement()) {
+            statement.execute("use " + dbName);
+            try (ResultSet rs = statement.executeQuery("show tables")) {
+                while (rs.next()){
+                    tableList.add(rs.getString("tab_name"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new GeneralException("getTableNameList fail!");
         }
-//        Jive jive = null;
-//        String jdbcUrl = getJdbcUrl(id, dbName);
-//        try {
-//            ConnectInfo connectInfo = new ConnectInfo();
-//            connectInfo.setJdbc(jdbcUrl);
-//            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-//            config.setTestOnBorrow(true);
-//            HivePool hivePool = new HivePool(config, connectInfo);
-//            jive = hivePool.getResource();
-//            return jive.getTableNameList();
-//        } finally {
-//            jive.close();
-//        }
+        return tableList;
     }
 
     @Override
