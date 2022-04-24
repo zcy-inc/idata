@@ -264,27 +264,27 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     private List<DevTreeNodeDto> buildFolderTreeNodes(List<FunctionModuleEnum> moduleEnumList) {
         if (ObjectUtils.isEmpty(moduleEnumList)) return Lists.newArrayList();
 
-        List<DevTreeNodeDto> expandedNodeDtoList = Lists.newArrayList();
-        List<CompositeFolder> funcFolders = Lists.newArrayList();
+        List<DevTreeNodeDto> expandedFolderNodeList = Lists.newArrayList();
+        List<DevTreeNodeDto> expandedFuncNodeList = Lists.newArrayList();
         for (FunctionModuleEnum moduleEnum : moduleEnumList) {
             List<CompositeFolder> folderList = compositeFolderRepo.queryFolder(moduleEnum);
             if (ObjectUtils.isNotEmpty(folderList)) {
-                expandedNodeDtoList.addAll(folderList.stream()
-                        .filter(compositeFolder -> {
-                            boolean idFolder = FolderTypeEnum.FOLDER.name().equals(compositeFolder.getType());
-                            if (!idFolder) {
-                                funcFolders.add(compositeFolder);
-                            }
-                            return idFolder;
-                        })
+                Map<String, List<DevTreeNodeDto>> treeNodeMap = folderList.stream()
                         .map(DevTreeNodeDto::from)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.groupingBy(DevTreeNodeDto::getType));
+                expandedFolderNodeList.addAll(treeNodeMap.get(FolderTypeEnum.FOLDER.name()));
+                expandedFuncNodeList.addAll(treeNodeMap.get(FolderTypeEnum.FUNCTION.name()));
             }
         }
 
-        final String treeTopId = funcFolders.size() == 1 ? funcFolders.get(0).getId().toString() : "0";
+        final String treeTopId = expandedFuncNodeList.size() == 1 ? expandedFuncNodeList.get(0).getId().toString() : "0";
+        if (expandedFuncNodeList.size() > 1) {
+            // 多个模块时，将模块信息也加入文件夹树
+            expandedFolderNodeList.addAll(expandedFuncNodeList);
+        }
+
         // 生成文件树
-        return TreeNodeGenerator.withExpandedNodes(expandedNodeDtoList).makeTree(() -> treeTopId);
+        return TreeNodeGenerator.withExpandedNodes(expandedFolderNodeList).makeTree(() -> treeTopId);
     }
 
     private List<DevTreeNodeDto> filterTreeNodes(List<DevTreeNodeDto> treeNodeDtoList, String keyWord) {
