@@ -26,6 +26,7 @@ import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -64,7 +65,7 @@ public interface DataSourceService {
      * @param id
      * @return
      */
-    List<String> getDbNames(Long id);
+    List<String> getHiveDbNames(Long id) ;
 
     /**
      * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
@@ -72,7 +73,7 @@ public interface DataSourceService {
      * @param dbName
      * @return
      */
-    List<String> getTableNames(Long id, String dbName);
+    List<String> getHiveTableNames(Long id, String dbName);
 
     /**
      * 获取列
