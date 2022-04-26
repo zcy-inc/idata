@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty } from 'antd';
 import { useModel } from 'umi';
 import type { FC, Key } from 'react';
+import { formatTreeData, highlightText } from '@/utils/utils';
 import styles from './index.less';
 
 import IconFont from '@/components/IconFont';
 import { deleteFolder, getFunctionTree } from '@/services/datadev';
 import { TreeNode as Treenode } from '@/types/datadev';
-import { FolderBelong, FolderTypes } from '@/constants/datadev';
+import { FolderTypes } from '@/constants/datadev';
 
 import CreateFolder from './components/CreateFolder';
 import TreeNodeTitle from './components/TreeNodeTitle';
 import IconCreate from './components/IconCreate';
 import IconFilter from './components/IconFilter';
 
-const { TreeNode } = Tree;
 const { confirm } = Modal;
 
 const FolderTree: FC = () => {
@@ -166,66 +166,38 @@ const FolderTree: FC = () => {
       },
     });
 
-  const isRootFolder = useCallback((belong: FolderBelong) => {
-    if (
-      belong === FolderBelong.DESIGN ||
-      belong === FolderBelong.DAG ||
-      belong === FolderBelong.DI ||
-      belong === FolderBelong.DEV
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, []);
-
-  // 为了加上样式所以使用TreeNode，不然可以用treeData属性
-  const loop = (data: Treenode[]): any => {
-    const n = data.length;
-    return data.map((_, i) => {
-      let tmp: any = _.name;
-      // 按组件的属性赋值key
-      _.key = _.cid;
-      // 给node加上样式
-      if (isRootFolder(_.belong) || i === n - 1) {
-        _.className = 'folder-margin';
-      }
-      const index = _.name.indexOf(keyWord);
-      if (index > -1) {
-        const beforeStr = _.name.substring(0, index);
-        const afterStr = _.name.substring(index + keyWord.length);
-        tmp = (
-          <span>
-            {beforeStr}
-            <span style={{ color: 'red' }}>{keyWord}</span>
-            {afterStr}
-          </span>
+  const treeData = useMemo(
+    () =>
+      formatTreeData(tree, (node) => {
+        const { name, parentId, type, cid } = node;
+        const titleText = (
+          <span
+            style={{ fontWeight: parentId ? 'normal' : 'bold' }}
+            dangerouslySetInnerHTML={{ __html: highlightText({ text: name, keyWord }) }}
+          ></span>
         );
-      }
-      // 给title加上样式
-      let title = <span className={_.parentId ? '' : 'folder-root'}>{tmp}</span>;
-      // 给type不为FolderTypes.RECORD的节点加上icon
-      if (_.type === FolderTypes.RECORD) {
-        _.title = title;
-      } else {
-        _.title = <TreeNodeTitle node={_} title={title} onAction={onAction} />;
-      }
+        let title = null;
+        // 给type不为FolderTypes.RECORD的节点加上icon
+        if (type === FolderTypes.RECORD) {
+          title = titleText;
+        } else {
+          title = <TreeNodeTitle node={node} title={titleText} onAction={onAction} />;
+        }
+        return {
+          ...node,
+          key: cid,
+          title,
+        };
+      }),
+    [tree, keyWord],
+  );
 
-      return _.children ? <TreeNode {..._}>{loop(_.children)}</TreeNode> : <TreeNode {..._} />;
-    });
-  };
-
-  // 渲染筛选树
-  const loopBelongTree = (data: Treenode[]) =>
-    data.map((_) => {
-      _.title = _.name;
-      _.key = _.belong;
-      return _.children ? (
-        <TreeNode {..._}>{loopBelongTree(_.children)}</TreeNode>
-      ) : (
-        <TreeNode {..._} />
-      );
-    });
+  // 功能性文件树
+  const functiontreeData = formatTreeData(functionTree, (node) => ({
+    ...node,
+    title: node.name,
+    key: node.belong,
+  }));
 
   // 获取父节点的key
   const getParentKey = (key: string, tree: Treenode[] = []): string => {
@@ -287,9 +259,8 @@ const FolderTree: FC = () => {
                   }
                   setBelongFunctions(checkedKeys);
                 }}
-              >
-                {loopBelongTree(functionTree)}
-              </Tree>
+                treeData={functiontreeData}
+              />
             ) : (
               <Empty />
             )
@@ -306,6 +277,7 @@ const FolderTree: FC = () => {
         <div className={styles.tree} style={{ marginTop: 16, height: '100%' }}>
           <Tree
             blockNode
+            treeData={treeData}
             onSelect={(selectedKeys, { node, ...props }) => {
               // 节点的浮窗菜单点击时会触发onSelect，不知道为什么。
               // 但是这个时候 selectedKeys.length === 0
@@ -323,9 +295,7 @@ const FolderTree: FC = () => {
               setExpandedKeys(keys);
               setAutoExpandParent(false);
             }}
-          >
-            {loop(tree)}
-          </Tree>
+          />
         </div>
       ) : (
         <Empty style={{ marginTop: 56 }} />
