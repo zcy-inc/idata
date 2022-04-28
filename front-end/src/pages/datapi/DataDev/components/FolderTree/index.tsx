@@ -107,6 +107,7 @@ const FolderTree: FC = () => {
 
   // 新建文件夹/标签/枚举/表
   const onAction = (key: Key, node?: Treenode) => {
+    setCurNode(node);
     switch (key) {
       case 'CreateFolder':
         setFolderMode('create');
@@ -133,17 +134,13 @@ const FolderTree: FC = () => {
         onCreateDAG();
         break;
       case 'CreateDI':
-        setCurNode(node);
         setVisibleTask(true);
         break;
       case 'CreateDev':
-        setCurNode(node);
         setVisibleDev(true);
         break;
       case 'CreateFun':
         onCreateFun();
-        break;
-      default:
         break;
     }
   };
