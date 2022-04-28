@@ -27,7 +27,7 @@ const FolderTree: FC = () => {
     tree,
     getTreeWrapped,
     setFolderMode,
-    curNode,
+    // curNode,
     setCurNode,
     belongFunctions,
     setBelongFunctions,
@@ -109,17 +109,6 @@ const FolderTree: FC = () => {
   const onAction = (key: Key, node?: Treenode) => {
     setCurNode(node);
     switch (key) {
-      case 'CreateFolder':
-        setFolderMode('create');
-        setVisible(true);
-        break;
-      case 'EditFolder':
-        setFolderMode('edit');
-        setVisible(true);
-        break;
-      case 'DeleteFolder':
-        onDeleteFolder();
-        break;
       case 'CreateTable':
         onCreateTable();
         break;
@@ -145,13 +134,26 @@ const FolderTree: FC = () => {
     }
   };
 
-  const onDeleteFolder = () =>
+  const onCreateFolder = (node: Treenode) => {
+    setCurNode(node);
+    setFolderMode('create');
+    setVisible(true);
+  };
+
+  const onEditFolder = (node: Treenode) => {
+    setCurNode(node);
+    setFolderMode('edit');
+    setVisible(true);
+  };
+
+  // 删除文件夹
+  const onDeleteFolder = (node: Treenode) =>
     confirm({
       title: '您确定要删除该文件夹吗？',
       autoFocusButton: null,
       onOk: () => {
-        if (curNode) {
-          deleteFolder({ id: curNode.id }).then((res) => {
+        if (node) {
+          deleteFolder({ id: node.id }).then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
               getTreeWrapped();
@@ -168,19 +170,39 @@ const FolderTree: FC = () => {
       case FolderBelong.DEV:
         return [];
       case FolderBelong.DESIGNTABLE:
-        operations.push({ label: '新建表', key: 'CreateTable', onClick: () => onAction('CreateTable', node) });
+        operations.push({
+          label: '新建表',
+          key: 'CreateTable',
+          onClick: () => onCreateFolder(node),
+        });
         break;
       case FolderBelong.DAG:
-        operations.push({ label: '新建DAG', key: 'CreateDAG', onClick: () => onAction('CreateDAG', node) });
+        operations.push({
+          label: '新建DAG',
+          key: 'CreateDAG',
+          onClick: () => onAction('CreateDAG', node),
+        });
         break;
       case FolderBelong.DI:
-        operations.push({ label: '新建DI', key: 'CreateDI', onClick: () => onAction('CreateDI', node) });
+        operations.push({
+          label: '新建DI',
+          key: 'CreateDI',
+          onClick: () => onAction('CreateDI', node),
+        });
         break;
       case FolderBelong.DEVJOB:
-        operations.push({ label: '新建作业', key: '新建作业', onClick: () => onAction('CreateDev', node) });
+        operations.push({
+          label: '新建作业',
+          key: '新建作业',
+          onClick: () => onAction('CreateDev', node),
+        });
         break;
       case FolderBelong.DEVFUN:
-        operations.push({ label: '新建函数', key: '新建函数', onClick: () => onAction('CreateFun', node) });
+        operations.push({
+          label: '新建函数',
+          key: '新建函数',
+          onClick: () => onAction('CreateFun', node),
+        });
         break;
     }
     operations.push({ type: 'divider' });
@@ -189,25 +211,28 @@ const FolderTree: FC = () => {
         operations.push({
           label: '新建文件夹',
           key: '新建文件夹',
-          onClick: () => onAction('CreateFolder', node),
+          onClick: () => onCreateFolder(node),
         });
         break;
       case FolderTypes.FOLDER:
-        operations.push({
-          label: '新建文件夹',
-          key: '新建文件夹',
-          onClick: () => onAction('CreateFolder', node),
-        });
-        operations.push({
-          label: '编辑文件夹',
-          key: '编辑文件夹',
-          onClick: () => onAction('EditFolder', node),
-        });
-        operations.push({
-          label: '删除文件夹',
-          key: '删除文件夹',
-          onClick: () => onAction('DeleteFolder', node),
-        });
+        operations.push(
+          {
+            label: '新建文件夹',
+            key: '新建文件夹',
+            onClick: () => onCreateFolder(node),
+          },
+          {
+            label: '编辑文件夹',
+            key: '编辑文件夹',
+            onClick: () => onEditFolder(node),
+          },
+          {
+            label: '删除文件夹',
+            key: '删除文件夹',
+            onClick: () => onDeleteFolder(node),
+          },
+        );
+
         break;
     }
     return operations;
