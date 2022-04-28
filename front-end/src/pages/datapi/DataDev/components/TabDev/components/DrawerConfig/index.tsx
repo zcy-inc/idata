@@ -449,7 +449,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       options={DAGList.map((_) => ({ label: _.name, value: _.id }))}
                       showSearch
                       filterOption={(input: string, option: any) =>
-                        option.label.indexOf(input) >= 0
+                        option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
                       }
                     />
                   </Item>

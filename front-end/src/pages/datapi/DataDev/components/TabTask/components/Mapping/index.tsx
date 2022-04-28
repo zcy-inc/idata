@@ -364,6 +364,9 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     });
     // 节点的点击功能
     graph.on('node:click', function (e: any) {
+      if(e.shape.cfg.name === 'anchor-point') { // 如果点击在锚点上
+        return;
+      }
       const node = e.item;
       const model = node._cfg.model;
       const data = model.data || {};

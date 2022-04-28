@@ -129,7 +129,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   };
 
   const columns = [
-    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '30%' },
+    { title: '父节点输出任务名称', dataIndex: 'prevJobName', key: 'prevJobName', width: '30%' },
     { title: '所属DAG', dataIndex: 'dagName', key: 'dagName' },
   ];
 
@@ -183,7 +183,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       size="large"
                       style={{ width }}
                       placeholder="请选择"
+                      showSearch
                       options={DAGList.map((_) => ({ label: _.name, value: _.id }))}
+                      filterOption={(input: string, option: any) =>
+                        option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
                     />
                   </Item>
                 </Col>

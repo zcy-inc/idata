@@ -608,6 +608,19 @@ export async function runTask(params: { id: number; environment: Environments })
 }
 
 /**
+ * 试运行作业
+ */
+ export async function tyrRun(data: any) {
+  return request<DefaultResponse & { data: boolean }>(
+    '/api/v1/idata/spark/sqlJobDryRun',
+    {
+      method: 'POST',
+      data,
+    },
+  );
+}
+
+/**
  * 保存Sql作业内容(done)
  */
 export async function saveSqlSpark(params: { jobId: number }, data: SqlSparkContent) {
