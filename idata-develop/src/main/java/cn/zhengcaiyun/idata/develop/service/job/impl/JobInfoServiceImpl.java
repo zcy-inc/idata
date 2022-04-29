@@ -44,6 +44,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
@@ -101,6 +102,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final SqlJobRepo sqlJobRepo;
     private final DAGRepo dagRepo;
+    private final CompositeFolderRepo compositeFolderRepo;
     private final JobManager jobManager;
     private final JobScheduleManager jobScheduleManager;
     private final JobEventPublisher jobEventPublisher;
@@ -110,7 +112,9 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DataSourceApi dataSourceApi;
 
     @Autowired
-    public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao, JobOutputMyDao jobOutputMyDao, JobInfoRepo jobInfoRepo,
+    public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
+                              JobOutputMyDao jobOutputMyDao,
+                              JobInfoRepo jobInfoRepo,
                               JobOutputRepo jobOutputRepo,
                               DevJobUdfMyDao devJobUdfMyDao,
                               JobPublishRecordMyDao jobPublishRecordMyDao,
@@ -118,6 +122,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                               JobExecuteConfigRepo jobExecuteConfigRepo,
                               JobPublishRecordRepo jobPublishRecordRepo,
                               SqlJobRepo sqlJobRepo, DAGRepo dagRepo,
+                              CompositeFolderRepo compositeFolderRepo,
                               JobManager jobManager,
                               JobScheduleManager jobScheduleManager,
                               JobEventPublisher jobEventPublisher,
@@ -135,6 +140,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.sqlJobRepo = sqlJobRepo;
         this.dagRepo = dagRepo;
+        this.compositeFolderRepo = compositeFolderRepo;
         this.jobManager = jobManager;
         this.jobDependenceRepo = jobDependenceRepo;
         this.jobScheduleManager = jobScheduleManager;
@@ -291,6 +297,18 @@ public class JobInfoServiceImpl implements JobInfoService {
     @Override
     public JobDryRunDto dryRunJob(Long jobId, Integer version) {
         return null;
+    }
+
+    @Override
+    public Boolean moveJob(List<Long> jobIds, Long destFolderId, Operator operator) {
+        checkArgument(!CollectionUtils.isEmpty(jobIds), "请选择作业");
+        checkArgument(Objects.nonNull(destFolderId), "请选择目标文件夹");
+        final List<Long> finalJobIds = jobIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return jobInfoRepo.updateJobFolder(finalJobIds, destFolderId, operator.getNickname());
     }
 
     @Override
@@ -574,7 +592,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 StringBuffer jarArgs = new StringBuffer("");
                 if (!CollectionUtils.isEmpty(contentSpark.getAppArguments())) {
                     for (Object script : contentSpark.getAppArguments()) {
-                        JobArgumentDto dto = (JobArgumentDto)script;
+                        JobArgumentDto dto = (JobArgumentDto) script;
                         jarArgs.append(dto.getArgumentValue() + " ");
                     }
                     sparkResponse.setAppArguments(jarArgs.toString());
@@ -603,7 +621,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 StringBuffer shellArgs = new StringBuffer("");
                 if (!CollectionUtils.isEmpty(contentScript.getScriptArguments())) {
                     for (Object script : contentScript.getScriptArguments()) {
-                        JobArgumentDto dto = (JobArgumentDto)script;
+                        JobArgumentDto dto = (JobArgumentDto) script;
                         shellArgs.append(dto.getArgumentValue() + " ");
                     }
                     scriptResponse.setScriptArguments(shellArgs.toString());
@@ -687,6 +705,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     /**
      * 生成src query
+     *
      * @param mappingColumnList
      * @param srcReadFilter
      * @param srcTables

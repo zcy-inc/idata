@@ -231,4 +231,12 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .orderBy(jobInfo.id.descending())
                 .limit(limit).offset(offset));
     }
+
+    @Override
+    public Boolean updateJobFolder(List<Long> jobIds, Long destFolderId, String operator) {
+        jobInfoDao.update(dsl -> dsl.set(jobInfo.folderId).equalTo(destFolderId)
+                .set(jobInfo.editor).equalTo(operator)
+                .where(jobInfo.id, isIn(jobIds)));
+        return Boolean.TRUE;
+    }
 }

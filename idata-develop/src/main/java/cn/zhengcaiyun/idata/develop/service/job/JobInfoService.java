@@ -25,7 +25,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @description:
@@ -52,6 +51,8 @@ public interface JobInfoService {
 
     JobDryRunDto dryRunJob(Long jobId, Integer version);
 
+    Boolean moveJob(List<Long> jobIds, Long destFolderId, Operator operator);
+
     /**
      * jobName模糊匹配
      *
@@ -72,9 +73,10 @@ public interface JobInfoService {
 
     /**
      * 填充JobName
-     * @param list 填充的集合
-     * @param klass 范型类型
-     * @param jobIdFieldName 对应的jobId
+     *
+     * @param list             填充的集合
+     * @param klass            范型类型
+     * @param jobIdFieldName   对应的jobId
      * @param jobNameFieldName 对应的jobName
      * @param <T>
      */
@@ -82,6 +84,7 @@ public interface JobInfoService {
 
     /**
      * 获取任务详情
+     *
      * @param id
      * @param env
      * @return

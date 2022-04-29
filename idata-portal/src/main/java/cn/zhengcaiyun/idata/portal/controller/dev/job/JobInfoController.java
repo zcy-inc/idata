@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoUpdateRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.HashBasedTable;
@@ -45,8 +46,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * job-basic-controller
@@ -133,6 +132,7 @@ public class JobInfoController {
     /**
      * 新增DI作业接口
      * 由于DI前端下拉和数据库模型映射不一致，需要做额外转换，所以单独addJobInfo()拉出一个接口
+     *
      * @return
      * @throws IllegalAccessException
      */
@@ -333,6 +333,17 @@ public class JobInfoController {
             throw new IllegalAccessException("没有任务监控权限");
         }
         return RestResult.success(jobInfoService.pagingOverhangJob(condition, PageParam.of(limit, offset)));
+    }
+
+    /**
+     * 移动作业
+     *
+     * @param batchOperationReq 请求对象
+     * @return
+     */
+    @PostMapping("/move")
+    public RestResult<Boolean> moveJob(@RequestBody JobBatchOperationReq batchOperationReq) {
+        return RestResult.success(jobInfoService.moveJob(batchOperationReq.getJobIds(), batchOperationReq.getDestFolderId(), OperatorContext.getCurrentOperator()));
     }
 
 }
