@@ -522,7 +522,7 @@ export async function getConfiguredTaskList(params: { environment: Environments 
   );
 }
 
-// 获取已配置的作业列表（依赖的上游任务）
+// 获取已配置的作业列表（依赖的上游作业）
 export async function getDependenceTaskList(params: { environment: Environments }) {
   return request<Tresponse<ConfiguredTaskListItem[]>>(
     `/api/p1/dev/jobs/environments/${params.environment}/jobs`,

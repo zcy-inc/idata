@@ -119,10 +119,10 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
     >
       <Title>基本配置</Title>
       <Form form={form} layout="horizontal" colon={false}>
-        <Item name="name" label="任务名称" rules={ruleText}>
+        <Item name="name" label="作业名称" rules={ruleText}>
           <Input size="large" style={{ width: widthL }} placeholder="请输入" />
         </Item>
-        <Item name="jobType" label="任务类型" rules={ruleSelc}>
+        <Item name="jobType" label="作业类型" rules={ruleSelc}>
           <Select
             size="large"
             style={{ width: widthL }}

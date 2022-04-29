@@ -79,7 +79,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   }, [visible]);
 
   const columnsDependence: ColumnsType<ConfiguredTaskListItem> = [
-    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '45%' },
+    { title: '父节点输出作业名称', dataIndex: 'jobName', key: 'jobName', width: '45%' },
     { title: '所属DAG', dataIndex: 'dagName', key: 'dagName', width: '45%' },
     {
       title: '操作',
@@ -202,7 +202,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.STAG) {
       const curConfiguredTaskId = stagForm.getFieldValue('configuredTask');
       if (!curConfiguredTaskId) {
-        message.info('请先选择依赖的上游任务');
+        message.info('请先选择依赖的上游作业');
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
@@ -217,7 +217,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (activeKey === Environments.PROD) {
       const curConfiguredTaskId = prodForm.getFieldValue('configuredTask');
       if (!curConfiguredTaskId) {
-        message.info('请先选择依赖的上游任务');
+        message.info('请先选择依赖的上游作业');
         return;
       }
       curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
@@ -547,7 +547,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 <Item
                   name="configuredTask"
                   className={styles['reset-label']}
-                  label="依赖的上游任务"
+                  label="依赖的上游作业"
                 >
                   <Select
                     style={{ width }}
@@ -606,7 +606,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   <Item
                     name="destDataSourceId"
                     className={styles['reset-label']}
-                    label="本任务的输出"
+                    label="本作业的输出"
                   >
                     <Select
                       style={{ width }}
