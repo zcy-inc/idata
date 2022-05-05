@@ -96,7 +96,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
     >
       <Title>基本配置</Title>
       <Form form={form} layout="horizontal" colon={false}>
-        <Item name="name" label="任务名称" rules={ruleSelc}>
+        <Item name="name" label="作业名称" rules={ruleSelc}>
           <Input size="large" style={{ width: widthL }} placeholder="请选择" />
         </Item>
         <Item name="dwLayerCode" label="数仓分层" rules={ruleSelc}>
@@ -108,7 +108,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
             disabled
           />
         </Item>
-        <Item name="jobType" label="任务类型" rules={ruleText}>
+        <Item name="jobType" label="作业类型" rules={ruleText}>
           <Select
             size="large"
             style={{ width: widthL }}

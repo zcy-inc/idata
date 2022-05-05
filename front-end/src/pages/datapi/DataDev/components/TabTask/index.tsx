@@ -69,6 +69,15 @@ const minWidth = 200;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
+//弹窗ModalForm的title枚举
+enum ActionModalTitle {
+  "resume"="恢复作业",
+  "run"="选择环境",
+  "pause"= "暂停作业"
+}
+
+type ActionType = keyof typeof ActionModalTitle;
+
 // 表选择组件
 const TableSelect: FC<{
   options: TaskTable[];
@@ -177,7 +186,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [actionType, setActionType] = useState('');
+  const [actionType, setActionType] = useState<ActionType>('run');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
@@ -398,7 +407,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   /**
    * 暂停、恢复、单次运行任务
    */
-  const onAction = (type: 'pause' | 'resume' | 'run') => {
+  const onAction = (type: ActionType) => {
     setActionType(type);
     setVisibleAction(true);
   };
@@ -935,7 +944,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           </Item>
         </ModalForm>
         <ModalForm
-          title="选择环境"
+          title={ActionModalTitle[actionType]}
           layout="horizontal"
           width={536}
           labelCol={{ span: 6 }}
