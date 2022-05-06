@@ -16,7 +16,7 @@ export const FolderFormItem: FC<{ belongFunctions: FolderBelong[] } & CascaderSe
     },
   );
   return (
-    <Form.Item name="folderId" label="目标文件夹">
+    <Form.Item name="folderId" label="目标文件夹" rules={[{ required: true, message: '请选择' }]}>
       <CascaderSelect size="large" options={folderTree} {...rest} />
     </Form.Item>
   );
@@ -24,4 +24,12 @@ export const FolderFormItem: FC<{ belongFunctions: FolderBelong[] } & CascaderSe
 
 export const DAGFolderFormItem: FC<CascaderSelectProps> = (props) => {
   return <FolderFormItem belongFunctions={[FolderBelong.DAG]} {...props} />;
+};
+
+export const DEVJOBFolderFormItem: FC<CascaderSelectProps> = (props) => {
+  return <FolderFormItem belongFunctions={[FolderBelong.DEVJOB]} {...props} />;
+};
+
+export const DEVFUNFolderFormItem: FC<CascaderSelectProps> = (props) => {
+  return <FolderFormItem belongFunctions={[FolderBelong.DEVFUN]} {...props} />;
 };

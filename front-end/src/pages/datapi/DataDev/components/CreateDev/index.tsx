@@ -4,16 +4,15 @@ import { Form, Input, message, Select } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from './index.less';
-
 import {
   createTask,
   getDataDevTypes,
   getEnumValues,
-  getFolders,
   getTaskTypes,
 } from '@/services/datadev';
-import { FolderBelong, TaskCategory, TaskTypes } from '@/constants/datadev';
-import { Folder, TaskType } from '@/types/datadev';
+import { TaskCategory, TaskTypes } from '@/constants/datadev';
+import { TaskType } from '@/types/datadev';
+import { DEVJOBFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
 
@@ -25,15 +24,15 @@ const rules = [{ required: true, message: '请选择' }];
 const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [taskTypes, setTaskTypes] = useState<TaskCategory[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [taskType, setTaskType] = useState<TaskCategory>();
   const [languages, setLanguages] = useState<TaskType[]>([]);
   const [form] = Form.useForm();
-  const { visibleDev, setVisibleDev, getTreeWrapped } = useModel('datadev', (_) => ({
-    visibleDev: _.visibleDev,
-    setVisibleDev: _.setVisibleDev,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { visibleDev, setVisibleDev, getTreeWrapped, curNode } = useModel('datadev');
+
+  useEffect(() => {
+    const folderId = curNode?.id;
+    form.setFieldsValue({ folderId });
+  }, [curNode])
 
   useEffect(() => {
     getDataDevTypes()
@@ -41,9 +40,6 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       .catch((err) => {});
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
-      .catch((err) => {});
-    getFolders({ belong: FolderBelong.DEVJOB })
-      .then((res) => setFolders(res.data))
       .catch((err) => {});
   }, []);
 
@@ -133,16 +129,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="folderId" label="目标文件夹" rules={rules}>
-        <Select
-          size="large"
-          style={{ width }}
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          showSearch
-          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-        />
-      </Item>
+      <DEVJOBFolderFormItem style={{ width }} />
       <Item name="remark" label="备注说明">
         <TextArea placeholder="请输入" style={{ width }} />
       </Item>
