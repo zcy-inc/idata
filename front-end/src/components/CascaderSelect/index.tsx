@@ -3,12 +3,12 @@ import { Cascader, CascaderProps } from 'antd';
 import { SingleValueType } from 'rc-cascader/es/cascader';
 import { getTreeParents } from '@/utils/utils';
 
-interface FormTreeSelectProps extends Omit<CascaderProps<any>, 'value' | 'onChange'> {
+export interface CascaderSelectProps extends Omit<CascaderProps<any>, 'value' | 'onChange'> {
   value?: React.Key;
   onChange?: (value?: React.Key) => void;
 }
 
-const FormTreeSelect: FC<FormTreeSelectProps> = ({ value, onChange, options, ...rest }) => {
+export const CascaderSelect: FC<CascaderSelectProps> = ({ value, onChange, options, ...rest }) => {
   let allKeys: SingleValueType | undefined = undefined;
   if (value && options) {
     allKeys = getTreeParents(options, (node) => node.value, value).map((node) => node.value);
@@ -23,5 +23,3 @@ const FormTreeSelect: FC<FormTreeSelectProps> = ({ value, onChange, options, ...
   };
   return <Cascader size="large" {...rest} value={allKeys} options={options} onChange={handleChange} />;
 };
-
-export default FormTreeSelect;
