@@ -4,11 +4,11 @@ import { Descriptions } from 'antd';
 import { get } from 'lodash';
 import type { FC } from 'react';
 import { getDAGStatus } from '@/utils/datadev';
-
-import { DAG, Folder } from '@/types/datadev';
+import { DAG } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
 import Title from '@/components/Title';
-import { getEnumValues, getFolders } from '@/services/datadev';
+import { getEnumValues } from '@/services/datadev';
+import { useFolderNames } from '../../../../../hooks/useFolderNames';
 
 interface ViewDAGProps {
   data?: DAG;
@@ -27,11 +27,10 @@ const MapPeriodRangeTranslated = {
 
 const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
+  const { folderNames } = useFolderNames([FolderBelong.DAG], data?.dagInfoDto?.folderId);
 
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' }).then((res) => setLayers(res.data));
-    getFolders({ belong: FolderBelong.DAG }).then((res) => setFolders(res.data));
   }, []);
 
   const renderPeriod = () => {
@@ -112,9 +111,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
         <Item label="数仓分层">
           {layers.find((_) => _.valueCode === data?.dagInfoDto.dwLayerCode)?.enumValue || '-'}
         </Item>
-        <Item label="目标文件夹">
-          {folders.find((_) => _.id === data?.dagInfoDto.folderId)?.name || '-'}
-        </Item>
+        <Item label="目标文件夹">{folderNames}</Item>
         <Item label="始止时间">
           {moment(data?.dagScheduleDto.beginTime).format(format)}
           {' ~ '}
