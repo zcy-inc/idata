@@ -10,17 +10,17 @@ import { Form } from 'antd';
 import moment from 'moment';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
-import { Tip } from '@/components';
 import { getDAGStatus } from '@/utils/datadev';
-import styles from './index.less';
-
 import { dayOptions, hourOptions, minuteOptions, monthOptions, weekOptions } from './constants';
-import { IconFont } from '@/components';
-import { DAG, Folder } from '@/types/datadev';
+import { IconFont, CascaderSelect, Tip } from '@/components';
+import { DAG } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
-import { getEnumValues, getFolders } from '@/services/datadev';
+import { getEnumValues, getSpecifiedFunctionTree } from '@/services/datadev';
 import { getEnvironments } from '@/services/datasource';
 import { Environments } from '@/constants/datasource';
+import { useRequest } from 'ahooks';
+
+import styles from './index.less';
 
 interface EditDAGProps {
   data?: DAG;
@@ -36,18 +36,16 @@ const { Item } = Form;
 
 const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [envs, setEnvs] = useState<Environments[]>([]);
   const [periodRange, setPeriodRange] = useState<PeriodRange>(PeriodRange.YEAR);
   const [triggerMode, setTriggerMode] = useState(TriggerMode.INTERVAL);
   const [cronExpression, setCronExpression] = useState('');
 
+  const { data: folderTree = [] } = useRequest(() => getSpecifiedFunctionTree({ belongFunctions: [FolderBelong.DAG] }));
+
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
-      .catch((err) => {});
-    getFolders({ belong: FolderBelong.DAG })
-      .then((res) => setFolders(res.data))
       .catch((err) => {});
     getEnvironments()
       .then((res) => setEnvs(res.data))
@@ -324,19 +322,9 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           fieldProps={{ size: 'large', style: { width } }}
           rules={ruleSlct}
         />
-        <ProFormSelect
-          name="folderId"
-          label="目标文件夹"
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          fieldProps={{
-            size: 'large',
-            style: { width },
-            showSearch: true,
-            filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
-          }}
-          rules={ruleSlct}
-        />
+        <Form.Item name="folderId" label="目标文件夹" >
+          <CascaderSelect size="large" options={folderTree} style={{ width }} />
+        </Form.Item>
         <ProFormDateTimeRangePicker
           name="range"
           label="始止时间"
