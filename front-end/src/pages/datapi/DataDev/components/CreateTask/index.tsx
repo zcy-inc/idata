@@ -9,13 +9,11 @@ import styles from './index.less';
 
 import {
   getEnumValues,
-  getFolders,
   createDIJob,
   getDIJobTypes,
   getDISyncMode,
 } from '@/services/datadev';
-import { FolderBelong } from '@/constants/datadev';
-import { Folder } from '@/types/datadev';
+import { DIFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
 
@@ -26,13 +24,14 @@ const rules = [{ required: true, message: '请选择' }];
 
 const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [form] = Form.useForm();
-  const { visibleTask, setVisibleTask, getTreeWrapped } = useModel('datadev', (_) => ({
-    visibleTask: _.visibleTask,
-    setVisibleTask: _.setVisibleTask,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { visibleTask, setVisibleTask, getTreeWrapped, curNode } = useModel('datadev');
+
+  useEffect(() => {
+    const folderId = curNode?.id;
+    form.setFieldsValue({ folderId });
+  }, [curNode])
+
   const { data: jobTypeOptions } = useRequest(getDIJobTypes);
   const { data: syncModeOptions = [], run: getSyncModeOptions } = useRequest(getDISyncMode, {
     manual: true,
@@ -57,9 +56,6 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
-      .catch((err) => {});
-    getFolders({ belong: FolderBelong.DI })
-      .then((res) => setFolders(res.data))
       .catch((err) => {});
   }, []);
 
@@ -118,16 +114,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="folderId" label="目标文件夹" rules={rules}>
-        <Select
-          size="large"
-          style={{ width }}
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          showSearch
-          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-        />
-      </Item>
+      <DIFolderFormItem style={{ width }} />
       <Item name="remark" label="备注说明">
         <TextArea placeholder="请输入" style={{ width }} />
       </Item>

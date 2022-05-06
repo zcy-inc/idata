@@ -7,6 +7,7 @@ import Title from '@/components/Title';
 import { DIJobBasicInfo } from '@/types/datadev';
 import { getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
+import { DIFolderFormItem } from '../../../../../components/FolderFormItem';
 
 import styles from './index.less';
 
@@ -129,6 +130,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
         <Item name="creator" label="所属人">
           <Input size="large" style={{ width: widthL }} placeholder="-" disabled />
         </Item>
+        <DIFolderFormItem style={{ width: widthL }} />
         <Item name="remark" label="备注">
           <TextArea style={{ width: widthL }} placeholder="请输入" />
         </Item>
