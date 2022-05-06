@@ -35,6 +35,7 @@ import {
   saveSpark,
   saveSqlSpark,
   submitTask,
+  tyrRun
 } from '@/services/datadev';
 import { IconFont } from '@/components';
 
@@ -49,6 +50,8 @@ import SparkPython from './components/Content/SparkPython';
 import ScriptShell from './components/Content/ScriptShell';
 import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
+import TyeRunSetting from './components/TryRunSetting';
+import showDialog from '@/utils/showDialog';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -64,6 +67,7 @@ enum Btns {
   DELETE, // 删除
   DIVIDER,
   JOB_CONFIG,
+  TRY_RUN
 }
 
 const { Item } = Form;
@@ -72,10 +76,10 @@ const { TextArea } = Input;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
-const TabTask: FC<TabTaskProps> = ({ pane }) => {
+const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [task, setTask] = useState<Task>();
   const [versions, setVersions] = useState<TaskVersion[]>([]);
-  const [version, setVersion] = useState<number | undefined>(-1);
+  const [version, setVersion] = useState<string | undefined>('-1');
   const [content, setContent] = useState<any>({});
 
   const [visibleJobConfig, setVisibleJobConfig] = useState(false);
@@ -115,8 +119,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   }, [pane.id]);
 
   useEffect(() => {
-    if (version && version > 0) {
-      getTaskContent(version);
+    if(version) {
+      const ver = version?.split('#')[0];
+      getTaskContent(+ver);
     }
   }, [version]);
 
@@ -144,7 +149,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       .then((res) => {
         setVersions(res.data);
         if (res.data[0]?.version) {
-          setVersion(res.data[0]?.version);
+          setVersion(`${res.data[0]?.version}#${res.data[0].environment}`);
         } else {
           setVersion(undefined);
         }
@@ -456,16 +461,32 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
+  const tryRun = () => {
+    showDialog('试运行配置', {
+      beforeConfirm: (dialog, form, done) => {
+        form.form.validateFields().then((values: any) => {
+          tyrRun({
+            ...values,
+            jobId: pane.id,
+            version
+          }).then(() => {
+            done();
+          })
+        })
+      }
+    }, TyeRunSetting)
+  }
+
   const btnMap = new Map([
     [
       Btns.SAVE,
-      <Tooltip title="保存">
+      <Tooltip title="保存" key="9">
         <Button className={styles.btn} icon={<IconFont type="icon-baocun" />} onClick={onSave} />
       </Tooltip>,
     ],
     [
       Btns.DEBUG,
-      <Tooltip title="调试">
+      <Tooltip title="调试" key="8">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-tiaoshi" />}
@@ -476,7 +497,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.RUN_ONCE,
-      <Tooltip title="单次运行">
+      <Tooltip title="单次运行" key="7">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-yunxing" />}
@@ -486,7 +507,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.SUBMIT,
-      <Tooltip title="提交版本">
+      <Tooltip title="提交版本" key="6">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-tijiaofabu" />}
@@ -502,7 +523,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.ONLINE,
-      <Tooltip title="上线">
+      <Tooltip title="上线" key="5">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-yunxingbaise-copy" />}
@@ -512,7 +533,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.OFFLINE,
-      <Tooltip title="下线">
+      <Tooltip title="下线" key="4">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-zantingbaise-copy" />}
@@ -522,7 +543,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DELETE,
-      <Tooltip title="删除">
+      <Tooltip title="删除" key="3">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-shanchubaise-copy" />}
@@ -532,15 +553,25 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DIVIDER,
-      <Divider type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
+      <Divider key="2" type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
     ],
     [
       Btns.JOB_CONFIG,
-      <Tooltip title="作业配置">
+      <Tooltip title="作业配置" key="1">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-peizhiguanli" />}
           onClick={() => setVisibleJobConfig(true)}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.TRY_RUN,
+      <Tooltip title="试运行" key="10">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-peizhiguanli" />}
+          onClick={tryRun}
         />
       </Tooltip>,
     ],
@@ -560,7 +591,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           Btns.OFFLINE,
           Btns.DELETE,
           Btns.DIVIDER,
-          Btns.JOB_CONFIG,
+          Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
         return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
@@ -572,7 +603,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           Btns.SUBMIT,
           Btns.ONLINE,
           Btns.OFFLINE,
-          Btns.DELETE,
+          Btns.DELETE
         ];
       default:
         return [Btns.SAVE, Btns.RUN_ONCE, Btns.SUBMIT, Btns.ONLINE, Btns.OFFLINE, Btns.DELETE];
@@ -646,7 +677,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     disabled={versions.length <= 0}
                     options={versions.map((_) => ({
                       label: renderVersionLabel(_),
-                      value: _.version,
+                      value: `${_.version}#${_.environment}`,
                     }))}
                     value={version}
                     onChange={(v) => setVersion(v as number)}
@@ -814,4 +845,4 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   );
 };
 
-export default TabTask;
+export default TabDev;

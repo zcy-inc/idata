@@ -69,6 +69,15 @@ const minWidth = 200;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
+//弹窗ModalForm的title枚举
+enum ActionModalTitle {
+  "resume"="恢复作业",
+  "run"="选择环境",
+  "pause"= "暂停作业"
+}
+
+type ActionType = keyof typeof ActionModalTitle;
+
 // 表选择组件
 const TableSelect: FC<{
   options: TaskTable[];
@@ -137,14 +146,14 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     getDIJobBasicInfo(jobId),
   );
   // 当前版本
-  const [version, setVersion] = useState<number>();
+  const [version, setVersion] = useState<string>();
   // 版本列表
   const { data: versions = [], refresh: refreshVersions } = useRequest(
     () => getTaskVersions({ jobId: pane.id }).then(({ data }) => data),
     {
       onSuccess: (data) => {
         if (typeof data[0]?.version !== 'undefined') {
-          setVersion(data[0]?.version);
+          setVersion(`${data[0]?.version}#${data[0]?.environment}`);
         }
       },
     },
@@ -177,7 +186,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const [destColumns, setDestColumns] = useState<MappedColumn[]>([]);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [actionType, setActionType] = useState('');
+  const [actionType, setActionType] = useState<ActionType>('run');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
@@ -228,7 +237,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   useEffect(() => {
     (async () => {
       if (typeof jobId !== 'undefined' && typeof version !== 'undefined') {
-        const { data } = await getDIJobContent({ jobId, version });
+        const ver = +version?.split('#')[0];
+        const { data } = await getDIJobContent({ jobId, version: ver });
         setJobContent(data);
         setSrcColumns(data.srcCols);
         setDestColumns(data.destCols);
@@ -397,7 +407,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   /**
    * 暂停、恢复、单次运行任务
    */
-  const onAction = (type: 'pause' | 'resume' | 'run') => {
+  const onAction = (type: ActionType) => {
     setActionType(type);
     setVisibleAction(true);
   };
@@ -460,15 +470,15 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   };
 
   /**
-   * 同行映射
+   * 同名映射
    */
   const onEponymousMapping = () => {
     const cloneSrcColumns = cloneDeep(srcColumns);
-    const cloneDestColumns = cloneDeep(destColumns);
-    srcColumns.forEach((_, i) => (_.mappedColumn = cloneDeep(cloneDestColumns[i])));
-    destColumns.forEach((_, i) => (_.mappedColumn = cloneDeep(cloneSrcColumns[i])));
-    setSrcColumns([...srcColumns]);
-    setSrcColumns([...destColumns]);
+    cloneSrcColumns.forEach(_ => {
+      const exist = destColumns.find(destCol => destCol.name === _.name);
+      _.mappedColumn = exist ? cloneDeep(exist) : undefined
+    });
+    setSrcColumns([...cloneSrcColumns]);
   };
 
   const renderVersionLabel = (_: TaskVersion) => {
@@ -509,7 +519,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       value: table.tableName,
     }));
     items.push(
-      <Item name="srcDataSourceType" label="数据源类型" rules={ruleSlct}>
+      <Item name="srcDataSourceType" label="数据源类型" rules={ruleSlct} key="1">
         <Select
           size="large"
           style={{ maxWidth, minWidth }}
@@ -522,7 +532,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Item>,
     );
     items.push(
-      <Item name="srcDataSourceId" label="数据源名称" rules={ruleSlct}>
+      <Item name="srcDataSourceId" label="数据源名称" rules={ruleSlct} key="2">
         <Select
           size="large"
           style={{ maxWidth, minWidth }}
@@ -536,7 +546,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     );
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
-        <Item label="表" name="srcTableConfig" rules={ruleSlct}>
+        <Item label="表" name="srcTableConfig" rules={ruleSlct} key="3">
           <TableSelectInput
             options={options}
             style={{ maxWidth, minWidth }}
@@ -546,7 +556,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       );
     } else if (srcDataSourceType === DataSourceType.HIVE) {
       items.push(
-        <Fragment>
+        <Fragment key="4">
           <Item name="srcDbName" label="数据库" rules={ruleSlct} style={{ width: '100%' }}>
             <Select
               size="large"
@@ -564,19 +574,19 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       );
     } else {
       items.push(
-        <Item label="表" name="srcTables" style={{ width: '100%' }}>
+        <Item label="表" name="srcTables" style={{ width: '100%' }} key="5">
           <TableSelect showRefresh options={srcTableOptions} onRefresh={refreshSrcVisualise} />
         </Item>,
       );
     }
     items.push(
-      <Item name="srcReadFilter" label="数据过滤">
+      <Item name="srcReadFilter" label="数据过滤" key="6">
         <TextArea style={{ maxWidth, minWidth }} placeholder="请参考相应SQL语法填写where过滤语句" />
       </Item>,
     );
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
-        <Fragment>
+        <Fragment key="7">
           <Item name="srcReadShardKey" label="切分键">
             <Input
               size="large"
@@ -608,7 +618,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   const getDestItems = () => {
     const items = [];
     items.push(
-      <Item name="destDataSourceType" label="数据源类型" rules={ruleSlct}>
+      <Item name="destDataSourceType" label="数据源类型" rules={ruleSlct} key="1">
         <Select
           size="large"
           style={{ maxWidth, minWidth }}
@@ -621,7 +631,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Item>,
     );
     items.push(
-      <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct}>
+      <Item name="destDataSourceId" label="数据源名称" rules={ruleSlct} key="2">
         <Select
           size="large"
           style={{ maxWidth, minWidth }}
@@ -634,7 +644,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Item>,
     );
     const batchWriteNode = (
-      <Fragment>
+      <Fragment key="3">
         <Item name="destBulkNum" label="批量写入数据量" rules={ruleText}>
           <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
         </Item>
@@ -649,7 +659,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Fragment>
     );
     const destTableNode = (
-      <Item name="destTable" label="表" rules={ruleText}>
+      <Item name="destTable" label="表" rules={ruleText} key="5">
         <TableInput
           showRefresh={basicInfo?.jobType !== DIJobType.DI}
           onRefresh={refreshDestVisualise}
@@ -657,12 +667,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Item>
     );
     const backFlowDestWriteModeNode = (
-      <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
+      <Item name="destWriteMode" label="写入模式" rules={ruleSlct} key="6">
         <Radio.Group options={backflowWriteModeOptions} />
       </Item>
     );
     const topicNode = (
-      <Item name="destTopic" label="topic" rules={ruleSlct}>
+      <Item name="destTopic" label="topic" rules={ruleSlct} key="7">
         <Select
           size="large"
           style={{ maxWidth, minWidth }}
@@ -674,13 +684,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </Item>
     );
     const customParamsNode = (
-      <Item name="destPropertyMap" label="自定义参数">
+      <Item name="destPropertyMap" label="自定义参数" key="8">
         <MapInput style={{ maxWidth, minWidth }} />
       </Item>
     );
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
-        <Fragment>
+        <Fragment key="9">
           {destTableNode}
           <Item name="destBeforeWrite" label="导入前准备语句">
             <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据前执行的SQL脚本" />
@@ -699,7 +709,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       )
     ) {
       items.push(
-        <Fragment>
+        <Fragment key="10">
           {destTableNode}
           {backFlowDestWriteModeNode}
           {batchWriteNode}
@@ -707,7 +717,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       );
     } else if ([DataSourceType.KAFKA].includes(destDataSourceType)) {
       items.push(
-        <Fragment>
+        <Fragment key="11">
           {topicNode}
           {batchWriteNode}
           {customParamsNode}
@@ -715,7 +725,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       );
     } else if ([DataSourceType.DORIS, DataSourceType.ELASTICSEARCH].includes(destDataSourceType)) {
       items.push(
-        <Fragment>
+        <Fragment key="12">
           {destTableNode}
           {backFlowDestWriteModeNode}
           {batchWriteNode}
@@ -801,7 +811,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 disabled={versions.length <= 0}
                 options={versions.map((_) => ({
                   label: renderVersionLabel(_),
-                  value: _.version,
+                  value: `${_.version}#${_.environment}`,
                 }))}
                 value={version}
                 onChange={(v) => setVersion(v)}
@@ -934,7 +944,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           </Item>
         </ModalForm>
         <ModalForm
-          title="选择环境"
+          title={ActionModalTitle[actionType]}
           layout="horizontal"
           width={536}
           labelCol={{ span: 6 }}

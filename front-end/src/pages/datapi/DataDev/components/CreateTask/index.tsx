@@ -41,11 +41,11 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   const handleCreateDI = async (values: CreateDIJobDto) => {
     const { success, msg } = await createDIJob(values);
     if (success) {
-      message.success('创建任务成功');
+      message.success('创建作业成功');
       setVisibleTask(false);
       getTreeWrapped();
     } else {
-      message.success(`创建任务失败: ${msg}`);
+      message.success(`创建作业失败: ${msg}`);
     }
   };
 
@@ -66,7 +66,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   return (
     <ModalForm
       className={styles.form}
-      title="新建任务"
+      title="新建作业"
       layout="horizontal"
       width={536}
       labelCol={{ span: 6 }}
@@ -84,7 +84,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       }}
       onFinish={handleCreateDI}
     >
-      <Item name="jobType" label="任务类型" rules={rules}>
+      <Item name="jobType" label="作业类型" rules={rules}>
         <Select
           size="large"
           style={{ width }}
@@ -105,7 +105,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="name" label="任务名称" rules={rules}>
+      <Item name="name" label="作业名称" rules={rules}>
         <Input size="large" style={{ width }} placeholder="请输入" />
       </Item>
       <Item name="dwLayerCode" label="数仓分层" rules={rules}>

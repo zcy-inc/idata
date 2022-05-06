@@ -20,4 +20,6 @@ export { default as TableSelectInput } from './TableSelectInput';
 
 export { default as Title } from './Title';
 
+export { default as TreeTitle } from './TreeTitle';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };

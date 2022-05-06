@@ -1,20 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty } from 'antd';
 import { useModel } from 'umi';
 import type { FC, Key } from 'react';
+import { formatTreeData, highlightText } from '@/utils/utils';
+import { usePersistFn } from '@/hooks';
 import styles from './index.less';
-
-import IconFont from '@/components/IconFont';
+import { IconFont, TreeTitle } from '@/components';
+import { Operation } from '@/components/TreeTitle';
 import { deleteFolder, getFunctionTree } from '@/services/datadev';
 import { TreeNode as Treenode } from '@/types/datadev';
-import { FolderBelong, FolderTypes } from '@/constants/datadev';
-
+import { FolderTypes, funcFolderIconMap, FolderBelong } from '@/constants/datadev';
 import CreateFolder from './components/CreateFolder';
-import TreeNodeTitle from './components/TreeNodeTitle';
 import IconCreate from './components/IconCreate';
 import IconFilter from './components/IconFilter';
 
-const { TreeNode } = Tree;
 const { confirm } = Modal;
 
 const FolderTree: FC = () => {
@@ -28,7 +27,7 @@ const FolderTree: FC = () => {
     tree,
     getTreeWrapped,
     setFolderMode,
-    curNode,
+    // curNode,
     setCurNode,
     belongFunctions,
     setBelongFunctions,
@@ -108,18 +107,8 @@ const FolderTree: FC = () => {
 
   // 新建文件夹/标签/枚举/表
   const onAction = (key: Key, node?: Treenode) => {
+    setCurNode(node);
     switch (key) {
-      case 'CreateFolder':
-        setFolderMode('create');
-        setVisible(true);
-        break;
-      case 'EditFolder':
-        setFolderMode('edit');
-        setVisible(true);
-        break;
-      case 'DeleteFolder':
-        onDeleteFolder();
-        break;
       case 'CreateTable':
         onCreateTable();
         break;
@@ -134,29 +123,37 @@ const FolderTree: FC = () => {
         onCreateDAG();
         break;
       case 'CreateDI':
-        setCurNode(node);
         setVisibleTask(true);
         break;
       case 'CreateDev':
-        setCurNode(node);
         setVisibleDev(true);
         break;
       case 'CreateFun':
         onCreateFun();
         break;
-
-      default:
-        break;
     }
   };
 
-  const onDeleteFolder = () =>
+  const onCreateFolder = (node: Treenode) => {
+    setCurNode(node);
+    setFolderMode('create');
+    setVisible(true);
+  };
+
+  const onEditFolder = (node: Treenode) => {
+    setCurNode(node);
+    setFolderMode('edit');
+    setVisible(true);
+  };
+
+  // 删除文件夹
+  const onDeleteFolder = (node: Treenode) =>
     confirm({
       title: '您确定要删除该文件夹吗？',
       autoFocusButton: null,
       onOk: () => {
-        if (curNode) {
-          deleteFolder({ id: curNode.id }).then((res) => {
+        if (node) {
+          deleteFolder({ id: node.id }).then((res) => {
             if (res.success) {
               message.success('删除文件夹成功');
               getTreeWrapped();
@@ -166,66 +163,131 @@ const FolderTree: FC = () => {
       },
     });
 
-  const isRootFolder = useCallback((belong: FolderBelong) => {
-    if (
-      belong === FolderBelong.DESIGN ||
-      belong === FolderBelong.DAG ||
-      belong === FolderBelong.DI ||
-      belong === FolderBelong.DEV
-    ) {
-      return true;
-    } else {
-      return false;
+  const calcOperation = usePersistFn((belong: FolderBelong, type: FolderTypes, node: Treenode) => {
+    const operations: Operation[] = [];
+    switch (belong) {
+      case FolderBelong.DESIGN:
+      case FolderBelong.DEV:
+        return [];
+      case FolderBelong.DESIGNTABLE:
+        operations.push({
+          label: '新建表',
+          key: 'CreateTable',
+          onClick: () => onCreateFolder(node),
+        });
+        break;
+      case FolderBelong.DAG:
+        operations.push({
+          label: '新建DAG',
+          key: 'CreateDAG',
+          onClick: () => onAction('CreateDAG', node),
+        });
+        break;
+      case FolderBelong.DI:
+        operations.push({
+          label: '新建DI',
+          key: 'CreateDI',
+          onClick: () => onAction('CreateDI', node),
+        });
+        break;
+      case FolderBelong.DEVJOB:
+        operations.push({
+          label: '新建作业',
+          key: '新建作业',
+          onClick: () => onAction('CreateDev', node),
+        });
+        break;
+      case FolderBelong.DEVFUN:
+        operations.push({
+          label: '新建函数',
+          key: '新建函数',
+          onClick: () => onAction('CreateFun', node),
+        });
+        break;
     }
-  }, []);
-
-  // 为了加上样式所以使用TreeNode，不然可以用treeData属性
-  const loop = (data: Treenode[]): any => {
-    const n = data.length;
-    return data.map((_, i) => {
-      let tmp: any = _.name;
-      // 按组件的属性赋值key
-      _.key = _.cid;
-      // 给node加上样式
-      if (isRootFolder(_.belong) || i === n - 1) {
-        _.className = 'folder-margin';
-      }
-      const index = _.name.indexOf(keyWord);
-      if (index > -1) {
-        const beforeStr = _.name.substring(0, index);
-        const afterStr = _.name.substring(index + keyWord.length);
-        tmp = (
-          <span>
-            {beforeStr}
-            <span style={{ color: 'red' }}>{keyWord}</span>
-            {afterStr}
-          </span>
+    operations.push({ type: 'divider' });
+    switch (type) {
+      case FolderTypes.FUNCTION:
+        operations.push({
+          label: '新建文件夹',
+          key: '新建文件夹',
+          onClick: () => onCreateFolder(node),
+        });
+        break;
+      case FolderTypes.FOLDER:
+        operations.push(
+          {
+            label: '新建文件夹',
+            key: '新建文件夹',
+            onClick: () => onCreateFolder(node),
+          },
+          {
+            label: '编辑文件夹',
+            key: '编辑文件夹',
+            onClick: () => onEditFolder(node),
+          },
+          {
+            label: '删除文件夹',
+            key: '删除文件夹',
+            onClick: () => onDeleteFolder(node),
+          },
         );
-      }
-      // 给title加上样式
-      let title = <span className={_.parentId ? '' : 'folder-root'}>{tmp}</span>;
-      // 给type不为FolderTypes.RECORD的节点加上icon
-      if (_.type === FolderTypes.RECORD) {
-        _.title = title;
-      } else {
-        _.title = <TreeNodeTitle node={_} title={title} onAction={onAction} />;
-      }
 
-      return _.children ? <TreeNode {..._}>{loop(_.children)}</TreeNode> : <TreeNode {..._} />;
-    });
-  };
+        break;
+    }
+    return operations;
+  });
 
-  // 渲染筛选树
-  const loopBelongTree = (data: Treenode[]) =>
-    data.map((_) => {
-      _.title = _.name;
-      _.key = _.belong;
-      return _.children ? (
-        <TreeNode {..._}>{loopBelongTree(_.children)}</TreeNode>
-      ) : (
-        <TreeNode {..._} />
-      );
-    });
+  const treeData = useMemo(
+    () =>
+      formatTreeData(tree, (node) => {
+        const { name, parentId, type, cid, belong } = node;
+        const titleText = (
+          <span
+            style={{ fontWeight: parentId ? 'normal' : 'bold' }}
+            dangerouslySetInnerHTML={{ __html: highlightText({ text: name, keyWord }) }}
+          ></span>
+        );
+        let title = null;
+        // 给type不为FolderTypes.RECORD的节点加上icon
+        switch (type) {
+          case FolderTypes.FUNCTION:
+            title = (
+              <TreeTitle
+                icon={funcFolderIconMap[belong]}
+                text={titleText}
+                operations={calcOperation?.(belong, type, node)}
+              />
+            );
+            break;
+          case FolderTypes.FOLDER:
+            title = (
+              <TreeTitle
+                icon="icon-wenjianjia"
+                text={titleText}
+                operations={calcOperation?.(belong, type, node)}
+              />
+            );
+            break;
+          case FolderTypes.RECORD:
+            title = <TreeTitle text={titleText} />;
+            break;
+        }
+        return {
+          ...node,
+          key: cid,
+          title,
+        };
+      }),
+    [tree, keyWord, calcOperation],
+  );
+
+  // 功能性文件树
+  const functiontreeData = formatTreeData(functionTree, (node) => ({
+    ...node,
+    title: node.name,
+    key: node.belong,
+  }));
 
   // 获取父节点的key
   const getParentKey = (key: string, tree: Treenode[] = []): string => {
@@ -287,9 +349,8 @@ const FolderTree: FC = () => {
                   }
                   setBelongFunctions(checkedKeys);
                 }}
-              >
-                {loopBelongTree(functionTree)}
-              </Tree>
+                treeData={functiontreeData}
+              />
             ) : (
               <Empty />
             )
@@ -305,6 +366,7 @@ const FolderTree: FC = () => {
       {tree?.length ? (
         <div className={styles.tree} style={{ marginTop: 16, height: '100%' }}>
           <Tree
+            treeData={treeData}
             blockNode
             onSelect={(selectedKeys, { node, ...props }) => {
               // 节点的浮窗菜单点击时会触发onSelect，不知道为什么。
@@ -323,9 +385,7 @@ const FolderTree: FC = () => {
               setExpandedKeys(keys);
               setAutoExpandParent(false);
             }}
-          >
-            {loop(tree)}
-          </Tree>
+          />
         </div>
       ) : (
         <Empty style={{ marginTop: 56 }} />

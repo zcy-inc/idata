@@ -522,7 +522,7 @@ export async function getConfiguredTaskList(params: { environment: Environments 
   );
 }
 
-// 获取已配置的作业列表（依赖的上游任务）
+// 获取已配置的作业列表（依赖的上游作业）
 export async function getDependenceTaskList(params: { environment: Environments }) {
   return request<Tresponse<ConfiguredTaskListItem[]>>(
     `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
@@ -603,6 +603,19 @@ export async function runTask(params: { id: number; environment: Environments })
     {
       method: 'POST',
       params,
+    },
+  );
+}
+
+/**
+ * 试运行作业
+ */
+ export async function tyrRun(data: any) {
+  return request<DefaultResponse & { data: boolean }>(
+    '/api/v1/idata/spark/sqlJobDryRun',
+    {
+      method: 'POST',
+      data,
     },
   );
 }
