@@ -155,6 +155,10 @@ public class MetadataFacade {
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(differentList)) {
             for (CompareInfoDTO.ChangeColumnInfo columnInfo : differentList) {
+                // 忽略属性字段不做修改
+                if (columnInfo.isHivePartition() || columnInfo.isPartition()) {
+                    continue;
+                }
                 String columnName = columnInfo.getColumnName();
                 String columnType = columnInfo.getColumnType();
                 String columnComment = columnInfo.getColumnComment();
