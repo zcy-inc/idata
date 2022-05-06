@@ -10,7 +10,7 @@ import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
 
 import EditDAG from './components/EditDAG';
-import ViewDAG from './components/ViewDAG';
+import ViewDAG from './ViewDAG';
 
 export interface TabDAGProps {
   pane: IPane;

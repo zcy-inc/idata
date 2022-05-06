@@ -8,7 +8,7 @@ import { DAG } from '@/types/datadev';
 import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
 import Title from '@/components/Title';
 import { getEnumValues } from '@/services/datadev';
-import { useFolderNames } from '../../../../../hooks/useFolderNames';
+import { useFolderNames } from '../../../hooks/useFolderNames';
 
 interface ViewDAGProps {
   data?: DAG;
