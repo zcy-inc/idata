@@ -300,6 +300,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
+    @Transactional
     public Boolean moveJob(List<Long> jobIds, Long destFolderId, Operator operator) {
         checkArgument(!CollectionUtils.isEmpty(jobIds), "请选择作业");
         checkArgument(Objects.nonNull(destFolderId), "请选择目标文件夹");

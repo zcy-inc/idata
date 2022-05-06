@@ -17,38 +17,42 @@
 
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+
+import java.util.Map;
+
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-04-28 14:41
+ * @create: 2022-05-05 13:54
  **/
-public class JobExtraOperateResult {
+public class JobReplicationDto {
 
-    private String jobName;
-    private Boolean success;
-    private String msg;
+    private JobInfoDto jobInfoDto;
+    private Map<EnvEnum, JobConfigCombinationDto> jobConfigCombinationDtoMap;
+    private String jobContentJson;
 
-    public String getJobName() {
-        return jobName;
+    public JobInfoDto getJobInfoDto() {
+        return jobInfoDto;
     }
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
+    public void setJobInfoDto(JobInfoDto jobInfoDto) {
+        this.jobInfoDto = jobInfoDto;
     }
 
-    public Boolean getSuccess() {
-        return success;
+    public Map<EnvEnum, JobConfigCombinationDto> getJobConfigCombinationDtoMap() {
+        return jobConfigCombinationDtoMap;
     }
 
-    public void setSuccess(Boolean success) {
-        this.success = success;
+    public void setJobConfigCombinationDtoMap(Map<EnvEnum, JobConfigCombinationDto> jobConfigCombinationDtoMap) {
+        this.jobConfigCombinationDtoMap = jobConfigCombinationDtoMap;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getJobContentJson() {
+        return jobContentJson;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setJobContentJson(String jobContentJson) {
+        this.jobContentJson = jobContentJson;
     }
 }

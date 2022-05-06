@@ -15,40 +15,25 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dto.job;
+package cn.zhengcaiyun.idata.develop.service.job;
+
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.dto.job.JobExtraOperateResult;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-04-28 14:41
+ * @create: 2022-04-28 14:28
  **/
-public class JobExtraOperateResult {
+public interface JobExtraOperationService {
 
-    private String jobName;
-    private Boolean success;
-    private String msg;
+    List<JobExtraOperateResult> copyJobTo(List<Long> jobIds, Long destFolderId, Operator operator);
 
-    public String getJobName() {
-        return jobName;
-    }
+    JobExtraOperateResult copyJobTo(Long jobId, Long destFolderId, Operator operator);
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
-    }
+    String exportJobJson(List<Long> jobIds);
 
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
+    List<JobExtraOperateResult> importJob(String jobJson, Long destFolderId, Operator operator);
 }
