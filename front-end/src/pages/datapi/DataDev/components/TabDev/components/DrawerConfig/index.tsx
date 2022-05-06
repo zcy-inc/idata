@@ -63,6 +63,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
 
   useEffect(() => {
     if (visible) {
+      setActiveKey(Environments.STAG);
       getTaskConfigsWrapped(Environments.STAG);
       getDAGListWrapped(Environments.STAG);
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
@@ -169,6 +170,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         executeConfig.jobTargetTablePk = output?.jobTargetTablePk;
         executeConfig.destDataSourceId = output?.destDataSourceId;
         executeConfig.destTable = output?.destTable;
+
+        setDestWriteMode(output.destWriteMode || 'OVERWRITE');
         // 赋值调度配置
         if (environment === Environments.STAG) {
           stagForm.setFieldsValue({ ...executeConfig });
@@ -177,7 +180,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
           }
         }
         if (environment === Environments.PROD) {
-          prodForm.setFieldsValue(executeConfig);
+          prodForm.setFieldsValue({ ...executeConfig });
           if (output) {
             setOutDataProd([{ ...output }]);
           }
@@ -418,6 +421,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     >
       <Tabs
         className="reset-tabs"
+        activeKey={activeKey}
         onChange={(k) => {
           setActiveKey(k as Environments);
           getTaskConfigsWrapped(k as Environments);
@@ -569,6 +573,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 size="small"
                 style={{ minHeight: 150 }}
               />
+              <Title>输出配置</Title>
               <Row>
                 <Col span={12}>
                   <Item
