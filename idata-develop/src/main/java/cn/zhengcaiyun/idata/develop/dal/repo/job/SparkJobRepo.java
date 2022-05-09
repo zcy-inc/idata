@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
@@ -28,9 +29,16 @@ import java.util.List;
 
 public interface SparkJobRepo {
     DevJobContentSpark query(Long jobId, Integer version);
+
     List<DevJobContentSpark> queryList(Long jobId);
+
     boolean add(DevJobContentSpark jobContentSpark);
+
     boolean update(DevJobContentSpark jobContentSpark);
+
     Integer newVersion(Long jobId);
+
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
+    Optional<DevJobContentSpark> queryLatest(Long jobId);
 }

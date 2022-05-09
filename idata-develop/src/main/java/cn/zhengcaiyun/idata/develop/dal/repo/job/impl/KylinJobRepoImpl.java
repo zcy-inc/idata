@@ -17,24 +17,20 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
-import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDao;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.KylinJobRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamicSqlSupport.devJobContentKylin;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
-import static org.mybatis.dynamic.sql.SqlBuilder.*;
+import static org.mybatis.dynamic.sql.SqlBuilder.and;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
 /**
  * @author caizhedong
@@ -50,9 +46,9 @@ public class KylinJobRepoImpl implements KylinJobRepo {
     @Override
     public DevJobContentKylin query(Long jobId, Integer version) {
         return devJobContentKylinDao.selectOne(c ->
-                c.where(devJobContentKylin.del, isEqualTo(DeleteEnum.DEL_NO.val),
-                        and(devJobContentKylin.jobId, isEqualTo(jobId)),
-                        and(devJobContentKylin.version, isEqualTo(version))))
+                        c.where(devJobContentKylin.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                                and(devJobContentKylin.jobId, isEqualTo(jobId)),
+                                and(devJobContentKylin.version, isEqualTo(version))))
                 .orElse(null);
     }
 
@@ -90,5 +86,13 @@ public class KylinJobRepoImpl implements KylinJobRepo {
                 .set(devJobContentKylin.editor).equalTo(operator)
                 .where(devJobContentKylin.id, isEqualTo(id)));
         return Boolean.TRUE;
+    }
+
+    @Override
+    public Optional<DevJobContentKylin> queryLatest(Long jobId) {
+        return devJobContentKylinDao.selectOne(dsl -> dsl.where(devJobContentKylin.jobId, isEqualTo(jobId),
+                        and(devJobContentKylin.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(devJobContentKylin.version.descending())
+                .limit(1));
     }
 }

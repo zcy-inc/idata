@@ -19,19 +19,21 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
-import cn.zhengcaiyun.idata.develop.dto.job.spark.SparkJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.manager.JobExtraOperationManager;
 import cn.zhengcaiyun.idata.develop.service.job.*;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -42,10 +44,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @description:
@@ -66,6 +65,12 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private final ScriptJobService scriptJobService;
     private final KylinJobService kylinJobService;
     private final JobExtraOperationManager jobExtraOperationManager;
+    private final DIJobContentRepo diJobContentRepo;
+    private final SqlJobRepo sqlJobRepo;
+    private final SparkJobRepo sparkJobRepo;
+    private final ScriptJobRepo scriptJobRepo;
+    private final KylinJobRepo kylinJobRepo;
+
 
     public JobExtraOperationServiceImpl(JobInfoService jobInfoService,
                                         JobExecuteConfigService jobExecuteConfigService,
@@ -75,7 +80,12 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                                         SparkJobService sparkJobService,
                                         ScriptJobService scriptJobService,
                                         KylinJobService kylinJobService,
-                                        JobExtraOperationManager jobExtraOperationManager) {
+                                        JobExtraOperationManager jobExtraOperationManager,
+                                        DIJobContentRepo diJobContentRepo,
+                                        SqlJobRepo sqlJobRepo,
+                                        SparkJobRepo sparkJobRepo,
+                                        ScriptJobRepo scriptJobRepo,
+                                        KylinJobRepo kylinJobRepo) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -85,6 +95,11 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         this.scriptJobService = scriptJobService;
         this.kylinJobService = kylinJobService;
         this.jobExtraOperationManager = jobExtraOperationManager;
+        this.diJobContentRepo = diJobContentRepo;
+        this.sqlJobRepo = sqlJobRepo;
+        this.sparkJobRepo = sparkJobRepo;
+        this.scriptJobRepo = scriptJobRepo;
+        this.kylinJobRepo = kylinJobRepo;
     }
 
     @Override
@@ -180,7 +195,8 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                 JobPublishRecord publishRecord = publishRecordList.get(0);
                 contentJson = getJobContentJson(jobInfoDto, publishRecord.getJobContentVersion());
             } else {
-                contentJson = null;
+                // 取最新的版本信息
+                contentJson = getJobContentJson(jobInfoDto, null);
             }
         }
 
@@ -195,23 +211,23 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         switch (jobType) {
             case DI_BATCH:
             case BACK_FLOW:
-                contentJson = getDIJobContentJson(jobInfoDto.getId(), version);
+                contentJson = getDIJobContentJson(jobInfoDto, version);
                 break;
             case SQL_SPARK:
             case SQL_FLINK:
             case SQL_DORIS:
-                contentJson = getSQLJobContentJson(jobInfoDto.getId(), version);
+                contentJson = getSQLJobContentJson(jobInfoDto, version);
                 break;
             case SPARK_JAR:
             case SPARK_PYTHON:
-                contentJson = getSparkJobContentJson(jobInfoDto.getId(), version);
+                contentJson = getSparkJobContentJson(jobInfoDto, version);
                 break;
             case SCRIPT_PYTHON:
             case SCRIPT_SHELL:
-                contentJson = getScriptJobContentJson(jobInfoDto.getId(), version);
+                contentJson = getScriptJobContentJson(jobInfoDto, version);
                 break;
             case KYLIN:
-                contentJson = getKylinJobContentJson(jobInfoDto.getId(), version);
+                contentJson = getKylinJobContentJson(jobInfoDto, version);
                 break;
             default:
                 contentJson = null;
@@ -220,29 +236,80 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         return contentJson;
     }
 
-    private String getDIJobContentJson(Long jobId, Integer version) {
-        DIJobContentContentDto contentDto = diJobContentService.get(jobId, version);
-        return new Gson().toJson(contentDto);
+    private String getDIJobContentJson(JobInfoDto jobInfoDto, Integer version) {
+        DIJobContentContentDto contentDto = null;
+        if (Objects.nonNull(version)) {
+            contentDto = diJobContentService.get(jobInfoDto.getId(), version);
+        } else {
+            Optional<DIJobContent> contentOptional = diJobContentRepo.queryLatest(jobInfoDto.getId());
+            if (contentOptional.isPresent()) {
+                contentDto = DIJobContentContentDto.from(contentOptional.get());
+            }
+        }
+        if (Objects.nonNull(contentDto)) {
+            contentDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(contentDto.getVersion(), contentDto.getCreateTime()));
+            jobInfoDto.setRemark(Strings.nullToEmpty(jobInfoDto.getRemark()) + "  来源版本：" + contentDto.getVersionDisplay());
+            return new Gson().toJson(contentDto);
+        }
+        return null;
     }
 
-    private String getSQLJobContentJson(Long jobId, Integer version) {
-        SqlJobContentDto contentDto = sqlJobService.find(jobId, version);
-        return new Gson().toJson(contentDto);
+    private String getSQLJobContentJson(JobInfoDto jobInfoDto, Integer version) {
+        SqlJobContentDto contentDto = null;
+        if (Objects.nonNull(version)) {
+            contentDto = sqlJobService.find(jobInfoDto.getId(), version);
+        } else {
+            Optional<DevJobContentSql> contentOptional = sqlJobRepo.queryLatest(jobInfoDto.getId());
+            if (contentOptional.isPresent()) {
+                contentDto = SqlJobContentDto.from(contentOptional.get());
+            }
+        }
+        if (Objects.nonNull(contentDto)) {
+            contentDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(contentDto.getVersion(), contentDto.getCreateTime()));
+            jobInfoDto.setRemark(Strings.nullToEmpty(jobInfoDto.getRemark()) + "  来源版本：" + contentDto.getVersionDisplay());
+            return new Gson().toJson(contentDto);
+        }
+        return null;
     }
 
-    private String getSparkJobContentJson(Long jobId, Integer version) {
-        SparkJobContentDto contentDto = sparkJobService.find(jobId, version);
-        return new Gson().toJson(contentDto);
+    private String getSparkJobContentJson(JobInfoDto jobInfoDto, Integer version) {
+        return null;
     }
 
-    private String getScriptJobContentJson(Long jobId, Integer version) {
-        ScriptJobContentDto contentDto = scriptJobService.find(jobId, version);
-        return new Gson().toJson(contentDto);
+    private String getScriptJobContentJson(JobInfoDto jobInfoDto, Integer version) {
+        ScriptJobContentDto contentDto = null;
+        if (Objects.nonNull(version)) {
+            contentDto = scriptJobService.find(jobInfoDto.getId(), version);
+        } else {
+            Optional<DevJobContentScript> contentOptional = scriptJobRepo.queryLatest(jobInfoDto.getId());
+            if (contentOptional.isPresent()) {
+                contentDto = PojoUtil.copyOne(contentOptional.get(), ScriptJobContentDto.class);
+            }
+        }
+        if (Objects.nonNull(contentDto)) {
+            contentDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(contentDto.getVersion(), contentDto.getCreateTime()));
+            jobInfoDto.setRemark(Strings.nullToEmpty(jobInfoDto.getRemark()) + "  来源版本：" + contentDto.getVersionDisplay());
+            return new Gson().toJson(contentDto);
+        }
+        return null;
     }
 
-    private String getKylinJobContentJson(Long jobId, Integer version) {
-        KylinJobDto contentDto = kylinJobService.find(jobId, version);
-        return new Gson().toJson(contentDto);
+    private String getKylinJobContentJson(JobInfoDto jobInfoDto, Integer version) {
+        KylinJobDto contentDto = null;
+        if (Objects.nonNull(version)) {
+            contentDto = kylinJobService.find(jobInfoDto.getId(), version);
+        } else {
+            Optional<DevJobContentKylin> contentOptional = kylinJobRepo.queryLatest(jobInfoDto.getId());
+            if (contentOptional.isPresent()) {
+                contentDto = PojoUtil.copyOne(contentOptional.get(), KylinJobDto.class);
+            }
+        }
+        if (Objects.nonNull(contentDto)) {
+            contentDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(contentDto.getVersion(), contentDto.getCreateTime()));
+            jobInfoDto.setRemark(Strings.nullToEmpty(jobInfoDto.getRemark()) + "  来源版本：" + contentDto.getVersionDisplay());
+            return new Gson().toJson(contentDto);
+        }
+        return null;
     }
 
     private void cleanOutJobReplication(JobReplicationDto jobReplicationDto, Long destFolderId, boolean fromImport) {

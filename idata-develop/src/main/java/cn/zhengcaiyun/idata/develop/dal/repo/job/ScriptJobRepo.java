@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
@@ -28,9 +29,16 @@ import java.util.List;
 
 public interface ScriptJobRepo {
     DevJobContentScript query(Long jobId, Integer version);
+
     List<DevJobContentScript> queryList(Long jobId);
+
     boolean add(DevJobContentScript jobContentScript);
+
     boolean update(DevJobContentScript jobContentScript);
+
     Integer newVersion(Long jobId);
+
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
+    Optional<DevJobContentScript> queryLatest(Long jobId);
 }
