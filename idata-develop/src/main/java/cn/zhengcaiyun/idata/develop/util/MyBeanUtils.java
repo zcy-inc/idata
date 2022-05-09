@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhanqian
@@ -24,7 +25,7 @@ public class MyBeanUtils {
      * @param diJobContent
      * @param diResponse
      */
-    public static void copyProperties(DIJobContent diJobContent, JobInfoExecuteDetailDto.DiJobDetailsDto diResponse) {
+    public static void copyDiProperties(DIJobContent diJobContent, JobInfoExecuteDetailDto.DiJobDetailsDto diResponse) {
         BeanUtils.copyProperties(diJobContent, diResponse);
         DiConfigModeEnum modeEnum = DiConfigModeEnum.getByValue(diJobContent.getConfigMode());
         switch (modeEnum) {
@@ -63,7 +64,9 @@ public class MyBeanUtils {
                 // json格式
                 String srcColumns = diJobContent.getSrcColumns();
                 if (StringUtils.isNotBlank(srcColumns)) {
-                    diResponse.setSrcCols(JSON.parseArray(srcColumns, MappingColumnDto.class));
+                    List<MappingColumnDto> columnDtoList = JSON.parseArray(srcColumns, MappingColumnDto.class);
+                    List<MappingColumnDto> mappedColumnDtoList = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).collect(Collectors.toList());
+                    diResponse.setSrcCols(mappedColumnDtoList);
                 }
                 diResponse.setDiQuery(diJobContent.getSrcQuery());
                 diResponse.setMergeSql(diJobContent.getMergeSql());
