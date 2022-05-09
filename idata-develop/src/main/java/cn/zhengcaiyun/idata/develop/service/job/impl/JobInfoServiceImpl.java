@@ -463,7 +463,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
                 checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
 
-                MyBeanUtils.copyProperties(diJobContent, diResponse);
+                // 拷贝基础数据
+                MyBeanUtils.copyDiProperties(diJobContent, diResponse);
 
                 //兼容数据库数据错误
                 if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
