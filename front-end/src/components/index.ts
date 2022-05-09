@@ -22,4 +22,6 @@ export { default as Title } from './Title';
 
 export { default as TreeTitle } from './TreeTitle';
 
+export * from './CascaderSelect';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };

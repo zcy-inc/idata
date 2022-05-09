@@ -10,7 +10,7 @@ import { IPane } from '@/models/datadev';
 import { DAG } from '@/types/datadev';
 
 import EditDAG from './components/EditDAG';
-import ViewDAG from './components/ViewDAG';
+import ViewDAG from './ViewDAG';
 
 export interface TabDAGProps {
   pane: IPane;
@@ -24,14 +24,18 @@ const TabDAG: FC<TabDAGProps> = ({ pane }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
 
-  const { getTreeWrapped, onRemovePane, replaceTab } = useModel('datadev', (_) => ({
-    replaceTab: _.replaceTab,
-    onRemovePane: _.onRemovePane,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { getTreeWrapped, onRemovePane, replaceTab, curNode } = useModel('datadev');
 
   useEffect(() => {
-    pane.id !== -1 && getDAGWrapped();
+    (async function() {
+      if (pane.id === -1) {
+        // 新增DAG时 目标文件夹赋默认值
+        const folderId = curNode?.id;
+        form.setFieldsValue({ folderId });
+      } else {
+        getDAGWrapped();
+      }
+    })()
   }, [pane.id]);
 
   const getDAGWrapped = () => getDAG({ id: pane.id }).then((res) => setData(res.data));

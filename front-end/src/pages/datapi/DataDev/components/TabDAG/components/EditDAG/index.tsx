@@ -10,17 +10,17 @@ import { Form } from 'antd';
 import moment from 'moment';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
-import { Tip } from '@/components';
 import { getDAGStatus } from '@/utils/datadev';
-import styles from './index.less';
-
 import { dayOptions, hourOptions, minuteOptions, monthOptions, weekOptions } from './constants';
-import { IconFont } from '@/components';
-import { DAG, Folder } from '@/types/datadev';
-import { FolderBelong, PeriodRange, TriggerMode } from '@/constants/datadev';
-import { getEnumValues, getFolders } from '@/services/datadev';
+import { IconFont, Tip } from '@/components';
+import { DAG } from '@/types/datadev';
+import { PeriodRange, TriggerMode } from '@/constants/datadev';
+import { getEnumValues } from '@/services/datadev';
 import { getEnvironments } from '@/services/datasource';
 import { Environments } from '@/constants/datasource';
+import { DAGFolderFormItem } from '../../../../../components/FolderFormItem';
+
+import styles from './index.less';
 
 interface EditDAGProps {
   data?: DAG;
@@ -28,7 +28,6 @@ interface EditDAGProps {
   renderCronExpression: (values: any) => string;
 }
 
-const width = 400;
 const format = 'HH:mm';
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
@@ -36,7 +35,6 @@ const { Item } = Form;
 
 const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [envs, setEnvs] = useState<Environments[]>([]);
   const [periodRange, setPeriodRange] = useState<PeriodRange>(PeriodRange.YEAR);
   const [triggerMode, setTriggerMode] = useState(TriggerMode.INTERVAL);
@@ -45,9 +43,6 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
   useEffect(() => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
-      .catch((err) => {});
-    getFolders({ belong: FolderBelong.DAG })
-      .then((res) => setFolders(res.data))
       .catch((err) => {});
     getEnvironments()
       .then((res) => setEnvs(res.data))
@@ -139,7 +134,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
               label="指定月份"
               placeholder="请选择"
               options={monthOptions}
-              fieldProps={{ size: 'large', mode: 'multiple', style: { width } }}
+              fieldProps={{ size: 'large', mode: 'multiple' }}
               rules={ruleSlct}
             />
             <ProFormSelect
@@ -147,13 +142,13 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
               label="指定日期"
               placeholder="请选择"
               options={dayOptions}
-              fieldProps={{ size: 'large', mode: 'multiple', style: { width } }}
+              fieldProps={{ size: 'large', mode: 'multiple' }}
               rules={ruleSlct}
             />
             <ProFormTimePicker
               name="time"
               label="定时调度"
-              fieldProps={{ size: 'large', format, style: { width } }}
+              fieldProps={{ size: 'large', format }}
               rules={ruleSlct}
             />
           </>
@@ -166,13 +161,13 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
               label="指定日期"
               placeholder="请选择"
               options={dayOptions}
-              fieldProps={{ size: 'large', mode: 'multiple', style: { width } }}
+              fieldProps={{ size: 'large', mode: 'multiple' }}
               rules={ruleSlct}
             />
             <ProFormTimePicker
               name="time"
               label="定时调度"
-              fieldProps={{ size: 'large', format, style: { width } }}
+              fieldProps={{ size: 'large', format }}
               rules={ruleSlct}
             />
           </>
@@ -185,13 +180,13 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
               label="指定星期"
               placeholder="请选择"
               options={weekOptions}
-              fieldProps={{ size: 'large', mode: 'multiple', style: { width } }}
+              fieldProps={{ size: 'large', mode: 'multiple' }}
               rules={ruleSlct}
             />
             <ProFormTimePicker
               name="time"
               label="定时调度"
-              fieldProps={{ size: 'large', format, style: { width } }}
+              fieldProps={{ size: 'large', format }}
               rules={ruleSlct}
             />
           </>
@@ -201,7 +196,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           <ProFormTimePicker
             name="time"
             label="定时调度"
-            fieldProps={{ size: 'large', format, style: { width } }}
+            fieldProps={{ size: 'large', format }}
             rules={ruleSlct}
           />
         );
@@ -224,20 +219,20 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
                 <ProFormTimePicker
                   name="start"
                   label="开始时间"
-                  fieldProps={{ size: 'large', format, style: { width } }}
+                  fieldProps={{ size: 'large', format }}
                   rules={ruleSlct}
                 />
                 <ProFormText
                   name="interval"
                   label="时间间隔"
                   placeholder="请输入"
-                  fieldProps={{ size: 'large', style: { width }, suffix: '时' }}
+                  fieldProps={{ size: 'large', suffix: '时' }}
                   rules={ruleText}
                 />
                 <ProFormTimePicker
                   name="end"
                   label="结束时间"
-                  fieldProps={{ size: 'large', format: 'HH', style: { width } }}
+                  fieldProps={{ size: 'large', format: 'HH' }}
                   rules={ruleSlct}
                 />
               </>
@@ -248,7 +243,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
                 label="指定小时"
                 placeholder="请选择"
                 options={hourOptions}
-                fieldProps={{ size: 'large', mode: 'multiple', style: { width } }}
+                fieldProps={{ size: 'large', mode: 'multiple' }}
                 rules={ruleSlct}
               />
             )}
@@ -260,21 +255,21 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
             <ProFormTimePicker
               name="start"
               label="开始时间"
-              fieldProps={{ size: 'large', format: 'HH', style: { width } }}
+              fieldProps={{ size: 'large', format: 'HH' }}
               rules={ruleSlct}
             />
             <ProFormSelect
               name="interval"
               label="时间间隔"
               placeholder="分"
-              fieldProps={{ size: 'large', style: { width } }}
+              fieldProps={{ size: 'large' }}
               options={minuteOptions}
               rules={ruleSlct}
             />
             <ProFormTimePicker
               name="end"
               label="结束时间"
-              fieldProps={{ size: 'large', format: 'HH', style: { width } }}
+              fieldProps={{ size: 'large', format: 'HH' }}
               rules={ruleSlct}
             />
           </>
@@ -293,19 +288,24 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
 
   return (
     <div className={styles['edit-dag']}>
-      <Tip label="当前状态" content={getDAGStatus(data?.dagInfoDto.status)} style={{ marginBottom: 20 }} />
+      <Tip
+        label="当前状态"
+        content={getDAGStatus(data?.dagInfoDto.status)}
+        style={{ marginBottom: 20 }}
+      />
       <ProForm
         form={form}
         layout="horizontal"
         colon={false}
         submitter={false}
         onValuesChange={renderCronExpressionWrapped}
+        style={{ width: 500 }}
       >
         <ProFormText
           name="name"
           label="DAG名称"
           placeholder="请输入"
-          fieldProps={{ size: 'large', style: { width } }}
+          fieldProps={{ size: 'large' }}
           rules={ruleText}
         />
         <ProFormSelect
@@ -313,7 +313,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           label="环境"
           placeholder="请选择"
           options={envs.map((_) => ({ label: _, value: _ }))}
-          fieldProps={{ size: 'large', style: { width } }}
+          fieldProps={{ size: 'large' }}
           rules={ruleSlct}
         />
         <ProFormSelect
@@ -321,28 +321,15 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           label="数仓分层"
           placeholder="请选择"
           options={layers.map((_) => ({ label: _.enumValue, value: _.valueCode }))}
-          fieldProps={{ size: 'large', style: { width } }}
+          fieldProps={{ size: 'large' }}
           rules={ruleSlct}
         />
-        <ProFormSelect
-          name="folderId"
-          label="目标文件夹"
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          fieldProps={{
-            size: 'large',
-            style: { width },
-            showSearch: true,
-            filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
-          }}
-          rules={ruleSlct}
-        />
+        <DAGFolderFormItem />
         <ProFormDateTimeRangePicker
           name="range"
           label="始止时间"
           fieldProps={{
             size: 'large',
-            style: { width },
             suffixIcon: <IconFont type="icon-rili" />,
             format: 'YYYY-MM-DD HH:mm',
           }}
