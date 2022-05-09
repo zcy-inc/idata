@@ -90,4 +90,12 @@ public interface JobInfoService {
      * @return
      */
     JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env);
+
+    /**
+     * 获取作业扩展信息
+     *
+     * @param jobIds
+     * @return
+     */
+    List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds);
 }

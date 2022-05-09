@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoUpdateRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
 import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
@@ -342,8 +343,19 @@ public class JobInfoController {
      * @return
      */
     @PostMapping("/move")
-    public RestResult<Boolean> moveJob(@RequestBody JobBatchOperationReq batchOperationReq) {
+    public RestResult<Boolean> moveJob(@RequestBody JobBatchOperationExtReq batchOperationReq) {
         return RestResult.success(jobInfoService.moveJob(batchOperationReq.getJobIds(), batchOperationReq.getDestFolderId(), OperatorContext.getCurrentOperator()));
+    }
+
+    /**
+     * 获取作业扩展信息
+     *
+     * @param batchOperationReq
+     * @return
+     */
+    @GetMapping("/extInfo")
+    public RestResult<List<JobExtInfoDto>> getExtJobInfo(@RequestParam JobBatchOperationReq batchOperationReq) {
+        return RestResult.success(jobInfoService.getJobExtInfo(batchOperationReq.getJobIds()));
     }
 
 }

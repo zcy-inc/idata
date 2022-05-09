@@ -637,6 +637,12 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
     }
 
+    @Override
+    public List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds) {
+        // todo
+        return null;
+    }
+
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto) {
         // 封装sql_job_content
         DevJobContentSql flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);

@@ -22,6 +22,7 @@ import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobExtraOperateResult;
 import cn.zhengcaiyun.idata.develop.service.job.JobExtraOperationService;
+import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
 import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
 import cn.zhengcaiyun.idata.portal.util.ExportUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -62,7 +63,7 @@ public class JobExtraOperationController {
      * @return
      */
     @PostMapping("/copy")
-    public RestResult<List<JobExtraOperateResult>> copyJob(@RequestBody JobBatchOperationReq batchOperationReq) {
+    public RestResult<List<JobExtraOperateResult>> copyJob(@RequestBody JobBatchOperationExtReq batchOperationReq) {
         return RestResult.success(jobExtraOperationService.copyJobTo(batchOperationReq.getJobIds(), batchOperationReq.getDestFolderId(), OperatorContext.getCurrentOperator()));
     }
 

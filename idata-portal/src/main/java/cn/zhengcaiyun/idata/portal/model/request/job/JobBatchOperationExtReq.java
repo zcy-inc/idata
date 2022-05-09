@@ -17,25 +17,22 @@
 
 package cn.zhengcaiyun.idata.portal.model.request.job;
 
-import java.util.List;
-
 /**
  * @description:
  * @author: yangjianhua
  * @create: 2022-04-29 10:55
  **/
-public class JobBatchOperationReq {
-
+public class JobBatchOperationExtReq extends JobBatchOperationReq {
     /**
-     * 作业id集合
+     * 目标文件夹id
      */
-    private List<Long> jobIds;
+    private Long destFolderId;
 
-    public List<Long> getJobIds() {
-        return jobIds;
+    public Long getDestFolderId() {
+        return destFolderId;
     }
 
-    public void setJobIds(List<Long> jobIds) {
-        this.jobIds = jobIds;
+    public void setDestFolderId(Long destFolderId) {
+        this.destFolderId = destFolderId;
     }
 }
