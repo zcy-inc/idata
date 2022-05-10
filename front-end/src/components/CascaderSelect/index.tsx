@@ -21,5 +21,5 @@ export const CascaderSelect: FC<CascaderSelectProps> = ({ value, onChange, optio
     }
     onChange?.(parsed);
   };
-  return <Cascader size="large" {...rest} value={allKeys} options={options} onChange={handleChange} />;
+  return <Cascader changeOnSelect size="large" {...rest} value={allKeys} options={options} onChange={handleChange} />;
 };

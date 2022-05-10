@@ -105,7 +105,7 @@ const FolderTree: FC = () => {
     </Menu>
   );
 
-  // 新建文件夹/标签/枚举/表
+  // 标签/枚举/表
   const onAction = (key: Key, node?: Treenode) => {
     setCurNode(node);
     switch (key) {

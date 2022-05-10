@@ -246,6 +246,34 @@ export const getAllParentsKey = <T extends TreeNode<T>>(
   return arr;
 };
 
+// 获取树中指定节点的所有父节点
+export function getTreeParents<T extends TreeNode>(
+  roots: Array<T>,
+  getKey: (node: T) => React.Key,
+  key: React.Key,
+) {
+  const stack: Array<T> = [];
+  let going = true;
+
+  const walker = (array: Array<T>) => {
+    array.forEach((item) => {
+      if (!going) return;
+      stack.push(item);
+      if (getKey(item) === key) {
+        going = false;
+      } else if (item.children) {
+        walker(item.children as T[]);
+      } else {
+        stack.pop();
+      }
+    });
+    if (going) stack.pop();
+  };
+
+  walker(roots);
+  return stack;
+}
+
 export const getWorkspacePrefix = () => {
   const workspaceString = sessionStorage.getItem('workspace');
   let workspace = '';

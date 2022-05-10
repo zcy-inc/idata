@@ -713,7 +713,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         pane={pane}
         getTaskWrapped={getTaskWrapped}
       />
-      <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
+      {/* TODO: 不要断言 */}
+      <DrawerConfig version={version as string} visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
       <DrawerVersion
         visible={visibleVersion}
         onClose={() => setVisibleVersion(false)}
