@@ -6,7 +6,6 @@ import { FolderBelong } from '@/constants/datadev';
 export const useFolderNames = (belongFunctions: FolderBelong[], folderId?: string | number) => {
   const [folderNames, setFolderNames] = useState('');
 
-  
   useEffect(() => {
     (async function () {
       if (typeof folderId !== 'undefined') {
@@ -16,7 +15,7 @@ export const useFolderNames = (belongFunctions: FolderBelong[], folderId?: strin
         const folderNames = getTreeParents(tree, (node) => node.value, folderId)
           .map((node) => node.title)
           .join(' / ');
-        setFolderNames(folderNames);
+        setFolderNames(folderNames || '-');
       }
     })();
   }, [folderId]);
