@@ -220,7 +220,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const onSave = () => {
     const values = formRef.current?.form?.getFieldsValue() || {};
     const monacoValue = monaco.current?.editor?.getValue() || '';
-
+    const ver = +(version?.split('#')[0] as string);
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
@@ -231,7 +231,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           sourceSql: monacoValue,
           externalTables: values.externalTables,
           udfIds: values.udfIds.join(','),
-          version,
+          version: ver,
         };
         saveSqlSpark({ jobId: pane.id }, dataSql)
           .then((res) => {
@@ -252,7 +252,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             argumentRemark: _.argumentRemark,
           })),
           mainClass: values.mainClass,
-          version,
+          version: ver,
         };
         saveSpark({ jobId: pane.id }, dataSparkJar)
           .then((res) => {
@@ -272,7 +272,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
           })),
-          version,
+          version: ver,
         };
         saveSpark({ jobId: pane.id }, dataSparkPython)
           .then((res) => {
@@ -288,7 +288,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
           sourceResource: monacoValue,
-          version,
+          version: ver,
         };
         saveScript({ jobId: pane.id }, dataScriptShell)
           .then((res) => {
@@ -308,7 +308,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
           })),
-          version,
+          version: ver,
         };
         saveScript({ jobId: pane.id }, dataScriptPython)
           .then((res) => {
@@ -327,7 +327,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           buildType: values.buildType,
           startTime: new Date(values.startTime).getTime(),
           endTime: new Date(values.endTime).getTime(),
-          version,
+          version: ver,
         };
         saveKylin({ jobId: pane.id }, dataKylin)
           .then((res) => {
