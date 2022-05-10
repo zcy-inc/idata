@@ -34,7 +34,7 @@ export default [
       },
       {
         path: '/datapi/tasks',
-        name: '任务列表',
+        name: '作业审批',
         component: './datapi/Tasks',
         featureCode: 'F_MENU_JOB_LIST',
       },

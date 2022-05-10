@@ -38,7 +38,14 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
   }));
 
   const renderData = () => {
+
+    const deleteMap = (map: { [x: string]: any; }) => {
+      Object.keys(map).forEach(k => {
+        delete map[k];
+      })
+    }
     // 画来源表的节点
+    deleteMap(srcMap.current);
     const srcNodes = srcColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       srcMap.current[`${_.name}-src`] = _; // 赋srcMap的值
@@ -58,6 +65,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     });
 
     // 画去向表的节点
+    deleteMap(destMap.current);
     const destNodes = destColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       destMap.current[`${_.name}-dest`] = _; // 赋destMap的值
