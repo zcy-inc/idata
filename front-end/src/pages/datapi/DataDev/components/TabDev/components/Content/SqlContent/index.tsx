@@ -3,6 +3,7 @@ import type { ForwardRefRenderFunction } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import SplitPane from 'react-split-pane';
 import { Form, Input, Modal, Select, Table, Tabs, Button, message } from 'antd';
+import { UpSquareOutlined, DownSquareOutlined } from '@ant-design/icons';
 import DataSourceSelect from '@/components/DSSelect';
 import type { IDisposable } from 'monaco-editor';
 import styles from './index.less';
@@ -32,6 +33,9 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   { monaco, data: { content, log, res, task }, removeResult, visible, onCancel },
   ref,
 ) => {
+  const [splitPaneSize, setSplitPaneSize] = useState<number | string>('calc(100% - 40px)');
+  const [collapsed, setCollapsed] = useState(true);
+  const splitIns = useRef<any>(null);
   const [monacoValue, setMonacoValue] = useState('');
   const [monacoHeight, setMonacoHeight] = useState(500);
   const [UDFList, setUDFList] = useState<UDF[]>([]);
@@ -102,11 +106,27 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
         生成模板
       </Button>
     ) : null;
+  const handleCollapse = () => {
+    setSplitPaneSize('calc(100% - 40px)');
+    setCollapsed(true);
+  };
+  const handleExpand = () => {
+    setSplitPaneSize('calc(100% - 200px)');
+    setCollapsed(false);
+  };
 
   return (
     <>
       <div style={{ position: 'relative', height: monacoHeight }}>
-        <SplitPane split="horizontal" defaultSize="60%" pane2Style={{ overflow: 'hidden' }}>
+        <SplitPane
+          ref={splitIns}
+          split="horizontal"
+          defaultSize="calc(100% - 40px)"
+          maxSize="calc(100% - 40px)"
+          pane2Style={{ overflow: 'hidden' }}
+          size={splitPaneSize}
+          onChange={setSplitPaneSize}
+        >
           <SqlEditor
             formRef={monaco}
             height="100%"
@@ -128,6 +148,15 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                 }
               }
             }}
+            tabBarExtraContent={
+              <div className={styles.collapseBtn}>
+                {collapsed ? (
+                  <UpSquareOutlined onClick={handleExpand} />
+                ) : (
+                  <DownSquareOutlined onClick={handleCollapse} />
+                )}
+              </div>
+            }
             style={{ height: '100%' }}
           >
             <TabPane tab="运行日志" key="log" style={{ height: '100%' }} closable={false}>
