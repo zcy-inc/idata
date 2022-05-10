@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
@@ -120,6 +121,7 @@ public class JobExtraOperationManager {
         contentDto.setId(null);
         contentDto.setJobId(jobId);
         contentDto.setVersion(null);
+        contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             contentDto.setSrcDataSourceId(null);
             contentDto.setDestDataSourceId(null);
@@ -133,6 +135,7 @@ public class JobExtraOperationManager {
         contentDto.setId(null);
         contentDto.setJobId(jobId);
         contentDto.setVersion(null);
+        contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             contentDto.setUdfIds(null);
             contentDto.setExternalTables(null);
@@ -148,6 +151,7 @@ public class JobExtraOperationManager {
         contentDto.setId(null);
         contentDto.setJobId(jobId);
         contentDto.setVersion(null);
+        contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             // none
         }
@@ -160,6 +164,7 @@ public class JobExtraOperationManager {
         contentDto.setId(null);
         contentDto.setJobId(jobId);
         contentDto.setVersion(null);
+        contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             // none
         }
@@ -172,6 +177,7 @@ public class JobExtraOperationManager {
         contentDto.setId(null);
         contentDto.setJobId(jobId);
         contentDto.setVersion(null);
+        contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             // none
         }

@@ -71,8 +71,9 @@ public class DIJobContentServiceImpl implements DIJobContentService {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
         // 判断目标表是否在其他job中已经存在
-        String destTable = contentDto.getDestTable();
-        checkArgument(unUsedDestTable(destTable, jobId), "目标表已经被其他作业使用");
+        // todo 暂时去除目标表判断，后续如果需要可以在作业提交时统一判断提交作业是否合法
+//        String destTable = contentDto.getDestTable();
+//        checkArgument(unUsedDestTable(destTable, jobId), "目标表已经被其他作业使用");
 
         Integer version = contentDto.getVersion();
 

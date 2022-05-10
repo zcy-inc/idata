@@ -26,4 +26,10 @@ public class Constants {
 
     public static final String DW_LAYER_ENUM_CODE = "dwLayerEnum:ENUM";
 
+    /**
+     * 默认dag id，表示当前还没有指定dag
+     */
+    public static final long DEFAULT_DAG_ID = 0L;
+    public static final long DEFAULT_DATASOURCE_ID = 0L;
+
 }

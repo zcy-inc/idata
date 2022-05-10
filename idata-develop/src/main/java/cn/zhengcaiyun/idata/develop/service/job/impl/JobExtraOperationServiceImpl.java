@@ -315,11 +315,14 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private void cleanOutJobReplication(JobReplicationDto jobReplicationDto, Long destFolderId, boolean fromImport) {
         JobInfoDto jobInfoDto = jobReplicationDto.getJobInfoDto();
         Map<EnvEnum, JobConfigCombinationDto> jobConfigCombinationDtoMap = jobReplicationDto.getJobConfigCombinationDtoMap();
+//        jobInfoDto.setName(fromImport ? jobInfoDto.getName() : getJobCopyName(jobInfoDto.getName()));
         jobInfoDto.setName(getJobCopyName(jobInfoDto.getName()));
         if (Objects.nonNull(destFolderId)) {
             jobInfoDto.setFolderId(destFolderId);
         }
         jobInfoDto.setId(null);
+        jobInfoDto.setCreateTime(null);
+        jobInfoDto.setEditTime(null);
 
         if (jobConfigCombinationDtoMap != null && jobConfigCombinationDtoMap.size() > 0) {
             jobConfigCombinationDtoMap.forEach((envEnum, jobConfigCombinationDto) -> {
@@ -327,25 +330,32 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                 if (Objects.nonNull(executeConfig)) {
                     executeConfig.setId(null);
                     executeConfig.setJobId(null);
+                    executeConfig.setCreateTime(null);
+                    executeConfig.setEditTime(null);
                     if (fromImport) {
                         executeConfig.setSchDagId(0L);
                     }
                 }
-                List<JobDependenceDto> dependencies = jobConfigCombinationDto.getDependencies();
-                if (CollectionUtils.isNotEmpty(dependencies)) {
-                    if (fromImport) {
-                        jobConfigCombinationDto.setDependencies(null);
-                    } else {
-                        for (JobDependenceDto dependenceDto : dependencies) {
-                            dependenceDto.setId(null);
-                            dependenceDto.setJobId(null);
-                        }
-                    }
-                }
+
+                // 暂不复制依赖关系
+                jobConfigCombinationDto.setDependencies(null);
+//                List<JobDependenceDto> dependencies = jobConfigCombinationDto.getDependencies();
+//                if (CollectionUtils.isNotEmpty(dependencies)) {
+//                    if (fromImport) {
+//                        jobConfigCombinationDto.setDependencies(null);
+//                    } else {
+//                        for (JobDependenceDto dependenceDto : dependencies) {
+//                            dependenceDto.setId(null);
+//                            dependenceDto.setJobId(null);
+//                            dependenceDto.setCreateTime(null);
+//                        }
+//                    }
+//                }
                 JobOutputDto output = jobConfigCombinationDto.getOutput();
                 if (Objects.nonNull(output)) {
                     output.setId(null);
                     output.setJobId(null);
+                    output.setCreateTime(null);
                     if (fromImport) {
                         output.setDestDataSourceId(0L);
                     }
