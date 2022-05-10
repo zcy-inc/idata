@@ -49,12 +49,19 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
     }
   }, [data]);
 
+  const udfType = Form.useWatch('udfType', form);
+
   return (
     <div className={styles['edit-dag']}>
       <Form form={form} layout="horizontal" colon={false}>
         <Item name="udfName" label="函数名称" rules={ruleText}>
           <Input placeholder="请输入" size="large" style={{ width }} />
         </Item>
+        {udfType === 'JavaFunction' && (
+          <Item name="sourceName" label="执行类" rules={ruleText}>
+            <Input placeholder="请输入" style={{ width }} />
+          </Item>
+        )}
         <Item name="udfType" label="函数类型" rules={ruleSlct}>
           <Select
             placeholder="请选择"
@@ -83,7 +90,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
               uploadUDFCodeFile(formData)
                 .then((res) => {
                   if (res.success) {
-                    onSuccess?.(res, file as unknown as XMLHttpRequest);
+                    onSuccess?.(res, (file as unknown) as XMLHttpRequest);
                     form.setFieldsValue({
                       fileName: res.data.fileName,
                       hdfsPath: res.data.relativePath,
@@ -92,7 +99,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                   }
                 })
                 .catch((err) => {
-                  onError?.(err, file as unknown as XMLHttpRequest);
+                  onError?.(err, (file as unknown) as XMLHttpRequest);
                 });
             }}
           >
