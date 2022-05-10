@@ -32,6 +32,7 @@ import {
   TaskTypes,
   execCoresOptions,
   defaultExecCores,
+  // SchRerunMode,
 } from '@/constants/datadev';
 import { getDataSourceList } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
@@ -195,6 +196,18 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, version }
     }
   };
 
+  const initialValues = {
+    schTimeOut: 3600,
+    schTimeOutStrategy: 'alarm',
+    schRerunMode: 'always',
+    execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
+    schPriority: 2,
+    execDriverMem: 2,
+    execWorkerMem: 2,
+    execCores: defaultExecCores,
+    execQueue: 'root.offline',
+  };
+
   return (
     <Drawer
       className={styles['drawer-config']}
@@ -230,7 +243,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, version }
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
-              initialValues={{ execCores: defaultExecCores }}
+              initialValues={initialValues}
             >
               <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">

@@ -557,7 +557,7 @@ export async function getRecommendJob({
 }: {
   jobId: number;
   environment: Environments;
-  version: string | null;
+  version?: string;
 }) {
   return request<Tresponse<DependenciesJob[]>>(
     `/api/p1/dev/jobs/${jobId}/environments/${environment}/dependencies/derive`,
@@ -565,24 +565,6 @@ export async function getRecommendJob({
       params: { version },
     },
   );
-}
-
-// 获取已配置的作业列表（依赖的上游作业）
-export async function getDependenceTaskList(params: { environment: Environments }) {
-  return request<Tresponse<ConfiguredTaskListItem[]>>(
-    `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
-    {
-      method: 'GET',
-    },
-  ).then(({ data }) => {
-    return data.map((item) => ({
-      ...item,
-      prevJobId: item.jobId,
-      prevJobName: item.jobName,
-      prevJobDagName: item.dagName,
-      prevJobDagId: item.dagId,
-    }));
-  });
 }
 
 /**

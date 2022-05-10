@@ -81,6 +81,7 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
     {
       title: '父节点输出作业名称',
       dataIndex: 'prevJobName',
+      key: 'prevJobName',
       width: '36%',
       align: 'center',
       render: (name, r) => {
@@ -94,7 +95,7 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
         );
       },
     },
-    { title: '所属DAG', dataIndex: 'prevJobDagName', width: '45%' },
+    { title: '所属DAG', dataIndex: 'prevJobDagName', key: 'prevJobDagName', width: '45%' },
     {
       title: '操作',
       key: 'option',
