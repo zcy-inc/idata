@@ -17,10 +17,10 @@ export const useTask = ({
   getContent: (basic: Task, jobId: number, version: number) => Promise<any>;
 }) => {
   const [task, setTask] = useState<Task>();
-  const [ver, setVer] = useState<Version>();
+  const [versionObj, setVersionObj] = useState<Version>();
   const [versions, setVersions] = useState<Version[]>([]);
   const [content, setContent] = useState<any>({});
-  const version = ver?.version;
+  const version = versionObj?.version;
 
   const transformLabel = ({
     environment = '',
@@ -53,8 +53,8 @@ export const useTask = ({
       value: transormValue(item),
     }));
     setVersions(versions);
-    const curVer = Array.isArray(versions) && versions.length > 0 ? versions[0] : undefined;
-    setVer(curVer);
+    const cur = Array.isArray(versions) && versions.length > 0 ? versions[0] : undefined;
+    setVersionObj(cur);
   }) as () => Promise<void>;
 
   // 刷新详细信息
@@ -66,10 +66,10 @@ export const useTask = ({
   });
 
   useEffect(() => {
-    if (ver) {
-      refreshContent?.(ver.version);
+    if (versionObj) {
+      refreshContent?.(versionObj.version);
     }
-  }, [ver]);
+  }, [versionObj]);
 
   useEffect(() => {
     (async function () {
@@ -82,8 +82,8 @@ export const useTask = ({
 
   return {
     task,
-    ver,
-    setVer,
+    versionObj,
+    setVersionObj,
     version,
     versions,
     content,

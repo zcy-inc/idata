@@ -123,7 +123,16 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         return Promise.resolve({});
     }
   };
-  const { versions, task, ver, setVer, version, content, refreshTaskBasic, refreshTask } = useTask({
+  const {
+    versions,
+    task,
+    versionObj,
+    setVersionObj,
+    version,
+    content,
+    refreshTaskBasic,
+    refreshTask,
+  } = useTask({
     jobId: pane.id,
     getContent: getTaskContent,
   });
@@ -609,8 +618,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                     bordered={false}
                     disabled={versions.length <= 0}
                     options={versions}
-                    value={ver?.value}
-                    onChange={(_, option) => setVer(option as Version)}
+                    value={versionObj?.value}
+                    onChange={(_, option) => setVersionObj(option as Version)}
                   />
                 )}
               </div>
