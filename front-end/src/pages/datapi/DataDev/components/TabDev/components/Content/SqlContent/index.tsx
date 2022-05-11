@@ -35,7 +35,6 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
 ) => {
   const [splitPaneSize, setSplitPaneSize] = useState<number | string>('calc(100% - 40px)');
   const [collapsed, setCollapsed] = useState(true);
-  const splitIns = useRef<any>(null);
   const [monacoValue, setMonacoValue] = useState('');
   const [monacoHeight, setMonacoHeight] = useState(500);
   const [UDFList, setUDFList] = useState<UDF[]>([]);
@@ -119,7 +118,6 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
     <>
       <div style={{ position: 'relative', height: monacoHeight }}>
         <SplitPane
-          ref={splitIns}
           split="horizontal"
           defaultSize="calc(100% - 40px)"
           maxSize="calc(100% - 40px)"
