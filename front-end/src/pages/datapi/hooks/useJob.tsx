@@ -4,23 +4,23 @@ import { VersionStatusDisplayMap, VersionStatus, EnvRunningState } from '@/const
 import type { TaskVersion, Task } from '@/types/datadev';
 import { usePersistFn } from '@/hooks';
 
-export type Version = TaskVersion & {
+export type VersionOption = TaskVersion & {
   label: string;
   value: string;
 };
 
-export const useTask = ({
+export const useJob = ({
   jobId,
   getContent,
 }: {
   jobId: number;
   getContent: (basic: Task, jobId: number, version: number) => Promise<any>;
 }) => {
-  const [task, setTask] = useState<Task>();
-  const [versionObj, setVersionObj] = useState<Version>();
-  const [versions, setVersions] = useState<Version[]>([]);
+  const [jobBasic, setJobBasic] = useState<Task>(); // 作业基本信息
+  const [versionOption, setVersionOption] = useState<VersionOption>();
+  const [versions, setVersions] = useState<VersionOption[]>([]);
   const [content, setContent] = useState<any>({});
-  const version = versionObj?.version;
+  const version = versionOption?.version;
 
   const transformLabel = ({
     environment = '',
@@ -41,7 +41,7 @@ export const useTask = ({
   // 刷新基本信息
   const refreshTaskBasic = usePersistFn(async () => {
     const { data: basic } = await getTask({ id: jobId });
-    setTask(basic);
+    setJobBasic(basic);
   }) as () => Promise<void>;
 
   // 刷新版本信息、详细信息
@@ -54,22 +54,22 @@ export const useTask = ({
     }));
     setVersions(versions);
     const cur = Array.isArray(versions) && versions.length > 0 ? versions[0] : undefined;
-    setVersionObj(cur);
+    setVersionOption(cur);
   }) as () => Promise<void>;
 
   // 刷新详细信息
   const refreshContent = usePersistFn(async (version: number) => {
-    if (task) {
-      const content = await getContent(task, jobId, version);
+    if (jobBasic) {
+      const content = await getContent(jobBasic, jobId, version);
       setContent(content);
     }
   });
 
   useEffect(() => {
-    if (versionObj) {
-      refreshContent?.(versionObj.version);
+    if (versionOption) {
+      refreshContent?.(versionOption.version);
     }
-  }, [versionObj]);
+  }, [versionOption]);
 
   useEffect(() => {
     (async function () {
@@ -81,9 +81,9 @@ export const useTask = ({
   }, [jobId, refreshTask, refreshTaskBasic]);
 
   return {
-    task,
-    versionObj,
-    setVersionObj,
+    jobBasic,
+    versionOption,
+    setVersionOption,
     version,
     versions,
     content,

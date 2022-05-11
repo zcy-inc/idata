@@ -44,7 +44,7 @@ import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
 import TyeRunSetting from './components/TryRunSetting';
 import showDialog from '@/utils/showDialog';
-import { useTask, Version } from '../../../hooks/useTask';
+import { useJob, VersionOption } from '../../../hooks/useJob';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -125,14 +125,14 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   };
   const {
     versions,
-    task,
-    versionObj,
-    setVersionObj,
+    jobBasic: task,
+    versionOption,
+    setVersionOption,
     version,
     content,
     refreshTaskBasic,
     refreshTask,
-  } = useTask({
+  } = useJob({
     jobId: pane.id,
     getContent: getTaskContent,
   });
@@ -618,8 +618,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                     bordered={false}
                     disabled={versions.length <= 0}
                     options={versions}
-                    value={versionObj?.value}
-                    onChange={(_, option) => setVersionObj(option as Version)}
+                    value={versionOption?.value}
+                    onChange={(_, option) => setVersionOption(option as VersionOption)}
                   />
                 )}
               </div>
