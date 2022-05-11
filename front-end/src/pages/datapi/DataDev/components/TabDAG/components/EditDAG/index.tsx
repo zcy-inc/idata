@@ -89,6 +89,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           });
           break;
         case PeriodRange.HOUR:
+          setTriggerMode(data.dagScheduleDto.triggerMode);
           if (data.dagScheduleDto.triggerMode === TriggerMode.INTERVAL) {
             const cronStartHour = cron[2].split('-')[0];
             const cronEndHour = cron[2].split('-')[1].split('/')[0];
@@ -103,7 +104,7 @@ const EditDAG: FC<EditDAGProps> = ({ data, form, renderCronExpression }) => {
           if (data.dagScheduleDto.triggerMode === TriggerMode.POINT) {
             Object.assign(initial, {
               triggerMode: data.dagScheduleDto.triggerMode,
-              hours: cron[2].split(','),
+              hours: cron[2].split(',').map(item => +item),
             });
           }
           break;
