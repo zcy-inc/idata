@@ -131,7 +131,12 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           }
         >
           {icon}
-          <Link to={item.path as string}>{defaultDom}</Link>
+          {
+            item.outLink ?
+              <a href={item.outLink} target="_blank">{defaultDom}</a> :
+              <Link to={item.path as string}>{defaultDom}</Link>
+          }
+          
         </div>
       );
     },
