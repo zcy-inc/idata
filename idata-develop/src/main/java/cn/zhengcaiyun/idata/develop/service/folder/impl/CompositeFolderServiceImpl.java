@@ -272,8 +272,15 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
                 Map<String, List<DevTreeNodeDto>> treeNodeMap = folderList.stream()
                         .map(DevTreeNodeDto::from)
                         .collect(Collectors.groupingBy(DevTreeNodeDto::getType));
-                expandedFolderNodeList.addAll(treeNodeMap.get(FolderTypeEnum.FOLDER.name()));
-                expandedFuncNodeList.addAll(treeNodeMap.get(FolderTypeEnum.FUNCTION.name()));
+
+                List<DevTreeNodeDto> folderTreeNodes = treeNodeMap.get(FolderTypeEnum.FOLDER.name());
+                List<DevTreeNodeDto> funcTreeNodes = treeNodeMap.get(FolderTypeEnum.FUNCTION.name());
+                if (!CollectionUtils.isEmpty(folderTreeNodes)) {
+                    expandedFolderNodeList.addAll(folderTreeNodes);
+                }
+                if (!CollectionUtils.isEmpty(funcTreeNodes)) {
+                    expandedFuncNodeList.addAll(funcTreeNodes);
+                }
             }
         }
 
