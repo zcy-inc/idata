@@ -65,7 +65,7 @@ public class DIJobContentController {
                                                         @RequestBody @Valid DIJobContentRequest contentRequest) {
         Integer srcShardingNum = contentRequest.getSrcShardingNum();
         String srcReadShardKey = contentRequest.getSrcReadShardKey();
-        if (srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
+        if (srcShardingNum != null && srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
             throw new GeneralException("分片数大于1时，切分键必填");
         }
 
