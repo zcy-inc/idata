@@ -197,13 +197,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   };
 
   const initialValues = {
-    schTimeOut: 3600,
+    schTimeOut: 60, // TODO:
     schTimeOutStrategy: 'alarm',
     schRerunMode: 'always',
     execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
     schPriority: 2,
-    execDriverMem: 2,
-    execWorkerMem: 2,
+    execDriverMem: 3,
+    execWorkerMem: 4,
     execCores: defaultExecCores,
     execQueue: 'root.offline',
   };

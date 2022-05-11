@@ -76,11 +76,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     getDataDevConfig({ jobId: data?.id as number, environment })
       .then((res) => {
         const config = res.data;
+        // TODO: 逻辑优化，不要数据转换后再次复制给该变量，同一个变量名应该只有一个含义
         if (config.executeConfig.schTimeOut) {
           config.executeConfig.schTimeOut = config.executeConfig.schTimeOut / 60;
         } else {
           config.executeConfig.schTimeOut = 0;
         }
+        // TODO: 逻辑优化
         if (config.executeConfig.schDryRun === 1) {
           config.executeConfig.schDryRun = ['schDryRun'];
         } else {
@@ -129,14 +131,14 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
 
   const initialValues = {
     executeConfig: {
-      schTimeOut: 3600,
+      schTimeOut: 60, // TODO: 
       schTimeOutStrategy: 'alarm',
       schRerunMode: 'always',
       execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
       schPriority: 2,
       execEngine: 'SQOOP',
-      execDriverMem: 2,
-      execWorkerMem: 2,
+      execDriverMem: 3,
+      execWorkerMem: 4,
       execCores: defaultExecCores,
       execQueue: 'root.offline',
     },
