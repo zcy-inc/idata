@@ -266,6 +266,7 @@ export interface DependenceTreeNode {
 
 export interface UDF {
   commandFormat: string;
+  sourceName?: string;
   description: string;
   fileName: string;
   folderId: number;

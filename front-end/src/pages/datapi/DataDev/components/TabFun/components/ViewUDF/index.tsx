@@ -34,6 +34,7 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
       <Title>函数信息</Title>
       <Descriptions colon={false} column={1}>
         <Item label="函数名称">{data?.udfName || '-'}</Item>
+        {data?.udfType === 'JavaFunction' && <Item label="执行类">{data?.sourceName || '-'}</Item>}
         <Item label="函数类型">{data?.udfType || '-'}</Item>
         <Item label="函数代码">
           <div style={{ position: 'relative', width: '100%', height: 28 }}>
