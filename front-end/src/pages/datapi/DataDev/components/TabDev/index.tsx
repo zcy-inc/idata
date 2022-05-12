@@ -1,11 +1,9 @@
 import React, { useRef, useState } from 'react';
-import MonacoEditor from 'react-monaco-editor';
-import { Form, FormInstance, Input, message, Modal, Select, Tooltip, Button, Divider } from 'antd';
+import { Form, Input, message, Modal, Select, Tooltip, Button, Divider } from 'antd';
 import { ModalForm } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import { get } from 'lodash';
 import type { FC } from 'react';
-import type { IRange } from 'monaco-editor';
 import styles from './index.less';
 import { IPane } from '@/models/datadev';
 import { Task } from '@/types/datadev';
@@ -30,7 +28,6 @@ import {
   tyrRun,
 } from '@/services/datadev';
 import { IconFont } from '@/components';
-
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
@@ -45,6 +42,7 @@ import Kylin from './components/Content/Kylin';
 import TyeRunSetting from './components/TryRunSetting';
 import showDialog from '@/utils/showDialog';
 import { useJob, VersionOption } from '../../../hooks/useJob';
+import { useEditorPanel } from '../../../hooks/useEditorPanel';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -84,24 +82,13 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  // content相关
-  const [log, setLog] = useState<string[]>([]);
-  const [results, setResults] = useState<{ columns: any[]; dataSource: any[] }[]>([]);
-  const monaco = useRef<MonacoEditor>(null);
-  const formRef = useRef<{ form: FormInstance }>(null);
+
   const pollingFrom = useRef<number>(0);
 
   const { getTreeWrapped, onRemovePane } = useModel('datadev', (_) => ({
     onRemovePane: _.onRemovePane,
     getTreeWrapped: _.getTreeWrapped,
   }));
-  /**
-   * 移除结果
-   */
-  const removeResult = (i: number) => {
-    results.splice(i, 1);
-    setResults([...results]);
-  };
 
   /**
    * 获取作业内容
@@ -136,6 +123,15 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     jobId: pane.id,
     getContent: getTaskContent,
   });
+  const [form] = Form.useForm();
+  const {
+    panelProps,
+    editorRef,
+    getDebugCode,
+    setResults,
+    setLog,
+    handleExpandChange,
+  } = useEditorPanel();
 
   /**
    * 暂停、恢复、单次运行任务
@@ -170,8 +166,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
    * 保存任务
    */
   const onSave = () => {
-    const values = formRef.current?.form?.getFieldsValue() || {};
-    const monacoValue = monaco.current?.editor?.getValue() || '';
+    const values = form.getFieldsValue();
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
@@ -179,9 +174,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           ...values,
           jobId: pane.id,
           jobType: task?.jobType,
-          sourceSql: monacoValue,
-          externalTables: values.externalTables,
-          udfIds: values.udfIds.join(','),
           version,
         };
         saveSqlSpark({ jobId: pane.id }, dataSql)
@@ -216,9 +208,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         break;
       case TaskTypes.SPARK_PYTHON:
         const dataSparkPython = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SPARK_PYTHON,
-          pythonResource: monacoValue,
           appArguments: values.appArguments?.map((_: any) => ({
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
@@ -236,9 +228,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         break;
       case TaskTypes.SCRIPT_SHELL:
         const dataScriptShell = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
           version,
         };
         saveScript({ jobId: pane.id }, dataScriptShell)
@@ -252,9 +244,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         break;
       case TaskTypes.SCRIPT_PYTHON:
         const dataScriptPython = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
           scriptArguments: values.scriptArguments?.map((_: any) => ({
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
@@ -292,17 +284,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       default:
         break;
     }
-  };
-
-  // 获取调试代码
-  const getDebugCode = () => {
-    const editor = monaco.current?.editor;
-    const range = editor?.getSelection() as IRange;
-    let value = editor?.getModel()?.getValueInRange(range);
-    if (!value) {
-      value = editor?.getValue();
-    }
-    return value;
   };
 
   // 轮询 pyspark 调试结果
@@ -364,11 +345,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           }, 2000);
         } else {
           pollingFrom.current = 0;
-          const columns: any[] = [];
-          const dataSource = res.data.resultSet;
-          const record = dataSource[0] || {};
-          Object.keys(record).forEach((_) => columns.push({ title: _, dataIndex: _, key: _ }));
-          setResults((pre) => [...pre, { columns, dataSource }]);
+          const result = res.data.resultSet;
+          setResults((pre) => [...pre, result]);
         }
       })
       .catch((err) => {});
@@ -383,6 +361,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       return message.error('请选择代码');
     }
     setDebugLoading(true);
+    handleExpandChange(true);
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK: {
         const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
@@ -560,40 +539,44 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       case TaskTypes.SQL_FLINK:
         return (
           <SqlContent
-            ref={formRef}
-            monaco={monaco}
-            data={{ task, content, log, res: results }}
-            removeResult={removeResult}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ task, content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.SPARK_JAR:
-        return <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />;
+        return (
+          <SparkJava form={form} data={content} jobId={content?.jobId || task?.id} />
+        );
       case TaskTypes.SPARK_PYTHON:
         return (
           <SparkPython
-            ref={formRef}
-            monaco={monaco}
-            data={{ content, log }}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.SCRIPT_SHELL:
-        return <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />;
+        return <ScriptShell form={form} editorRef={editorRef} data={{ content }} />;
       case TaskTypes.SCRIPT_PYTHON:
         return (
           <ScriptPython
-            ref={formRef}
-            monaco={monaco}
-            data={{ content, log }}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.KYLIN:
-        return <Kylin ref={formRef} data={content} />;
+        return <Kylin form={form} data={content} />;
       default:
         return null;
     }

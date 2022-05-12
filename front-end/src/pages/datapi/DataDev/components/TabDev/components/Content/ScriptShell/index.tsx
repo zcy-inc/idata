@@ -1,16 +1,20 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import type { ForwardRefRenderFunction } from 'react';
+import { Form, FormInstance } from 'antd';
 
 interface ScriptShellProps {
-  monaco: any;
+  form: FormInstance<any>;
+  editorRef: any;
   data: {
     content: any;
   };
 }
 
+const { Item } = Form;
+
 const ScriptShell: ForwardRefRenderFunction<unknown, ScriptShellProps> = (
-  { monaco, data: { content } },
+  { data: { content }, form, editorRef },
   ref,
 ) => {
   const [monacoHeight, setMonacoHeight] = useState(500);
@@ -22,16 +26,22 @@ const ScriptShell: ForwardRefRenderFunction<unknown, ScriptShellProps> = (
     setMonacoHeight(height);
   }, []);
 
+  // TODO:
+  useEffect(() => {
+    form.setFieldsValue({ pythonResource: content.pythonResource });
+  }, [content]);
+
   return (
     <div style={{ position: 'relative', height: monacoHeight }}>
-      <MonacoEditor
-        ref={monaco}
-        height="100%"
-        language="shell"
-        theme="vs-dark"
-        value={content.sourceResource}
-        options={{ automaticLayout: true }}
-      />
+      <Item name="sourceResource" noStyle>
+        <MonacoEditor
+          ref={editorRef}
+          height="100%"
+          language="shell"
+          theme="vs-dark"
+          options={{ automaticLayout: true }}
+        />
+      </Item>
     </div>
   );
 };

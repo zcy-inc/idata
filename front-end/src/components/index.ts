@@ -22,4 +22,6 @@ export { default as TreeTitle } from './TreeTitle';
 
 export * from './CascaderSelect';
 
+export { default as JoinSelect } from './JoinSelect';
+
 export { IconFont, Operation, SearchPanel, RightContent, TiledTable };

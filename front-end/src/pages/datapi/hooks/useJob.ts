@@ -87,6 +87,7 @@ export const useJob = ({
     version,
     versions,
     content,
+    setContent,
     refreshTaskBasic,
     refreshTask,
   };
