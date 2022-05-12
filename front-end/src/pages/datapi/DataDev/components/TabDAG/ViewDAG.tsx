@@ -68,7 +68,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
           const cronInterval = cron[2].split('-')[1].split('/')[1];
           return (
             <>
-              <Item label="方式选择">{data.dagScheduleDto.triggerMode || '-'}</Item>
+              <Item label="方式选择">时间间隔</Item>
               <Item label="开始时间">
                 {moment(`${cron[1]}:${cronStartHour}`).format(format) || '-'}
               </Item>
@@ -80,7 +80,7 @@ const ViewDAG: FC<ViewDAGProps> = ({ data }) => {
         if (data.dagScheduleDto.triggerMode === TriggerMode.POINT) {
           return (
             <>
-              <Item label="方式选择">{data.dagScheduleDto.triggerMode || '-'}</Item>
+              <Item label="方式选择">指定时间</Item>
               <Item label="指定小时">{cron[2] || '-'}</Item>
             </>
           );

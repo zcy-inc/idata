@@ -42,7 +42,7 @@ interface DrawerConfigProps {
   visible: boolean;
   onClose: () => void;
   data?: Task;
-  version: string;
+  // version: string;
 }
 
 const { Item } = Form;
@@ -51,7 +51,7 @@ const width = 200;
 const env = Object.values(Environments).map((_) => _);
 const ruleSelc = [{ required: true, message: '请选择' }];
 
-const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, version }) => {
+const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [activeKey, setActiveKey] = useState<Environments>(Environments.STAG);
   const [DAGList, setDAGList] = useState<DAGListItem[]>([]);
   const [dataSource, setDataSource] = useState<DataSourceItem[]>([]);
@@ -197,13 +197,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, version }
   };
 
   const initialValues = {
-    schTimeOut: 3600,
+    schTimeOut: 60, // TODO:
     schTimeOutStrategy: 'alarm',
     schRerunMode: 'always',
     execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
     schPriority: 2,
-    execDriverMem: 2,
-    execWorkerMem: 2,
+    execDriverMem: 3,
+    execWorkerMem: 4,
     execCores: defaultExecCores,
     execQueue: 'root.offline',
   };
@@ -357,7 +357,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data, version }
               <Title>依赖配置</Title>
               <DependenciesFormItem
                 name="dependencies"
-                fieldProps={{ environment: _, jobId: data?.id as number, version }}
+                fieldProps={{ environment: _, jobId: data?.id as number }}
               />
               <Title>输出配置</Title>
               <Item name="destWriteMode" label="数据写入模式" style={{ marginTop: 16 }}>
