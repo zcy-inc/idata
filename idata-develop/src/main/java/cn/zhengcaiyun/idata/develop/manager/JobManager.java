@@ -130,7 +130,7 @@ public class JobManager {
     }
 
     private List<JobDependenceDto> deriveJobDependencies(final JobInfo jobInfo, final String environment, final List<String> tables) {
-        if (CollectionUtils.isEmpty(tables)){
+        if (CollectionUtils.isEmpty(tables)) {
             return Lists.newArrayList();
         }
         List<JobOutput> outputList = jobOutputRepo.queryByDestTable(tables, environment);
@@ -161,22 +161,26 @@ public class JobManager {
                 .map(JobDependence::getPrevJobId)
                 .collect(Collectors.toSet());
 
-        List<JobExecuteConfig> derivedDepJobConfigList = jobExecuteConfigRepo.queryList(derivedDepJobIds, environment);
         List<JobDependenceDto> finalDepDtoList = Lists.newArrayList();
-        for (JobExecuteConfig derivedDepJobConfig : derivedDepJobConfigList) {
-            if (!existDepJobIdSet.contains(derivedDepJobConfig.getJobId())) {
-                JobDependenceDto dependenceDto = new JobDependenceDto();
-                dependenceDto.setJobId(jobInfo.getId());
-                dependenceDto.setEnvironment(environment);
-                dependenceDto.setPrevJobId(derivedDepJobConfig.getJobId());
-                dependenceDto.setPrevJobDagId(derivedDepJobConfig.getSchDagId());
-                dependenceDto.setFresh(Boolean.TRUE);
-                finalDepDtoList.add(dependenceDto);
+        if (CollectionUtils.isNotEmpty(derivedDepJobIds)) {
+            List<JobExecuteConfig> derivedDepJobConfigList = jobExecuteConfigRepo.queryList(derivedDepJobIds, environment);
+            for (JobExecuteConfig derivedDepJobConfig : derivedDepJobConfigList) {
+                if (!existDepJobIdSet.contains(derivedDepJobConfig.getJobId())) {
+                    JobDependenceDto dependenceDto = new JobDependenceDto();
+                    dependenceDto.setJobId(jobInfo.getId());
+                    dependenceDto.setEnvironment(environment);
+                    dependenceDto.setPrevJobId(derivedDepJobConfig.getJobId());
+                    dependenceDto.setPrevJobDagId(derivedDepJobConfig.getSchDagId());
+                    dependenceDto.setFresh(Boolean.TRUE);
+                    finalDepDtoList.add(dependenceDto);
+                }
             }
         }
-        finalDepDtoList.addAll(existDepList.stream()
-                .map(JobDependenceDto::from)
-                .collect(Collectors.toList()));
+        if (CollectionUtils.isNotEmpty(existDepList)) {
+            finalDepDtoList.addAll(existDepList.stream()
+                    .map(JobDependenceDto::from)
+                    .collect(Collectors.toList()));
+        }
         return finalDepDtoList;
     }
 
