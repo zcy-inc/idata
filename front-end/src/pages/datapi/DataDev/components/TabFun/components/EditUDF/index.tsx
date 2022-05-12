@@ -24,6 +24,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
   useEffect(() => {
     if (data) {
       const values = {
+        ...data,
         udfName: data.udfName,
         udfType: data.udfType,
         upload: data.fileName,
