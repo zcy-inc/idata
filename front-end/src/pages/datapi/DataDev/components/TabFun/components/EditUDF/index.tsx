@@ -95,6 +95,9 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
                   onError?.(err, (file as unknown) as XMLHttpRequest);
                 });
             }}
+            onRemove={async () => {
+              form.resetFields(['fileName', 'hdfsPath']);
+            }}
           >
             <Button>上传文件</Button>
           </Upload>
