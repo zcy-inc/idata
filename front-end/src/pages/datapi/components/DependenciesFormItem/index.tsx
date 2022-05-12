@@ -56,8 +56,11 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
 
     if (Array.isArray(value)) {
       const newVal = [...value];
-      newVal.push(valueItem);
-      onChange?.(newVal);
+      const prevJobIds = newVal.map((item) => item.prevJobId);
+      if (!prevJobIds.includes(valueItem.prevJobId)) {
+        newVal.push(valueItem);
+        onChange?.(newVal);
+      }
     } else {
       onChange?.([valueItem]);
     }

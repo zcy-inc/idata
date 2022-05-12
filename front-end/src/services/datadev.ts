@@ -557,7 +557,7 @@ export async function getRecommendJob({
 }: {
   jobId: number;
   environment: Environments;
-  version?: string;
+  version?: string | null;
 }) {
   return request<Tresponse<DependenciesJob[]>>(
     `/api/p1/dev/jobs/${jobId}/environments/${environment}/dependencies/derive`,
