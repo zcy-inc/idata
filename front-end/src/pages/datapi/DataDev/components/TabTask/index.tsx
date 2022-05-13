@@ -360,6 +360,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
     if (success) {
       message.success('刷新成功');
+      let scriptItem=data.map((item: {name : string}) => item.name).join();//字段名以','链接的字符串
+      form.setFieldsValue({scriptSelectColumns:scriptItem});//将最终字符串设置到对应文本框scriptSelectColumns
       setSrcColumns(data);
       setDestColumns([]);
     }
