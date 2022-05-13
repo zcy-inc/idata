@@ -60,6 +60,8 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
       if (!prevJobIds.includes(valueItem.prevJobId)) {
         newVal.push(valueItem);
         onChange?.(newVal);
+      } else {
+        message.info('作业已存在，勿重复添加');
       }
     } else {
       onChange?.([valueItem]);
