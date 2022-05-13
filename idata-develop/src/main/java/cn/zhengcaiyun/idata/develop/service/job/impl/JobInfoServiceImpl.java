@@ -386,6 +386,20 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
+
+        Map<String, String> confProp = Maps.newHashMap();
+        if (StringUtils.isNotBlank(jobInfoExecuteDetailDto.getExtProperties())) {
+            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(jobInfoExecuteDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            extendProperties.stream()
+                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
+        }
+        if (!confProp.containsKey("logLevel")) {
+            // 给个默认值
+            confProp.put("logLevel", "warn");
+        }
+        jobInfoExecuteDetailDto.setConfProp(confProp);
+
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
@@ -575,7 +589,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 StringBuffer jarArgs = new StringBuffer("");
                 if (!CollectionUtils.isEmpty(contentSpark.getAppArguments())) {
                     for (Object script : contentSpark.getAppArguments()) {
-                        JobArgumentDto dto = (JobArgumentDto)script;
+                        JobArgumentDto dto = (JobArgumentDto) script;
                         jarArgs.append(dto.getArgumentValue() + " ");
                     }
                     sparkResponse.setAppArguments(jarArgs.toString());
@@ -604,7 +618,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 StringBuffer shellArgs = new StringBuffer("");
                 if (!CollectionUtils.isEmpty(contentScript.getScriptArguments())) {
                     for (Object script : contentScript.getScriptArguments()) {
-                        JobArgumentDto dto = (JobArgumentDto)script;
+                        JobArgumentDto dto = (JobArgumentDto) script;
                         shellArgs.append(dto.getArgumentValue() + " ");
                     }
                     scriptResponse.setScriptArguments(shellArgs.toString());
@@ -668,26 +682,16 @@ public class JobInfoServiceImpl implements JobInfoService {
         flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
         flinkSqlResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
         flinkSqlResponse.setJobPrivacyProp(privacyProps);
-        Map<String, String> confProp = Maps.newHashMap();
-        if (StringUtils.isNotBlank(baseJobDetailDto.getExtProperties())) {
-            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(baseJobDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
-            }.getType());
-            extendProperties.stream()
-                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
-        }
-        if (!confProp.containsKey("logLevel")) {
-            // 给个默认值
-            confProp.put("logLevel", "warn");
-        }
-        flinkSqlResponse.setConfProp(confProp);
+
         flinkSqlResponse.setPublished(published);
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
-        flinkSqlResponse.setFlinkVersion(confProp.getOrDefault("Flink-version", "flink-1.10"));
+        flinkSqlResponse.setFlinkVersion(flinkSqlResponse.getConfProp().getOrDefault("Flink-version", "flink-1.10"));
         return flinkSqlResponse;
     }
 
     /**
      * 生成src query
+     *
      * @param mappingColumnList
      * @param srcReadFilter
      * @param srcTables

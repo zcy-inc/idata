@@ -1,7 +1,10 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.*;
+import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.WriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
@@ -39,14 +42,19 @@ public class JobInfoExecuteDetailDto {
      */
     private EngineTypeEnum execEngine;
     /**
-     * 扩展配置参数
+     * 扩展配置参数，数据库json string格式，转化为confProp
      */
     private String extProperties;
+    /**
+     * 扩展参数配置
+     */
+    private Map<String, String> confProp;
 
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
 
         }
+
         public DiJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -59,38 +67,39 @@ public class JobInfoExecuteDetailDto {
         private DriverTypeEnum srcDriverType;// driverType
         private String srcDbName; //dbName
         /**
-         *   数据来源-来源表
+         * 数据来源-来源表
          */
         private String srcTables;//sourceTableName
         /**
-         *   数据去向-目标表
+         * 数据去向-目标表
          */
         private String destTable;//带库名 targetTableName
 
         /**
          * 数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
-//         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+         * //         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+         *
          * @see WriteModeEnum.DiEnum
          */
         private WriteModeEnum.DiEnum destWriteMode; // isRecreate
         /**
-         *   数据来源-读取模式，all：全量，incremental：增量
+         * 数据来源-读取模式，all：全量，incremental：增量
          */
         private SrcReadModeEnum srcReadMode;
         /**
-         *   数据来源-切分键 srcShardingNum>1 必填
+         * 数据来源-切分键 srcShardingNum>1 必填
          */
         private String srcReadShardKey;
         /**
-         *   数据来源-分片数量（并行度） 必填
+         * 数据来源-分片数量（并行度） 必填
          */
         private Integer srcShardingNum;
         /**
-         *   TODO
+         * TODO
          */
         private String mergeSql;
         /**
-         *   数据来源-过滤条件
+         * 数据来源-过滤条件
          */
         private String srcReadFilter; // diCondition
         /**
@@ -375,22 +384,23 @@ public class JobInfoExecuteDetailDto {
         public SqlJobDetailsDto() {
 
         }
+
         public SqlJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
 
         /**
-         *   数据去向-目标表
+         * 数据去向-目标表
          */
         private String destTable; // targetTableName
 
         /**
-         *   数据去向-写入模式，overwrite，upsert
+         * 数据去向-写入模式，overwrite，upsert
          */
         private WriteModeEnum.SqlEnum destWriteMode; // saveMode
 
         /**
-         *   数据来源表主键(写入模式为upsert时必填)
+         * 数据来源表主键(写入模式为upsert时必填)
          */
         private String jobTargetTablePk;
 
@@ -460,6 +470,7 @@ public class JobInfoExecuteDetailDto {
         public SparkJobDetailsDto() {
 
         }
+
         public SparkJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -499,9 +510,11 @@ public class JobInfoExecuteDetailDto {
         public KylinDetailJobDto() {
 
         }
+
         public KylinDetailJobDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
+
         private String cubeName;
         private String buildType;
 
@@ -526,6 +539,7 @@ public class JobInfoExecuteDetailDto {
         public ScriptJobDetailsDto() {
 
         }
+
         public ScriptJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -562,6 +576,7 @@ public class JobInfoExecuteDetailDto {
         public FlinkSqlJobDetailsDto() {
 
         }
+
         public FlinkSqlJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -581,11 +596,7 @@ public class JobInfoExecuteDetailDto {
         /**
          * 作业私有信息
          */
-        private Map<String,String> jobPrivacyProp;
-        /**
-         * 扩展参数配置
-         */
-        private Map<String, String> confProp;
+        private Map<String, String> jobPrivacyProp;
         /**
          * 是否已发布作业，未发布作业走调试流程
          */
@@ -625,14 +636,6 @@ public class JobInfoExecuteDetailDto {
 
         public void setJobPrivacyProp(Map<String, String> jobPrivacyProp) {
             this.jobPrivacyProp = jobPrivacyProp;
-        }
-
-        public Map<String, String> getConfProp() {
-            return confProp;
-        }
-
-        public void setConfProp(Map<String, String> confProp) {
-            this.confProp = confProp;
         }
 
         public Boolean getPublished() {
@@ -714,5 +717,13 @@ public class JobInfoExecuteDetailDto {
 
     public void setExtProperties(String extProperties) {
         this.extProperties = extProperties;
+    }
+
+    public Map<String, String> getConfProp() {
+        return confProp;
+    }
+
+    public void setConfProp(Map<String, String> confProp) {
+        this.confProp = confProp;
     }
 }
