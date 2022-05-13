@@ -370,7 +370,8 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
       if (model.tableType === 'src') {
         setVisible(true);
         setCurrentNode(model);
-        form.setFieldsValue({ mappingSql: model.data.mappingSql || '' });
+        model.data.mappingSql=srcMap.current[model.id].mappingSql;
+        form.setFieldsValue({ mappingSql:  model.data.mappingSql || '' });
       }
       if (model.tableType === 'dest') {
         if (model.data.primaryKey) {
@@ -401,6 +402,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         onCancel={() => setVisible(false)}
         onOk={() => {
           const values = form.getFieldsValue();
+          //获取图表对应的节点，需要保证srcMap.current[currentNode.id]与之前点击的对象是同一个
           srcMap.current[currentNode.id].mappingSql = values.mappingSql;
           setCurrentNode(null);
           setVisible(false);
