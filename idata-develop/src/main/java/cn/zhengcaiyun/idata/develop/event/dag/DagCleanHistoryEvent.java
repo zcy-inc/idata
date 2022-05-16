@@ -15,29 +15,22 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.constant.enums;
+package cn.zhengcaiyun.idata.develop.event.dag;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-11-10 14:56
+ * @create: 2021-11-04 15:21
  **/
-public enum EventTypeEnum {
-    CREATED,
-    UPDATED,
-    DELETED,
-    DAG_SCHEDULE_UPDATED,
-    DAG_OFFLINE,
-    DAG_ONLINE,
-    DAG_ADD_DEPENDENCE,
-    DAG_DEL_DEPENDENCE,
-    DAG_CLEAN_HISTORY,
-    JOB_SCHEDULE_UPDATED,
-    JOB_PAUSE,
-    JOB_RESUME,
-    JOB_PUBLISH,
-    JOB_BIND_DAG,
-    JOB_UNBIND_DAG,
-    JOB_BUILD_PREV,
-    ;
+public class DagCleanHistoryEvent extends DagBaseEvent {
+
+    private String cleanMsg;
+
+    public String getCleanMsg() {
+        return cleanMsg;
+    }
+
+    public void setCleanMsg(String cleanMsg) {
+        this.cleanMsg = cleanMsg;
+    }
 }

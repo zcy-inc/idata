@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.develop.event.dag.bus.DagEventBus;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -110,6 +111,31 @@ public class DagEventPublisher {
         DagEventBus.getInstance().post(event);
         // 检查事件处理结果
         processResult(event);
+        return;
+    }
+
+    public void whenToCleanHistory(DAGEventLog eventLog) {
+        if (!EventTypeEnum.DAG_CLEAN_HISTORY.name().equals(eventLog.getDagEvent())) return;
+
+        DagCleanHistoryEvent event = new DagCleanHistoryEvent();
+        event.setDagId(eventLog.getDagId());
+        event.setEventId(eventLog.getId());
+        // 发布事件
+        DagEventBus.getInstance().post(event);
+        // 检查事件处理结果
+        DAGEventLog updateEventLog = new DAGEventLog();
+        updateEventLog.setId(event.getEventId());
+        if (event.hasFailed()) {
+            // 处理失败
+            updateEventLog.setHandleStatus(EventStatusEnum.FAIL.val);
+            updateEventLog.setHandleMsg(Strings.nullToEmpty(event.fetchFailedMessage()));
+            throw new ExternalIntegrationException(event.fetchFailedMessage());
+        } else {
+            // 处理成功，标记事件已处理
+            updateEventLog.setHandleStatus(EventStatusEnum.SUCCESS.val);
+        }
+        updateEventLog.setEventInfo(StringUtils.defaultString(event.getCleanMsg()));
+        dagEventLogRepo.update(updateEventLog);
         return;
     }
 
