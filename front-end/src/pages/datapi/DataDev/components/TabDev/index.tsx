@@ -1,21 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import MonacoEditor from 'react-monaco-editor';
-import { Form, FormInstance, Input, message, Modal, Select, Tooltip, Button, Divider } from 'antd';
+import React, { useRef, useState } from 'react';
+import { Form, Input, message, Modal, Select, Tooltip, Button, Divider } from 'antd';
 import { ModalForm } from '@ant-design/pro-form';
 import { useModel } from 'umi';
 import { get } from 'lodash';
 import type { FC } from 'react';
-import type { IRange } from 'monaco-editor';
 import styles from './index.less';
 import { IPane } from '@/models/datadev';
-import { Task, TaskVersion } from '@/types/datadev';
-import {
-  EnvRunningState,
-  StatementState,
-  TaskTypes,
-  VersionStatus,
-  VersionStatusDisplayMap,
-} from '@/constants/datadev';
+import { Task } from '@/types/datadev';
+import { StatementState, TaskTypes } from '@/constants/datadev';
 import { Environments } from '@/constants/datasource';
 import {
   deleteTask,
@@ -23,8 +15,6 @@ import {
   getScript,
   getSpark,
   getSqlSpark,
-  getTask,
-  getTaskVersions,
   pauseTask,
   resumeTask,
   runQueryResult,
@@ -35,9 +25,9 @@ import {
   saveSpark,
   saveSqlSpark,
   submitTask,
+  tyrRun,
 } from '@/services/datadev';
 import { IconFont } from '@/components';
-
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
@@ -49,6 +39,10 @@ import SparkPython from './components/Content/SparkPython';
 import ScriptShell from './components/Content/ScriptShell';
 import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
+import TyeRunSetting from './components/TryRunSetting';
+import showDialog from '@/utils/showDialog';
+import { useJob, VersionOption } from '../../../hooks/useJob';
+import { useEditorPanel } from '../../../hooks/useEditorPanel';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -64,6 +58,7 @@ enum Btns {
   DELETE, // 删除
   DIVIDER,
   JOB_CONFIG,
+  TRY_RUN,
 }
 
 const { Item } = Form;
@@ -72,12 +67,7 @@ const { TextArea } = Input;
 const ruleText = [{ required: true, message: '请输入' }];
 const ruleSlct = [{ required: true, message: '请选择' }];
 
-const TabTask: FC<TabTaskProps> = ({ pane }) => {
-  const [task, setTask] = useState<Task>();
-  const [versions, setVersions] = useState<TaskVersion[]>([]);
-  const [version, setVersion] = useState<number | undefined>(-1);
-  const [content, setContent] = useState<any>({});
-
+const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [visibleJobConfig, setVisibleJobConfig] = useState(false);
   const [visibleBasic, setVisibleBasic] = useState(false);
   const [visibleConfig, setVisibleConfig] = useState(false);
@@ -92,11 +82,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  // content相关
-  const [log, setLog] = useState<string[]>([]);
-  const [results, setResults] = useState<{ columns: any[]; dataSource: any[] }[]>([]);
-  const monaco = useRef<MonacoEditor>(null);
-  const formRef = useRef<{ form: FormInstance }>(null);
+
   const pollingFrom = useRef<number>(0);
 
   const { getTreeWrapped, onRemovePane } = useModel('datadev', (_) => ({
@@ -104,81 +90,48 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     getTreeWrapped: _.getTreeWrapped,
   }));
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await getTaskWrapped();
-      await getTaskVersionsWrapped();
-    };
-    if (pane) {
-      fetchData();
-    }
-  }, [pane.id]);
-
-  useEffect(() => {
-    if (version && version > 0) {
-      getTaskContent(version);
-    }
-  }, [version]);
-
-  /**
-   * 移除结果
-   */
-  const removeResult = (i: number) => {
-    results.splice(i, 1);
-    setResults([...results]);
-  };
-
-  /**
-   * 获取作业配置
-   */
-  const getTaskWrapped = () =>
-    getTask({ id: pane.id })
-      .then((res) => setTask(res.data))
-      .catch((err) => {});
-
-  /**
-   * 获取作业版本
-   */
-  const getTaskVersionsWrapped = () =>
-    getTaskVersions({ jobId: pane.id })
-      .then((res) => {
-        setVersions(res.data);
-        if (res.data[0]?.version) {
-          setVersion(res.data[0]?.version);
-        } else {
-          setVersion(undefined);
-        }
-      })
-      .catch((err) => {});
-
   /**
    * 获取作业内容
    */
-  const getTaskContent = (version: number) => {
+  const getTaskContent = (task: Task, jobId: number, version: number) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
-        getSqlSpark({ jobId: pane.id, version }).then((res) => setContent(res.data));
-        break;
+        return getSqlSpark({ jobId, version }).then((res) => res.data);
       case TaskTypes.SPARK_JAR:
       case TaskTypes.SPARK_PYTHON:
-        getSpark({ jobId: pane.id, version })
-          .then((res) => setContent(res.data))
-          .catch((err) => {});
-        break;
+        return getSpark({ jobId, version }).then((res) => res.data);
       case TaskTypes.SCRIPT_SHELL:
       case TaskTypes.SCRIPT_PYTHON:
-        getScript({ jobId: pane.id, version })
-          .then((res) => setContent(res.data))
-          .catch((err) => {});
-        break;
+        return getScript({ jobId, version }).then((res) => res.data);
       case TaskTypes.KYLIN:
-        getKylin({ jobId: pane.id, version })
-          .then((res) => setContent(res.data))
-          .catch((err) => {});
-        break;
+        return getKylin({ jobId, version }).then((res) => res.data);
+      default:
+        return Promise.resolve({});
     }
   };
+  const {
+    versions,
+    jobBasic: task,
+    versionOption,
+    setVersionOption,
+    version,
+    content,
+    refreshTaskBasic,
+    refreshTask,
+  } = useJob({
+    jobId: pane.id,
+    getContent: getTaskContent,
+  });
+  const [form] = Form.useForm();
+  const {
+    panelProps,
+    editorRef,
+    getDebugCode,
+    setResults,
+    setLog,
+    handleExpandChange,
+  } = useEditorPanel();
 
   /**
    * 暂停、恢复、单次运行任务
@@ -213,9 +166,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
    * 保存任务
    */
   const onSave = () => {
-    const values = formRef.current?.form?.getFieldsValue() || {};
-    const monacoValue = monaco.current?.editor?.getValue() || '';
-
+    const values = form.getFieldsValue();
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
@@ -223,16 +174,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           ...values,
           jobId: pane.id,
           jobType: task?.jobType,
-          sourceSql: monacoValue,
-          externalTables: values.externalTables,
-          udfIds: values.udfIds.join(','),
           version,
         };
         saveSqlSpark({ jobId: pane.id }, dataSql)
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
@@ -253,16 +201,16 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
         break;
       case TaskTypes.SPARK_PYTHON:
         const dataSparkPython = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SPARK_PYTHON,
-          pythonResource: monacoValue,
           appArguments: values.appArguments?.map((_: any) => ({
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
@@ -273,32 +221,32 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
         break;
       case TaskTypes.SCRIPT_SHELL:
         const dataScriptShell = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
           version,
         };
         saveScript({ jobId: pane.id }, dataScriptShell)
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
         break;
       case TaskTypes.SCRIPT_PYTHON:
         const dataScriptPython = {
+          ...values,
           jobId: pane.id,
           jobType: TaskTypes.SCRIPT_SHELL,
-          sourceResource: monacoValue,
           scriptArguments: values.scriptArguments?.map((_: any) => ({
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,
@@ -309,7 +257,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
@@ -328,7 +276,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           .then((res) => {
             if (res.success) {
               message.success('保存成功');
-              getTaskVersionsWrapped();
+              refreshTask();
             }
           })
           .catch((err) => {});
@@ -336,17 +284,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       default:
         break;
     }
-  };
-
-  // 获取调试代码
-  const getDebugCode = () => {
-    const editor = monaco.current?.editor;
-    const range = editor?.getSelection() as IRange;
-    let value = editor?.getModel()?.getValueInRange(range);
-    if (!value) {
-      value = editor?.getValue();
-    }
-    return value;
   };
 
   // 轮询 pyspark 调试结果
@@ -408,11 +345,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           }, 2000);
         } else {
           pollingFrom.current = 0;
-          const columns: any[] = [];
-          const dataSource = res.data.resultSet;
-          const record = dataSource[0] || {};
-          Object.keys(record).forEach((_) => columns.push({ title: _, dataIndex: _, key: _ }));
-          setResults((pre) => [...pre, { columns, dataSource }]);
+          const result = res.data.resultSet;
+          setResults((pre) => [...pre, result]);
         }
       })
       .catch((err) => {});
@@ -427,6 +361,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       return message.error('请选择代码');
     }
     setDebugLoading(true);
+    handleExpandChange(true);
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK: {
         const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
@@ -443,29 +378,36 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     setDebugLoading(false);
   };
 
-  const renderVersionLabel = (_: TaskVersion) => {
-    const env = _.environment || '';
-    const verState = VersionStatusDisplayMap[_.versionStatus];
-    let runState = '';
-    if (
-      _.versionStatus === VersionStatus.PUBLISHED &&
-      _.envRunningState === EnvRunningState.PAUSED
-    ) {
-      runState = '(暂停)';
-    }
-    return `${_.versionDisplay}-${env}-${verState}${runState}`;
+  const tryRun = () => {
+    showDialog(
+      '试运行配置',
+      {
+        beforeConfirm: (dialog, form, done) => {
+          form.form.validateFields().then((values: any) => {
+            tyrRun({
+              ...values,
+              jobId: pane.id,
+              version,
+            }).then(() => {
+              done();
+            });
+          });
+        },
+      },
+      TyeRunSetting,
+    );
   };
 
   const btnMap = new Map([
     [
       Btns.SAVE,
-      <Tooltip title="保存">
+      <Tooltip title="保存" key="9">
         <Button className={styles.btn} icon={<IconFont type="icon-baocun" />} onClick={onSave} />
       </Tooltip>,
     ],
     [
       Btns.DEBUG,
-      <Tooltip title="调试">
+      <Tooltip title="调试" key="8">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-tiaoshi" />}
@@ -476,7 +418,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.RUN_ONCE,
-      <Tooltip title="单次运行">
+      <Tooltip title="单次运行" key="7">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-yunxing" />}
@@ -486,7 +428,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.SUBMIT,
-      <Tooltip title="提交版本">
+      <Tooltip title="提交版本" key="6">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-tijiaofabu" />}
@@ -502,7 +444,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.ONLINE,
-      <Tooltip title="上线">
+      <Tooltip title="上线" key="5">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-yunxingbaise-copy" />}
@@ -512,7 +454,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.OFFLINE,
-      <Tooltip title="下线">
+      <Tooltip title="下线" key="4">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-zantingbaise-copy" />}
@@ -522,7 +464,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DELETE,
-      <Tooltip title="删除">
+      <Tooltip title="删除" key="3">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-shanchubaise-copy" />}
@@ -532,15 +474,25 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DIVIDER,
-      <Divider type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
+      <Divider key="2" type="vertical" style={{ margin: '0 16px', backgroundColor: '#545c75' }} />,
     ],
     [
       Btns.JOB_CONFIG,
-      <Tooltip title="作业配置">
+      <Tooltip title="作业配置" key="1">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-peizhiguanli" />}
           onClick={() => setVisibleJobConfig(true)}
+        />
+      </Tooltip>,
+    ],
+    [
+      Btns.TRY_RUN,
+      <Tooltip title="试运行" key="10">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-peizhiguanli" />}
+          onClick={tryRun}
         />
       </Tooltip>,
     ],
@@ -587,40 +539,44 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       case TaskTypes.SQL_FLINK:
         return (
           <SqlContent
-            ref={formRef}
-            monaco={monaco}
-            data={{ task, content, log, res: results }}
-            removeResult={removeResult}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ task, content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.SPARK_JAR:
-        return <SparkJava ref={formRef} data={content} jobId={content?.jobId || task?.id} />;
+        return (
+          <SparkJava form={form} data={content} jobId={content?.jobId || task?.id} />
+        );
       case TaskTypes.SPARK_PYTHON:
         return (
           <SparkPython
-            ref={formRef}
-            monaco={monaco}
-            data={{ content, log }}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.SCRIPT_SHELL:
-        return <ScriptShell ref={formRef} monaco={monaco} data={{ content }} />;
+        return <ScriptShell form={form} editorRef={editorRef} data={{ content }} />;
       case TaskTypes.SCRIPT_PYTHON:
         return (
           <ScriptPython
-            ref={formRef}
-            monaco={monaco}
-            data={{ content, log }}
+            editorRef={editorRef}
+            panelProps={panelProps}
+            form={form}
+            data={{ content }}
             visible={visibleJobConfig}
             onCancel={() => setVisibleJobConfig(false)}
           />
         );
       case TaskTypes.KYLIN:
-        return <Kylin ref={formRef} data={content} />;
+        return <Kylin form={form} data={content} />;
       default:
         return null;
     }
@@ -644,12 +600,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                     placeholder="请选择"
                     bordered={false}
                     disabled={versions.length <= 0}
-                    options={versions.map((_) => ({
-                      label: renderVersionLabel(_),
-                      value: _.version,
-                    }))}
-                    value={version}
-                    onChange={(v) => setVersion(v as number)}
+                    options={versions}
+                    value={versionOption?.value}
+                    onChange={(_, option) => setVersionOption(option as VersionOption)}
                   />
                 )}
               </div>
@@ -680,7 +633,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         onClose={() => setVisibleBasic(false)}
         data={task}
         pane={pane}
-        getTaskWrapped={getTaskWrapped}
+        getTaskWrapped={refreshTaskBasic}
       />
       <DrawerConfig visible={visibleConfig} onClose={() => setVisibleConfig(false)} data={task} />
       <DrawerVersion
@@ -722,7 +675,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               .then((res) => {
                 if (res.success) {
                   message.success('暂停成功');
-                  getTaskWrapped();
+                  refreshTaskBasic();
                   setVisibleAction(false);
                 }
               })
@@ -734,7 +687,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               .then((res) => {
                 if (res.success) {
                   message.success('恢复成功');
-                  getTaskWrapped();
+                  refreshTaskBasic();
                   setVisibleAction(false);
                 }
               })
@@ -746,7 +699,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
               .then((res) => {
                 if (res.success) {
                   message.success('单次运行成功，运行结果在历史标签页内查看。');
-                  getTaskWrapped();
+                  refreshTaskBasic();
                   setVisibleAction(false);
                 }
               })
@@ -814,4 +767,4 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   );
 };
 
-export default TabTask;
+export default TabDev;

@@ -13,7 +13,7 @@ import {
   Tabs,
 } from 'antd';
 import type { FC } from 'react';
-import { MapInput, ListSelect } from '@/components';
+import { MapInput } from '@/components';
 import { DIJobType } from '@/constants/datadev';
 import styles from './index.less';
 
@@ -26,8 +26,6 @@ import {
   getEnumValues,
   getExecuteQueues,
   saveTaskConfig,
-  getConfiguredTaskList,
-  getDependenceTaskList,
 } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
 import {
@@ -36,6 +34,7 @@ import {
   execCoresOptions,
   defaultExecCores,
 } from '@/constants/datadev';
+import { DependenciesFormItem } from '../../../../../components/DependenciesFormItem';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -77,11 +76,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     getDataDevConfig({ jobId: data?.id as number, environment })
       .then((res) => {
         const config = res.data;
+        // TODO: 逻辑优化，不要数据转换后再次复制给该变量，同一个变量名应该只有一个含义
         if (config.executeConfig.schTimeOut) {
           config.executeConfig.schTimeOut = config.executeConfig.schTimeOut / 60;
         } else {
           config.executeConfig.schTimeOut = 0;
         }
+        // TODO: 逻辑优化
         if (config.executeConfig.schDryRun === 1) {
           config.executeConfig.schDryRun = ['schDryRun'];
         } else {
@@ -128,10 +129,20 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
   };
 
-  const columns = [
-    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '30%' },
-    { title: '所属DAG', dataIndex: 'dagName', key: 'dagName' },
-  ];
+  const initialValues = {
+    executeConfig: {
+      schTimeOut: 60, // TODO: 
+      schTimeOutStrategy: 'alarm',
+      schRerunMode: 'always',
+      execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
+      schPriority: 2,
+      execEngine: 'SQOOP',
+      execDriverMem: 3,
+      execWorkerMem: 4,
+      execCores: defaultExecCores,
+      execQueue: 'root.offline',
+    },
+  };
 
   return (
     <Drawer
@@ -167,7 +178,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               form={env === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
-              initialValues={{ execCores: defaultExecCores }}
+              initialValues={initialValues}
               wrapperCol={{ span: 16 }}
             >
               <Title>调度配置</Title>
@@ -183,7 +194,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       size="large"
                       style={{ width }}
                       placeholder="请选择"
+                      showSearch
                       options={DAGList.map((_) => ({ label: _.name, value: _.id }))}
+                      filterOption={(input: string, option: any) =>
+                        option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
                     />
                   </Item>
                 </Col>
@@ -245,7 +260,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execEngineOptions}
                 />
               </Item>
-              <Item name={['executeConfig', 'execDriverMem']} label="Driver Memory" rules={ruleSelc}>
+              <Item
+                name={['executeConfig', 'execDriverMem']}
+                label="Driver Memory"
+                rules={ruleSelc}
+              >
                 <Select
                   size="large"
                   style={{ width }}
@@ -253,7 +272,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   options={execDriverMemOptions}
                 />
               </Item>
-              <Item name={['executeConfig', 'execWorkerMem']} label="Executor Memory" rules={ruleSelc}>
+              <Item
+                name={['executeConfig', 'execWorkerMem']}
+                label="Executor Memory"
+                rules={ruleSelc}
+              >
                 <Select
                   size="large"
                   style={{ width }}
@@ -272,17 +295,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               <Item name={['executeConfig', 'extProperties']} label="自定义参数">
                 <MapInput style={{ width }} />
               </Item>
-              {jobType === DIJobType.BACK_FLOW && <>
-                <Title>依赖配置</Title>
-                <Item name="dependencies" label="依赖的上游任务">
-                  <ListSelect
-                    fetchData={() => getDependenceTaskList({ environment: env })}
-                    labelField="prevJobName"
-                    valueField="prevJobId"
-                    columns={columns}
+              {jobType === DIJobType.BACK_FLOW && (
+                <>
+                  <Title>依赖配置</Title>
+                  <DependenciesFormItem
+                    name="dependencies"
+                    fieldProps={{ environment: env, jobId: data?.id as number }}
                   />
-                </Item>
-              </>}
+                </>
+              )}
             </Form>
           </TabPane>
         ))}

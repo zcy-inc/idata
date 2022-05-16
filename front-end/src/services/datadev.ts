@@ -24,8 +24,16 @@ import type {
   CreateDIJobDto,
   DIJobBasicInfo,
   MergeSqlParamDto,
+  DependenciesJob,
 } from '@/types/datadev';
-import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
+import { formatTreeData } from '@/utils/utils';
+import type {
+  PeriodRange,
+  StatementState,
+  TaskCategory,
+  TaskTypes,
+  FolderBelong,
+} from '@/constants/datadev';
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -132,7 +140,7 @@ export async function getDimensionColumnInfos(tableId: any, params: any) {
 /**
  * 表 获取参考字段
  */
- export async function getTableReferStr(params: any) {
+export async function getTableReferStr(params: any) {
   return request(`/api/p1/dev/columnInfos/${params.tableId}`, { method: 'GET', params });
 }
 
@@ -202,6 +210,25 @@ export async function getFunctionTree() {
     {
       method: 'GET',
     },
+  );
+}
+
+// 获取指定的功能性文件夹树
+export async function getSpecifiedFunctionTree(data?: {
+  belongFunctions: FolderBelong[];
+  keyWord?: string;
+}) {
+  return request('/api/p1/dev/compositeFolders/folders/tree', {
+    method: 'POST',
+    data,
+  }).then(({ data }) =>
+    formatTreeData(data, (node) => ({
+      ...node,
+      key: node.id,
+      title: node.name,
+      label: node.name,
+      value: node.id,
+    })),
   );
 }
 
@@ -522,22 +549,22 @@ export async function getConfiguredTaskList(params: { environment: Environments 
   );
 }
 
-// 获取已配置的作业列表（依赖的上游任务）
-export async function getDependenceTaskList(params: { environment: Environments }) {
-  return request<Tresponse<ConfiguredTaskListItem[]>>(
-    `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
+// 获取自动推荐依赖作业
+export async function getRecommendJob({
+  jobId,
+  environment,
+  version,
+}: {
+  jobId: number;
+  environment: Environments;
+  version?: string | null;
+}) {
+  return request<Tresponse<DependenciesJob[]>>(
+    `/api/p1/dev/jobs/${jobId}/environments/${environment}/dependencies/derive`,
     {
-      method: 'GET',
+      params: { version },
     },
-  ).then(({ data }) => {
-    return data.map((item) => ({
-      ...item,
-      prevJobId: item.jobId,
-      prevJobName: item.jobName,
-      prevJobDagName: item.dagName,
-      prevJobDagId: item.dagId,
-    }));
-  });
+  );
 }
 
 /**
@@ -605,6 +632,16 @@ export async function runTask(params: { id: number; environment: Environments })
       params,
     },
   );
+}
+
+/**
+ * 试运行作业
+ */
+export async function tyrRun(data: any) {
+  return request<DefaultResponse & { data: boolean }>('/api/v1/idata/spark/sqlJobDryRun', {
+    method: 'POST',
+    data,
+  });
 }
 
 /**

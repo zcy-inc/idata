@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Descriptions } from 'antd';
 import type { FC } from 'react';
-
-import { Folder, UDF } from '@/types/datadev';
+import { UDF } from '@/types/datadev';
 import { FolderBelong } from '@/constants/datadev';
 import Title from '@/components/Title';
-import { getFolders } from '@/services/datadev';
 import { getWorkspacePrefix } from '@/utils/utils';
+
+import { useFolderNames } from '../../../../../hooks/useFolderNames';
 
 interface ViewUDFProps {
   data?: UDF;
@@ -15,12 +15,7 @@ interface ViewUDFProps {
 const { Item } = Descriptions;
 
 const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
-  const [folders, setFolders] = useState<Folder[]>([]);
-
-  useEffect(() => {
-    getFolders({ belong: FolderBelong.DEVFUN }).then((res) => setFolders(res.data));
-  }, []);
-
+  const { folderNames } = useFolderNames([FolderBelong.DEVFUN], data?.folderId);
   const renderDownload = () => {
     let workspace = getWorkspacePrefix();
     if (workspace) {
@@ -39,6 +34,7 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
       <Title>函数信息</Title>
       <Descriptions colon={false} column={1}>
         <Item label="函数名称">{data?.udfName || '-'}</Item>
+        {data?.udfType === 'JavaFunction' && <Item label="执行类">{data?.sourceName || '-'}</Item>}
         <Item label="函数类型">{data?.udfType || '-'}</Item>
         <Item label="函数代码">
           <div style={{ position: 'relative', width: '100%', height: 28 }}>
@@ -60,7 +56,7 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
         </Item>
         <Item label="返回类型">{data?.returnType || '-'}</Item>
         <Item label="返回值">{data?.returnSample || '-'}</Item>
-        <Item label="目标文件夹">{folders.find((_) => _.id === data?.folderId)?.name || '-'}</Item>
+        <Item label="目标文件夹">{folderNames}</Item>
         <Item label="描述">{data?.description || '-'}</Item>
         <Item label="命令格式">{data?.commandFormat || '-'}</Item>
         <Item label="示例">{data?.udfSample || '-'}</Item>

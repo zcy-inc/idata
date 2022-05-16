@@ -1,9 +1,11 @@
+// 节点类型
 export enum FolderTypes {
   FUNCTION = 'FUNCTION', // 功能性文件夹
   FOLDER = 'FOLDER', // 普通文件夹
   RECORD = 'RECORD', // 业务数据
 }
 
+// 功能性文件夹枚举
 export enum FolderBelong {
   DESIGN = 'DESIGN', // 数仓设计
   DESIGNTABLE = 'DESIGN.TABLE', // 数仓设计-表
@@ -15,6 +17,20 @@ export enum FolderBelong {
   DEVJOB = 'DEV.JOB', // 数据开发-作业
   DEVFUN = 'DEV.FUN', // 数据开发-函数
 }
+
+// 功能性文件夹icon
+export const funcFolderIconMap = {
+  [FolderBelong.DESIGN]: 'icon-shujukaifa-shucangsheji',
+  [FolderBelong.DESIGNTABLE]: 'icon-shujukaifa-biao',
+  // [FolderBelong.DESIGNLABEL]: 'icon-shujukaifa-biaoqian',
+  // [FolderBelong.DESIGNENUM]: 'icon-shujukaifa-meijuleixing',
+  [FolderBelong.DAG]: 'icon-shujukaifa-dag',
+  [FolderBelong.DI]: 'icon-shujukaifa-shujujicheng',
+  [FolderBelong.DEV]: 'icon-shujukaifa-shujukaifa',
+  [FolderBelong.DEVJOB]: 'icon-shujukaifa-zuoye',
+  [FolderBelong.DEVFUN]: 'icon-shujukaifa-hanshu',
+  // [FolderTypes.FOLDER]: 'icon-wenjianjia',
+};
 
 export enum PeriodRange {
   YEAR = 'year',

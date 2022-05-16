@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.event.dag.subscriber.IDagEventSubscriber;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +119,34 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
         } catch (Exception ex) {
             event.processFailed("同步DS失败，请稍后重试");
             LOGGER.warn("DagIntegrationSubscriber.onDeleted failed. ex: {}.", ex);
+        }
+    }
+
+    @Override
+    public void onCleanHistory(DagCleanHistoryEvent event) {
+        try {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
+            if (dagInfoOptional.isEmpty()) {
+                event.processFailed("DAG不存在");
+                return;
+            }
+            DAGInfo dagInfo = dagInfoOptional.get();
+            List<Integer> deleteVersions = dagIntegrator.cleanHistory(event.getDagId(), dagInfo.getEnvironment());
+            if (CollectionUtils.isNotEmpty(deleteVersions)) {
+                String logMsg = "";
+                if (deleteVersions.size() == 1) {
+                    logMsg = String.format("删除版本号：%s", deleteVersions.get(0));
+                } else {
+                    logMsg = String.format("删除版本号：%s - %s", deleteVersions.get(deleteVersions.size() - 1), deleteVersions.get(0));
+                }
+                event.setCleanMsg(logMsg);
+            }
+        } catch (ExternalIntegrationException iex) {
+            event.processFailed(iex.getMessage());
+            LOGGER.warn("DagIntegrationSubscriber.onCleanHistory failed. ex: {}.", iex);
+        } catch (Exception ex) {
+            event.processFailed("同步DS失败，请稍后重试");
+            LOGGER.warn("DagIntegrationSubscriber.onCleanHistory failed. ex: {}.", ex);
         }
     }
 

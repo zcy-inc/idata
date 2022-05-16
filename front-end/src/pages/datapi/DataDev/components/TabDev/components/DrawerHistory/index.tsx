@@ -73,7 +73,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
             key: 'options',
             render: (_) => (
               <a href={_.businessLogsUrl} target="_blank">
-                查看
+                查看日志
               </a>
             ),
           },

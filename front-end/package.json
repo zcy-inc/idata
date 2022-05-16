@@ -55,7 +55,7 @@
     "@umijs/route-utils": "^1.0.33",
     "@zcy-data/idata-utils": "^1.0.11",
     "ahooks": "^2.10.12",
-    "antd": "^4.18.5",
+    "antd": "^4.20.1",
     "classnames": "^2.2.6",
     "dhtmlx-gantt": "^7.1.8",
     "echarts": "^5.2.2",

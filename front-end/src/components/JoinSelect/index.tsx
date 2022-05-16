@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { Select } from 'antd';
 import { SelectProps } from 'antd/es/select';
 
-const JoinSelect: FC<{ onChange: (value?: string) => void; value?: string } & SelectProps> = ({
+const JoinSelect: FC<{ onChange?: (value?: string) => void; value?: string } & SelectProps> = ({
   value,
   onChange,
   ...rest

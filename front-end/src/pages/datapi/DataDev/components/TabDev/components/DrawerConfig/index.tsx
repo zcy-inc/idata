@@ -10,18 +10,15 @@ import {
   Radio,
   Row,
   Select,
-  Table,
   Tabs,
 } from 'antd';
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
 import type { FC } from 'react';
-import { ColumnsType } from 'antd/es/table';
 import styles from './index.less';
 import { MapInput, Title } from '@/components';
 import { restartOptions, execDriverMemOptions, execWorkerMemOptions } from './constants';
-import { ConfiguredTaskListItem, DAGListItem, TaskConfig, Task } from '@/types/datadev';
+import { DAGListItem, TaskConfig, Task } from '@/types/datadev';
 import {
-  getConfiguredTaskList,
   getDAGList,
   getDataDevConfig,
   getEnumValues,
@@ -29,14 +26,23 @@ import {
   saveTaskConfig,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
-import { ExecEngine, SchPriority, TaskTypes, execCoresOptions, defaultExecCores } from '@/constants/datadev';
+import {
+  ExecEngine,
+  SchPriority,
+  TaskTypes,
+  execCoresOptions,
+  defaultExecCores,
+  // SchRerunMode,
+} from '@/constants/datadev';
 import { getDataSourceList } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
+import { DependenciesFormItem } from '../../../../../components/DependenciesFormItem';
 
 interface DrawerConfigProps {
   visible: boolean;
   onClose: () => void;
   data?: Task;
+  // version: string;
 }
 
 const { Item } = Form;
@@ -48,21 +54,17 @@ const ruleSelc = [{ required: true, message: '请选择' }];
 const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [activeKey, setActiveKey] = useState<Environments>(Environments.STAG);
   const [DAGList, setDAGList] = useState<DAGListItem[]>([]);
-  const [configuredTaskList, setConfiguredTaskList] = useState<ConfiguredTaskListItem[]>([]);
   const [dataSource, setDataSource] = useState<DataSourceItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
   const [destWriteMode, setDestWriteMode] = useState('');
 
-  const [depDataStag, setDepDataStag] = useState<any[]>([]);
-  const [outDataStag, setOutDataStag] = useState<any[]>([]);
-  const [depDataProd, setDepDataProd] = useState<any[]>([]);
-  const [outDataProd, setOutDataProd] = useState<any[]>([]);
   const [stagForm] = Form.useForm();
   const [prodForm] = Form.useForm();
 
   useEffect(() => {
     if (visible) {
+      setActiveKey(Environments.STAG);
       getTaskConfigsWrapped(Environments.STAG);
       getDAGListWrapped(Environments.STAG);
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
@@ -71,61 +73,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getExecuteQueues()
         .then((res) => setExecuteQueues(res.data))
         .catch((err) => {});
-      getConfiguredTaskListWrapped(Environments.STAG);
       getDataSourceList({ limit: 999, offset: 0 })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
     }
   }, [visible]);
-
-  const columnsDependence: ColumnsType<ConfiguredTaskListItem> = [
-    { title: '父节点输出任务名称', dataIndex: 'jobName', key: 'jobName', width: '45%' },
-    { title: '所属DAG', dataIndex: 'dagName', key: 'dagName', width: '45%' },
-    {
-      title: '操作',
-      key: 'option',
-      render: (v, r, i) => (
-        <a
-          onClick={() => {
-            if (activeKey === Environments.STAG) {
-              depDataStag.splice(i, 1);
-              setDepDataStag([...depDataStag]);
-            }
-            if (activeKey === Environments.PROD) {
-              depDataProd.splice(i, 1);
-              setDepDataProd([...depDataProd]);
-            }
-          }}
-        >
-          删除
-        </a>
-      ),
-    },
-  ];
-
-  const columnsOutput: ColumnsType<ConfiguredTaskListItem> = [
-    { title: '输出表名', dataIndex: 'destTable', key: 'destTable' },
-    {
-      title: '操作',
-      key: 'option',
-      render: (v, r, i) => (
-        <a
-          onClick={() => {
-            if (activeKey === Environments.STAG) {
-              outDataStag.splice(i, 1);
-              setOutDataStag([...outDataStag]);
-            }
-            if (activeKey === Environments.PROD) {
-              outDataProd.splice(i, 1);
-              setOutDataProd([...outDataProd]);
-            }
-          }}
-        >
-          删除
-        </a>
-      ),
-    },
-  ];
 
   const getTaskConfigsWrapped = (environment: Environments) =>
     getDataDevConfig({ jobId: data?.id as number, environment })
@@ -145,42 +97,14 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           executeConfig.schDryRun = [];
         }
-        // 处理上游依赖
-        if (environment === Environments.STAG) {
-          const tmp = dependencies.map((_: any) => ({
-            ..._,
-            jobName: _.prevJobName,
-            dagName: _.prevJobDagName,
-            dagId: _.prevJobDagId,
-          }));
-          setDepDataStag(tmp);
-        }
-        if (environment === Environments.PROD) {
-          const tmp = dependencies.map((_: any) => ({
-            ..._,
-            jobName: _.prevJobName,
-            dagName: _.prevJobDagName,
-            dagId: _.prevJobDagId,
-          }));
-          setDepDataProd(tmp);
-        }
-        // 处理输出
-        executeConfig.destWriteMode = output?.destWriteMode;
-        executeConfig.jobTargetTablePk = output?.jobTargetTablePk;
-        executeConfig.destDataSourceId = output?.destDataSourceId;
-        executeConfig.destTable = output?.destTable;
+
+        setDestWriteMode(output.destWriteMode || 'OVERWRITE');
         // 赋值调度配置
         if (environment === Environments.STAG) {
-          stagForm.setFieldsValue({ ...executeConfig });
-          if (output) {
-            setOutDataStag([{ ...output }]);
-          }
+          stagForm.setFieldsValue({ ...executeConfig, ...output, dependencies });
         }
         if (environment === Environments.PROD) {
-          prodForm.setFieldsValue(executeConfig);
-          if (output) {
-            setOutDataProd([{ ...output }]);
-          }
+          prodForm.setFieldsValue({ ...executeConfig, ...output, dependencies });
         }
       })
       .catch((err) => {});
@@ -191,133 +115,13 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
-  const getConfiguredTaskListWrapped = (environment: Environments) =>
-    getConfiguredTaskList({ environment })
-      .then((res) => setConfiguredTaskList(res.data))
-      .catch((err) => {});
-
-  const addDepRecord = () => {
-    const key = new Date().getTime();
-    let curConfiguredTask;
-    if (activeKey === Environments.STAG) {
-      const curConfiguredTaskId = stagForm.getFieldValue('configuredTask');
-      if (!curConfiguredTaskId) {
-        message.info('请先选择依赖的上游任务');
-        return;
-      }
-      curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataStag.push({
-        key,
-        ...curConfiguredTask,
-        prevJobId: curConfiguredTask?.jobId,
-        prevJobDagId: curConfiguredTask?.dagId,
-      });
-      setDepDataStag([...depDataStag]);
-    }
-    if (activeKey === Environments.PROD) {
-      const curConfiguredTaskId = prodForm.getFieldValue('configuredTask');
-      if (!curConfiguredTaskId) {
-        message.info('请先选择依赖的上游任务');
-        return;
-      }
-      curConfiguredTask = configuredTaskList.find((_) => _.jobId === curConfiguredTaskId);
-      depDataProd.push({
-        key,
-        ...curConfiguredTask,
-        prevJobId: curConfiguredTask?.jobId,
-        prevJobDagId: curConfiguredTask?.dagId,
-      });
-      setDepDataProd([...depDataProd]);
-    }
-  };
-
-  const addOutRecord = () => {
-    if (activeKey === Environments.STAG) {
-      if (!stagForm.getFieldValue('destWriteMode')) {
-        message.info('请选择数据写入模式');
-        return;
-      }
-      if (!stagForm.getFieldValue('destDataSourceId')) {
-        message.info('请选择本任务的输出');
-        return;
-      }
-      if (!stagForm.getFieldValue('destTable')) {
-        message.info('请填写输出的表名');
-        return;
-      }
-      if (outDataStag.length > 0) {
-        message.info('输出表只能存在一张');
-        return;
-      }
-
-      const destDataSourceId = stagForm.getFieldValue('destDataSourceId');
-      const destDataSourceType =
-        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
-      const destTable = stagForm.getFieldValue('destTable');
-      const destWriteMode = stagForm.getFieldValue('destWriteMode');
-      const jobTargetTablePk = stagForm.getFieldValue('jobTargetTablePk');
-      const outData = {
-        jobId: data?.id,
-        environment: Environments.STAG,
-        destDataSourceType,
-        destDataSourceId,
-        destTable,
-        destWriteMode,
-        jobTargetTablePk,
-      };
-      outDataStag.push(outData);
-      setOutDataStag([...outDataStag]);
-    }
-    if (activeKey === Environments.PROD) {
-      if (!prodForm.getFieldValue('destWriteMode')) {
-        message.info('请选择数据写入模式');
-        return;
-      }
-      if (!prodForm.getFieldValue('destDataSourceId')) {
-        message.info('请选择本任务的输出');
-        return;
-      }
-      if (!prodForm.getFieldValue('destTable')) {
-        message.info('请填写输出的表名');
-        return;
-      }
-      if (outDataProd.length > 0) {
-        message.info('输出表只能存在一张');
-        return;
-      }
-      const destDataSourceId = prodForm.getFieldValue('destDataSourceId');
-      const destDataSourceType =
-        dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
-      const destTable = prodForm.getFieldValue('destTable');
-      const destWriteMode = prodForm.getFieldValue('destWriteMode');
-      const jobTargetTablePk = prodForm.getFieldValue('jobTargetTablePk');
-      const outData = {
-        jobId: data?.id,
-        environment: Environments.PROD,
-        destDataSourceType,
-        destDataSourceId,
-        destTable,
-        destWriteMode,
-        jobTargetTablePk,
-      };
-      outDataProd.push(outData);
-      setOutDataProd([...outDataProd]);
-    }
-  };
-
   const onSave = (environment: Environments) => {
     let values: any = {};
-    let depData: any[] = [];
-    let outData: any = {};
     if (activeKey === Environments.STAG) {
       values = stagForm.getFieldsValue();
-      depData = depDataStag;
-      outData = outDataStag[0] || {};
     }
     if (activeKey === Environments.PROD) {
       values = prodForm.getFieldsValue();
-      depData = depDataProd;
-      outData = outDataProd[0] || {};
     }
     // 处理空跑调度
     if (!values.schDryRun) {
@@ -330,6 +134,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
     }
+
+    const destDataSourceId = values.destDataSourceId;
+    const destDataSourceType =
+      dataSource.find((_) => _.id === destDataSourceId)?.type || DataSourceTypes.HIVE;
     const params = {
       executeConfig: {
         ...values,
@@ -348,20 +156,12 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         execWorkerMem: values.execWorkerMem,
         execEngine: values.execEngine,
       },
-      dependencies: depData.map((_) => ({
-        jobId: data?.id as number,
-        environment: activeKey,
-        prevJobId: _.prevJobId,
-        prevJobDagId: _.prevJobDagId,
-      })),
+      dependencies: values.dependencies,
       output: {
+        ...pick(values, ['destDataSourceId', 'destTable', 'destWriteMode', 'jobTargetTablePk']),
         jobId: data?.id as number,
         environment: activeKey,
-        destDataSourceType: outData.destDataSourceType,
-        destDataSourceId: outData.destDataSourceId,
-        destTable: outData.destTable,
-        destWriteMode: outData.destWriteMode,
-        jobTargetTablePk: outData.jobTargetTablePk,
+        destDataSourceType: destDataSourceType,
       },
     };
     saveTaskConfig({ jobId: data?.id as number, environment }, params as TaskConfig)
@@ -396,6 +196,18 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     }
   };
 
+  const initialValues = {
+    schTimeOut: 60, // TODO:
+    schTimeOutStrategy: 'alarm',
+    schRerunMode: 'always',
+    execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
+    schPriority: 2,
+    execDriverMem: 3,
+    execWorkerMem: 4,
+    execCores: defaultExecCores,
+    execQueue: 'root.offline',
+  };
+
   return (
     <Drawer
       className={styles['drawer-config']}
@@ -418,11 +230,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     >
       <Tabs
         className="reset-tabs"
+        activeKey={activeKey}
         onChange={(k) => {
           setActiveKey(k as Environments);
           getTaskConfigsWrapped(k as Environments);
           getDAGListWrapped(k as Environments);
-          getConfiguredTaskListWrapped(k as Environments);
         }}
       >
         {env.map((_) => (
@@ -431,7 +243,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               form={_ === Environments.STAG ? stagForm : prodForm}
               layout="horizontal"
               colon={false}
-              initialValues={{ execCores: defaultExecCores }}
+              initialValues={initialValues}
             >
               <Title>调度配置</Title>
               <Item name="schDryRun" label="空跑调度">
@@ -449,7 +261,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                       options={DAGList.map((_) => ({ label: _.name, value: _.id }))}
                       showSearch
                       filterOption={(input: string, option: any) =>
-                        option.label.indexOf(input) >= 0
+                        option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
                       }
                     />
                   </Item>
@@ -543,104 +355,39 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 <MapInput style={{ width }} />
               </Item>
               <Title>依赖配置</Title>
-              <div style={{ display: 'flex' }}>
-                <Item
-                  name="configuredTask"
-                  className={styles['reset-label']}
-                  label="依赖的上游任务"
-                >
-                  <Select
-                    style={{ width }}
-                    placeholder="请选择"
-                    options={configuredTaskList.map((_) => ({ label: _.jobName, value: _.jobId }))}
-                    showSearch
-                    filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-                  />
+              <DependenciesFormItem
+                name="dependencies"
+                fieldProps={{ environment: _, jobId: data?.id as number }}
+              />
+              <Title>输出配置</Title>
+              <Item name="destWriteMode" label="数据写入模式" style={{ marginTop: 16 }}>
+                <Select
+                  style={{ width }}
+                  placeholder="请选择"
+                  options={[
+                    { label: 'OVERWRITE', value: 'OVERWRITE' },
+                    { label: 'UPSERT', value: 'UPSERT' },
+                  ]}
+                  onChange={(_) => setDestWriteMode(_ as string)}
+                />
+              </Item>
+              {destWriteMode === 'UPSERT' && (
+                <Item name="jobTargetTablePk" label="目标表主键" style={{ marginTop: 16 }}>
+                  <Input placeholder="请输入" style={{ width }} />
                 </Item>
-                <a style={{ marginLeft: 16, marginTop: 5 }} onClick={addDepRecord}>
-                  添加
-                </a>
-              </div>
-              <Table<ConfiguredTaskListItem>
-                rowKey="jobName"
-                columns={columnsDependence}
-                dataSource={activeKey === Environments.STAG ? depDataStag : depDataProd}
-                pagination={false}
-                size="small"
-                style={{ minHeight: 150 }}
-              />
-              <Row>
-                <Col span={12}>
-                  <Item
-                    name="destWriteMode"
-                    className={styles['reset-label']}
-                    label="数据写入模式"
-                    style={{ marginTop: 16 }}
-                  >
-                    <Select
-                      style={{ width }}
-                      placeholder="请选择"
-                      options={[
-                        { label: 'OVERWRITE', value: 'OVERWRITE' },
-                        { label: 'UPSERT', value: 'UPSERT' },
-                      ]}
-                      onChange={(_) => setDestWriteMode(_ as string)}
-                    />
-                  </Item>
-                </Col>
-                {destWriteMode === 'UPSERT' && (
-                  <Col span={12}>
-                    <Item
-                      name="jobTargetTablePk"
-                      label="目标表主键"
-                      className={styles['reset-label']}
-                      style={{ marginTop: 16 }}
-                    >
-                      <Input placeholder="请输入" style={{ width }} />
-                    </Item>
-                  </Col>
-                )}
-              </Row>
-              <Row>
-                <Col span={12}>
-                  <Item
-                    name="destDataSourceId"
-                    className={styles['reset-label']}
-                    label="本任务的输出"
-                  >
-                    <Select
-                      style={{ width }}
-                      placeholder="选择数据源"
-                      options={dataSource.map((_) => ({ label: _.name, value: _.id }))}
-                      showSearch
-                      filterOption={(input: string, option: any) =>
-                        option.label.indexOf(input) >= 0
-                      }
-                    />
-                  </Item>
-                </Col>
-                <Col span={10}>
-                  <Item name="destTable" className={styles['reset-label']} label="输出的表名">
-                    <Input placeholder="请输入" style={{ width }} />
-                  </Item>
-                </Col>
-                <Col span={2}>
-                  <a
-                    style={{ marginLeft: 16, marginTop: 5, display: 'flow-root' }}
-                    onClick={addOutRecord}
-                  >
-                    添加
-                  </a>
-                </Col>
-              </Row>
-              <Table
-                rowKey="destTable"
-                columns={columnsOutput}
-                dataSource={activeKey === Environments.STAG ? outDataStag : outDataProd}
-                pagination={false}
-                size="small"
-                style={{ minHeight: 150 }}
-              />
+              )}
+              <Item name="destDataSourceId" label="本作业的输出">
+                <Select
+                  style={{ width }}
+                  placeholder="选择数据源"
+                  options={dataSource.map((_) => ({ label: _.name, value: _.id }))}
+                  showSearch
+                  filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
+                />
+              </Item>
+              <Item name="destTable" label=" ">
+                <Input placeholder="请输入表名" style={{ width }} />
+              </Item>
             </Form>
           </TabPane>
         ))}

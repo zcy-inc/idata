@@ -9,6 +9,7 @@ import { Task, TaskType } from '@/types/datadev';
 import { editTask, getDataDevTypes, getEnumValues, getTaskTypes } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
 import { TaskCategory, TaskTypes } from '@/constants/datadev';
+import { DEVJOBFolderFormItem } from '../../../../../components/FolderFormItem';
 
 interface DrawerBasicProps {
   visible: boolean;
@@ -48,6 +49,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
     if (visible && data) {
       const jobType = data.jobType?.split('_')[0];
       const values = {
+        ...data,
         name: data.name,
         dwLayerCode: data.dwLayerCode,
         jobType: data.jobType?.split('_')[0],
@@ -119,10 +121,10 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
     >
       <Title>基本配置</Title>
       <Form form={form} layout="horizontal" colon={false}>
-        <Item name="name" label="任务名称" rules={ruleText}>
+        <Item name="name" label="作业名称" rules={ruleText}>
           <Input size="large" style={{ width: widthL }} placeholder="请输入" />
         </Item>
-        <Item name="jobType" label="任务类型" rules={ruleSelc}>
+        <Item name="jobType" label="作业类型" rules={ruleSelc}>
           <Select
             size="large"
             style={{ width: widthL }}
@@ -152,6 +154,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
         <Item name="creator" label="所属人">
           <Input size="large" style={{ width: widthL }} placeholder="-" disabled />
         </Item>
+        <DEVJOBFolderFormItem style={{ width: widthL }} />
         <Item name="remark" label="备注">
           <TextArea style={{ width: widthL }} placeholder="请输入" />
         </Item>

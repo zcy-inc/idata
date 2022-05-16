@@ -41,25 +41,36 @@
       }
     }
   }
-  .table {
-    :global {
-      .ant-table {
-        background-color: transparent;
-        border-radius: 4px 4px 0 0;
-      }
-      .ant-table-thead > tr > th {
-        color: rgba(255, 255, 255, 0.85);
-        background-color: #545c75 !important;
-        border-bottom: 1px solid #545c75;
-        border-radius: 0;
-      }
-      .ant-table-tbody > tr > td {
-        color: #fff;
-        border-bottom: 1px solid #545c75;
-      }
-      .ant-table-tbody > tr.ant-table-row:hover > td {
-        background-color: #262626;
-      }
+}
+
+.table {
+  :global {
+    .ant-table {
+      background-color: transparent;
+      border-radius: 4px 4px 0 0;
     }
+    .ant-table-thead > tr > th {
+      color: rgba(255, 255, 255, 0.85);
+      background-color: #545c75 !important;
+      border-bottom: 1px solid #545c75;
+      border-radius: 0;
+    }
+    .ant-table-tbody > tr > td {
+      color: #fff;
+      border-bottom: 1px solid #545c75;
+    }
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background-color: #262626;
+    }
+  }
+}
+
+.collapseBtn {
+  margin-right: 10px;
+  color: #fff;
+  font-size: 16px;
+  &:hover {
+    color: #304ffe;
+    cursor: pointer;
   }
 }

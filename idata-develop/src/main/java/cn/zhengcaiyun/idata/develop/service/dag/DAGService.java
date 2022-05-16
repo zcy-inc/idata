@@ -39,6 +39,8 @@ public interface DAGService {
 
     Boolean removeDag(Long id, Operator operator) throws IllegalAccessException;
 
+    Boolean cleanDagHistory(Long id, Operator operator);
+
     Boolean online(Long id, Operator operator);
 
     Boolean offline(Long id, Operator operator);

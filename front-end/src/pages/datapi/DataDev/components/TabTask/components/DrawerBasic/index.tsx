@@ -7,6 +7,7 @@ import Title from '@/components/Title';
 import { DIJobBasicInfo } from '@/types/datadev';
 import { getEnumValues, getDIJobTypes, getDISyncMode, saveDIJobBasicInfo } from '@/services/datadev';
 import { IPane } from '@/models/datadev';
+import { DIFolderFormItem } from '../../../../../components/FolderFormItem';
 
 import styles from './index.less';
 
@@ -96,7 +97,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
     >
       <Title>基本配置</Title>
       <Form form={form} layout="horizontal" colon={false}>
-        <Item name="name" label="任务名称" rules={ruleSelc}>
+        <Item name="name" label="作业名称" rules={ruleSelc}>
           <Input size="large" style={{ width: widthL }} placeholder="请选择" />
         </Item>
         <Item name="dwLayerCode" label="数仓分层" rules={ruleSelc}>
@@ -108,7 +109,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
             disabled
           />
         </Item>
-        <Item name="jobType" label="任务类型" rules={ruleText}>
+        <Item name="jobType" label="作业类型" rules={ruleText}>
           <Select
             size="large"
             style={{ width: widthL }}
@@ -129,6 +130,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, refre
         <Item name="creator" label="所属人">
           <Input size="large" style={{ width: widthL }} placeholder="-" disabled />
         </Item>
+        <DIFolderFormItem style={{ width: widthL }} />
         <Item name="remark" label="备注">
           <TextArea style={{ width: widthL }} placeholder="请输入" />
         </Item>

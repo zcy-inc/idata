@@ -405,6 +405,20 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
         jobInfoExecuteDetailDto.setJobTypeEnum(jobTypeEnum);
+
+        Map<String, String> confProp = Maps.newHashMap();
+        if (StringUtils.isNotBlank(jobInfoExecuteDetailDto.getExtProperties())) {
+            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(jobInfoExecuteDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            extendProperties.stream()
+                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
+        }
+        if (!confProp.containsKey("logLevel")) {
+            // 给个默认值
+            confProp.put("logLevel", "warn");
+        }
+        jobInfoExecuteDetailDto.setConfProp(confProp);
+
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
@@ -482,7 +496,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 DIJobContent diJobContent = jobPublishRecordMyDao.getPublishedDiJobContent(id, env);
                 checkArgument(Objects.nonNull(diJobContent), String.format("发布记录不存在或di_content_id未匹配, jobId:%d，环境:%s", id, env));
 
-                MyBeanUtils.copyProperties(diJobContent, diResponse);
+                // 拷贝基础数据
+                MyBeanUtils.copyDiProperties(diJobContent, diResponse);
 
                 //兼容数据库数据错误
                 if (diResponse.getSrcShardingNum() == null || diResponse.getSrcShardingNum() < 1) {
@@ -692,21 +707,10 @@ public class JobInfoServiceImpl implements JobInfoService {
         flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
         flinkSqlResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
         flinkSqlResponse.setJobPrivacyProp(privacyProps);
-        Map<String, String> confProp = Maps.newHashMap();
-        if (StringUtils.isNotBlank(baseJobDetailDto.getExtProperties())) {
-            List<KeyValuePair<String, String>> extendProperties = new Gson().fromJson(baseJobDetailDto.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
-            }.getType());
-            extendProperties.stream()
-                    .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
-        }
-        if (!confProp.containsKey("logLevel")) {
-            // 给个默认值
-            confProp.put("logLevel", "warn");
-        }
-        flinkSqlResponse.setConfProp(confProp);
+
         flinkSqlResponse.setPublished(published);
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
-        flinkSqlResponse.setFlinkVersion(confProp.getOrDefault("Flink-version", "flink-1.10"));
+        flinkSqlResponse.setFlinkVersion(flinkSqlResponse.getConfProp().getOrDefault("Flink-version", "flink-1.10"));
         return flinkSqlResponse;
     }
 

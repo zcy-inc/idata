@@ -65,8 +65,8 @@ const DataSource: FC = () => {
     },
     {
       title: '提交时间',
-      key: 'approveTime',
-      dataIndex: 'approveTime',
+      key: 'createTime',
+      dataIndex: 'createTime',
       render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss'),
     },
     {

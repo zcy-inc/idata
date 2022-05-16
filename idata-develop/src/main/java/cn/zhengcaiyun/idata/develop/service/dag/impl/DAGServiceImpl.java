@@ -38,8 +38,6 @@ import cn.zhengcaiyun.idata.develop.event.dag.publisher.DagEventPublisher;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -193,6 +191,13 @@ public class DAGServiceImpl implements DAGService {
 
         devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
         return ret;
+    }
+
+    @Override
+    public Boolean cleanDagHistory(Long id, Operator operator) {
+        DAGEventLog eventLog = logDagEvent(id, EventTypeEnum.DAG_CLEAN_HISTORY, operator);
+        dagEventPublisher.whenToCleanHistory(eventLog);
+        return Boolean.TRUE;
     }
 
     @Override

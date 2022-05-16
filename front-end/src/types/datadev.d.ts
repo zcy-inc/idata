@@ -180,6 +180,14 @@ export interface ConfiguredTaskListItem {
   dagName: string;
 }
 
+export interface DependenciesJob extends ConfiguredTaskListItem {
+  prevJobId: number;
+  prevJobDagId: number;
+  prevJobDagName: string;
+  prevJobName: string;
+  environment: Environments;
+}
+
 export interface SqlSparkContent {
   jobId: number;
   jobType: TaskTypes;
@@ -258,6 +266,7 @@ export interface DependenceTreeNode {
 
 export interface UDF {
   commandFormat: string;
+  sourceName?: string;
   description: string;
   fileName: string;
   folderId: number;

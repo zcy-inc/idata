@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
@@ -62,6 +63,13 @@ public class DIJobContentController {
     @PostMapping("/contents")
     public RestResult<DIJobContentResponse> saveContent(@PathVariable("jobId") Long jobId,
                                                         @RequestBody @Valid DIJobContentRequest contentRequest) {
+        Integer srcShardingNum = contentRequest.getSrcShardingNum();
+        String srcReadShardKey = contentRequest.getSrcReadShardKey();
+        if (srcShardingNum != null && srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
+            throw new GeneralException("分片数大于1时，切分键必填");
+        }
+
+
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
 

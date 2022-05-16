@@ -32,6 +32,8 @@ public interface IDagEventSubscriber {
 
     void onDeleted(DagDeletedEvent event);
 
+    void onCleanHistory(DagCleanHistoryEvent event);
+
     void onOnline(DagOnlineEvent event);
 
     void onOffline(DagOfflineEvent event);
