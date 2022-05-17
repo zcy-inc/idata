@@ -173,7 +173,7 @@ const FolderTree: FC = () => {
         operations.push({
           label: '新建表',
           key: 'CreateTable',
-          onClick: () => onCreateFolder(node),
+          onClick: () => onAction('CreateTable', node),
         });
         break;
       case FolderBelong.DAG:
