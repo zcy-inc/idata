@@ -470,8 +470,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     private void checkOutputConfig(JobInfo jobInfo, JobOutputDto outputDto) {
         if (Objects.isNull(outputDto)) return;
 
-        if (!JobTypeEnum.SQL_SPARK.name().equals(jobInfo.getJobType())
-                && !JobTypeEnum.SQL_DORIS.name().equals(jobInfo.getJobType()))
+        if (!JobTypeEnum.SQL_SPARK.name().equals(jobInfo.getJobType()))
             return;
 
         checkArgument(Objects.nonNull(outputDto.getDestDataSourceId()), "作业输出数据源为空");

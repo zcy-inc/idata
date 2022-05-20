@@ -145,8 +145,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
             content.setId(jobContentOptional.get().getId());
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
-                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
-                || JobTypeEnum.SQL_DORIS.getCode().equals(jobType)) {
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
             DevJobContentSql contentSql = sqlJobRepo.query(jobId, version);
             checkArgument(contentSql != null, "作业版本不存在");
             content.setId(contentSql.getId());
@@ -180,8 +179,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
             contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
-                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
-                || JobTypeEnum.SQL_DORIS.getCode().equals(jobType)) {
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
