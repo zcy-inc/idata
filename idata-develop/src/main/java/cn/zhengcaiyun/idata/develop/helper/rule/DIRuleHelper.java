@@ -12,6 +12,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -54,14 +55,16 @@ public class DIRuleHelper {
         }
         checkArgument(StringUtils.isNotBlank(contentDto.getDestWriteMode()), "写入模式为空");
         checkArgument(StringUtils.isNotBlank(contentDto.getSrcTables()) || !Objects.isNull(contentDto.getSrcTableConfig()), "来源数据表为空");
-//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");   数据迁移完后需要取消注释
-//todo        checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");  数据迁移完后需要取消注释
 
-        List<MappingColumnDto> mappingColumnDtoList = contentDto.getSrcCols().stream()
-                .filter(columnDto -> Objects.nonNull(columnDto.getMappedColumn()))
-                .collect(Collectors.toList());
-//todo        checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");  数据迁移完后需要取消注释
+        if (DiConfigModeEnum.VISIBLE.value.equals(contentDto.getConfigMode())) {
+            checkArgument(ObjectUtils.isNotEmpty(contentDto.getSrcCols()), "来源数据表字段为空");
+            checkArgument(ObjectUtils.isNotEmpty(contentDto.getDestCols()), "目标数据表字段为空");
 
+            List<MappingColumnDto> mappingColumnDtoList = contentDto.getSrcCols().stream()
+                    .filter(columnDto -> Objects.nonNull(columnDto.getMappedColumn()))
+                    .collect(Collectors.toList());
+            checkArgument(ObjectUtils.isNotEmpty(mappingColumnDtoList), "映射字段为空");
+        }
 
         DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
         // 回流 + 目标源为doris 不构建sql
@@ -81,7 +84,7 @@ public class DIRuleHelper {
     /**
      * 是否构建mergeSql
      *
-     * @param jobType @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum
+     * @param jobType     @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum
      * @param srcReadMode 读取模式
      * @return
      */
@@ -92,10 +95,10 @@ public class DIRuleHelper {
     /**
      * 是否构建query sql
      *
-     * @param jobType @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum
-     * @param configMode 配置模式 可视化/脚本
+     * @param jobType       @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum
+     * @param configMode    配置模式 可视化/脚本
      * @param srcReadFilter 读取过滤条件
-     * @param srcCols 可视化列
+     * @param srcCols       可视化列
      * @return
      */
     public static boolean buildQuery(String jobType, Integer configMode, String srcReadFilter, List<MappingColumnDto> srcCols, DataSourceTypeEnum dataSourceTypeEnum) {
@@ -109,12 +112,13 @@ public class DIRuleHelper {
 
     /**
      * 生成mergeSql
-     * @param columnList select的列
-     * @param keyColumns 主见keys，逗号分隔
+     *
+     * @param columnList  select的列
+     * @param keyColumns  主见keys，逗号分隔
      * @param sourceTable 源数据表，可能是多张，按正则解析
-     * @param destTable 目标表（带库名）
-     * @param typeEnum 驱动类型 @see cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum
-     * @param days 天数，近几天
+     * @param destTable   目标表（带库名）
+     * @param typeEnum    驱动类型 @see cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum
+     * @param days        天数，近几天
      * @return
      * @throws IllegalArgumentException
      */
@@ -174,9 +178,10 @@ public class DIRuleHelper {
 
     /**
      * 生成脚本query
+     *
      * @param selectColumns 列明逗号分隔
      * @param srcReadFilter 过滤条件
-     * @param srcTables 源表
+     * @param srcTables     源表
      * @return
      */
     public static String generateScriptQuery(String selectColumns, String srcReadFilter, String srcTables) {
@@ -189,9 +194,10 @@ public class DIRuleHelper {
 
     /**
      * 生成可视化query
+     *
      * @param mappingColumnList 封装的列
-     * @param srcReadFilter 过滤条件
-     * @param srcTables 源表
+     * @param srcReadFilter     过滤条件
+     * @param srcTables         源表
      * @return
      */
     public static String generateSrcQuery(List<MappingColumnDto> mappingColumnList, String srcReadFilter, String srcTables) {
@@ -214,6 +220,7 @@ public class DIRuleHelper {
 
     /**
      * 作业类型和执行引擎组合是否支持query sql方式
+     *
      * @return
      */
     public static boolean supportQuerySQL(SupportQuerySqlParam param) {
@@ -248,7 +255,7 @@ public class DIRuleHelper {
                         case SCRIPT:
                             if (StringUtils.isNotEmpty(scriptSelectColumns)) {
                                 // 是否带函数，用括号判断
-                                long aliseCount =  Arrays.stream(scriptSelectColumns.split(",")).filter(e -> StringUtils.isNotEmpty(e) && e.contains("(") && e.contains(")")).count();
+                                long aliseCount = Arrays.stream(scriptSelectColumns.split(",")).filter(e -> StringUtils.isNotEmpty(e) && e.contains("(") && e.contains(")")).count();
                                 return aliseCount > 0;
                             }
                         case VISIBLE:
@@ -269,7 +276,8 @@ public class DIRuleHelper {
 
     /**
      * 作业类型和执行引擎组合是否必须带有query
-     * @param jobTypeEnum 任务类型
+     *
+     * @param jobTypeEnum    任务类型
      * @param engineTypeEnum 执行引擎
      * @return
      */
@@ -287,7 +295,8 @@ public class DIRuleHelper {
 
     /**
      * 作业类型和执行引擎组合是否支持columns 方式同步(即非SQL方式)
-     * @param jobTypeEnum 任务类型
+     *
+     * @param jobTypeEnum    任务类型
      * @param engineTypeEnum 执行引擎
      * @return
      */

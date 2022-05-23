@@ -98,7 +98,8 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                                 and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
                                 and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
                                 and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
-                                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+                                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
                         ).orderBy(jobPublishRecord.id.descending())
                         .limit(limit).offset(offset)
         );
@@ -114,7 +115,8 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                 and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
                 and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
                 and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
-                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
         ));
     }
 

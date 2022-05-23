@@ -123,6 +123,7 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
     }
 
     @Override
+    @Subscribe
     public void onCleanHistory(DagCleanHistoryEvent event) {
         try {
             Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(event.getDagId());
@@ -133,13 +134,15 @@ public class DagIntegrationSubscriber implements IDagEventSubscriber {
             DAGInfo dagInfo = dagInfoOptional.get();
             List<Integer> deleteVersions = dagIntegrator.cleanHistory(event.getDagId(), dagInfo.getEnvironment());
             if (CollectionUtils.isNotEmpty(deleteVersions)) {
-                String logMsg = "";
+                String logMsg;
                 if (deleteVersions.size() == 1) {
                     logMsg = String.format("删除版本号：%s", deleteVersions.get(0));
                 } else {
                     logMsg = String.format("删除版本号：%s - %s", deleteVersions.get(deleteVersions.size() - 1), deleteVersions.get(0));
                 }
                 event.setCleanMsg(logMsg);
+            } else {
+                event.setCleanMsg("删除版本号：无需删除版本");
             }
         } catch (ExternalIntegrationException iex) {
             event.processFailed(iex.getMessage());
