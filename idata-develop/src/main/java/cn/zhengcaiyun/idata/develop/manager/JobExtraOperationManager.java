@@ -95,7 +95,6 @@ public class JobExtraOperationManager {
                 break;
             case SQL_SPARK:
             case SQL_FLINK:
-            case SQL_DORIS:
                 version = saveSQLJobContent(jobId, jobType, contentJson, fromImport, operator);
                 break;
             case SPARK_JAR:
