@@ -12,6 +12,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class SparkSqlUtil {
 
@@ -59,6 +62,23 @@ public class SparkSqlUtil {
             getFromTables(sql.substring(parseSql.length()), tableSet);
         }
         return new ArrayList(tableSet);
+    }
+
+    public static List<String> getSelectColumns(String sql) {
+        String[] sqls = sql.split(" |\n|\t|,");
+        List<String> newSqlList = new ArrayList<>(Arrays.asList(sqls)).stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        int beginIndex = newSqlList.lastIndexOf("select");
+        int endIndex = newSqlList.lastIndexOf("from") != -1 ? newSqlList.lastIndexOf("from") : newSqlList.size();
+        if (newSqlList.subList(beginIndex, endIndex).contains("as")) {
+            checkArgument((endIndex - beginIndex + 1) % 3 == 0, "解析失败");
+        }
+        List<String> echoList = new ArrayList<>();
+        for (int i = beginIndex; i < endIndex; i++) {
+            if ("as".equals(newSqlList.get(i)) && i < newSqlList.size() - 1) {
+                echoList.add(newSqlList.get(i + 1));
+            }
+        }
+        return echoList;
     }
 
     public static class AddDatabaseEnvListener extends SparkSqlBaseListener {
@@ -139,5 +159,52 @@ public class SparkSqlUtil {
             op = null;
         }
 
+    }
+
+    public static void main(String[] args) {
+        String sql = "with t_trade as (\n" +
+                "select * \n" +
+                "  from (select trade_id,\n" +
+                "               contract_no,\n" +
+                "               contract_name,\n" +
+                "          from dwd.dwd_trade_all_detail t_dtad) t\n" +
+                "),\n" +
+                "t_plan as (\n" +
+                "select \n" +
+                "     \tinstance_code\n" +
+                "     \t,trade_id\n" +
+                "   from dwd.dwd_trade_all_detail \n" +
+                "),\n" +
+                "delivers as (\n" +
+                "select \n" +
+                "\t\torder_id\n" +
+                "  from ods.ods_db_trade_zcy_order_deliveries ---替换为新表\n" +
+                "),\n" +
+                "return as (\n" +
+                "select \n" +
+                "\t\tcreed_id,\n" +
+                "  \t\tsum(agg_unit_price*quantity_return) return_amount\n" +
+                "   from ods.ods_db_creed_item\n" +
+                "  where is_del=0\n" +
+                "  group by 1\n" +
+                ")\n" +
+                "select \tt_trade.trade_id as t1,\n" +
+                "\t   \tt_trade.contract_no as t2,\n" +
+                "       \tt_trade.contract_name as t3,\n" +
+                "  from t_trade";
+        String[] sqls = sql.split(" |\n|\t|,");
+        List<String> newSqlList = new ArrayList<>(Arrays.asList(sqls)).stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        int beginIndex = newSqlList.lastIndexOf("select");
+        int endIndex = newSqlList.lastIndexOf("from") != -1 ? newSqlList.lastIndexOf("from") : newSqlList.size();
+        if (newSqlList.subList(beginIndex, endIndex).contains("as")) {
+            boolean isAs = (endIndex - beginIndex + 1) % 3 == 0;
+        }
+        List<String> echoList = new ArrayList<>();
+        for (int i = beginIndex; i < endIndex; i++) {
+            if ("as".equals(newSqlList.get(i)) && i < newSqlList.size() - 1) {
+                echoList.add(newSqlList.get(i + 1));
+            }
+        }
+        System.out.println(sqls);
     }
 }

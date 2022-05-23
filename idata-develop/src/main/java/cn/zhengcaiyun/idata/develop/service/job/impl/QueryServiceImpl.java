@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevColumnInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevColumnInfo;
@@ -76,13 +77,24 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind,
-                                               Integer from, Integer size) {
+    public QueryRunResultDto runQueryResult(String selectSql, Integer sessionId, Integer statementId, String sessionKind,
+                                            Integer from, Integer size) {
         checkArgument(LivySessionKindEnum.checkSessionKind(sessionKind), "Spark执行代码类型有误");
         QueryRunResultDto queryRunResult = PojoUtil.copyOne(livyService.queryResult(sessionId, statementId,
                 LivySessionKindEnum.valueOf(sessionKind)), QueryRunResultDto.class);
         if (LivySessionKindEnum.spark.name().equals(sessionKind)) {
             queryRunResult.setQueryRunLog(livyService.queryLog(sessionId, from, size));
+        }
+
+        // 字段为null处理
+        List<Map<String, Object>> resultSet = queryRunResult.getResultSet();
+        if (resultSet != null && resultSet.size() > 0) {
+            List<String> selectColumnList = SparkSqlUtil.getSelectColumns(selectSql);
+            List<List<Object>> resultList = resultSet.stream()
+                    .map(result -> selectColumnList.stream().map(column -> result.getOrDefault(column, "")).collect(Collectors.toList()))
+                    .collect(Collectors.toList());
+            queryRunResult.setResultHeader(selectColumnList);
+            queryRunResult.setResult(resultList);
         }
         return queryRunResult;
     }

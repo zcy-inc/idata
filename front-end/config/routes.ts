@@ -199,6 +199,39 @@ export default [
       },
     ]
   },
+  // 后端不能配数据地图；菜单写死，不需要根据enable判断能否展开;先用F_MENU_MEASURE_MANAGE让它能显示
+  {
+    path:'/datamap',
+    name:"数据地图",
+    outLink: '/',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_DATA_MAP',
+  },
+  {
+    path:'/xiaocaiBI',
+    name:"小采BI",
+    outLink: '/itable/#/itable/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_XIAOCAI_BI',
+  },
+  {
+    path:'/quality',
+    name:"数据质量",
+    outLink: '/idata-pro/#/data-quality/monitoring/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_DATA_QUALITY',
+  },
+  {
+    path:'/DataPi',
+    name:"DataPi",
+    outLink: '/idata/#/datapi/apiDevelop',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_DATAPI',
+  },
   {
     component: './404',
   },
