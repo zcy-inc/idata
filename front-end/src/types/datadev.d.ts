@@ -33,6 +33,10 @@ export interface TreeNode {
   key?: string;
 }
 
+export interface Job {
+ 
+}
+
 // 平铺文件夹的类型
 export interface Folder {
   id: number;

@@ -25,6 +25,7 @@ import type {
   DIJobBasicInfo,
   MergeSqlParamDto,
   DependenciesJob,
+  Job
 } from '@/types/datadev';
 import { formatTreeData } from '@/utils/utils';
 import type {
@@ -239,6 +240,15 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
   return request<DefaultResponse & { data: TreeNode[] }>('/api/p1/dev/compositeFolders/tree', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取作业扩展信息
+ */
+ export async function getJobInfo(params: {jobIds: string}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/extInfo', {
+    params,
   });
 }
 
