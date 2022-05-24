@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
@@ -92,5 +91,12 @@ public class ScriptJobRepoImpl implements ScriptJobRepo {
                         and(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(devJobContentScript.version.descending())
                 .limit(1));
+    }
+
+    @Override
+    public List<DevJobContentScript> queryList(List<Long> ids) {
+        return devJobContentScriptDao.select(c ->
+                c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentScript.id, isIn(ids))));
     }
 }

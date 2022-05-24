@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -58,8 +59,10 @@ import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -110,6 +113,10 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final OverhangJobLocalCache overhangJobLocalCache;
     private final DevAccessService devAccessService;
     private final DataSourceApi dataSourceApi;
+    private final DIJobContentRepo diJobContentRepo;
+    private final SparkJobRepo sparkJobRepo;
+    private final ScriptJobRepo scriptJobRepo;
+    private final KylinJobRepo kylinJobRepo;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -129,7 +136,11 @@ public class JobInfoServiceImpl implements JobInfoService {
                               DevTreeNodeLocalCache devTreeNodeLocalCache,
                               OverhangJobLocalCache overhangJobLocalCache,
                               DevAccessService devAccessService,
-                              DataSourceApi dataSourceApi) {
+                              DataSourceApi dataSourceApi,
+                              DIJobContentRepo diJobContentRepo,
+                              SparkJobRepo sparkJobRepo,
+                              ScriptJobRepo scriptJobRepo,
+                              KylinJobRepo kylinJobRepo) {
         this.devJobInfoMyDao = devJobInfoMyDao;
         this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
@@ -149,6 +160,10 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.overhangJobLocalCache = overhangJobLocalCache;
         this.devAccessService = devAccessService;
         this.dataSourceApi = dataSourceApi;
+        this.diJobContentRepo = diJobContentRepo;
+        this.sparkJobRepo = sparkJobRepo;
+        this.scriptJobRepo = scriptJobRepo;
+        this.kylinJobRepo = kylinJobRepo;
     }
 
     @Override
@@ -652,12 +667,6 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
     }
 
-    @Override
-    public List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds) {
-        // todo
-        return null;
-    }
-
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto) {
         // 封装sql_job_content
         DevJobContentSql flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
@@ -712,6 +721,134 @@ public class JobInfoServiceImpl implements JobInfoService {
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
         flinkSqlResponse.setFlinkVersion(flinkSqlResponse.getConfProp().getOrDefault("Flink-version", "flink-1.10"));
         return flinkSqlResponse;
+    }
+
+    @Override
+    public List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds) {
+        if (CollectionUtils.isEmpty(jobIds)) {
+            return Lists.newArrayList();
+        }
+        List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(jobIds);
+        if (CollectionUtils.isEmpty(jobInfoList)) {
+            return Lists.newArrayList();
+        }
+        List<JobExtInfoDto> extInfoDtoList = jobInfoList.stream()
+                .map(JobExtInfoDto::from)
+                .collect(Collectors.toList());
+        Map<JobTypeEnum, List<JobExtInfoDto>> jobTypeMap = extInfoDtoList.stream()
+                .collect(Collectors.groupingBy(JobExtInfoDto::getJobType));
+        for (Map.Entry<JobTypeEnum, List<JobExtInfoDto>> entry : jobTypeMap.entrySet()) {
+            List<Long> subJobIds = entry.getValue().stream()
+                    .map(JobExtInfoDto::getId)
+                    .collect(Collectors.toList());
+            Map<Long, JobContentVersionDto> jobVersionMap = fetchJobVersions(entry.getKey(), subJobIds);
+            entry.getValue().forEach(jobExtInfoDto -> {
+                JobContentVersionDto versionDto = jobVersionMap.get(jobExtInfoDto.getId());
+                if (Objects.nonNull(versionDto)) {
+                    jobExtInfoDto.setVersion(versionDto.getVersion());
+                    if (StringUtils.isNotBlank(versionDto.getVersionDisplay())) {
+                        String envTag = "";
+                        if (StringUtils.isNotBlank(versionDto.getEnvironment())) {
+                            envTag = "-" + versionDto.getEnvironment();
+                        }
+                        jobExtInfoDto.setVersionDisplay(versionDto.getVersionDisplay() + envTag);
+                    }
+                }
+            });
+        }
+        return extInfoDtoList;
+    }
+
+    private Map<Long, JobContentVersionDto> fetchJobVersions(JobTypeEnum typeEnum, List<Long> jobIds) {
+        if (CollectionUtils.isEmpty(jobIds)) {
+            return Maps.newHashMap();
+        }
+
+        JobPublishRecordCondition condition = new JobPublishRecordCondition();
+        condition.setJobIds(jobIds);
+        condition.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+        condition.setEnvironment(EnvEnum.prod.name());
+        List<JobPublishRecord> prodPublishRecordList = jobPublishRecordRepo.queryList(condition);
+        List<Long> prodPublishContentIds = prodPublishRecordList.stream()
+                .map(JobPublishRecord::getJobContentId)
+                .collect(Collectors.toList());
+        Map<Long, JobContentVersionDto> jobVersionMap = Maps.newHashMap();
+        putJobVersions(typeEnum, prodPublishContentIds, EnvEnum.prod, jobVersionMap);
+
+        condition.setEnvironment(EnvEnum.stag.name());
+        List<JobPublishRecord> stagPublishRecordList = jobPublishRecordRepo.queryList(condition);
+        List<Long> stagPublishContentIds = stagPublishRecordList.stream()
+                .map(JobPublishRecord::getJobContentId)
+                .collect(Collectors.toList());
+        putJobVersions(typeEnum, stagPublishContentIds, EnvEnum.stag, jobVersionMap);
+        return jobVersionMap;
+    }
+
+    private void putJobVersions(JobTypeEnum typeEnum, List<Long> jobPublishContentIds, EnvEnum publishedEnvEnum, Map<Long, JobContentVersionDto> jobVersionMap) {
+        if (CollectionUtils.isEmpty(jobPublishContentIds)) {
+            return;
+        }
+        if (JobTypeEnum.DI_BATCH == typeEnum || JobTypeEnum.BACK_FLOW == typeEnum) {
+            List<DIJobContent> contentList = diJobContentRepo.queryList(jobPublishContentIds);
+            for (DIJobContent content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        } else if (JobTypeEnum.SQL_SPARK == typeEnum || JobTypeEnum.SQL_FLINK == typeEnum) {
+            List<DevJobContentSql> contentList = sqlJobRepo.queryList(jobPublishContentIds);
+            for (DevJobContentSql content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        } else if (JobTypeEnum.SPARK_JAR == typeEnum || JobTypeEnum.SPARK_PYTHON == typeEnum) {
+            List<DevJobContentSpark> contentList = sparkJobRepo.queryList(jobPublishContentIds);
+            for (DevJobContentSpark content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        } else if (JobTypeEnum.SCRIPT_PYTHON == typeEnum || JobTypeEnum.SCRIPT_SHELL == typeEnum) {
+            List<DevJobContentScript> contentList = scriptJobRepo.queryList(jobPublishContentIds);
+            for (DevJobContentScript content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        } else if (JobTypeEnum.KYLIN == typeEnum) {
+            List<DevJobContentKylin> contentList = kylinJobRepo.queryList(jobPublishContentIds);
+            for (DevJobContentKylin content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        }
     }
 
     /**

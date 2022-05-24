@@ -44,6 +44,8 @@ public interface DIJobContentRepo {
 
     List<DIJobContent> queryList(Long jobId);
 
+    List<DIJobContent> queryList(List<Long> ids);
+
     List<DIJobContent> queryList(String destTable);
 
     List<DIJobContent> queryListByDestTable(List<String> destTable);

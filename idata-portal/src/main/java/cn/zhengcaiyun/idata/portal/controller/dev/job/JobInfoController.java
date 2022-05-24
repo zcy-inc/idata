@@ -353,8 +353,8 @@ public class JobInfoController {
      * @param batchOperationReq
      * @return
      */
-    @GetMapping("/extInfo")
-    public RestResult<List<JobExtInfoDto>> getExtJobInfo(@RequestParam JobBatchOperationReq batchOperationReq) {
+    @PostMapping("/extInfo")
+    public RestResult<List<JobExtInfoDto>> getExtJobInfo(@RequestBody JobBatchOperationReq batchOperationReq) {
         return RestResult.success(jobInfoService.getJobExtInfo(batchOperationReq.getJobIds()));
     }
 

@@ -41,4 +41,6 @@ public interface SparkJobRepo {
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
 
     Optional<DevJobContentSpark> queryLatest(Long jobId);
+
+    List<DevJobContentSpark> queryList(List<Long> ids);
 }

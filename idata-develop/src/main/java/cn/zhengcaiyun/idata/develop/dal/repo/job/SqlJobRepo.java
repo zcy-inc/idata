@@ -41,4 +41,6 @@ public interface SqlJobRepo {
     Integer newVersion(Long jobId);
 
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
+    List<DevJobContentSql> queryList(List<Long> ids);
 }

@@ -215,7 +215,6 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                 break;
             case SQL_SPARK:
             case SQL_FLINK:
-            case SQL_DORIS:
                 contentJson = getSQLJobContentJson(jobInfoDto, version);
                 break;
             case SPARK_JAR:

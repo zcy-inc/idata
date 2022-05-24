@@ -121,6 +121,22 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
     }
 
     @Override
+    public List<JobPublishRecord> queryList(JobPublishRecordCondition condition) {
+        return jobPublishRecordDao.select(dsl -> dsl.where(
+                jobPublishRecord.jobId, isEqualToWhenPresent(condition.getJobId()),
+                and(jobPublishRecord.jobId, isInWhenPresent(condition.getJobIds())),
+                and(jobPublishRecord.jobContentVersion, isEqualToWhenPresent(condition.getJobContentVersion())),
+                and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
+                and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
+                and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
+        ).orderBy(jobPublishRecord.id.descending()));
+    }
+
+    @Override
     public Long save(JobPublishRecord record) {
         int ret = jobPublishRecordDao.insertSelective(record);
         if (ret <= 0) return null;

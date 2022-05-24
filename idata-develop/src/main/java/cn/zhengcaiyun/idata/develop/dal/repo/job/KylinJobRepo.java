@@ -41,4 +41,6 @@ public interface KylinJobRepo {
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
 
     Optional<DevJobContentKylin> queryLatest(Long jobId);
+
+    List<DevJobContentKylin> queryList(List<Long> ids);
 }

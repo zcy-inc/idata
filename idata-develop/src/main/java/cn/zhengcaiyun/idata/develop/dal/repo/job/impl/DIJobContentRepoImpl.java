@@ -98,6 +98,12 @@ public class DIJobContentRepoImpl implements DIJobContentRepo {
     }
 
     @Override
+    public List<DIJobContent> queryList(List<Long> ids) {
+        return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.id, isIn(ids),
+                and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
     public List<DIJobContent> queryList(String destTable) {
         return diJobContentDao.select(dsl -> dsl.where(DI_JOB_CONTENT.destTable, isEqualTo(destTable),
                         and(DI_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val)))

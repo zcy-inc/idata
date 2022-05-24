@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
@@ -90,5 +89,12 @@ public class SparkJobRepoImpl implements SparkJobRepo {
                         and(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val)))
                 .orderBy(devJobContentSpark.version.descending())
                 .limit(1));
+    }
+
+    @Override
+    public List<DevJobContentSpark> queryList(List<Long> ids) {
+        return devJobContentSparkDao.select(c ->
+                c.where(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentSpark.id, isIn(ids))));
     }
 }

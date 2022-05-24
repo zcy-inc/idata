@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
@@ -44,9 +43,9 @@ public class SqlJobRepoImpl implements SqlJobRepo {
     @Override
     public DevJobContentSql query(Long jobId, Integer version) {
         return devJobContentSqlDao.selectOne(c ->
-                c.where(devJobContentSql.del, isEqualTo(DeleteEnum.DEL_NO.val),
-                        and(devJobContentSql.jobId, isEqualTo(jobId)),
-                        and(devJobContentSql.version, isEqualTo(version))))
+                        c.where(devJobContentSql.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                                and(devJobContentSql.jobId, isEqualTo(jobId)),
+                                and(devJobContentSql.version, isEqualTo(version))))
                 .orElse(null);
     }
 
@@ -90,5 +89,12 @@ public class SqlJobRepoImpl implements SqlJobRepo {
                 .set(devJobContentSql.editor).equalTo(operator)
                 .where(devJobContentSql.id, isEqualTo(id)));
         return Boolean.TRUE;
+    }
+
+    @Override
+    public List<DevJobContentSql> queryList(List<Long> ids) {
+        return devJobContentSqlDao.select(c ->
+                c.where(devJobContentSql.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentSql.id, isIn(ids))));
     }
 }

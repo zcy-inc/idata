@@ -1,5 +1,7 @@
 package cn.zhengcaiyun.idata.develop.condition.job;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -46,6 +48,11 @@ public class JobPublishRecordCondition {
      * 提交人
      */
     private String submitOperator;
+
+    /**
+     * 作业id集合
+     */
+    private List<Long> jobIds;
 
     public Long getJobId() {
         return jobId;
@@ -109,5 +116,13 @@ public class JobPublishRecordCondition {
 
     public void setSubmitOperator(String submitOperator) {
         this.submitOperator = submitOperator;
+    }
+
+    public List<Long> getJobIds() {
+        return jobIds;
+    }
+
+    public void setJobIds(List<Long> jobIds) {
+        this.jobIds = jobIds;
     }
 }

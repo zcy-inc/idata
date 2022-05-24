@@ -41,4 +41,6 @@ public interface ScriptJobRepo {
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
 
     Optional<DevJobContentScript> queryLatest(Long jobId);
+
+    List<DevJobContentScript> queryList(List<Long> ids);
 }
