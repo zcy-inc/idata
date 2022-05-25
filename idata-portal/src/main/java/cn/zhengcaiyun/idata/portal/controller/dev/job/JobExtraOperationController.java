@@ -23,8 +23,8 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.JobExtraOperateResult;
 import cn.zhengcaiyun.idata.develop.service.job.JobExtraOperationService;
 import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
-import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
 import cn.zhengcaiyun.idata.portal.util.ExportUtil;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -70,13 +70,20 @@ public class JobExtraOperationController {
     /**
      * 导出作业
      *
-     * @param batchOperationReq 请求对象
-     * @return
+     * @param jobIds   作业编号，多个编号用英文 , 号分隔
+     * @param response
      */
-    @PostMapping("/export")
-    public void exportJob(@RequestBody JobBatchOperationReq batchOperationReq,
+    @GetMapping("/export")
+    public void exportJob(@RequestParam String jobIds,
                           HttpServletResponse response) {
-        String jobJson = jobExtraOperationService.exportJobJson(batchOperationReq.getJobIds());
+        List<Long> ids = Lists.newArrayList();
+        if (StringUtils.isNotBlank(jobIds)) {
+            String[] idArr = jobIds.split(",");
+            for (String idStr : idArr) {
+                ids.add(Long.parseLong(idStr.trim()));
+            }
+        }
+        String jobJson = jobExtraOperationService.exportJobJson(ids);
         ExportUtil.writeToTxt(response, jobJson, "export_job");
     }
 
