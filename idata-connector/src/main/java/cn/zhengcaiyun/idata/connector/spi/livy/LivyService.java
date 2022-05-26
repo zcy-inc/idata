@@ -52,6 +52,7 @@ public class LivyService {
     }};
     private final String DEFAULT_DRIVER_MEMORY = "1G";
     private final String DEFAULT_EXECUTOR_MEMORY = "2G";
+    private final String YARN_QUEUE = "root.offline";
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -82,6 +83,7 @@ public class LivyService {
         body.put("driverMemory", DEFAULT_DRIVER_MEMORY);
         body.put("executorMemory", DEFAULT_EXECUTOR_MEMORY);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
         Map<String, Object> session = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
                 },
@@ -222,6 +224,7 @@ public class LivyService {
         body.put("driverMemory", driverMemory);
         body.put("executorMemory", executorMemory);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
 
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
