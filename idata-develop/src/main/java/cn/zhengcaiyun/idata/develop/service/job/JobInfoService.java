@@ -89,7 +89,7 @@ public interface JobInfoService {
      * @param env
      * @return
      */
-    JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env);
+    JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env, Integer jobVersion);
 
     /**
      * 获取作业扩展信息

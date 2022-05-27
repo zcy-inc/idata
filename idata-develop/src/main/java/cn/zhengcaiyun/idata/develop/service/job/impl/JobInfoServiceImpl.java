@@ -411,7 +411,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env) {
+    public JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env, Integer jobVersion) {
         JobInfoExecuteDetailDto jobInfoExecuteDetailDto = devJobInfoMyDao.selectJobInfoExecuteDetail(id, env);
         checkArgument(jobInfoExecuteDetailDto != null, String.format("任务不存在或配置不存在, jobId:%d，环境:%s", id, env));
 
@@ -560,8 +560,16 @@ public class JobInfoServiceImpl implements JobInfoService {
                         .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", id, env)));
 
                 // 封装sql_job_content
-                DevJobContentSql contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
-                checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                // dryRun不需要发布，正常调用jobVersion > 0
+                DevJobContentSql contentSql;
+                if (jobVersion != null && jobVersion > 1) {
+                    contentSql = sqlJobRepo.query(id, jobVersion);
+                    checkArgument(Objects.nonNull(contentSql), String.format("sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                }
+                else {
+                    contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
+                    checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
+                }
 
                 List<DevJobUdf> udfList = new ArrayList<>();
                 String udfIds = contentSql.getUdfIds();
@@ -660,21 +668,25 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                 return scriptResponse;
             case SQL_FLINK:
-                return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto);
+                return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
         }
     }
 
-    private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto) {
+    private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
+                                                         Integer jobVersion) {
         // 封装sql_job_content
-        DevJobContentSql flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
+        // dryRun不需要发布，正常调用jobVersion > 0
+        DevJobContentSql flinkSqlContent;
         boolean published = true;
-        if (Objects.isNull(flinkSqlContent)) {
-            // 没有发布版本，走调试逻辑，取最新一个版本
-            flinkSqlContent = sqlJobRepo.queryLatest(jobId).orElse(null);
+        if (jobVersion != null && jobVersion > 0) {
+            flinkSqlContent = sqlJobRepo.query(jobId, jobVersion);
             published = false;
+        }
+        else {
+            flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
         }
         checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%s，环境:%s", jobId, env));
         String jobExtendConfigs = flinkSqlContent.getExtendConfigs();
