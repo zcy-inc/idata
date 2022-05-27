@@ -310,8 +310,10 @@ const FolderTree: FC = () => {
 
   const showBatchOperate = () => {
     showDialog('批量处理', {
+      hideFooter: true,
       modalProps: {
-        width: 980
+        width: 980,
+        wrapClassName: styles['batch-operate-modal']
       }
     },BatchOpetate);
   }

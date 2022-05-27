@@ -246,9 +246,52 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
 /**
  * 获取作业扩展信息
  */
- export async function getJobInfo(params: {jobIds: string}) {
+ export async function getJobInfo(data: {jobIds: number []}) {
   return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/extInfo', {
-    params,
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导出作业
+ */
+ export async function jobExport(params: {jobIds: string}) {
+   window.open(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`)
+  }
+
+/**
+ * 复制作业
+ */
+ export async function jobCopy(data: {jobIds: number [], destFolderId: number}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/copy', {
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导入作业
+ */
+ export async function jobImport(data: {destFolderId: number | string, file: string | Blob}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/import', {
+    data: {
+      file: data.file
+    },
+    params: {
+      destFolderId: data.destFolderId
+    },
+    method: 'POST',
+  });
+}
+
+/**
+ * 移动作业
+ */
+ export async function jobMove(data: {jobIds: number [], destFolderId: number}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/move', {
+    data,
+    method: 'POST',
   });
 }
 

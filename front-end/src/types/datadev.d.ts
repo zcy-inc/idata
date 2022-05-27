@@ -34,7 +34,10 @@ export interface TreeNode {
 }
 
 export interface Job {
- 
+  id: number;
+  name: string;
+  jobType: string;
+  displayVersion?: string;
 }
 
 // 平铺文件夹的类型
