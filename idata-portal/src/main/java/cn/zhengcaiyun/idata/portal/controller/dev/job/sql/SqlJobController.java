@@ -18,6 +18,8 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job.sql;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.DryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
@@ -51,5 +53,10 @@ public class SqlJobController {
     @PostMapping("/sql/flink/template")
     public RestResult<String> generateFlinkSqlTemplate(@RequestBody FlinkSqlJobExtendConfigDto configDto) {
         return RestResult.success(sqlJobService.generateFlinkSqlTemplate(configDto.getFlinkSourceConfigs(), configDto.getFlinkSinkConfigs()));
+    }
+
+    @PostMapping("/sql/sqlJobDryRun")
+    public RestResult<LivySessionDto> sqlJobDryRun(@RequestBody DryRunDto dryRunDto) {
+        return RestResult.success(sqlJobService.sqlJobDryRun(dryRunDto));
     }
 }

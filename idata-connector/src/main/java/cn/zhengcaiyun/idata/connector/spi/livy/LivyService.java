@@ -215,15 +215,10 @@ public class LivyService {
         }
     }
 
-    public LivySessionDto createBatches(String file, List<String> args, String driverMemory, String executorMemory) {
+    public LivySessionDto createBatches(String file, List<String> args) {
         Map<String, Object> body = new HashMap<>();
-        driverMemory = isNotEmpty(driverMemory) ? driverMemory : DEFAULT_DRIVER_MEMORY;
-        executorMemory = isNotEmpty(executorMemory) ? executorMemory : DEFAULT_EXECUTOR_MEMORY;
         body.put("file", file);
         body.put("args", args);
-        body.put("driverMemory", driverMemory);
-        body.put("executorMemory", executorMemory);
-        body.put("conf", DEFAULT_MAX_EXECUTORS);
         body.put("queue", YARN_QUEUE);
 
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),

@@ -17,11 +17,15 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.DryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
@@ -29,12 +33,11 @@ import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -46,10 +49,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Service
 public class SqlJobServiceImpl implements SqlJobService {
 
+    @Value("${dev.job.dryRunPyFile}")
+    private String LIVY_DRY_RUN_PY_FILE;
+
     @Autowired
     private JobInfoRepo jobInfoRepo;
     @Autowired
     private SqlJobRepo sqlJobRepo;
+    @Autowired
+    private LivyService livyService;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -119,6 +127,19 @@ public class SqlJobServiceImpl implements SqlJobService {
         }
         sqlBuilder.append("-- business code ").append("\n");
         return sqlBuilder.toString();
+    }
+
+    @Override
+    public LivySessionDto sqlJobDryRun(DryRunDto dryRunDto) {
+        checkArgument(dryRunDto.getJobId() != null, "作业ID不能为空");
+        checkArgument(dryRunDto.getJobVersion() != null, "作业版本不能为空");
+        JobInfo existJobInfo = jobInfoRepo.queryJobInfo(dryRunDto.getJobId())
+                .orElseThrow(() -> new IllegalArgumentException("作业不存在"));
+        DevJobContentSql existSqlJob = sqlJobRepo.query(dryRunDto.getJobId(), dryRunDto.getJobVersion());
+        checkArgument(existSqlJob != null, "作业不存在");
+
+        List<String> args = Arrays.asList(dryRunDto.getJobId().toString(), dryRunDto.getJobVersion().toString());
+        return livyService.createBatches(LIVY_DRY_RUN_PY_FILE, args);
     }
 
 }

@@ -17,6 +17,8 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,8 @@ public class QueryController {
 
     @Autowired
     private QueryService queryService;
+    @Autowired
+    private LivyService livyService;
 
     @PostMapping("/runQuery")
     public RestResult<QueryStatementDto> runQuery(@RequestBody QueryDto queryDto) {
@@ -52,5 +56,14 @@ public class QueryController {
     @GetMapping("/autocompletionTipConfigs")
     public RestResult<AutocompletionTipDto> getAutocompletionTipConfigs(@RequestParam("autocompletionType") String autocompletionType) {
         return RestResult.success(queryService.getAutocompletionTipConfigs(autocompletionType));
+    }
+
+    @GetMapping("/batchesLog")
+    public RestResult<LivySessionLogDto> getBatchesLog(@RequestParam("sessionId") Integer sessionId,
+                                                       @RequestParam(value = "from", required = false) Integer from,
+                                                       @RequestParam(value = "size", required = false) Integer size) {
+        LivySessionLogDto sessionLogDto = livyService.getBatchesLog(sessionId, from, size);
+        sessionLogDto.setState(livyService.getBatchesState(sessionId));
+        return RestResult.success(sessionLogDto);
     }
 }

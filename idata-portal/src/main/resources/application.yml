@@ -77,6 +77,7 @@ dev:
   job:
     publish:
       whitelist: 熠然,大时
+    dryRunPyFile: /usr/local/lib/dryRunHtool.py
 
 pagehelper:
   helperDialect: mysql

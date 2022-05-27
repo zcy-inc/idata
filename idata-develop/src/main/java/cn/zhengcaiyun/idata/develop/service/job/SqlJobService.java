@@ -16,6 +16,9 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.DryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 
@@ -33,4 +36,6 @@ public interface SqlJobService {
 
     String generateFlinkSqlTemplate(List<FlinkSqlJobExtendConfigDto.FlinkDataSourceConfigDto> flinkSourceConfigs,
                                     List<FlinkSqlJobExtendConfigDto.FlinkDataSourceConfigDto> flinkSinkConfigs);
+
+    LivySessionDto sqlJobDryRun(DryRunDto dryRunDto);
 }
