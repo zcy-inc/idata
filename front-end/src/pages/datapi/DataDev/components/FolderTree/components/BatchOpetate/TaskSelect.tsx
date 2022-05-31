@@ -111,7 +111,7 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
         leafNodes.push(node.key)
       }
     });
-    getJobInfo({jobIds: [30,20,18,11]}).then(res => {
+    getJobInfo({jobIds: leafNodes}).then(res => {
       setJobInfo(res.data);
     })
   }
