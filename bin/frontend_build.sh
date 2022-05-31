@@ -12,4 +12,4 @@ fi
 npm run build
 cp -f -r ./dist ./docker/
 cd ./docker
-docker build -t docker-image.cai-inc.com/bigdata/idata-portal-front .
+docker build -t docker-image.cai-inc.com/bigdata/idata-portal-front:v20220519 .

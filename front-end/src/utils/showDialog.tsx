@@ -1,13 +1,10 @@
 import React, { useState, useRef, forwardRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal } from 'antd';
-
+import type { ModalProps } from 'antd'; 
 
 interface Attrs {
-  modalProps?: {
-    width? : number;
-    title?: string;
-  };
+  modalProps?: ModalProps;
   formProps?: any;
   beforeConfirm?: (dialog: any, form: any, done: () => void) => void;
   beforeHide?: (dialog: any, form: any, done: () => void) => void;
@@ -60,6 +57,7 @@ export default (title = '对话框', customAttrs: Attrs, DialogContent: any) => 
       const $form = useRef();
 
       const handleCancel = () => {
+        console.log(123213);
         customAttrs.beforeHide && customAttrs.beforeHide(dialogInstance, $form.current, () => {
           setVisible(false)
         });
@@ -133,11 +131,11 @@ export default (title = '对话框', customAttrs: Attrs, DialogContent: any) => 
       return <Modal
         visible={visible}
         onCancel={handleCancel}
-        footer={footer}
+        footer={footer?.length ? footer : false}
         onOk={confirm}
         {...customAttrs.modalProps}
       >
-      <ChildComponent ref={$form} {...customAttrs.formProps} />
+      <ChildComponent ref={$form} {...customAttrs.formProps} dialog={dialogInstance} />
     </Modal>
     }
     ReactDOM.render(

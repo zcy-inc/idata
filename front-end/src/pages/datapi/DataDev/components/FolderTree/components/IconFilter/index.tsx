@@ -6,17 +6,12 @@ const IconFilter: FC<{}> = ({}) => {
   const [isHover, setIsHover] = useState(false);
 
   return (
-    <div
+    <IconFont
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
-      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1 }}
-    >
-      {isHover ? (
-        <IconFont type="icon-shaixuan-copy" style={{ fontSize: 18 }} />
-      ) : (
-        <IconFont type="icon-shaixuan" style={{ fontSize: 18 }} />
-      )}
-    </div>
+      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1,  fontSize: 18 }}
+      type={isHover ? 'icon-shaixuan-copy' : 'icon-shaixuan'}
+    />
   );
 };
 
