@@ -562,7 +562,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 // 封装sql_job_content
                 // dryRun不需要发布，正常调用jobVersion > 0
                 DevJobContentSql contentSql;
-                if (jobVersion != null && jobVersion > 1) {
+                if (jobVersion != null && jobVersion > 0) {
                     contentSql = sqlJobRepo.query(id, jobVersion);
                     checkArgument(Objects.nonNull(contentSql), String.format("sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 }
