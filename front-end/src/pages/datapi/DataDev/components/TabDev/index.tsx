@@ -26,6 +26,7 @@ import {
   saveSqlSpark,
   submitTask,
   tyrRun,
+  getTyrRunLog,
 } from '@/services/datadev';
 import { IconFont } from '@/components';
 import DrawerBasic from './components/DrawerBasic';
@@ -39,8 +40,6 @@ import SparkPython from './components/Content/SparkPython';
 import ScriptShell from './components/Content/ScriptShell';
 import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
-import TyeRunSetting from './components/TryRunSetting';
-import showDialog from '@/utils/showDialog';
 import { useJob, VersionOption } from '../../../hooks/useJob';
 import { useEditorPanel } from '../../../hooks/useEditorPanel';
 
@@ -129,6 +128,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     editorRef,
     getDebugCode,
     setResults,
+    setResultHeader,
     setLog,
     handleExpandChange,
   } = useEditorPanel();
@@ -326,6 +326,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       sessionId,
       sessionKind: 'spark',
       statementId,
+      selectSql: getDebugCode(),
       from: pollingFrom.current,
       size: 10,
     })
@@ -346,7 +347,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         } else {
           pollingFrom.current = 0;
           const result = res.data.resultSet;
+          const resultHeader = res.data.resultHeader;
           setResults((pre) => [...pre, result]);
+          setResultHeader(resultHeader);
         }
       })
       .catch((err) => {});
@@ -379,24 +382,29 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   };
 
   const tryRun = () => {
-    showDialog(
-      '试运行配置',
-      {
-        beforeConfirm: (dialog, form, done) => {
-          form.form.validateFields().then((values: any) => {
-            tyrRun({
-              ...values,
-              jobId: pane.id,
-              version,
-            }).then(() => {
-              done();
-            });
-          });
-        },
-      },
-      TyeRunSetting,
-    );
+    tyrRun({
+      jobId: pane.id,
+      jobVersion: version,
+    }).then((res: any) => {
+      genTryRunLog(res.data.sessionId);
+    });
   };
+
+  const genTryRunLog = (sessionId: number, from = 0, pageSize = 10) => {
+    getTyrRunLog({
+      sessionId,
+      from,
+      pageSize
+    }).then(res => {
+      setLog(res.data?.log || []);
+      const endSign = ['shutting_down', 'error', 'dead', 'killed', 'success'];
+      if(!endSign.includes(res.data.state)) {
+        setTimeout(() => {
+          genTryRunLog(sessionId, res.data.from);
+        }, 1000)
+      }
+    });
+  }
 
   const btnMap = new Map([
     [
@@ -501,6 +509,18 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const getBtnNames = () => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+        return [
+          Btns.SAVE,
+          Btns.DEBUG,
+          Btns.RUN_ONCE,
+          Btns.SUBMIT,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+          Btns.DIVIDER,
+          Btns.JOB_CONFIG,
+          Btns.TRY_RUN
+        ];
       case TaskTypes.SPARK_PYTHON:
       case TaskTypes.SCRIPT_PYTHON:
         return [
@@ -512,10 +532,10 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.OFFLINE,
           Btns.DELETE,
           Btns.DIVIDER,
-          Btns.JOB_CONFIG,
+          Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
+        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG, Btns.TRY_RUN];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,

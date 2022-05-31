@@ -638,9 +638,18 @@ export async function runTask(params: { id: number; environment: Environments })
  * 试运行作业
  */
 export async function tyrRun(data: any) {
-  return request<DefaultResponse & { data: boolean }>('/api/v1/idata/spark/sqlJobDryRun', {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/sql/sqlJobDryRun', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取试运行日志
+ */
+ export async function getTyrRunLog(params: any) {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/batchesLog', {
+    params,
   });
 }
 
@@ -793,6 +802,7 @@ export async function runQueryResult(params: {
   statementId: number;
   from?: number;
   size?: number;
+  selectSql: string;
 }) {
   return request<
     DefaultResponse & {
@@ -809,6 +819,7 @@ export async function runQueryResult(params: {
         statementState: StatementState;
         outputStatus: string;
         resultSet: { [key: string]: string }[];
+        resultHeader: string [];
         pythonResults?: string;
       };
     }

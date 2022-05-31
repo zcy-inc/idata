@@ -8,6 +8,7 @@ const defaultExpandedSize = 'calc(100% - 200px)';
 export const useEditorPanel = () => {
   const [log, setLog] = useState<string[]>([]); // 日志
   const [results, setResults] = useState<Record<string, unknown>[][]>([]); // 执行结果
+  const [resultHeader, setResultHeader] = useState<string []>([]); // 执行结果
   const [size, setSize] = useState<number | string>(collapsedSize);
   const [expand, setExpand] = useState(false);
   const editorRef = useRef<any>(); // monaco实例
@@ -47,6 +48,7 @@ export const useEditorPanel = () => {
     size,
     setSize,
     results,
+    resultHeader,
     handleExpandChange,
     removeResult,
     maxSize: collapsedSize,
@@ -57,6 +59,7 @@ export const useEditorPanel = () => {
     editorRef,
     setLog,
     setResults,
+    setResultHeader,
     handleExpandChange,
     getDebugCode,
   };

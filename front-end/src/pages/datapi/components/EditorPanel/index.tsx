@@ -15,6 +15,7 @@ export interface EditorPanelProps {
   size: number | string;
   setSize: (size: number) => void;
   results: Record<string, unknown>[][];
+  resultHeader: string [];
   removeResult?: (index: number) => void;
   maxSize?: number | string;
 }
@@ -26,15 +27,15 @@ export const EditorPanel: FC<EditorPanelProps> = ({
   size,
   setSize,
   results,
+  resultHeader,
   removeResult,
   maxSize,
   children,
 }) => {
   const [height, setHeight] = useState(500);
 
-  const calcColumns = (result: Record<string, unknown>[]) => {
-    const keys = Object.keys(result[0] || {});
-    return keys.map((key) => ({ title: key, dataIndex: key, key }));
+  const calcColumns = (resultHeader: string[]) => {
+    return resultHeader.map((key) => ({ title: key, dataIndex: key, key }));
   };
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export const EditorPanel: FC<EditorPanelProps> = ({
               >
                 <Table
                   className={styles.table}
-                  columns={calcColumns(result)}
+                  columns={calcColumns(resultHeader)}
                   dataSource={result}
                   size="small"
                   pagination={{
