@@ -29,7 +29,6 @@ import java.util.List;
 public class QueryRunResultDto extends LivySqlResultDto {
     private LivySessionLogDto queryRunLog;
     private List<String> resultHeader;
-    private List<List<Object>> result;
 
     // GaS
     public LivySessionLogDto getQueryRunLog() {
@@ -46,13 +45,5 @@ public class QueryRunResultDto extends LivySqlResultDto {
 
     public void setResultHeader(List<String> resultHeader) {
         this.resultHeader = resultHeader;
-    }
-
-    public List<List<Object>> getResult() {
-        return result;
-    }
-
-    public void setResult(List<List<Object>> result) {
-        this.result = result;
     }
 }

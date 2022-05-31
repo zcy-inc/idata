@@ -44,13 +44,12 @@ public class QueryController {
     }
 
     @GetMapping("/runQueryResult")
-    public RestResult<QueryRunResultDto> runQueryResult(@RequestParam("selectSql") String selectSql,
-                                                        @RequestParam("sessionId") Integer sessionId,
+    public RestResult<QueryRunResultDto> runQueryResult(@RequestParam("sessionId") Integer sessionId,
                                                         @RequestParam("statementId") Integer statementId,
                                                         @RequestParam("sessionKind") String sessionKind,
                                                         @RequestParam(value = "from", required = false) Integer from,
                                                         @RequestParam(value = "size", required = false) Integer size) {
-        return RestResult.success(queryService.runQueryResult(selectSql, sessionId, statementId, sessionKind, from, size));
+        return RestResult.success(queryService.runQueryResult(sessionId, statementId, sessionKind, from, size));
     }
 
     @GetMapping("/autocompletionTipConfigs")

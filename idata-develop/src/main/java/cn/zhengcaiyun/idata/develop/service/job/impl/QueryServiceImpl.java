@@ -77,7 +77,7 @@ public class QueryServiceImpl implements QueryService {
     }
 
     @Override
-    public QueryRunResultDto runQueryResult(String selectSql, Integer sessionId, Integer statementId, String sessionKind,
+    public QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind,
                                             Integer from, Integer size) {
         checkArgument(LivySessionKindEnum.checkSessionKind(sessionKind), "Spark执行代码类型有误");
         QueryRunResultDto queryRunResult = PojoUtil.copyOne(livyService.queryResult(sessionId, statementId,
@@ -89,12 +89,7 @@ public class QueryServiceImpl implements QueryService {
         // 字段为null处理
         List<Map<String, Object>> resultSet = queryRunResult.getResultSet();
         if (resultSet != null && resultSet.size() > 0) {
-            List<String> selectColumnList = SparkSqlUtil.getSelectColumns(selectSql);
-            List<List<Object>> resultList = resultSet.stream()
-                    .map(result -> selectColumnList.stream().map(column -> result.getOrDefault(column, "")).collect(Collectors.toList()))
-                    .collect(Collectors.toList());
-            queryRunResult.setResultHeader(selectColumnList);
-            queryRunResult.setResult(resultList);
+            queryRunResult.setResultHeader(SparkSqlUtil.getSelectColumns(resultSet));
         }
         return queryRunResult;
     }

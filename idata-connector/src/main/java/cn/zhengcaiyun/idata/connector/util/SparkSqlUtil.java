@@ -64,21 +64,18 @@ public class SparkSqlUtil {
         return new ArrayList(tableSet);
     }
 
-    public static List<String> getSelectColumns(String sql) {
-        String[] sqls = sql.split(" |\n|\t|,");
-        List<String> newSqlList = new ArrayList<>(Arrays.asList(sqls)).stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        int beginIndex = newSqlList.lastIndexOf("select");
-        int endIndex = newSqlList.lastIndexOf("from") != -1 ? newSqlList.lastIndexOf("from") : newSqlList.size();
-        if (newSqlList.subList(beginIndex, endIndex).contains("as")) {
-            checkArgument((endIndex - beginIndex + 1) % 3 == 0, "解析失败");
-        }
-        List<String> echoList = new ArrayList<>();
-        for (int i = beginIndex; i < endIndex; i++) {
-            if ("as".equals(newSqlList.get(i)) && i < newSqlList.size() - 1) {
-                echoList.add(newSqlList.get(i + 1));
+    public static List<String> getSelectColumns(List<Map<String, Object>> resultSet) {
+        int longestIndex = 0;
+        int longestSize = 0;
+        for (int i = 0; i < resultSet.size(); i++) {
+            if (resultSet.get(i).size() > longestSize) {
+                longestIndex = i;
+                longestSize = resultSet.get(i).size();
             }
         }
-        return echoList;
+        Set<String> columns = resultSet.get(longestIndex).keySet();
+        List<String> echo = new ArrayList<>(columns);
+        return echo;
     }
 
     public static class AddDatabaseEnvListener extends SparkSqlBaseListener {
@@ -162,49 +159,28 @@ public class SparkSqlUtil {
     }
 
     public static void main(String[] args) {
-        String sql = "with t_trade as (\n" +
-                "select * \n" +
-                "  from (select trade_id,\n" +
-                "               contract_no,\n" +
-                "               contract_name,\n" +
-                "          from dwd.dwd_trade_all_detail t_dtad) t\n" +
-                "),\n" +
-                "t_plan as (\n" +
-                "select \n" +
-                "     \tinstance_code\n" +
-                "     \t,trade_id\n" +
-                "   from dwd.dwd_trade_all_detail \n" +
-                "),\n" +
-                "delivers as (\n" +
-                "select \n" +
-                "\t\torder_id\n" +
-                "  from ods.ods_db_trade_zcy_order_deliveries ---替换为新表\n" +
-                "),\n" +
-                "return as (\n" +
-                "select \n" +
-                "\t\tcreed_id,\n" +
-                "  \t\tsum(agg_unit_price*quantity_return) return_amount\n" +
-                "   from ods.ods_db_creed_item\n" +
-                "  where is_del=0\n" +
-                "  group by 1\n" +
-                ")\n" +
-                "select \tt_trade.trade_id as t1,\n" +
-                "\t   \tt_trade.contract_no as t2,\n" +
-                "       \tt_trade.contract_name as t3,\n" +
-                "  from t_trade";
-        String[] sqls = sql.split(" |\n|\t|,");
+        String sql = "select \n" +
+                " a.month_data                      --bigint    comment '项目月份'\n" +
+                ",a.district_code                   --string    comment '区划code' \n" +
+                ",a.district_name                   --string    comment '区划名称' \n" +
+                ",sum(a.liv_cnt)                         --bigint    comment '不见面开评标项目数'\n" +
+                ",sum(a.liv_cnt_all)                     --bigint    comment '不见面开评标项目总数'\n" +
+                ",sum(a.intention_cnt)                   --bigint    comment '采购意向公开满足30天项目数'\n" +
+                ",sum(a.intention_cnt_all)               --bigint    comment '采购意向公开满足30天项目总数'           \n" +
+                ",sum(a.sigh_cnt)                        --bigint    comment '7日内合同备案项目数'\n" +
+                ",sum(a.sigh_cnt_all)                    --bigint    comment '7日内合同备案项目总数'\n" +
+                ",sum(a.performance_cnt)                 --bigint    comment '履约验收公告发布项目数'\n" +
+                ",sum(a.performance_cnt_all)             --bigint    comment '履约验收公告发布项目总数'\n" +
+                ",sum(a.reply_cnt)                       --bigint    comment '7日内质疑答复项目数'\n" +
+                ",sum(a.reply_cnt_all)                   --bigint    comment '7日内质疑答复项目总数'\n" +
+                ",sum(a.publish_cnt)                     --bigint    comment '2日内中标通知项目数'\n" +
+                ",sum(a.publish_cnt_all)                 --bigint    comment '2日内中标通知项目总数'\n" +
+                "from ads.ads_dtjk_trade_district_purchaser a\n" +
+                "group by 1,2,3";
+        String[] sqls = sql.split("select|from");
         List<String> newSqlList = new ArrayList<>(Arrays.asList(sqls)).stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        int beginIndex = newSqlList.lastIndexOf("select");
-        int endIndex = newSqlList.lastIndexOf("from") != -1 ? newSqlList.lastIndexOf("from") : newSqlList.size();
-        if (newSqlList.subList(beginIndex, endIndex).contains("as")) {
-            boolean isAs = (endIndex - beginIndex + 1) % 3 == 0;
-        }
-        List<String> echoList = new ArrayList<>();
-        for (int i = beginIndex; i < endIndex; i++) {
-            if ("as".equals(newSqlList.get(i)) && i < newSqlList.size() - 1) {
-                echoList.add(newSqlList.get(i + 1));
-            }
-        }
+        String[] columns = newSqlList.get(0).split("\\n|\\t|,");
+        List<String> columnsList = new ArrayList<>(Arrays.asList(columns)).stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         System.out.println(sqls);
     }
 }
