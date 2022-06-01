@@ -425,6 +425,16 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       </Tooltip>,
     ],
     [
+      Btns.TRY_RUN,
+      <Tooltip title="试运行" key="10">
+        <Button
+          className={styles.btn}
+          icon={<IconFont type="icon-shiyunhang" />}
+          onClick={tryRun}
+        />
+      </Tooltip>,
+    ],
+    [
       Btns.RUN_ONCE,
       <Tooltip title="单次运行" key="7">
         <Button
@@ -494,16 +504,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         />
       </Tooltip>,
     ],
-    [
-      Btns.TRY_RUN,
-      <Tooltip title="试运行" key="10">
-        <Button
-          className={styles.btn}
-          icon={<IconFont type="icon-peizhiguanli" />}
-          onClick={tryRun}
-        />
-      </Tooltip>,
-    ],
   ]);
 
   const getBtnNames = () => {
@@ -512,6 +512,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         return [
           Btns.SAVE,
           Btns.DEBUG,
+          Btns.TRY_RUN,
           Btns.RUN_ONCE,
           Btns.SUBMIT,
           Btns.ONLINE,
@@ -519,7 +520,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.DELETE,
           Btns.DIVIDER,
           Btns.JOB_CONFIG,
-          Btns.TRY_RUN
         ];
       case TaskTypes.SPARK_PYTHON:
       case TaskTypes.SCRIPT_PYTHON:

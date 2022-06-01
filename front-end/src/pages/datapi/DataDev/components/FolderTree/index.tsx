@@ -7,7 +7,7 @@ import { usePersistFn } from '@/hooks';
 import styles from './index.less';
 import { IconFont, TreeTitle } from '@/components';
 import { Operation } from '@/components/TreeTitle';
-import { deleteFolder, getFunctionTree } from '@/services/datadev';
+import { deleteFolder, getFunctionTree, deleteTask, jobCopy } from '@/services/datadev';
 import { TreeNode as Treenode } from '@/types/datadev';
 import { FolderTypes, funcFolderIconMap, FolderBelong } from '@/constants/datadev';
 import CreateFolder from './components/CreateFolder';
@@ -46,8 +46,10 @@ const FolderTree: FC = () => {
     setVisibleDev,
     setCurLabel,
     folderList,
+    onRemovePane
   } = useModel('datadev', (_) => ({
     tree: _.tree,
+    onRemovePane: _.onRemovePane,
     getTreeWrapped: _.getTreeWrapped,
     setFolderMode: _.setFolderMode,
     curNode: _.curNode,
@@ -167,7 +169,7 @@ const FolderTree: FC = () => {
     });
 
   const calcOperation = usePersistFn((belong: FolderBelong, type: FolderTypes, node: Treenode) => {
-    const operations: Operation[] = [];
+    let operations: Operation[] = [];
     switch (belong) {
       case FolderBelong.DESIGN:
       case FolderBelong.DEV:
@@ -235,8 +237,47 @@ const FolderTree: FC = () => {
             onClick: () => onDeleteFolder(node),
           },
         );
-
         break;
+      case FolderTypes.RECORD:
+        if([FolderBelong.DAG, FolderBelong.DI, FolderBelong.DEVJOB, FolderBelong.DEV, FolderBelong.DEVFUN].includes(belong)) {
+          operations = [{
+            label: '删除',
+            key: 'delete',
+            onClick: () => {
+              confirm({
+                title: '删除任务',
+                content: '您确认要删除该任务吗？',
+                autoFocusButton: null,
+                onOk: () =>
+                  deleteTask({ id: node.id })
+                    .then((res) => {
+                      if (res.success) {
+                        message.success('删除成功');
+                        onRemovePane(node.cid);
+                        getTreeWrapped();
+                      }
+                    })
+                    .catch((err) => {}),
+              });
+            },
+          },
+          {
+            label: '复制',
+            key: 'copy',
+            onClick: () => {
+              jobCopy({
+                jobIds: [node.id],
+                destFolderId: node.parentId
+              }).then(() => {
+                message.success('复制成功！');
+                getTreeWrapped();
+              })
+            },
+          }];
+        } else {
+          operations = [];
+        }
+      
     }
     return operations;
   });
@@ -273,7 +314,7 @@ const FolderTree: FC = () => {
             );
             break;
           case FolderTypes.RECORD:
-            title = <TreeTitle text={titleText} />;
+            title = <TreeTitle onClick={() => onViewTree(node)} text={titleText} operations={calcOperation?.(belong, type, node)} />;
             break;
         }
         return {
@@ -384,17 +425,6 @@ const FolderTree: FC = () => {
           <Tree
             treeData={treeData}
             blockNode
-            onSelect={(selectedKeys, { node, ...props }) => {
-              // 节点的浮窗菜单点击时会触发onSelect，不知道为什么。
-              // 但是这个时候 selectedKeys.length === 0
-              // 可以通过这个来判断是选中节点还是浮窗点击。
-              if (selectedKeys.length) {
-                const nodeForTSLint: any = node;
-                if (nodeForTSLint.type === FolderTypes.RECORD) {
-                  onViewTree(nodeForTSLint);
-                }
-              }
-            }}
             expandedKeys={expandedKeys}
             autoExpandParent={autoExpandParent}
             onExpand={(keys) => {

@@ -2,16 +2,17 @@ import React, { FC, useState } from 'react';
 import { IconFont } from '@/components';
 import { Dropdown, Menu } from 'antd';
 
-export type Operation = { label?: string; key: string; onClick?: () => void } | { type: 'divider' };
+export type Operation = { label?: string; key: string; onClick?: (e: MouseEvent) => void } | { type: 'divider' };
 
 interface TreeTitleProps {
   text: React.ReactNode;
   icon?: string;
   operations?: Operation[];
+  onClick?: (e: MouseEvent) => void | any;
   style?: React.CSSProperties;
 }
 
-const TreeTitle: FC<TreeTitleProps> = ({ icon, text, operations, style = {} }) => {
+const TreeTitle: FC<TreeTitleProps> = ({ icon, text, operations, style = {}, onClick }) => {
   // FIXME: 去掉设置curNode可能有问题
   //   const { setCurNode } = useModel('datadev', (_) => ({
   //     setCurNode: _.setCurNode,
@@ -50,14 +51,21 @@ const TreeTitle: FC<TreeTitleProps> = ({ icon, text, operations, style = {} }) =
     >
       <div
         style={{
-          whiteSpace: 'nowrap',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
           paddingRight: 6,
+          width: '100%',
+          display: 'flex'
         }}
       >
         {icon && <IconFont type={icon} />}
-        {text}
+        <div
+          style={{
+            width: '100%',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden'
+          }}
+          onClick={(e: any) => {onClick && onClick(e)}}
+        >{text}</div>
       </div>
       {renderOperationBtn()}
     </div>

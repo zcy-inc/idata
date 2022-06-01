@@ -263,7 +263,7 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
 /**
  * 复制作业
  */
- export async function jobCopy(data: {jobIds: number [], destFolderId: number}) {
+ export async function jobCopy(data: {jobIds: number [], destFolderId: number | undefined}) {
   return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/copy', {
     data,
     method: 'POST',
