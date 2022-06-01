@@ -298,7 +298,8 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     // if create-edge is canceled before ending, update the 'links' on the anchor-point circles
     // 调用 graph.remove / graph.removeItem 方法之后触发
     graph.on('afterremoveitem', (e: any) => {
-      if (e.item && e.item.source && e.item.target) {
+      // e.item.depth表示事件由改变edge触发，改方法只在点击联系时触发
+      if (e.item && e.item.source && e.item.target && e.item.depth !== 0) {
         const sourceNode = graph.findById(e.item.source);
         const targetNode = graph.findById(e.item.target);
         const { sourceAnchor, targetAnchor } = e.item;

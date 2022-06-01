@@ -25,6 +25,7 @@ import type {
   DIJobBasicInfo,
   MergeSqlParamDto,
   DependenciesJob,
+  Job
 } from '@/types/datadev';
 import { formatTreeData } from '@/utils/utils';
 import type {
@@ -239,6 +240,58 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
   return request<DefaultResponse & { data: TreeNode[] }>('/api/p1/dev/compositeFolders/tree', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取作业扩展信息
+ */
+ export async function getJobInfo(data: {jobIds: number []}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/extInfo', {
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导出作业
+ */
+ export async function jobExport(params: {jobIds: string}) {
+   window.open(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`)
+  }
+
+/**
+ * 复制作业
+ */
+ export async function jobCopy(data: {jobIds: number [], destFolderId: number}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/copy', {
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导入作业
+ */
+ export async function jobImport(data: {destFolderId: number | string, file: string | Blob}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/import', {
+    data: {
+      file: data.file
+    },
+    params: {
+      destFolderId: data.destFolderId
+    },
+    method: 'POST',
+  });
+}
+
+/**
+ * 移动作业
+ */
+ export async function jobMove(data: {jobIds: number [], destFolderId: number}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/move', {
+    data,
+    method: 'POST',
   });
 }
 
@@ -638,9 +691,18 @@ export async function runTask(params: { id: number; environment: Environments })
  * 试运行作业
  */
 export async function tyrRun(data: any) {
-  return request<DefaultResponse & { data: boolean }>('/api/v1/idata/spark/sqlJobDryRun', {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/sql/sqlJobDryRun', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取试运行日志
+ */
+ export async function getTyrRunLog(params: any) {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/batchesLog', {
+    params,
   });
 }
 
@@ -793,6 +855,7 @@ export async function runQueryResult(params: {
   statementId: number;
   from?: number;
   size?: number;
+  selectSql: string;
 }) {
   return request<
     DefaultResponse & {
@@ -809,6 +872,7 @@ export async function runQueryResult(params: {
         statementState: StatementState;
         outputStatus: string;
         resultSet: { [key: string]: string }[];
+        resultHeader: string [];
         pythonResults?: string;
       };
     }

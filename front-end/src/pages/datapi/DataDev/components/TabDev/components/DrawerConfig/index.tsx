@@ -84,7 +84,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .then((res) => {
         const executeConfig = get(res, 'data.executeConfig', {});
         const dependencies = get(res, 'data.dependencies', []);
-        const output = get(res, 'data.output', null);
+        const output = get(res, 'data.output', {});
         // 处理超时
         if (executeConfig.schTimeOut) {
           executeConfig.schTimeOut = executeConfig.schTimeOut / 60;

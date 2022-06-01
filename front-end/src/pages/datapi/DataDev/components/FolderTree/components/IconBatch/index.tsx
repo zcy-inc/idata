@@ -11,11 +11,11 @@ const IconCreate: FC<IconCreateProps> = ({ onClick }) => {
 
   return (
     <IconFont
-      onClick={onClick}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
+      onClick={onClick}
       style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1,  fontSize: 18 }}
-      type={isHover ? 'icon-tianjia' : 'icon-xinjian1'}
+      type={isHover ? 'icon-piliangcaozuojihuo-copy' : 'icon-piliangcaozuo'}
     />
   );
 };

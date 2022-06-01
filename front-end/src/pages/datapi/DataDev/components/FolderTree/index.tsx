@@ -14,6 +14,9 @@ import CreateFolder from './components/CreateFolder';
 import IconCreate from './components/IconCreate';
 import IconFilter from './components/IconFilter';
 
+import IconBatch from './components/IconBatch';
+import BatchOpetate from './components/BatchOpetate';
+import showDialog from '@/utils/showDialog';
 const { confirm } = Modal;
 
 const FolderTree: FC = () => {
@@ -305,32 +308,20 @@ const FolderTree: FC = () => {
     return parentKey;
   };
 
+  const showBatchOperate = () => {
+    showDialog('批量处理', {
+      hideFooter: true,
+      modalProps: {
+        width: 980,
+        wrapClassName: styles['batch-operate-modal']
+      }
+    },BatchOpetate);
+  }
+
   return (
     <div className="folder-tree">
-      <div className="search">
-        <Input
-          className="search-input"
-          placeholder="请输入关键字进行搜索"
-          prefix={<IconFont type="icon-sousuo" />}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              getTreeWrapped();
-              const tmpKeys = !!keyWord
-                ? folderList.current
-                    .map((item) => {
-                      if (item.title.indexOf(keyWord) > -1) {
-                        return getParentKey(item.key, tree);
-                      }
-                      return null;
-                    })
-                    .filter((item, i, self) => item && self.indexOf(item) === i)
-                : [];
-              setExpandedKeys(tmpKeys as Key[]);
-              setAutoExpandParent(true);
-            }
-          }}
-          onChange={({ target: { value } }) => setKeyWord(value)}
-        />
+      <div className={styles['operation-list']}>
+        <IconBatch onClick={showBatchOperate} />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
           <IconCreate onClick={() => setCurNode(null)} />
         </Dropdown>
@@ -358,10 +349,35 @@ const FolderTree: FC = () => {
           placement="bottomLeft"
           trigger="click"
         >
-          <div>
+          <div style={{display: 'inline'}}>
             <IconFilter />
           </div>
         </Popover>
+      </div>
+      <div className="search">
+        <Input
+          className="search-input"
+          placeholder="请输入关键字进行搜索"
+          prefix={<IconFont type="icon-sousuo" />}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              getTreeWrapped();
+              const tmpKeys = !!keyWord
+                ? folderList.current
+                    .map((item) => {
+                      if (item.title.indexOf(keyWord) > -1) {
+                        return getParentKey(item.key, tree);
+                      }
+                      return null;
+                    })
+                    .filter((item, i, self) => item && self.indexOf(item) === i)
+                : [];
+              setExpandedKeys(tmpKeys as Key[]);
+              setAutoExpandParent(true);
+            }
+          }}
+          onChange={({ target: { value } }) => setKeyWord(value)}
+        />
       </div>
       {tree?.length ? (
         <div className={styles.tree} style={{ marginTop: 16, height: '100%' }}>
