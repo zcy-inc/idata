@@ -11,9 +11,8 @@ import showDialog from '@/utils/showDialog';
 import FolderTreeItem from '../FolderTreeItem';
 import { TreeTitle } from '@/components';
 import type { UploadFile } from 'antd/lib/upload/interface';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-
-export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belongFunctions: string [], dialog:any, getTreeWrapped: any, setLoading: any}) => {
+import ImportResult from './ImportResult';
+export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any}) => {
   const [tree, setTree] = useState<TreeNode []>([]);
   const [jobInfo, setJobInfo] = useState<Job []>([]);
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
@@ -148,7 +147,7 @@ export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belong
           }).then(() => {
             message.success('操作成功！');
             done();
-            dialog.handleCancel();
+            getTreeData();
             getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
@@ -166,7 +165,6 @@ export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belong
       e.stopPropagation();
       return;
     }
-    setLoading(true);
   }
 
   const onCopy = () => {
@@ -191,7 +189,7 @@ export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belong
           }).then(() => {
             message.success('操作成功！');
             done();
-            dialog.handleCancel();
+            getTreeData();
             getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
@@ -204,30 +202,26 @@ export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belong
   }
 
   const onImport = ({file}: {file: UploadFile}) => {
-    setLoading(false);
-    getTreeWrapped();
+    if(file.status === 'uploading') {
+      setLoading(true);
+    }
    if(file.status === 'done') {
-     let errFileList: string [] = [];
-     file.response.data.forEach((job: { success: boolean; jobName: string; }) => {
-       if(!job.success) {
-        errFileList.push(job.jobName);
-       }
-     });
-     if(errFileList.length === 0) {
-      Modal.confirm({
-        title: '导入结果',
-        icon: <ExclamationCircleOutlined />,
-        content: `一共上传了${file.response.data.length}个作业，其中${errFileList.length}个(${errFileList.join()})上传失败`,
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          dialog.handleCancel();
+    setLoading(false);
+    getTreeData();
+    getTreeWrapped();
+     const someError = file.response.data.some((item: { success: boolean; }) => !item.success);
+     if(someError) {
+      showDialog('导入结果', {
+        modalProps: {
+          width: 580
+        },
+        formProps: {
+          data: file.response.data || []
         }
-      });
+      }, ImportResult)
       return;
      }
      message.success('上传完成');
-     dialog.handleCancel();
    }
   }
 

@@ -12,22 +12,19 @@ export default ({data}: {data : TreeNode []}, ref: React.Ref<unknown> | undefine
   }))
   
   const getTreeNode =( data: TreeNode []): Record<string, any> [] => {
-    const newData = _.cloneDeep(data);
-    return newData.map((item) => {
+    return data.map((item) => {
       if (item.type !== 'RECORD') {
-        item.children = item.children || [];
-        item.children = item.children.filter(child => child.children?.length);
+        let children = item.children || [];
+        children = children.filter(child => child.type !== 'RECORD');
         return {
           title: <TreeTitle icon="icon-wenjianjia" text={item.name} />,
           key: item.id,
-          children: getTreeNode(item.children)
+          children: getTreeNode(children)
         };
       }
       return {}
-  })
-  }
- ;
-
+    })
+  };
   return  <Tree
     className='folder-tree-item'
     treeData={getTreeNode(data)}

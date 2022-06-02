@@ -12,7 +12,7 @@ const initPanelList = [{
   key: '2',
   belongFunctions: ["DEV", "DEV.JOB"]
 }]
-export default ({dialog, getTreeWrapped}: {dialog: any, getTreeWrapped: any}, _: any) => {
+export default ({ getTreeWrapped}: {dialog: any, getTreeWrapped: any}, _: any) => {
   const [activeKey, setActiveKey] = useState('1');
   const  [panelList] = useState(initPanelList);
   const [loading, setLoading] = useState(false)
@@ -20,7 +20,7 @@ export default ({dialog, getTreeWrapped}: {dialog: any, getTreeWrapped: any}, _:
     <Tabs activeKey={activeKey} onChange={val => setActiveKey(val)}>
   {panelList.map(panel => (
     <TabPane tab={panel.title} key={panel.key}>
-      <TaskSelect belongFunctions={panel.belongFunctions} dialog={dialog} setLoading={setLoading} getTreeWrapped={getTreeWrapped} />
+      <TaskSelect belongFunctions={panel.belongFunctions} setLoading={setLoading} getTreeWrapped={getTreeWrapped} />
     </TabPane>
   ))}
 </Tabs>
