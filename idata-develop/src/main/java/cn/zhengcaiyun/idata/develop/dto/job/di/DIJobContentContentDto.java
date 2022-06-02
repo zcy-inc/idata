@@ -1,7 +1,6 @@
 package cn.zhengcaiyun.idata.develop.dto.job.di;
 
 import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
-import cn.zhengcaiyun.idata.develop.constant.Constants;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
@@ -22,11 +21,6 @@ import java.util.Objects;
  * @create: 2021-09-23 11:20
  **/
 public class DIJobContentContentDto extends JobContentBaseDto {
-    /**
-     * 作业版本号描述
-     */
-    private String versionDisplay;
-
     /**
      * 数据来源-数据源类型
      */
@@ -308,14 +302,6 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setContentHash(String contentHash) {
         this.contentHash = contentHash;
-    }
-
-    public String getVersionDisplay() {
-        return versionDisplay;
-    }
-
-    public void setVersionDisplay(String versionDisplay) {
-        this.versionDisplay = versionDisplay;
     }
 
     public Integer getSrcShardingNum() {
