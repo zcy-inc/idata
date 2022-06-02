@@ -314,8 +314,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private void cleanOutJobReplication(JobReplicationDto jobReplicationDto, Long destFolderId, boolean fromImport) {
         JobInfoDto jobInfoDto = jobReplicationDto.getJobInfoDto();
         Map<EnvEnum, JobConfigCombinationDto> jobConfigCombinationDtoMap = jobReplicationDto.getJobConfigCombinationDtoMap();
-//        jobInfoDto.setName(fromImport ? jobInfoDto.getName() : getJobCopyName(jobInfoDto.getName()));
-        jobInfoDto.setName(getJobCopyName(jobInfoDto.getName()));
+        jobInfoDto.setName(fromImport ? jobInfoDto.getName() : getJobCopyName(jobInfoDto.getName()));
         if (Objects.nonNull(destFolderId)) {
             jobInfoDto.setFolderId(destFolderId);
         }

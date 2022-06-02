@@ -122,8 +122,8 @@ public class JobExtraOperationManager {
         contentDto.setVersion(null);
         contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
-            contentDto.setSrcDataSourceId(null);
-            contentDto.setDestDataSourceId(null);
+            contentDto.setSrcDataSourceId(0L);
+            contentDto.setDestDataSourceId(0L);
         }
         DIJobContentContentDto newContentDto = diJobContentService.save(jobId, contentDto, operator);
         return newContentDto.getVersion();
