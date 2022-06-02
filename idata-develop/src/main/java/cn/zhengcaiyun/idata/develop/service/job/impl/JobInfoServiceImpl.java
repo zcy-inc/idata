@@ -324,7 +324,9 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return jobInfoRepo.updateJobFolder(finalJobIds, destFolderId, operator.getNickname());
+        jobInfoRepo.updateJobFolder(finalJobIds, destFolderId, operator.getNickname());
+        devTreeNodeLocalCache.invalidate(Lists.newArrayList(FunctionModuleEnum.DI, FunctionModuleEnum.DEV_JOB));
+        return Boolean.TRUE;
     }
 
     @Override
@@ -565,8 +567,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 if (jobVersion != null && jobVersion > 0) {
                     contentSql = sqlJobRepo.query(id, jobVersion);
                     checkArgument(Objects.nonNull(contentSql), String.format("sql_content_id未匹配, jobId:%d，环境:%s", id, env));
-                }
-                else {
+                } else {
                     contentSql = jobPublishRecordMyDao.getPublishedSqlJobContent(id, env);
                     checkArgument(Objects.nonNull(contentSql), String.format("发布记录不存在或sql_content_id未匹配, jobId:%d，环境:%s", id, env));
                 }
@@ -684,8 +685,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         if (jobVersion != null && jobVersion > 0) {
             flinkSqlContent = sqlJobRepo.query(jobId, jobVersion);
             published = false;
-        }
-        else {
+        } else {
             flinkSqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
         }
         checkArgument(Objects.nonNull(flinkSqlContent), String.format("未查询到可用的Flink作业内容, jobId:%s，环境:%s", jobId, env));
