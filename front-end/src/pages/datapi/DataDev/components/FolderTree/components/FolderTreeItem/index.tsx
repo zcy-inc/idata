@@ -14,7 +14,8 @@ export default ({data}: {data : TreeNode []}, ref: React.Ref<unknown> | undefine
   const getTreeNode =( data: TreeNode []): Record<string, any> [] => {
     const newData = _.cloneDeep(data);
     return newData.map((item) => {
-      if (item.children) {
+      if (item.type !== 'RECORD') {
+        item.children = item.children || [];
         item.children = item.children.filter(child => child.children?.length);
         return {
           title: <TreeTitle icon="icon-wenjianjia" text={item.name} />,

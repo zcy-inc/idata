@@ -6,13 +6,11 @@ const { TabPane } = Tabs;
 const initPanelList = [{
   title: '数据集成',
   key: '1',
-  selectedList: [],
   belongFunctions: ["DI"]
 }, {
   title: '数据开发',
   key: '2',
-  selectedList: [],
-  belongFunctions: ["DEV", "DEV.JOB", "DEV.FUN"]
+  belongFunctions: ["DEV", "DEV.JOB"]
 }]
 export default ({dialog}: {dialog: any}, _: any) => {
   const [activeKey, setActiveKey] = useState('1');
