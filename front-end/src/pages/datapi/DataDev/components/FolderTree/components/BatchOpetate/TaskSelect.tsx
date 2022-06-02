@@ -71,11 +71,11 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
         ) : (
           <span>{item.name}</span>
         );
-      if (item.children) {
+      if (item.type !== 'RECORD') {
         return {
           title: <TreeTitle icon="icon-wenjianjia" text={title} />,
           key: item.id,
-          children: getTreeNode(item.children)
+          children: item.children?.length ? getTreeNode(item.children) : []
         };
       }
 
@@ -230,11 +230,13 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
       title: '作业名',
       dataIndex: 'name',
       key: 'name',
+      width: 240
     },
     {
       title: '作业类型',
       dataIndex: 'jobType',
       key: 'jobType',
+      width: 200
     },
     {
       title: '版本',
@@ -286,7 +288,7 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
         />
       </div>
       <div className={styles["right-table"]}>
-        <Table dataSource={jobInfo} columns={columns} pagination={false} rowKey='id' />
+        <Table dataSource={jobInfo} columns={columns} pagination={false} rowKey='id' scroll={{ y: 315 }} />
       </div>
     </SplitPane>
   </div>
