@@ -13,14 +13,14 @@ import { TreeTitle } from '@/components';
 import type { UploadFile } from 'antd/lib/upload/interface';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
-
-export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog:any}) => {
+export default ({ belongFunctions, dialog, getTreeWrapped, setLoading }: {belongFunctions: string [], dialog:any, getTreeWrapped: any, setLoading: any}) => {
   const [tree, setTree] = useState<TreeNode []>([]);
   const [jobInfo, setJobInfo] = useState<Job []>([]);
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
   const [autoExpandParent, setAutoExpandParent] = useState(false);
   const [keyWord, setKeyWord] = useState('');
+
   useEffect(() => {
     getTreeData();
   }, []);
@@ -149,6 +149,7 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
             message.success('操作成功！');
             done();
             dialog.handleCancel();
+            getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
           })
@@ -163,7 +164,9 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
     if(!selectedKeys.length) {
       message.warning('请在左侧选择要导入的目标文件夹')
       e.stopPropagation();
+      return;
     }
+    setLoading(true);
   }
 
   const onCopy = () => {
@@ -189,6 +192,7 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
             message.success('操作成功！');
             done();
             dialog.handleCancel();
+            getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
           })
@@ -200,6 +204,8 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
   }
 
   const onImport = ({file}: {file: UploadFile}) => {
+    setLoading(false);
+    getTreeWrapped();
    if(file.status === 'done') {
      let errFileList: string [] = [];
      file.response.data.forEach((job: { success: boolean; jobName: string; }) => {
@@ -221,9 +227,9 @@ export default ({ belongFunctions, dialog }: {belongFunctions: string [], dialog
       return;
      }
      message.success('上传完成');
+     dialog.handleCancel();
    }
   }
-
 
   const columns = [
     {

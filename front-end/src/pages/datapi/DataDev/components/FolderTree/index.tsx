@@ -352,6 +352,9 @@ const FolderTree: FC = () => {
   const showBatchOperate = () => {
     showDialog('批量处理', {
       hideFooter: true,
+      formProps: {
+        getTreeWrapped
+      },
       modalProps: {
         width: 980,
         wrapClassName: styles['batch-operate-modal']
