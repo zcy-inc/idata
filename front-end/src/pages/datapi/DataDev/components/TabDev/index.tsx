@@ -382,6 +382,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   };
 
   const tryRun = () => {
+    handleExpandChange(true);
     tyrRun({
       jobId: pane.id,
       jobVersion: version,
