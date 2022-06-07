@@ -41,6 +41,7 @@ const FolderTree: FC = () => {
     onViewTree,
     showLabel,
     onCreateDAG,
+    panes,
     onCreateFun,
     setVisibleTask,
     setVisibleDev,
@@ -63,6 +64,7 @@ const FolderTree: FC = () => {
     onViewTree: _.onViewTree,
     showLabel: _.showLabel,
     onCreateDAG: _.onCreateDAG,
+    panes: _.panes,
     onCreateFun: _.onCreateFun,
     setVisibleTask: _.setVisibleTask,
     setVisibleDev: _.setVisibleDev,
@@ -82,14 +84,6 @@ const FolderTree: FC = () => {
       <Menu.Item key="CreateTable">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianwenjianjia1" />
         新建表
-      </Menu.Item>
-      <Menu.Item key="CreateLabel">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianbiaoqian1" />
-        新建标签
-      </Menu.Item>
-      <Menu.Item key="CreateEnum">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianmeiju" />
-        新建枚举
       </Menu.Item>
       <Menu.Item key="CreateDAG">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianDAG" />
@@ -323,7 +317,7 @@ const FolderTree: FC = () => {
           title,
         };
       }),
-    [tree, keyWord, calcOperation],
+    [tree, keyWord, calcOperation, panes],
   );
 
   // 功能性文件树

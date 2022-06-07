@@ -109,10 +109,14 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   const onCheck = (_: any, {checkedNodes}: {checkedNodes : any []}) => {
     let leafNodes: number [] = [];
     checkedNodes.forEach(node => {
-      if(!node.children?.length) {
+      if(node.type === 'RECORD') {
         leafNodes.push(node.key)
       }
     });
+    if(leafNodes.length > 200) {
+      leafNodes = leafNodes.slice(0, 200);
+      message.warning('最多只能处理200条作业，超过200条的作业将被忽略');
+    }
     getJobInfo({jobIds: leafNodes}).then(res => {
       setJobInfo(res.data);
     })
