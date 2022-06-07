@@ -101,6 +101,8 @@ public class JobExtraOperationController {
         checkArgument(file.getSize() > 0, "上传的文件大小需要大于0kb");
         String originFileName = file.getOriginalFilename();
         checkArgument(StringUtils.isNotBlank(originFileName), "文件名称不能为空");
+        checkArgument(originFileName.toLowerCase().endsWith(".txt"), "上传文件格式不合法");
+
         try {
             String jobJson = new String(file.getBytes(), Charset.forName("utf-8"));
             return RestResult.success(jobExtraOperationService.importJob(jobJson, destFolderId, OperatorContext.getCurrentOperator()));

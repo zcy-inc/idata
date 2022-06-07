@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -45,6 +46,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @description:
@@ -143,17 +146,24 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
 
     @Override
     public List<JobExtraOperateResult> importJob(String jobJson, Long destFolderId, Operator operator) {
-        List<JobReplicationDto> replicationDtoList = new GsonBuilder().create().fromJson(jobJson, new TypeToken<List<JobReplicationDto>>() {
-        }.getType());
+        List<JobReplicationDto> replicationDtoList;
+        try {
+            replicationDtoList = new GsonBuilder().create().fromJson(jobJson, new TypeToken<List<JobReplicationDto>>() {
+            }.getType());
+        } catch (Exception ex) {
+            throw new BizProcessException("导入作业数据不合法", ex);
+        }
+        checkArgument(CollectionUtils.isNotEmpty(replicationDtoList), "导入数据为空");
+
         List<JobExtraOperateResult> results = Lists.newArrayList();
         for (JobReplicationDto replicationDto : replicationDtoList) {
             JobExtraOperateResult result = new JobExtraOperateResult();
+            result.setJobName(replicationDto.getJobInfoDto().getName());
             try {
                 boolean fromImport = true;
                 cleanOutJobReplication(replicationDto, destFolderId, fromImport);
                 jobExtraOperationManager.saveJobReplication(replicationDto, fromImport, operator);
 
-                result.setJobName(replicationDto.getJobInfoDto().getName());
                 result.setSuccess(Boolean.TRUE);
             } catch (Exception ex) {
                 result.setSuccess(Boolean.FALSE);
