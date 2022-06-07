@@ -213,25 +213,31 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   const onImport = ({file}: {file: UploadFile}) => {
     if(file.status === 'uploading') {
       setLoading(true);
-    }
-   if(file.status === 'done') {
-    setLoading(false);
-    getTreeData();
-    getTreeWrapped();
-     const someError = file.response.data.some((item: { success: boolean; }) => !item.success);
-     if(someError) {
-      showDialog('导入结果', {
-        modalProps: {
-          width: 580
-        },
-        formProps: {
-          data: file.response.data || []
+    } else if(file.status === 'error') {
+      setLoading(false);
+      message.success('文件导入失败');
+    } else if(file.status === 'done') {
+      setLoading(false);
+      if(file.response.success) {
+        getTreeData();
+        getTreeWrapped();
+        const someError = file.response.data.some((item: { success: boolean; }) => !item.success);
+        if(someError) {
+          showDialog('导入结果', {
+            modalProps: {
+              width: 580
+            },
+            formProps: {
+              data: file.response.data || []
+            }
+          }, ImportResult)
+          return;
         }
-      }, ImportResult)
-      return;
-     }
-     message.success('上传完成');
-   }
+        message.success('上传完成');
+      } else {
+        message.error(file.response.msg);
+      }
+    }
   }
 
   const columns = [
