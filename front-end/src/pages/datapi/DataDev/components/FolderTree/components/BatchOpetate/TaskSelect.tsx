@@ -18,6 +18,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
   const [plaingTree, setPlainTree] = useState<TreeNode []>([]);
+  const [autoExpandParent, setAutoExpandParent] = useState(false);
   const [keyWord, setKeyWord] = useState('');
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           })
           .filter((item, i, self) => item && self.indexOf(item) === i);
         setExpandedKeys(keys as number []);
+        setAutoExpandParent(true);
       }
     });
   }
@@ -101,6 +103,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
 
   const onExpand = (expandedKeys: React.SetStateAction<(string | number)[]>) => {
     setExpandedKeys(expandedKeys);
+    setAutoExpandParent(false);
   }
 
   const onCheck = (_: any, {checkedNodes}: {checkedNodes : any []}) => {
@@ -291,6 +294,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           onCheck={onCheck}
           selectedKeys={selectedKeys}
           onSelect={keys => setSelectedKeys(keys)}
+          autoExpandParent={autoExpandParent}
         />
       </div>
       <div className={styles["right-table"]}>
