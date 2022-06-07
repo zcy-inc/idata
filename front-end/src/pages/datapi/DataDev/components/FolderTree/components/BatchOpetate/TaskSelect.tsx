@@ -17,7 +17,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   const [jobInfo, setJobInfo] = useState<Job []>([]);
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
-  const [autoExpandParent, setAutoExpandParent] = useState(false);
+  const [plaingTree, setPlainTree] = useState<TreeNode []>([]);
   const [keyWord, setKeyWord] = useState('');
 
   useEffect(() => {
@@ -37,10 +37,11 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
     getTree({ belongFunctions, keyWord }).then((res) => {
       res.data = res.data || [];
       setTree(res.data);
+      const plainTree : TreeNode [] = [];
+      getPlainTree(res.data, plainTree);
+      setPlainTree(plainTree);
       // 如果是通过搜索查询的
       if(keyWord) {
-        const plainTree : TreeNode [] = [];
-        getPlainTree(res.data, plainTree);
         const keys = plainTree
           .map(item => {
             if (item.name.indexOf(keyWord) > -1) {
@@ -50,7 +51,6 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           })
           .filter((item, i, self) => item && self.indexOf(item) === i);
         setExpandedKeys(keys as number []);
-        setAutoExpandParent(true);
       }
     });
   }
@@ -165,6 +165,12 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
       e.stopPropagation();
       return;
     }
+    const exist = plaingTree.find(item => item.id === selectedKeys[0]);
+    if(exist?.type === 'RECORD') {
+      message.warning('请选择文件夹类型')
+      e.stopPropagation();
+      return;
+    }
   }
 
   const onCopy = () => {
@@ -255,6 +261,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
         style={{display: 'inline-block'}}
         showUploadList={false}
         onChange={onImport}
+        accept="text/plain"
       >
         <Button icon={<Iconfont type="icon-daoru" />} onClick={beforeUpload}>导入</Button>
       </Upload>
@@ -279,7 +286,6 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
         <Tree
           onExpand={onExpand}
           checkable
-          autoExpandParent={autoExpandParent}
           expandedKeys={expandedKeys}
           treeData={getTreeNode(tree)}
           onCheck={onCheck}

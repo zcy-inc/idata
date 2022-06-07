@@ -382,6 +382,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   };
 
   const tryRun = () => {
+    handleExpandChange(true);
     tyrRun({
       jobId: pane.id,
       jobVersion: version,
@@ -535,7 +536,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG, Btns.TRY_RUN];
+        return [Btns.SAVE, Btns.SUBMIT, Btns.TRY_RUN, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG, Btns.TRY_RUN];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,

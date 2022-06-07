@@ -17,7 +17,7 @@ export default ({ data} : {data: any []}, _: any) => {
   ];
   const errorData = data.filter((item: { success: boolean; }) => !item.success)
   return <div>
-    <p>成功 {data.length} 条，失败 <span style={{color: '#FF5753'}}>{errorData.length}</span>条</p>
+    <p>总共 {data.length} 条，失败 <span style={{color: '#FF5753'}}>{errorData.length}</span>条</p>
     <Table
       dataSource={errorData}
       columns={columns}

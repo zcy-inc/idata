@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty } from 'antd';
+import { Dropdown, Input, Menu, message, Tree, Modal, Popover, Empty, Tooltip } from 'antd';
 import { useModel } from 'umi';
 import type { FC, Key } from 'react';
 import { formatTreeData, highlightText } from '@/utils/utils';
@@ -365,9 +365,10 @@ const FolderTree: FC = () => {
   return (
     <div className="folder-tree">
       <div className={styles['operation-list']}>
-        <IconBatch onClick={showBatchOperate} />
         <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-          <IconCreate onClick={() => setCurNode(null)} />
+          <Tooltip title="新建">
+            <IconCreate onClick={() => setCurNode(null)} />
+          </Tooltip>
         </Dropdown>
         <Popover
           content={
@@ -394,9 +395,14 @@ const FolderTree: FC = () => {
           trigger="click"
         >
           <div style={{display: 'inline'}}>
+          <Tooltip title="过滤">
             <IconFilter />
+            </Tooltip>
           </div>
         </Popover>
+        <Tooltip title="批量处理">
+          <IconBatch onClick={showBatchOperate} />
+        </Tooltip>
       </div>
       <div className="search">
         <Input
