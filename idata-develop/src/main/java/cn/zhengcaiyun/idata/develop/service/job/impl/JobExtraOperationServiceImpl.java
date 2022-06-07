@@ -24,6 +24,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
@@ -340,6 +341,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                     executeConfig.setJobId(null);
                     executeConfig.setCreateTime(null);
                     executeConfig.setEditTime(null);
+                    executeConfig.setRunningState(RunningStateEnum.pause.val);
                     if (fromImport) {
                         executeConfig.setSchDagId(0L);
                     }
