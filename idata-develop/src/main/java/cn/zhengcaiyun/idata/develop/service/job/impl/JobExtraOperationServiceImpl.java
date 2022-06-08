@@ -19,13 +19,16 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
@@ -74,6 +77,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private final SparkJobRepo sparkJobRepo;
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
+    private final CompositeFolderRepo compositeFolderRepo;
 
 
     public JobExtraOperationServiceImpl(JobInfoService jobInfoService,
@@ -89,7 +93,8 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
                                         SqlJobRepo sqlJobRepo,
                                         SparkJobRepo sparkJobRepo,
                                         ScriptJobRepo scriptJobRepo,
-                                        KylinJobRepo kylinJobRepo) {
+                                        KylinJobRepo kylinJobRepo,
+                                        CompositeFolderRepo compositeFolderRepo) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -104,10 +109,15 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         this.sparkJobRepo = sparkJobRepo;
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
+        this.compositeFolderRepo = compositeFolderRepo;
     }
 
     @Override
     public List<JobExtraOperateResult> copyJobTo(List<Long> jobIds, Long destFolderId, Operator operator) {
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
+        checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
+
         List<JobExtraOperateResult> resultList = Lists.newArrayList();
         for (Long jobId : jobIds) {
             JobExtraOperateResult result = copyJobTo(jobId, destFolderId, operator);
@@ -118,6 +128,10 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
 
     @Override
     public JobExtraOperateResult copyJobTo(Long jobId, Long destFolderId, Operator operator) {
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
+        checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
+
         JobExtraOperateResult result = new JobExtraOperateResult();
         try {
             boolean fromImport = false;
@@ -147,6 +161,10 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
 
     @Override
     public List<JobExtraOperateResult> importJob(String jobJson, Long destFolderId, Operator operator) {
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
+        checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
+
         List<JobReplicationDto> replicationDtoList;
         try {
             replicationDtoList = new GsonBuilder().create().fromJson(jobJson, new TypeToken<List<JobReplicationDto>>() {
