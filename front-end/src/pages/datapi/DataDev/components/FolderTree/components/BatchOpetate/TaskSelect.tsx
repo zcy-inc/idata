@@ -106,11 +106,12 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
     setAutoExpandParent(false);
   }
 
-  const onCheck = (_: any, {checkedNodes}: {checkedNodes : any []}) => {
+  const onCheck = (checked: any) => {
     let leafNodes: number [] = [];
-    checkedNodes.forEach(node => {
-      if(node.type === 'RECORD') {
-        leafNodes.push(node.key)
+    checked.forEach((key: number) => {
+      const node = plaingTree.find(item => item.id === key);
+      if(node?.type === 'RECORD') {
+        leafNodes.push(node.id)
       }
     });
     if(leafNodes.length > 200) {
