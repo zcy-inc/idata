@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.develop.dto.job.script;
 
 import cn.zhengcaiyun.idata.develop.dto.job.JobArgumentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +32,7 @@ public class ScriptJobContentDto extends JobContentBaseDto {
     private String sourceResource;
     private List<JobArgumentDto> scriptArguments;
     // JobTypeEnum.language
+    @ApiModelProperty(value = "PYTHON | SHELL")
     private String scriptLanguage;
 
     // GaS
@@ -50,6 +52,14 @@ public class ScriptJobContentDto extends JobContentBaseDto {
         this.scriptArguments = scriptArguments;
     }
 
+    public String getScriptLanguage() {
+        return scriptLanguage;
+    }
+
+    public void setScriptLanguage(String scriptLanguage) {
+        this.scriptLanguage = scriptLanguage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,11 +67,13 @@ public class ScriptJobContentDto extends JobContentBaseDto {
         if (!super.equals(o)) return false;
         ScriptJobContentDto that = (ScriptJobContentDto) o;
         if (scriptArguments.size() != that.scriptArguments.size()) return false;
-        return Objects.equals(sourceResource, that.sourceResource) && Objects.equals(scriptArguments, that.scriptArguments);
+        return Objects.equals(sourceResource, that.sourceResource)
+                && Objects.equals(scriptArguments, that.scriptArguments)
+                && Objects.equals(scriptLanguage, that.scriptLanguage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceResource, scriptArguments);
+        return Objects.hash(sourceResource, scriptArguments, scriptLanguage);
     }
 }
