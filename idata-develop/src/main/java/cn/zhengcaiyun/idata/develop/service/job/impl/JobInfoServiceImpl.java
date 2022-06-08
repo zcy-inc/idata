@@ -458,8 +458,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                     List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getSrcColumns(), MappingColumnDto.class);
                     List<String> columnNameList = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toList());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameList, ","));
-                    //抽取主键key
-                    List<String> keyNameList = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toList());
+                    //抽取主键key，此处使用destColumns字段，原因：1. 业务逻辑正确需要 2. 使用srcColumns的mappingColumn 前端传入的primaryKey错误都是false，无法使用 3. 如果字段维护都没有bug的话，可以统一使用destColumns字段，为了保证之前问题数据作业不影响，上面仍旧使用srcColumns
+                    columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    List<String> keyNameList = columnDtoList.stream()
+                            .filter(e -> e.getMappedColumn() != null)
+                            .filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey()))
+                            .map(e -> e.getName())
+                            .collect(Collectors.toList());
                     backFlowResponse.setUpdateKey(StringUtils.join(keyNameList, ","));
 
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
