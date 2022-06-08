@@ -71,8 +71,9 @@ const FolderTree: FC = () => {
     setCurLabel: _.setCurLabel,
     folderList: _.folderList,
   }));
-
   useEffect(() => {
+    setKeyWord('');
+    setExpandedKeys([]);
     getTreeWrapped();
     getFunctionTree()
       .then((res) => setFunctionTree(res.data))
@@ -355,7 +356,6 @@ const FolderTree: FC = () => {
       }
     },BatchOpetate);
   }
-
   return (
     <div className="folder-tree">
       <div className={styles['operation-list']}>
@@ -420,6 +420,7 @@ const FolderTree: FC = () => {
               setAutoExpandParent(true);
             }
           }}
+          value={keyWord}
           onChange={({ target: { value } }) => setKeyWord(value)}
         />
       </div>

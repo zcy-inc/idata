@@ -12,7 +12,7 @@ import FolderTreeItem from '../FolderTreeItem';
 import { TreeTitle } from '@/components';
 import type { UploadFile } from 'antd/lib/upload/interface';
 import ImportResult from './ImportResult';
-export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any}) => {
+export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any, dialog:any}) => {
   const [tree, setTree] = useState<TreeNode []>([]);
   const [jobInfo, setJobInfo] = useState<Job []>([]);
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
@@ -35,6 +35,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   }
 
   const getTreeData = () => {
+    setAutoExpandParent(false);
     getTree({ belongFunctions, keyWord }).then((res) => {
       res.data = res.data || [];
       setTree(res.data);
@@ -155,7 +156,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           }).then(() => {
             message.success('操作成功！');
             done();
-            getTreeData();
+            dialog.handleCancel();
             getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
@@ -203,7 +204,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           }).then(() => {
             message.success('操作成功！');
             done();
-            getTreeData();
+            dialog.handleCancel();
             getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
@@ -232,13 +233,20 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
             modalProps: {
               width: 580
             },
+            btns: {
+              positive:'确定',
+              negetive: false
+            },
             formProps: {
               data: file.response.data || []
-            }
-          }, ImportResult)
+            },
+          }, ImportResult).then(() => {
+            dialog.handleCancel();
+          })
           return;
         }
         message.success('上传完成');
+        dialog.handleCancel();
       } else {
         message.error(file.response.msg);
       }
