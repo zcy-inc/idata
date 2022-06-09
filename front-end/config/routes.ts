@@ -201,7 +201,7 @@ export default [
   },
   // 后端不能配数据地图；菜单写死，不需要根据enable判断能否展开;先用F_MENU_MEASURE_MANAGE让它能显示
   {
-    path:'/datamap',
+    path:'/outLink1',
     name:"数据地图",
     outLink: '/',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/afdd0ff9-65b8-4602-b8b7-5a7ec45e124a.png',
@@ -209,7 +209,7 @@ export default [
     featureCode: 'F_MENU_DATA_MAP',
   },
   {
-    path:'/xiaocaiBI',
+    path:'/outLink2',
     name:"小采BI",
     outLink: '/itable/#/itable/list',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/896839e6-18ee-4c86-896f-7201835a6175.png',
@@ -217,7 +217,7 @@ export default [
     featureCode: 'F_MENU_XIAOCAI_BI',
   },
   {
-    path:'/quality',
+    path:'/outLink3',
     name:"数据质量",
     outLink: '/idata-pro/#/data-quality/monitoring/list',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/92612579-f054-42c6-89aa-89dd2e92999d.png',
@@ -225,7 +225,7 @@ export default [
     featureCode: 'F_MENU_DATA_QUALITY',
   },
   {
-    path:'/DataPi',
+    path:'/outLink4',
     name:"DataPi",
     outLink: '/idata/#/datapi/apiDevelop',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/acb20dc4-957e-40ff-8fdb-8379b5620e13.png',

@@ -201,11 +201,30 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
           jobCopy({
             jobIds: jobInfo.map(item => item.id),
             destFolderId: form.selectedFolder
-          }).then(() => {
+          }).then((res) => {
+            console.log(res);
+            const someError = res.data.some((item: { success: boolean; }) => !item.success);
+            getTreeWrapped();
+            if(someError) {
+              showDialog('复制结果', {
+                modalProps: {
+                  width: 580
+                },
+                btns: {
+                  positive:'确定',
+                  negetive: false
+                },
+                formProps: {
+                  data: res.data || []
+                },
+              }, ImportResult).then(() => {
+                dialog.handleCancel();
+              })
+              return;
+            }
             message.success('操作成功！');
             done();
             dialog.handleCancel();
-            getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
           })
@@ -225,7 +244,6 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
     } else if(file.status === 'done') {
       setLoading(false);
       if(file.response.success) {
-        getTreeData();
         getTreeWrapped();
         const someError = file.response.data.some((item: { success: boolean; }) => !item.success);
         if(someError) {
@@ -284,6 +302,13 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
         showUploadList={false}
         onChange={onImport}
         accept="text/plain"
+        beforeUpload={file => {
+          if(file.size > 1024 * 1024 * 1024) {
+            message.warning('前选择小于1G的文件');
+            return false;
+          }
+          return true;
+        }}
       >
         <Button icon={<Iconfont type="icon-daoru" />} onClick={beforeUpload}>导入</Button>
       </Upload>

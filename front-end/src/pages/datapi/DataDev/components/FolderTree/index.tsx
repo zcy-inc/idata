@@ -7,7 +7,7 @@ import { usePersistFn } from '@/hooks';
 import styles from './index.less';
 import { IconFont, TreeTitle } from '@/components';
 import { Operation } from '@/components/TreeTitle';
-import { deleteFolder, getFunctionTree, deleteTask, jobCopy } from '@/services/datadev';
+import { deleteFolder, getFunctionTree, deleteTask, jobCopy, deleteDAG, deleteUDF } from '@/services/datadev';
 import { TreeNode as Treenode } from '@/types/datadev';
 import { FolderTypes, funcFolderIconMap, FolderBelong } from '@/constants/datadev';
 import CreateFolder from './components/CreateFolder';
@@ -243,32 +243,44 @@ const FolderTree: FC = () => {
                 title: '删除任务',
                 content: '您确认要删除该任务吗？',
                 autoFocusButton: null,
-                onOk: () =>
-                  deleteTask({ id: node.id })
-                    .then((res) => {
-                      if (res.success) {
-                        message.success('删除成功');
-                        onRemovePane(node.cid);
-                        getTreeWrapped();
-                      }
-                    })
-                    .catch((err) => {}),
+                onOk: () => {
+                  let handle = deleteTask;
+                  if(FolderBelong.DAG) {
+                    handle = deleteDAG
+                  }
+                  if(FolderBelong.DEVFUN) {
+                    handle = deleteUDF
+                  }
+                  handle({ id: node.id })
+                  .then((res) => {
+                    if (res.success) {
+                      message.success('删除成功');
+                      onRemovePane(node.cid);
+                      getTreeWrapped();
+                    }
+                  })
+                  .catch((err) => {})
+                }
+                 
               });
             },
-          },
-          {
-            label: '复制',
-            key: 'copy',
-            onClick: () => {
-              jobCopy({
-                jobIds: [node.id],
-                destFolderId: node.parentId
-              }).then(() => {
-                message.success('复制成功！');
-                getTreeWrapped();
-              })
-            },
-          }];
+          }
+          ];
+          if([FolderBelong.DI, FolderBelong.DEVJOB].includes(belong)) {
+            operations.push( {
+              label: '复制',
+              key: 'copy',
+              onClick: () => {
+                jobCopy({
+                  jobIds: [node.id],
+                  destFolderId: node.parentId
+                }).then(() => {
+                  message.success('复制成功！');
+                  getTreeWrapped();
+                })
+              },
+            })
+          }
         } else {
           operations = [];
         }
