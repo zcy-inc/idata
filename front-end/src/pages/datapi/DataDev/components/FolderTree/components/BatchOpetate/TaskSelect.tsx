@@ -36,6 +36,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
 
   const getTreeData = () => {
     setAutoExpandParent(false);
+    setExpandedKeys([]);
     getTree({ belongFunctions, keyWord }).then((res) => {
       res.data = res.data || [];
       setTree(res.data);
@@ -303,7 +304,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
         onChange={onImport}
         accept="text/plain"
         beforeUpload={file => {
-          if(file.size > 1024 * 1024 * 1024) {
+          if(file.size > 30 * 1024 * 1024) {
             message.warning('前选择小于1G的文件');
             return false;
           }
@@ -325,7 +326,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
             onChange={e => setKeyWord(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                getTreeData()
+                getTreeData();
               }
             }}
           />
