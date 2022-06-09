@@ -305,7 +305,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
         accept="text/plain"
         beforeUpload={file => {
           if(file.size > 30 * 1024 * 1024) {
-            message.warning('前选择小于1G的文件');
+            message.warning('请选择小于30M的文件');
             return false;
           }
           return true;

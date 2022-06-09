@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC } from 'react';
+import { Tooltip } from 'antd'
 import { RetweetOutlined } from '@ant-design/icons';
 import { DefaultOptionType } from 'antd/es/select';
 import JoinSelect from '../JoinSelect';
@@ -89,7 +90,9 @@ const TableSelectInput: FC<{
         <JoinSelect size="large" options={options} value={value?.rawTable} onChange={onSelect} />
       )}
       <div className={styles.extra}>
+        <Tooltip title="切换模式">
         <RetweetOutlined onClick={changeMode} style={{ marginRight: 8 }} />
+        </Tooltip>
         <a onClick={onRefresh}>刷新视图</a>
       </div>
     </div>
