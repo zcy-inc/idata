@@ -245,10 +245,10 @@ const FolderTree: FC = () => {
                 autoFocusButton: null,
                 onOk: () => {
                   let handle = deleteTask;
-                  if(FolderBelong.DAG) {
+                  if(belong === FolderBelong.DAG) {
                     handle = deleteDAG
                   }
-                  if(FolderBelong.DEVFUN) {
+                  if(belong === FolderBelong.DEVFUN) {
                     handle = deleteUDF
                   }
                   handle({ id: node.id })
