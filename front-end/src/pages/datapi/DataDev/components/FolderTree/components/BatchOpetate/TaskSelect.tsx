@@ -219,6 +219,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
                   data: res.data || []
                 },
               }, ImportResult).then(() => {
+                done();
                 dialog.handleCancel();
               })
               return;
