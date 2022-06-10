@@ -133,14 +133,16 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
 
         JobExtraOperateResult result = new JobExtraOperateResult();
+        result.setJobName("作业编号：" + jobId);
         try {
             boolean fromImport = false;
             JobReplicationDto jobReplicationDto = getJobReplication(jobId);
             String jobOriginName = jobReplicationDto.getJobInfoDto().getName();
+            result.setJobName(jobOriginName);
+
             cleanOutJobReplication(jobReplicationDto, destFolderId, fromImport);
             jobExtraOperationManager.saveJobReplication(jobReplicationDto, fromImport, operator);
 
-            result.setJobName(jobOriginName);
             result.setSuccess(Boolean.TRUE);
         } catch (Exception ex) {
             result.setSuccess(Boolean.FALSE);
