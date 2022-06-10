@@ -176,6 +176,12 @@ public class TableInfoServiceImpl implements TableInfoService {
         return getTableInfoById(existTableInfo.getId());
     }
 
+    // TODO
+    @Override
+    public List<TableInfoDto> getRequiredTablesInfoByDataBase(String database) {
+        return null;
+    }
+
     @Override
     public String getTableDDL(Long tableId) {
         StringBuilder ddl = new StringBuilder("");
