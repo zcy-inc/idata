@@ -326,7 +326,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       sessionId,
       sessionKind: 'spark',
       statementId,
-      selectSql: getDebugCode(),
       from: pollingFrom.current,
       size: 10,
     })

@@ -855,7 +855,6 @@ export async function runQueryResult(params: {
   statementId: number;
   from?: number;
   size?: number;
-  selectSql: string;
 }) {
   return request<
     DefaultResponse & {
