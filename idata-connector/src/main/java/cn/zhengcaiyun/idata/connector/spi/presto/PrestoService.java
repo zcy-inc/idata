@@ -30,7 +30,7 @@ public class PrestoService {
         try (Connection conn = DriverManager.getConnection(jdbcUrl, "presto", null);
              Statement stmt = conn.createStatement();
              ResultSet res = stmt.executeQuery("select " + columnNames + " from \"" + dbName + "\".\""
-                     + tblName + "\"" + "limit " + limit + "offset " + offset)) {
+                     + tblName + "\"" +  " offset " + offset + " limit " + limit)) {
             int columnCount = res.getMetaData().getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
                 ColumnInfoDto columnDto = new ColumnInfoDto();

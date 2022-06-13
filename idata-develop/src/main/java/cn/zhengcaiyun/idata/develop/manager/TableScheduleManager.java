@@ -29,18 +29,30 @@ import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.DIJobContentRepo;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DiJobDetailsDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.SensitiveColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import org.apache.avro.generic.GenericData;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
+import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 /**
  * @author caizhedong
@@ -49,6 +61,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class TableScheduleManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableInfoDto.class);
 
     @Autowired
     private TableInfoService tableInfoService;
@@ -62,16 +76,19 @@ public class TableScheduleManager {
     private DataSourceRepo dataSourceRepo;
     @Autowired
     private DataQueryApi dataQueryApi;
+    @Autowired
+    private UacUserDao uacUserDao;
 
     private final Long DEFAULT_LIMIT = 20000L;
     private final String DW_LAYER_ODS = "DW_LAYER_ODS:ENUM_VALUE";
     private final String[] tableLabelCodes = {"dbName:LABEL", "partitionedTbl:LABEL", "tblSecurityLevel:LABEL", "dwLayer:LABEL", "tblComment:LABEL", "dwOwnerId:LABEL",
-            "pwOwnerId:LABEL", "domainId:LABEL"};
+            "pwOwnerId:LABEL", "domainId:LABEL", "dwOwnerId:LABEL"};
     private final String[] columnLabelCodes = {"pk:LABEL", "columnType:LABEL", "colSecurityLevel:LABEL", "partitionedCol:LABEL"};
     private final String SECURITY_LEVEL_LOW_CODE = "SECURITY_LEVEL_LOW:ENUM_VALUE";
 
-    public List<TableInfoDto> syncTableColumnsSecurity() {
-        // 获取DI作业同步表及字段（表名、字段名、字段类型）（暂不通过hdfs获取）
+    public Boolean syncTableColumnsSecurity() throws IllegalAccessException {
+        LOGGER.info("******************** 同步ODS字段安全等级开始 ********************");
+        // 获取DI作业同步表及字段（表名、字段名、字段类型）（暂不通过hive获取）
         JobPublishRecordCondition publishCondition = new JobPublishRecordCondition();
         publishCondition.setEnvironment(EnvEnum.prod.name());
         publishCondition.setJobTypeCode(JobTypeEnum.DI_BATCH.getCode());
@@ -104,7 +121,7 @@ public class TableScheduleManager {
         List<DataSource> allDataSourceList = dataSourceRepo.getDataSources();
         Map<Long, String> dataSourceNameMap = allDataSourceList
                 .stream().collect(Collectors.toMap(DataSource::getId, DataSource::getName));
-        Map<Long, List<DIJobContent>> diMap = diContentPublishList.stream().collect(Collectors.groupingBy(DIJobContent::getId));
+        Map<Long, List<DIJobContent>> diMap = diContentPublishList.stream().collect(Collectors.groupingBy(DIJobContent::getSrcDataSourceId));
         Map<String, List<DIJobContent>> nonSensitiveDiSourceJobMap = new HashMap<>();
         Map<String, List<DIJobContent>> sensitiveDiSourceJobMap = new HashMap<>();
         List<DIJobContent> nonSensitiveDiJobList = new ArrayList<>();
@@ -138,17 +155,58 @@ public class TableScheduleManager {
         List<TableInfoDto> existOdsTableList = tableInfoService.getRequiredTablesInfoByDataBase(DW_LAYER_ODS);
         Map<String, TableInfoDto> existOdsTableMap = existOdsTableList.stream().collect(Collectors.toMap(TableInfoDto::getTableName, Function.identity()));
         Set<String> existOdsTableNames = existOdsTableMap.keySet();
-        // 与需要同步的表比较，获取新增表list、修改表list（比较字段数量变化、字段名变化、安全等级变化）
-        List<TableInfoDto> odsNonSensitiveTableList = getTableList(nonSensitiveDiJobList, SECURITY_LEVEL_LOW_CODE);
-        List<TableInfoDto> odsSensitiveTableList = getTableList(sensitiveDiJobList, null);
-        return null;
+        // 与需要同步的表比较，获取新增表list、修改表list
+        List<TableInfoDto> odsNonSensitiveTableList = changeDiToTableList(nonSensitiveDiJobList, SECURITY_LEVEL_LOW_CODE, dataSourceNameMap);
+        List<TableInfoDto> odsSensitiveTableList = changeDiToTableList(sensitiveDiJobList, null, dataSourceNameMap);
+        // 新增无需打标的ods表
+        List<TableInfoDto> newOdsNonSensitiveTableList = odsNonSensitiveTableList.stream()
+                .filter(c -> !existOdsTableNames.contains(c.getTableName())).collect(Collectors.toList());
+        // 新增需要打标的ods表
+        List<TableInfoDto> newOdsSensitiveTableList = odsSensitiveTableList.stream()
+                .filter(c -> !existOdsTableNames.contains(c.getTableName())).collect(Collectors.toList());
+        // 修改的ods表（当前仅比较字段数量）TODO 后续增加比较字段重命名、安全等级变化
+        // 无需打标的ods变更表
+        List<TableInfoDto> changeOdsNonSensitiveTableList = odsNonSensitiveTableList.stream()
+                .filter(c -> existOdsTableNames.contains(c.getTableName())
+                        && existOdsTableMap.get(c.getTableName()).getColumnInfos().size() != c.getColumnInfos().size()).
+                        collect(Collectors.toList());
+        // 需打标的ods表更表
+        List<TableInfoDto> changeOdsSensitiveTableList = odsSensitiveTableList.stream()
+                .filter(c -> existOdsTableNames.contains(c.getTableName())
+                        && existOdsTableMap.get(c.getTableName()).getColumnInfos().size() != c.getColumnInfos().size()).
+                        collect(Collectors.toList());
+
+        LOGGER.info("******************** 数仓设计新增无敏感字段ODS表，共{}张 ********************", newOdsNonSensitiveTableList.size());
+        LOGGER.info("******************** 数仓设计新增敏感字段ODS表，共{}张 ********************", newOdsSensitiveTableList.size());
+        LOGGER.info("******************** 数仓设计修改无敏感字段ODS表，共{}张 ********************", changeOdsNonSensitiveTableList.size());
+        LOGGER.info("******************** 数仓设计修改敏感字段ODS表，共{}张 ********************", changeOdsSensitiveTableList.size());
+
+        // 新增ods表
+        List<TableInfoDto> addList = new ArrayList<>();
+        addList.addAll(newOdsNonSensitiveTableList);
+        addList.addAll(newOdsSensitiveTableList);
+        TableInfoDto echoTable;
+        for (TableInfoDto tableInfoDto : addList) {
+//            LOGGER.info("******************** 数仓设计新增ODS表，表名为：{} ********************", tableInfoDto.getTableName());
+            echoTable = tableInfoService.create(tableInfoDto, "系统管理员");
+        }
+        LOGGER.info("******************** 数仓设计新增ODS表，共{}张 ********************", addList.size());
+        // 修改ods表
+        List<TableInfoDto> updateList = getUpdateTableList(changeOdsNonSensitiveTableList, existOdsTableMap);
+        updateList.addAll(getUpdateTableList(changeOdsSensitiveTableList, existOdsTableMap));
+        for (TableInfoDto tableInfoDto : updateList) {
+//            LOGGER.info("******************** 数仓设计修改ODS表，表名为：{} ********************", tableInfoDto.getTableName());
+            echoTable = tableInfoService.edit(tableInfoDto, "系统管理员");
+        }
+        LOGGER.info("******************** 数仓设计修改ODS表，共{}张 ********************", updateList.size());
+        return true;
     }
 
-    // TODO dbName和tableName待数据落数仓后修改
+    // TODO dbName和tableName待数据落数仓后修改，获取数仓字段安全等级
     private List<SensitiveColumnDto> queryColumnSecurity() {
-        String dbName = "dbName";
-        String tableName = "tableName";
-        QueryResultDto resultDto = dataQueryApi.queryData(dbName, tableName, DEFAULT_LIMIT, 0L);
+        String dbName = "tmp";
+        String tableName = "sensitive_column";
+        QueryResultDto resultDto = dataQueryApi.queryData(dbName, tableName, null, DEFAULT_LIMIT, 0L);
         Map<String, Integer> columnIndexMap = new HashMap<>();
         for (int i = 0; i < resultDto.getMeta().size(); i++) {
             columnIndexMap.put(resultDto.getMeta().get(i).getColumnName(), i);
@@ -158,23 +216,170 @@ public class TableScheduleManager {
             sensitiveColumn.setColumnName(data.get(columnIndexMap.get("columnname")));
             sensitiveColumn.setTableName(data.get(columnIndexMap.get("tablename")));
             sensitiveColumn.setSchemaName(data.get(columnIndexMap.get("schemaname")));
-            sensitiveColumn.setSecurityLevel(data.get(columnIndexMap.get("securitylevel")));
+            sensitiveColumn.setSecurityLevel(changeColSecurityLevel(data.get(columnIndexMap.get("securitylevel"))));
             return sensitiveColumn;
         }).collect(Collectors.toList());
         return sensitiveColumnList;
     }
 
-    // TODO，securityLevelCode为空则动态查询
-    private List<TableInfoDto> getTableList(List<DIJobContent> diJobList, String securityLevelCode) {
-        return new ArrayList<>();
+    // 将diJob修改为tableInfo，securityLevelCode为空则动态查询
+    private List<TableInfoDto> changeDiToTableList(List<DIJobContent> diJobList, String securityLevelCode,
+                                                   Map<Long, String> dataSourceMap) {
+        Map<String, String> tableSecurityMap = getTableSecurityMap();
+        Map<String, String> columnSecurityMap = getColumnSecurityMap();
+        Map<String, Long> userMap = uacUserDao.select(c -> c.where(uacUser.del, isNotEqualTo(1)))
+                .stream().collect(Collectors.toMap(UacUser::getNickname, UacUser::getId));
+        List<TableInfoDto> echoList = diJobList.stream().map(diJob -> {
+            TableInfoDto tableInfoDto = new TableInfoDto();
+            // 线上ODS的folderId
+            tableInfoDto.setFolderId(3L);
+            tableInfoDto.setTableName(diJob.getDestTable().split("\\.")[1]);
+            List<LabelDto> tableLabelList = new ArrayList<>();
+            List<String> tableLabelCodeList = Arrays.asList(tableLabelCodes);
+            // 表相关
+            for (String labelCode : tableLabelCodeList) {
+                LabelDto tableLabel = new LabelDto();
+                if ("dbName:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("dbName:LABEL");
+                    tableLabel.setLabelParamValue("ods");
+                }
+                else if ("partitionedTbl:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("partitionedTbl:LABEL");
+                    tableLabel.setLabelParamValue("false");
+                }
+                else if ("pwOwnerId:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("pwOwnerId:LABEL");
+                    tableLabel.setLabelParamValue(diJob.getCreator());
+                }
+                else if ("tblSecurityLevel:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("tblSecurityLevel:LABEL");
+                    if (securityLevelCode != null || !dataSourceMap.containsKey(diJob.getSrcDataSourceId())) {
+                        tableLabel.setLabelParamValue(securityLevelCode);
+                    }
+                    else {
+                        tableLabel.setLabelParamValue(tableSecurityMap.getOrDefault(dataSourceMap.get(diJob.getSrcDataSourceId()) + "." + diJob.getSrcTables(), SECURITY_LEVEL_LOW_CODE));
+                    }
+                }
+                else if ("dwLayer:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("dwLayer:LABEL");
+                    tableLabel.setLabelParamValue("DW_LAYER_ODS:ENUM_VALUE");
+                }
+                else if ("tblComment:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("tblComment:LABEL");
+                    tableLabel.setLabelParamValue(diJob.getDestTable());
+                }
+                else if ("dwOwnerId:LABEL".equals(labelCode)) {
+                    tableLabel.setLabelCode("dwOwnerId:LABEL");
+                    // 若找不到用户，则默认大时
+                    Long userId = userMap.getOrDefault(StringUtils.isNotEmpty(diJob.getEditor()) ? diJob.getEditor() : diJob.getCreator(), 45L);
+                    tableLabel.setLabelParamValue(userId.toString());
+                }
+                else {
+                    tableLabel.setLabelCode("domainId:LABEL");
+                    // 元数据域，仅用于打标，需手动插入
+                    tableLabel.setLabelParamValue("ODS_DOMAIN:ENUM_VALUE");
+                }
+                tableLabelList.add(tableLabel);
+            }
+            tableInfoDto.setTableLabels(tableLabelList);
+            // 字段相关
+            // 获取字段列表，组成dto
+            List<String> columnNameList = StringUtils.isNotEmpty(diJob.getScriptSelectColumns())
+                    ? Arrays.asList(diJob.getScriptSelectColumns().split(","))
+                    : DIJobContentContentDto.from(diJob).getDestCols().stream().map(MappingColumnDto::getName).collect(Collectors.toList());
+            List<ColumnInfoDto> columnList = columnNameList.stream().map(columnName -> {
+                ColumnInfoDto columnInfoDto = new ColumnInfoDto();
+                List<LabelDto> columnLabelList = new ArrayList<>();
+                List<String> columnLabelCodeList = Arrays.asList(columnLabelCodes);
+                for (String columnLabelCode : columnLabelCodeList) {
+                    LabelDto columnLabel = new LabelDto();
+                    columnLabel.setColumnName(columnName);
+                    if ("pk:LABEL".equals(columnLabelCode)) {
+                        columnLabel.setLabelCode("pk:LABEL");
+                        columnLabel.setLabelParamValue("false");
+                    }
+                    // 暂时默认给STRING
+                    else if ("columnType:LABEL".equals(columnLabelCode)) {
+                        columnLabel.setLabelCode("columnType:LABEL");
+                        columnLabel.setLabelParamValue("HIVE_COL_TYPE_STRING:ENUM_VALUE");
+                    }
+                    else if ("colSecurityLevel:LABEL".equals(columnLabelCode)) {
+                        columnLabel.setLabelCode("colSecurityLevel:LABEL");
+                        if (dataSourceMap.containsKey(diJob.getSrcDataSourceId())) {
+                            columnLabel.setLabelParamValue(columnSecurityMap
+                                    .getOrDefault(dataSourceMap.get(diJob.getSrcDataSourceId()) + "." + diJob.getSrcTables() + "." + columnName,
+                                            "SECURITY_LEVEL_LOW:ENUM_VALUE"));
+                        }
+                        else {
+                            columnLabel.setLabelParamValue("SECURITY_LEVEL_LOW:ENUM_VALUE");
+                        }
+                    }
+                    else {
+                        columnLabel.setLabelCode("partitionedCol:LABEL");
+                        columnLabel.setLabelParamValue("false");
+                    }
+                    columnLabelList.add(columnLabel);
+                }
+                columnInfoDto.setColumnName(columnName);
+                columnInfoDto.setColumnLabels(columnLabelList);
+                columnInfoDto.setColumnIndex(columnNameList.indexOf(columnName));
+                return columnInfoDto;
+            }).collect(Collectors.toList());
+            tableInfoDto.setColumnInfos(columnList);
+            return tableInfoDto;
+        }).collect(Collectors.toList());
+        return echoList;
+    }
+    
+    private List<TableInfoDto> getUpdateTableList(List<TableInfoDto> tableInfoList, Map<String, TableInfoDto> existTableMap) {
+        List<TableInfoDto> echoList = new ArrayList<>();
+        for (TableInfoDto tableInfoDto : tableInfoList) {
+            TableInfoDto existTableInfoDto = existTableMap.get(tableInfoDto.getTableName());
+            List<ColumnInfoDto> existColumnInfoList = existTableInfoDto.getColumnInfos();
+            Set<String> existColumnNames = existColumnInfoList.stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toSet());
+            for (ColumnInfoDto columnInfoDto : tableInfoDto.getColumnInfos()) {
+                if (!existColumnNames.contains(columnInfoDto.getColumnName())) {
+                    existColumnInfoList.add(columnInfoDto);
+                }
+            }
+            echoList.add(existTableInfoDto);
+        }
+        return echoList;
+    }
+
+    private Map<String, String> getTableSecurityMap() {
+        List<SensitiveColumnDto> sensitiveColumnList = queryColumnSecurity();
+        Map<String, List<SensitiveColumnDto>> sensitiveColumnMap = sensitiveColumnList.stream()
+                .collect(Collectors.groupingBy(sensitiveColumnDto -> sensitiveColumnDto.getSchemaName() + "." + sensitiveColumnDto.getTableName()));
+        Map<String, String> tableSecurityMap = new HashMap<>();
+        for (Map.Entry<String, List<SensitiveColumnDto>> entry : sensitiveColumnMap.entrySet()) {
+            List<SensitiveColumnDto> sensitiveColList = entry.getValue();
+            Set<String> sensitiveLevels = sensitiveColList.stream().map(SensitiveColumnDto::getSecurityLevel).collect(Collectors.toSet());
+            if (sensitiveLevels.size() == 1) {
+                tableSecurityMap.put(entry.getKey(), new ArrayList<>(sensitiveLevels).get(0));
+            }
+            else {
+                // 当前只可能有2种枚举
+                tableSecurityMap.put(entry.getKey(), "SECURITY_LEVEL_HIGH:ENUM_VALUE");
+            }
+        }
+        return tableSecurityMap;
+    }
+
+    private Map<String, String> getColumnSecurityMap() {
+        List<SensitiveColumnDto> sensitiveColumnList = queryColumnSecurity();
+        return sensitiveColumnList.stream()
+                .collect(Collectors.toMap(
+                        sensitiveColumnDto -> sensitiveColumnDto.getSchemaName() + "." + sensitiveColumnDto.getTableName() + "." + sensitiveColumnDto.getColumnName(),
+                        SensitiveColumnDto::getSecurityLevel));
     }
 
     private String changeColSecurityLevel(String securityLevel) {
-        if ("SENSITIVE".equals(securityLevel)) {
-            return "SECURITY_LEVEL_MEDIUM:ENUM_VALUE";
-        }
-        else if ("CONFIDENTIAL".equals(securityLevel)) {
+        if ("CONFIDENTIAL".equals(securityLevel)) {
             return "SECURITY_LEVEL_HIGH:ENUM_VALUE";
+        }
+        else if ("SENSITIVE".equals(securityLevel)) {
+            return "SECURITY_LEVEL_MEDIUM:ENUM_VALUE";
         }
         else {
             return "SECURITY_LEVEL_LOW:ENUM_VALUE";

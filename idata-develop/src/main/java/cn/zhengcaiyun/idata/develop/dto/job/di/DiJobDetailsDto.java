@@ -22,4 +22,14 @@ package cn.zhengcaiyun.idata.develop.dto.job.di;
  */
 
 public class DiJobDetailsDto extends DIJobContentContentDto {
+    private String srcDataSourceName;
+
+    // Gas
+    public String getSrcDataSourceName() {
+        return srcDataSourceName;
+    }
+
+    public void setSrcDataSourceName(String srcDataSourceName) {
+        this.srcDataSourceName = srcDataSourceName;
+    }
 }

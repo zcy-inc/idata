@@ -27,6 +27,7 @@ import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
+import cn.zhengcaiyun.idata.develop.manager.TableScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
@@ -53,6 +54,8 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private TableScheduleManager tableScheduleManager;
 
     @Autowired
     private MetadataFacade metadataFacade;
@@ -166,5 +169,9 @@ public class TableInfoController {
         return RestResult.success(metadataFacade.compareHive(tableId));
     }
 
+    @GetMapping("/p0/testSync")
+    public RestResult testSync() throws IllegalAccessException {
+        return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
+    }
 
 }
