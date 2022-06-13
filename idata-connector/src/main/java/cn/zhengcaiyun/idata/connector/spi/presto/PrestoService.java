@@ -7,19 +7,30 @@ import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class PrestoService {
 
     public QueryResultDto previewTable(String jdbcUrl, String dbName, String tblName) {
+        return queryTable(jdbcUrl, dbName, tblName, null, null, null);
+    }
+
+    public QueryResultDto queryTable(String jdbcUrl, String dbName, String tblName, String[] columns, Long limit,
+                                      Long offset) {
+        String columnNames = columns != null && columns.length > 0
+                ? String.join(",", Arrays.asList(columns)) : "*";
+        limit = limit != null ? limit : 10L;
+        offset = offset != null ? offset : 0;
+
         QueryResultDto queryResultDto = new QueryResultDto();
         List<ColumnInfoDto> meta = new ArrayList<>();
         List<List<String>> data = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, "presto", null);
              Statement stmt = conn.createStatement();
-             ResultSet res = stmt.executeQuery("select * from \"" + dbName + "\".\""
-                     + tblName + "\"" + "limit 10")) {
+             ResultSet res = stmt.executeQuery("select " + columnNames + " from \"" + dbName + "\".\""
+                     + tblName + "\"" + "limit " + limit + "offset " + offset)) {
             int columnCount = res.getMetaData().getColumnCount();
             for (int i = 1; i <= columnCount; i++) {
                 ColumnInfoDto columnDto = new ColumnInfoDto();
