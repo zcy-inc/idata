@@ -348,7 +348,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           const result = res.data.resultSet;
           const resultHeader = res.data.resultHeader || [];
           setResults((pre) => [...pre, result]);
-          setResultHeader(resultHeader);
+          setResultHeader((pre) => [...pre, resultHeader]);
         }
       })
       .catch((err) => {});
