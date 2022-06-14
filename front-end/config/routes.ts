@@ -233,6 +233,14 @@ export default [
     featureCode: 'F_MENU_DATAPI',
   },
   {
+    path:'/outLink5',
+    name:"浑仪",
+    outLink: '/behavior-analysis/rulesManage/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/acb20dc4-957e-40ff-8fdb-8379b5620e13.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/9d13ea38-5034-4aee-a5c6-7379f5a52111.png',
+    featureCode: 'F_MENU_HUNYI',
+  },
+  {
     component: './404',
   },
 ];
