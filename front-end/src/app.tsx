@@ -131,7 +131,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     menuItemRender: (item, defaultDom) => {
       const path = item.path || '';
       let icon = null;
-      const iconMenus = ['/objectLabel', '/outLink1','/outLink2','/outLink3','/outLink4', 'outLink5'];//需要icon的menu集合
+      const iconMenus = ['/objectLabel', '/outLink1','/outLink2','/outLink3','/outLink4', '/outLink5'];//需要icon的menu集合
       if (iconMenus.includes(path)) {
         icon = location.hash.includes(path)
           ? renderIcon(item.iconActive)
