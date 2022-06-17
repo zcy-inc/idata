@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.folder;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
+import cn.zhengcaiyun.idata.develop.condition.tree.FolderTreeCondition;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 
@@ -35,7 +36,7 @@ public interface CompositeFolderService {
 
     List<DevTreeNodeDto> searchDevTree(DevTreeCondition condition, Long userId);
 
-    List<DevTreeNodeDto> searchFolderTree(DevTreeCondition condition, Long userId);
+    List<DevTreeNodeDto> searchFolderTree(FolderTreeCondition condition, Long userId);
 
     Long addFolder(CompositeFolderDto folderDto, Operator operator) throws IllegalAccessException;
 

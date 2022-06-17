@@ -35,6 +35,11 @@ public class JobPublishRecordCondition {
     private Integer publishStatus;
 
     /**
+     * 发布状态，1：待发布，2：已发布，4：已驳回，9：已归档
+     */
+    private List<Integer> publishStatusList;
+
+    /**
      * 作业类型
      */
     private String jobTypeCode;
@@ -124,5 +129,13 @@ public class JobPublishRecordCondition {
 
     public void setJobIds(List<Long> jobIds) {
         this.jobIds = jobIds;
+    }
+
+    public List<Integer> getPublishStatusList() {
+        return publishStatusList;
+    }
+
+    public void setPublishStatusList(List<Integer> publishStatusList) {
+        this.publishStatusList = publishStatusList;
     }
 }
