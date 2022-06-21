@@ -283,24 +283,24 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public List<ColumnInfoDto> getTableColumns(Long id, String dbName, String tableName) {
         // hive数据源唯一 + 当前接口仅给hive使用
-        try (Jive jive = hivePool.getResource()) {
-            return jive.getColumnMetaInfo(dbName, tableName);
-        }
-//        Jive jive = null;
-//        HivePool hivePool = null;
-//        String jdbcUrl = getJdbcUrl(id, dbName);
-//        try {
-//            ConnectInfo connectInfo = new ConnectInfo();
-//            connectInfo.setJdbc(jdbcUrl);
-//            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-//            config.setTestOnBorrow(true);
-//            hivePool = new HivePool(config, connectInfo);
-//            jive = hivePool.getResource();
+//        try (Jive jive = hivePool.getResource()) {
 //            return jive.getColumnMetaInfo(dbName, tableName);
-//        } finally {
-//            jive.close();
-//            hivePool.close();
 //        }
+        Jive jive = null;
+        HivePool hivePool = null;
+        String jdbcUrl = getJdbcUrl(id, dbName);
+        try {
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setJdbc(jdbcUrl);
+            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            config.setTestOnBorrow(true);
+            hivePool = new HivePool(config, connectInfo);
+            jive = hivePool.getResource();
+            return jive.getColumnMetaInfo(dbName, tableName);
+        } finally {
+            jive.close();
+            hivePool.close();
+        }
     }
 
     private boolean supportTestConnection(DataSourceTypeEnum dataSourceType) {
