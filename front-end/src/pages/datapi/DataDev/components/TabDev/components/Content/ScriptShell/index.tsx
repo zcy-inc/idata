@@ -28,11 +28,11 @@ const ScriptShell: ForwardRefRenderFunction<unknown, ScriptShellProps> = (
 
   // TODO:
   useEffect(() => {
-    form.setFieldsValue({ pythonResource: content.pythonResource });
+    form.setFieldsValue({ sourceResource: content.sourceResource });
   }, [content]);
 
   return (
-    <div style={{ position: 'relative', height: monacoHeight }}>
+    <Form form={form} colon={false} style={{ position: 'relative', height: monacoHeight }}>
       <Item name="sourceResource" noStyle>
         <MonacoEditor
           ref={editorRef}
@@ -42,7 +42,7 @@ const ScriptShell: ForwardRefRenderFunction<unknown, ScriptShellProps> = (
           options={{ automaticLayout: true }}
         />
       </Item>
-    </div>
+    </Form>
   );
 };
 

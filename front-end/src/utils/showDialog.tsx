@@ -57,7 +57,6 @@ export default (title = '对话框', customAttrs: Attrs, DialogContent: any) => 
       const $form = useRef();
 
       const handleCancel = () => {
-        console.log(123213);
         customAttrs.beforeHide && customAttrs.beforeHide(dialogInstance, $form.current, () => {
           setVisible(false)
         });

@@ -25,6 +25,7 @@ import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeCacheValue;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
+import cn.zhengcaiyun.idata.develop.condition.tree.FolderTreeCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.FunctionModuleEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
@@ -37,6 +38,7 @@ import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplier;
 import cn.zhengcaiyun.idata.develop.spi.tree.BizTreeNodeSupplierFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,11 +108,11 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
     }
 
     @Override
-    public List<DevTreeNodeDto> searchFolderTree(DevTreeCondition condition, Long userId) {
+    public List<DevTreeNodeDto> searchFolderTree(FolderTreeCondition condition, Long userId) {
         // 获取选择的功能模块，未选择则默认所有功能模块
         List<FunctionModuleEnum> moduleEnumList = getSelectModuleOrAll(condition.getBelongFunctions());
         // 生成文件树
-        List<DevTreeNodeDto> treeNodeDtoList = buildFolderTreeNodes(moduleEnumList);
+        List<DevTreeNodeDto> treeNodeDtoList = buildFolderTreeNodes(moduleEnumList, condition.getIncludeFunFolders());
         List<DevTreeNodeDto> teList = filterTreeNodes(treeNodeDtoList, condition.getKeyWord());
         if (userId != null) {
             Set<String> folderIdList = devFolderService.getUserTableFolderIds(userId)
@@ -261,7 +263,7 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
         return nodeDtoList;
     }
 
-    private List<DevTreeNodeDto> buildFolderTreeNodes(List<FunctionModuleEnum> moduleEnumList) {
+    private List<DevTreeNodeDto> buildFolderTreeNodes(List<FunctionModuleEnum> moduleEnumList, Boolean includeFunFolders) {
         if (ObjectUtils.isEmpty(moduleEnumList)) return Lists.newArrayList();
 
         List<DevTreeNodeDto> expandedFolderNodeList = Lists.newArrayList();
@@ -284,12 +286,15 @@ public class CompositeFolderServiceImpl implements CompositeFolderService {
             }
         }
 
-        final String treeTopId = expandedFuncNodeList.size() == 1 ? expandedFuncNodeList.get(0).getId().toString() : "0";
-        if (expandedFuncNodeList.size() > 1) {
+        String topId;
+        if (BooleanUtils.isTrue(includeFunFolders) || expandedFuncNodeList.size() > 1) {
             // 多个模块时，将模块信息也加入文件夹树
+            topId = expandedFuncNodeList.size() == 1 ? expandedFuncNodeList.get(0).getParentId().toString() : "0";
             expandedFolderNodeList.addAll(expandedFuncNodeList);
+        } else {
+            topId = expandedFuncNodeList.size() == 1 ? expandedFuncNodeList.get(0).getId().toString() : "0";
         }
-
+        final String treeTopId = topId;
         // 生成文件树
         return TreeNodeGenerator.withExpandedNodes(expandedFolderNodeList).makeTree(() -> treeTopId);
     }

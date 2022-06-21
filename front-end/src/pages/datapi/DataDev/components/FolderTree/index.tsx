@@ -7,7 +7,7 @@ import { usePersistFn } from '@/hooks';
 import styles from './index.less';
 import { IconFont, TreeTitle } from '@/components';
 import { Operation } from '@/components/TreeTitle';
-import { deleteFolder, getFunctionTree, deleteTask, jobCopy } from '@/services/datadev';
+import { deleteFolder, getFunctionTree, deleteTask, jobCopy, deleteDAG, deleteUDF } from '@/services/datadev';
 import { TreeNode as Treenode } from '@/types/datadev';
 import { FolderTypes, funcFolderIconMap, FolderBelong } from '@/constants/datadev';
 import CreateFolder from './components/CreateFolder';
@@ -41,6 +41,7 @@ const FolderTree: FC = () => {
     onViewTree,
     showLabel,
     onCreateDAG,
+    panes,
     onCreateFun,
     setVisibleTask,
     setVisibleDev,
@@ -63,14 +64,16 @@ const FolderTree: FC = () => {
     onViewTree: _.onViewTree,
     showLabel: _.showLabel,
     onCreateDAG: _.onCreateDAG,
+    panes: _.panes,
     onCreateFun: _.onCreateFun,
     setVisibleTask: _.setVisibleTask,
     setVisibleDev: _.setVisibleDev,
     setCurLabel: _.setCurLabel,
     folderList: _.folderList,
   }));
-
   useEffect(() => {
+    setKeyWord('');
+    setExpandedKeys([]);
     getTreeWrapped();
     getFunctionTree()
       .then((res) => setFunctionTree(res.data))
@@ -82,14 +85,6 @@ const FolderTree: FC = () => {
       <Menu.Item key="CreateTable">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianwenjianjia1" />
         新建表
-      </Menu.Item>
-      <Menu.Item key="CreateLabel">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianbiaoqian1" />
-        新建标签
-      </Menu.Item>
-      <Menu.Item key="CreateEnum">
-        <IconFont style={{ marginRight: 8 }} type="icon-xinjianmeiju" />
-        新建枚举
       </Menu.Item>
       <Menu.Item key="CreateDAG">
         <IconFont style={{ marginRight: 8 }} type="icon-xinjianDAG" />
@@ -248,32 +243,44 @@ const FolderTree: FC = () => {
                 title: '删除任务',
                 content: '您确认要删除该任务吗？',
                 autoFocusButton: null,
-                onOk: () =>
-                  deleteTask({ id: node.id })
-                    .then((res) => {
-                      if (res.success) {
-                        message.success('删除成功');
-                        onRemovePane(node.cid);
-                        getTreeWrapped();
-                      }
-                    })
-                    .catch((err) => {}),
+                onOk: () => {
+                  let handle = deleteTask;
+                  if(belong === FolderBelong.DAG) {
+                    handle = deleteDAG
+                  }
+                  if(belong === FolderBelong.DEVFUN) {
+                    handle = deleteUDF
+                  }
+                  handle({ id: node.id })
+                  .then((res) => {
+                    if (res.success) {
+                      message.success('删除成功');
+                      onRemovePane(node.cid);
+                      getTreeWrapped();
+                    }
+                  })
+                  .catch((err) => {})
+                }
+                 
               });
             },
-          },
-          {
-            label: '复制',
-            key: 'copy',
-            onClick: () => {
-              jobCopy({
-                jobIds: [node.id],
-                destFolderId: node.parentId
-              }).then(() => {
-                message.success('复制成功！');
-                getTreeWrapped();
-              })
-            },
-          }];
+          }
+          ];
+          if([FolderBelong.DI, FolderBelong.DEVJOB].includes(belong)) {
+            operations.push( {
+              label: '复制',
+              key: 'copy',
+              onClick: () => {
+                jobCopy({
+                  jobIds: [node.id],
+                  destFolderId: node.parentId
+                }).then(() => {
+                  message.success('复制成功！');
+                  getTreeWrapped();
+                })
+              },
+            })
+          }
         } else {
           operations = [];
         }
@@ -323,7 +330,7 @@ const FolderTree: FC = () => {
           title,
         };
       }),
-    [tree, keyWord, calcOperation],
+    [tree, keyWord, calcOperation, panes],
   );
 
   // 功能性文件树
@@ -361,7 +368,6 @@ const FolderTree: FC = () => {
       }
     },BatchOpetate);
   }
-
   return (
     <div className="folder-tree">
       <div className={styles['operation-list']}>
@@ -426,6 +432,7 @@ const FolderTree: FC = () => {
               setAutoExpandParent(true);
             }
           }}
+          value={keyWord}
           onChange={({ target: { value } }) => setKeyWord(value)}
         />
       </div>

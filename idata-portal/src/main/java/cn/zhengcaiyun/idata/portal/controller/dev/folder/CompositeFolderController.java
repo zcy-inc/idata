@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.folder;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
+import cn.zhengcaiyun.idata.develop.condition.tree.FolderTreeCondition;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
@@ -72,7 +73,7 @@ public class CompositeFolderController {
      * @return
      */
     @PostMapping("/folders/tree")
-    public RestResult<List<DevTreeNodeDto>> searchFolderTree(@RequestBody DevTreeCondition condition) {
+    public RestResult<List<DevTreeNodeDto>> searchFolderTree(@RequestBody FolderTreeCondition condition) {
         return RestResult.success(compositeFolderService.searchFolderTree(condition, OperatorContext.getCurrentOperator().getId()));
     }
 

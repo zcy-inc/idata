@@ -7,12 +7,14 @@ import type { Job } from '@/types/datadev';
 import type { TreeNode } from '@/types/datadev';
 import SplitPane from 'react-split-pane';
 import Iconfont from '@/components/IconFont'
+import { getRequestUrl } from '@/utils/utils';
 import showDialog from '@/utils/showDialog';
 import FolderTreeItem from '../FolderTreeItem';
 import { TreeTitle } from '@/components';
 import type { UploadFile } from 'antd/lib/upload/interface';
 import ImportResult from './ImportResult';
-export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any}) => {
+
+export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any, dialog:any}) => {
   const [tree, setTree] = useState<TreeNode []>([]);
   const [jobInfo, setJobInfo] = useState<Job []>([]);
   const [expandedKeys, setExpandedKeys] = useState<(string | number)[]>([]);
@@ -35,6 +37,8 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
   }
 
   const getTreeData = () => {
+    setAutoExpandParent(false);
+    setExpandedKeys([]);
     getTree({ belongFunctions, keyWord }).then((res) => {
       res.data = res.data || [];
       setTree(res.data);
@@ -106,13 +110,18 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
     setAutoExpandParent(false);
   }
 
-  const onCheck = (_: any, {checkedNodes}: {checkedNodes : any []}) => {
+  const onCheck = (checked: any) => {
     let leafNodes: number [] = [];
-    checkedNodes.forEach(node => {
-      if(!node.children?.length) {
-        leafNodes.push(node.key)
+    checked.forEach((key: number) => {
+      const node = plaingTree.find(item => item.id === key);
+      if(node?.type === 'RECORD') {
+        leafNodes.push(node.id)
       }
     });
+    if(leafNodes.length > 200) {
+      leafNodes = leafNodes.slice(0, 200);
+      message.warning('最多只能处理200条作业，超过200条的作业将被忽略');
+    }
     getJobInfo({jobIds: leafNodes}).then(res => {
       setJobInfo(res.data);
     })
@@ -150,7 +159,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           }).then(() => {
             message.success('操作成功！');
             done();
-            getTreeData();
+            dialog.handleCancel();
             getTreeWrapped();
           }).finally(() => {
             dialogItem.hideLoading();
@@ -195,11 +204,31 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
           jobCopy({
             jobIds: jobInfo.map(item => item.id),
             destFolderId: form.selectedFolder
-          }).then(() => {
+          }).then((res) => {
+            console.log(res);
+            const someError = res.data.some((item: { success: boolean; }) => !item.success);
+            getTreeWrapped();
+            if(someError) {
+              showDialog('复制结果', {
+                modalProps: {
+                  width: 580
+                },
+                btns: {
+                  positive:'确定',
+                  negetive: false
+                },
+                formProps: {
+                  data: res.data || []
+                },
+              }, ImportResult).then(() => {
+                done();
+                dialog.handleCancel();
+              })
+              return;
+            }
             message.success('操作成功！');
             done();
-            getTreeData();
-            getTreeWrapped();
+            dialog.handleCancel();
           }).finally(() => {
             dialogItem.hideLoading();
           })
@@ -219,7 +248,6 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
     } else if(file.status === 'done') {
       setLoading(false);
       if(file.response.success) {
-        getTreeData();
         getTreeWrapped();
         const someError = file.response.data.some((item: { success: boolean; }) => !item.success);
         if(someError) {
@@ -227,13 +255,20 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
             modalProps: {
               width: 580
             },
+            btns: {
+              positive:'确定',
+              negetive: false
+            },
             formProps: {
               data: file.response.data || []
-            }
-          }, ImportResult)
+            },
+          }, ImportResult).then(() => {
+            dialog.handleCancel();
+          })
           return;
         }
         message.success('上传完成');
+        dialog.handleCancel();
       } else {
         message.error(file.response.msg);
       }
@@ -266,11 +301,18 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
       <Button icon={<Iconfont type="icon-yidong" />} onClick={onMove}>移动</Button>
       <Button icon={<Iconfont type="icon-fuzhi1" />} onClick={onCopy}>复制</Button>
       <Upload
-        action={`/api/p1/dev/jobs/import?destFolderId=${selectedKeys[0]}`}
+        action={getRequestUrl(`/api/p1/dev/jobs/import?destFolderId=${selectedKeys[0]}`)}
         style={{display: 'inline-block'}}
         showUploadList={false}
         onChange={onImport}
         accept="text/plain"
+        beforeUpload={file => {
+          if(file.size > 30 * 1024 * 1024) {
+            message.warning('请选择小于30M的文件');
+            return false;
+          }
+          return true;
+        }}
       >
         <Button icon={<Iconfont type="icon-daoru" />} onClick={beforeUpload}>导入</Button>
       </Upload>
@@ -287,7 +329,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading }: {belongFunction
             onChange={e => setKeyWord(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                getTreeData()
+                getTreeData();
               }
             }}
           />

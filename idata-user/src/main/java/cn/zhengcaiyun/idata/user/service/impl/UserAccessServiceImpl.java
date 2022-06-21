@@ -25,9 +25,7 @@ import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDao;
 import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDynamicSqlSupport;
 import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dal.model.SysResource;
-import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
+import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SysResourceService;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
@@ -90,8 +88,18 @@ public class UserAccessServiceImpl implements UserAccessService {
         UacUser user = uacUserDao.selectOne(c -> c.where(uacUser.id, isEqualTo(userId),
                 and(uacUser.del, isNotEqualTo(1)))).orElse(null);
         checkArgument(user != null, "用户不存在");
+
+        // 数据地图默认拥有权限
+        FeatureTreeNodeDto dataMapFeatureDto = new FeatureTreeNodeDto();
+        dataMapFeatureDto.setEnable(true);
+        dataMapFeatureDto.setFeatureCode(FeatureCodeEnum.F_MENU_DATA_MAP.name());
+        dataMapFeatureDto.setType(FeatureTypeEnum.F_MENU.name());
+        dataMapFeatureDto.setName("数据地图");
+        List<FeatureTreeNodeDto> echo = new ArrayList<>();
+        echo.add(dataMapFeatureDto);
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) {
-            return systemService.getFeatureTree(SystemService.FeatureTreeMode.FULL_ENABLE, null);
+            echo.addAll(systemService.getFeatureTree(SystemService.FeatureTreeMode.FULL_ENABLE, null));
+            return echo;
         }
         Set<String> roleCodes = uacUserRoleDao.select(c ->
                 c.where(uacUserRole.userId, isEqualTo(userId),
@@ -103,7 +111,8 @@ public class UserAccessServiceImpl implements UserAccessService {
                         and(uacRoleAccess.del, isNotEqualTo(1)),
                         and(uacRoleAccess.accessCode, isLike("F_%"))))
                 .stream().map(UacRoleAccess::getAccessCode).collect(Collectors.toSet());
-        return systemService.getFeatureTree(SystemService.FeatureTreeMode.PART, enableFeatureCodes);
+        echo.addAll(systemService.getFeatureTree(SystemService.FeatureTreeMode.PART, enableFeatureCodes));
+        return echo;
     }
 
     @Override

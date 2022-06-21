@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.event.job.subscriber.impl;
 
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.constant.Constants;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
@@ -138,6 +139,10 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
             }
             JobInfo jobInfo = jobInfoOptional.get();
             for (JobExecuteConfig executeConfig : executeConfigList) {
+                if (Constants.DEFAULT_DAG_ID == executeConfig.getSchDagId()) {
+                    LOGGER.warn("Job: {} dag id is 0, do not need to delete it.", event.getJobId());
+                    continue;
+                }
                 jobIntegrator.unBindDag(jobInfo, executeConfig.getSchDagId(), executeConfig.getEnvironment());
                 jobIntegrator.delete(jobInfo, executeConfig.getEnvironment());
             }

@@ -306,7 +306,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String req_url = getDSBaseUrl(environment) + String.format("/projects/analysis/task-state-count?projectCode=%s&startDate=%s&endDate=%s", projectCode, startStr, endStr);
 
         HttpInput req_input = buildHttpReq(Maps.newHashMap(), req_url, "GET", getDSToken(environment));
-        ResultDto<JSONObject> resultDto = sendReq(req_input); if (!resultDto.isSuccess()) {
+        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("获取DS任务实例信息失败：%s", resultDto.getMsg()));
         }
         JSONObject data = resultDto.getData();
@@ -484,9 +485,11 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         taskJson.put("flag", "YES");
         taskJson.put("taskPriority", "MEDIUM");
         taskJson.put("workerGroup", getDSWorkGroup(executeConfig.getEnvironment()));
-        taskJson.put("timeoutFlag", "CLOSE");
-        taskJson.put("timeout", "0");
-        taskJson.put("timeoutNotifyStrategy", "");
+        taskJson.put("timeoutFlag", "OPEN");
+        taskJson.put("timeout", "15");
+        taskJson.put("timeoutNotifyStrategy", "FAILED");
+        taskJson.put("failRetryTimes", "6");
+        taskJson.put("failRetryInterval", "5");
 
         JSONObject depItemJson = taskJson.getJSONObject("taskParams").getJSONObject("dependence").getJSONArray("dependTaskList").getJSONObject(0).getJSONArray("dependItemList").getJSONObject(0);
         depItemJson.put("projectCode", projectCode);

@@ -14,30 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.system.dto;
+
+package cn.zhengcaiyun.idata.develop.condition.tree;
 
 /**
- * @author caizhedong
- * @date 2021-12-19 下午7:52
- */
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-09-17 18:00
+ **/
+public class FolderTreeCondition extends DevTreeCondition {
 
-public enum FeatureCodeEnum {
-    F_MENU_SYSTEM_CONFIG,
-    F_MENU_USER_FEATURE,
-    F_MENU_CONFIG_CENTER,
-    F_MENU_LDAP_CONFIG,
-    F_MENU_METADATA_CONFIG,
+    /**
+     * 是否包含功能性文件夹如DAG、作业、函数，新建或修改普通文件夹时需要设置为true，作业作业或表时设置为false
+     */
+    private Boolean includeFunFolders;
 
-    F_MENU_BIGDATA_RD,
-    F_MENU_DATA_DEVELOP,
-    F_MENU_MEASURE_MANAGE,
-    F_MENU_DATASOURCE_CENTER,
-    F_MENU_JOB_LIST,
-    F_ICON_DATA_DEVELOP_ROOT_DIR,
-    F_ICON_RELEASE_DATA_JOB,
+    public Boolean getIncludeFunFolders() {
+        return includeFunFolders;
+    }
 
-    F_MENU_LABEL_MANAGE,
-
-    F_MENU_DATAPI,
-    F_MENU_DATA_MAP;
+    public void setIncludeFunFolders(Boolean includeFunFolders) {
+        this.includeFunFolders = includeFunFolders;
+    }
 }
