@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
@@ -86,6 +87,7 @@ public class TableScheduleManager {
     private final String[] columnLabelCodes = {"pk:LABEL", "columnType:LABEL", "colSecurityLevel:LABEL", "partitionedCol:LABEL"};
     private final String SECURITY_LEVEL_LOW_CODE = "SECURITY_LEVEL_LOW:ENUM_VALUE";
 
+    @Transactional(rollbackFor = Throwable.class)
     public Boolean syncTableColumnsSecurity() throws IllegalAccessException {
         LOGGER.info("******************** 同步ODS字段安全等级开始 ********************");
         // 获取DI作业同步表及字段（表名、字段名、字段类型）（暂不通过hive获取）
@@ -202,10 +204,10 @@ public class TableScheduleManager {
         return true;
     }
 
-    // TODO dbName和tableName待数据落数仓后修改，获取数仓字段安全等级
+    // dbName和tableName待数据落数仓后修改，获取数仓字段安全等级
     private List<SensitiveColumnDto> queryColumnSecurity() {
-        String dbName = "tmp";
-        String tableName = "sensitive_column";
+        String dbName = "ods";
+        String tableName = "ods_db_data_porter_sensitive_column";
         QueryResultDto resultDto = dataQueryApi.queryData(dbName, tableName, null, DEFAULT_LIMIT, 0L);
         Map<String, Integer> columnIndexMap = new HashMap<>();
         for (int i = 0; i < resultDto.getMeta().size(); i++) {
