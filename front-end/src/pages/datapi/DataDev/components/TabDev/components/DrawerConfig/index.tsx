@@ -386,7 +386,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 />
               </Item>
               <Item name="destTable" label=" ">
-                <Input placeholder="请输入表名" style={{ width }} />
+                <Input placeholder="请输入表名" style={{ width:'80%' }} />
               </Item>
             </Form>
           </TabPane>

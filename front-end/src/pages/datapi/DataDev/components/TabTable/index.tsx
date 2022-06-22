@@ -160,7 +160,10 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           })
           .finally(() => setLoading(false));
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        // 手动异步解决视图切换延迟触发多次
+        setTimeout(()=> setLoading(false),100)
+      });
   };
 
   const onDelete = () =>

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form';
+import { ModalForm, ProFormText } from '@ant-design/pro-form';
 import { Form, message } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 
-import { createFolder, getFolders, updateFolder } from '@/services/datadev';
-import { Folder } from '@/types/datadev';
+import { createFolder,  updateFolder } from '@/services/datadev';
 import { FolderTypes } from '@/constants/datadev';
+import { LOCATIONFolderFormItem } from '../../../../../components/FolderFormItem';
 
 export interface CreateFolderProps {
   visible: boolean;
@@ -15,8 +15,7 @@ export interface CreateFolderProps {
 
 const rules = [{ required: true, message: '必填' }];
 
-const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
-  const [folders, setFolders] = useState<Folder[]>([]);
+const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel}) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const { curNode, folderMode, getTreeWrapped } = useModel('datadev', (_) => ({
@@ -26,14 +25,8 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
   }));
 
   useEffect(() => {
-    if (visible && curNode) {
-      getFolders({ belong: curNode.belong }).then((res) => setFolders(res.data));
-    }
-  }, [visible, curNode]);
-
-  useEffect(() => {
-    let name = folderMode === 'edit' ? curNode?.name : '';
-    let parentId = folderMode === 'edit' ? curNode?.parentId : curNode?.id;
+    const name = folderMode === 'edit' ? curNode?.name : '';
+    const parentId = folderMode === 'edit' ? curNode?.parentId : curNode?.id;
     form.setFieldsValue({ name, parentId });
   }, [folderMode, curNode]);
 
@@ -94,12 +87,7 @@ const CreateFolder: FC<CreateFolderProps> = ({ visible, onCancel }) => {
       }}
     >
       <ProFormText name="name" label="文件夹名称" placeholder="请输入名称" rules={rules} />
-      <ProFormSelect
-        name="parentId"
-        label="位置"
-        placeholder="根目录"
-        options={folders.map((_) => ({ label: _.name, value: _.id }))}
-      />
+      <LOCATIONFolderFormItem belongFunctions={[curNode?.belong]}/>
     </ModalForm>
   );
 };

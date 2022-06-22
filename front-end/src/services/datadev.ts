@@ -217,6 +217,7 @@ export async function getFunctionTree() {
 // 获取指定的功能性文件夹树
 export async function getSpecifiedFunctionTree(data?: {
   belongFunctions: FolderBelong[];
+  includeFunFolders?:	boolean;
   keyWord?: string;
 }) {
   return request('/api/p1/dev/compositeFolders/folders/tree', {
@@ -419,7 +420,7 @@ export async function offlineDAG(params: { id: Key }) {
 /**
  * 获取作业类型
  */
-export async function getTaskTypes(params: { catalog: TaskCategory }) {
+export async function getTaskTypes(params?: { catalog: TaskCategory }) {
   return request<DefaultResponse & { data: TaskType[] }>('/api/p1/dev/jobs/types', {
     method: 'GET',
     params,
