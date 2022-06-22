@@ -37,6 +37,7 @@ import type {
 } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
+import { getRequestUrl } from '@/utils/utils';
 
 /**
  * 标签 创建
@@ -257,14 +258,14 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
  * 导出作业
  */
  export async function jobExport(params: {jobIds: string}) {
-   window.open(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`)
+   window.open(getRequestUrl(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`))
   }
 
 /**
  * 复制作业
  */
  export async function jobCopy(data: {jobIds: number [], destFolderId: number | undefined}) {
-  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/copy', {
+  return request('/api/p1/dev/jobs/copy', {
     data,
     method: 'POST',
   });
@@ -855,7 +856,6 @@ export async function runQueryResult(params: {
   statementId: number;
   from?: number;
   size?: number;
-  selectSql: string;
 }) {
   return request<
     DefaultResponse & {

@@ -12,10 +12,16 @@ Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.126
 {"executeConfig":{"schDryRun":0,"schDagId":1,"execQueue":"root.offline","schTimeOut":0,"schRerunMode":"never","execWarnLevel":"ALARM_LEVEL_LOW:ENUM_VALUE","schPriority":1,"execEngine":"SPARK","execDriverMem":1,"execWorkerMem":1,"execCores":2,"jobId":16,"environment":"stag"},"dependencies":[],"output":{"jobId":16,"environment":"stag"}}
 
 ###
-GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=2268
+GET http://idata.cai-inc.com/jx_portal/api/p0/job/execute-detail?env=prod&jobId=2906
 Accept: application/json
+
+
 ###
-GET http://localhost:8080/api/p0/job/execute-detail?env=prod&jobId=825
+GET http://localhost:8080/api/p0/job/execute-detail?env=prod&jobId=2906
+Accept: application/json
+
+###
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=2906
 Accept: application/json
 
 ###
@@ -50,7 +56,7 @@ Accept: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjEyOCwiYXZhdGFyIjoiTlVMTCIsImV4cCI6MTY0ODk1MTY1NiwiZW1haWwiOiJ6aGFucWlhbkBjYWktaW5jLmNvbSIsInVzZXJuYW1lIjoiemhhbnFpYW4ifQ.8qDrCyw2UZXFyyeUcRzW6UkX7pCq180gkT9vdarRAflNAAHCCA0MFT5w7ZCUlq8cDD7aWOpGuHqOsoZaKPr78w; _gid=GA1.2.1451389939.1648879952
 
 ###
-GET http://idata.cai-inc.com//api/p0/job/execute-detail?jobId=2661&env=prod
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?jobId=2324&env=prod
 Accept: application/json
 
 ###

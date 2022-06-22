@@ -38,5 +38,6 @@ public enum FeatureCodeEnum {
 
     F_MENU_LABEL_MANAGE,
 
-    F_MENU_DATAPI;
+    F_MENU_DATAPI,
+    F_MENU_DATA_MAP;
 }

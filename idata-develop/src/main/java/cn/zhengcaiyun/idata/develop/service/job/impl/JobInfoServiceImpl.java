@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
@@ -42,6 +43,7 @@ import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.query.JobOutputQuery;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -171,6 +173,10 @@ public class JobInfoServiceImpl implements JobInfoService {
     public Long addJob(JobInfoDto dto, Operator operator) throws IllegalAccessException {
         checkJobInfo(dto);
         devAccessService.checkAddAccess(operator.getId(), dto.getFolderId());
+
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(dto.getFolderId());
+        checkArgument(folderOptional.isPresent(), "作业所属文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "作业不能建在模块根目录下");
 
         List<JobInfo> dupNameRecords = jobInfoRepo.queryJobInfoByName(dto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameRecords), "作业名称已存在");
@@ -324,6 +330,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                 .distinct()
                 .collect(Collectors.toList());
 
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
+        checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
+
         jobInfoRepo.updateJobFolder(finalJobIds, destFolderId, operator.getNickname());
         devTreeNodeLocalCache.invalidate(Lists.newArrayList(FunctionModuleEnum.DI, FunctionModuleEnum.DEV_JOB));
         return Boolean.TRUE;
@@ -458,8 +468,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                     List<MappingColumnDto> columnDtoList = JSON.parseArray(bfJobContent.getSrcColumns(), MappingColumnDto.class);
                     List<String> columnNameList = columnDtoList.stream().filter(e -> e.getMappedColumn() != null).map(e -> e.getName()).collect(Collectors.toList());
                     backFlowResponse.setDestColumnNames(StringUtils.join(columnNameList, ","));
-                    //抽取主键key
-                    List<String> keyNameList = columnDtoList.stream().filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey())).map(e -> e.getName()).collect(Collectors.toList());
+                    //抽取主键key，此处使用destColumns字段，原因：1. 业务逻辑正确需要 2. 使用srcColumns的mappingColumn 前端传入的primaryKey错误都是false，无法使用 3. 如果字段维护都没有bug的话，可以统一使用destColumns字段，为了保证之前问题数据作业不影响，上面仍旧使用srcColumns
+                    columnDtoList = JSON.parseArray(bfJobContent.getDestColumns(), MappingColumnDto.class);
+                    List<String> keyNameList = columnDtoList.stream()
+                            .filter(e -> e.getMappedColumn() != null)
+                            .filter(e -> (e.getPrimaryKey() != null && e.getPrimaryKey()))
+                            .map(e -> e.getName())
+                            .collect(Collectors.toList());
                     backFlowResponse.setUpdateKey(StringUtils.join(keyNameList, ","));
 
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {

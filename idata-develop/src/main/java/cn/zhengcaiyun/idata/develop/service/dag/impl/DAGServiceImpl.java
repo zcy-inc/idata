@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.dag.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
@@ -28,8 +29,10 @@ import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGEventLogRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
@@ -67,6 +70,7 @@ public class DAGServiceImpl implements DAGService {
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final DagEventPublisher dagEventPublisher;
     private final DevAccessService devAccessService;
+    private final CompositeFolderRepo compositeFolderRepo;
 
     @Autowired
     public DAGServiceImpl(DAGRepo dagRepo,
@@ -74,13 +78,15 @@ public class DAGServiceImpl implements DAGService {
                           JobExecuteConfigRepo jobExecuteConfigRepo,
                           DevTreeNodeLocalCache devTreeNodeLocalCache,
                           DagEventPublisher dagEventPublisher,
-                          DevAccessService devAccessService) {
+                          DevAccessService devAccessService,
+                          CompositeFolderRepo compositeFolderRepo) {
         this.dagRepo = dagRepo;
         this.dagEventLogRepo = dagEventLogRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.dagEventPublisher = dagEventPublisher;
         this.devAccessService = devAccessService;
+        this.compositeFolderRepo = compositeFolderRepo;
     }
 
     @Override
@@ -91,6 +97,11 @@ public class DAGServiceImpl implements DAGService {
 
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
+
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(dagInfoDto.getFolderId());
+        checkArgument(folderOptional.isPresent(), "DAG所属文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "DAG不能建在模块根目录下");
+
         List<DAGInfo> dupNameDag = dagRepo.queryDAGInfo(dagInfoDto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameDag), "DAG名称已存在");
 

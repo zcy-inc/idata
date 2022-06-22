@@ -326,7 +326,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       sessionId,
       sessionKind: 'spark',
       statementId,
-      selectSql: getDebugCode(),
       from: pollingFrom.current,
       size: 10,
     })
@@ -347,9 +346,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         } else {
           pollingFrom.current = 0;
           const result = res.data.resultSet;
-          const resultHeader = res.data.resultHeader;
+          const resultHeader = res.data.resultHeader || [];
           setResults((pre) => [...pre, result]);
-          setResultHeader(resultHeader);
+          setResultHeader((pre) => [...pre, resultHeader]);
         }
       })
       .catch((err) => {});
@@ -536,7 +535,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.TRY_RUN, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG, Btns.TRY_RUN];
+        return [Btns.SAVE, Btns.SUBMIT, Btns.TRY_RUN, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,
