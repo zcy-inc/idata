@@ -862,7 +862,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 >
                   复制来源表
                 </Button>
-                {basicInfo?.jobType === DIJobType.DI && (
+                {Object.keys(DIJobType).includes(basicInfo?.jobType??'') && (
                   <Item name="configMode" rules={ruleSlct} noStyle>
                     <RadioGroup
                       options={diConfigOptions}

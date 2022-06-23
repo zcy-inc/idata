@@ -9,6 +9,11 @@ import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 const { REACT_APP_ENV } = process.env;
 
 export default defineConfig({
+  nodeModulesTransform: {
+    type: 'none',
+    exclude: [],
+  },
+  mfsu: {},
   hash: true,
   history: { type: 'hash' },
   publicPath: '/idata-portal/',
