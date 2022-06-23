@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -212,6 +213,17 @@ public class Jive extends BinaryJive {
         return JiveUtil.parseMetadataInfo(ddl);
     }
 
+    public static void main(String[] args) {
+        String ddl = "CREATE TABLE stag_tmp.test_employees (  \n" +
+                "    name STRING,  \n" +
+                "    salary FLOAT,  \n" +
+                "    age bigint,\n" +
+                "    sex String\n" +
+                ") PARTITIONED BY (country STRING, state STRING);";
+        JiveUtil.parseMetadataInfo(ddl);
+        System.out.println(JSON.toJSONString(JiveUtil.parseMetadataInfo(ddl)));
+    }
+
     /**
      * 获取普通列（非分区列）的元数据信息
      *
@@ -221,14 +233,55 @@ public class Jive extends BinaryJive {
      */
     public List<ColumnInfoDto> getColumnMetaInfo(String dbName, String tableName) {
         MetadataInfo metadataInfo = getMetadataInfo(dbName, tableName);
-        List<ColumnInfoDto> list = metadataInfo.getColumnList().stream().map(e -> {
+        List<ColumnInfoDto> list = new ArrayList<>();
+        int index = 0;
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getColumnList()) {
             ColumnInfoDto dto = new ColumnInfoDto();
             dto.setColumnType(e.getColumnType());
             dto.setColumnName(e.getColumnName());
             dto.setColumnComment(e.getColumnComment());
-            return dto;
-        }).collect(Collectors.toList());
+            dto.setColumnIndex(index);
+            dto.setPartition(false);
 
+            list.add(dto);
+            index++;
+        }
+        return list;
+    }
+
+    /**
+     * 获取列（包括分区列）的元数据信息
+     *
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    public List<ColumnInfoDto> getColumnMetaInfoIncludePartition(String dbName, String tableName) {
+        MetadataInfo metadataInfo = getMetadataInfo(dbName, tableName);
+        List<ColumnInfoDto> list = new ArrayList<>();
+        int index = 0;
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getColumnList()) {
+            ColumnInfoDto dto = new ColumnInfoDto();
+            dto.setColumnType(e.getColumnType());
+            dto.setColumnName(e.getColumnName());
+            dto.setColumnComment(e.getColumnComment());
+            dto.setColumnIndex(index);
+            dto.setPartition(false);
+
+            list.add(dto);
+            index++;
+        }
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getPartitionColumnList()) {
+            ColumnInfoDto dto = new ColumnInfoDto();
+            dto.setColumnType(e.getColumnType());
+            dto.setColumnName(e.getColumnName());
+            dto.setColumnComment(e.getColumnComment());
+            dto.setColumnIndex(index);
+            dto.setPartition(true);
+
+            list.add(dto);
+            index++;
+        }
         return list;
     }
 

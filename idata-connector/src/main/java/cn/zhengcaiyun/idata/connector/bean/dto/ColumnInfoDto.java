@@ -41,6 +41,10 @@ public class ColumnInfoDto {
      */
     private String columnComment;
     /**
+     * 字段描述
+     */
+    private Integer columnIndex;
+    /**
      * 数据类型
      */
     private WideDataTypeEnum dataType;
@@ -101,5 +105,13 @@ public class ColumnInfoDto {
 
     public void setPartition(Boolean partition) {
         isPartition = partition;
+    }
+
+    public Integer getColumnIndex() {
+        return columnIndex;
+    }
+
+    public void setColumnIndex(Integer columnIndex) {
+        this.columnIndex = columnIndex;
     }
 }

@@ -18,6 +18,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoNewDTO;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
@@ -26,11 +27,16 @@ import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.facade.ColumnFacade;
 import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.portal.model.request.dev.PullHiveInfoRequest;
+import cn.zhengcaiyun.idata.portal.model.response.dev.CompareInfoResponse;
+import cn.zhengcaiyun.idata.portal.model.response.dev.PullHiveResponse;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +62,9 @@ public class TableInfoController {
 
     @Autowired
     private MetadataFacade metadataFacade;
+
+    @Autowired
+    private ColumnFacade columnFacade;
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
@@ -166,5 +175,76 @@ public class TableInfoController {
         return RestResult.success(metadataFacade.compareHive(tableId));
     }
 
+    /**
+     * 比较hive不同的相关信息提示
+     * @param tableId
+     * @return
+     */
+    @GetMapping("/pull/hive/info/{tableId}")
+    public RestResult<CompareInfoResponse> pullHiveInfo(@PathVariable("tableId") Long tableId) {
+        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+
+        CompareInfoResponse response = new CompareInfoResponse();
+        List<CompareInfoResponse.ChangeContentInfo> changeContentInfoList = new ArrayList<>();
+        response.setChangeContentInfoList(changeContentInfoList);
+
+        compareInfoNewDTO.getLessList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore("-");
+            changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
+            changeContentInfo.setChangeDescription("字段新增");
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        compareInfoNewDTO.getMoreList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore(e.getColumnName());
+            changeContentInfo.setColumnNameAfter("-");
+            changeContentInfo.setChangeDescription("字段删除");
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        compareInfoNewDTO.getDifferentList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore(e.getColumnName());
+            changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
+
+            StringBuilder stringBuilder = new StringBuilder("字段修改\n");
+            if (e.getHiveColumnIndex() != e.getColumnIndex()) {
+                stringBuilder.append("排序变更：" + e.getColumnIndex() + " 改为 " + e.getHiveColumnIndex() + "\n");
+            }
+            if (!StringUtils.equalsIgnoreCase(e.getColumnType(), e.getHiveColumnType())) {
+                stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
+            }
+            if (!StringUtils.equalsIgnoreCase(e.getColumnComment(), e.getHiveColumnComment())) {
+                stringBuilder.append("描述：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
+            }
+            if (e.isPartition() != e.isHivePartition()) {
+                stringBuilder.append("是否分区字段：" + e.isPartition() + " 改为 " + e.isHivePartition() + "\n");
+            }
+            changeContentInfo.setChangeDescription(stringBuilder.toString());
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        return RestResult.success(response);
+    }
+
+    /**
+     * 拉取hive信息
+     * @param tableId
+     * @return
+     */
+    @PostMapping("/pull/hive/{tableId}")
+    public RestResult<Boolean> pullHive(@PathVariable("tableId") Long tableId) {
+        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+        Boolean overwrite = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
+        return RestResult.success(overwrite);
+    }
 
 }
