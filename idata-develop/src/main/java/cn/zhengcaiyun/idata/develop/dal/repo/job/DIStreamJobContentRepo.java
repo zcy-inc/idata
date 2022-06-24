@@ -15,45 +15,18 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.commons.enums;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobContent;
 
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 /**
- * @description: 数据源类型
+ * @description:
  * @author: yangjianhua
- * @create: 2021-09-15 15:48
+ * @create: 2022-06-24 14:09
  **/
-public enum DataSourceTypeEnum {
-    mysql,
-    postgresql,
-    hive,
-    presto,
-    kylin,
-    phoenix,
-    elasticsearch,
-    mssql,
-    kafka,
-    doris,
-    starrocks,
-    csv,
-    ;
+public interface DIStreamJobContentRepo {
 
-    private static final Map<String, DataSourceTypeEnum> map = Maps.newHashMap();
-
-    static {
-        Arrays.stream(DataSourceTypeEnum.values())
-                .forEach(enumObj -> map.put(enumObj.name(), enumObj));
-    }
-
-    public static Optional<DataSourceTypeEnum> getEnum(String enumName) {
-        if (StringUtils.isEmpty(enumName)) return Optional.empty();
-        return Optional.ofNullable(map.get(enumName));
-    }
+    Optional<DIStreamJobContent> query(Long jobId, Integer version);
 }

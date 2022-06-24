@@ -120,6 +120,8 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
 
+    private final DIStreamJobContentRepo diStreamJobContentRepo;
+
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
                               JobOutputMyDao jobOutputMyDao,
@@ -142,7 +144,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                               DIJobContentRepo diJobContentRepo,
                               SparkJobRepo sparkJobRepo,
                               ScriptJobRepo scriptJobRepo,
-                              KylinJobRepo kylinJobRepo) {
+                              KylinJobRepo kylinJobRepo,
+                              DIStreamJobContentRepo diStreamJobContentRepo) {
         this.devJobInfoMyDao = devJobInfoMyDao;
         this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
@@ -166,6 +169,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.sparkJobRepo = sparkJobRepo;
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
+        this.diStreamJobContentRepo = diStreamJobContentRepo;
     }
 
     @Override
@@ -685,6 +689,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 return scriptResponse;
             case SQL_FLINK:
                 return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
+            case DI_STREAM:
+                return getFlinkCDCJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
@@ -748,6 +754,35 @@ public class JobInfoServiceImpl implements JobInfoService {
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
         flinkSqlResponse.setFlinkVersion(flinkSqlResponse.getConfProp().getOrDefault("Flink-version", "flink-1.10"));
         return flinkSqlResponse;
+    }
+
+    private JobInfoExecuteDetailDto getFlinkCDCJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
+                                                         Integer jobVersion) {
+        // dryRun不需要发布，正常调用jobVersion > 0
+        Integer version = jobVersion;
+        boolean published = false;
+        if (version == null || version < 1) {
+            // 查询发布版本
+            JobPublishRecordCondition recordCond = new JobPublishRecordCondition();
+            recordCond.setJobId(jobId);
+            recordCond.setEnvironment(env);
+            recordCond.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+            List<JobPublishRecord> publishRecordList = jobPublishRecordRepo.queryList(recordCond);
+            checkArgument(!CollectionUtils.isEmpty(publishRecordList), String.format("FlinkCDC作业未发布，请先发布在运行, jobId:%s，环境:%s", jobId, env));
+            version = publishRecordList.get(0).getJobContentVersion();
+            published = true;
+        }
+        Optional<DIStreamJobContent> contentOptional = diStreamJobContentRepo.query(jobId, jobVersion);
+        checkArgument(contentOptional.isPresent(), String.format("未查询到可用的FlinkCDC作业内容, jobId:%s，环境:%s，版本:%s", jobId, env, version));
+        DIStreamJobContent jobContent = contentOptional.get();
+        checkArgument(StringUtils.isNotBlank(jobContent.getCdcTables()), String.format("FlinkCDC作业表配置不合法, jobId:%s，环境:%s，版本:%s", jobId, env, version));
+//        JobInfoExecuteDetailDto.FlinkCDCJobDetailDto cdcJobDetailDto = new JobInfoExecuteDetailDto.FlinkCDCJobDetailDto(baseJobDetailDto);
+        JobInfoExecuteDetailDto.FlinkCDCJobDetailDto cdcJobDetailDto = JSON.parseObject(jobContent.getCdcTables(), JobInfoExecuteDetailDto.FlinkCDCJobDetailDto.class);
+        BeanUtils.copyProperties(baseJobDetailDto, cdcJobDetailDto);
+        cdcJobDetailDto.setJobVersion(jobVersion.toString());
+        cdcJobDetailDto.setPublished(published);
+
+        return cdcJobDetailDto;
     }
 
     @Override
