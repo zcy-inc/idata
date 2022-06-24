@@ -444,10 +444,6 @@ public class JobInfoServiceImpl implements JobInfoService {
             extendProperties.stream()
                     .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
         }
-        if (!confProp.containsKey("logLevel")) {
-            // 给个默认值
-            confProp.put("logLevel", "warn");
-        }
         jobInfoExecuteDetailDto.setConfProp(confProp);
 
         switch (jobTypeEnum) {
@@ -745,6 +741,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                     dataSourceDto.getType(), dbConfigDto));
         });
 
+        if (!baseJobDetailDto.getConfProp().containsKey("logLevel")) {
+            // 给个默认值
+            baseJobDetailDto.getConfProp().put("logLevel", "warn");
+        }
         JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto flinkSqlResponse = new JobInfoExecuteDetailDto.FlinkSqlJobDetailsDto(baseJobDetailDto);
         flinkSqlResponse.setSourceSql(flinkSqlContent.getSourceSql());
         flinkSqlResponse.setUdfList(udfList.stream().map(e -> JobUdfDto.fromModel(e)).collect(Collectors.toList()));
