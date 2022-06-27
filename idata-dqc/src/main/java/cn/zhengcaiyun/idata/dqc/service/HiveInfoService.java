@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.dqc.service;
 
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsFileInfo;
+import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,8 +11,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HiveInfoService {
-//    @Autowired
-//    private HdfsService hdfsService;
+    @Autowired
+    private HdfsService hdfsService;
 
     public void getPartition(String partition) {
         String[] arr = new String[]{"yyyy", "yyyy-MM", "yyyy/MM", "yyyyMM",
@@ -19,8 +21,7 @@ public class HiveInfoService {
     }
 
     public HdfsFileInfo getTableInfo(String databaseName, String tableName, String partition) {
-//        String hdfsPath = "/hive/"+databaseName+".db/"+tableName+"/"+partition;
-//        return hdfsService.getFileInfo(hdfsPath);
-        return null;
+        String hdfsPath = "/hive/"+databaseName+".db/"+tableName+"/"+partition;
+        return hdfsService.getFileInfo(hdfsPath);
     }
 }
