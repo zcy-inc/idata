@@ -193,7 +193,7 @@ public class TableInfoController {
             CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
             changeContentInfo.setColumnNameBefore("-");
             changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
-            changeContentInfo.setChangeDescription("字段新增");
+            changeContentInfo.setChangeDescription("");//字段新增
             changeContentInfo.setChangeType(1);
 
             changeContentInfoList.add(changeContentInfo);
@@ -203,7 +203,7 @@ public class TableInfoController {
             CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
             changeContentInfo.setColumnNameBefore(e.getColumnName());
             changeContentInfo.setColumnNameAfter("-");
-            changeContentInfo.setChangeDescription("字段删除");
+            changeContentInfo.setChangeDescription("");//字段删除
             changeContentInfo.setChangeType(2);
 
             changeContentInfoList.add(changeContentInfo);
