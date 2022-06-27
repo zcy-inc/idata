@@ -27,6 +27,11 @@ public class CompareInfoResponse {
         private String changeDescription;
 
         /**
+         * 修改类型 1：新增，2：删除，3：修改
+         */
+        private Integer changeType;
+
+        /**
          * Hive更新后字段名称
          */
         private String columnNameAfter;
@@ -53,6 +58,14 @@ public class CompareInfoResponse {
 
         public void setColumnNameAfter(String columnNameAfter) {
             this.columnNameAfter = columnNameAfter;
+        }
+
+        public Integer getChangeType() {
+            return changeType;
+        }
+
+        public void setChangeType(Integer changeType) {
+            this.changeType = changeType;
         }
     }
 
