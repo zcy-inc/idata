@@ -680,7 +680,11 @@ public class JobInfoExecuteDetailDto {
 
         private Integer tableNum;
 
-        private String destDbType; // starrocks
+        /**
+         * cdc目标数据源，目前用字符串，后续可以改成和HTool一直的枚举
+         * StarRocks, Kafka, Iceberg
+         */
+        private String destType;
         private String destHost;
 
         private Integer destPort;
@@ -775,12 +779,12 @@ public class JobInfoExecuteDetailDto {
             this.srcTableConfigs = srcTableConfigs;
         }
 
-        public String getDestDbType() {
-            return destDbType;
+        public String getDestType() {
+            return destType;
         }
 
-        public void setDestDbType(String destDbType) {
-            this.destDbType = destDbType;
+        public void setDestType(String destType) {
+            this.destType = destType;
         }
 
         public String getDestHost() {
