@@ -28,8 +28,8 @@ import java.util.TimeZone;
 @MapperScan({"cn.zhengcaiyun.idata.*.dal.dao","cn.zhengcaiyun.idata.dqc.dao"})
 @EnableScheduling
 public class DqcApplication {
-
     private static final Logger log = LoggerFactory.getLogger(DqcApplication.class);
+
     public static void main( String[] args ) {
         SpringApplication.run(DqcApplication.class, args);
         log.info("Dqc server started successfully...");
