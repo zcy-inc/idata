@@ -1,0 +1,73 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  file:
+    path: logs
+  level:
+    cn.zhengcaiyun.idata.user.dal.dao: debug
+
+spring:
+  application:
+    name: idata-portal-server
+  datasource:
+    hikari.poolName: HikariPool-portal-mysql
+    url: jdbc:mysql://mysql-5-7:30106/idata?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+    username: root
+    password: 123456
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      FAIL_ON_INVALID_SUBTYPE: false
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    date-format: yyyy-MM-dd HH:mm:ss.SSS
+    time-zone: Asia/Shanghai
+  flyway:
+    enabled: false
+
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath*:mapper/*.xml # 配置 Mapper XML 地址
+
+auth:
+  jwt:
+    security: mc3dLNBafcps8iAjHA6AMu3csiHjFw5EPCvoFAz85Whb9BSGBxGYnEjVkYKoeKguw9djsTTycuuoiJrgMo4oy3ECJzeuHY4QDAjhSRQZCkdL4TJ7tt
+
+pg:
+  datasource:
+    jdbcUrl: jdbc:postgresql://pgm-9dpnl7hlk20gh0hp1o.pg.rds.aliyuncs.com:3433/db_datapi?currentSchema=idata
+    username: staging
+    password: userOFstaging0726
+
+
+hdfs:
+  #  nameservices: nameservice1
+  #  nn1: 172.29.108.184:8020
+  #  nn2: 172.29.108.185:8020
+  basePath: /tmp/shiyin/
+#  user: hdfs
+
+#yarn:
+#  resourceManagerUri: http://bigdata-master3.cai-inc.com:8088
+
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+access:
+  mode : idata-merge
+
+zcy:
+  is-cloud: ture # 是否是云端，ture：云端，false：本地化
+
+
+
+
+

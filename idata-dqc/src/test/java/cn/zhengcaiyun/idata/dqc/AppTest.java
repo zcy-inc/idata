@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata;
+package cn.zhengcaiyun.idata.dqc;
 
 import static org.junit.Assert.assertTrue;
 

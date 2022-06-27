@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.dqc.dao.MonitorRuleDao">
+  <resultMap id="BaseResultMap" type="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="table_name" jdbcType="VARCHAR" property="tableName" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="rule_type" jdbcType="INTEGER" property="ruleType" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="monitor_obj" jdbcType="VARCHAR" property="monitorObj" />
+    <result column="alarm_level" jdbcType="INTEGER" property="alarmLevel" />
+    <result column="alarm_receiver" jdbcType="VARCHAR" property="alarmReceiver" />
+    <result column="check_type" jdbcType="INTEGER" property="checkType" />
+    <result column="check_mode" jdbcType="INTEGER" property="checkMode" />
+    <result column="compare_type" jdbcType="VARCHAR" property="compareType" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="range_start" jdbcType="BIGINT" property="rangeStart" />
+    <result column="range_end" jdbcType="BIGINT" property="rangeEnd" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="del" jdbcType="TINYINT" property="del" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="editor" jdbcType="VARCHAR" property="editor" />
+    <result column="edit_time" jdbcType="TIMESTAMP" property="editTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, `table_name`, `name`, rule_type, template_id, monitor_obj, alarm_level, alarm_receiver, 
+    check_type, check_mode, compare_type, content, range_start, range_end, `status`, 
+    del, creator, create_time, editor, edit_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from dqc_monitor_rule
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from dqc_monitor_rule
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule" useGeneratedKeys="true">
+    insert into dqc_monitor_rule (`table_name`, `name`, rule_type, 
+      template_id, monitor_obj, alarm_level, 
+      alarm_receiver, check_type, check_mode, 
+      compare_type, content, range_start, 
+      range_end, `status`, del, 
+      creator, create_time, editor, 
+      edit_time)
+    values (#{tableName,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{ruleType,jdbcType=INTEGER}, 
+      #{templateId,jdbcType=BIGINT}, #{monitorObj,jdbcType=VARCHAR}, #{alarmLevel,jdbcType=INTEGER}, 
+      #{alarmReceiver,jdbcType=VARCHAR}, #{checkType,jdbcType=INTEGER}, #{checkMode,jdbcType=INTEGER}, 
+      #{compareType,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{rangeStart,jdbcType=BIGINT}, 
+      #{rangeEnd,jdbcType=BIGINT}, #{status,jdbcType=INTEGER}, #{del,jdbcType=TINYINT}, 
+      #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{editor,jdbcType=VARCHAR}, 
+      #{editTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule" useGeneratedKeys="true">
+    insert into dqc_monitor_rule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="tableName != null">
+        `table_name`,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="ruleType != null">
+        rule_type,
+      </if>
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="monitorObj != null">
+        monitor_obj,
+      </if>
+      <if test="alarmLevel != null">
+        alarm_level,
+      </if>
+      <if test="alarmReceiver != null">
+        alarm_receiver,
+      </if>
+      <if test="checkType != null">
+        check_type,
+      </if>
+      <if test="checkMode != null">
+        check_mode,
+      </if>
+      <if test="compareType != null">
+        compare_type,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="rangeStart != null">
+        range_start,
+      </if>
+      <if test="rangeEnd != null">
+        range_end,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="del != null">
+        del,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="editor != null">
+        editor,
+      </if>
+      <if test="editTime != null">
+        edit_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="tableName != null">
+        #{tableName,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleType != null">
+        #{ruleType,jdbcType=INTEGER},
+      </if>
+      <if test="templateId != null">
+        #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="monitorObj != null">
+        #{monitorObj,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmLevel != null">
+        #{alarmLevel,jdbcType=INTEGER},
+      </if>
+      <if test="alarmReceiver != null">
+        #{alarmReceiver,jdbcType=VARCHAR},
+      </if>
+      <if test="checkType != null">
+        #{checkType,jdbcType=INTEGER},
+      </if>
+      <if test="checkMode != null">
+        #{checkMode,jdbcType=INTEGER},
+      </if>
+      <if test="compareType != null">
+        #{compareType,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeStart != null">
+        #{rangeStart,jdbcType=BIGINT},
+      </if>
+      <if test="rangeEnd != null">
+        #{rangeEnd,jdbcType=BIGINT},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="del != null">
+        #{del,jdbcType=TINYINT},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="editor != null">
+        #{editor,jdbcType=VARCHAR},
+      </if>
+      <if test="editTime != null">
+        #{editTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule">
+    update dqc_monitor_rule
+    <set>
+      <if test="tableName != null">
+        `table_name` = #{tableName,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleType != null">
+        rule_type = #{ruleType,jdbcType=INTEGER},
+      </if>
+      <if test="templateId != null">
+        template_id = #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="monitorObj != null">
+        monitor_obj = #{monitorObj,jdbcType=VARCHAR},
+      </if>
+      <if test="alarmLevel != null">
+        alarm_level = #{alarmLevel,jdbcType=INTEGER},
+      </if>
+      <if test="alarmReceiver != null">
+        alarm_receiver = #{alarmReceiver,jdbcType=VARCHAR},
+      </if>
+      <if test="checkType != null">
+        check_type = #{checkType,jdbcType=INTEGER},
+      </if>
+      <if test="checkMode != null">
+        check_mode = #{checkMode,jdbcType=INTEGER},
+      </if>
+      <if test="compareType != null">
+        compare_type = #{compareType,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="rangeStart != null">
+        range_start = #{rangeStart,jdbcType=BIGINT},
+      </if>
+      <if test="rangeEnd != null">
+        range_end = #{rangeEnd,jdbcType=BIGINT},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="del != null">
+        del = #{del,jdbcType=TINYINT},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="editor != null">
+        editor = #{editor,jdbcType=VARCHAR},
+      </if>
+      <if test="editTime != null">
+        edit_time = #{editTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule">
+    update dqc_monitor_rule
+    set `table_name` = #{tableName,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      rule_type = #{ruleType,jdbcType=INTEGER},
+      template_id = #{templateId,jdbcType=BIGINT},
+      monitor_obj = #{monitorObj,jdbcType=VARCHAR},
+      alarm_level = #{alarmLevel,jdbcType=INTEGER},
+      alarm_receiver = #{alarmReceiver,jdbcType=VARCHAR},
+      check_type = #{checkType,jdbcType=INTEGER},
+      check_mode = #{checkMode,jdbcType=INTEGER},
+      compare_type = #{compareType,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      range_start = #{rangeStart,jdbcType=BIGINT},
+      range_end = #{rangeEnd,jdbcType=BIGINT},
+      `status` = #{status,jdbcType=INTEGER},
+      del = #{del,jdbcType=TINYINT},
+      creator = #{creator,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      editor = #{editor,jdbcType=VARCHAR},
+      edit_time = #{editTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
