@@ -123,7 +123,7 @@ public class ColumnFacade {
         return compareInfoNewDTO;
     }
 
-    public Boolean overwriteList(TableInfoDto tableInfo, CompareInfoNewDTO compareInfoNewDTO) {
+    public List<ColumnInfoDto> overwriteList(TableInfoDto tableInfo, CompareInfoNewDTO compareInfoNewDTO) {
         System.out.println();
         List<ColumnInfoDto> localColumnInfoList = tableInfo.getColumnInfos();
         String dbName = tableInfo.getDbName();
@@ -211,18 +211,7 @@ public class ColumnFacade {
             list.add(column);
         }
 
-        String operator = OperatorContext.getCurrentOperator().getNickname();
-        if (list == null) {
-            List<Long> existColumnIdList = columnInfoService.getColumns(tableId)
-                    .stream()
-                    .map(ColumnInfoDto::getId)
-                    .collect(Collectors.toList());
-            existColumnIdList.forEach(columnId -> columnInfoService.delete(columnId, operator));
-        } else {
-            List<Long> columnIdList = list.stream().map(ColumnInfoDto::getId).collect(Collectors.toList());
-            columnInfoService.createOrEdit(list, tableId, columnIdList, operator);
-        }
-        return true;
+        return list;
     }
 
     private List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> getColumnMetaInfoIncludePartition(String dbName, String tableName) {

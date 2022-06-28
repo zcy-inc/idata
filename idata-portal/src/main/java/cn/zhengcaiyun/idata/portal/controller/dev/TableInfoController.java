@@ -177,12 +177,11 @@ public class TableInfoController {
 
     /**
      * 比较hive不同的相关信息提示
-     * @param tableId
+     * @param tableInfo
      * @return
      */
-    @GetMapping("/pull/hive/info/{tableId}")
-    public RestResult<CompareInfoResponse> pullHiveInfo(@PathVariable("tableId") Long tableId) {
-        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
+    @GetMapping("/pull/hive/info")
+    public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
         CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
 
         CompareInfoResponse response = new CompareInfoResponse();
@@ -237,17 +236,15 @@ public class TableInfoController {
     }
 
     /**
-     * 拉取hive信息
-     * @param tableId
+     * 拉取hive信息覆盖的列信息
+     * @param tableInfo
      * @return
      */
-    @PostMapping("/pull/hive/{tableId}")
-    public RestResult<Boolean> pullHive(@PathVariable("tableId") Long tableId) {
-        TableInfoDto tableInfo = tableInfoService.getTableInfo(tableId);
-
+    @PostMapping("/pull/hive/columns")
+    public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
         CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
-        Boolean overwrite = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
-        return RestResult.success(overwrite);
+        List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
+        return RestResult.success(list);
     }
 
 }
