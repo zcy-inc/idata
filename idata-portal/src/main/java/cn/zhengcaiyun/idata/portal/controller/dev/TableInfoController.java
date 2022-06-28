@@ -180,7 +180,7 @@ public class TableInfoController {
      * @param tableInfo
      * @return
      */
-    @GetMapping("/pull/hive/info")
+    @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
         CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
 
