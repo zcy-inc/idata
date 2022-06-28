@@ -1,24 +1,24 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Button, Form, message, Modal, Space } from 'antd';
-import { useModel } from 'umi';
 import { cloneDeep, get, set } from 'lodash';
 import type { FC } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useModel } from 'umi';
 
 import {
   createTable,
   delTable,
-  getDDL,
   getTable,
   getTableConstruct,
   postSyncMetabase,
   syncHive,
 } from '@/services/datadev';
-import { Table, ForeignKey } from '@/types/datapi';
+import { ForeignKey, Table } from '@/types/datapi';
 
-import ViewTable from './ViewTable';
-import EditTable from './EditTable';
-import DDLModal from './components/DDLModal';
 import { IPane } from '@/models/datadev';
+import DDLModal from './components/DDLModal';
+import SyncHiveFormModal from './components/SyncHiveFormModal';
+import EditTable from './EditTable';
+import ViewTable from './ViewTable';
 
 export interface TabTableProps {
   pane: IPane;
@@ -36,7 +36,8 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
   const [data, setData] = useState<Table>();
   const [loading, setLoading] = useState<boolean>(false);
   const [metabaseLoading, setMetabaseLoading] = useState<boolean>(false);
-  const [visible, setVisible] = useState(false);
+  const [ddlModalVisible, setDdlModalVisible] = useState(false);
+  const [syncHiveFormModalVisible, setSyncHiveFormModalVisible] = useState(false);
 
   const [label] = Form.useForm();
   const refs = { label };
@@ -162,7 +163,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
       })
       .finally(() => {
         // 手动异步解决视图切换延迟触发多次
-        setTimeout(()=> setLoading(false),100)
+        setTimeout(() => setLoading(false), 100);
       });
   };
 
@@ -241,7 +242,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
             <Button key="hive" size="large" onClick={onSyncHive}>
               同步Hive
             </Button>
-            <Button key="edit" size="large" onClick={() => setVisible(true)}>
+            <Button key="edit" size="large" onClick={() => setDdlModalVisible(true)}>
               DDL模式
             </Button>
             <Button key="metabase" size="large" onClick={syncMetabase} loading={metabaseLoading}>
@@ -254,6 +255,9 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         )}
         {mode === 'edit' && (
           <Space>
+            <Button key="hive" size="large" onClick={() => setSyncHiveFormModalVisible(true)}>
+              同步Hive表结构
+            </Button>
             <Button key="save" size="large" type="primary" onClick={onSubmit} loading={loading}>
               保存
             </Button>
@@ -263,10 +267,22 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           </Space>
         )}
       </div>
-      {visible && (
+      {ddlModalVisible && (
         <DDLModal
-          visible={visible}
-          onCancel={() => setVisible(false)}
+          visible={ddlModalVisible}
+          onCancel={() => setDdlModalVisible(false)}
+          data={data}
+          generateTableConstruct={generateTableConstruct}
+        />
+      )}
+      {syncHiveFormModalVisible && (
+        <SyncHiveFormModal
+          visible={syncHiveFormModalVisible}
+          onCancel={() => setSyncHiveFormModalVisible(false)}
+          refresh={() => {
+            getTableInfo(data?.id as number );
+            setMode('view');
+          }}
           data={data}
           generateTableConstruct={generateTableConstruct}
         />

@@ -201,7 +201,20 @@ export async function syncHive(data: { tableId: number }) {
     data,
   });
 }
-
+// 表 比较hive不同的相关信息提示
+export async function getCompareHiveChange(params: { tableId: number }) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/info/${params.tableId}`, {
+    method: 'Get',
+    // params,
+  });
+}
+// 表 拉取hive信息
+export async function hiveTableChange(data: { tableId: number }) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/${data.tableId}`, {
+    method: 'POST',
+    data,
+  });
+}
 /* ==================== DataDev ==================== */
 /**
  * 获取功能性文件树
