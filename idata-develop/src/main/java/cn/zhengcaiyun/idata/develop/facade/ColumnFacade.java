@@ -102,9 +102,9 @@ public class ColumnFacade {
                 }
                 String localColumnType = localTypeMapping.get(localColumnTypeDesc);
 
-                if (!StringUtils.equals(localColumnType, hiveColumnType)
+                if (!StringUtils.equalsIgnoreCase(localColumnType, hiveColumnType)
                         || !JiveUtil.commentEquals(localColumnComment, hiveColumnComment)
-                        || (localColumnPartition == hiveColumnPartition)) {
+                        || (localColumnPartition != hiveColumnPartition)) {
                     CompareInfoNewDTO.ChangeColumnInfo changeColumnInfo = new CompareInfoNewDTO.ChangeColumnInfo();
                     changeColumnInfo.setColumnId(localColumnId);
                     changeColumnInfo.setColumnName(columnName);
@@ -124,6 +124,7 @@ public class ColumnFacade {
     }
 
     public Boolean overwriteList(TableInfoDto tableInfo, CompareInfoNewDTO compareInfoNewDTO) {
+        System.out.println();
         List<ColumnInfoDto> localColumnInfoList = tableInfo.getColumnInfos();
         String dbName = tableInfo.getDbName();
         String tableName = tableInfo.getTableName();
@@ -160,7 +161,7 @@ public class ColumnFacade {
 
                 LabelDto labelDto2 = new LabelDto();
                 labelDto2.setLabelCode("columnType:LABEL");
-                labelDto2.setLabelParamValue(hiveTypeMapping.get(hiveColumn.getColumnType().toUpperCase(Locale.ROOT)));
+                labelDto2.setLabelParamValue(hiveTypeMapping.getOrDefault(hiveColumn.getColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
                 labelDto2.setColumnName(columnName);
                 labelDtoList.add(labelDto2);
 
@@ -189,18 +190,22 @@ public class ColumnFacade {
                     LabelDto labelDto = labelDtoMap.get("partitionedCol:LABEL");
                     labelDto.setLabelParamValue(changeColumnInfo.isHivePartition() + "");
                 }
-                if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnComment(), changeColumnInfo.getHiveColumnComment())) {
+                String hiveColumnComment = changeColumnInfo.getHiveColumnComment();
+                if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnComment(), hiveColumnComment)) {
                     LabelDto labelDto = labelDtoMap.computeIfAbsent("columnComment:LABEL", e -> {
                         LabelDto elem = new LabelDto();
                         elem.setColumnName(columnName);
                         elem.setLabelCode("columnComment:LABEL");
                         return elem;
                     });
-                    labelDto.setLabelParamValue(changeColumnInfo.getHiveColumnComment());
+                    if (hiveColumnComment == null) {
+                        hiveColumnComment = "";
+                    }
+                    labelDto.setLabelParamValue(hiveColumnComment);
                 }
                 if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnType(), changeColumnInfo.getHiveColumnType())) {
                     LabelDto labelDto = labelDtoMap.get("columnType:LABEL");
-                    labelDto.setLabelParamValue(hiveTypeMapping.get(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT)));
+                    labelDto.setLabelParamValue(hiveTypeMapping.getOrDefault(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
                 }
             }
             list.add(column);

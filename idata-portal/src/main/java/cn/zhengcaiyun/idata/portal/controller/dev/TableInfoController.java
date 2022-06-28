@@ -215,7 +215,7 @@ public class TableInfoController {
             changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
             changeContentInfo.setChangeType(3);
 
-            StringBuilder stringBuilder = new StringBuilder("字段修改\n");
+            StringBuilder stringBuilder = new StringBuilder("");//字段修改
             if (e.getHiveColumnIndex() != e.getColumnIndex()) {
                 stringBuilder.append("排序变更：" + e.getColumnIndex() + " 改为 " + e.getHiveColumnIndex() + "\n");
             }
