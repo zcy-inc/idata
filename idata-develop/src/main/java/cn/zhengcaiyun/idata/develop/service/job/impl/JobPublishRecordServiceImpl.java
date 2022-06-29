@@ -149,6 +149,11 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         return Boolean.TRUE;
     }
 
+    @Override
+    public List<JobPublishRecord> findJobs(JobPublishRecordCondition condition) {
+        return jobPublishRecordRepo.queryList(condition);
+    }
+
     private Map<String, String> getDwLayer() {
         List<EnumValueDto> enumValueDtoList = enumService.getEnumValues(Constants.DW_LAYER_ENUM_CODE);
         if (ObjectUtils.isEmpty(enumValueDtoList)) return Maps.newHashMap();

@@ -56,8 +56,9 @@ public class DataQueryApiImpl implements DataQueryApi {
     }
 
     @Override
-    public QueryResultDto queryData(String db, String table, String[] columns, long limit, long offset) {
-        return null;
+    public QueryResultDto queryData(String db, String table, String[] columns, Long limit, Long offset) {
+        String jdbcUrl = getConnectionCfg();
+        return prestoService.queryTable(jdbcUrl, db, table, columns, limit, offset);
     }
 
     private String getConnectionCfg() {

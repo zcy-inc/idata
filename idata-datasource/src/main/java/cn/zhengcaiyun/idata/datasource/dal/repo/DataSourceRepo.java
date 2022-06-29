@@ -48,4 +48,5 @@ public interface DataSourceRepo {
 
     List<DataSource> queryDataSource(String name);
 
+    List<DataSource> getDataSources();
 }
