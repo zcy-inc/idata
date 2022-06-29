@@ -49,6 +49,9 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.nonNull;
+
 /**
  * @author caizhedong
  * @date 2021-05-19 11:05
@@ -191,7 +194,14 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
-        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
 
         CompareInfoResponse response = new CompareInfoResponse();
         List<CompareInfoResponse.ChangeContentInfo> changeContentInfoList = new ArrayList<>();
@@ -251,7 +261,15 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
-        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
         List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
         return RestResult.success(list);
     }
