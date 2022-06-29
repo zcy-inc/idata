@@ -28,5 +28,5 @@ public interface DataQueryApi {
 
     QueryResultDto queryData(String db, String table, long limit, long offset);
 
-    QueryResultDto queryData(String db, String table, String[] columns, long limit, long offset);
+    QueryResultDto queryData(String db, String table, String[] columns, Long limit, Long offset);
 }

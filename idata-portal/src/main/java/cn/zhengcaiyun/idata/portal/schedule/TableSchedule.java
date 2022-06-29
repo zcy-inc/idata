@@ -14,22 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.develop.dto.job.di;
+package cn.zhengcaiyun.idata.portal.schedule;
+
+import cn.zhengcaiyun.idata.develop.manager.TableScheduleManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
  * @author caizhedong
- * @date 2021-12-24 上午9:23
+ * @date 2022-06-21 下午7:53
  */
 
-public class DiJobDetailsDto extends DIJobContentContentDto {
-    private String srcDataSourceName;
+@Component
+public class TableSchedule {
 
-    // Gas
-    public String getSrcDataSourceName() {
-        return srcDataSourceName;
-    }
-
-    public void setSrcDataSourceName(String srcDataSourceName) {
-        this.srcDataSourceName = srcDataSourceName;
-    }
+//    private static final String COLUMN_SECURITY_CRON = "0 0 12 * * ?";
+//
+//    @Autowired
+//    private TableScheduleManager tableScheduleManager;
+//
+//    @Scheduled(cron = COLUMN_SECURITY_CRON)
+//    public void syncColumnSecurityDay() throws IllegalAccessException {
+//        tableScheduleManager.syncTableColumnsSecurity();
+//    }
 }
