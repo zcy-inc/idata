@@ -269,6 +269,8 @@ public class TableInfoController {
 
         checkArgument(nonNull(dbName), "数据库为空");
 
+        tableInfo.setDbName(dbName);
+
         CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
         List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
         return RestResult.success(list);
