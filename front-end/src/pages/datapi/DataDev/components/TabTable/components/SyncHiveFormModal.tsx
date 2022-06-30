@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import type { FC } from 'react';
 
-import { hiveTableChange, compareHiveChange } from '@/services/datadev';
+import { compareHiveChange, hiveTableChange } from '@/services/datadev';
 import type { HivechangeContentInfo, Table as HiveTable } from '@/types/datapi';
 
 interface SyncHiveFormModalProps {
@@ -38,7 +38,7 @@ const columns: ColumnsType<HivechangeContentInfo> = [
         <Tag color={HivechangeTypeString?.[record?.changeType]?.color ?? ''}>
           {HivechangeTypeString?.[record?.changeType]?.text ?? '-'}
         </Tag>
-        <pre  dangerouslySetInnerHTML={{ __html: record.changeDescription }}/>
+        <pre dangerouslySetInnerHTML={{ __html: record.changeDescription }} />
       </>
     ),
   },
@@ -63,19 +63,19 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
   useEffect(() => {
     if (data) {
       setTableLoading(true);
-      params = createTableParams()
-      compareHiveChange({...params, id: data.id })
+      params = createTableParams();
+      compareHiveChange({ ...params, id: data.id })
         .then((res) => {
           setDataSource(res?.data?.changeContentInfoList ?? []);
         })
-        .catch((e) => { })
+        .catch((e) => {})
         .finally(() => setTableLoading(false));
     }
   }, [visible]);
 
   return (
     <Modal
-      bodyStyle={{height: '75VH', overflowY: 'auto', padding: 16}}
+      bodyStyle={{ height: '75VH', overflowY: 'auto', padding: 16 }}
       title="同步Hive表结构"
       visible={visible}
       onCancel={onCancel}
@@ -89,16 +89,17 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
           size="large"
           type="primary"
           loading={btnLoading}
-          onClick={() =>{
+          onClick={() => {
             setBtnLoading(true);
-            hiveTableChange({...params, id: data.id }).then((res) => {
-              if (res.success) {
-                onCancel();
-                refresh();
-              }
-            }).finally(() => setBtnLoading(false));
-          }
-        }
+            hiveTableChange({ ...params, id: data.id })
+              .then((res) => {
+                if (res.success) {
+                  onCancel();
+                  refresh(res.data ?? {});
+                }
+              })
+              .finally(() => setBtnLoading(false));
+          }}
         >
           确认覆盖表结构
         </Button>,
