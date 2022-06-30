@@ -39,6 +39,7 @@ public interface TableInfoService {
     List<DevTableInfo> getForeignKeyTables(Long tableId);
     List<DevTableInfo> getTablesByCondition(String tableName);
     TableInfoDto getTableInfoByName(String tableName);
+    List<TableInfoDto> getRequiredTablesInfoByDataBase(String dwLayerCode);
 
     /**
      * 获取table的创建语句DDL

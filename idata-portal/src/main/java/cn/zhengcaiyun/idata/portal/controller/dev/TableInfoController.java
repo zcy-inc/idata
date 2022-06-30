@@ -29,12 +29,15 @@ import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
 import cn.zhengcaiyun.idata.develop.facade.ColumnFacade;
 import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
+import cn.zhengcaiyun.idata.develop.manager.TableScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.portal.model.request.dev.PullHiveInfoRequest;
 import cn.zhengcaiyun.idata.portal.model.response.dev.CompareInfoResponse;
 import cn.zhengcaiyun.idata.portal.model.response.dev.PullHiveResponse;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.nonNull;
 
 /**
  * @author caizhedong
@@ -59,6 +67,10 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private TableScheduleManager tableScheduleManager;
+    @Autowired
+    private UacUserDao uacUserDao;
 
     @Autowired
     private MetadataFacade metadataFacade;
@@ -182,7 +194,14 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
-        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
 
         CompareInfoResponse response = new CompareInfoResponse();
         List<CompareInfoResponse.ChangeContentInfo> changeContentInfoList = new ArrayList<>();
@@ -242,9 +261,26 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
-        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(tableInfo.getDbName(), tableInfo.getTableName(), tableInfo.getColumnInfos());
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+
+        tableInfo.setDbName(dbName);
+
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
         List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
         return RestResult.success(list);
+    }
+    @GetMapping("/syncSecurityColumn")
+    public RestResult syncSecurityColumn(HttpServletRequest request) throws IllegalAccessException {
+        UacUser user = uacUserDao.selectByPrimaryKey(tokenService.getUserId(request)).orElse(null);
+        // 暂时控制权限，只允许系统管理员操作
+        checkArgument(user != null && 2 == user.getSysAdmin(), "无权限同步ODS字段安全等级");
+        return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
     }
 
 }

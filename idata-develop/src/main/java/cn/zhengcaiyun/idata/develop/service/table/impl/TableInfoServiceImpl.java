@@ -121,6 +121,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String COLUMN_PK_LABEL = "pk:LABEL";
+    private final String DW_LAYER_LABEL = "dwLayer:LABEL";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -174,6 +175,17 @@ public class TableInfoServiceImpl implements TableInfoService {
         if (existTableInfo == null) return new TableInfoDto();
 
         return getTableInfoById(existTableInfo.getId());
+    }
+
+    @Override
+    public List<TableInfoDto> getRequiredTablesInfoByDataBase(String dwLayerCode) {
+        List<Long> tableIdList = devLabelDao.selectMany(select(devLabel.tableId)
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DW_LAYER_LABEL)), 
+                        and(devLabel.labelParamValue, isEqualTo(dwLayerCode)))
+                .build().render(RenderingStrategies.MYBATIS3))
+                .stream().map(DevLabel::getTableId).collect(Collectors.toList());
+        return tableIdList.stream().map(this::getTableInfoById).collect(Collectors.toList());
     }
 
     @Override
@@ -277,7 +289,9 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public TableInfoDto create(TableInfoDto tableInfoDto, String operator) throws IllegalAccessException {
-        devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId());
+        if (!"系统管理员".equals(operator)) {
+            devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId());
+        }
 
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(tableInfoDto.getTableName()), "表名称不能为空");
