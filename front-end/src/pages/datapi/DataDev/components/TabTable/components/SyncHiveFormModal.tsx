@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 
 import type { FC } from 'react';
 
-import { hiveTableChange, getCompareHiveChange } from '@/services/datadev';
+import { hiveTableChange, compareHiveChange } from '@/services/datadev';
 import type { HivechangeContentInfo, Table as HiveTable } from '@/types/datapi';
 
 interface SyncHiveFormModalProps {
   visible: boolean;
   onCancel: () => void;
   refresh: () => void;
+  createTableParams: () => HiveTable;
   data: HiveTable;
 }
 
@@ -19,6 +20,8 @@ const HivechangeTypeString = {
   2: { text: '字段删除', color: 'magenta' },
   3: { text: '字段修改', color: 'orange' },
 };
+
+let params: HiveTable;
 
 const columns: ColumnsType<HivechangeContentInfo> = [
   {
@@ -49,6 +52,7 @@ const columns: ColumnsType<HivechangeContentInfo> = [
 const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
   visible,
   onCancel,
+  createTableParams,
   data,
   refresh,
 }) => {
@@ -59,7 +63,8 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
   useEffect(() => {
     if (data) {
       setTableLoading(true);
-      getCompareHiveChange({ tableId: data.id })
+      params = createTableParams()
+      compareHiveChange({...params, id: data.id })
         .then((res) => {
           setDataSource(res?.data?.changeContentInfoList ?? []);
         })
@@ -86,10 +91,10 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
           loading={btnLoading}
           onClick={() =>{
             setBtnLoading(true);
-            hiveTableChange({ tableId: data.id }).then((res) => {
+            hiveTableChange({...params, id: data.id }).then((res) => {
               if (res.success) {
                 onCancel();
-                // refresh();
+                refresh();
               }
             }).finally(() => setBtnLoading(false));
           }

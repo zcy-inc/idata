@@ -202,15 +202,15 @@ export async function syncHive(data: { tableId: number }) {
   });
 }
 // 表 比较hive不同的相关信息提示
-export async function getCompareHiveChange(params: { tableId: number }) {
-  return request<DefaultResponse>(`/api/p1/dev/pull/hive/info/${params.tableId}`, {
-    method: 'Get',
-    // params,
+export async function compareHiveChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/info`, {
+    method: 'POST',
+    data,
   });
 }
 // 表 拉取hive信息
-export async function hiveTableChange(data: { tableId: number }) {
-  return request<DefaultResponse>(`/api/p1/dev/pull/hive/${data.tableId}`, {
+export async function hiveTableChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/columns`, {
     method: 'POST',
     data,
   });

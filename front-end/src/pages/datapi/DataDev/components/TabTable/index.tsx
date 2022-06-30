@@ -56,114 +56,115 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
 
   const getTableInfo = (tableId: number) => getTable({ tableId }).then((res) => setData(res.data));
 
+  const createTableParams = (): Table => {
+    let folderId: number = -1;
+    let tableName: string = '';
+    const tableLabels: [] = [];
+    const labels = refTable.current?.labels || new Map();
+    const stData = refTable.current?.stData || [];
+    const colsInfoMap = refTable.current?.columnsMap || new Map();
+    const columnInfos = [];
+    let foreignKeys = refTable.current?.fkData || [];
+
+    // 检查外键字段与参考字段的长度是否一致
+    for (const _ of foreignKeys) {
+      if (_.columnNames.length !== _.referColumnNames.length) {
+        message.error('字段与参考字段的长度不一致');
+        return;
+      }
+    }
+    // 处理tableLabels的入参格式
+    for (const [key, value] of labels.entries()) {
+      if (!value) {
+        continue;
+      }
+      if (key === 'tableName') {
+        tableName = value;
+        continue;
+      }
+      if (key === 'folderId') {
+        folderId = value;
+        continue;
+      }
+      const item = { labelCode: key, labelParamValue: value };
+      if (Array.isArray(value)) {
+        Reflect.deleteProperty(item, 'labelParamValue');
+      }
+      tableLabels.push(item);
+    }
+    // 处理columnInfos的入参格式
+    for (const [i, _] of stData.entries()) {
+      const item = { columnIndex: i, columnName: _.columnName, id: _.id };
+      const columnLabels = [];
+      for (const [key, value] of Object.entries(_)) {
+        if (key === 'key' || key === 'id' || key === 'enableCompare' || key === 'hiveDiff') {
+          continue;
+        }
+        // 检查表结构的必填项
+        const tmp = colsInfoMap.get(key);
+        if (value === null && tmp.labelRequired === 1) {
+          message.error(`表结构-${tmp.labelName}为必填项`);
+          return;
+        }
+        if (key !== 'key' && key !== 'columnName' && key !== 'folderId' && value !== null) {
+          columnLabels.push({
+            columnName: _.columnName,
+            labelCode: key,
+            labelParamValue: value,
+          });
+        }
+      }
+      Object.assign(item, { columnLabels });
+      _.id && Object.assign(item, { id: _.id }); // 当id存在时带上其id表示更新该条数据
+      columnInfos[i] = item;
+    }
+    // 处理foreignKeys的入参格式
+    foreignKeys = foreignKeys?.map((_: any) => {
+      return {
+        ..._,
+        columnNames: _.columnNames.join(','),
+        referColumnNames: _.referColumnNames.join(','),
+      };
+    });
+    //组装入参
+    return {
+      folderId,
+      tableName,
+      tableLabels,
+      columnInfos,
+      foreignKeys,
+    };
+  };
+
   const onSubmit = () => {
+    const isValidate: Promise<boolean> = label.validateFields();
+    if (!isValidate) return false;
+    const params = createTableParams();
+    // 如果data有值, 本次提交为更新, 增加id字段
+    data && Object.assign(params, { id: data.id });
     setLoading(true);
-    label
-      .validateFields()
-      .then(() => {
-        let folderId = -1;
-        let tableName = '';
-        let tableLabels = [];
-        let labels = refTable.current?.labels || new Map();
-        let stData = refTable.current?.stData || [];
-        let colsInfoMap = refTable.current?.columnsMap || new Map();
-        let columnInfos = [];
-        let foreignKeys = refTable.current?.fkData || [];
-        let params = {};
-        // 检查外键字段与参考字段的长度是否一致
-        for (let _ of foreignKeys) {
-          if (_.columnNames.length !== _.referColumnNames.length) {
-            message.error('字段与参考字段的长度不一致');
-            return;
+    createTable(params)
+      .then((res) => {
+        if (res.success) {
+          if (pane.id === -1) {
+            message.success('创建表成功');
+            replaceTab({
+              oldKey: 'newTable',
+              newKey: `${pane.type}_${pane.belong}_${res.data.id}`,
+              title: res.data.tableName,
+              pane: { ...pane, id: res.data.id },
+            });
+          } else {
+            message.success('修改表成功');
+            replaceTab({ oldKey: pane.cid, newKey: pane.cid, title: res.data.tableName, pane });
+            getTableInfo(res.data.id).then(() => setMode('view'));
+            getTreeWrapped();
           }
         }
-        // 处理tableLabels的入参格式
-        for (let [key, value] of labels.entries()) {
-          if (!value) {
-            continue;
-          }
-          if (key === 'tableName') {
-            tableName = value;
-            continue;
-          }
-          if (key === 'folderId') {
-            folderId = value;
-            continue;
-          }
-          const item = { labelCode: key, labelParamValue: value };
-          if (Array.isArray(value)) {
-            Reflect.deleteProperty(item, 'labelParamValue');
-          }
-          tableLabels.push(item);
-        }
-        // 处理columnInfos的入参格式
-        for (let [i, _] of stData.entries()) {
-          const item = { columnIndex: i, columnName: _.columnName, id: _.id };
-          const columnLabels = [];
-          for (let [key, value] of Object.entries(_)) {
-            if (key === 'key' || key === 'id' || key === 'enableCompare' || key === 'hiveDiff') {
-              continue;
-            }
-            // 检查表结构的必填项
-            const tmp = colsInfoMap.get(key);
-            if (value === null && tmp.labelRequired === 1) {
-              message.error(`表结构-${tmp.labelName}为必填项`);
-              return;
-            }
-            if (key !== 'key' && key !== 'columnName' && key !== 'folderId' && value !== null) {
-              columnLabels.push({
-                columnName: _.columnName,
-                labelCode: key,
-                labelParamValue: value,
-              });
-            }
-          }
-          Object.assign(item, { columnLabels });
-          _.id && Object.assign(item, { id: _.id }); // 当id存在时带上其id表示更新该条数据
-          columnInfos[i] = item;
-        }
-        // 处理foreignKeys的入参格式
-        foreignKeys = foreignKeys?.map((_: any) => {
-          return {
-            ..._,
-            columnNames: _.columnNames.join(','),
-            referColumnNames: _.referColumnNames.join(','),
-          };
-        });
-        //组装入参
-        params = {
-          folderId,
-          tableName,
-          tableLabels,
-          columnInfos,
-          foreignKeys,
-        };
-        // 如果data有值, 本次提交为更新, 增加id字段
-        data && Object.assign(params, { id: data.id });
-        createTable(params)
-          .then((res) => {
-            if (res.success) {
-              if (pane.id === -1) {
-                message.success('创建表成功');
-                replaceTab({
-                  oldKey: 'newTable',
-                  newKey: `${pane.type}_${pane.belong}_${res.data.id}`,
-                  title: res.data.tableName,
-                  pane: { ...pane, id: res.data.id },
-                });
-              } else {
-                message.success('修改表成功');
-                replaceTab({ oldKey: pane.cid, newKey: pane.cid, title: res.data.tableName, pane });
-                getTableInfo(res.data.id).then(() => setMode('view'));
-                getTreeWrapped();
-              }
-            }
-          })
-          .finally(() => setLoading(false));
       })
       .finally(() => {
         // 手动异步解决视图切换延迟触发多次
-        setTimeout(() => setLoading(false), 100);
+        setTimeout(() => setLoading(false), 1000);
       });
   };
 
@@ -216,7 +217,6 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         }
         return res;
       })
-      .catch((err) => {});
 
   const onSyncHive = () =>
     syncHive({ tableId: data?.id as number })
@@ -227,7 +227,12 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           message.error(`同步Hive失败：${res.msg}`);
         }
       })
-      .catch((err) => {});
+
+    const showSyncHiveFormModal = () => {
+      const isValidate: Promise<boolean> = label.validateFields();
+      if (!isValidate) return false;
+      setSyncHiveFormModalVisible(true)
+    }
 
   return (
     <Fragment>
@@ -255,7 +260,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         )}
         {mode === 'edit' && (
           <Space>
-            <Button key="hive" size="large" onClick={() => setSyncHiveFormModalVisible(true)}>
+            <Button key="hive" size="large" onClick={showSyncHiveFormModal}>
               同步Hive表结构
             </Button>
             <Button key="save" size="large" type="primary" onClick={onSubmit} loading={loading}>
@@ -280,11 +285,11 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           visible={syncHiveFormModalVisible}
           onCancel={() => setSyncHiveFormModalVisible(false)}
           refresh={() => {
-            getTableInfo(data?.id as number );
+            getTableInfo(data?.id as number);
             setMode('view');
           }}
+          createTableParams={createTableParams}
           data={data}
-          generateTableConstruct={generateTableConstruct}
         />
       )}
     </Fragment>
