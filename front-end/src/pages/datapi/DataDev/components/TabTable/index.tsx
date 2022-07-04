@@ -284,10 +284,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
         <SyncHiveFormModal
           visible={syncHiveFormModalVisible}
           onCancel={() => setSyncHiveFormModalVisible(false)}
-          refresh={() => {
-            getTableInfo(data?.id as number);
-            setMode('view');
-          }}
+          refresh={(newColumnInfos) => setData({...data, columnInfos: newColumnInfos})}
           createTableParams={createTableParams}
           data={data}
         />
