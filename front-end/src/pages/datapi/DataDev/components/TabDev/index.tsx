@@ -211,6 +211,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           ...values,
           jobId: pane.id,
           jobType: TaskTypes.SPARK_PYTHON,
+          resourceHdfsPath: content.resourceHdfsPath,
           appArguments: values.appArguments?.map((_: any) => ({
             argumentValue: _.argumentValue,
             argumentRemark: _.argumentRemark,

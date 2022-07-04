@@ -28,7 +28,9 @@ const SparkPython: ForwardRefRenderFunction<unknown, SparkPythonProps> = (
   }));
 
   useEffect(() => {
-    form.setFieldsValue({ pythonResource: content.pythonResource });
+    if (content) {
+      form.setFieldsValue(content);
+    }
   }, [content]);
 
   return (
