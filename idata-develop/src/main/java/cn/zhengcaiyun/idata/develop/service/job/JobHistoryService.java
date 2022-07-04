@@ -1,9 +1,11 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.hutool.core.date.DateTime;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import com.github.pagehelper.PageInfo;
 
@@ -92,4 +94,14 @@ public interface JobHistoryService {
      */
     List<JobHistoryTableGanttDto> transform(List<JobHistoryGanttDto> list);
 
+    /**
+     * 分页查询作业运行历史
+     *
+     * @param jobId
+     * @param environment
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Integer pageNo, Integer pageSize);
 }

@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
@@ -55,6 +56,14 @@ public class JobHistoryController {
     public RestResult<Boolean> pullSparkSqlJobHistory() {
         jobSchedule.pullSparkSqlJobHistoryDay();
         return RestResult.success(true);
+    }
+
+    @GetMapping("/anotherPage")
+    public RestResult<Page<JobAnotherHistoryDto>> pagingJobHistory(@RequestParam Long jobId,
+                                                                   @RequestParam String environment,
+                                                                   @RequestParam Integer pageNo,
+                                                                   @RequestParam Integer pageSize) {
+        return RestResult.success(jobHistoryService.pagingJobHistory(jobId, environment, pageNo, pageSize));
     }
 
 }
