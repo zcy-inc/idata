@@ -20,7 +20,9 @@ package cn.zhengcaiyun.idata.develop.integration.schedule;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.PageInfoDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskInstanceDto;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 
 import java.util.Date;
@@ -59,10 +61,14 @@ public interface IJobIntegrator {
 
     /**
      * 按任务状态分组统计
+     *
      * @param environment
      * @param startTime
      * @param endTime
      * @return
      */
     List<TaskCountDto> getTaskCountGroupState(String environment, Date startTime, Date endTime);
+
+    PageInfoDto<TaskInstanceDto> pagingJobHistory(Long jobId, String environment, String state,
+                                                  Integer pageNo, Integer pageSize);
 }

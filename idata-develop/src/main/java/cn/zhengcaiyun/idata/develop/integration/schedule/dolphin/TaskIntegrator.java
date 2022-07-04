@@ -29,9 +29,7 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSDependenceNodeRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskCountDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.*;
 import cn.zhengcaiyun.idata.develop.util.DagJobPair;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSONArray;
@@ -45,6 +43,7 @@ import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -315,6 +314,33 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         List<TaskCountDto> list = JSONObject.parseObject(taskCountDtos.toJSONString(), new TypeReference<>() {
         });
         return list;
+    }
+
+    @Override
+    public PageInfoDto<TaskInstanceDto> pagingJobHistory(Long jobId, String environment, String state, Integer pageNo, Integer pageSize) {
+        String projectCode = getDSProjectCode(environment);
+        // 获取task code
+        Long taskCode = getTaskCode(jobId, environment);
+
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-instances/another?pageSize=%d&pageNo=%d", projectCode, pageSize, pageNo);
+        String req_method = "GET";
+        String token = getDSToken(environment);
+
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("taskCode", taskCode.toString());
+        if (!StringUtils.isEmpty(state)) {
+            paramMap.put("stateType", state);
+        }
+
+        HttpInput req_input = buildHttpReq(paramMap, req_url, req_method, token);
+        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        if (!resultDto.isSuccess()) {
+            throw new ExternalIntegrationException(String.format("获取DS任务实例信息失败：%s", resultDto.getMsg()));
+        }
+        JSONObject data = resultDto.getData();
+        PageInfoDto<TaskInstanceDto> pageInfoDto = data.toJavaObject(new TypeReference<PageInfoDto<TaskInstanceDto>>() {
+        });
+        return pageInfoDto;
     }
 
     private void removePrevRelation(String token, String projectCode, Long workflowCode, Long taskCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, List<DagJobPair> removingPrevRelations) {

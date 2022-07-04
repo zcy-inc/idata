@@ -655,6 +655,211 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
+    public static final class FlinkCDCJobDetailDto extends JobInfoExecuteDetailDto {
+
+        public FlinkCDCJobDetailDto() {
+        }
+
+        public FlinkCDCJobDetailDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        private String srcDbType;
+        private String srcHost;
+        private Integer srcPort;
+        private String srcUsername;
+        private String srcPassword;
+        private String srcDbName;
+
+        /**
+         * pgsql抽数时
+         */
+        private String srcSchema;
+
+        private List<CDCTableConfig> srcTableConfigs;
+
+        private Integer tableNum;
+
+        /**
+         * cdc目标数据源，目前用字符串，后续可以改成和HTool一直的枚举
+         * StarRocks, Kafka, Iceberg
+         */
+        private String destType;
+        private String destHost;
+
+        private Integer destPort;
+        private String destUsername;
+        private String destPassword;
+
+        private WriteModeEnum.DiEnum destWriteMode;
+
+        private String jobVersion;
+
+        private Boolean published;
+
+        public static final class CDCTableConfig {
+            /**
+             * 可以传正则表达式：table_*，
+             * 或单表名：table_1，
+             * 或分表：table_[0-9]
+             */
+            private String tablePattern;
+            private Map<String, String> tableProp;
+
+            public String getTablePattern() {
+                return tablePattern;
+            }
+
+            public void setTablePattern(String tablePattern) {
+                this.tablePattern = tablePattern;
+            }
+
+            public Map<String, String> getTableProp() {
+                return tableProp;
+            }
+
+            public void setTableProp(Map<String, String> tableProp) {
+                this.tableProp = tableProp;
+            }
+        }
+
+        public String getSrcDbType() {
+            return srcDbType;
+        }
+
+        public void setSrcDbType(String srcDbType) {
+            this.srcDbType = srcDbType;
+        }
+
+        public String getSrcHost() {
+            return srcHost;
+        }
+
+        public void setSrcHost(String srcHost) {
+            this.srcHost = srcHost;
+        }
+
+        public Integer getSrcPort() {
+            return srcPort;
+        }
+
+        public void setSrcPort(Integer srcPort) {
+            this.srcPort = srcPort;
+        }
+
+        public String getSrcUsername() {
+            return srcUsername;
+        }
+
+        public void setSrcUsername(String srcUsername) {
+            this.srcUsername = srcUsername;
+        }
+
+        public String getSrcPassword() {
+            return srcPassword;
+        }
+
+        public void setSrcPassword(String srcPassword) {
+            this.srcPassword = srcPassword;
+        }
+
+        public String getSrcDbName() {
+            return srcDbName;
+        }
+
+        public void setSrcDbName(String srcDbName) {
+            this.srcDbName = srcDbName;
+        }
+
+        public List<CDCTableConfig> getSrcTableConfigs() {
+            return srcTableConfigs;
+        }
+
+        public void setSrcTableConfigs(List<CDCTableConfig> srcTableConfigs) {
+            this.srcTableConfigs = srcTableConfigs;
+        }
+
+        public String getDestType() {
+            return destType;
+        }
+
+        public void setDestType(String destType) {
+            this.destType = destType;
+        }
+
+        public String getDestHost() {
+            return destHost;
+        }
+
+        public void setDestHost(String destHost) {
+            this.destHost = destHost;
+        }
+
+        public Integer getDestPort() {
+            return destPort;
+        }
+
+        public void setDestPort(Integer destPort) {
+            this.destPort = destPort;
+        }
+
+        public String getDestUsername() {
+            return destUsername;
+        }
+
+        public void setDestUsername(String destUsername) {
+            this.destUsername = destUsername;
+        }
+
+        public String getDestPassword() {
+            return destPassword;
+        }
+
+        public void setDestPassword(String destPassword) {
+            this.destPassword = destPassword;
+        }
+
+        public String getJobVersion() {
+            return jobVersion;
+        }
+
+        public void setJobVersion(String jobVersion) {
+            this.jobVersion = jobVersion;
+        }
+
+        public String getSrcSchema() {
+            return srcSchema;
+        }
+
+        public void setSrcSchema(String srcSchema) {
+            this.srcSchema = srcSchema;
+        }
+
+        public WriteModeEnum.DiEnum getDestWriteMode() {
+            return destWriteMode;
+        }
+
+        public void setDestWriteMode(WriteModeEnum.DiEnum destWriteMode) {
+            this.destWriteMode = destWriteMode;
+        }
+
+        public Integer getTableNum() {
+            return tableNum;
+        }
+
+        public void setTableNum(Integer tableNum) {
+            this.tableNum = tableNum;
+        }
+
+        public Boolean getPublished() {
+            return published;
+        }
+
+        public void setPublished(Boolean published) {
+            this.published = published;
+        }
+    }
+
     public String getJobType() {
         return jobType;
     }
