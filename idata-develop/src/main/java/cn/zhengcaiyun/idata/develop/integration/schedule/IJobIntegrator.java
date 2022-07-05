@@ -70,5 +70,5 @@ public interface IJobIntegrator {
     List<TaskCountDto> getTaskCountGroupState(String environment, Date startTime, Date endTime);
 
     PageInfoDto<TaskInstanceDto> pagingJobHistory(Long jobId, String environment, String state,
-                                                  Integer pageNo, Integer pageSize);
+                                                  Date startTime, Date endTime, Integer pageNo, Integer pageSize);
 }

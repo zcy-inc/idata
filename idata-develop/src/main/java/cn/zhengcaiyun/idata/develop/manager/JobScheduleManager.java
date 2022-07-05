@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -92,8 +93,9 @@ public class JobScheduleManager {
         return jobLatestRecords;
     }
 
-    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Integer pageNo, Integer pageSize) {
-        PageInfoDto<TaskInstanceDto> pageInfoDto = jobIntegrator.pagingJobHistory(jobId, environment, null, pageNo, pageSize);
+    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
+                                                       Integer pageNo, Integer pageSize) {
+        PageInfoDto<TaskInstanceDto> pageInfoDto = jobIntegrator.pagingJobHistory(jobId, environment, null, startTime, endTime, pageNo, pageSize);
         if (Objects.isNull(pageInfoDto) || CollectionUtils.isEmpty(pageInfoDto.getTotalList())) {
             return Page.empty();
         }

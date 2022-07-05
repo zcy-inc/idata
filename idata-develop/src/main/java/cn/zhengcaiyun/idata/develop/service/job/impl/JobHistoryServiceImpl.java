@@ -231,8 +231,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Integer pageNo, Integer pageSize) {
-        return jobScheduleManager.pagingJobHistory(jobId, environment, pageNo, pageSize);
+    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
+                                                       Integer pageNo, Integer pageSize) {
+        return jobScheduleManager.pagingJobHistory(jobId, environment, startTime, endTime, pageNo, pageSize);
     }
 
 }

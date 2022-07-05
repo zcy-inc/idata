@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -317,7 +318,8 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
     }
 
     @Override
-    public PageInfoDto<TaskInstanceDto> pagingJobHistory(Long jobId, String environment, String state, Integer pageNo, Integer pageSize) {
+    public PageInfoDto<TaskInstanceDto> pagingJobHistory(Long jobId, String environment, String state, Date startTime, Date endTime,
+                                                         Integer pageNo, Integer pageSize) {
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobId, environment);
@@ -330,6 +332,13 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         paramMap.put("taskCode", taskCode.toString());
         if (!StringUtils.isEmpty(state)) {
             paramMap.put("stateType", state);
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (!Objects.isNull(startTime)) {
+            paramMap.put("startTime", dateFormat.format(startTime));
+        }
+        if (!Objects.isNull(endTime)) {
+            paramMap.put("endTime", dateFormat.format(endTime));
         }
 
         HttpInput req_input = buildHttpReq(paramMap, req_url, req_method, token);

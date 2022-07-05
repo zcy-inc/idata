@@ -9,6 +9,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import com.github.pagehelper.PageInfo;
 
+import java.util.Date;
 import java.util.List;
 
 public interface JobHistoryService {
@@ -22,6 +23,7 @@ public interface JobHistoryService {
 
     /**
      * 分页任务历史
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -30,6 +32,7 @@ public interface JobHistoryService {
 
     /**
      * topN分组耗时duration
+     *
      * @param startDate
      * @param endDate
      * @param top
@@ -39,6 +42,7 @@ public interface JobHistoryService {
 
     /**
      * topN分组耗时cpu memory
+     *
      * @param startDate
      * @param endDate
      * @param top
@@ -48,6 +52,7 @@ public interface JobHistoryService {
 
     /**
      * 作业历史分页
+     *
      * @param startDateBegin
      * @param startDateEnd
      * @param finishDateBegin
@@ -64,6 +69,7 @@ public interface JobHistoryService {
 
     /**
      * 作业历史查询甘特图
+     *
      * @param startDate
      * @param layerCode
      * @param dagId
@@ -75,6 +81,7 @@ public interface JobHistoryService {
 
     /**
      * 任务最后运行时间
+     *
      * @param jobId
      * @return
      */
@@ -89,6 +96,7 @@ public interface JobHistoryService {
 
     /**
      * 甘特图返回变量格式转换并进行内部排序
+     *
      * @param list
      * @return
      */
@@ -103,5 +111,6 @@ public interface JobHistoryService {
      * @param pageSize
      * @return
      */
-    Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Integer pageNo, Integer pageSize);
+    Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
+                                                Integer pageNo, Integer pageSize);
 }

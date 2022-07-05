@@ -19,6 +19,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+
 @Api("历史作业")
 @RestController
 @RequestMapping("/p1/dev/jobs/history")
@@ -61,9 +63,11 @@ public class JobHistoryController {
     @GetMapping("/anotherPage")
     public RestResult<Page<JobAnotherHistoryDto>> pagingJobHistory(@RequestParam Long jobId,
                                                                    @RequestParam String environment,
+                                                                   @RequestParam Date startTime,
+                                                                   @RequestParam Date endTime,
                                                                    @RequestParam Integer pageNo,
                                                                    @RequestParam Integer pageSize) {
-        return RestResult.success(jobHistoryService.pagingJobHistory(jobId, environment, pageNo, pageSize));
+        return RestResult.success(jobHistoryService.pagingJobHistory(jobId, environment, startTime, endTime, pageNo, pageSize));
     }
 
 }
