@@ -65,9 +65,9 @@ public class JobHistoryController {
                                                                    @RequestParam String environment,
                                                                    @RequestParam Date startTime,
                                                                    @RequestParam Date endTime,
-                                                                   @RequestParam Integer pageNo,
+                                                                   @RequestParam Integer pageNum,
                                                                    @RequestParam Integer pageSize) {
-        return RestResult.success(jobHistoryService.pagingJobHistory(jobId, environment, startTime, endTime, pageNo, pageSize));
+        return RestResult.success(jobHistoryService.pagingJobHistory(jobId, environment, startTime, endTime, pageNum, pageSize));
     }
 
 }
