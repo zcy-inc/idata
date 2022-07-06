@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
+import cn.zhengcaiyun.idata.develop.condition.job.JobAnotherHistoryCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
@@ -231,9 +232,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
-                                                       Integer pageNo, Integer pageSize) {
-        return jobScheduleManager.pagingJobHistory(jobId, environment, startTime, endTime, pageNo, pageSize);
+    public Page<JobAnotherHistoryDto> pagingJobHistory(JobAnotherHistoryCondition condition) {
+        return jobScheduleManager.pagingJobHistory(condition.getJobId(), condition.getEnvironment(), condition.getStartTime(), condition.getEndTime(),
+                condition.getPageNum(), condition.getPageSize());
     }
 
 }

@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.hutool.core.date.DateTime;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.develop.condition.job.JobAnotherHistoryCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
@@ -9,7 +10,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import com.github.pagehelper.PageInfo;
 
-import java.util.Date;
 import java.util.List;
 
 public interface JobHistoryService {
@@ -111,6 +111,5 @@ public interface JobHistoryService {
      * @param pageSize
      * @return
      */
-    Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
-                                                Integer pageNo, Integer pageSize);
+    Page<JobAnotherHistoryDto> pagingJobHistory(JobAnotherHistoryCondition condition);
 }
