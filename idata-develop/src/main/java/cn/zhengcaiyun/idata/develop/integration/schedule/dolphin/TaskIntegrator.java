@@ -335,10 +335,10 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (!Objects.isNull(startTime)) {
-            paramMap.put("startTime", dateFormat.format(startTime));
+            paramMap.put("startDate", dateFormat.format(startTime));
         }
         if (!Objects.isNull(endTime)) {
-            paramMap.put("endTime", dateFormat.format(endTime));
+            paramMap.put("endDate", dateFormat.format(endTime));
         }
 
         HttpInput req_input = buildHttpReq(paramMap, req_url, req_method, token);
