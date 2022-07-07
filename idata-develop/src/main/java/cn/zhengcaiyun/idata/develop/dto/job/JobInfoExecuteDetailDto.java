@@ -417,6 +417,8 @@ public class JobInfoExecuteDetailDto {
          */
         private List<JobUdfDto> udfList; // udfs
 
+        private List<ExternalTableDto> externalTableList;
+
         public String getDestTable() {
             return destTable;
         }
@@ -463,6 +465,66 @@ public class JobInfoExecuteDetailDto {
 
         public void setSourceSql(String sourceSql) {
             this.sourceSql = sourceSql;
+        }
+
+        public List<ExternalTableDto> getExternalTableList() {
+            return externalTableList;
+        }
+
+        public void setExternalTableList(List<ExternalTableDto> externalTableList) {
+            this.externalTableList = externalTableList;
+        }
+
+        public static class ExternalTableDto {
+            /**
+             * StarRocks
+             */
+            private String extSrcType;
+            private String extSrcUrl;
+            private String extSrcUsername;
+            private String extSrcPassword;
+            // k: SourceSql using table, v: 'type' having table
+            private Map<String, String> externalTables;
+
+            public String getExtSrcType() {
+                return extSrcType;
+            }
+
+            public void setExtSrcType(String extSrcType) {
+                this.extSrcType = extSrcType;
+            }
+
+            public String getExtSrcUrl() {
+                return extSrcUrl;
+            }
+
+            public void setExtSrcUrl(String extSrcUrl) {
+                this.extSrcUrl = extSrcUrl;
+            }
+
+            public String getExtSrcUsername() {
+                return extSrcUsername;
+            }
+
+            public void setExtSrcUsername(String extSrcUsername) {
+                this.extSrcUsername = extSrcUsername;
+            }
+
+            public String getExtSrcPassword() {
+                return extSrcPassword;
+            }
+
+            public void setExtSrcPassword(String extSrcPassword) {
+                this.extSrcPassword = extSrcPassword;
+            }
+
+            public Map<String, String> getExternalTables() {
+                return externalTables;
+            }
+
+            public void setExternalTables(Map<String, String> externalTables) {
+                this.externalTables = externalTables;
+            }
         }
     }
 
