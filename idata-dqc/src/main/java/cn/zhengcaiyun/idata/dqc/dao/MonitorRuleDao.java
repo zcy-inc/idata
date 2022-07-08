@@ -1,17 +1,37 @@
 package cn.zhengcaiyun.idata.dqc.dao;
 
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule;
+import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
+import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public interface MonitorRuleDao {
-    int deleteByPrimaryKey(Long id);
+    int insert(@Param("rule") MonitorRule record);
 
-    int insert(MonitorRule record);
+    MonitorRule getById(Long id);
 
-    int insertSelective(MonitorRule record);
+    List<MonitorRuleVO> getByPage(@Param("query") MonitorRuleQuery query);
 
-    MonitorRule selectByPrimaryKey(Long id);
+    Integer getCount(@Param("query") MonitorRuleQuery query);
+    @MapKey("tableName")
+    HashMap<String, MonitorTableVO> getRuleCountByTableName(@Param("tables") List<String> tables);
+    @MapKey("baselineId")
+    HashMap<Long, MonitorTableVO> getRuleCountByBaselineId(@Param("baselineIdList") List<Long> baselineIdList);
 
-    int updateByPrimaryKeySelective(MonitorRule record);
+    int updateNotNull(@Param("rule") MonitorRule record);
 
-    int updateByPrimaryKey(MonitorRule record);
+    boolean del(@Param("baselineId") Long baselineId,@Param("tableName") String tableName,@Param("editor") String editor);
+
+    int update(@Param("rule") MonitorRule record);
+
+    int updateByTemplateId(@Param("rule") MonitorRule rule);
+
+    List<MonitorRuleVO> getScheduleRuleList(@Param("typeList")List<String> typeList,@Param("startIndex")Integer startIndex);
+    List<MonitorRuleVO> getBaselineScheduleRuleList(@Param("typeList")List<String> typeList,@Param("startIndex")Integer startIndex);
 }

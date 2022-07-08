@@ -2,6 +2,8 @@ package cn.zhengcaiyun.idata.dqc.model.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import cn.zhengcaiyun.idata.dqc.model.common.BaseEntity;
 import lombok.Data;
 
 /**
@@ -9,16 +11,15 @@ import lombok.Data;
  * @author 
  */
 @Data
-public class MonitorRule implements Serializable {
-    /**
-     * 主键
-     */
-    private Long id;
+public class MonitorRule extends BaseEntity {
+    private Long baselineId; //默认-1，非基线规则
 
     /**
      * 表名名称
      */
     private String tableName;
+
+    private String fieldName;
 
     /**
      * 规则名称
@@ -26,9 +27,9 @@ public class MonitorRule implements Serializable {
     private String name;
 
     /**
-     * 规则类型，1内置规则，2模板规则，3自定义规则
+     * 规则类型，system内置规则，template模板规则，custom自定义规则
      */
-    private Integer ruleType;
+    private String ruleType;
 
     /**
      * 模板规则id
@@ -56,11 +57,6 @@ public class MonitorRule implements Serializable {
     private Integer checkType;
 
     /**
-     * 校验方式:1与固定值比较，2和上周期比较
-     */
-    private Integer checkMode;
-
-    /**
      * 比较方式：>,>=,<,<=,<>,=,range,up,down
      */
     private String compareType;
@@ -69,6 +65,10 @@ public class MonitorRule implements Serializable {
      * 内置规则为对应的值，自定义规则为sql
      */
     private String content;
+
+    private Integer outputType;
+
+    private Long fixValue;
 
     /**
      * 开始值
@@ -85,29 +85,5 @@ public class MonitorRule implements Serializable {
      */
     private Integer status;
 
-    /**
-     * 是否删除，0否，1是
-     */
-    private Byte del;
-
-    /**
-     * 创建者
-     */
-    private String creator;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 修改者
-     */
-    private String editor;
-
-    /**
-     * 修改时间
-     */
-    private Date editTime;
 
 }

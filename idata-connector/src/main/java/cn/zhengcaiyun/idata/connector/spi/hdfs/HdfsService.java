@@ -126,7 +126,7 @@ public class HdfsService {
         return fs;
     }
 
-    public HdfsFileInfo getFileInfo(String hdfsPath){
+    public HiveTable getHiveTableInfo(String tableName, String hdfsPath){
         Path path = new Path(hdfsPath);
         try (FileSystem fs = createFileSystem()) {
             if (!fs.exists(path)) {
@@ -134,7 +134,7 @@ public class HdfsService {
             }
             FileStatus status = fs.getFileStatus(path);
 
-            return new HdfsFileInfo(status.getAccessTime(),status.getModificationTime(),status.getBlockSize());
+            return new HiveTable(tableName, status.getAccessTime(),status.getModificationTime(),status.getBlockSize());
         } catch (IOException e) {
             log.error(e.getMessage(),e);
         }

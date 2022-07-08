@@ -39,9 +39,9 @@ auth:
 
 pg:
   datasource:
-    jdbcUrl: jdbc:postgresql://pgm-9dpnl7hlk20gh0hp1o.pg.rds.aliyuncs.com:3433/db_datapi?currentSchema=idata
-    username: staging
-    password: userOFstaging0726
+    jdbcUrl: jdbc:postgresql://pgm-9dp8h62q1cz48b2d117910.pg.rds.aliyuncs.com:1921/hive?currentSchema=idata
+    username: zcy_hive
+    password: VzkiigdCSikU
 
 
 hdfs:
@@ -66,6 +66,9 @@ access:
 
 zcy:
   is-cloud: ture # 是否是云端，ture：云端，false：本地化
+
+idataEtl:
+  checkToken: 89f30cec4f8fbc0ccdca079d025be0d4
 
 
 

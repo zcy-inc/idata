@@ -14,10 +14,26 @@ public enum MonitorTemplateEnum {
     FIELD_NOT_NULL("字段值不为空",  "field_not_null");
 
     private String desc;
-    private String type;
+    private String value;
 
-    MonitorTemplateEnum(String desc,String type) {
+    MonitorTemplateEnum(String desc,String value) {
         this.desc = desc;
-        this.type = type;
+        this.value = value;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

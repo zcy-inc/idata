@@ -4,15 +4,29 @@ package cn.zhengcaiyun.idata.connector.spi.hdfs;
  * author:zheng
  * Date:2022/6/23
  */
-public class HdfsFileInfo {
+public class HiveTable {
+    private String tableName;
     private Long createTime;
     private Long modifyTime;
     private Long blockSize;
+    private boolean partitioned;
 
-    public HdfsFileInfo(Long createTime, Long modifyTime, Long blockSize) {
+    public HiveTable() {
+    }
+
+    public HiveTable(String tableName, Long createTime, Long modifyTime, Long blockSize) {
+        this.tableName = tableName;
         this.createTime = createTime;
         this.modifyTime = modifyTime;
         this.blockSize = blockSize;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public Long getCreateTime() {
@@ -37,5 +51,13 @@ public class HdfsFileInfo {
 
     public void setBlockSize(Long blockSize) {
         this.blockSize = blockSize;
+    }
+
+    public boolean isPartitioned() {
+        return partitioned;
+    }
+
+    public void setPartitioned(boolean partitioned) {
+        this.partitioned = partitioned;
     }
 }
