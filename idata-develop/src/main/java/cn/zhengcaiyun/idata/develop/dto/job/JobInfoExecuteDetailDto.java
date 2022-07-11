@@ -747,9 +747,7 @@ public class JobInfoExecuteDetailDto {
          * StarRocks, Kafka, Iceberg
          */
         private String destType;
-        private String destHost;
-
-        private Integer destPort;
+        private List<HostAndPort> destHostPorts;
         private String destUsername;
         private String destPassword;
 
@@ -849,20 +847,12 @@ public class JobInfoExecuteDetailDto {
             this.destType = destType;
         }
 
-        public String getDestHost() {
-            return destHost;
+        public List<HostAndPort> getDestHostPorts() {
+            return destHostPorts;
         }
 
-        public void setDestHost(String destHost) {
-            this.destHost = destHost;
-        }
-
-        public Integer getDestPort() {
-            return destPort;
-        }
-
-        public void setDestPort(Integer destPort) {
-            this.destPort = destPort;
+        public void setDestHostPorts(List<HostAndPort> destHostPorts) {
+            this.destHostPorts = destHostPorts;
         }
 
         public String getDestUsername() {
@@ -919,6 +909,27 @@ public class JobInfoExecuteDetailDto {
 
         public void setPublished(Boolean published) {
             this.published = published;
+        }
+    }
+
+    public static class HostAndPort {
+        private String host;
+        private Integer port;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
         }
     }
 
