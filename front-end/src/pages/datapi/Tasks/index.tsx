@@ -188,7 +188,17 @@ const DataSource: FC = () => {
           查询
         </Button>
       </ProForm>
-      <div>
+      <Tabs
+        className="reset-tabs"
+        activeKey={activeTabKey}
+        style={{ marginTop: 8 }}
+        onChange={(status) => setActiveTabKey(status)}
+      >
+        <TabPane tab="待处理" key={publishListStatusMode.WAITINGTASK}/>
+        <TabPane tab="已处理" key={publishListStatusMode.FINISHTASK}/>
+      </Tabs>
+      {
+        activeTabKey === publishListStatusMode.WAITINGTASK && <div>
         <Button
           onClick={() => {
             if (actionRecords.length) {
@@ -201,15 +211,7 @@ const DataSource: FC = () => {
           批量发布
         </Button>
       </div>
-      <Tabs
-        className="reset-tabs"
-        activeKey={activeTabKey}
-        style={{ marginTop: 8 }}
-        onChange={(status) => setActiveTabKey(status)}
-      >
-        <TabPane tab="待处理" key={publishListStatusMode.WAITINGTASK}/>
-        <TabPane tab="已处理" key={publishListStatusMode.FINISHTASK}/>
-      </Tabs>
+      }
       <Table<TaskListItem>
         rowKey="id"
         columns={columns}

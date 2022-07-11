@@ -243,7 +243,13 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
       </Title>
       <ProForm layout="inline" colon={false} form={form} submitter={false}>
         {renderFormList()}
-        <DESIGNTABLEFolderFormItem label="位置" style={{ width:'216px'}}/>
+        <DESIGNTABLEFolderFormItem
+          label="位置"
+          style={{ width:'216px'}}
+          onChange={(v) => {
+            labelValues.current.set('folderId', v)
+          }}
+        />
         {/* <ProFormSelect
           name="folderId"
           label="位置"

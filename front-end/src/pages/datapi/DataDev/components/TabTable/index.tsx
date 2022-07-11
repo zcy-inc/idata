@@ -136,9 +136,8 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
     };
   };
 
-  const onSubmit = () => {
-    const isValidate: Promise<boolean> = label.validateFields();
-    if (!isValidate) return false;
+  const onSubmit = async () => {
+    await label.validateFields();
     const params = createTableParams();
     // 如果data有值, 本次提交为更新, 增加id字段
     data && Object.assign(params, { id: data.id });
@@ -161,6 +160,9 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
             getTreeWrapped();
           }
         }
+      })
+      .catch((e) => {
+        console.log(e);
       })
       .finally(() => {
         // 手动异步解决视图切换延迟触发多次
@@ -227,10 +229,12 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           message.error(`同步Hive失败：${res.msg}`);
         }
       })
+      .catch((e) => {
+        console.log(e);
+      })
 
-    const showSyncHiveFormModal = () => {
-      const isValidate: Promise<boolean> = label.validateFields();
-      if (!isValidate) return false;
+    const showSyncHiveFormModal = async () => {
+      await label.validateFields();
       setSyncHiveFormModalVisible(true)
     }
 

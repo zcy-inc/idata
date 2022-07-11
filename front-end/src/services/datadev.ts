@@ -897,7 +897,54 @@ export async function runQueryResult(params: {
 }
 
 /**
- * 获取作业历史
+ * 数据开发-作业：获取作业历史
+ */
+ export async function getDevHistory(data: {
+  environment: string,
+  jobId: number;
+  startTime: number;
+  endTime: number;
+  pageNum: number;
+  pageSize: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        content: TaskHistoryItem[];
+        pageNum: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+      };
+    }
+  >(`/api/p1/dev/jobs/history/anotherPage`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 数据开发-作业：查看作业日志
+ */
+ export async function getDevLog(params: {
+  jobId: number;
+  env: string;
+  lineNum: number;
+  skipLineNum: number;
+  taskId: number;
+ }) {
+  return request<
+    DefaultResponse & {
+      data: string;
+    }
+  >(`/api/p1/dev/jobs/dependency/${params.jobId}/running/log`, {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 数据集成：获取作业历史
  */
 export async function getTaskHistory(data: {
   condition: {

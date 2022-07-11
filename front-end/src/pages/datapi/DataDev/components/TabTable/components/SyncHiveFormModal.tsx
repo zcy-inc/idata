@@ -75,7 +75,7 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
 
   return (
     <Modal
-      bodyStyle={{ height: '75VH', overflowY: 'auto', padding: 16 }}
+      bodyStyle={{ maxHeight: '75VH', overflowY: 'auto', padding: 16 }}
       title="同步Hive表结构"
       visible={visible}
       onCancel={onCancel}
@@ -88,6 +88,7 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
           key="hive_createBtb"
           size="large"
           type="primary"
+          disabled={dataSource.length < 1}
           loading={btnLoading}
           onClick={() => {
             setBtnLoading(true);
