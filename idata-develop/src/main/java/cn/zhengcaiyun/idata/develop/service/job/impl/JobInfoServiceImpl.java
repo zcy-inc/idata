@@ -654,12 +654,11 @@ public class JobInfoServiceImpl implements JobInfoService {
 
                             List<SqlJobExternalTableDto.ExternalTableInfo> tables = extTableDto.getTables();
                             checkArgument(!CollectionUtils.isEmpty(tables), "外部表信息为空，jobId:%s，环境:%s", id.toString(), env);
-                            Map<String, String> externalTables = new HashMap<>();
+                            List<String> extSrcTables = new ArrayList<>();
                             for (SqlJobExternalTableDto.ExternalTableInfo extTableInfo : tables) {
-                                String extTableAlias = StringUtils.isNotBlank(extTableInfo.getTableAlias()) ? extTableInfo.getTableAlias() : extTableInfo.getTableName();
-                                externalTables.put(extTableAlias, extTableInfo.getTableName());
+                                extSrcTables.add(extTableInfo.getTableName());
                             }
-                            externalTableDto.setExternalTables(externalTables);
+                            externalTableDto.setExtSrcTables(extSrcTables);
                             externalTableList.add(externalTableDto);
                         }
                     }

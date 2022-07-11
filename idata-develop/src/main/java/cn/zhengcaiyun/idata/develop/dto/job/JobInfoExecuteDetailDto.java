@@ -483,8 +483,8 @@ public class JobInfoExecuteDetailDto {
             private String extSrcUrl;
             private String extSrcUsername;
             private String extSrcPassword;
-            // k: SourceSql using table, v: 'type' having table
-            private Map<String, String> externalTables;
+
+            private List<String> extSrcTables;
 
             public String getExtSrcType() {
                 return extSrcType;
@@ -518,12 +518,12 @@ public class JobInfoExecuteDetailDto {
                 this.extSrcPassword = extSrcPassword;
             }
 
-            public Map<String, String> getExternalTables() {
-                return externalTables;
+            public List<String> getExtSrcTables() {
+                return extSrcTables;
             }
 
-            public void setExternalTables(Map<String, String> externalTables) {
-                this.externalTables = externalTables;
+            public void setExtSrcTables(List<String> extSrcTables) {
+                this.extSrcTables = extSrcTables;
             }
         }
     }
