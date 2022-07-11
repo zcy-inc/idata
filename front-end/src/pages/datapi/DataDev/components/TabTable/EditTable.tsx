@@ -102,7 +102,7 @@ const EditTable: ForwardRefRenderFunction<unknown, EditTableProps> = ({ refs, in
         })
         .catch((err) => {});
     });
-  }, []);
+  }, [initial]);
 
   // 单选
   const onCheck = (list: any[]) => {
