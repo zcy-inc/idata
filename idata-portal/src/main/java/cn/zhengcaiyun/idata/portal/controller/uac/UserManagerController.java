@@ -72,9 +72,10 @@ public class UserManagerController {
     @GetMapping("userFolderTree/{userId}")
     public RestResult<List<FolderTreeNodeDto>> getUserFolderTree(@PathVariable("userId") Long userId,
                                                                  HttpServletRequest request) throws IllegalAccessException {
-        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
-            throw new IllegalAccessException("没有用户管理权限");
-        }
+        // 浑仪接入的数据权限依赖此接口，线上IDATA激活了此校验无法跳过下面的鉴权判断，故注释，后面考虑迁移
+//        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+//            throw new IllegalAccessException("没有用户管理权限");
+//        }
         return RestResult.success(userAccessService.getUserFolderTree(userId));
     }
 
