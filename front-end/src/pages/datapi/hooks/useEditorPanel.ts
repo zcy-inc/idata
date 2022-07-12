@@ -39,8 +39,8 @@ export const useEditorPanel = () => {
 
   // 移除执行结果
   const removeResult = (i: number) => {
-    results.splice(i, 1);
-    setResults([...results]);
+    setResults([...results.slice(0, i), ...results.slice(i+1)]);
+    setResultHeader([...resultHeader.slice(0, i), ...resultHeader.slice(i+1)]);
   };
   const panelProps: EditorPanelProps = {
     expand,
