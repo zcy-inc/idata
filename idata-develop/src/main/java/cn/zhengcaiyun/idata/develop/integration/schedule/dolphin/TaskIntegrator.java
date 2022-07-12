@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -128,6 +129,22 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
+        enableRunning(projectCode, taskCode, environment);
+
+        // 检查作业是否存在对应的dependent节点，若存在，则一起设置
+        List<DSDependenceNode> dsDependenceNodes = dsDependenceNodeRepo.queryDepNodeByPrevTask(taskCode);
+        if (!CollectionUtils.isEmpty(dsDependenceNodes)) {
+            List<Long> depNodeCodes = dsDependenceNodes.stream()
+                    .map(DSDependenceNode::getDependenceNodeCode)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (Long depNodeCode : depNodeCodes) {
+                enableRunning(projectCode, depNodeCode, environment);
+            }
+        }
+    }
+
+    private void enableRunning(String projectCode, Long taskCode, String environment) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
@@ -146,6 +163,22 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
+        disableRunning(projectCode, taskCode, environment);
+
+        // 检查作业是否存在对应的dependent节点，若存在，则一起设置
+        List<DSDependenceNode> dsDependenceNodes = dsDependenceNodeRepo.queryDepNodeByPrevTask(taskCode);
+        if (!CollectionUtils.isEmpty(dsDependenceNodes)) {
+            List<Long> depNodeCodes = dsDependenceNodes.stream()
+                    .map(DSDependenceNode::getDependenceNodeCode)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (Long depNodeCode : depNodeCodes) {
+                disableRunning(projectCode, depNodeCode, environment);
+            }
+        }
+    }
+
+    private void disableRunning(String projectCode, Long taskCode, String environment) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
@@ -164,6 +197,22 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         String projectCode = getDSProjectCode(environment);
         // 获取task code
         Long taskCode = getTaskCode(jobInfo.getId(), environment);
+        publish(projectCode, taskCode, environment);
+
+        // 检查作业是否存在对应的dependent节点，若存在，则一起设置
+        List<DSDependenceNode> dsDependenceNodes = dsDependenceNodeRepo.queryDepNodeByPrevTask(taskCode);
+        if (!CollectionUtils.isEmpty(dsDependenceNodes)) {
+            List<Long> depNodeCodes = dsDependenceNodes.stream()
+                    .map(DSDependenceNode::getDependenceNodeCode)
+                    .distinct()
+                    .collect(Collectors.toList());
+            for (Long depNodeCode : depNodeCodes) {
+                publish(projectCode, depNodeCode, environment);
+            }
+        }
+    }
+
+    private void publish(String projectCode, Long taskCode, String environment) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition/%s/release", projectCode, taskCode);
         String req_method = "POST";
         String token = getDSToken(environment);
@@ -455,6 +504,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         Long prevDagId = dagJobPair.getDagId();
         Long prevWorkflowCode = getWorkflowCode(prevDagId, environment);
         List<Long> prevJobIds = dagJobPair.getJobIds();
+        Map<Long, RunningStateEnum> prevJobStateMap = dagJobPair.getJobStateMap();
         for (Long prevJobId : prevJobIds) {
             Long prevTaskCode = getTaskCode(prevJobId, environment);
             Long dependenceNodeCode;
@@ -462,7 +512,15 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
             List<DSDependenceNode> dsDependenceNodes = dsDependenceNodeRepo.queryDependenceNodeInWorkflow(workflowCode, prevTaskCode);
             if (CollectionUtils.isEmpty(dsDependenceNodes)) {
                 // 创建依赖节点
-                dependenceNodeCode = createDependenceNode(token, projectCode, jobInfo, executeConfig, environment, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId);
+                boolean depNodeState = true;
+                if (!CollectionUtils.isEmpty(prevJobStateMap)) {
+                    RunningStateEnum prevJobStateEnum = prevJobStateMap.get(prevJobId);
+                    if (Objects.nonNull(prevJobStateEnum)) {
+                        depNodeState = RunningStateEnum.pause != prevJobStateEnum;
+                    }
+                }
+                dependenceNodeCode = createDependenceNode(token, projectCode, jobInfo, executeConfig, environment,
+                        prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, depNodeState);
             } else {
                 dependenceNodeCode = dsDependenceNodes.get(0).getDependenceNodeCode();
             }
@@ -487,11 +545,12 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         }
     }
 
-    private Long createDependenceNode(String token, String projectCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId) {
+    private Long createDependenceNode(String token, String projectCode, JobInfo jobInfo, JobExecuteConfig executeConfig, String environment,
+                                      Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId, boolean depNodeState) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/task-definition", projectCode);
         String req_method = "POST";
 
-        Map<String, String> req_param = buildDependenceNodeParam(projectCode, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, jobInfo, executeConfig);
+        Map<String, String> req_param = buildDependenceNodeParam(projectCode, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, jobInfo, executeConfig, depNodeState);
         HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
         ResultDto<JSONObject> resultDto = sendReq(req_input);
         if (!resultDto.isSuccess()) {
@@ -503,21 +562,23 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         return depCode;
     }
 
-    private Map<String, String> buildDependenceNodeParam(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId, JobInfo jobInfo, JobExecuteConfig executeConfig) {
-        String taskJson = buildDependenceNodeJson(projectCode, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, jobInfo, executeConfig);
+    private Map<String, String> buildDependenceNodeParam(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId,
+                                                         JobInfo jobInfo, JobExecuteConfig executeConfig, boolean depNodeState) {
+        String taskJson = buildDependenceNodeJson(projectCode, prevWorkflowCode, prevTaskCode, prevDagId, prevJobId, jobInfo, executeConfig, depNodeState);
 
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("taskDefinitionJson", taskJson);
         return paramMap;
     }
 
-    private String buildDependenceNodeJson(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId, JobInfo jobInfo, JobExecuteConfig executeConfig) {
+    private String buildDependenceNodeJson(String projectCode, Long prevWorkflowCode, Long prevTaskCode, Long prevDagId, Long prevJobId,
+                                           JobInfo jobInfo, JobExecuteConfig executeConfig, boolean depNodeState) {
         JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"depend-node-template-1\",\"description\":\"It is a dependent node\",\"delayTime\":0," + "\"taskType\":\"DEPENDENT\",\"taskParams\":{\"dependence\":{\"relation\":\"AND\",\"dependTaskList\":[{\"relation\":\"AND\",\"dependItemList\":[{\"projectCode\":811464712822784,\"definitionCode\":3602075624352,\"depTaskCode\":3602064345376,\"cycle\":\"day\",\"dateValue\":\"today\"}]}]}," + "\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{\"strategy\":\"FAILED\",\"interval\":null,\"checkInterval\":null,\"enable\":false},\"switchResult\":{}}," + "\"flag\":\"YES\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":0,\"failRetryInterval\":1,\"timeoutFlag\":\"CLOSE\",\"timeoutNotifyStrategy\":\"\",\"timeout\":0,\"environmentCode\":-1}");
 
         String name = "dep#to__t-" + Strings.padStart(prevJobId.toString(), 6, '0') + "__w-" + Strings.padStart(prevDagId.toString(), 6, '0') + "__f-" + Strings.padStart(jobInfo.getId().toString(), 6, '0');
         taskJson.put("name", name);
         taskJson.put("taskType", "DEPENDENT");
-        taskJson.put("flag", "YES");
+        taskJson.put("flag", depNodeState ? "YES" : "NO");
         taskJson.put("taskPriority", "MEDIUM");
         taskJson.put("workerGroup", getDSWorkGroup(executeConfig.getEnvironment()));
         taskJson.put("timeoutFlag", "OPEN");

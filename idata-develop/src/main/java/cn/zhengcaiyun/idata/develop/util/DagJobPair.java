@@ -17,7 +17,10 @@
 
 package cn.zhengcaiyun.idata.develop.util;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -28,6 +31,7 @@ public class DagJobPair {
 
     private final Long dagId;
     private final List<Long> jobIds;
+    private Map<Long, RunningStateEnum> jobStateMap;
 
     public DagJobPair(Long dagId, List<Long> jobIds) {
         this.dagId = dagId;
@@ -40,5 +44,13 @@ public class DagJobPair {
 
     public List<Long> getJobIds() {
         return jobIds;
+    }
+
+    public Map<Long, RunningStateEnum> getJobStateMap() {
+        return jobStateMap;
+    }
+
+    public void setJobStateMap(Map<Long, RunningStateEnum> jobStateMap) {
+        this.jobStateMap = jobStateMap;
     }
 }
