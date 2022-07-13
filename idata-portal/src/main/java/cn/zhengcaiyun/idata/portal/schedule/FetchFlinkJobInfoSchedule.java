@@ -21,7 +21,6 @@ import cn.zhengcaiyun.idata.develop.service.job.FlinkJobCommonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,7 +40,7 @@ public class FetchFlinkJobInfoSchedule {
         this.flinkJobCommonService = flinkJobCommonService;
     }
 
-    @Scheduled(cron = "0 0/5 * * * ?")
+    //    @Scheduled(cron = "0 0/5 * * * ?")
     public void fetchFlinkJobInfo() {
         LOGGER.info("Start to fetchFlinkJobInfo... ...");
         flinkJobCommonService.fetchFlinkJobId();

@@ -69,9 +69,9 @@ public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
 
         String flinkJobUrl = trackingUrl + "jobs/overview";
         HttpInput httpInput = new HttpInput();
-        httpInput.setServerName("[Flink Job Manager]");
+        httpInput.setServerName("Flink Job Manager");
         httpInput.setUri(flinkJobUrl);
-        httpInput.setMethod("get");
+        httpInput.setMethod("GET");
 
         JSONObject result = HttpClientUtil.executeHttpRequest(httpInput, new TypeReference<JSONObject>() {
         });
