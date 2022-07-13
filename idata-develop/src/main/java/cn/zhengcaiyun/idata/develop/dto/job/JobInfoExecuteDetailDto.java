@@ -757,6 +757,8 @@ public class JobInfoExecuteDetailDto {
 
         private Boolean published;
 
+        private Boolean initFromSavePoint;
+
         public static final class CDCTableConfig {
             /**
              * 可以传正则表达式：table_*，
@@ -765,6 +767,11 @@ public class JobInfoExecuteDetailDto {
              */
             private String tablePattern;
             private Map<String, String> tableProp;
+
+            /**
+             * 当initFromSavePoint为true时，flinkJobId不为空则从savePoint启动flink job
+             */
+            private String flinkJobId;
 
             public String getTablePattern() {
                 return tablePattern;
@@ -780,6 +787,14 @@ public class JobInfoExecuteDetailDto {
 
             public void setTableProp(Map<String, String> tableProp) {
                 this.tableProp = tableProp;
+            }
+
+            public String getFlinkJobId() {
+                return flinkJobId;
+            }
+
+            public void setFlinkJobId(String flinkJobId) {
+                this.flinkJobId = flinkJobId;
             }
         }
 
@@ -909,6 +924,14 @@ public class JobInfoExecuteDetailDto {
 
         public void setPublished(Boolean published) {
             this.published = published;
+        }
+
+        public Boolean getInitFromSavePoint() {
+            return initFromSavePoint;
+        }
+
+        public void setInitFromSavePoint(Boolean initFromSavePoint) {
+            this.initFromSavePoint = initFromSavePoint;
         }
     }
 
