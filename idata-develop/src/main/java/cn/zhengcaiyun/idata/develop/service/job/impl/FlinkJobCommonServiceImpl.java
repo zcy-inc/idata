@@ -81,7 +81,7 @@ public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
             String name = (String) jobObject.get("name");
             String jid = (String) jobObject.get("jid");
             Long startTime = (Long) jobObject.get("start-time");
-            Long duration = (Long) jobObject.get("duration");
+            Integer duration = (Integer) jobObject.get("duration");
         }
     }
 }
