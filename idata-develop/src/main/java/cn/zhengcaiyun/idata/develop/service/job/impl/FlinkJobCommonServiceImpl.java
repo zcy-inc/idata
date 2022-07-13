@@ -62,12 +62,12 @@ public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
     }
 
     private void processCDCJob(ClusterAppDto appDto) {
-        String trackingUI = appDto.getTrackingUI();
-        if (StringUtils.isBlank(trackingUI)) {
+        String trackingUrl = appDto.getTrackingUrl();
+        if (StringUtils.isBlank(trackingUrl)) {
             return;
         }
 
-        String flinkJobUrl = trackingUI.substring(0, trackingUI.indexOf("/#/overview")) + "/jobs/overview";
+        String flinkJobUrl = trackingUrl + "/jobs/overview";
         HttpInput httpInput = new HttpInput();
         httpInput.setServerName("[Flink Job Manager]");
         httpInput.setUri(flinkJobUrl);

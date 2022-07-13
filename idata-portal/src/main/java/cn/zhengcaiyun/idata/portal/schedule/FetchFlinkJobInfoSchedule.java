@@ -41,7 +41,7 @@ public class FetchFlinkJobInfoSchedule {
         this.flinkJobCommonService = flinkJobCommonService;
     }
 
-    @Scheduled(cron = "0 10 23 * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void fetchFlinkJobInfo() {
         LOGGER.info("Start to fetchFlinkJobInfo... ...");
         flinkJobCommonService.fetchFlinkJobId();

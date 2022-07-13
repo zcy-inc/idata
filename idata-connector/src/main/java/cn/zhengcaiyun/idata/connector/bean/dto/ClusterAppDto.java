@@ -128,7 +128,7 @@ public class ClusterAppDto {
      */
     private String amContainerLogs;
 
-    private String trackingUI;
+    private String trackingUrl;
 
     public String getAppId() {
         return appId;
@@ -290,11 +290,11 @@ public class ClusterAppDto {
         this.amContainerLogs = amContainerLogs;
     }
 
-    public String getTrackingUI() {
-        return trackingUI;
+    public String getTrackingUrl() {
+        return trackingUrl;
     }
 
-    public void setTrackingUI(String trackingUI) {
-        this.trackingUI = trackingUI;
+    public void setTrackingUrl(String trackingUrl) {
+        this.trackingUrl = trackingUrl;
     }
 }
