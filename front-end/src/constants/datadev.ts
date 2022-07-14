@@ -137,8 +137,8 @@ export enum publishListStatusMode {
 }
 
 export const publishListStatus = {
-  [publishListStatusMode.FINISHTASK]:[1], // 已处理
-  [publishListStatusMode.WAITINGTASK]:[2,4,9], // 待处理
+  [publishListStatusMode.FINISHTASK]:[2,4,9], // 已处理
+  [publishListStatusMode.WAITINGTASK]:[1], // 待处理
 }
 
 export enum EnvRunningState {

@@ -162,7 +162,7 @@ const DataSource: FC = () => {
           options={taskTypes.map((_) => ({ label: _.code, value: _.code }))}
         />
         <ProFormText
-          name="approveOperator"
+          name="submitOperator"
           label="提交人"
           placeholder="请输入"
           fieldProps={{ style: { width: 200 }, size: 'large' }}

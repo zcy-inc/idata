@@ -32,7 +32,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
 
   useEffect(() => {
     if (visible && data) {
-      getTaskHistoryWrapped(0);
+      getTaskHistoryWrapped(1);
     }
   }, [visible, data, activeKey]);
 
