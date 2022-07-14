@@ -39,14 +39,10 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
   const getTaskHistoryWrapped = (pageNum: number) => {
     setLoading(false);
     getDevHistory({
-      jobId: 2566,
-      environment: "prod",
-      startTime: 1657094561000,
-      endTime: 1657101761000,
-      // environment: activeKey,
-      // jobId: data?.id as number,
-      // startTime: moment().endOf('day').subtract(7, 'days').valueOf(),
-      // endTime: moment().endOf('day').valueOf(),
+      environment: activeKey,
+      jobId: data?.id as number,
+      startTime: moment().endOf('day').subtract(7, 'days').valueOf(),
+      endTime: moment().endOf('day').valueOf(),
       pageNum,
       pageSize: 10,
     })
@@ -55,24 +51,15 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
         setHistory(res.data.content);
       })
       .catch((err) => {
-        setHistory([
-          {
-            jobId: 1,
-            taskInstanceId: 2,
-            taskInstanceName: '3',
-            submitTime: new Date().getTime(),
-            startTime: new Date().getTime(),
-            endTime: new Date().getTime(),
-            environment: 'PROD'
-          }
-        ]);
+        console.log(err);
+        setTotal(0);
+        setHistory([]);
       })
       .finally(() => setLoading(false));
   };
 
   const toggleMonacoModal = (l:any) => {
     setLog(l);
-    console.log('l', l);
   };
 
   return (
@@ -111,25 +98,37 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
               dataIndex: 'submitTime',
               key: 'submitTime',
               render: (_) => moment(_).format(fmt),
+              fixed:'left',
+              width: 200,
             },
             {
               title: '开始时间',
               dataIndex: 'startTime',
               key: 'startTime',
-              render: (_) => moment(_).format(fmt),
+              render: (_) => _ ? moment(_).format(fmt) : '-',
+              width: 200,
             },
             {
               title: '结束时间',
               dataIndex: 'endTime	',
               key: 'endTime	',
-              render: (_) => moment(_).format(fmt),
+              render: (_) => _ ? moment(_).format(fmt) : '-',
+              width: 200,
             },
-            { title: '执行时长', dataIndex: 'duration', key: 'duration' },
-            { title: '工作流实例', dataIndex: 'processInstanceName', key: 'processInstanceName' },
-            { title: '状态', dataIndex: 'state', key: 'state' },
+            {
+              title: '执行时长',
+              dataIndex: 'duration',
+              key: 'duration',
+              render: (_) => _ || '-',
+              width: 100,
+            },
+            { title: '工作流实例', dataIndex: 'processInstanceName', key: 'processInstanceName', width: 200, },
+            { title: '状态', dataIndex: 'state', key: 'state', width: 200,},
             {
               title: '操作',
               key: 'options',
+              fixed:'right',
+              width: 100,
               render: (_) => (
                 <a
                 onClick={() => {
@@ -141,6 +140,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
               ),
             },
           ]}
+          scroll={{ x: 732 }}
           dataSource={history}
           pagination={{
             total,
@@ -150,7 +150,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
         />
       </Drawer>
       {
-        !!log.jobId && !!log.environment && !!log.taskInstanceId && <MonacoModal 
+        !!log.jobId && <MonacoModal 
         visible={!!log.jobId}
         logParam={{
           jobId: log.jobId,
