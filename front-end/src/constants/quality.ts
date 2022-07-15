@@ -1,16 +1,19 @@
-export enum alarmLevelEnum {
-  NORMAL = 'NORMAL',
-  GENERAL = 'GENERAL',
-  IMPORTANT = 'IMPORTANT',
-  SERIOUS = 'SERIOUS',
-}
+export const alarmLevelList = [
+  {value: 1, label: '一般'},
+  {value: 2, label: '重要'},
+  {value: 3, label: '严重'},
+];
 
-export const alarmLevelMap = new Map([
-  [alarmLevelEnum.NORMAL, '无'],
-  [alarmLevelEnum.GENERAL, '一般'],
-  [alarmLevelEnum.IMPORTANT, '重要'],
-  [alarmLevelEnum.SERIOUS, '严重'],
-]);
+export const monitorObjList = [
+  {value: 'field', label: '表'},
+  {value: 'table', label: '字段'},
+];
+
+export const ruleTypeList = [
+  {value: 'system', label: '内置规则'},
+  {value: 'template', label: '模版规则'},
+  {value: 'custom', label: '自定义规则'},
+];
 
 export enum operatorEnum {
   BETWEEN = 'between',
