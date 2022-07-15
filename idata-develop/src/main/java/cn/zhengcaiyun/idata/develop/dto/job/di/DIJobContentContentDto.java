@@ -176,6 +176,16 @@ public class DIJobContentContentDto extends JobContentBaseDto {
      */
     private List<KeyValuePair<String, String>> destPropertyMap;
 
+    /**
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    private String srcTablePt;
+
+    /**
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    private String destTablePt;
+
     public String getSrcDbName() {
         return srcDbName;
     }
@@ -422,6 +432,22 @@ public class DIJobContentContentDto extends JobContentBaseDto {
 
     public void setSrcTableConfig(DITableFashionConfig srcTableConfig) {
         this.srcTableConfig = srcTableConfig;
+    }
+
+    public String getSrcTablePt() {
+        return srcTablePt;
+    }
+
+    public void setSrcTablePt(String srcTablePt) {
+        this.srcTablePt = srcTablePt;
+    }
+
+    public String getDestTablePt() {
+        return destTablePt;
+    }
+
+    public void setDestTablePt(String destTablePt) {
+        this.destTablePt = destTablePt;
     }
 
     public static DIJobContentContentDto from(DIJobContent content) {

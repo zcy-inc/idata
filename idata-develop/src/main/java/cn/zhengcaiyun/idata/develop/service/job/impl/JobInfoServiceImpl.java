@@ -476,9 +476,9 @@ public class JobInfoServiceImpl implements JobInfoService {
                             .map(e -> e.getName())
                             .collect(Collectors.toList());
                     backFlowResponse.setUpdateKey(StringUtils.join(keyNameList, ","));
-
                 } else if (DiConfigModeEnum.SCRIPT.value.equals(bfJobContent.getConfigMode())) {
                     backFlowResponse.setSrcSql(bfJobContent.getScriptQuery());
+                    backFlowResponse.setDestColumnNames(bfJobContent.getScriptSelectColumns());
                     backFlowResponse.setUpdateKey(bfJobContent.getScriptKeyColumns());
                 }
                 backFlowResponse.setParallelism(bfJobContent.getDestShardingNum());

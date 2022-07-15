@@ -12,16 +12,16 @@ Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.126
 {"executeConfig":{"schDryRun":0,"schDagId":1,"execQueue":"root.offline","schTimeOut":0,"schRerunMode":"never","execWarnLevel":"ALARM_LEVEL_LOW:ENUM_VALUE","schPriority":1,"execEngine":"SPARK","execDriverMem":1,"execWorkerMem":1,"execCores":2,"jobId":16,"environment":"stag"},"dependencies":[],"output":{"jobId":16,"environment":"stag"}}
 
 ###
-GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=3016
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=stag&jobId=2695&jobVersion=9
 Accept: application/json
 
 
 ###
-GET http://localhost:8080/api/p0/job/execute-detail?env=prod&jobId=2906
+GET http://localhost:8080/api/p0/job/execute-detail?env=prod&jobId=3107
 Accept: application/json
 
 ###
-GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=2906
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=3107
 Accept: application/json
 
 ###

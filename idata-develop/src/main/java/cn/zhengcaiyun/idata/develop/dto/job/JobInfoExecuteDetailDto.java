@@ -260,6 +260,10 @@ public class JobInfoExecuteDetailDto {
         private Integer parallelism; //新版本
         private Map<String, String> destPropMap; //其余属性定义map
 
+        // 这俩个字段目前仅针对 hive -> doris 回流
+        private String srcTablePt; // 回流数据源（hive）的分区目录信息 例如pt=20220801
+        private String destTablePt; //目标数据源（doris）的分区别名，例如p20220801
+
         public BackFlowDetailDto() {
         }
 
@@ -377,6 +381,22 @@ public class JobInfoExecuteDetailDto {
 
         public void setParallelism(Integer parallelism) {
             this.parallelism = parallelism;
+        }
+
+        public String getSrcTablePt() {
+            return srcTablePt;
+        }
+
+        public void setSrcTablePt(String srcTablePt) {
+            this.srcTablePt = srcTablePt;
+        }
+
+        public String getDestTablePt() {
+            return destTablePt;
+        }
+
+        public void setDestTablePt(String destTablePt) {
+            this.destTablePt = destTablePt;
         }
     }
 
