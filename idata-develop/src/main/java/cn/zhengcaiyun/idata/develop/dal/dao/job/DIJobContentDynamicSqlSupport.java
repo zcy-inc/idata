@@ -236,6 +236,20 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_table_pt")
+    public static final SqlColumn<String> srcTablePt = DI_JOB_CONTENT.srcTablePt;
+
+    /**
+     * Database Column Remarks:
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table_pt")
+    public static final SqlColumn<String> destTablePt = DI_JOB_CONTENT.destTablePt;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-来源表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
@@ -348,6 +362,10 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<String> scriptMergeSqlParam = column("script_merge_sql_param", JDBCType.VARCHAR);
 
         public final SqlColumn<Integer> configMode = column("config_mode", JDBCType.TINYINT);
+
+        public final SqlColumn<String> srcTablePt = column("src_table_pt", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> destTablePt = column("dest_table_pt", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcTables = column("src_tables", JDBCType.LONGVARCHAR);
 

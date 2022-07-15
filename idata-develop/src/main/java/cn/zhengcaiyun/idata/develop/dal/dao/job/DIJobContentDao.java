@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcTopic, srcTablesFashion, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTopic, destTable, destWriteMode, destBeforeWrite, destAfterWrite, destProperties, destShardingNum, destBulkNum, contentHash, scriptSelectColumns, scriptKeyColumns, scriptMergeSqlParam, configMode, srcTables, srcColumns, srcQuery, destColumns, mergeSql, scriptMergeSql, scriptQuery);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, srcTopic, srcTablesFashion, srcReadMode, srcReadFilter, srcReadShardKey, srcShardingNum, destDataSourceType, destDataSourceId, destTopic, destTable, destWriteMode, destBeforeWrite, destAfterWrite, destProperties, destShardingNum, destBulkNum, contentHash, scriptSelectColumns, scriptKeyColumns, scriptMergeSqlParam, configMode, srcTablePt, destTablePt, srcTables, srcColumns, srcQuery, destColumns, mergeSql, scriptMergeSql, scriptQuery);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -89,6 +89,8 @@ public interface DIJobContentDao {
         @Result(column="script_key_columns", property="scriptKeyColumns", jdbcType=JdbcType.VARCHAR),
         @Result(column="script_merge_sql_param", property="scriptMergeSqlParam", jdbcType=JdbcType.VARCHAR),
         @Result(column="config_mode", property="configMode", jdbcType=JdbcType.TINYINT),
+        @Result(column="src_table_pt", property="srcTablePt", jdbcType=JdbcType.VARCHAR),
+        @Result(column="dest_table_pt", property="destTablePt", jdbcType=JdbcType.VARCHAR),
         @Result(column="src_tables", property="srcTables", jdbcType=JdbcType.LONGVARCHAR),
         @Result(column="src_columns", property="srcColumns", jdbcType=JdbcType.LONGVARCHAR),
         @Result(column="src_query", property="srcQuery", jdbcType=JdbcType.LONGVARCHAR),
@@ -154,6 +156,8 @@ public interface DIJobContentDao {
             .map(scriptKeyColumns).toProperty("scriptKeyColumns")
             .map(scriptMergeSqlParam).toProperty("scriptMergeSqlParam")
             .map(configMode).toProperty("configMode")
+            .map(srcTablePt).toProperty("srcTablePt")
+            .map(destTablePt).toProperty("destTablePt")
             .map(srcTables).toProperty("srcTables")
             .map(srcColumns).toProperty("srcColumns")
             .map(srcQuery).toProperty("srcQuery")
@@ -198,6 +202,8 @@ public interface DIJobContentDao {
             .map(scriptKeyColumns).toPropertyWhenPresent("scriptKeyColumns", record::getScriptKeyColumns)
             .map(scriptMergeSqlParam).toPropertyWhenPresent("scriptMergeSqlParam", record::getScriptMergeSqlParam)
             .map(configMode).toPropertyWhenPresent("configMode", record::getConfigMode)
+            .map(srcTablePt).toPropertyWhenPresent("srcTablePt", record::getSrcTablePt)
+            .map(destTablePt).toPropertyWhenPresent("destTablePt", record::getDestTablePt)
             .map(srcTables).toPropertyWhenPresent("srcTables", record::getSrcTables)
             .map(srcColumns).toPropertyWhenPresent("srcColumns", record::getSrcColumns)
             .map(srcQuery).toPropertyWhenPresent("srcQuery", record::getSrcQuery)
@@ -268,6 +274,8 @@ public interface DIJobContentDao {
                 .set(scriptKeyColumns).equalTo(record::getScriptKeyColumns)
                 .set(scriptMergeSqlParam).equalTo(record::getScriptMergeSqlParam)
                 .set(configMode).equalTo(record::getConfigMode)
+                .set(srcTablePt).equalTo(record::getSrcTablePt)
+                .set(destTablePt).equalTo(record::getDestTablePt)
                 .set(srcTables).equalTo(record::getSrcTables)
                 .set(srcColumns).equalTo(record::getSrcColumns)
                 .set(srcQuery).equalTo(record::getSrcQuery)
@@ -310,6 +318,8 @@ public interface DIJobContentDao {
                 .set(scriptKeyColumns).equalToWhenPresent(record::getScriptKeyColumns)
                 .set(scriptMergeSqlParam).equalToWhenPresent(record::getScriptMergeSqlParam)
                 .set(configMode).equalToWhenPresent(record::getConfigMode)
+                .set(srcTablePt).equalToWhenPresent(record::getSrcTablePt)
+                .set(destTablePt).equalToWhenPresent(record::getDestTablePt)
                 .set(srcTables).equalToWhenPresent(record::getSrcTables)
                 .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
                 .set(srcQuery).equalToWhenPresent(record::getSrcQuery)
@@ -353,6 +363,8 @@ public interface DIJobContentDao {
             .set(scriptKeyColumns).equalTo(record::getScriptKeyColumns)
             .set(scriptMergeSqlParam).equalTo(record::getScriptMergeSqlParam)
             .set(configMode).equalTo(record::getConfigMode)
+            .set(srcTablePt).equalTo(record::getSrcTablePt)
+            .set(destTablePt).equalTo(record::getDestTablePt)
             .set(srcTables).equalTo(record::getSrcTables)
             .set(srcColumns).equalTo(record::getSrcColumns)
             .set(srcQuery).equalTo(record::getSrcQuery)
@@ -398,6 +410,8 @@ public interface DIJobContentDao {
             .set(scriptKeyColumns).equalToWhenPresent(record::getScriptKeyColumns)
             .set(scriptMergeSqlParam).equalToWhenPresent(record::getScriptMergeSqlParam)
             .set(configMode).equalToWhenPresent(record::getConfigMode)
+            .set(srcTablePt).equalToWhenPresent(record::getSrcTablePt)
+            .set(destTablePt).equalToWhenPresent(record::getDestTablePt)
             .set(srcTables).equalToWhenPresent(record::getSrcTables)
             .set(srcColumns).equalToWhenPresent(record::getSrcColumns)
             .set(srcQuery).equalToWhenPresent(record::getSrcQuery)
