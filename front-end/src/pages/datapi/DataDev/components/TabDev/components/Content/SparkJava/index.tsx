@@ -35,7 +35,7 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = (
         },
       ]);
       form.setFieldsValue({
-        // upload: data.resourceHdfsPath,
+        upload: data.resourceHdfsPath,
         resourceHdfsPath: data.resourceHdfsPath,
         appArguments: data.appArguments,
         mainClass: data.mainClass,
@@ -53,6 +53,11 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = (
             accept="*"
             maxCount={1}
             fileList={fileList}
+            showUploadList={{
+              showRemoveIcon: false,
+              showPreviewIcon: false
+            }
+            }
             customRequest={({ file, onSuccess, onError }) => {
               const formData = new FormData();
               formData.append('file', file);
