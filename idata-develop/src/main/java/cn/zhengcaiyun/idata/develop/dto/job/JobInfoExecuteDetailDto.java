@@ -751,13 +751,9 @@ public class JobInfoExecuteDetailDto {
         private String destUsername;
         private String destPassword;
 
-        private WriteModeEnum.DiEnum destWriteMode;
-
         private String jobVersion;
 
         private Boolean published;
-
-        private Boolean initFromSavePoint;
 
         public static final class CDCTableConfig {
             /**
@@ -767,6 +763,15 @@ public class JobInfoExecuteDetailDto {
              */
             private String tablePattern;
             private Map<String, String> tableProp;
+
+            /**
+             * 初始化目标表，会删表重建
+             */
+            private Boolean initDestTable;
+            /**
+             * 从SavePoint启动flink job
+             */
+            private Boolean startFromSavePoint;
 
             /**
              * 当initFromSavePoint为true时，flinkJobId不为空则从savePoint启动flink job
@@ -787,6 +792,22 @@ public class JobInfoExecuteDetailDto {
 
             public void setTableProp(Map<String, String> tableProp) {
                 this.tableProp = tableProp;
+            }
+
+            public Boolean getInitDestTable() {
+                return initDestTable;
+            }
+
+            public void setInitDestTable(Boolean initDestTable) {
+                this.initDestTable = initDestTable;
+            }
+
+            public Boolean getStartFromSavePoint() {
+                return startFromSavePoint;
+            }
+
+            public void setStartFromSavePoint(Boolean startFromSavePoint) {
+                this.startFromSavePoint = startFromSavePoint;
             }
 
             public String getFlinkJobId() {
@@ -902,14 +923,6 @@ public class JobInfoExecuteDetailDto {
             this.srcSchema = srcSchema;
         }
 
-        public WriteModeEnum.DiEnum getDestWriteMode() {
-            return destWriteMode;
-        }
-
-        public void setDestWriteMode(WriteModeEnum.DiEnum destWriteMode) {
-            this.destWriteMode = destWriteMode;
-        }
-
         public Integer getTableNum() {
             return tableNum;
         }
@@ -924,14 +937,6 @@ public class JobInfoExecuteDetailDto {
 
         public void setPublished(Boolean published) {
             this.published = published;
-        }
-
-        public Boolean getInitFromSavePoint() {
-            return initFromSavePoint;
-        }
-
-        public void setInitFromSavePoint(Boolean initFromSavePoint) {
-            this.initFromSavePoint = initFromSavePoint;
         }
     }
 
