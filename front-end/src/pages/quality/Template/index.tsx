@@ -1,0 +1,189 @@
+import React, { useEffect, useState } from 'react';
+import ProForm, { ProFormSelect } from '@ant-design/pro-form';
+import { Button, Form, Table, Popconfirm, message, Row } from 'antd';
+import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import type { FC } from 'react';
+import { PageContainer } from '@/components';
+import type { ColumnsType } from 'antd/lib/table/Table';
+import showDrawer from '@/utils/showDrawer';
+import AddTemplate from './components/AddTemplate';
+import type { TemplateItem } from '@/types/quality';
+import { getTemplateList, addTemplate, updateTemplate, deleteMonitor } from '@/services/quality';
+import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
+
+import styles from './index.less';
+
+
+const Monitor: FC<{history: any}> = ({ history }) => {
+  const [data, setData] = useState<TemplateItem[]>([]);
+  const [curPage, setCurPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    getTasksWrapped(1);
+  }, []);
+
+  const getTasksWrapped = (pageNum: number = curPage) => {
+    const params = form.getFieldsValue();
+    const condition: any = {
+      category: params.category,
+      type: params.type
+    };
+    setLoading(true);
+    getTemplateList({ pageSize: 10, curPage: pageNum, ...condition })
+      .then((res) => {
+        setTotal(res.data.totalElements);
+        setData(res.data.data);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleAddTemplate = (row: any = {}) => {
+    const isEdit = !!row.id;
+    showDrawer(`${isEdit ? '编辑' : '新建'}默认规则`, {
+      formProps: {
+        id: row.id
+      },
+      beforeConfirm: (dialog, form, done) => {
+        form.handleSubmit().then((values: any) => {
+          const handler = isEdit ? updateTemplate : addTemplate;
+          const params = isEdit ? {...values, id: row.id} : values;
+          dialog.showLoading();
+          handler(params).then(() => {
+            message.success(`${isEdit ? '修改': '新增'}成功！`);
+            done();
+            getTasksWrapped();
+          }).finally(() => {
+            dialog.hideLoading();
+          })
+        })
+      }
+    }, AddTemplate);
+  }
+
+  const handleDelete = (row: TemplateItem) => {
+    deleteMonitor({id: row.id, isBaseline: false}).then(() => {
+      message.success('删除成功');
+      getTasksWrapped();
+    })
+  }
+
+  const columns: ColumnsType<TemplateItem> = [
+    { title: '规则名称', key: 'name', dataIndex: 'name' },
+    { 
+      title: '规则类型',
+      key: 'type',
+      dataIndex: 'type',
+      render: (_) => ruleTypeList.find(item => item.value === _)?.label || '-'
+    },
+    {
+      title: '纬度',
+      key: 'category',
+      dataIndex: 'category',
+      render: (_) => categoryList.find(item => item.value === _)?.label || '-'
+    },
+    {
+      title: '监控对象',
+      key: 'monitorObj',
+      dataIndex: 'monitorObj',
+      render: (_) => monitorObjList.find(item => item.value === _)?.label || '-'
+    },
+    { title: '创建人', key: 'creator', dataIndex: 'creator' },
+    { title: '创建时间', key: 'createTime', dataIndex: 'createTime' },
+    {
+      title: '状态',
+      key: 'status',
+      dataIndex: 'status',
+      render: (_) => statusList.find(item => item.value === _)?.label || '-'
+    },
+    {
+      title: '操作',
+      key: 'amContainerLogsUrl',
+      dataIndex: 'amContainerLogsUrl',
+      width: 160,
+      fixed: 'right',
+      render: (_, row) => {
+        if(row.type === 'system') {
+          return  '-';
+        }
+        return (
+          <>
+          <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
+            停用
+          </Button>
+          <Button type="link" onClick={() => handleAddTemplate(row)} disabled={row.status === 0}>
+            编辑
+          </Button>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
+            <Button danger type="text">
+              删除
+            </Button>
+          </Popconfirm>
+        </>
+        )
+      },
+    },
+  ];
+
+  return (
+    <PageContainer>
+      <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
+        <ProFormSelect
+          name="category"
+          label="纬度"
+          placeholder="请选择"
+          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          options={categoryList}
+        />
+        <ProFormSelect
+          name="type"
+          label="规则类型"
+          placeholder="请选择"
+          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          options={ruleTypeList}
+        />
+        <Button
+          size="large"
+          icon={<ReloadOutlined />}
+          style={{ margin: '0 0 24px 14px' }}
+          onClick={() => {
+            form.resetFields();
+            getTasksWrapped(1);
+          }}
+        >
+          重置
+        </Button>
+        <Button
+          type="primary"
+          size="large"
+          icon={<SearchOutlined />}
+          style={{ margin: '0 0 24px 16px' }}
+          onClick={() => getTasksWrapped(0)}
+        >
+          查询
+        </Button>
+      </ProForm>
+      <div>
+        <Button onClick={handleAddTemplate}>新建模版规则</Button>
+      </div>
+      <Table<TemplateItem>
+        rowKey="id"
+        columns={columns}
+        dataSource={data}
+        scroll={{ x: 'max-content' }}
+        style={{ marginTop: 16 }}
+        loading={loading}
+        pagination={{
+          total,
+          showSizeChanger: false,
+          showTotal: (t) => `共${t}条`,
+          onChange: (page) => setCurPage(page),
+        }}
+      />
+    </PageContainer>
+  );
+};
+
+export default Monitor;

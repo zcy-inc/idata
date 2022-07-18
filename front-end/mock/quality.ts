@@ -128,5 +128,141 @@ export default {
         "totalPages":0
       }
     })
-  }
+  },
+  'POST /api/monitorRule/add': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":{
+        "id":8,
+        "type":0,
+        "tableName":"dwd.dw_search_query_item_click_di",
+        "name":"自定义sql上升范围",
+        "ruleType":"system",
+        "templateId":-1,
+        "monitorObj":"field",
+        "alarmLevel":1,
+        "alarmReceivers":"元宿",
+        "content":"select 1",
+        "rangeStart":5,
+        "rangeEnd":10
+      }
+    })
+  },
+  'POST /api/monitorRule/update': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":{
+        "id":8,
+        "type":0,
+        "tableName":"dwd.dw_search_query_item_click_di",
+        "name":"自定义sql上升范围",
+        "ruleType":"system",
+        "templateId":-1,
+        "monitorObj":"field",
+        "alarmLevel":1,
+        "alarmReceivers":"元宿",
+        "content":"select 1",
+        "rangeStart":5,
+        "rangeEnd":10
+      }
+    })
+  },
+  'POST /api/monitorTemplate/getByPage': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":	{
+        "data": [{
+          "id": 1,
+          "del": 0,
+          "creator": "系统管理员",
+          "createTime": "2022-06-30 20:19:17.000",
+          "editor": "系统管理员",
+          "editTime": "2022-07-04 10:28:24.000",
+          "type": "system",
+          "monitorObj": "table",
+          "status": 1,
+          "name": "表行数",
+          "category": "integrity",
+          "outputType": 1
+      },{
+        "id": 2,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "name": "产出时间",
+        "category": "integrity",
+        "outputType": 1
+    }],
+        "totalElements": 0,
+        "pageSize": 5,
+        "curPage": 1,
+        "totalPages": 0
+      }
+    })
+  },
+  'POST /api/monitorTemplate/add': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 9,
+        "type": "custom",
+        "monitorObj": "table",
+        "content": "20:00",
+        "name": "表产出时间",
+        "category": "accuracy",
+        "outputType": 1
+        }
+    })
+  },
+  'POST /api/monitorTemplate/update': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 9,
+        "type": "custom",
+        "monitorObj": "table",
+        "content": "20:00",
+        "name": "表产出时间",
+        "category": "accuracy",
+        "outputType": 1
+        }
+    })
+  },
+  'GET /api/monitorTemplate/get/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 9,
+        "del": 0,
+        "creator": "元宿",
+        "createTime": "2022-07-05 15:56:34.000",
+        "editor": "元宿",
+        "editTime": "2022-07-05 16:03:43.000",
+        "type": "template",
+        "monitorObj": "table",
+        "content": "20:00",
+        "status": 0,
+        "name": "表产出时间",
+        "category": "accuracy",
+        "outputType": 1
+      }
+    })
+  },
 };

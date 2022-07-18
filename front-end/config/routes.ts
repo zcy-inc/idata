@@ -68,6 +68,18 @@ export default [
           },
         ]
       },
+      {
+        path: '/quality/template',
+        name: '模版管理',
+        featureCode: 'F_MENU_DATA_QUALITY_TEMPLATE',
+        component: './quality/Template',
+      },
+      {
+        path: '/quality/baseline',
+        name: '基线管理',
+        featureCode: 'F_MENU_DATA_QUALITY_BASE_LINE',
+        component: './quality/Baseline',
+      },
     ],
   },
   {

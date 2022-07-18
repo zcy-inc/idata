@@ -5,14 +5,30 @@ export const alarmLevelList = [
 ];
 
 export const monitorObjList = [
-  {value: 'field', label: '表'},
-  {value: 'table', label: '字段'},
+  {value: 'table', label: '表'},
+  {value: 'field', label: '字段'},
 ];
 
 export const ruleTypeList = [
   {value: 'system', label: '内置规则'},
   {value: 'template', label: '模版规则'},
   {value: 'custom', label: '自定义规则'},
+];
+
+export const categoryList = [
+  {value: 'timely', label: '及时性'},
+  {value: 'accuracy', label: '准确性'},
+  {value: 'integrity', label: '完整性'},
+];
+
+export const statusList = [
+  {value: 1, label: '已启用'},
+  {value: 0, label: '未启用'},
+];
+
+export const outputTypeList = [
+  {value: 1, label: '文本'},
+  {value: 2, label: '数值'},
 ];
 
 export enum operatorEnum {

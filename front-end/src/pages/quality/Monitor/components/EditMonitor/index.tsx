@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { useParams, Prompt } from 'umi';
-import { Button, Form, Table, Input, message, Modal } from 'antd';
+import { Button, Form, Table, Input, message, Modal, Popconfirm } from 'antd';
 import type { FC } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import type { ColumnsType } from 'antd/lib/table/Table';
-import showDialog from '@/utils/showDialog';
+import showDrawer from '@/utils/showDrawer';
 
 import type { MonitorItem,MonitorRuleItem } from '@/types/quality';
-import { getMonitorInfo, editMonitorInfo, getMonitorRules } from '@/services/quality';
+import { getMonitorInfo, editMonitorInfo, getMonitorRules, addMonitorRule } from '@/services/quality';
 import AddMonitorRules from '../AddMonitorRules';
 import styles from './index.less';
 
@@ -55,11 +55,12 @@ const TaskHistory: FC<{history: any}> = ({history}) => {
     })
   }
 
-  const addMonitorRules = () => {
-    showDialog('编辑监控规则', {
-      modalProps: {
+  const addMonitorRules = (row={}) => {
+    showDrawer('编辑监控规则', {
+      drawerProps: {
         width: 800
-      }
+      },
+      beforeConfirm: () => {}
     }, AddMonitorRules)
   }
 
@@ -84,6 +85,10 @@ const TaskHistory: FC<{history: any}> = ({history}) => {
     setIsEdit(false);
   }
 
+  const handleDelete = (row: MonitorRuleItem) => {
+    console.log(row);
+  }
+
   const columns: ColumnsType<MonitorRuleItem> = [
     { title: '规则名称', key: 'name', dataIndex: 'name' },
     { title: '规则类型', key: 'ruleType', dataIndex: 'ruleType' },
@@ -96,22 +101,24 @@ const TaskHistory: FC<{history: any}> = ({history}) => {
     },
     {
       title: '告知人',
-      key: 'alarm_receivers',
-      dataIndex: 'alarm_receivers'
+      key: 'alarmReceivers',
+      dataIndex: 'alarmReceivers'
     },
     {
       title: '操作',
       key: 'amContainerLogsUrl',
       dataIndex: 'amContainerLogsUrl',
       fixed: 'right',
-      render: (_) => (
+      render: (_, row) => (
         <>
-          <a href={_} target="_blank">
+         <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
             编辑
-          </a>
-          <a href={_} target="_blank">
-            删除
-          </a>
+          </Button>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
+            <Button danger type="text">
+              删除
+            </Button>
+          </Popconfirm>
         </>
       ),
     },
@@ -177,8 +184,8 @@ const TaskHistory: FC<{history: any}> = ({history}) => {
     
       <div className={styles.container} style={{marginTop: 16}}>
         <p>监控信息</p>
-        <Button onClick={addMonitorRules}>新增监控规则</Button>
-        <Table<MonitorItem>
+        <Button onClick={() => addMonitorRules()}>新增监控规则</Button>
+        <Table<MonitorRuleItem>
           rowKey="id"
           columns={columns}
           dataSource={data}
