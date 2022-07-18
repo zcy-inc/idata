@@ -277,6 +277,11 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
                 if (BooleanUtils.isTrue(suc)) {
                     deletedIds.add(instanceDto.getId());
                 }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException iex) {
+
+                }
             }
         }
         return deletedIds;
