@@ -196,7 +196,7 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
                 .map(WorkflowDefinitionLog::getVersion)
                 .distinct()
                 .sorted(Comparator.reverseOrder())
-                .skip(100)
+                .skip(20)
                 .collect(Collectors.toList());
         return deleteWorkflowVersions(environment, projectCode, workflowCode, versions);
     }
