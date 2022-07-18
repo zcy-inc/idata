@@ -28,6 +28,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.integration.DSEntityMappingRepo;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.ResultDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.WorkflowDefinitionLog;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.WorkflowInstanceDto;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -201,6 +203,23 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         return deleteWorkflowVersions(environment, projectCode, workflowCode, versions);
     }
 
+    @Override
+    public List<Integer> cleanExecutionHistory(String environment) {
+        // 根据环境获取ds project code
+        String projectCode = getDSProjectCode(environment);
+
+
+    }
+
+    private List<WorkflowInstanceDto> getWorkflowInstances(String environment, String projectCode, Date startTimeBegin, Date startTimeEnd,
+                                                           Integer pageNo, Integer pageSize){
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/{projectCode}/process-instances", projectCode);
+        String req_method = "GET";
+        String token = getDSToken(environment);
+
+
+    }
+
     private List<WorkflowDefinitionLog> getWorkflowDefinitionLogs(String environment, String projectCode, Long workflowCode) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-definition/%s/versions", projectCode, workflowCode);
         String req_method = "GET";
@@ -323,6 +342,13 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
     }
 
     private Map<String, String> buildQueryDagVersionParam(Integer pageNo, Integer pageSize) {
+        Map<String, String> paramMap = Maps.newHashMap();
+        paramMap.put("pageNo", pageNo.toString());
+        paramMap.put("pageSize", pageSize.toString());
+        return paramMap;
+    }
+
+    private Map<String, String> buildQueryWorkflowInstanceParam(Date startTimeBegin, Date startTimeEnd, Integer pageNo, Integer pageSize) {
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("pageNo", pageNo.toString());
         paramMap.put("pageSize", pageSize.toString());
