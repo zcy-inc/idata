@@ -40,16 +40,16 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -203,23 +203,6 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         return deleteWorkflowVersions(environment, projectCode, workflowCode, versions);
     }
 
-    @Override
-    public List<Integer> cleanExecutionHistory(String environment) {
-        // 根据环境获取ds project code
-        String projectCode = getDSProjectCode(environment);
-
-
-    }
-
-    private List<WorkflowInstanceDto> getWorkflowInstances(String environment, String projectCode, Date startTimeBegin, Date startTimeEnd,
-                                                           Integer pageNo, Integer pageSize){
-        String req_url = getDSBaseUrl(environment) + String.format("/projects/{projectCode}/process-instances", projectCode);
-        String req_method = "GET";
-        String token = getDSToken(environment);
-
-
-    }
-
     private List<WorkflowDefinitionLog> getWorkflowDefinitionLogs(String environment, String projectCode, Long workflowCode) {
         String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-definition/%s/versions", projectCode, workflowCode);
         String req_method = "GET";
@@ -272,6 +255,68 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         ResultDto<Object> resultDto = simpleSendReq(req_input);
         if (!resultDto.isSuccess()) {
             throw new ExternalIntegrationException(String.format("删除DS工作流版本%d失败：%s", version, resultDto.getMsg()));
+        }
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public List<Integer> cleanExecutionHistory(String environment) {
+        // 根据环境获取ds project code
+        String projectCode = getDSProjectCode(environment);
+
+        LocalDateTime now = LocalDateTime.now();
+        Date startTimeBegin = Date.from(now.minusDays(100).atZone(ZoneId.systemDefault()).toInstant());
+        Date startTimeEnd = Date.from(now.minusDays(20).atZone(ZoneId.systemDefault()).toInstant());
+        List<WorkflowInstanceDto> instanceDtoList = getWorkflowInstances(environment, projectCode, startTimeBegin, startTimeEnd,
+                1, 2000);
+
+        List<Integer> deletedIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(instanceDtoList)) {
+            for (WorkflowInstanceDto instanceDto : instanceDtoList) {
+                Boolean suc = deleteWorkflowInstance(environment, projectCode, instanceDto.getId());
+                if (BooleanUtils.isTrue(suc)) {
+                    deletedIds.add(instanceDto.getId());
+                }
+            }
+        }
+        return deletedIds;
+    }
+
+    private List<WorkflowInstanceDto> getWorkflowInstances(String environment, String projectCode, Date startTimeBegin, Date startTimeEnd,
+                                                           Integer pageNo, Integer pageSize) {
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-instances", projectCode);
+        String req_method = "GET";
+        String token = getDSToken(environment);
+
+        Map<String, String> req_param = buildQueryWorkflowInstanceParam(startTimeBegin, startTimeEnd, pageNo, pageSize);
+        HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
+        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        if (!resultDto.isSuccess()) {
+            throw new ExternalIntegrationException(String.format("查询DS工作流运行实例失败：%s", resultDto.getMsg()));
+        }
+
+        JSONObject data = resultDto.getData();
+        JSONArray totalList = data.getJSONArray("totalList");
+        if (totalList.size() == 0) {
+            return Lists.newArrayList();
+        }
+        return JSONObject.parseArray(totalList.toJSONString(), WorkflowInstanceDto.class);
+    }
+
+    private Boolean deleteWorkflowInstance(String environment, String projectCode, Integer instanceId) {
+        String req_url = getDSBaseUrl(environment) + String.format("/projects/%s/process-instances/%s", projectCode, instanceId.toString());
+        String req_method = "DELETE";
+        String token = getDSToken(environment);
+
+        Map<String, String> req_param = new HashMap<>();
+        HttpInput req_input = buildHttpReq(req_param, req_url, req_method, token);
+        ResultDto<JSONObject> resultDto = sendReq(req_input);
+        if (!resultDto.isSuccess()) {
+            if (Objects.equals(resultDto.getCode(), 50001)) {
+                //50001, "process instance id does not exist"
+                return Boolean.TRUE;
+            }
+            throw new ExternalIntegrationException(String.format("删除DS工作流运行实例%s失败：%s", instanceId.toString(), resultDto.getMsg()));
         }
         return Boolean.TRUE;
     }
@@ -352,6 +397,15 @@ public class WorkflowIntegrator extends DolphinIntegrationAdapter implements IDa
         Map<String, String> paramMap = Maps.newHashMap();
         paramMap.put("pageNo", pageNo.toString());
         paramMap.put("pageSize", pageSize.toString());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (!Objects.isNull(startTimeBegin)) {
+            paramMap.put("startDate", dateFormat.format(startTimeBegin));
+        }
+        if (!Objects.isNull(startTimeEnd)) {
+            paramMap.put("endDate", dateFormat.format(startTimeEnd));
+        }
+
         return paramMap;
     }
 

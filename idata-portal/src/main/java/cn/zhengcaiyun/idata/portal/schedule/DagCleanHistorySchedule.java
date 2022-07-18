@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.portal.schedule;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
@@ -69,5 +70,24 @@ public class DagCleanHistorySchedule {
             }
         }
         LOGGER.info("End to cleanDagHistory... ...");
+    }
+
+    @Scheduled(cron = "0 35 22 * * ?")
+    public void cleanDagExecutionHistory() {
+        LOGGER.info("Start to cleanDagExecutionHistory... ...");
+        try {
+            dagService.cleanDagExecutionHistory(EnvEnum.prod);
+            LOGGER.info("Clean Dag execution history successfully in env {}.", EnvEnum.prod);
+        } catch (Exception ex) {
+            LOGGER.warn("Clean Dag execution history successfully in env {}. ex {}", EnvEnum.prod, Throwables.getStackTraceAsString(ex));
+        }
+
+        try {
+            dagService.cleanDagExecutionHistory(EnvEnum.stag);
+            LOGGER.info("Clean Dag execution history successfully in env {}.", EnvEnum.stag);
+        } catch (Exception ex) {
+            LOGGER.warn("Clean Dag execution history successfully in env {}. ex {}", EnvEnum.stag, Throwables.getStackTraceAsString(ex));
+        }
+        LOGGER.info("End to cleanDagExecutionHistory... ...");
     }
 }
