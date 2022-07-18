@@ -49,7 +49,6 @@ const envs = Object.values(Environments).map((_) => _);
 const ruleSelc = [{ required: true, message: '请选择' }];
 
 const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
-  console.log('-------11111--------');
   const [activeKey, setActiveKey] = useState<Environments>(Environments.STAG);
   const [DAGList, setDAGList] = useState<DAGListItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);

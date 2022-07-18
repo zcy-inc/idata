@@ -138,10 +138,10 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
 
   const onSubmit = async () => {
     await label.validateFields();
+    setLoading(true); // 必须在这里set,createTableParams内refTable才能获取最新更新值
     const params = createTableParams();
     // 如果data有值, 本次提交为更新, 增加id字段
     data && Object.assign(params, { id: data.id });
-    setLoading(true);
     createTable(params)
       .then((res) => {
         if (res.success) {
