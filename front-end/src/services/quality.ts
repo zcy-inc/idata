@@ -6,7 +6,8 @@ import type {
   MonitorObj,
   RuleType,
   Category,
-  OutputType
+  OutputType,
+  BaselineItem
 } from '@/types/quality';
 import { request } from 'umi';
 import type { DefaultResponse } from './global';
@@ -144,8 +145,78 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
   });
 }
 
+/**
+ *  删除模板
+ */
+ export async function removeTemplate(params: {id: number;}) {
+  return request<DefaultResponse & { data: TemplateItem } >(`/api/monitorTemplate/del/${params.id}`, {
+    method: 'GET',
+  });
+}
 
+/**
+ *  开启、停止模板
+ */
+ export async function toggleTemplate(params: {id: number;status: number;}) {
+  return request<DefaultResponse & { data: TemplateItem } >(`/api/monitorTemplate/setStatus/${params.id}/${params.status}`, {
+    method: 'GET',
+  });
+}
 
+/* ========== 基线管理 ========== */
+/**
+ *  获取模板列表
+ */
+ export async function getBaselineList(data: {curPage: number; pageSize: number; name: string;}) {
+  return request<DefaultResponse & { data: {data: BaselineItem [], totalElements: number} } >('/api/monitorBaseline/getByPage', {
+    method: 'POST',
+    data
+  });
+}
 
+/**
+ *  新增基线
+ */
+ export async function addBaseline(data: { name: string;}) {
+  return request<DefaultResponse & { data: BaselineItem [] } >('/api/monitorBaseline/add', {
+    method: 'POST',
+    data
+  });
+}
 
+/**
+ *  更新基线
+ */
+ export async function updateBaseline(data: { name: string; id: number;}) {
+  return request<DefaultResponse & { data: BaselineItem [] } >('/api/monitorBaseline/update', {
+    method: 'POST',
+    data
+  });
+}
 
+/**
+ *  获取基线信息
+ */
+ export async function getBaseline(data: { id: string;}) {
+  return request<DefaultResponse & { data: BaselineItem } >(`/api/monitorBaseline/get/${data.id}`, {
+    method: 'GET'
+  });
+}
+
+/**
+ *  删除基线
+ */
+ export async function deleteBaseline(data: { id: number;}) {
+  return request<DefaultResponse & { data: BaselineItem } >(`/api/monitorBaseline/del/${data.id}`, {
+    method: 'GET'
+  });
+}
+
+/**
+ *  卡其、停止基线
+ */
+ export async function toggleBaseline(data: { id: number; status: number;}) {
+  return request<DefaultResponse & { data: BaselineItem} >(`/api/monitorBaseline/setStatus/${data.id}/${data.status}`, {
+    method: 'GET'
+  });
+}

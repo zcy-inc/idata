@@ -76,9 +76,23 @@ export default [
       },
       {
         path: '/quality/baseline',
-        name: '基线管理',
         featureCode: 'F_MENU_DATA_QUALITY_BASE_LINE',
-        component: './quality/Baseline',
+        name: '基线管理',
+        routes: [
+          { path: '/quality/baseline', redirect: '/quality/baseline/list' },
+          {
+            path: '/quality/baseline/list',
+            component: './quality/Baseline',
+            name: '基线管理',
+            hideInMenu: true
+          },
+          {
+            path: '/quality/baseline/edit/:id',
+            name: '基线编辑',
+            component: './quality/baseline/components/EditBaseline',
+            hideInMenu: true
+          },
+        ]
       },
     ],
   },

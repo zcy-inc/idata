@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import { Button, Form, Table, Popconfirm, message } from 'antd';
+import ProForm, { ProFormText } from '@ant-design/pro-form';
+import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
 import { PageContainer } from '@/components';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDialog from '@/utils/showDialog';
-
-import type { TemplateItem } from '@/types/quality';
-import { getMonitorList, addMonitor, deleteMonitor } from '@/services/quality';
-import { alarmLevelList } from '@/constants/quality'
-
+import type { BaselineItem } from '@/types/quality';
+import { getBaselineList, addBaseline, deleteBaseline, toggleBaseline } from '@/services/quality';
+import { statusList } from '@/constants/quality'
+import AddBaseline from './components/AddBaseline';
 import styles from './index.less';
 
 
-const Monitor: FC<{history: any}> = ({ history }) => {
-  const [data, setData] = useState<TemplateItem[]>([]);
+const Baseline: FC<{history: any}> = ({ history }) => {
+  const [data, setData] = useState<BaselineItem[]>([]);
   const [curPage, setCurPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,61 +27,101 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();
     const condition: any = {
-      tableName: params.tableName,
-      alarmLevel: params.alarmLevel,
-      baselineId: -1
+      name: params.name
     };
     setLoading(true);
-    getMonitorList({ pageSize: 10, curPage: pageNum, ...condition })
+    getBaselineList({ pageSize: 10, curPage: pageNum, ...condition })
       .then((res) => {
-        console.log(res);
         setTotal(res.data.totalElements);
         setData(res.data.data);
       })
-      .catch((err) => {})
       .finally(() => setLoading(false));
   };
 
-  const handleAddMonitor = () => {
-   
+  const handleAddBaseline = (row: any = {}) => {
+    showDialog('新建基线', {
+      modalProps: {
+        width: 500
+      },
+      formProps: {
+        id: row.id
+      },
+      beforeConfirm: (dialog, form, done) => {
+        form.handleSubmit().then((values: any) => {
+          dialog.showLoading();
+          addBaseline(values).then(() => {
+            message.success('新增成功！');
+            done();
+            getTasksWrapped();
+          }).finally(() => {
+            dialog.hideLoading();
+          })
+        })
+      }
+    }, AddBaseline);
   }
 
-  const handleDelete = (row: TemplateItem) => {
-    deleteMonitor({id: row.id, isBaseline: false}).then(() => {
+  const handleDelete = (row: BaselineItem) => {
+    deleteBaseline({id: row.id}).then(() => {
       message.success('删除成功');
       getTasksWrapped();
     })
   }
 
-  const columns: ColumnsType<TemplateItem> = [
-    { title: '表英文名', key: 'tableName', dataIndex: 'tableName' },
-    { title: '表中文名', key: 'comment', dataIndex: 'comment'},
-    { title: '最新执行时间', key: 'accessTime', dataIndex: 'accessTime' },
-    {
-      title: '实时告警情况',
-      key: 'latestAlarmLevel',
-      dataIndex: 'latestAlarmLevel',
-      render: (_) => alarmLevelList.find(item => item.value === _)?.label || '-'
+  const handleToggle = (row: BaselineItem) => {
+    const isStop = row.status === 1;
+    Modal.confirm({
+      title: `确认要${isStop ? '停用' : '启用'}基线【${row.name}】吗？`,
+      onOk() {
+        toggleBaseline({id: row.id, status: isStop ? 0 : 1}).then(() => {
+          message.success(`${isStop ? '停用' : '启用'}成功`);
+          getTasksWrapped();
+        })
+      }
+    })
+  }
+
+  const columns: ColumnsType<BaselineItem> = [
+    { title: '规则名称', key: 'name', dataIndex: 'name' },
+    { 
+      title: '包含规则数量',
+      key: 'ruleCount',
+      dataIndex: 'ruleCount'
     },
-    { title: '启用规则数量', key: 'ruleCount', dataIndex: 'ruleCount' },
+    {
+      title: '包含表数',
+      key: 'tableCount',
+      dataIndex: 'tableCount'
+    },
+    {
+      title: '状态',
+      key: 'status',
+      dataIndex: 'status',
+      render: (_) => statusList.find(item => item.value === _)?.label || '-'
+    },
     {
       title: '操作',
       key: 'amContainerLogsUrl',
       dataIndex: 'amContainerLogsUrl',
-      width: 120,
+      width: 160,
       fixed: 'right',
-      render: (_, row) => (
-        <>
-          <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
+      render: (_, row) => {
+        return (
+          <>
+          <Button type="link" onClick={() => handleToggle(row)}>
+            停用
+          </Button>
+          <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)} disabled={row.status === 0}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 0}>
+            <Button danger type="text" disabled={row.status === 0}>
               删除
             </Button>
           </Popconfirm>
         </>
-      ),
+        )
+      },
     },
   ];
 
@@ -90,17 +129,10 @@ const Monitor: FC<{history: any}> = ({ history }) => {
     <PageContainer>
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
         <ProFormText
-          name="tableName"
-          label="表名称"
+          name="name"
+          label="基线名称"
           placeholder="请输入"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
-        />
-        <ProFormSelect
-          name="alarmLevel"
-          label="告警等级"
-          placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
-          options={alarmLevelList}
         />
         <Button
           size="large"
@@ -124,10 +156,9 @@ const Monitor: FC<{history: any}> = ({ history }) => {
         </Button>
       </ProForm>
       <div>
-        <Button onClick={handleAddMonitor}>新增监控</Button>
-        <Button style={{float: 'right'}}>监控日志</Button>
+        <Button onClick={handleAddBaseline}>新建基线</Button>
       </div>
-      <Table<TemplateItem>
+      <Table<BaselineItem>
         rowKey="id"
         columns={columns}
         dataSource={data}
@@ -145,4 +176,4 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   );
 };
 
-export default Monitor;
+export default Baseline;

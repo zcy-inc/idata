@@ -7,18 +7,18 @@ import { PageContainer } from '@ant-design/pro-layout';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 
-import type { MonitorItem,MonitorRuleItem } from '@/types/quality';
-import { getMonitorInfo, editMonitorInfo, getMonitorRules, addMonitorRule } from '@/services/quality';
-import AddMonitorRules from '../AddMonitorRules';
+import type { MonitorRuleItem } from '@/types/quality';
+import { getBaseline, updateBaseline, getMonitorRules, addMonitorRule } from '@/services/quality';
+import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
 import styles from './index.less';
 
 const format = 'YYYY-MM-DD HH:mm:ss';
 const { Item } = Form;
-const EditMonitor: FC<{history: any}> = ({history}) => {
+const EditBaseline: FC<{history: any}> = ({history}) => {
   const params = useParams<{id: string; tableName: string}>();
   const [data, setData] = useState<MonitorRuleItem[]>([]);
-  const [baseInfo, setBaseInfo] = useState<MonitorItem>({id: +params.id, tableName: params.tableName})
-  const [originBaseInfo, setOriginBaseInfo] = useState<MonitorItem>({id: +params.id, tableName: params.tableName})
+  const [baseInfo, setBaseInfo] = useState<{id: string; name: string; creator?: string;}>({id: params.id, name: ''})
+  const [originBaseInfo, setOriginBaseInfo] = useState<{id: string; name: string; creator?: string;}>({id: params.id, name: ''})
   const [isEdit, setIsEdit] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -46,11 +46,16 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   };
 
   const getBaseInfo = () => {
-    getMonitorInfo({id: params.id}).then(res => {
-      setBaseInfo(res.data);
-      setOriginBaseInfo(res.data);
+    getBaseline({id: params.id}).then(res => {
+      const newBaseInfo = {
+        ...baseInfo,
+        name: res.data.name,
+        creator: res.data.creator
+      }
+      setBaseInfo(newBaseInfo);
+      setOriginBaseInfo(newBaseInfo);
       form.setFieldsValue({
-        partitionExpr: res.data.partitionExpr
+        name: newBaseInfo.name
       });
     })
   }
@@ -64,16 +69,15 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     }, AddMonitorRules)
   }
 
-  const updateMonitorInfo = () => {
+  const updateBaseInfo = () => {
     return form.validateFields().then(res => {
-      return editMonitorInfo({
-        id: params.id,
-        baselineId: -1,
-        partitionExpr: res.partitionExpr
+      return updateBaseline({
+        id: +params.id,
+        name: res.name
       }).then(() => {
         message.success('修改成功！');
         setIsEdit(false);
-        const newBaseInfo = {...baseInfo, partitionExpr: res.partitionExpr}
+        const newBaseInfo = {...baseInfo, name: res.name}
         setBaseInfo(newBaseInfo);
         setOriginBaseInfo(newBaseInfo);
       })
@@ -111,7 +115,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
+         <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)}>
             编辑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
@@ -130,19 +134,19 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
         breadcrumb: {
           routes: [
             {
-              path: '/quality/monitor/list',
-              breadcrumbName: '监控管理',
+              path: '/quality/baseline/list',
+              breadcrumbName: '基线管理',
             },
             {
               path: '',
-              breadcrumbName: '监控规则',
+              breadcrumbName: '基线编辑',
             },
           ],
         },
       }}
     >
       <Prompt
-        when={baseInfo.partitionExpr !== originBaseInfo.partitionExpr}
+        when={baseInfo.name !== originBaseInfo.name}
         message={(location) => {
           Modal.confirm({
             title: '暂未保存您所做的更改，是否保存？',
@@ -150,7 +154,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
             okText: '保存',
             cancelText: '取消',
             onOk() {
-              updateMonitorInfo().then(() => {
+              updateBaseInfo().then(() => {
                 history.push(location.pathname)
               })
             },
@@ -161,25 +165,43 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           return false;
         }}
       />
+
       <div className={styles.container}>
         <div>基本信息
           <div className={styles.operations}>
             {isEdit ? <>
               <Button onClick={onCancal} style={{marginRight: 8}}>取消</Button>
-              <Button type="primary" onClick={updateMonitorInfo}>保存</Button>
+              <Button type="primary" onClick={updateBaseInfo}>保存</Button>
             </> :
               <Button onClick={() => setIsEdit(true)} type="primary">编辑</Button>
             }
           </div>
         </div>
         <Form form={form} className={styles.form} layout="inline">
-          <Item label="表名称">
-            {baseInfo.tableName}
+          <Item label="基线名称" name={isEdit ? 'name' : undefined} rules={[{ required: isEdit, message: '请输入基线名称' }]}>
+            {isEdit ? <Input placeholder='请输入' onChange={e => setBaseInfo({...baseInfo, name: e.target.value})} /> : baseInfo.name }
           </Item>
-          <Item label="时间分区表达式" name={isEdit ? 'partitionExpr' : undefined} rules={[{ required: isEdit, message: '请输入时间分区表达式' }]}>
-            {isEdit ? <Input placeholder='请输入' onChange={e => setBaseInfo({...baseInfo, partitionExpr: e.target.value})} /> : baseInfo.partitionExpr }
+          <Item label="基线创建人">
+            {baseInfo.creator}
           </Item>
         </Form>
+      </div>
+
+      <div className={styles.container} style={{marginTop: 16}}>
+        <p>表信息</p>
+        <Table<MonitorRuleItem>
+          rowKey="id"
+          columns={columns}
+          dataSource={data}
+          scroll={{ x: 'max-content' }}
+          style={{ marginTop: 16 }}
+          loading={loading}
+          pagination={{
+            total,
+            showTotal: (t) => `共${t}条`,
+            onChange: (page) => getTasksWrapped(page),
+          }}
+        />
       </div>
     
       <div className={styles.container} style={{marginTop: 16}}>
@@ -203,4 +225,4 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   );
 };
 
-export default EditMonitor;
+export default EditBaseline;

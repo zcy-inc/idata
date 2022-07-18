@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ProForm, { ProFormSelect } from '@ant-design/pro-form';
-import { Button, Form, Table, Popconfirm, message, Row } from 'antd';
+import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
 import { PageContainer } from '@/components';
@@ -8,13 +8,13 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 import AddTemplate from './components/AddTemplate';
 import type { TemplateItem } from '@/types/quality';
-import { getTemplateList, addTemplate, updateTemplate, deleteMonitor } from '@/services/quality';
+import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTemplate } from '@/services/quality';
 import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
 
 import styles from './index.less';
 
 
-const Monitor: FC<{history: any}> = ({ history }) => {
+const Template: FC<{history: any}> = ({ history }) => {
   const [data, setData] = useState<TemplateItem[]>([]);
   const [curPage, setCurPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -64,10 +64,24 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   }
 
   const handleDelete = (row: TemplateItem) => {
-    deleteMonitor({id: row.id, isBaseline: false}).then(() => {
+    removeTemplate({id: row.id}).then(() => {
       message.success('删除成功');
       getTasksWrapped();
     })
+  }
+
+  const toggleTemplte = (row: TemplateItem) => {
+    const isStop = row.status === 1;
+    Modal.confirm({
+      title: `确认要${isStop ? '停用' : '启用'}规则【${row.name}】吗？`,
+      onOk() {
+        toggleTemplate({id: row.id, status: isStop ? 0 : 1}).then(() => {
+          message.success(`${isStop ? '停用' : '启用'}成功`);
+          getTasksWrapped();
+        })
+      }
+    })
+   
   }
 
   const columns: ColumnsType<TemplateItem> = [
@@ -110,14 +124,14 @@ const Monitor: FC<{history: any}> = ({ history }) => {
         }
         return (
           <>
-          <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
+          <Button type="link" onClick={() => toggleTemplte(row)}>
             停用
           </Button>
           <Button type="link" onClick={() => handleAddTemplate(row)} disabled={row.status === 0}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 0}>
+            <Button danger type="text" disabled={row.status === 0}>
               删除
             </Button>
           </Popconfirm>
@@ -186,4 +200,4 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   );
 };
 
-export default Monitor;
+export default Template;

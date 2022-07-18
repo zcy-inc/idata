@@ -265,4 +265,109 @@ export default {
       }
     })
   },
+  'GET /api/monitorTemplate/del/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":""
+    })
+  },
+  'GET /api/monitorTemplate/setStatus/:id/:status': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":""
+    })
+  },
+  'POST /api/monitorBaseline/getByPage': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":	{
+        "data": [
+        {
+        "id": 1,
+        "name": "基线名称",
+        "status": 1,
+        "del": 0,
+        "creator": "元宿",
+        "createTime": "2022-07-06 15:45:15.000",
+        "editor": "元宿",
+        "editTime": "2022-07-06 17:49:35.000",
+        "ruleCount": 0,
+        "tableCount": 0
+        }
+        ],
+        "totalElements": 0,
+        "pageSize": 5,
+        "curPage": 1,
+        "totalPages": 0
+      }
+    })
+  },
+  'POST /api/monitorBaseline/add': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 9,
+        "type": "custom",
+        "monitorObj": "table",
+        "content": "20:00",
+        "name": "表产出时间",
+        "category": "accuracy",
+        "outputType": 1
+        }
+    })
+  },
+  'POST /api/monitorBaseline/update': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 9,
+        "type": "custom",
+        "monitorObj": "table",
+        "content": "20:00",
+        "name": "表产出时间",
+        "category": "accuracy",
+        "outputType": 1
+        }
+    })
+  },
+  'GET /api/monitorBaseline/get/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": {
+        "id": 1,
+        "name": "基线名称",
+        "status": 1,
+        "del": 0,
+        "creator": "元宿",
+        "createTime": "2022-07-06 15:45:15",
+        "editor": "元宿",
+        "editTime": "2022-07-06 15:46:38"
+      }
+    })
+  },
+  'GET /api/monitorBaseline/del/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":""
+    })
+  },
+  'GET /api/monitorBaseline/setStatus/:id/:status': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":""
+    })
+  },
+  
 };

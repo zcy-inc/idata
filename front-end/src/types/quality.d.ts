@@ -29,7 +29,7 @@ export interface MonitorRuleItem {
 }
 
 export interface TemplateItem {
-  id?: number;
+  id: number;
   type: RuleType;
   tableName: string;
   name: string;
@@ -44,4 +44,14 @@ export interface TemplateItem {
   content?: string;
   rangeStart?: number;
   rangeEnd?: number;
+}
+
+export interface BaselineItem {
+  id: number;
+  name: string;
+  status: Status;
+  creator: string;
+  createTime: string;
+  ruleCount: number;
+  tableCount: number;
 }
