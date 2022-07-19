@@ -53,6 +53,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExtendConfigDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExternalTableDto;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
@@ -632,6 +633,37 @@ public class JobInfoServiceImpl implements JobInfoService {
                 sqlResponse.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
                 // 根据规则定位真正的表
                 sqlResponse.setDestTable(EnvRuleHelper.handlerDbTableName(sqlDsName, sqlResponse.getDestTable(), env));
+
+                //处理外部表
+                List<JobInfoExecuteDetailDto.SqlJobDetailsDto.ExternalTableDto> externalTableList = new ArrayList<>();
+                String extTables = contentSql.getExternalTables();
+                if (StringUtils.isNotBlank(extTables)) {
+                    List<SqlJobExternalTableDto> extTableDtoList = JSON.parseArray(extTables, SqlJobExternalTableDto.class);
+                    if (!CollectionUtils.isEmpty(extTableDtoList)) {
+                        for (SqlJobExternalTableDto extTableDto : extTableDtoList) {
+                            checkArgument(DataSourceTypeEnum.doris.name().equals(extTableDto.getDataSourceType())
+                                            || DataSourceTypeEnum.starrocks.name().equals(extTableDto.getDataSourceType()),
+                                    String.format("作业外部表目前支持doris或starrocks, jobId:%s，环境:%s", id.toString(), env));
+
+                            DataSourceDetailDto extDataSource = dataSourceApi.getDataSourceDetail(extTableDto.getDataSourceId(), env);
+                            JobInfoExecuteDetailDto.SqlJobDetailsDto.ExternalTableDto externalTableDto = new JobInfoExecuteDetailDto.SqlJobDetailsDto.ExternalTableDto();
+                            externalTableDto.setExtSrcType("StarRocks");
+                            externalTableDto.setExtSrcUrl(extDataSource.getHost() + ":8030");
+                            externalTableDto.setExtSrcUsername(extDataSource.getUserName());
+                            externalTableDto.setExtSrcPassword(extDataSource.getPassword());
+
+                            List<SqlJobExternalTableDto.ExternalTableInfo> tables = extTableDto.getTables();
+                            checkArgument(!CollectionUtils.isEmpty(tables), "外部表信息为空，jobId:%s，环境:%s", id.toString(), env);
+                            List<String> extSrcTables = new ArrayList<>();
+                            for (SqlJobExternalTableDto.ExternalTableInfo extTableInfo : tables) {
+                                extSrcTables.add(extTableInfo.getTableName());
+                            }
+                            externalTableDto.setExtSrcTables(extSrcTables);
+                            externalTableList.add(externalTableDto);
+                        }
+                    }
+                }
+                sqlResponse.setExternalTableList(externalTableList);
 
                 return sqlResponse;
             case SPARK_PYTHON:

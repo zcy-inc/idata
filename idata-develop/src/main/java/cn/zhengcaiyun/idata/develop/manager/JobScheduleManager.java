@@ -19,12 +19,14 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
 import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.PageInfoDto;
@@ -51,12 +53,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JobScheduleManager {
 
     private final IJobIntegrator jobIntegrator;
+    private final IDagIntegrator dagIntegrator;
     private final JobInfoRepo jobInfoRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
 
     @Autowired
-    public JobScheduleManager(IJobIntegrator jobIntegrator, JobInfoRepo jobInfoRepo, JobExecuteConfigRepo jobExecuteConfigRepo) {
+    public JobScheduleManager(IJobIntegrator jobIntegrator,
+                              IDagIntegrator dagIntegrator,
+                              JobInfoRepo jobInfoRepo,
+                              JobExecuteConfigRepo jobExecuteConfigRepo) {
         this.jobIntegrator = jobIntegrator;
+        this.dagIntegrator = dagIntegrator;
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
     }
@@ -108,5 +115,9 @@ public class JobScheduleManager {
             return historyDto;
         }).collect(Collectors.toList());
         return Page.newOne(historyDtoList, pageInfoDto.getTotal());
+    }
+
+    public List<Integer> cleanDagExecutionHistory(EnvEnum envEnum) {
+        return dagIntegrator.cleanExecutionHistory(envEnum.name());
     }
 }
