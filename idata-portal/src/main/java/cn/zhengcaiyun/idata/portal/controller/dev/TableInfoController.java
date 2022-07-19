@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -130,6 +131,13 @@ public class TableInfoController {
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) throws IllegalAccessException {
+        long count = tableInfoDto.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
@@ -194,6 +202,13 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         String dbName = tableInfo.getTableLabels()
                 .stream()
                 .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
@@ -261,6 +276,13 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         String dbName = tableInfo.getTableLabels()
                 .stream()
                 .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
