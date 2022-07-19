@@ -205,8 +205,9 @@ public class ColumnFacade {
                 }
                 if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnType(), changeColumnInfo.getHiveColumnType())) {
                     LabelDto labelDto = labelDtoMap.get("columnType:LABEL");
-                    labelDto.setLabelParamValue(hiveTypeMapping.getOrDefault(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
+                    labelDto.setLabelParamValue(hiveTypeMapping.get(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT)));
                 }
+                column.setColumnLabels(new ArrayList<>(labelDtoMap.values()));
             }
             list.add(column);
         }
