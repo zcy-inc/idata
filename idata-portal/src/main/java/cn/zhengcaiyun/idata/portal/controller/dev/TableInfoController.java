@@ -241,7 +241,7 @@ public class TableInfoController {
                 stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
             }
             if (!StringUtils.equalsIgnoreCase(e.getColumnComment(), e.getHiveColumnComment())) {
-                stringBuilder.append("字段备注：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
+                stringBuilder.append("字段中文名称：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
             }
             if (e.isPartition() != e.isHivePartition()) {
                 stringBuilder.append("是否分区字段：" + e.isPartition() + " 改为 " + e.isHivePartition() + "\n");

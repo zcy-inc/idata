@@ -7,6 +7,7 @@ import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoNewDTO;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
@@ -157,23 +158,28 @@ public class ColumnFacade {
                 labelDto1.setLabelCode("pk:LABEL");
                 labelDto1.setLabelParamValue("false");
                 labelDto1.setColumnName(columnName);
+                labelDto1.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
+
                 labelDtoList.add(labelDto1);
 
                 LabelDto labelDto2 = new LabelDto();
                 labelDto2.setLabelCode("columnType:LABEL");
                 labelDto2.setLabelParamValue(hiveTypeMapping.getOrDefault(hiveColumn.getColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
                 labelDto2.setColumnName(columnName);
+                labelDto2.setLabelTag(LabelTagEnum.ENUM_VALUE_LABEL.name());
                 labelDtoList.add(labelDto2);
 
                 LabelDto labelDto3 = new LabelDto();
                 labelDto3.setLabelCode("partitionedCol:LABEL");
                 labelDto3.setLabelParamValue(hiveColumn.getPartition() ? "true" : "false");
                 labelDto3.setColumnName(columnName);
+                labelDto3.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
                 labelDtoList.add(labelDto3);
 
                 if (StringUtils.isNotEmpty(hiveColumn.getColumnComment())) {
                     LabelDto labelDto4 = new LabelDto();
                     labelDto4.setLabelCode("columnComment:LABEL");
+                    labelDto4.setLabelTag(LabelTagEnum.STRING_LABEL.name());
                     labelDto4.setLabelParamValue(hiveColumn.getColumnComment());
                     labelDto4.setColumnName(columnName);
                     labelDtoList.add(labelDto4);
@@ -196,6 +202,7 @@ public class ColumnFacade {
                         LabelDto elem = new LabelDto();
                         elem.setColumnName(columnName);
                         elem.setLabelCode("columnComment:LABEL");
+                        elem.setLabelTag(LabelTagEnum.STRING_LABEL.name());
                         return elem;
                     });
                     if (hiveColumnComment == null) {
