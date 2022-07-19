@@ -26,7 +26,23 @@ spring:
     time-zone: Asia/Shanghai
   flyway:
     enabled: false
+  ldap:
+    urls: ldap://172.16.101.127:389
+    base: DC=ldap,DC=cai-inc,DC=com
+    username: CN=dev,CN=Users,DC=ldap,DC=cai-inc,DC=com
+    password: ReadOnly@ZcyDEVUser
+  dubbo:
+    appname: web-idata-server
+    registry: zookeeper://172.31.2.166:1500?backup=172.31.2.167:1500,172.31.2.168:1500
+#    registry: zookeeper://${zookeeper.host}:${zookeeper.port}
+    threads: 500
+    port: -1
+    server: true
 
+apollo:
+  bootstrap:
+    enabled: true
+    namespaces: application,dev.common
 
 mybatis:
   configuration:

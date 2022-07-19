@@ -41,6 +41,11 @@ public class MonitorTableServiceImpl implements MonitorTableService {
     }
 
     @Override
+    public List<MonitorTableVO> getByBaselineId(Long baselineId) {
+        return monitorTableDao.getByBaselineId(baselineId);
+    }
+
+    @Override
     public PageResult<MonitorTableVO> getByPage(MonitorTableQuery query) {
         int count = monitorTableDao.count(query);
         PageResult page = new PageResult();

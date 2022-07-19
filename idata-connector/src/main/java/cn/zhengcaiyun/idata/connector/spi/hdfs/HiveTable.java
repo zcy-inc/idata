@@ -6,6 +6,8 @@ package cn.zhengcaiyun.idata.connector.spi.hdfs;
  */
 public class HiveTable {
     private String tableName;
+
+    private String comment;
     private Long createTime;
     private Long modifyTime;
     private Long blockSize;
@@ -59,5 +61,13 @@ public class HiveTable {
 
     public void setPartitioned(boolean partitioned) {
         this.partitioned = partitioned;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

@@ -49,12 +49,12 @@ public class MonitorRule extends BaseEntity {
     /**
      * 告警接收人，逗号分隔
      */
-    private String alarmReceiver;
+    private String alarmReceivers;
 
     /**
-     * 校验类型:1数值型，2波动率型
+     * 校验类型:abs绝对值，pre_period上周期
      */
-    private Integer checkType;
+    private String checkType;
 
     /**
      * 比较方式：>,>=,<,<=,<>,=,range,up,down
@@ -85,5 +85,8 @@ public class MonitorRule extends BaseEntity {
      */
     private Integer status;
 
+    private String version;
+
+    private String accessTime;
 
 }

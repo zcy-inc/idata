@@ -7,7 +7,7 @@ package cn.zhengcaiyun.idata.dqc.model.enums;
 public enum MonitorTemplateEnum {
     TABLE_ROW("表行数","table_row"),
     TABLE_OUTPUT_TIME("表产出时间",  "table_output_time"),
-    TABLE_PK_UNIQUE("表主键唯一",  "table_pk_unique"),
+    FIELD_UNIQUE("值唯一",  "field_unique"),
     FIELD_ENUM_CONTENT("字段枚举内容",  "field_enum_content"),
     FIELD_ENUM_COUNT("字段枚举数量",  "field_enum_count" ),
     FIELD_DATA_RANGE("字段数值范围",  "field_data_range" ),

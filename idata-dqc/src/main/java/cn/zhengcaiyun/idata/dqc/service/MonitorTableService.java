@@ -18,6 +18,7 @@ import java.util.List;
 public interface MonitorTableService {
 
     MonitorTableVO getById(Long id);
+    List<MonitorTableVO> getByBaselineId(Long baselineId);
 
     PageResult<MonitorTableVO> getByPage(MonitorTableQuery query);
 

@@ -24,6 +24,20 @@
         where del=0 and id = #{id}
     </select>
 
+    <select id="getByBaselineId" resultMap="DqcMonitorTableMap">
+        select
+          id, table_name, `partition_expr`
+        from dqc_monitor_table
+        where del=0 and baseline_id = #{baselineId}
+    </select>
+
+    <select id="getByTableName" resultMap="DqcMonitorTableMap">
+        select
+          id, baseline_id, table_name, `partition_expr`
+        from dqc_monitor_table
+        where del=0 and table_name = #{tableName} and baseline_id=#{baselineId}
+    </select>
+
     <!--查询指定行数据-->
     <select id="getByPage" resultMap="DqcMonitorTableMap" parameterType="cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery">
         select
@@ -39,6 +53,7 @@
         <if test="latestAlarmLevel != null">
             and latest_alarm_level = #{latestAlarmLevel}
         </if>
+        order by edit_time desc
         limit #{startIndex}, #{pageSize}
     </select>
 
@@ -96,10 +111,21 @@
         where id = #{id}
     </update>
 
+    <update id="updateByTableName" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
+        update dqc_monitor_table set
+            <if test="latestAlarmLevel != null">
+                latest_alarm_level = #{latestAlarmLevel},
+            </if>
+            <if test="accessTime != null">
+                access_time = #{accessTime},
+            </if>
+        where table_name = #{tableName}
+    </update>
+
     <update id="delByBaselineId">
         update dqc_monitor_table
         set del=1,editor = #{editor},edit_time = now()
-        where baseline_id=#{baselineId}
+        where baseline_id != -1 and baseline_id=#{baselineId}
     </update>
 
     <select id="getTableCountByBaselineId" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO">

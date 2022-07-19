@@ -4,17 +4,19 @@ import cn.hutool.core.lang.Assert;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.dqc.dao.MonitorTemplateDao;
 import cn.zhengcaiyun.idata.dqc.model.common.Converter;
+import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate;
+import cn.zhengcaiyun.idata.dqc.model.enums.RuleTypeEnum;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTemplateQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTemplateService;
+import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -61,10 +63,14 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
     }
 
     @Override
-    public MonitorTemplateVO insert(MonitorTemplateVO vo) {
-        check(vo);
+    public Result<MonitorTemplateVO> insert(MonitorTemplateVO vo) {
+        try {
+            check(vo);
+        } catch (Exception e) {
+            return Result.failureResult(e.getMessage());
+        }
         MonitorTemplate template = Converter.MONITOR_TEMPLATE_CONVERTER.toDto(vo);
-        template.setStatus(0);
+        template.setStatus(1);
         template.setDel(0);
 
         String nickname = OperatorContext.getCurrentOperator().getNickname();
@@ -73,10 +79,12 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
 
         monitorTemplateDao.insert(template);
         vo.setId(template.getId());
-        return vo;
+        return Result.successResult(vo);
     }
 
     public void check(MonitorTemplateVO vo) {
+        RuleUtils.checkSql(vo.getContent());
+
         Assert.isFalse(StringUtils.isEmpty(vo.getName()), "规则名称不能为空");
         Assert.isFalse(StringUtils.isEmpty(vo.getMonitorObj()), "监控对戏不能为空");
         Assert.isFalse(StringUtils.isEmpty(vo.getCategory()), "维度不能为空");
@@ -96,6 +104,11 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
         MonitorRuleVO rule = new MonitorRuleVO();
         rule.setTemplateId(vo.getId());
         rule.setMonitorObj(vo.getMonitorObj());
+
+        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getType())) {
+            rule.setContent(vo.getContent());
+        }
+
         monitorRuleService.updateByTemplateId(rule);
 
         return vo;

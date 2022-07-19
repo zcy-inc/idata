@@ -3,7 +3,7 @@ package cn.zhengcaiyun.idata.dqc.controller;
 import cn.zhengcaiyun.idata.connector.jdbc.model.Column;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HiveTable;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
-import cn.zhengcaiyun.idata.dqc.service.HiveTableService;
+import cn.zhengcaiyun.idata.dqc.service.TableService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * author:zheng
@@ -23,12 +24,16 @@ public class TableController {
     private static final Logger logger = LoggerFactory.getLogger(TableController.class);
 
     @Autowired
-    private HiveTableService hiveTableService;
+    private TableService tableService;
 
     @RequestMapping("/hive/getTables")
     @ResponseBody
-    public Result<List<HiveTable>> getTables(String tableName) {
-        List<HiveTable> tableList = hiveTableService.getTableList(tableName);
+    public Result<Set<HiveTable>> getTables(String tableName, Integer limit, String editTable) {
+        Set<HiveTable> tableList = tableService.getTableList(tableName, limit);
+
+        if (StringUtils.isNotEmpty(editTable)) {
+            tableList.addAll(tableService.getTableList(tableName, limit));
+        }
         return Result.successResult(tableList);
     }
 
@@ -44,12 +49,22 @@ public class TableController {
         }
 
         try {
-            List<Column> colList = hiveTableService.getColumns(arr[0], arr[1]);
+            List<Column> colList = tableService.getColumns(arr[0], arr[1]);
             return Result.successResult(colList);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Result.failureResult(e.getMessage());
         }
 
+    }
+
+    @RequestMapping("/table/getOwners")
+    @ResponseBody
+    public Result getOwner(String tableName) {
+        String[] arr = tableName.split("\\.");
+        if (arr.length != 2) {
+            return Result.failureResult("表名错误");
+        }
+        return Result.successResult(tableService.getOwners(arr[0], arr[1]));
     }
 }

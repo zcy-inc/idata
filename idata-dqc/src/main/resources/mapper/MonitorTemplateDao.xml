@@ -29,7 +29,7 @@
     <!--查询指定行数据-->
     <select id="getByPage" resultMap="DqcMonitorTemplateMap" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate">
         select
-          id, type, monitor_obj,  status, del, creator, create_time, editor, edit_time, name, category, output_type
+          id, type, monitor_obj,if(type='system',content,'') content,  status, del, creator, create_time, editor, edit_time, name, category, output_type
         from dqc_monitor_template
         where del=0
             <if test="type != null and type != ''">

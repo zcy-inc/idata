@@ -9,7 +9,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface MonitorRuleDao {
     int insert(@Param("rule") MonitorRule record);
@@ -19,19 +18,27 @@ public interface MonitorRuleDao {
     List<MonitorRuleVO> getByPage(@Param("query") MonitorRuleQuery query);
 
     Integer getCount(@Param("query") MonitorRuleQuery query);
+
     @MapKey("tableName")
     HashMap<String, MonitorTableVO> getRuleCountByTableName(@Param("tables") List<String> tables);
+
     @MapKey("baselineId")
     HashMap<Long, MonitorTableVO> getRuleCountByBaselineId(@Param("baselineIdList") List<Long> baselineIdList);
 
     int updateNotNull(@Param("rule") MonitorRule record);
 
-    boolean del(@Param("baselineId") Long baselineId,@Param("tableName") String tableName,@Param("editor") String editor);
+    boolean del(@Param("baselineId") Long baselineId, @Param("tableName") String tableName, @Param("editor") String editor);
 
     int update(@Param("rule") MonitorRule record);
+    int updateAccessTime(@Param("ruleId")Long ruleId,@Param("accessTime") String accessTime);
 
     int updateByTemplateId(@Param("rule") MonitorRule rule);
 
-    List<MonitorRuleVO> getScheduleRuleList(@Param("typeList")List<String> typeList,@Param("startIndex")Integer startIndex);
-    List<MonitorRuleVO> getBaselineScheduleRuleList(@Param("typeList")List<String> typeList,@Param("startIndex")Integer startIndex);
+    List<MonitorRuleVO> getScheduleRuleList(@Param("typeList") List<String> typeList, @Param("startIndex") Integer startIndex);
+
+    List<MonitorRuleVO> getBaselineScheduleRuleList(@Param("typeList") List<String> typeList, @Param("startIndex") Integer startIndex);
+
+    List<MonitorRuleVO> getRulesByTable(@Param("tableName") String tableName);
+
+    List<MonitorRuleVO> getBaselineRulesByTableName(@Param("tableName") String tableName);
 }

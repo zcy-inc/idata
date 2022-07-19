@@ -1,13 +1,8 @@
 package cn.zhengcaiyun.idata.dqc.model.common;
 
-import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
-import cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule;
-import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
-import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
+import cn.zhengcaiyun.idata.dqc.model.entity.*;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory;
+import cn.zhengcaiyun.idata.dqc.model.vo.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -16,6 +11,7 @@ public interface Converter {
     MonitorTemplateConverter MONITOR_TEMPLATE_CONVERTER = Mappers.getMapper(MonitorTemplateConverter.class);
     MonitorTableConverter MONITOR_TABLE_CONVERTER = Mappers.getMapper(MonitorTableConverter.class);
     MonitorBaselineConverter MONITOR_BASELINE_CONVERTER = Mappers.getMapper(MonitorBaselineConverter.class);
+    MonitorHistoryConverter MONITOR_HISTORY_CONVERTER = Mappers.getMapper(MonitorHistoryConverter.class);
 
     @Mapper
     interface MonitorRuleConverter {
@@ -41,5 +37,11 @@ public interface Converter {
     interface MonitorBaselineConverter {
         MonitorBaselineVO toVo(MonitorBaseline table);
         MonitorBaseline toDto(MonitorBaselineVO vo);
+    }
+
+    @Mapper
+    interface MonitorHistoryConverter {
+        MonitorHistoryVO toVo(MonitorHistory dto);
+        MonitorHistory toDto(MonitorHistoryVO vo);
     }
 }

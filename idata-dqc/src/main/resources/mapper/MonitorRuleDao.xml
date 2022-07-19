@@ -12,10 +12,11 @@
     <result column="template_id" jdbcType="BIGINT" property="templateId" />
     <result column="monitor_obj" jdbcType="VARCHAR" property="monitorObj" />
     <result column="alarm_level" jdbcType="INTEGER" property="alarmLevel" />
-    <result column="alarm_receiver" jdbcType="VARCHAR" property="alarmReceiver" />
-    <result column="check_type" jdbcType="INTEGER" property="checkType" />
+    <result column="alarm_receivers" jdbcType="VARCHAR" property="alarmReceivers" />
+    <result column="check_type" jdbcType="VARCHAR" property="checkType" />
     <result column="compare_type" jdbcType="VARCHAR" property="compareType" />
     <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="version" jdbcType="VARCHAR" property="version" />
     <result column="output_type" jdbcType="INTEGER" property="outputType" />
     <result column="fix_value" jdbcType="BIGINT" property="fixValue" />
     <result column="range_start" jdbcType="BIGINT" property="rangeStart" />
@@ -28,7 +29,7 @@
     <result column="edit_time" jdbcType="TIMESTAMP" property="editTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, baseline_id,`table_name`,field_name, `name`, rule_type, template_id, monitor_obj, alarm_level, alarm_receiver,
+    id, baseline_id,`table_name`,field_name, `name`, rule_type, template_id, monitor_obj, alarm_level, alarm_receivers,version,
     check_type,  compare_type, content,output_type,fix_value, range_start, range_end, `status`, creator, create_time, editor, edit_time
   </sql>
   <select id="getById" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -40,16 +41,15 @@
 
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule" useGeneratedKeys="true">
     insert into dqc_monitor_rule (baseline_id,`table_name`,field_name, `name`, rule_type, template_id,
-                                  monitor_obj, alarm_level, alarm_receiver,
+                                  monitor_obj, alarm_level, alarm_receivers,
                                   check_type, compare_type,
                                   content,output_type，fix_value, range_start, range_end, `status`,
-                                  del, creator, create_time, editor, edit_time)
+                                  del, creator, create_time, editor, edit_time,version)
     values (#{rule.baselineId},#{rule.tableName}, #{rule.fieldName}, #{rule.name}, #{rule.ruleType}, #{rule.templateId},
-            #{rule.monitorObj}, #{rule.alarmLevel}, #{rule.alarmReceiver},
+            #{rule.monitorObj}, #{rule.alarmLevel}, #{rule.alarmReceivers},
             #{rule.checkType}, #{rule.compareType},
             #{rule.content},#{rule.outputType}, #{rule.fixValue}, #{rule.rangeStart}, #{rule.rangeEnd}, #{rule.status},
-            0, #{rule.creator}, now(), #{rule.editor},
-      now())
+            0, #{rule.creator}, now(), #{rule.editor},now(),#{version})
   </insert>
 
   <update id="updateNotNull" >
@@ -75,8 +75,8 @@
       <if test="rule.alarmLevel != null">
         alarm_level = #{rule.alarmLevel},
       </if>
-      <if test="rule.alarmReceiver != null">
-        alarm_receiver = #{rule.alarmReceiver},
+      <if test="rule.alarmReceivers != null">
+        alarm_receiver = #{rule.alarmReceivers},
       </if>
       <if test="rule.checkType != null">
         check_type = #{rule.checkType},
@@ -101,6 +101,9 @@
       </if>
       <if test="rule.status != null">
         `status` = #{rule.status},
+      </if>
+      <if test="rule.version != null">
+        `version` = #{rule.version},
       </if>
       <if test="rule.del != null">
         del = #{rule.del},
@@ -132,13 +135,14 @@
 
   <update id="update" >
     update dqc_monitor_rule
+    set edit_time = now(),
       `field_name` = #{rule.fieldName},
       `name` = #{rule.name},
       rule_type = #{rule.ruleType},
       template_id = #{rule.templateId},
       monitor_obj = #{rule.monitorObj},
       alarm_level = #{rule.alarmLevel},
-      alarm_receiver = #{rule.alarmReceiver},
+      alarm_receivers = #{rule.alarmReceivers},
       check_type = #{rule.checkType},
       compare_type = #{rule.compareType},
       content = #{rule.content},
@@ -147,13 +151,18 @@
       range_start = #{rule.rangeStart},
       range_end = #{rule.rangeEnd},
       editor = #{rule.editor},
-      edit_time = now(),
+      version = #{rule.version}
     where id = #{rule.id}
+  </update>
+
+  <update id="updateAccessTime" >
+    update dqc_monitor_rule set access_time=#{accessTime}
+    where id = #{ruleId}
   </update>
 
   <select id="getByPage" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
     select id, `table_name`,  `name`, rule_type, monitor_obj monitorObj, alarm_level alarmLevel,
-           alarm_receiver alarmReceiver,`status`, editor, edit_time editTime
+           alarm_receivers alarmReceivers,`status`, editor, edit_time editTime
     from dqc_monitor_rule
     where del=0 and table_name=#{query.tableName} and baseline_id=#{query.baselineId}
     <if test="query.templateId != null">
@@ -165,6 +174,7 @@
     <if test="query.monitorObj != null">
       and monitor_obj=#{query.monitorObj}
     </if>
+    order by edit_time desc
     limit #{query.startIndex},#{query.pageSize}
   </select>
 
@@ -206,16 +216,16 @@
 
   <select id="getScheduleRuleList" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
     select  r.id, r.baseline_id baselineId,r.table_name tableName,r.field_name tableName, r.name, r.rule_type ruleType,
-            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receiver alarmReceiver,
+            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receivers alarmReceivers,
             r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
-            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr
+            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
     from dqc_monitor_rule r
     inner join dqc_monitor_table t on r.table_name=t.table_name
     where r.baseline_id=-1 and r.status=1
           and (r.access_time = '' or r.access_time >= DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00'))
-          and t.template_id in
+          and r.template_id in
                 (select id
-                 from dqc_monitor_baseline
+                 from dqc_monitor_template
                  where monitor_obj='system' and content in
                  <foreach collection="typeList" item="item" separator="," open="(" close=")">
                    #{item}
@@ -226,22 +236,43 @@
 
   <select id="getBaselineScheduleRuleList" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
     select  r.id, r.baseline_id baselineId,r.table_name tableName,r.field_name tableName, r.name, r.rule_type ruleType,
-    r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receiver alarmReceiver,
-    r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
-    r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr
+            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receivers alarmReceivers,
+            r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
+            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
     from dqc_monitor_baseline b
     inner join dqc_monitor_table t on b.id=t.baseline_id
     inner join dqc_monitor_rule r on  b.id=r.baseline_id and r.table_name=t.table_name
     where b.status=1 and r.baseline_id=1 and r.status=1
           and (r.access_time = '' or r.access_time >= DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00'))
-          and t.template_id in
+          and r.template_id in
           (select id
-           from dqc_monitor_baseline
+           from dqc_monitor_template
            where monitor_obj='system' and content in
            <foreach collection="typeList" item="item" separator="," open="(" close=")">
              #{item}
            </foreach>
           )
     limit #{startIndex},20
+  </select>
+
+  <select id="getRulesByTable" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
+    select  r.id, r.baseline_id baselineId,r.table_name tableName,r.field_name tableName, r.name, r.rule_type ruleType,
+            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receivers alarmReceivers,
+            r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
+            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
+    from dqc_monitor_rule r
+    inner join dqc_monitor_table t on r.table_name=t.table_name
+    where r.baseline_id=-1 and r.status=1 and r.table_name=#{tableName}
+  </select>
+
+  <select id="getBaselineRulesByTableName" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
+    select  r.id, r.baseline_id baselineId,r.table_name tableName,r.field_name tableName, r.name, r.rule_type ruleType,
+            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receivers alarmReceivers,
+            r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
+            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
+    from dqc_monitor_baseline b
+    inner join dqc_monitor_table t on b.id=t.baseline_id
+    inner join dqc_monitor_rule r on  b.id=r.baseline_id and r.table_name=t.table_name
+    where b.status=1 and r.baseline_id=1 and r.status=1 and r.table_name=#{tableName}
   </select>
 </mapper>

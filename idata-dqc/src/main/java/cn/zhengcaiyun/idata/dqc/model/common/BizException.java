@@ -1,19 +1,14 @@
 package cn.zhengcaiyun.idata.dqc.model.common;
 
 public class BizException extends RuntimeException {
-    private int code;
-    private String msg;
+    private String message;
 
-    public int getCode() {
-        return this.code;
+    public BizException(String message) {
+        this.message = message;
     }
 
-    public String getMsg() {
-        return this.msg;
-    }
-
-    public BizException(int code, String msg) {
-        this.code = code;
-        this.msg = msg;
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

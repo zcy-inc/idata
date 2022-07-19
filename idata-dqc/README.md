@@ -1,0 +1,1 @@
+本地启动增加参数：-Denv=UAT -Dapollo.cluster=preliminary

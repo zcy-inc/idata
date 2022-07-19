@@ -1,9 +1,9 @@
 package cn.zhengcaiyun.idata.dqc.model.vo;
 
 import lombok.Data;
-import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * author:zheng
@@ -51,12 +51,12 @@ public class MonitorRuleVO {
     /**
      * 告警接收人，逗号分隔
      */
-    private String alarmReceiver;
+    private String alarmReceivers;
 
     /**
-     * 校验类型:1数值型，2波动率型
+     * 校验类型:abs绝对值，pre_period上周期
      */
-    private Integer checkType;
+    private String checkType;
 
     /**
      * 比较方式：>,>=,<,<=,<>,=,range,up,down
@@ -110,4 +110,26 @@ public class MonitorRuleVO {
 
     private String partitionExpr;
 
+    private String version;
+
+    private String partitionCondition;
+
+    private MonitorHistoryVO monitorHistory;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MonitorRuleVO that = (MonitorRuleVO) o;
+        return Objects.equals(tableName, that.tableName) && Objects.equals(fieldName, that.fieldName) && Objects.equals(ruleType, that.ruleType) && Objects.equals(templateId, that.templateId) && Objects.equals(monitorObj, that.monitorObj) && Objects.equals(alarmLevel, that.alarmLevel) && Objects.equals(alarmReceivers, that.alarmReceivers) && Objects.equals(checkType, that.checkType) && Objects.equals(compareType, that.compareType) && Objects.equals(content, that.content) && Objects.equals(outputType, that.outputType) && Objects.equals(fixValue, that.fixValue) && Objects.equals(rangeStart, that.rangeStart) && Objects.equals(rangeEnd, that.rangeEnd) && Objects.equals(partitionExpr, that.partitionExpr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tableName, fieldName, ruleType, templateId, monitorObj, alarmLevel, alarmReceivers, checkType, compareType, content, outputType, fixValue, rangeStart, rangeEnd, partitionExpr);
+    }
 }

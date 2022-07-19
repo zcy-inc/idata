@@ -5,7 +5,7 @@ import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
-import cn.zhengcaiyun.idata.dqc.service.HiveTableService;
+import cn.zhengcaiyun.idata.dqc.service.TableService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class MonitorTableController {
     private MonitorTableService monitorTableService;
 
     @Autowired
-    private HiveTableService hiveTableService;
+    private TableService tableService;
 
     @RequestMapping("/add")
     public Result<MonitorTableVO> add(@RequestBody MonitorTableVO vo) {
@@ -44,7 +44,7 @@ public class MonitorTableController {
             return Result.failureResult("表名错误");
         }
 
-        HiveTable hiveTable = hiveTableService.getTable(arr[0], arr[1]);
+        HiveTable hiveTable = tableService.getTable(arr[0], arr[1]);
         if (hiveTable == null) {
             return Result.failureResult("表不存在");
         }
@@ -77,10 +77,10 @@ public class MonitorTableController {
         return Result.successResult(monitorTableService.getById(id));
     }
 
-    @RequestMapping("/logs/{id}")
-    public Result getLogs(@PathVariable("id") Long id) {
-        //todo
-        return Result.successResult();
+    @RequestMapping("/tables/get/{baselineId}")
+    public Result getByBaselineId(@PathVariable("baselineId") Long baselineId) {
+        return Result.successResult(monitorTableService.getByBaselineId(baselineId));
     }
+
 }
 

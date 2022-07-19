@@ -2,7 +2,9 @@ package cn.zhengcaiyun.idata.dqc.service;
 
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 
@@ -17,7 +19,8 @@ public interface MonitorRuleService {
     Result<MonitorRuleVO> add(MonitorRuleVO monitorRule);
 
     Result<MonitorRuleVO> update(MonitorRuleVO monitorRule);
-//    Boolean update(MonitorRule monitorRule);
+
+    boolean updateAccessTime(Long ruleId, String accessTime);
 
     Result<Boolean> updateByTemplateId(MonitorRuleVO monitorRule);
 
@@ -38,4 +41,9 @@ public interface MonitorRuleService {
     boolean setStatus(Long id, Integer status);
 
     List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex, boolean isBaseline);
+
+    void analyse(Long jobId);
+
+    Result<MonitorHistoryVO> tryRun(Long id);
+
 }

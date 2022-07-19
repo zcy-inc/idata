@@ -34,11 +34,7 @@ public class MonitorTemplateController {
 
     @RequestMapping("/add")
     public Result<MonitorTemplateVO> add(@RequestBody MonitorTemplateVO vo) {
-        try {
-            return Result.successResult(monitorTemplateService.insert(vo));
-        } catch (Exception e) {
-            return Result.failureResult(e.getMessage());
-        }
+        return monitorTemplateService.insert(vo);
     }
 
     @RequestMapping("/update")

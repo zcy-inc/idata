@@ -31,6 +31,7 @@
             <if test="status != null">
                 and status = #{status}
             </if>
+        order by edit_time desc
         limit #{startIndex}, #{pageSize}
     </select>
 

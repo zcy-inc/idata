@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.dqc.service;
 
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
+import cn.zhengcaiyun.idata.dqc.model.common.Result;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTemplateQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
@@ -17,7 +18,7 @@ public interface MonitorTemplateService {
 
     PageResult<MonitorTemplate> getByPage(MonitorTemplateQuery query);
 
-    MonitorTemplateVO insert(MonitorTemplateVO monitorTemplate);
+    Result<MonitorTemplateVO> insert(MonitorTemplateVO monitorTemplate);
 
     MonitorTemplateVO update(MonitorTemplateVO monitorTemplate);
 

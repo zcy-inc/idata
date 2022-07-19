@@ -78,13 +78,8 @@ public class MonitorRuleController {
 
     @RequestMapping("/tryRun/{id}")
     public Result add(@PathVariable Long id) {
-        //todo
+        monitorRuleService.tryRun(id);
         return Result.successResult();
     }
 
-    @RequestMapping("/logs/{id}")
-    public Result getLogs(@PathVariable Long id) {
-        //todo
-        return Result.successResult();
-    }
 }

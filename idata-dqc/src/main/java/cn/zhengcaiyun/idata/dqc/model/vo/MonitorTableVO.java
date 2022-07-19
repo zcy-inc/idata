@@ -17,6 +17,8 @@ public class MonitorTableVO {
      * 表名
      */
     private String tableName;
+
+    private String comment;
     /**
      * 分区信息
      */

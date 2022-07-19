@@ -100,7 +100,7 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
     @Override
     @Transactional
     public boolean delById(Long id) {
-        //todo 删除表、规则
+        //删除表、规则
         monitorRuleService.del(id, null);
         monitorTableService.delByBaselineId(id);
 
