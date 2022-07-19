@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Form, message, Modal, Space, Table,Tabs } from 'antd';
@@ -50,12 +50,15 @@ const DataSource: FC = () => {
   const [columns, setColumns] = useState<ColumnsType<TaskListItem>>(defaultColumns);
   const [activeTabKey, setActiveTabKey] = useState<publishListStatusMode>(publishListStatusMode.WAITINGTASK);
   const [loading, setLoading] = useState(false);
+  const [rowSelection, setRowSelection] = useState({});
   const [form] = Form.useForm();
+
+  const limit = useRef(10);
 
   const getTasksWrapped = (offset: number) => {
     const params = form.getFieldsValue();
     setLoading(true);
-    getTasks({ ...params, limit: 10, offset, publishStatusList: publishListStatus[activeTabKey]})
+    getTasks({ ...params, limit: limit.current, offset, publishStatusList: publishListStatus[activeTabKey]})
       .then((res) => {
         setTotal(res.data.total);
         setData(res.data.content);
@@ -132,6 +135,22 @@ const DataSource: FC = () => {
     // 判断activeTabKey,拼接操作栏目,已处理tab下不需要操作栏
     if(activeTabKey===publishListStatusMode.WAITINGTASK&&!columnHasOperate()) setColumns(publishList =>[...publishList, operateColumn])
     if(activeTabKey===publishListStatusMode.FINISHTASK&&columnHasOperate()) setColumns(publishList => [...publishList.slice(0,publishList.length-1)])
+  }, [activeTabKey]);
+
+
+  useEffect(() => {
+    if (activeTabKey===publishListStatusMode.WAITINGTASK) {
+      setRowSelection({
+        rowSelection: {
+          onChange: (selectedRowKeys: React.Key[], selectedRows: TaskListItem[]) => {
+            setActionRecords(selectedRows);
+          },
+        }
+      });
+    } else {
+      setRowSelection({});
+    }
+
   }, [activeTabKey]);
 
   return (
@@ -222,13 +241,14 @@ const DataSource: FC = () => {
         pagination={{
           total,
           showTotal: (t) => `共${t}条`,
-          onChange: (page) => getTasksWrapped(10 * (page - 1)),
-        }}
-        rowSelection={{
-          onChange: (selectedRowKeys: React.Key[], selectedRows: TaskListItem[]) => {
-            setActionRecords(selectedRows);
+          onChange: (page, pageSize) => {
+            limit.current = pageSize;
+            getTasksWrapped(10 * (page - 1))
           },
         }}
+        {
+          ...rowSelection
+        }
       />
     </PageContainer>
   );

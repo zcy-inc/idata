@@ -109,12 +109,16 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
           case 'BOOLEAN_LABEL':
             Object.assign(column, {
               width: 'auto',
-              renderFormItem: (schema: any) => (
-                <Switch
-                  checked={data[schema.index][schema.dataIndex]}
-                  onChange={(checked) => setValue(schema, checked)}
-                />
-              ),
+              renderFormItem: (schema: any) => {
+                const value = data[schema.index][schema.dataIndex];
+                const checked = value === 'true' || value === true;
+                return (
+                  <Switch
+                    checked={checked}
+                    onChange={(checked) => setValue(schema, checked)}
+                  />
+                )
+              },
             });
             break;
           case 'ENUM_VALUE_LABEL':
