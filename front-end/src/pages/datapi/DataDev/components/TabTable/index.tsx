@@ -137,37 +137,41 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
   };
 
   const onSubmit = async () => {
-    await label.validateFields();
-    setLoading(true); // 必须在这里set,createTableParams内refTable才能获取最新更新值
-    const params = createTableParams();
-    // 如果data有值, 本次提交为更新, 增加id字段
-    data && Object.assign(params, { id: data.id });
-    createTable(params)
-      .then((res) => {
-        if (res.success) {
-          if (pane.id === -1) {
-            message.success('创建表成功');
-            replaceTab({
-              oldKey: 'newTable',
-              newKey: `${pane.type}_${pane.belong}_${res.data.id}`,
-              title: res.data.tableName,
-              pane: { ...pane, id: res.data.id },
-            });
-          } else {
-            message.success('修改表成功');
-            replaceTab({ oldKey: pane.cid, newKey: pane.cid, title: res.data.tableName, pane });
-            getTableInfo(res.data.id).then(() => setMode('view'));
-            getTreeWrapped();
+    try {
+      await label.validateFields();
+      setLoading(true); // 必须在这里set,createTableParams内refTable才能获取最新更新值
+      const params = createTableParams();
+      // 如果data有值, 本次提交为更新, 增加id字段
+      data && Object.assign(params, { id: data.id });
+      createTable(params)
+        .then((res) => {
+          if (res.success) {
+            if (pane.id === -1) {
+              message.success('创建表成功');
+              replaceTab({
+                oldKey: 'newTable',
+                newKey: `${pane.type}_${pane.belong}_${res.data.id}`,
+                title: res.data.tableName,
+                pane: { ...pane, id: res.data.id },
+              });
+            } else {
+              message.success('修改表成功');
+              replaceTab({ oldKey: pane.cid, newKey: pane.cid, title: res.data.tableName, pane });
+              getTableInfo(res.data.id).then(() => setMode('view'));
+              getTreeWrapped();
+            }
           }
-        }
-      })
-      .catch((e) => {
-        console.log(e);
-      })
-      .finally(() => {
-        // 手动异步解决视图切换延迟触发多次
-        setTimeout(() => setLoading(false), 1000);
-      });
+        })
+        .catch((e) => {
+          console.log(e);
+        })
+        .finally(() => {
+          // 手动异步解决视图切换延迟触发多次
+          setTimeout(() => setLoading(false), 1000);
+        });
+    } catch(e) {
+      setLoading(false);
+    }
   };
 
   const onDelete = () =>
