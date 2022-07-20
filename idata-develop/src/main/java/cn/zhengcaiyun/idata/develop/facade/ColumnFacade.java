@@ -212,7 +212,7 @@ public class ColumnFacade {
                 }
                 if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnType(), changeColumnInfo.getHiveColumnType())) {
                     LabelDto labelDto = labelDtoMap.get("columnType:LABEL");
-                    labelDto.setLabelParamValue(hiveTypeMapping.get(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT)));
+                    labelDto.setLabelParamValue(getHiveColumnMapping(hiveTypeMapping, changeColumnInfo.getHiveColumnType()));
                 }
                 column.setColumnLabels(new ArrayList<>(labelDtoMap.values()));
             }
@@ -220,6 +220,58 @@ public class ColumnFacade {
         }
 
         return list;
+    }
+
+    /**
+     * hive 类型映射 idata
+     *
+     * @param hiveTypeMapping idata本地的数据类型和hive数据类型的映射
+     * @param hiveColumnType hive的数据类型
+     * @return
+     */
+    private String getHiveColumnMapping(Map<String, String> hiveTypeMapping, String hiveColumnType) {
+        String hiveColumnTypeUpper = hiveColumnType.toUpperCase(Locale.ROOT);
+        String idataType = hiveTypeMapping.get(hiveColumnTypeUpper);
+        if (idataType != null) {
+            return idataType;
+        }
+        // varchar
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "VARCHAR")) {
+            return hiveTypeMapping.get("VARCHAR");
+        }
+        // char
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "CHAR")) {
+            return hiveTypeMapping.get("CHAR");
+        }
+        // DECIMAL
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "DECIMAL")) {
+            return hiveTypeMapping.get("DECIMAL");
+        }
+        // FLOAT
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "FLOAT")) {
+            return hiveTypeMapping.get("FLOAT");
+        }
+        // BOOLEAN
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "BOOLEAN")) {
+            return hiveTypeMapping.get("BOOLEAN");
+        }
+        // ARRAY
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "ARRAY")) {
+            return hiveTypeMapping.get("ARRAY");
+        }
+        // MAP
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "MAP")) {
+            return hiveTypeMapping.get("MAP");
+        }
+        // STRUCT
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "STRUCT")) {
+            return hiveTypeMapping.get("STRUCT");
+        }
+        // DOUBLE
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "DOUBLE")) {
+            return hiveTypeMapping.get("DOUBLE");
+        }
+        return null;
     }
 
     private List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> getColumnMetaInfoIncludePartition(String dbName, String tableName) {
