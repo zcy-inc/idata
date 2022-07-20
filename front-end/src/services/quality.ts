@@ -100,6 +100,25 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
   });
 }
 
+/**
+ * 　获取规则详情
+ */
+ export async function getMonitorRule(data: {id: number}) {
+  return request<DefaultResponse & {data: MonitorRuleItem }>(`/api/monitorRule/get/${data.id}`, {
+    method: 'GET',
+  });
+}
+
+/**
+ *  获取告知人
+ */
+ export async function getRecivers(params: {name?: string}) {
+  return request<DefaultResponse & { data: {nickname: string} [] }>('/api/user/getList', {
+    method: 'GET',
+    params
+  });
+}
+
 
 /* ========== 规则模板库 ========== */
 /**

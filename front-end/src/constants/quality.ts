@@ -21,6 +21,22 @@ export const categoryList = [
   {value: 'integrity', label: '完整性'},
 ];
 
+export const compareOptions = [
+  {value: '>', label: '大于'},
+  {value: '>=', label: '大于等于'},
+  {value: '=', label: '等于'},
+  {value: '<', label: '小于'},
+  {value: '<=', label: '小于等于'},
+  {value: '<>', label: '不等于'},
+  {value: 'up', label: '上浮'},
+  {value: 'down', label: '下降'},
+];
+
+export const compareObjOptions = [
+  {value: 'abs', label: '绝对值'},
+  {value: '>=', label: 'pre_period'}
+];
+
 export const statusList = [
   {value: 1, label: '已启用'},
   {value: 0, label: '未启用'},

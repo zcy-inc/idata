@@ -171,13 +171,35 @@ export default {
       }
     })
   },
+  'GET /api/monitorRule/get/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":{
+        "id":8,
+        "type":0,
+        "tableName":"dwd.dw_search_query_item_click_di",
+        "name":"自定义sql上升范围",
+        "ruleType":"system",
+        "templateId":-1,
+        "monitorObj":"field",
+        "alarmLevel":1,
+        "alarmReceivers":"元宿",
+        "content":"select 1",
+        "rangeStart":5,
+        "rangeEnd":10
+      }
+    })
+  },
   'POST /api/monitorTemplate/getByPage': (req: Request, res: Response) => { 
     res.send({
       "success":true,
       "code":"200",
       "msg":"",
       "data":	{
-        "data": [{
+        "data": [
+        {
           "id": 1,
           "del": 0,
           "creator": "系统管理员",
@@ -188,9 +210,11 @@ export default {
           "monitorObj": "table",
           "status": 1,
           "name": "表行数",
+          "content": "table_row",
           "category": "integrity",
           "outputType": 1
-      },{
+      },
+      {
         "id": 2,
         "del": 0,
         "creator": "系统管理员2",
@@ -200,10 +224,87 @@ export default {
         "type": "template",
         "monitorObj": "field",
         "status": 1,
-        "name": "产出时间",
+        "name": "表产出时间",
+        "content": "table_output_time",
         "category": "integrity",
         "outputType": 1
-    }],
+      },
+      {
+        "id": 3,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "name": "值唯一",
+        "content": "field_unique",
+        "category": "integrity",
+        "outputType": 1
+      },
+      {
+        "id": 4,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "content": "field_enum_content",
+        "name": "字段枚举内容",
+        "category": "integrity",
+        "outputType": 1
+      },
+      {
+        "id": 5,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "name": "字段枚举数量",
+        "content": "field_enum_count",
+        "category": "integrity",
+        "outputType": 1
+      },
+      {
+        "id": 6,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "name": "字段数值范围",
+        "content": "field_data_range",
+        "category": "integrity",
+        "outputType": 1
+      },
+      {
+        "id": 7,
+        "del": 0,
+        "creator": "系统管理员2",
+        "createTime": "2022-06-10 20:19:17.000",
+        "editor": "系统管理员2",
+        "editTime": "2022-09-04 10:28:24.000",
+        "type": "template",
+        "monitorObj": "field",
+        "status": 1,
+        "name": "字段值不为空",
+        "content": "field_not_null",
+        "category": "integrity",
+        "outputType": 1
+      }
+  ],
         "totalElements": 0,
         "pageSize": 5,
         "curPage": 1,
@@ -369,5 +470,19 @@ export default {
       "msg":""
     })
   },
-  
+  'GET /api/user/getList': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "data": [
+        {
+        "nickname": "张三"
+        },
+        {
+          "nickname": "李四"
+          }
+        ],
+      "msg":""
+    })
+  },
 };

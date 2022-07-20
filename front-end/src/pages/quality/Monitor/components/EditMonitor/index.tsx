@@ -55,10 +55,13 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     })
   }
 
-  const addMonitorRules = (row={}) => {
+  const addMonitorRules = (row: MonitorRuleItem | undefined) => {
     showDrawer('编辑监控规则', {
       drawerProps: {
         width: 800
+      },
+      formProps: {
+        id: row?.id
       },
       beforeConfirm: () => {}
     }, AddMonitorRules)
@@ -111,7 +114,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => history.push(`/quality/monitor/edit/${row.id}/${row.tableName}`)}>
+         <Button type="link" onClick={() => addMonitorRules(row)}>
             编辑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
@@ -140,6 +143,11 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           ],
         },
       }}
+      extra={[
+        <Button onClick={() => history.go(-1)} key="goBack">
+          返回
+        </Button>,
+      ]}
     >
       <Prompt
         when={baseInfo.partitionExpr !== originBaseInfo.partitionExpr}

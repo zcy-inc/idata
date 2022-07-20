@@ -77,6 +77,7 @@
     "react-monaco-editor": "^0.44.0",
     "react-split-pane": "^0.1.92",
     "umi": "^3.2.14",
+    "umi-plugin-keep-alive": "0.0.1-beta.34",
     "umi-request": "^1.0.8",
     "use-merge-value": "^1.0.1",
     "uuid": "^8.3.2"

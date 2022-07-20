@@ -33,6 +33,7 @@ export interface TemplateItem {
   type: RuleType;
   tableName: string;
   name: string;
+  content: string;
   ruleType: RuleType;
   category: Category;
   status: Status;
