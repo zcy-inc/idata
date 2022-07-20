@@ -47,6 +47,7 @@ const DataSource: FC = () => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [actionRecords, setActionRecords] = useState<TaskListItem[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<TaskListItem[]>([]);
   const [columns, setColumns] = useState<ColumnsType<TaskListItem>>(defaultColumns);
   const [activeTabKey, setActiveTabKey] = useState<publishListStatusMode>(publishListStatusMode.WAITINGTASK);
   const [loading, setLoading] = useState(false);
@@ -56,12 +57,19 @@ const DataSource: FC = () => {
   const limit = useRef(10);
 
   const getTasksWrapped = (offset: number) => {
+    setActionRecords([]); // 清空选中
+    setSelectedRowKeys([]);
     const params = form.getFieldsValue();
     setLoading(true);
     getTasks({ ...params, limit: limit.current, offset, publishStatusList: publishListStatus[activeTabKey]})
       .then((res) => {
         setTotal(res.data.total);
         setData(res.data.content);
+      })
+      .catch((e) => {
+        console.error(e);
+        setTotal(0);
+        setData([]);
       })
       .finally(() => setLoading(false));
   };
@@ -144,14 +152,16 @@ const DataSource: FC = () => {
         rowSelection: {
           onChange: (selectedRowKeys: React.Key[], selectedRows: TaskListItem[]) => {
             setActionRecords(selectedRows);
+            setSelectedRowKeys(selectedRowKeys);
           },
+          selectedRowKeys: selectedRowKeys,
         }
       });
     } else {
       setRowSelection({});
     }
 
-  }, [activeTabKey]);
+  }, [activeTabKey, actionRecords]);
 
   return (
     <PageContainer>

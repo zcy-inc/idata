@@ -26,6 +26,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
   // 表结构的列与数据
   const [data, setData] = useState<any[]>([]);
   const [keys, setKeys] = useState<Key[]>([]);
+  const [compKey, setCompKey] = useState('');
 
   useImperativeHandle(ref, () => ({ data }));
 
@@ -51,6 +52,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
       });
       setData(tmpData);
       setKeys(tmpKeys);
+      setCompKey(Date.now().toString());
     }
   }, [initial]);
 
@@ -163,6 +165,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     <>
       <EditableProTable
         rowKey="key"
+        key={compKey}
         columns={renderColumns()}
         value={data}
         bordered
