@@ -2,7 +2,7 @@ package cn.zhengcaiyun.idata.dqc.model.enums;
 
 public enum RuleCheckTypeEnum {
     ABS("绝对值","abs"),
-    PRE_PREIOD("上周期",  "pre_period上周期");
+    PRE_PREIOD("上周期",  "pre_period");
     private String desc;
     private String value;
     RuleCheckTypeEnum(String desc, String value) {
