@@ -65,6 +65,7 @@ import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -72,6 +73,8 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,6 +99,8 @@ import static com.google.common.base.Preconditions.checkState;
  **/
 @Service
 public class JobInfoServiceImpl implements JobInfoService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobInfoServiceImpl.class);
 
     private DevJobInfoMyDao devJobInfoMyDao;
     private JobOutputMyDao jobOutputMyDao;
@@ -638,7 +643,12 @@ public class JobInfoServiceImpl implements JobInfoService {
                 List<JobInfoExecuteDetailDto.SqlJobDetailsDto.ExternalTableDto> externalTableList = new ArrayList<>();
                 String extTables = contentSql.getExternalTables();
                 if (StringUtils.isNotBlank(extTables)) {
-                    List<SqlJobExternalTableDto> extTableDtoList = JSON.parseArray(extTables, SqlJobExternalTableDto.class);
+                    List<SqlJobExternalTableDto> extTableDtoList = null;
+                    try {
+                        extTableDtoList = JSON.parseArray(extTables, SqlJobExternalTableDto.class);
+                    } catch (Exception ex) {
+                        LOGGER.warn("Parse ExternalTables to Array for SQL_SPARK job {} in env {} failed. ex {}.", id, env, Throwables.getStackTraceAsString(ex));
+                    }
                     if (!CollectionUtils.isEmpty(extTableDtoList)) {
                         for (SqlJobExternalTableDto extTableDto : extTableDtoList) {
                             checkArgument(DataSourceTypeEnum.doris.name().equals(extTableDto.getDataSourceType())
