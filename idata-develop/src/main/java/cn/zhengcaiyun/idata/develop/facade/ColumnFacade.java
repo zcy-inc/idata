@@ -7,6 +7,7 @@ import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoNewDTO;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
@@ -157,23 +158,28 @@ public class ColumnFacade {
                 labelDto1.setLabelCode("pk:LABEL");
                 labelDto1.setLabelParamValue("false");
                 labelDto1.setColumnName(columnName);
+                labelDto1.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
+
                 labelDtoList.add(labelDto1);
 
                 LabelDto labelDto2 = new LabelDto();
                 labelDto2.setLabelCode("columnType:LABEL");
                 labelDto2.setLabelParamValue(hiveTypeMapping.getOrDefault(hiveColumn.getColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
                 labelDto2.setColumnName(columnName);
+                labelDto2.setLabelTag(LabelTagEnum.ENUM_VALUE_LABEL.name());
                 labelDtoList.add(labelDto2);
 
                 LabelDto labelDto3 = new LabelDto();
                 labelDto3.setLabelCode("partitionedCol:LABEL");
                 labelDto3.setLabelParamValue(hiveColumn.getPartition() ? "true" : "false");
                 labelDto3.setColumnName(columnName);
+                labelDto3.setLabelTag(LabelTagEnum.BOOLEAN_LABEL.name());
                 labelDtoList.add(labelDto3);
 
                 if (StringUtils.isNotEmpty(hiveColumn.getColumnComment())) {
                     LabelDto labelDto4 = new LabelDto();
                     labelDto4.setLabelCode("columnComment:LABEL");
+                    labelDto4.setLabelTag(LabelTagEnum.STRING_LABEL.name());
                     labelDto4.setLabelParamValue(hiveColumn.getColumnComment());
                     labelDto4.setColumnName(columnName);
                     labelDtoList.add(labelDto4);
@@ -196,6 +202,7 @@ public class ColumnFacade {
                         LabelDto elem = new LabelDto();
                         elem.setColumnName(columnName);
                         elem.setLabelCode("columnComment:LABEL");
+                        elem.setLabelTag(LabelTagEnum.STRING_LABEL.name());
                         return elem;
                     });
                     if (hiveColumnComment == null) {
@@ -205,13 +212,66 @@ public class ColumnFacade {
                 }
                 if (!StringUtils.equalsIgnoreCase(changeColumnInfo.getColumnType(), changeColumnInfo.getHiveColumnType())) {
                     LabelDto labelDto = labelDtoMap.get("columnType:LABEL");
-                    labelDto.setLabelParamValue(hiveTypeMapping.getOrDefault(changeColumnInfo.getHiveColumnType().toUpperCase(Locale.ROOT), "HIVE_COL_TYPE_STRING:ENUM_VALUE"));
+                    labelDto.setLabelParamValue(getHiveColumnMapping(hiveTypeMapping, changeColumnInfo.getHiveColumnType()));
                 }
+                column.setColumnLabels(new ArrayList<>(labelDtoMap.values()));
             }
             list.add(column);
         }
 
         return list;
+    }
+
+    /**
+     * hive 类型映射 idata
+     *
+     * @param hiveTypeMapping idata本地的数据类型和hive数据类型的映射
+     * @param hiveColumnType hive的数据类型
+     * @return
+     */
+    private String getHiveColumnMapping(Map<String, String> hiveTypeMapping, String hiveColumnType) {
+        String hiveColumnTypeUpper = hiveColumnType.toUpperCase(Locale.ROOT);
+        String idataType = hiveTypeMapping.get(hiveColumnTypeUpper);
+        if (idataType != null) {
+            return idataType;
+        }
+        // varchar
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "VARCHAR")) {
+            return hiveTypeMapping.get("VARCHAR");
+        }
+        // char
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "CHAR")) {
+            return hiveTypeMapping.get("CHAR");
+        }
+        // DECIMAL
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "DECIMAL")) {
+            return hiveTypeMapping.get("DECIMAL");
+        }
+        // FLOAT
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "FLOAT")) {
+            return hiveTypeMapping.get("FLOAT");
+        }
+        // BOOLEAN
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "BOOLEAN")) {
+            return hiveTypeMapping.get("BOOLEAN");
+        }
+        // ARRAY
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "ARRAY")) {
+            return hiveTypeMapping.get("ARRAY");
+        }
+        // MAP
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "MAP")) {
+            return hiveTypeMapping.get("MAP");
+        }
+        // STRUCT
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "STRUCT")) {
+            return hiveTypeMapping.get("STRUCT");
+        }
+        // DOUBLE
+        if (StringUtils.startsWithIgnoreCase(hiveColumnType, "DOUBLE")) {
+            return hiveTypeMapping.get("DOUBLE");
+        }
+        return null;
     }
 
     private List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> getColumnMetaInfoIncludePartition(String dbName, String tableName) {

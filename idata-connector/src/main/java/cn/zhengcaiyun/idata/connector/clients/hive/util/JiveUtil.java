@@ -70,14 +70,14 @@ public class JiveUtil {
      * @return
      */
     public static boolean commentEquals(String localColumnComment, String hiveColumnComment) {
-        if (StringUtils.isBlank(localColumnComment) && StringUtils.isBlank(hiveColumnComment)) {
-            return true;
-        }
         if (StringUtils.equals("null", localColumnComment)) {
             localColumnComment = null;
         }
         if (StringUtils.equals("null", hiveColumnComment)) {
             hiveColumnComment = null;
+        }
+        if (StringUtils.isBlank(localColumnComment) && StringUtils.isBlank(hiveColumnComment)) {
+            return true;
         }
         return StringUtils.equalsIgnoreCase(localColumnComment, hiveColumnComment);
     }

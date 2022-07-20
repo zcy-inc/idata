@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -130,6 +131,13 @@ public class TableInfoController {
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) throws IllegalAccessException {
+        long count = tableInfoDto.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
@@ -194,6 +202,13 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         String dbName = tableInfo.getTableLabels()
                 .stream()
                 .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
@@ -241,7 +256,7 @@ public class TableInfoController {
                 stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
             }
             if (!StringUtils.equalsIgnoreCase(e.getColumnComment(), e.getHiveColumnComment())) {
-                stringBuilder.append("描述：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
+                stringBuilder.append("字段中文名称：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
             }
             if (e.isPartition() != e.isHivePartition()) {
                 stringBuilder.append("是否分区字段：" + e.isPartition() + " 改为 " + e.isHivePartition() + "\n");
@@ -261,6 +276,13 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         String dbName = tableInfo.getTableLabels()
                 .stream()
                 .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
@@ -275,6 +297,7 @@ public class TableInfoController {
         List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
         return RestResult.success(list);
     }
+
     @GetMapping("/syncSecurityColumn")
     public RestResult syncSecurityColumn(HttpServletRequest request) throws IllegalAccessException {
         UacUser user = uacUserDao.selectByPrimaryKey(tokenService.getUserId(request)).orElse(null);

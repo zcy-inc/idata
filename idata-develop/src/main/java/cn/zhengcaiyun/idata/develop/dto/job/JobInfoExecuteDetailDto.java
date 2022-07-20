@@ -437,6 +437,8 @@ public class JobInfoExecuteDetailDto {
          */
         private List<JobUdfDto> udfList; // udfs
 
+        private List<ExternalTableDto> externalTableList;
+
         public String getDestTable() {
             return destTable;
         }
@@ -483,6 +485,66 @@ public class JobInfoExecuteDetailDto {
 
         public void setSourceSql(String sourceSql) {
             this.sourceSql = sourceSql;
+        }
+
+        public List<ExternalTableDto> getExternalTableList() {
+            return externalTableList;
+        }
+
+        public void setExternalTableList(List<ExternalTableDto> externalTableList) {
+            this.externalTableList = externalTableList;
+        }
+
+        public static class ExternalTableDto {
+            /**
+             * StarRocks
+             */
+            private String extSrcType;
+            private String extSrcUrl;
+            private String extSrcUsername;
+            private String extSrcPassword;
+
+            private List<String> extSrcTables;
+
+            public String getExtSrcType() {
+                return extSrcType;
+            }
+
+            public void setExtSrcType(String extSrcType) {
+                this.extSrcType = extSrcType;
+            }
+
+            public String getExtSrcUrl() {
+                return extSrcUrl;
+            }
+
+            public void setExtSrcUrl(String extSrcUrl) {
+                this.extSrcUrl = extSrcUrl;
+            }
+
+            public String getExtSrcUsername() {
+                return extSrcUsername;
+            }
+
+            public void setExtSrcUsername(String extSrcUsername) {
+                this.extSrcUsername = extSrcUsername;
+            }
+
+            public String getExtSrcPassword() {
+                return extSrcPassword;
+            }
+
+            public void setExtSrcPassword(String extSrcPassword) {
+                this.extSrcPassword = extSrcPassword;
+            }
+
+            public List<String> getExtSrcTables() {
+                return extSrcTables;
+            }
+
+            public void setExtSrcTables(List<String> extSrcTables) {
+                this.extSrcTables = extSrcTables;
+            }
         }
     }
 
@@ -705,13 +767,9 @@ public class JobInfoExecuteDetailDto {
          * StarRocks, Kafka, Iceberg
          */
         private String destType;
-        private String destHost;
-
-        private Integer destPort;
+        private List<HostAndPort> destHostPorts;
         private String destUsername;
         private String destPassword;
-
-        private WriteModeEnum.DiEnum destWriteMode;
 
         private String jobVersion;
 
@@ -725,6 +783,20 @@ public class JobInfoExecuteDetailDto {
              */
             private String tablePattern;
             private Map<String, String> tableProp;
+
+            /**
+             * 初始化目标表，会删表重建
+             */
+            private Boolean initDestTable;
+            /**
+             * 从SavePoint启动flink job
+             */
+            private Boolean startFromSavePoint;
+
+            /**
+             * 当initFromSavePoint为true时，flinkJobId不为空则从savePoint启动flink job
+             */
+            private String flinkJobId;
 
             public String getTablePattern() {
                 return tablePattern;
@@ -740,6 +812,30 @@ public class JobInfoExecuteDetailDto {
 
             public void setTableProp(Map<String, String> tableProp) {
                 this.tableProp = tableProp;
+            }
+
+            public Boolean getInitDestTable() {
+                return initDestTable;
+            }
+
+            public void setInitDestTable(Boolean initDestTable) {
+                this.initDestTable = initDestTable;
+            }
+
+            public Boolean getStartFromSavePoint() {
+                return startFromSavePoint;
+            }
+
+            public void setStartFromSavePoint(Boolean startFromSavePoint) {
+                this.startFromSavePoint = startFromSavePoint;
+            }
+
+            public String getFlinkJobId() {
+                return flinkJobId;
+            }
+
+            public void setFlinkJobId(String flinkJobId) {
+                this.flinkJobId = flinkJobId;
             }
         }
 
@@ -807,20 +903,12 @@ public class JobInfoExecuteDetailDto {
             this.destType = destType;
         }
 
-        public String getDestHost() {
-            return destHost;
+        public List<HostAndPort> getDestHostPorts() {
+            return destHostPorts;
         }
 
-        public void setDestHost(String destHost) {
-            this.destHost = destHost;
-        }
-
-        public Integer getDestPort() {
-            return destPort;
-        }
-
-        public void setDestPort(Integer destPort) {
-            this.destPort = destPort;
+        public void setDestHostPorts(List<HostAndPort> destHostPorts) {
+            this.destHostPorts = destHostPorts;
         }
 
         public String getDestUsername() {
@@ -855,14 +943,6 @@ public class JobInfoExecuteDetailDto {
             this.srcSchema = srcSchema;
         }
 
-        public WriteModeEnum.DiEnum getDestWriteMode() {
-            return destWriteMode;
-        }
-
-        public void setDestWriteMode(WriteModeEnum.DiEnum destWriteMode) {
-            this.destWriteMode = destWriteMode;
-        }
-
         public Integer getTableNum() {
             return tableNum;
         }
@@ -877,6 +957,27 @@ public class JobInfoExecuteDetailDto {
 
         public void setPublished(Boolean published) {
             this.published = published;
+        }
+    }
+
+    public static class HostAndPort {
+        private String host;
+        private Integer port;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
         }
     }
 
