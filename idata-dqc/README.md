@@ -1,4 +1,11 @@
 本地启动增加参数：-Denv=UAT -Dapollo.cluster=preliminary
 
 
-docker push docker-image.cai-inc.com/bigdata/idata-dqc-server 
+--登录私库
+docker login docker-image.cai-inc.com
+
+--提交docker
+docker push docker-image.cai-inc.com/bigdata/web-dqc
+
+
+

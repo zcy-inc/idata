@@ -19,3 +19,22 @@ ADD startup.sh /app/
 WORKDIR /app
 RUN chmod a+x startup.sh
 CMD /app/startup.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
