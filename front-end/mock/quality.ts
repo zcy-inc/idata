@@ -171,6 +171,106 @@ export default {
       }
     })
   },
+  'GET /api/monitorRule/setStatus/:id/:status': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":{
+        "id":8,
+        "type":0,
+        "tableName":"dwd.dw_search_query_item_click_di",
+        "name":"自定义sql上升范围",
+        "ruleType":"system",
+        "templateId":-1,
+        "monitorObj":"field",
+        "alarmLevel":1,
+        "alarmReceivers":"元宿",
+        "content":"select 1",
+        "rangeStart":5,
+        "rangeEnd":10
+      }
+    })
+  },
+  'GET /api/monitorRule/del/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":{
+        "id":8,
+        "type":0,
+        "tableName":"dwd.dw_search_query_item_click_di",
+        "name":"自定义sql上升范围",
+        "ruleType":"system",
+        "templateId":-1,
+        "monitorObj":"field",
+        "alarmLevel":1,
+        "alarmReceivers":"元宿",
+        "content":"select 1",
+        "rangeStart":5,
+        "rangeEnd":10
+      }
+    })
+  },
+  'GET /api/monitorRule/tryRun/:id': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":[{
+        "tableName": "tableName",
+        "comment":"zhongwen",
+        "ruleName":"规则名称",
+        "ruleType": 1,
+        "fixValue": 1,//规则固定值
+        "rangeStart": 1, //规则开始值
+        "rangeEnd": 2, //规则结束值
+        "alarm":1,//是否告警1告警0未告警
+        "alarmLevel": 1,//是否告警1告警0未告警
+        "createTime": "2022-07-15 13:57:29",
+        "dataValue":2 //告警结果值
+      }]
+    })
+  },
+  'GET /api/table/getOwners': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data": ["张三"]
+    })
+  },
+  'GET /api/hive/table/getColumns': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":[{
+            "name":"query"
+        }]
+    })
+  },
+  'GET /api/monitorHistory/get': (req: Request, res: Response) => { 
+    res.send({
+      "success":true,
+      "code":"200",
+      "msg":"",
+      "data":[{
+        "tableName": "tableName",
+        "comment":"zhongwen",
+        "ruleName":"规则名称",
+        "ruleType": 1,
+        "fixValue": 1,//规则固定值
+        "rangeStart": 1, //规则开始值
+        "rangeEnd": 2, //规则结束值
+        "alarm":1,//是否告警1告警0未告警
+        "alarmLevel": 1,//是否告警1告警0未告警
+        "createTime": "2022-07-15 13:57:29",
+        "dataValue":2 //告警结果值
+      }]
+    })
+  },
   'GET /api/monitorRule/get/:id': (req: Request, res: Response) => { 
     res.send({
       "success":true,

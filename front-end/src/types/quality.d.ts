@@ -17,11 +17,12 @@ export type Category = 'timely' | 'accuracy' | 'integrity';
 export type OutputType = 1 | 2;
 export type Status = 0 | 1;
 export interface MonitorRuleItem {
-  id?: number;
+  id: number;
   baselineId: number;
   name: string;
   monitorObj: MonitorObj;
   templateId: 2 | -1;
+  status: Status;
   tableName: string;
   ruleType: RuleType;
   alarmLevel: AlarmLevel;
@@ -45,6 +46,21 @@ export interface TemplateItem {
   content?: string;
   rangeStart?: number;
   rangeEnd?: number;
+}
+
+export interface LogItem {
+  createTime: string;
+  comment: string;
+  tableName: string;
+  ruleName: string;
+  alarm: number;
+  ruleType: RuleType;
+  dataValue: string;
+  alarmLevel?: AlarmLevel
+  content?: string;
+  rangeStart?: string;
+  rangeEnd?: string;
+  fixValue?: string;
 }
 
 export interface BaselineItem {

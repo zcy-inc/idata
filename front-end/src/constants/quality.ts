@@ -34,7 +34,7 @@ export const compareOptions = [
 
 export const compareObjOptions = [
   {value: 'abs', label: '绝对值'},
-  {value: '>=', label: 'pre_period'}
+  {value: 'pre_period', label: '上周期'}
 ];
 
 export const statusList = [

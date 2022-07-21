@@ -8,11 +8,21 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 
 import type { MonitorItem,MonitorRuleItem } from '@/types/quality';
-import { getMonitorInfo, editMonitorInfo, getMonitorRules, addMonitorRule } from '@/services/quality';
+import {
+  getMonitorInfo,
+  editMonitorInfo,
+  getMonitorRules,
+  addMonitorRule,
+  updateMonitorRule,
+  removeMonitorRule,
+  toggleMonitorRule
+} from '@/services/quality';
 import AddMonitorRules from '../AddMonitorRules';
+import LogsContent from '../LogsContent';
 import styles from './index.less';
+import showDialog from '@/utils/showDialog';
+import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/quality';
 
-const format = 'YYYY-MM-DD HH:mm:ss';
 const { Item } = Form;
 const EditMonitor: FC<{history: any}> = ({history}) => {
   const params = useParams<{id: string; tableName: string}>();
@@ -22,13 +32,18 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   const [isEdit, setIsEdit] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
   useEffect(() => {
     getTasksWrapped(1);
     getBaseInfo();
   }, []);
 
-  const getTasksWrapped = (pageNum: number) => {
+  useEffect(() => {
+    getTasksWrapped();
+  }, [currentPage])
+
+  const getTasksWrapped = (pageNum: number = currentPage) => {
     const params = form.getFieldsValue();
     const condition: any = {
       tableName: params.tableName,
@@ -55,15 +70,30 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     })
   }
 
-  const addMonitorRules = (row: MonitorRuleItem | undefined) => {
-    showDrawer('编辑监控规则', {
+  const handleAddMonitorRule = (row?: MonitorRuleItem) => {
+    const isEdit = !!row?.id;
+    showDrawer(`${isEdit ? '编辑' : '新增'}监控规则`, {
       drawerProps: {
         width: 800
       },
       formProps: {
-        id: row?.id
+        id: row?.id,
+        tableName: baseInfo.tableName
       },
-      beforeConfirm: () => {}
+      beforeConfirm: (dialog, form, done) => {
+        form.handleSubmit().then((res: any) => {
+          const handler = isEdit ? updateMonitorRule : addMonitorRule;
+          const params = isEdit ? {...res, id: row.id} : res;
+          dialog.showLoading();
+          handler(params).then(() => {
+            message.success(`${isEdit ? '编辑' : '新增'}成功`);
+            done();
+            getTasksWrapped();
+          })
+        }).finally(() => {
+          dialog.hideLoading();
+        })
+      }
     }, AddMonitorRules)
   }
 
@@ -88,19 +118,56 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     setIsEdit(false);
   }
 
+  const viewLogs = (row: MonitorRuleItem, type: 1 | 2) => {
+    showDialog(type === 1 ? '监控日志' : '试跑结果', {
+      formProps: {
+        params: {
+          ruleId: row.id
+        },
+        type
+      }
+    }, LogsContent)
+  }
+
   const handleDelete = (row: MonitorRuleItem) => {
-    console.log(row);
+    removeMonitorRule({id: row.id}).then(res => {
+      message.success('删除成功');
+      getTasksWrapped();
+    })
+  }
+
+  const handleToggle = (row: MonitorRuleItem) => {
+    const isStop = row.status === 1;
+    Modal.confirm({
+      title: `确认要${isStop ? '停用' : '启用'}规则【${row.name}】吗？`,
+      onOk() {
+        toggleMonitorRule({id: row.id, status: isStop ? 0 : 1}).then(() => {
+          message.success(`${isStop ? '停用' : '启用'}成功`);
+          getTasksWrapped();
+        })
+      }
+    })
   }
 
   const columns: ColumnsType<MonitorRuleItem> = [
     { title: '规则名称', key: 'name', dataIndex: 'name' },
-    { title: '规则类型', key: 'ruleType', dataIndex: 'ruleType' },
-    { title: '监控对象', key: 'monitorObj', dataIndex: 'monitorObj' },
+    {
+      title: '规则类型',
+      key: 'ruleType',
+      dataIndex: 'ruleType',
+      render: (text) => ruleTypeList.find(item => item.value === text)?.label || '-'
+    },
+    {
+      title: '监控对象',
+      key: 'monitorObj',
+      dataIndex: 'monitorObj',
+      render: (text) => monitorObjList.find(item => item.value === text)?.label || '-'
+    },
     {
       title: '告警等级',
       key: 'alarmLevel',
       dataIndex: 'alarmLevel',
-      render: (_) => moment(_).format(format)
+      render: (text) => alarmLevelList.find(item => item.value === text)?.label || '-'
     },
     {
       title: '告知人',
@@ -114,11 +181,20 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => addMonitorRules(row)}>
+          <Button type="link" onClick={() => handleToggle(row)}>
+            {row.status === 0 ? '启用' : '禁用'}
+          </Button>
+          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+          <Button type="link" onClick={() => viewLogs(row, 1)}>
+            日志
+          </Button>
+          <Button type="link" onClick={() => viewLogs(row, 2)}>
+            试跑
+          </Button>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 0}>
+            <Button type="link" disabled={row.status === 0}>
               删除
             </Button>
           </Popconfirm>
@@ -192,7 +268,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     
       <div className={styles.container} style={{marginTop: 16}}>
         <p>监控信息</p>
-        <Button onClick={() => addMonitorRules()}>新增监控规则</Button>
+        <Button onClick={() => handleAddMonitorRule()}>新增监控规则</Button>
         <Table<MonitorRuleItem>
           rowKey="id"
           columns={columns}
@@ -203,7 +279,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           pagination={{
             total,
             showTotal: (t) => `共${t}条`,
-            onChange: (page) => getTasksWrapped(page),
+            onChange: (page) => setCurrentPage(page),
           }}
         />
       </div>

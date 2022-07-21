@@ -7,7 +7,8 @@ import type {
   RuleType,
   Category,
   OutputType,
-  BaselineItem
+  BaselineItem,
+  LogItem
 } from '@/types/quality';
 import { request } from 'umi';
 import type { DefaultResponse } from './global';
@@ -101,6 +102,36 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 }
 
 /**
+ * 　删除监控规则
+ */
+ export async function removeMonitorRule(data: {id: number;}) {
+  return request<DefaultResponse>(`/api/monitorRule/del/${data.id}`, {
+    method: 'GET',
+    data
+  });
+}
+
+/**
+ * 　启用、停用监控规则
+ */
+ export async function toggleMonitorRule(data: {id: number; status: number}) {
+  return request<DefaultResponse>(`/api/monitorRule/setStatus/${data.id}/${data.status}`, {
+    method: 'GET',
+    data
+  });
+}
+
+/**
+ * 　试跑监控规则
+ */
+ export async function tryRunMonitorRule(data: {id: number;}) {
+  return request<DefaultResponse & { data: LogItem [] }>(`/api/monitorRule/tryRun/${data.id}`, {
+    method: 'GET',
+    data
+  });
+}
+
+/**
  * 　获取规则详情
  */
  export async function getMonitorRule(data: {id: number}) {
@@ -110,10 +141,44 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 }
 
 /**
+ *  获取所有字段
+ */
+ export async function getFiledList(params: {tableName: string}) {
+  return request<DefaultResponse & { data: {name: string} [] }>('/api/hive/table/getColumns', {
+    method: 'GET',
+    params
+  });
+}
+
+/**
  *  获取告知人
  */
  export async function getRecivers(params: {name?: string}) {
   return request<DefaultResponse & { data: {nickname: string} [] }>('/api/user/getList', {
+    method: 'GET',
+    params
+  });
+}
+
+/**
+ *  获取日志
+ */
+export async function getLogs(params: {
+  ruleId?: string | number;
+  baselineId?: string | number;
+  days?: string
+}) {
+  return request<DefaultResponse & { data: LogItem [] }>('/api/monitorHistory/get', {
+    method: 'GET',
+    params
+  });
+}
+
+/**
+ *  获取当前表负责人
+ */
+ export async function getTableOwners(params: {tableName: string}) {
+  return request<DefaultResponse & { data: LogItem [] }>('/api/table/getOwners', {
     method: 'GET',
     params
   });

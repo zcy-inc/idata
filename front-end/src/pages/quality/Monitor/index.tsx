@@ -94,7 +94,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
             编辑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+            <Button type="link">
               删除
             </Button>
           </Popconfirm>

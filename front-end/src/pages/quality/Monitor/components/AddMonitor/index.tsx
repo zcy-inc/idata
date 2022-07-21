@@ -1,5 +1,5 @@
 import React, { useImperativeHandle } from 'react';
-import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { Form } from 'antd';
 import type { FC } from 'react';
 import TableSelect from '../TableSelect';
@@ -14,9 +14,8 @@ const AddMonitor: FC = ({}, ref) => {
   }))
 
   const handleSubmit = () => {
-    return form.validateFields()
+    return form.validateFields();
   }
-
 
   return (
     <ProForm form={form} colon={false} className={styles.form} submitter={false} layout="horizontal">
