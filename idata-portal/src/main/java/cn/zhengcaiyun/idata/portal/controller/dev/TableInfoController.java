@@ -132,6 +132,11 @@ public class TableInfoController {
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) throws IllegalAccessException {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfoDto.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
         long count = tableInfoDto.getColumnInfos().stream()
                 .map(e -> e.getColumnName().trim())
                 .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
@@ -287,6 +292,12 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfo.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+
         long count = tableInfo.getColumnInfos().stream()
                 .map(e -> e.getColumnName())
                 .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
