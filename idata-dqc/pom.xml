@@ -153,12 +153,12 @@
 
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>prod</id>
-            <url>http://mvn.cai-inc.com/content/groups/public/</url>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>prod</id>-->
+<!--            <url>http://mvn.cai-inc.com/content/groups/public/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
 
     <build>
