@@ -193,7 +193,7 @@ public class TableServiceImpl implements TableService {
             HiveTable hiveTable = new HiveTable();
             hiveTable.setComment(tableVO.getTableAlias());
             hiveTable.setTableName(tableVO.getTableName());
-            hiveTable.setPartitioned(tableVO.getPartitioned());
+            hiveTable.setPartitioned(tableVO.getPartitioned() == null ? false : tableVO.getPartitioned());
             tableSet.add(hiveTable);
         }
         return tableSet;

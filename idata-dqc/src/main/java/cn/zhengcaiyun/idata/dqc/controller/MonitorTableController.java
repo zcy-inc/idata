@@ -48,7 +48,7 @@ public class MonitorTableController {
         if (hiveTable == null) {
             return Result.failureResult("表不存在");
         }
-        if (hiveTable.isPartitioned() && StringUtils.isEmpty(vo.getPartitionExpr())) {
+        if (hiveTable.getPartitioned() && StringUtils.isEmpty(vo.getPartitionExpr())) {
             return Result.failureResult("该表为分区表，未填写分区信息");
         }
 
@@ -68,8 +68,8 @@ public class MonitorTableController {
     }
 
     @RequestMapping("/getByPage")
-    public PageResult<MonitorTableVO> getByPage(MonitorTableQuery query) {
-        return monitorTableService.getByPage(query);
+    public Result<PageResult<MonitorTableVO>> getByPage(MonitorTableQuery query) {
+        return Result.successResult(monitorTableService.getByPage(query));
     }
 
     @RequestMapping("/get/{id}")

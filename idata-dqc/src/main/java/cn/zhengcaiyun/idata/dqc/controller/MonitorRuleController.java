@@ -47,11 +47,11 @@ public class MonitorRuleController {
     }
 
     @RequestMapping("/getByPage")
-    public PageResult<List<MonitorRuleVO>> getByPage(@RequestBody MonitorRuleQuery query) {
+    public Result<PageResult<List<MonitorRuleVO>>> getByPage(@RequestBody MonitorRuleQuery query) {
         if (query.getBaselineId() == null) {
             query.setBaselineId(-1L);
         }
-        return monitorRuleService.getMonitorRules(query);
+        return Result.successResult(monitorRuleService.getMonitorRules(query));
     }
 
     @RequestMapping("/get/{id}")

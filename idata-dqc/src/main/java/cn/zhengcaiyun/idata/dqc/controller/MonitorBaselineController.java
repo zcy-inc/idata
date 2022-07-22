@@ -43,8 +43,8 @@ public class MonitorBaselineController {
     }
 
     @RequestMapping("getByPage")
-    public PageResult<MonitorBaselineVO> getByPage(@RequestBody MonitorBaselineQuery query) {
-        return monitorBaselineService.getByPage(query);
+    public Result<PageResult<MonitorBaselineVO>> getByPage(@RequestBody MonitorBaselineQuery query) {
+        return Result.successResult(monitorBaselineService.getByPage(query));
     }
 
     @RequestMapping("get/{id}")

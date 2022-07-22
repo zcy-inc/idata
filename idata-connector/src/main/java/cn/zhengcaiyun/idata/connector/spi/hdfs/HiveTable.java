@@ -11,7 +11,7 @@ public class HiveTable {
     private Long createTime;
     private Long modifyTime;
     private Long blockSize;
-    private boolean partitioned;
+    private Boolean partitioned;
 
     public HiveTable() {
     }
@@ -55,11 +55,11 @@ public class HiveTable {
         this.blockSize = blockSize;
     }
 
-    public boolean isPartitioned() {
+    public Boolean getPartitioned() {
         return partitioned;
     }
 
-    public void setPartitioned(boolean partitioned) {
+    public void setPartitioned(Boolean partitioned) {
         this.partitioned = partitioned;
     }
 

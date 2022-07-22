@@ -8,5 +8,5 @@ public class MonitorTableQuery extends BaseQuery {
     private String tableName;
     private Long templateId;
     private Long baselineId;
-    private Integer alarmLevel;
+    private Integer latestAlarmLevel;
 }

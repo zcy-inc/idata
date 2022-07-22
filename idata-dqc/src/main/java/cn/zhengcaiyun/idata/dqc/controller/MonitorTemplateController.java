@@ -49,8 +49,8 @@ public class MonitorTemplateController {
     }
 
     @RequestMapping("/getByPage")
-    public PageResult<MonitorTemplate> getByPage(@RequestBody MonitorTemplateQuery query) {
-        return monitorTemplateService.getByPage(query);
+    public Result<PageResult<MonitorTemplate>> getByPage(@RequestBody MonitorTemplateQuery query) {
+        return Result.successResult(monitorTemplateService.getByPage(query));
     }
 
     @RequestMapping("/get/{id}")

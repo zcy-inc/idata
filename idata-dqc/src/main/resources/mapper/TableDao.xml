@@ -12,7 +12,7 @@
 
 
     <select id="getTables" resultMap="tableVO">
-        select distinct t.table_name tableName,l.label_param_value ,l.label_code
+        select distinct t.table_name ,l.label_param_value ,l.label_code
         from dev_table_info t
         left join dev_label l on t.id = l.table_id
         where l.label_code in('tblComment:LABEL','partitionedCol:LABEL','dbName:LABEL')
