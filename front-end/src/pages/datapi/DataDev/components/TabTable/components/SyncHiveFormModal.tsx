@@ -38,7 +38,7 @@ const columns: ColumnsType<HivechangeContentInfo> = [
         <Tag color={HivechangeTypeString?.[record?.changeType]?.color ?? ''}>
           {HivechangeTypeString?.[record?.changeType]?.text ?? '-'}
         </Tag>
-        <pre dangerouslySetInnerHTML={{ __html: record.changeDescription }} />
+        <p>{record.changeDescription}</p>
       </>
     ),
   },
