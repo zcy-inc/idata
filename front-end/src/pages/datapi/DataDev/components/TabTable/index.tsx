@@ -252,9 +252,9 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
             <Button key="del" size="large" onClick={onDelete}>
               删除
             </Button>
-            <Button key="hive" size="large" onClick={onSyncHive}>
+            {/* <Button key="hive" size="large" onClick={onSyncHive}>
               同步Hive
-            </Button>
+            </Button> */}
             <Button key="edit" size="large" onClick={() => setDdlModalVisible(true)}>
               DDL模式
             </Button>
