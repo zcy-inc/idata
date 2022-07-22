@@ -26,7 +26,7 @@ public class TableController {
     @Autowired
     private TableService tableService;
 
-    @RequestMapping("/hive/getTables")
+    @RequestMapping("/getTables")
     @ResponseBody
     public Result<Set<HiveTable>> getTables(String tableName, Integer limit, String editTable) {
         Set<HiveTable> tableList = tableService.getTableList(tableName, limit);
@@ -37,7 +37,7 @@ public class TableController {
         return Result.successResult(tableList);
     }
 
-    @RequestMapping("/hive/table/getColumns")
+    @RequestMapping("/table/getColumns")
     @ResponseBody
     public Result<List<Column>> getColumns(String tableName) {
         if (StringUtils.isEmpty(tableName)) {
