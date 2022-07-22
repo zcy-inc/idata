@@ -278,20 +278,13 @@ public class ColumnFacade {
         ConfigDto systemConfigByKey = systemConfigApi.getSystemConfigByKey("hive-info");
         String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
 
-        Jive jive = null;
-        HivePool hivePool = null;
-        try {
-            ConnectInfo connectInfo = new ConnectInfo();
-            connectInfo.setJdbc(jdbcUrl);
-            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-            config.setTestOnBorrow(true);
-            hivePool = new HivePool(config, connectInfo);
-            jive = hivePool.getResource();
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setJdbc(jdbcUrl);
+        GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+        config.setTestOnBorrow(true);
+        try (HivePool hivePool = new HivePool(config, connectInfo); Jive jive = hivePool.getResource()) {
             List<cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto> columnMetaInfo = jive.getColumnMetaInfoIncludePartition(dbName, tableName);
             return columnMetaInfo;
-        } finally {
-            jive.close();
-            hivePool.close();
         }
     }
 }

@@ -68,7 +68,7 @@ public class Jive extends BinaryJive {
             statement.execute(String.format("alter table `%s`.%s rename to `%s`.%s", dbName, sourceName, dbName, targetName));
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：表重命名失败！");
+            throw new GeneralException("[hive]：表重命名失败！");
         }
         return exist(dbName, targetName);
     }
@@ -84,7 +84,7 @@ public class Jive extends BinaryJive {
             statement.execute(ddl);
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：创建表DDL失败!");
+            throw new GeneralException("[hive]：创建表DDL失败!");
         }
         MetadataInfo metadataInfo = JiveUtil.parseMetadataInfo(ddl);
         return exist(metadataInfo.getDbName(), metadataInfo.getTableName());
@@ -107,7 +107,11 @@ public class Jive extends BinaryJive {
             return createSql.toString();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：获取创建表DDL 失败!");
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Table not found")) {
+                throw new GeneralException("[hive]请确认是否存在表：" + dbName + "." + tableName);
+            } else {
+                throw new GeneralException("[hive]：获取创建表DDL 失败!");
+            }
         }
     }
 
@@ -132,7 +136,7 @@ public class Jive extends BinaryJive {
         } catch (SQLException e) {
             e.printStackTrace();
             success = false;
-            throw new GeneralException("【Jive】：新增列失败!");
+            throw new GeneralException("[hive]：新增列失败!");
         }
         return success;
     }
@@ -156,7 +160,7 @@ public class Jive extends BinaryJive {
             success = true;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：修改列失败!");
+            throw new GeneralException("[hive]：修改列失败!");
         }
         return success;
     }
@@ -172,7 +176,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：获取指定库下表数据!");
+            throw new GeneralException("[hive]：获取指定库下表数据!");
         }
         return tableList;
     }
@@ -186,7 +190,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("【Jive】：获取库名失败!");
+            throw new GeneralException("[hive]：获取库名失败!");
         }
         return dbList;
     }

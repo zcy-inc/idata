@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoNewDTO;
@@ -131,8 +132,13 @@ public class TableInfoController {
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) throws IllegalAccessException {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfoDto.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
         long count = tableInfoDto.getColumnInfos().stream()
-                .map(e -> e.getColumnName())
+                .map(e -> e.getColumnName().trim())
                 .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
                 .entrySet()
                 .stream().filter(e -> e.getValue() > 1).count();
@@ -202,6 +208,12 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/info")
     public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfo.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+
         long count = tableInfo.getColumnInfos().stream()
                 .map(e -> e.getColumnName())
                 .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
@@ -253,7 +265,11 @@ public class TableInfoController {
                 stringBuilder.append("排序变更：" + e.getColumnIndex() + " 改为 " + e.getHiveColumnIndex() + "\n");
             }
             if (!StringUtils.equalsIgnoreCase(e.getColumnType(), e.getHiveColumnType())) {
-                stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
+                if (e.getHiveColumnType() != null) {
+                    stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType().toUpperCase(Locale.ROOT) + "\n");
+                } else {
+                    stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
+                }
             }
             if (!StringUtils.equalsIgnoreCase(e.getColumnComment(), e.getHiveColumnComment())) {
                 stringBuilder.append("字段中文名称：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
@@ -276,6 +292,12 @@ public class TableInfoController {
      */
     @PostMapping("/pull/hive/columns")
     public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfo.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+
         long count = tableInfo.getColumnInfos().stream()
                 .map(e -> e.getColumnName())
                 .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
@@ -305,5 +327,7 @@ public class TableInfoController {
         checkArgument(user != null && 2 == user.getSysAdmin(), "无权限同步ODS字段安全等级");
         return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
     }
+
+
 
 }
