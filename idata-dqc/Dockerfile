@@ -6,11 +6,8 @@ RUN mvn clean package
 
 FROM docker-image.cai-inc.com/compile/openjdk11:x86_64-centos-jre-11.0.10_9
 RUN mkdir /app
-COPY --from=builder /app/target/idata-dqc-1.0.0.jar /app/app.jar
-ADD docker/startup.sh /app/
+COPY --from=builder /app/idata-dqc/target/idata-dqc-1.0.0.jar /app/app.jar
+ADD idata-dqc/docker/startup.sh /app/
 WORKDIR /app
 RUN chmod a+x startup.sh
 CMD /app/startup.sh
-
-
-
