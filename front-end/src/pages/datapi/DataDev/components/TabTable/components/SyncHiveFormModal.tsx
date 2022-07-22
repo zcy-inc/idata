@@ -61,16 +61,14 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
   const [btnLoading, setBtnLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (data) {
-      setTableLoading(true);
-      params = createTableParams();
-      compareHiveChange({ ...params, id: data.id })
-        .then((res) => {
-          setDataSource(res?.data?.changeContentInfoList ?? []);
-        })
-        .catch((e) => {})
-        .finally(() => setTableLoading(false));
-    }
+    setTableLoading(true);
+    params = createTableParams();
+    compareHiveChange({ ...params, id: data?.id })
+      .then((res) => {
+        setDataSource(res?.data?.changeContentInfoList ?? []);
+      })
+      .catch((e) => {})
+      .finally(() => setTableLoading(false));
   }, [visible]);
 
   return (
@@ -92,7 +90,7 @@ const SyncHiveFormModal: FC<SyncHiveFormModalProps> = ({
           loading={btnLoading}
           onClick={() => {
             setBtnLoading(true);
-            hiveTableChange({ ...params, id: data.id })
+            hiveTableChange({ ...params, id: data?.id })
               .then((res) => {
                 if (res.success) {
                   onCancel();

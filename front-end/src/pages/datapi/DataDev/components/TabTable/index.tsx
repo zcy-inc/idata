@@ -36,6 +36,7 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
   const [data, setData] = useState<Table>();
   const [loading, setLoading] = useState<boolean>(false);
   const [metabaseLoading, setMetabaseLoading] = useState<boolean>(false);
+  const [hiveDisabled, setHiveDisabled] = useState<boolean>(false);
   const [ddlModalVisible, setDdlModalVisible] = useState(false);
   const [syncHiveFormModalVisible, setSyncHiveFormModalVisible] = useState(false);
 
@@ -219,6 +220,10 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
           const columnInfos = get(res, 'data.columnInfos');
           set(tmp, 'columnInfos', columnInfos);
           setData(tmp);
+          setHiveDisabled(true);
+          setTimeout(() => {
+            setHiveDisabled(false);
+          }, 1000);
           setMode('edit');
         }
         return res;
@@ -261,14 +266,20 @@ const TabTable: FC<TabTableProps> = ({ pane }) => {
             <Button key="metabase" size="large" onClick={syncMetabase} loading={metabaseLoading}>
               同步Metabase
             </Button>
-            <Button key="edit" size="large" type="primary" onClick={() => setMode('edit')}>
+            <Button key="edit" size="large" type="primary" onClick={() => {
+              setHiveDisabled(true);
+              setTimeout(() => {
+                setHiveDisabled(false);
+              }, 1000);
+              setMode('edit');
+            }}>
               编辑
             </Button>
           </Space>
         )}
         {mode === 'edit' && (
           <Space>
-            <Button key="hive" size="large" onClick={showSyncHiveFormModal}>
+            <Button key="hive" size="large" onClick={showSyncHiveFormModal} disabled={hiveDisabled}>
               同步Hive表结构
             </Button>
             <Button key="save" size="large" type="primary" onClick={onSubmit} loading={loading}>
