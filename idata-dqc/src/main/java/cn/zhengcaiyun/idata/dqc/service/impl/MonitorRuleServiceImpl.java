@@ -25,18 +25,15 @@ import cn.zhengcaiyun.idata.dqc.model.enums.MonitorObjEnum;
 import cn.zhengcaiyun.idata.dqc.model.enums.MonitorTemplateEnum;
 import cn.zhengcaiyun.idata.dqc.model.enums.RuleTypeEnum;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
-import cn.zhengcaiyun.idata.dqc.model.vo.JobOutputVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
-import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
-import cn.zhengcaiyun.idata.dqc.service.TableService;
+import cn.zhengcaiyun.idata.dqc.model.vo.*;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
+import cn.zhengcaiyun.idata.dqc.service.MonitorTemplateService;
+import cn.zhengcaiyun.idata.dqc.service.TableService;
 import cn.zhengcaiyun.idata.dqc.utils.DateUtils;
 import cn.zhengcaiyun.idata.dqc.utils.ParameterUtils;
 import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +71,9 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
     @Autowired
     private MessageSendService messageSendService;
 
+    @Autowired
+    private MonitorTemplateService monitorTemplateService;
+
     @Override
     @Transactional
     public Result<MonitorRuleVO> add(MonitorRuleVO vo) {
@@ -86,6 +86,11 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         Result result = this.check(vo);
         if (!result.isSuccess()) {
             return result;
+        }
+
+        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType())) {
+            MonitorTemplateVO template = monitorTemplateService.getById(vo.getTemplateId());
+            monitorRule.setContent(template.getContent());
         }
 
         monitorRule.setVersion(this.getRuleVersion(monitorRule));
@@ -103,6 +108,11 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         Result result = this.check(vo);
         if (!result.isSuccess()) {
             return result;
+        }
+
+        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType())) {
+            MonitorTemplateVO template = monitorTemplateService.getById(vo.getTemplateId());
+            monitorRule.setContent(template.getContent());
         }
 
         monitorRule.setVersion(this.getRuleVersion(monitorRule));
@@ -155,6 +165,13 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         ArrayList<String> fixList = Lists.newArrayList(">", ">=", "=", "<", "<=", "<>");
         if (fixList.contains(vo.getCompareType()) && vo.getFixValue() == null) {
             return Result.failureResult("未选择比较方式或固定值");
+        }
+
+        if (vo.getFixValue() != null && vo.getFixValue() < 0) {
+            return Result.failureResult("固定值不能为负值");
+        }
+        if ((vo.getRangeStart() != null && vo.getRangeStart() < 0) || vo.getRangeEnd() != null && vo.getRangeEnd() < 0) {
+            return Result.failureResult("范围值不能为负值");
         }
         return Result.successResult();
     }

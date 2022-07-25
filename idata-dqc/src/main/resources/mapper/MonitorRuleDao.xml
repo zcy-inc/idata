@@ -164,7 +164,13 @@
     select id, `table_name`,  `name`, rule_type, monitor_obj monitorObj, alarm_level alarmLevel,
            alarm_receivers alarmReceivers,`status`, editor, edit_time editTime
     from dqc_monitor_rule
-    where del=0 and table_name=#{query.tableName} and baseline_id=#{query.baselineId}
+    where del=0
+    <if test="query.tableName!=null and query.tableName!=''">
+      and table_name=#{query.tableName}
+    </if>
+    <if test="query.baselineId!=null">
+      and baseline_id=#{query.baselineId}
+    </if>
     <if test="query.templateId != null">
       and template_id=#{query.templateId}
     </if>
@@ -173,6 +179,9 @@
     </if>
     <if test="query.monitorObj != null">
       and monitor_obj=#{query.monitorObj}
+    </if>
+    <if test="query.status != null">
+      and status=#{query.status}
     </if>
     order by edit_time desc
     limit #{query.startIndex},#{query.pageSize}
@@ -181,7 +190,13 @@
   <select id="getCount" resultType="java.lang.Integer">
     select count(*)
     from dqc_monitor_rule
-    where del=0 and table_name=#{query.tableName} and baseline_id=#{query.baselineId}
+    where del=0
+    <if test="query.tableName!=null and query.tableName!=''">
+      and table_name=#{query.tableName}
+    </if>
+    <if test="query.baselineId!=null">
+      and baseline_id=#{query.baselineId}
+    </if>
     <if test="query.templateId != null">
       and template_id=#{query.templateId}
     </if>
@@ -190,6 +205,9 @@
     </if>
     <if test="query.monitorObj != null">
       and monitor_obj=#{query.monitorObj}
+    </if>
+    <if test="query.status != null">
+      and status=#{query.status}
     </if>
     limit #{query.startIndex},#{query.pageSize}
   </select>

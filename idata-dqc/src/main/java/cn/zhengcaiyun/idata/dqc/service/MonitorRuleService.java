@@ -2,7 +2,6 @@ package cn.zhengcaiyun.idata.dqc.service;
 
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
-import cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
