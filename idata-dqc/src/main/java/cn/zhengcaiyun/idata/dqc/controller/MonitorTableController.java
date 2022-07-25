@@ -44,11 +44,8 @@ public class MonitorTableController {
             return Result.failureResult("表名错误");
         }
 
-        HiveTable hiveTable = tableService.getTable(arr[0], arr[1]);
-        if (hiveTable == null) {
-            return Result.failureResult("表不存在");
-        }
-        if (hiveTable.getPartitioned() && StringUtils.isEmpty(vo.getPartitionExpr())) {
+        HiveTable hiveTable = tableService.getPartitionTable(arr[0], arr[1]);
+        if (hiveTable != null && hiveTable.getPartitioned() && StringUtils.isEmpty(vo.getPartitionExpr())) {
             return Result.failureResult("该表为分区表，未填写分区信息");
         }
 

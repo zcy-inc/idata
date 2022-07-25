@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface TableDao {
     List<TableVO> getTables(@Param("tableName") String tableName,@Param("limit") Integer limit);
-    TableVO getTable(@Param("database") String database,@Param("tableName") String tableName);
+    TableVO getPartitionTable(@Param("database") String database,@Param("tableName") String tableName);
 
     List<Column> getColumns(@Param("database") String database,@Param("tableName") String tableName);
     List<String> getOwners(@Param("database") String database,@Param("tableName") String tableName);

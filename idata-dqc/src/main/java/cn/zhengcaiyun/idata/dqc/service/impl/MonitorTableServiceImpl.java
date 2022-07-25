@@ -11,6 +11,7 @@ import cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +86,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         monitorTable.setEditor(nickname);
 
         monitorTable.setAccessTime("");
+        monitorTable.setPartitionExpr(StringUtils.isEmpty(vo.getPartitionExpr()) ? "" : vo.getPartitionExpr());
 
         monitorTableDao.insert(monitorTable);
         vo.setId(monitorTable.getId());

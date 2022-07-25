@@ -22,10 +22,10 @@
         limit #{limit}
     </select>
 
-    <select id="getTable" resultType="cn.zhengcaiyun.idata.dqc.model.vo.TableVO">
-        select label_param_value partitioned
+    <select id="getPartitionTable" resultType="cn.zhengcaiyun.idata.dqc.model.vo.TableVO">
+        select distinct label_param_value partitioned
         from dev_label
-        where label_code = 'partitionedCol:LABEL'
+        where label_code = 'partitionedCol:LABEL' and label_param_value='true'
           and table_id in (select t.id
                            from dev_table_info t
                            left join dev_label l on t.id = l.table_id

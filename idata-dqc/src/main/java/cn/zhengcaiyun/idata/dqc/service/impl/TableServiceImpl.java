@@ -200,12 +200,15 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public HiveTable getTable(String database, String tableName) {
-        TableVO tableVO = tableDao.getTable(database, tableName);
+    public HiveTable getPartitionTable(String database, String tableName) {
+        TableVO tableVO = tableDao.getPartitionTable(database, tableName);
+        if (tableVO == null) {
+            return null;
+        }
 
         HiveTable hiveTable = new HiveTable();
-        hiveTable.setPartitioned(tableVO.getPartitioned());
         hiveTable.setTableName(database + "." + tableName);
+        hiveTable.setPartitioned(tableVO.getPartitioned());
         return hiveTable;
     }
 

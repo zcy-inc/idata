@@ -20,7 +20,7 @@ public interface TableService {
     Set<HiveTable> getTableList(String tableName, Integer limit);
 
     HiveTable getMetastoreTable(String database, String tableName);
-    HiveTable getTable(String database, String tableName);
+    HiveTable getPartitionTable(String database, String tableName);
 
     List<Column> getMetastoreColumns(String database, String tableName) throws IdataException;
     List<Column> getColumns(String database, String tableName) throws IdataException;
