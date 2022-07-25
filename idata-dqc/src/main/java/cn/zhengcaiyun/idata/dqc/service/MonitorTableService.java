@@ -22,7 +22,7 @@ public interface MonitorTableService {
 
     PageResult<MonitorTableVO> getByPage(MonitorTableQuery query);
 
-    MonitorTableVO insert(MonitorTableVO monitorTable);
+    Result<MonitorTableVO> insert(MonitorTableVO monitorTable);
 
     boolean update(MonitorTableVO monitorTable);
 

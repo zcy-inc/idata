@@ -49,9 +49,7 @@ public class MonitorTableController {
             return Result.failureResult("该表为分区表，未填写分区信息");
         }
 
-        monitorTableService.insert(vo);
-
-        return Result.successResult(vo);
+        return monitorTableService.insert(vo);
     }
 
     @RequestMapping("/update")

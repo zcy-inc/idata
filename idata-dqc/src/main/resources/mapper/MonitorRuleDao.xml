@@ -39,17 +39,17 @@
     where id = #{id} and del=0
   </select>
 
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorRule" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
     insert into dqc_monitor_rule (baseline_id,`table_name`,field_name, `name`, rule_type, template_id,
                                   monitor_obj, alarm_level, alarm_receivers,
                                   check_type, compare_type,
-                                  content,output_type，fix_value, range_start, range_end, `status`,
+                                  content,output_type,fix_value, range_start, range_end, `status`,
                                   del, creator, create_time, editor, edit_time,version)
     values (#{rule.baselineId},#{rule.tableName}, #{rule.fieldName}, #{rule.name}, #{rule.ruleType}, #{rule.templateId},
             #{rule.monitorObj}, #{rule.alarmLevel}, #{rule.alarmReceivers},
             #{rule.checkType}, #{rule.compareType},
             #{rule.content},#{rule.outputType}, #{rule.fixValue}, #{rule.rangeStart}, #{rule.rangeEnd}, #{rule.status},
-            0, #{rule.creator}, now(), #{rule.editor},now(),#{version})
+            0, #{rule.creator}, now(), #{rule.editor},now(),#{rule.version})
   </insert>
 
   <update id="updateNotNull" >
@@ -91,7 +91,7 @@
         output_type = #{rule.outputType},
       </if>
       <if test="rule.fixValue != null">
-        fix_value = #{fixValue},
+        fix_value = #{rule.fixValue},
       </if>
       <if test="rule.rangeStart != null">
         range_start = #{rule.rangeStart},

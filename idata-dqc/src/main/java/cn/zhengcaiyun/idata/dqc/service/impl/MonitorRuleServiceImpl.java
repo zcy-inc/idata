@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.dqc.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivyQueryDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlResultDto;
@@ -76,13 +77,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
     @Override
     @Transactional
     public Result<MonitorRuleVO> add(MonitorRuleVO vo) {
-        MonitorRuleQuery query = new MonitorRuleQuery();
-        query.setBaselineId(vo.getBaselineId());
-        query.setTableName(vo.getTableName());
-        if (monitorRuleDao.getCount(query) > 0) {
-            return Result.failureResult("该表已经存在，请勿重复创建");
-        }
-
         MonitorRule monitorRule = Converter.MONITOR_RULE_CONVERTER.toDto(vo);
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         monitorRule.setCreator(nickname);
@@ -123,7 +117,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
 
     private String getRuleVersion(MonitorRule rule) {
-        return Md5Crypt.apr1Crypt(rule.getFieldName() + rule.getRuleType() + rule.getTemplateId()
+        return DigestUtil.md5(rule.getFieldName() + rule.getRuleType() + rule.getTemplateId()
                 + rule.getMonitorObj() + rule.getCheckType() + rule.getCompareType()
                 + rule.getContent() + rule.getFixValue() + rule.getRangeStart() + rule.getRangeEnd());
     }

@@ -78,7 +78,12 @@ public class MonitorTableServiceImpl implements MonitorTableService {
     }
 
     @Override
-    public MonitorTableVO insert(MonitorTableVO vo) {
+    public Result<MonitorTableVO> insert(MonitorTableVO vo) {
+        MonitorTable old = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
+        if(old !=null){
+            return Result.failureResult("该表已经存在，请勿重复创建");
+        }
+
         MonitorTable monitorTable = Converter.MONITOR_TABLE_CONVERTER.toDto(vo);
 
         String nickname = OperatorContext.getCurrentOperator().getNickname();
@@ -90,7 +95,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
 
         monitorTableDao.insert(monitorTable);
         vo.setId(monitorTable.getId());
-        return vo;
+        return Result.successResult(vo);
     }
 
     @Override
