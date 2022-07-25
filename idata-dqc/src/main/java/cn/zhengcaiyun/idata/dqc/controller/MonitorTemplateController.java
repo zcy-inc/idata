@@ -39,6 +39,14 @@ public class MonitorTemplateController {
 
     @RequestMapping("/update")
     public Result<MonitorTemplateVO> update(@RequestBody MonitorTemplateVO vo) {
+        MonitorRuleQuery query = new MonitorRuleQuery();
+        query.setTemplateId(vo.getId());
+        query.setStatus(1);
+
+        if (monitorRuleService.getCount(query) > 0) {
+            return Result.failureResult("该模板有关联规则，停止后才能删除");
+        }
+
         try {
             Assert.isFalse(vo.getId() == null, "id不能为空");
             monitorTemplateService.check(vo);
@@ -65,7 +73,7 @@ public class MonitorTemplateController {
         query.setTemplateId(id);
 
         if (monitorRuleService.getCount(query) > 0) {
-            return Result.failureResult("规则已被关联，取消后才能删除");
+            return Result.failureResult("该模板有关联规则，停止规则后才能删除");
         }
 
         MonitorTemplateVO monitorTemplateVO = new MonitorTemplateVO();
@@ -81,9 +89,10 @@ public class MonitorTemplateController {
         if (status == 0) {
             MonitorRuleQuery query = new MonitorRuleQuery();
             query.setTemplateId(id);
+            query.setStatus(1);
 
             if (monitorRuleService.getCount(query) > 0) {
-                return Result.failureResult("规则已被关联，取消后才能停用");
+                return Result.failureResult("该模板有关联规则，停止规则后才能停用");
             }
         }
         MonitorTemplateVO monitorTemplateVO = new MonitorTemplateVO();
