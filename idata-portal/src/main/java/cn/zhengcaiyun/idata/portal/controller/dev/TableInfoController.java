@@ -320,13 +320,14 @@ public class TableInfoController {
         return RestResult.success(list);
     }
 
-    @GetMapping("/syncSecurityColumn")
-    public RestResult syncSecurityColumn(HttpServletRequest request) throws IllegalAccessException {
-        UacUser user = uacUserDao.selectByPrimaryKey(tokenService.getUserId(request)).orElse(null);
-        // 暂时控制权限，只允许系统管理员操作
-        checkArgument(user != null && 2 == user.getSysAdmin(), "无权限同步ODS字段安全等级");
-        return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
-    }
+    // 暂注释避免误同步
+//    @GetMapping("/syncSecurityColumn")
+//    public RestResult syncSecurityColumn(HttpServletRequest request) throws IllegalAccessException {
+//        UacUser user = uacUserDao.selectByPrimaryKey(tokenService.getUserId(request)).orElse(null);
+//        // 暂时控制权限，只允许系统管理员操作
+//        checkArgument(user != null && 2 == user.getSysAdmin(), "无权限同步ODS字段安全等级");
+//        return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
+//    }
 
 
 
