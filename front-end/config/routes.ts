@@ -41,6 +41,65 @@ export default [
     ],
   },
   {
+    path: '/quality',
+    name: '数据质量',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/92612579-f054-42c6-89aa-89dd2e92999d.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/0d46004d-ad86-4e57-b4b4-9721f881aaf4.png',
+    featureCode: 'F_MENU_DATA_QUALITY',
+    routes: [
+      { path: '/quality', redirect: '/quality/monitor/list' },
+      {
+        path: '/quality/monitor',
+        name: '监控管理',
+        featureCode: 'F_MENU_DATA_QUALITY_MONITOR',
+        routes: [
+          { path: '/quality/monitor', redirect: '/quality/monitor/list' },
+          {
+            path: '/quality/monitor/list',
+            component: './quality/Monitor',
+            name: '监控管理',
+            keepAlive: true,
+            hideInMenu: true
+          },
+          {
+            path: '/quality/monitor/edit/:id/:tableName',
+            name: '监控编辑',
+            component: './quality/Monitor/components/EditMonitor',
+            hideInMenu: true
+          },
+        ]
+      },
+      {
+        path: '/quality/template',
+        name: '模版管理',
+        featureCode: 'F_MENU_DATA_QUALITY_TEMPLATE',
+        component: './quality/Template',
+        keepAlive: true,
+      },
+      {
+        path: '/quality/baseline',
+        featureCode: 'F_MENU_DATA_QUALITY_BASE_LINE',
+        name: '基线管理',
+        routes: [
+          { path: '/quality/baseline', redirect: '/quality/baseline/list' },
+          {
+            path: '/quality/baseline/list',
+            component: './quality/Baseline',
+            name: '基线管理',
+            keepAlive: true,
+            hideInMenu: true
+          },
+          {
+            path: '/quality/baseline/edit/:id',
+            name: '基线编辑',
+            component: './quality/baseline/components/EditBaseline',
+            hideInMenu: true
+          },
+        ]
+      },
+    ],
+  },
+  {
     path: '/objectLabel',
     name: '数据标签',
     component: './ObjectLabel',
@@ -177,6 +236,7 @@ export default [
         path: '/measure/list',
         name: '指标',
         component: './Measure/List',
+        keepAlive: true,
         featureCode: 'F_MENU_MEASURE_METRIC',
       },
       {
@@ -194,12 +254,12 @@ export default [
       {
         path: '/measure/modifier',
         name: '修饰词',
+        keepAlive: true,
         component: './Measure/Modifier',
         featureCode: 'F_MENU_MEASURE_MODIFIER',
       },
     ]
   },
-  // 后端不能配数据地图；菜单写死，不需要根据enable判断能否展开;先用F_MENU_MEASURE_MANAGE让它能显示
   {
     path:'/outLink1',
     name:"数据地图",
@@ -216,14 +276,7 @@ export default [
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/896839e6-18ee-4c86-896f-7201835a6175.png',
     featureCode: 'F_MENU_XIAOCAI_BI',
   },
-  {
-    path:'/outLink3',
-    name:"数据质量",
-    outLink: '/idata-pro/#/data-quality/monitoring/list',
-    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/92612579-f054-42c6-89aa-89dd2e92999d.png',
-    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/0d46004d-ad86-4e57-b4b4-9721f881aaf4.png',
-    featureCode: 'F_MENU_DATA_QUALITY',
-  },
+ 
   {
     path:'/outLink4',
     name:"DataPi",
