@@ -115,7 +115,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
             编辑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 0}>
-            <Button danger type="text" disabled={row.status === 0}>
+            <Button type="link" disabled={row.status === 0}>
               删除
             </Button>
           </Popconfirm>

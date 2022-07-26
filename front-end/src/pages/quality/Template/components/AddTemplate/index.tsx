@@ -1,20 +1,17 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useImperativeHandle } from 'react';
 import ProForm, { ProFormSelect, ProFormText, ProFormRadio } from '@ant-design/pro-form';
 import { Form } from 'antd';
 import type { FC } from 'react';
-import { monitorObjList, ruleTypeList, outputTypeList, categoryList } from '@/constants/quality';
-import { getTemplateList, getTemplate } from '@/services/quality';
-import type { MonitorObj, RuleType, TemplateItem } from '@/types/quality';
+import { monitorObjList, outputTypeList, categoryList } from '@/constants/quality';
+import { getTemplate } from '@/services/quality';
 
 
 const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
   const [form] = Form.useForm();
-  const [templateList, setTemplateList] = useState<{label: string; value: number} []>([]);
 
   useEffect(() => {
     if(id) {
       getTemplate({id}).then(res => {
-        console.log(res);
         form.setFieldsValue(res.data);
       })
     }

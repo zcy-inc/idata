@@ -30,13 +30,12 @@ const Monitor: FC<{history: any}> = ({ history }) => {
     const params = form.getFieldsValue();
     const condition: any = {
       tableName: params.tableName,
-      alarmLevel: params.alarmLevel,
+      latestAlarmLevel: params.latestAlarmLevel,
       baselineId: -1
     };
     setLoading(true);
     getMonitorList({ pageSize: 10, curPage: pageNum, ...condition })
       .then((res) => {
-        console.log(res);
         setTotal(res.data.totalElements);
         setData(res.data.data);
       })
@@ -52,7 +51,10 @@ const Monitor: FC<{history: any}> = ({ history }) => {
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((values: any) => {
           dialog.showLoading();
-          addMonitor(values).then((res) => {
+          addMonitor({
+            ...values,
+            baselineId: -1
+          }).then((res) => {
             done();
             const {tableName, id} = res.data;
             history.push(`/quality/monitor/edit/${id}/${tableName}`);
@@ -113,7 +115,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
           fieldProps={{ style: { width: 200 }, size: 'large' }}
         />
         <ProFormSelect
-          name="alarmLevel"
+          name="latestAlarmLevel"
           label="告警等级"
           placeholder="请选择"
           fieldProps={{ style: { width: 200 }, size: 'large' }}

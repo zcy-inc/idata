@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
 import { useParams, Prompt } from 'umi';
 import { Button, Form, Table, Input, message, Modal, Popconfirm } from 'antd';
 import type { FC } from 'react';
@@ -83,9 +82,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
           const handler = isEdit ? updateMonitorRule : addMonitorRule;
-          const params = isEdit ? {...res, id: row.id} : res;
           dialog.showLoading();
-          handler(params).then(() => {
+          handler(res).then(() => {
             message.success(`${isEdit ? '编辑' : '新增'}成功`);
             done();
             getTasksWrapped();

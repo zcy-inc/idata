@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Spin } from 'antd'
-import { ProFormSelect } from '@ant-design/pro-form';
+import { Spin, Select } from 'antd';
+import type { SelectProps } from 'antd';
 import type { FC } from 'react';
 import { getTables } from '@/services/quality';
 import _ from 'lodash';
-const TableSelect: FC = ({}, ref) => {
+const TableSelect: FC<SelectProps> = (props) => {
   const [optopns, setOptions] = useState<{label: string; value: string;} []>([]);
   const [isFetching, setIsFetching] = useState(false);
   useEffect(() => {
@@ -23,19 +23,15 @@ const TableSelect: FC = ({}, ref) => {
   const onSearch = _.debounce(getOptions, 800);
 
   return (
-    <ProFormSelect
-      name="tableName"
-      label="适用表名"
+    <Select
       placeholder="请选择"
-      rules={[{ required: true, message: '请选择适用表名' }]}
       options={optopns}
-      fieldProps={{
-        searchOnFocus: true,
-        showSearch: true,
-        filterOption: false,
-        notFoundContent: isFetching ? <Spin size="small" /> : 'Not Found',
-        onSearch
-      }}
+      showSearch
+      filterOption={false}
+      notFoundContent={ isFetching ? <Spin size="small" /> : 'Not Found'}
+      onSearch={onSearch}
+      allowClear
+      {...props}
     />
   );
 };

@@ -18,7 +18,7 @@ import type { DefaultResponse } from './global';
  * 获取监控列表
  */
 export async function getMonitorList(data: {tableName?: string; alarmLevel?: number; curPage: number; pageSize: number; baselineId: number}) {
-  return request<DefaultResponse & { data: {data: MonitorItem [], totalElements: number} }>('/api/monitorTable/getByPage', {
+  return request<DefaultResponse & { data: {data: MonitorItem [], totalElements: number} }>('/api/dqc/monitorTable/getByPage', {
     method: 'POST',
     data
   });
@@ -28,7 +28,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 添加监控规则
  */
  export async function addMonitor(data: {tableName: string; partitionExpr?: string; baselineId: number}) {
-  return request<DefaultResponse & { data: MonitorItem }>('/api/monitorTable/add', {
+  return request<DefaultResponse & { data: MonitorItem }>('/api/dqc/monitorTable/add', {
     method: 'POST',
     data
   });
@@ -38,7 +38,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 删除监控规则
  */
  export async function deleteMonitor(data: {id: number;  isBaseline: boolean}) {
-  return request<DefaultResponse & { data: MonitorItem }>(`/api/monitorTable/del/${data.id}/${data.isBaseline}`, {
+  return request<DefaultResponse & { data: MonitorItem }>(`/api/dqc/monitorTable/del/${data.id}/${data.isBaseline}`, {
     method: 'GET',
   });
 }
@@ -47,7 +47,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 获取所有表
  */
  export async function getTables(params?: {tableName?: string; editTable?: string}) {
-  return request<DefaultResponse & { data: TableItem [] }>('/api/getTables', {
+  return request<DefaultResponse & { data: TableItem [] }>('/api/dqc/getTables', {
     method: 'GET',
     params
   });
@@ -57,7 +57,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 获取单个监控下的监控规则列表
  */
  export async function getMonitorRules(data: {tableName?: string; curPage: number; pageSize: number; baselineId: number}) {
-  return request<DefaultResponse & { data: {data: MonitorRuleItem [], totalElements: number} }>('/api/monitorRule/getByPage', {
+  return request<DefaultResponse & { data: {data: MonitorRuleItem [], totalElements: number} }>('/api/dqc/monitorRule/getByPage', {
     method: 'POST',
     data
   });
@@ -67,7 +67,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 获取监控表信息
  */
  export async function getMonitorInfo(params: {id?: string; }) {
-  return request<DefaultResponse & { data: MonitorItem }>(`/api/monitorTable/get/${params.id}`, {
+  return request<DefaultResponse & { data: MonitorItem }>(`/api/dqc/monitorTable/get/${params.id}`, {
     method: 'GET',
   });
 }
@@ -76,7 +76,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 修改监控表信息
  */
  export async function editMonitorInfo(data: {id: string;baselineId: number; partitionExpr: string; }) {
-  return request<DefaultResponse>('/api/monitorTable/update', {
+  return request<DefaultResponse>('/api/dqc/monitorTable/update', {
     method: 'POST',
     data
   });
@@ -85,7 +85,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 添加监控规则
  */
  export async function addMonitorRule(data: MonitorRuleItem) {
-  return request<DefaultResponse>('/api/monitorRule/add', {
+  return request<DefaultResponse>('/api/dqc/monitorRule/add', {
     method: 'POST',
     data
   });
@@ -95,7 +95,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 　修改监控规则
  */
  export async function updateMonitorRule(data: MonitorRuleItem) {
-  return request<DefaultResponse>('/api/monitorRule/update', {
+  return request<DefaultResponse>('/api/dqc/monitorRule/update', {
     method: 'POST',
     data
   });
@@ -105,7 +105,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 　删除监控规则
  */
  export async function removeMonitorRule(data: {id: number;}) {
-  return request<DefaultResponse>(`/api/monitorRule/del/${data.id}`, {
+  return request<DefaultResponse>(`/api/dqc/monitorRule/del/${data.id}`, {
     method: 'GET',
     data
   });
@@ -115,7 +115,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 　启用、停用监控规则
  */
  export async function toggleMonitorRule(data: {id: number; status: number}) {
-  return request<DefaultResponse>(`/api/monitorRule/setStatus/${data.id}/${data.status}`, {
+  return request<DefaultResponse>(`/api/dqc/monitorRule/setStatus/${data.id}/${data.status}`, {
     method: 'GET',
     data
   });
@@ -125,7 +125,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 　试跑监控规则
  */
  export async function tryRunMonitorRule(data: {id: number;}) {
-  return request<DefaultResponse & { data: LogItem [] }>(`/api/monitorRule/tryRun/${data.id}`, {
+  return request<DefaultResponse & { data: LogItem [] }>(`/api/dqc/monitorRule/tryRun/${data.id}`, {
     method: 'GET',
     data
   });
@@ -135,7 +135,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  * 　获取规则详情
  */
  export async function getMonitorRule(data: {id: number}) {
-  return request<DefaultResponse & {data: MonitorRuleItem }>(`/api/monitorRule/get/${data.id}`, {
+  return request<DefaultResponse & {data: MonitorRuleItem }>(`/api/dqc/monitorRule/get/${data.id}`, {
     method: 'GET',
   });
 }
@@ -144,7 +144,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  *  获取所有字段
  */
  export async function getFiledList(params: {tableName: string}) {
-  return request<DefaultResponse & { data: {name: string} [] }>('/api/hive/table/getColumns', {
+  return request<DefaultResponse & { data: {name: string} [] }>('/api/dqc/table/getColumns', {
     method: 'GET',
     params
   });
@@ -154,7 +154,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
  *  获取告知人
  */
  export async function getRecivers(params: {name?: string}) {
-  return request<DefaultResponse & { data: {nickname: string} [] }>('/api/user/getList', {
+  return request<DefaultResponse & { data: {nickname: string} [] }>('/api/dqc/user/getList', {
     method: 'GET',
     params
   });
@@ -168,7 +168,7 @@ export async function getLogs(params: {
   baselineId?: string | number;
   days?: string
 }) {
-  return request<DefaultResponse & { data: LogItem [] }>('/api/monitorHistory/get', {
+  return request<DefaultResponse & { data: LogItem [] }>('/api/dqc/monitorHistory/get', {
     method: 'GET',
     params
   });
@@ -178,7 +178,7 @@ export async function getLogs(params: {
  *  获取当前表负责人
  */
  export async function getTableOwners(params: {tableName: string}) {
-  return request<DefaultResponse & { data: LogItem [] }>('/api/table/getOwners', {
+  return request<DefaultResponse & { data: LogItem [] }>('/api/dqc/table/getOwners', {
     method: 'GET',
     params
   });
@@ -190,7 +190,7 @@ export async function getLogs(params: {
  *  获取模板列表
  */
  export async function getTemplateList(data: {curPage: number, pageSize: number, monitorObj?: MonitorObj, type?: RuleType}) {
-  return request<DefaultResponse & { data: {data: TemplateItem [], totalElements: number} } >('/api/monitorTemplate/getByPage', {
+  return request<DefaultResponse & { data: {data: TemplateItem [], totalElements: number} } >('/api/dqc/monitorTemplate/getByPage', {
     method: 'POST',
     data
   });
@@ -202,7 +202,7 @@ export async function getLogs(params: {
  export async function addTemplate(
   data: {name: string, category: Category, monitorObj: MonitorObj, type: RuleType,content: string; outputType: OutputType}
 ) {
-  return request<DefaultResponse & { data: TemplateItem } >('/api/monitorTemplate/add', {
+  return request<DefaultResponse & { data: TemplateItem } >('/api/dqc/monitorTemplate/add', {
     method: 'POST',
     data
   });
@@ -214,7 +214,7 @@ export async function getLogs(params: {
  export async function updateTemplate(
   data: {id?: number; name: string, category: Category, monitorObj: MonitorObj, type: RuleType,content: string; outputType: OutputType}
 ) {
-  return request<DefaultResponse & { data: TemplateItem } >('/api/monitorTemplate/update', {
+  return request<DefaultResponse & { data: TemplateItem } >('/api/dqc/monitorTemplate/update', {
     method: 'POST',
     data
   });
@@ -224,7 +224,7 @@ export async function getLogs(params: {
  *  获取模板
  */
  export async function getTemplate(params: {id: number;}) {
-  return request<DefaultResponse & { data: TemplateItem } >(`/api/monitorTemplate/get/${params.id}`, {
+  return request<DefaultResponse & { data: TemplateItem } >(`/api/dqc/monitorTemplate/get/${params.id}`, {
     method: 'GET',
   });
 }
@@ -233,7 +233,7 @@ export async function getLogs(params: {
  *  删除模板
  */
  export async function removeTemplate(params: {id: number;}) {
-  return request<DefaultResponse & { data: TemplateItem } >(`/api/monitorTemplate/del/${params.id}`, {
+  return request<DefaultResponse & { data: TemplateItem } >(`/api/dqc/monitorTemplate/del/${params.id}`, {
     method: 'GET',
   });
 }
@@ -242,7 +242,15 @@ export async function getLogs(params: {
  *  开启、停止模板
  */
  export async function toggleTemplate(params: {id: number;status: number;}) {
-  return request<DefaultResponse & { data: TemplateItem } >(`/api/monitorTemplate/setStatus/${params.id}/${params.status}`, {
+  return request<DefaultResponse & { data: TemplateItem } >(`/api/dqc/monitorTemplate/setStatus/${params.id}/${params.status}`, {
+    method: 'GET',
+  });
+}
+/**
+ *  开启、停止模板
+ */
+ export async function getUseInfo() {
+  return request<DefaultResponse & { data: {nickname: string} } >('/api/dqc/user/getCur', {
     method: 'GET',
   });
 }
@@ -252,7 +260,7 @@ export async function getLogs(params: {
  *  获取模板列表
  */
  export async function getBaselineList(data: {curPage: number; pageSize: number; name: string;}) {
-  return request<DefaultResponse & { data: {data: BaselineItem [], totalElements: number} } >('/api/monitorBaseline/getByPage', {
+  return request<DefaultResponse & { data: {data: BaselineItem [], totalElements: number} } >('/api/dqc/monitorBaseline/getByPage', {
     method: 'POST',
     data
   });
@@ -262,7 +270,7 @@ export async function getLogs(params: {
  *  新增基线
  */
  export async function addBaseline(data: { name: string;}) {
-  return request<DefaultResponse & { data: BaselineItem [] } >('/api/monitorBaseline/add', {
+  return request<DefaultResponse & { data: BaselineItem [] } >('/api/dqc/monitorBaseline/add', {
     method: 'POST',
     data
   });
@@ -272,7 +280,7 @@ export async function getLogs(params: {
  *  更新基线
  */
  export async function updateBaseline(data: { name: string; id: number;}) {
-  return request<DefaultResponse & { data: BaselineItem [] } >('/api/monitorBaseline/update', {
+  return request<DefaultResponse & { data: BaselineItem [] } >('/api/dqc/monitorBaseline/update', {
     method: 'POST',
     data
   });
@@ -282,7 +290,7 @@ export async function getLogs(params: {
  *  获取基线信息
  */
  export async function getBaseline(data: { id: string;}) {
-  return request<DefaultResponse & { data: BaselineItem } >(`/api/monitorBaseline/get/${data.id}`, {
+  return request<DefaultResponse & { data: BaselineItem } >(`/api/dqc/monitorBaseline/get/${data.id}`, {
     method: 'GET'
   });
 }
@@ -291,16 +299,25 @@ export async function getLogs(params: {
  *  删除基线
  */
  export async function deleteBaseline(data: { id: number;}) {
-  return request<DefaultResponse & { data: BaselineItem } >(`/api/monitorBaseline/del/${data.id}`, {
+  return request<DefaultResponse & { data: BaselineItem } >(`/api/dqc/monitorBaseline/del/${data.id}`, {
     method: 'GET'
   });
 }
 
 /**
- *  卡其、停止基线
+ *  开启、停止基线
  */
  export async function toggleBaseline(data: { id: number; status: number;}) {
-  return request<DefaultResponse & { data: BaselineItem} >(`/api/monitorBaseline/setStatus/${data.id}/${data.status}`, {
+  return request<DefaultResponse & { data: BaselineItem} >(`/api/dqc/monitorBaseline/setStatus/${data.id}/${data.status}`, {
+    method: 'GET'
+  });
+}
+
+/**
+ *  开启、停止基线
+ */
+ export async function getBaselineTables(data: { id: string | number; }) {
+  return request<DefaultResponse & { data: TableItem []} >(`/api/dqc/tables/get/${data.id}`, {
     method: 'GET'
   });
 }

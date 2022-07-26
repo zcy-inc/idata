@@ -6,8 +6,10 @@ export interface MonitorItem {
 }
 
 export interface TableItem {
+  id: number;
   tableName: string;
-  partitioned: boolean;
+  comment: string;
+  partitioned: string;
 }
 
 export type MonitorObj = 'table' | 'field';
@@ -46,6 +48,7 @@ export interface TemplateItem {
   content?: string;
   rangeStart?: number;
   rangeEnd?: number;
+  creator?: string;
 }
 
 export interface LogItem {

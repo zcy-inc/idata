@@ -8,7 +8,7 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 import AddTemplate from './components/AddTemplate';
 import type { TemplateItem } from '@/types/quality';
-import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTemplate } from '@/services/quality';
+import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTemplate, getUseInfo } from '@/services/quality';
 import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
 
 import styles from './index.less';
@@ -20,9 +20,13 @@ const Template: FC<{history: any}> = ({ history }) => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [useInfo, setUserInfo] = useState({nickname: ''})
 
   useEffect(() => {
     getTasksWrapped(1);
+    getUseInfo().then(res => {
+      setUserInfo(res.data);
+    });
   }, []);
 
   const getTasksWrapped = (pageNum: number = curPage) => {
@@ -119,7 +123,7 @@ const Template: FC<{history: any}> = ({ history }) => {
       width: 160,
       fixed: 'right',
       render: (_, row) => {
-        if(row.type === 'system') {
+        if(useInfo.nickname !== row.creator) {
           return  '-';
         }
         return (
