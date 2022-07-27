@@ -201,7 +201,6 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
   // 内置规则渲染
   const renderSystemRules = () => {
     const templateId = formValues.templateId;
-    console.log(templateId);
     if(templateId === 'table_output_time') { // 表产出时间
       return <ProFormTimePicker
         label=" "

@@ -75,7 +75,6 @@ const Monitor: FC<{history: any}> = ({ history }) => {
 
   const columns: ColumnsType<MonitorItem> = [
     { title: '表英文名', key: 'tableName', dataIndex: 'tableName' },
-    { title: '表中文名', key: 'comment', dataIndex: 'comment'},
     { title: '最新执行时间', key: 'accessTime', dataIndex: 'accessTime' },
     {
       title: '实时告警情况',

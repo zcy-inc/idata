@@ -33,7 +33,7 @@ export const compareOptions = [
 ];
 
 export const compareObjOptions = [
-  {value: 'abs', label: '绝对值'},
+  {value: 'fix', label: '固定值'},
   {value: 'pre_period', label: '上周期'}
 ];
 
@@ -43,8 +43,7 @@ export const statusList = [
 ];
 
 export const outputTypeList = [
-  {value: 1, label: '文本'},
-  {value: 2, label: '数值'},
+  {value: 2, label: '数值'}
 ];
 
 export enum operatorEnum {

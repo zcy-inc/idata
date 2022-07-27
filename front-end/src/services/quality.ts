@@ -75,7 +75,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 修改监控表信息
  */
- export async function editMonitorInfo(data: {id: string;baselineId: number; partitionExpr: string; }) {
+ export async function editMonitorInfo(data: {id: string | number;baselineId: number; partitionExpr: string; }) {
   return request<DefaultResponse>('/api/dqc/monitorTable/update', {
     method: 'POST',
     data
@@ -317,7 +317,7 @@ export async function getLogs(params: {
  *  开启、停止基线
  */
  export async function getBaselineTables(data: { id: string | number; }) {
-  return request<DefaultResponse & { data: TableItem []} >(`/api/dqc/tables/get/${data.id}`, {
+  return request<DefaultResponse & { data: TableItem []} >(`api/dqc/monitorTable/tables/get/${data.id}`, {
     method: 'GET'
   });
 }
