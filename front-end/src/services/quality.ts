@@ -27,7 +27,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 添加监控规则
  */
- export async function addMonitor(data: {tableName: string; partitionExpr?: string; baselineId: number}) {
+ export async function addMonitor(data: {tableName: string | undefined; partitionExpr?: string; baselineId: number}) {
   return request<DefaultResponse & { data: MonitorItem }>('/api/dqc/monitorTable/add', {
     method: 'POST',
     data
@@ -124,10 +124,9 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 　试跑监控规则
  */
- export async function tryRunMonitorRule(data: {id: number;}) {
-  return request<DefaultResponse & { data: LogItem [] }>(`/api/dqc/monitorRule/tryRun/${data.id}`, {
-    method: 'GET',
-    data
+ export async function tryRunMonitorRule(data: {ruleId: number; baselineId: number | string}) {
+  return request<DefaultResponse & { data: LogItem [] }>(`/api/dqc/monitorRule/tryRun/${data.baselineId}/${data.ruleId}`, {
+    method: 'GET'
   });
 }
 

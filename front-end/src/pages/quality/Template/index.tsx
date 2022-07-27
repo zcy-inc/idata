@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ProForm, { ProFormSelect } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
@@ -148,18 +148,25 @@ const Template: FC<{history: any}> = ({ history }) => {
   return (
     <PageContainer>
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
+        <ProFormText
+          name="name"
+          label="规则名称"
+          placeholder="请输入"
+          fieldProps={{ style: { width: 200 }, size: 'large' }}
+        />
         <ProFormSelect
           name="category"
           label="纬度"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={categoryList}
+          
         />
         <ProFormSelect
           name="type"
           label="规则类型"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={ruleTypeList}
         />
         <Button

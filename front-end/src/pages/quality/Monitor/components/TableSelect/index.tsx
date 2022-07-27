@@ -3,7 +3,7 @@ import { Spin, Select } from 'antd';
 import type { FC } from 'react';
 import { getTables } from '@/services/quality';
 import _ from 'lodash';
-const TableSelect: FC< { onChange: any; value: any }> = (props) => {
+const TableSelect: FC< { onChange: any; value?: any }> = (props) => {
   const [optipns, setOptions] = useState<{label: string; value: string; partitioned: boolean} []>([]);
   const [isFetching, setIsFetching] = useState(false);
   useEffect(() => {

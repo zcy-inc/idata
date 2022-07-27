@@ -117,7 +117,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
           name="latestAlarmLevel"
           label="告警等级"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={alarmLevelList}
         />
         <Button

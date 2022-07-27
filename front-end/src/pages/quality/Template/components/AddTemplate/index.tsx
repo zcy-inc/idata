@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle } from 'react';
-import ProForm, { ProFormSelect, ProFormText, ProFormRadio } from '@ant-design/pro-form';
-import { Form } from 'antd';
+import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTextArea } from '@ant-design/pro-form';
+import { Form, Alert } from 'antd';
 import type { FC } from 'react';
 import { monitorObjList, outputTypeList, categoryList } from '@/constants/quality';
 import { getTemplate } from '@/services/quality';
@@ -46,15 +46,21 @@ const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
         rules={[{ required: true, message: '请输入规则名称' }]}
         placeholder="请输入"
       />
-      <ProFormText
+      <ProFormTextArea
         name="content"
         label="SQL"
         rules={[{ required: true, message: '请输入SQL' }]}
         placeholder="请输入"
       />
+      <Alert
+        style={{margin: '0 0 24px 100px'}}
+        message="sql支持${tableName}占位符。例，select count(*) from ${tableName}"
+        type="info"
+      />
       <ProFormRadio.Group
         label="产出类型"
         name="outputType"
+        initialValue={2}
         options={outputTypeList}
       />
     </ProForm>

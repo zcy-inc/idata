@@ -18,7 +18,8 @@ import {
   getBaselineTables,
   addMonitor,
   editMonitorInfo,
-  deleteMonitor
+  deleteMonitor,
+  tryRunMonitorRule
 } from '@/services/quality';
 import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/quality';
 import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
@@ -126,6 +127,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
         const newBaseInfo = {...baseInfo, name: res.name}
         setBaseInfo(newBaseInfo);
         setOriginBaseInfo(newBaseInfo);
+        return;
       })
     })
   }
@@ -147,17 +149,6 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       message.success('删除成功！');
       getTablesData();
     })
-  }
-
-  const viewLogs = (row: MonitorRuleItem, type: 1 | 2) => {
-    showDialog(type === 1 ? '监控日志' : '试跑结果', {
-      formProps: {
-        params: {
-          ruleId: row.id
-        },
-        type
-      }
-    }, LogsContent)
   }
 
   const handleTableSelectChange = (tableName: string, partitioned: boolean, index: any) => {
@@ -196,7 +187,16 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       const originRow = originTableData[rowIndex];
       setTableData([...tableData.slice(0, rowIndex), {...originRow}, ...tableData.slice(rowIndex + 1)])
     }
-  } 
+  }
+  
+  const tryRun = (row: MonitorRuleItem) => {
+    tryRunMonitorRule({
+      ruleId: row.id,
+      baselineId: params.id
+    }).then(() => {
+      message.success('提交成功，试跑结束后结果将以钉钉形式发送');
+    })
+  }
 
   const addNewLine = () => {
     const exist = tableData.some(item => item.showEdit);
@@ -249,7 +249,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             编辑
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 2)}>
+          <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
@@ -331,16 +331,23 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
         message={(location) => {
           Modal.confirm({
             title: '暂未保存您所做的更改，是否保存？',
-            content: '点击“保存”将保存信息并返回，点击“取消”停留在该页面',
+            content: '点击“保存”将保存信息并返回',
             okText: '保存',
-            cancelText: '取消',
+            cancelText: '不保存',
+            closable: true,
             onOk() {
               updateBaseInfo().then(() => {
                 history.push(location.pathname)
               })
             },
-            onCancel() {
-              // history.push(location.pathname);
+            onCancel(close) {
+              if(!close?.triggerCancel) {
+                setBaseInfo(originBaseInfo);
+                setTableModified(false);
+                setTimeout(() => {
+                  history.push(location.pathname);
+                }, 0)
+              }
             }
           });
           return false;

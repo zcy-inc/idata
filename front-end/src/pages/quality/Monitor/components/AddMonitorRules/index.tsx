@@ -1,5 +1,5 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
-import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet, ProFormTextArea } from '@ant-design/pro-form';
 import { Form, Spin } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
@@ -90,6 +90,11 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
     if (params.templateId === 'table_output_time') {
       params.content = moment(params.content).format('HH:mm');
     }
+    if(params.transform) {
+      params.rangeStart = params.transform[0];
+      params.rangeEnd = params.transform[2];
+      delete params.transform;
+    }
     return params;
   }
 
@@ -166,35 +171,35 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
       placeholder="请选择"
       rules={[{ validator: requiredValidator }]}
     />
-      {checkType === 'abs'?
+    {checkType === 'fix'&&
+      <ProFormText
+        placeholder="请选择"
+        name="fixValue"
+        label=" "
+        rules={[{ validator: requiredValidator }]}
+      />}
+    {['up', 'down'].includes(formValues.compareType) && formValues.checkType &&  <ProFormFieldSet
+        name="transform"
+        label=" "
+      >
+        <ProFormText
+          name="rangeStart"
+          placeholder="请选择"
+          rules={[{ validator: requiredValidator }]}
+          fieldProps={{
+            suffix: "%"
+          }}
+        />
+        <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
           placeholder="请选择"
-          name="fixValue"
-          label=" "
+          name="rangeEnd"
           rules={[{ validator: requiredValidator }]}
-        /> : checkType === 'pre_period' ?
-        <ProFormFieldSet
-          name="pre_period"
-          label=" "
-          transform={(value: any) => ({ rangeStart: value[0], rangeEnd: value[1] })}
-        >
-          <ProFormText
-            placeholder="请选择"
-            rules={[{ validator: requiredValidator }]}
-            fieldProps={{
-              suffix: "%"
-            }}
-          />
-          <span style={{lineHeight: '34px'}}>~</span>
-          <ProFormText
-            placeholder="请选择"
-            rules={[{ validator: requiredValidator }]}
-            fieldProps={{
-              suffix: "%"
-            }}
-          />
-      </ProFormFieldSet> : null
-    }
+          fieldProps={{
+            suffix: "%"
+          }}
+        />
+    </ProFormFieldSet>}
   </>
   }
 
@@ -227,9 +232,8 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
       />
     } else if(templateId === 'field_data_range') {
       return <ProFormFieldSet
-        name="fieldDataRange"
+        name="transform"
         label=" "
-        transform={(value: any) => ({ rangeStart: value[0], rangeEnd: value[1] })}
       >
         <ProFormText
           placeholder="请选择"
@@ -287,7 +291,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           placeholder="请输入"
           rules={[{ required: true, message: '请输入规则名称' }]}
         />
-        <ProFormText
+        <ProFormTextArea
           label="SQL"
           name="content"
           placeholder="请输入"

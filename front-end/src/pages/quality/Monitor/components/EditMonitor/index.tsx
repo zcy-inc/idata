@@ -14,7 +14,8 @@ import {
   addMonitorRule,
   updateMonitorRule,
   removeMonitorRule,
-  toggleMonitorRule
+  toggleMonitorRule,
+  tryRunMonitorRule
 } from '@/services/quality';
 import AddMonitorRules from '../AddMonitorRules';
 import LogsContent from '../LogsContent';
@@ -107,6 +108,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
         const newBaseInfo = {...baseInfo, partitionExpr: res.partitionExpr}
         setBaseInfo(newBaseInfo);
         setOriginBaseInfo(newBaseInfo);
+        return;
       })
     })
   }
@@ -116,15 +118,23 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     setIsEdit(false);
   }
 
-  const viewLogs = (row: MonitorRuleItem, type: 1 | 2) => {
-    showDialog(type === 1 ? '监控日志' : '试跑结果', {
+  const viewLogs = (row: MonitorRuleItem) => {
+    showDialog('监控日志' , {
       formProps: {
         params: {
           ruleId: row.id
         },
-        type
       }
     }, LogsContent)
+  }
+
+  const tryRun = (row: MonitorRuleItem) => {
+    tryRunMonitorRule({
+      ruleId: row.id,
+      baselineId: params.id
+    }).then(() => {
+      message.success('提交成功，试跑结束后结果将以钉钉形式发送');
+    })
   }
 
   const handleDelete = (row: MonitorRuleItem) => {
@@ -185,10 +195,10 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             编辑
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 1)}>
+          <Button type="link" onClick={() => viewLogs(row)}>
             日志
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 2)}>
+          <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 0}>
@@ -228,16 +238,22 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
         message={(location) => {
           Modal.confirm({
             title: '暂未保存您所做的更改，是否保存？',
-            content: '点击“保存”将保存信息并返回，点击“取消”停留在该页面',
+            content: '点击“保存”将保存信息并返回',
             okText: '保存',
-            cancelText: '取消',
+            cancelText: '不保存',
+            closable: true,
             onOk() {
               updateMonitorInfo().then(() => {
                 history.push(location.pathname)
               })
             },
-            onCancel() {
-              // history.push(location.pathname);
+            onCancel: async (close)  => {
+              if(!close?.triggerCancel) {
+                setBaseInfo(originBaseInfo);
+                setTimeout(() => {
+                  history.push(location.pathname);
+                }, 0)
+              }
             }
           });
           return false;
