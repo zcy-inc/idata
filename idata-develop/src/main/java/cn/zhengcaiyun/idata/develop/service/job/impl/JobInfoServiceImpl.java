@@ -794,7 +794,22 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         flinkSqlResponse.setPublished(published);
         flinkSqlResponse.setJobVersion(flinkSqlContent.getVersion().toString());
-        flinkSqlResponse.setFlinkVersion(flinkSqlResponse.getConfProp().getOrDefault("Flink-version", "flink-1.10"));
+
+        String flinkVersion = flinkSqlResponse.getConfProp().get("Flink-Version");
+        flinkSqlResponse.getConfProp().remove("Flink-Version");
+        if (StringUtils.isNotBlank(flinkVersion)) {
+            // flink-1.10
+            flinkSqlResponse.setFlinkVersion(flinkVersion);
+        }
+
+        // todo IData待支持
+        flinkSqlResponse.setStartFromSavePoint(Boolean.FALSE);
+        flinkSqlResponse.setFlinkJobId("");
+
+        Optional<JobOutput> outputOptional = jobOutputRepo.query(jobId, env);
+        checkArgument(outputOptional.isPresent(), "Flink SQL 作业输出表未配置, jobId:%s，环境:%s", jobId, env);
+        JobOutput jobOutput = outputOptional.get();
+        flinkSqlResponse.setDestTableName(jobOutput.getDestTable());
         return flinkSqlResponse;
     }
 

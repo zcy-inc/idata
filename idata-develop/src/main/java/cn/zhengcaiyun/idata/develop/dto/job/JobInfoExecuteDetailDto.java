@@ -687,6 +687,18 @@ public class JobInfoExecuteDetailDto {
          * flink版本
          */
         private String flinkVersion;
+        /**
+         * 是否从SavePoint启动
+         */
+        private Boolean startFromSavePoint;
+        /**
+         * flink job id
+         */
+        private String flinkJobId;
+        /**
+         * 目标表
+         */
+        private String destTableName;
 
         public String getJobVersion() {
             return jobVersion;
@@ -734,6 +746,30 @@ public class JobInfoExecuteDetailDto {
 
         public void setFlinkVersion(String flinkVersion) {
             this.flinkVersion = flinkVersion;
+        }
+
+        public Boolean getStartFromSavePoint() {
+            return startFromSavePoint;
+        }
+
+        public void setStartFromSavePoint(Boolean startFromSavePoint) {
+            this.startFromSavePoint = startFromSavePoint;
+        }
+
+        public String getFlinkJobId() {
+            return flinkJobId;
+        }
+
+        public void setFlinkJobId(String flinkJobId) {
+            this.flinkJobId = flinkJobId;
+        }
+
+        public String getDestTableName() {
+            return destTableName;
+        }
+
+        public void setDestTableName(String destTableName) {
+            this.destTableName = destTableName;
         }
     }
 
