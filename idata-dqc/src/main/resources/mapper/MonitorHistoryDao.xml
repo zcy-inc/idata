@@ -22,7 +22,7 @@
 
     <select id="getByPage" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
         select
-          id, table_name, partition, rule_id, rule_name, rule_type, monitor_obj, data_value, sql, rule_vallue, version, creator, create_time, editor, edit_time, alarm_level
+          id, table_name, partition, rule_id, rule_name, rule_type, monitor_obj, data_value, sql, rule_value, version, creator, create_time, editor, edit_time, alarm_level
         from dqc_monitor_history
         <where>
             <if test="tableName != null and tableName != ''">
@@ -49,8 +49,8 @@
             <if test="sql != null and sql != ''">
                 and sql = #{sql}
             </if>
-            <if test="ruleVallue != null and ruleVallue != ''">
-                and rule_vallue = #{ruleVallue}
+            <if test="ruleValue != null and ruleValue != ''">
+                and rule_value = #{ruleValue}
             </if>
             <if test="version != null and version != ''">
                 and version = #{version}
@@ -102,8 +102,8 @@
             <if test="sql != null and sql != ''">
                 and sql = #{sql}
             </if>
-            <if test="ruleVallue != null and ruleVallue != ''">
-                and rule_vallue = #{ruleVallue}
+            <if test="ruleValue != null and ruleValue != ''">
+                and rule_value = #{ruleValue}
             </if>
             <if test="version != null and version != ''">
                 and version = #{version}
@@ -126,7 +126,7 @@
         </where>
     </select>
 
-    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" >
         insert into dqc_monitor_history
             ( `table_name`, `partition`, `rule_id`, `rule_name`, `rule_type`, `monitor_obj`,
               `alarm_level`, `alarm_receivers`, `fix_value`, `range_start`, `range_end`, `sql`, `alarm`,
@@ -134,7 +134,7 @@
         values
             (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj},
              #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},
-             #{entity.dataValue},  #{entity.ruleVallue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
+             #{entity.dataValue},  #{entity.ruleValue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
     </insert>
 
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
@@ -146,7 +146,7 @@
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj},
             #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},
-            #{entity.dataValue},  #{entity.ruleVallue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
+            #{entity.dataValue},  #{entity.ruleValue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
         </foreach>
     </insert>
 

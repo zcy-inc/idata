@@ -122,12 +122,13 @@ public class ParameterUtils {
 //        String date = ParameterUtils.getPreCycleDate("dasda${yyyy-MM-dd-1*7}", new Date());
 //        String date1 = ParameterUtils.getPreCycleDate("dasda${yyyy-MM-dd}", new Date());
 //        String date = ParameterUtils.dateTemplateParse("dasda${yyyy-MM-dd}", new Date());
-        String date1 = ParameterUtils.dateTemplateParse("pt=${yyyyMMdd+7}", new Date());
-        String date = ParameterUtils.getPreCycleDate("pt=${yyyyMMdd+7}", new Date());
+        String date1 = ParameterUtils.dateTemplateParse("select count(*) from dwd.dqc_test where bizdate=${yyyyMMdd} ", new Date());
+//        String date1 = ParameterUtils.dateTemplateParse("pt=${yyyyMMdd+7}", new Date());
+//        String date = ParameterUtils.getPreCycleDate("pt=${yyyyMMdd+7}", new Date());
 //        String date3 = ParameterUtils.dateTemplateParse("${yyyyMMdd-7}", new Date());
 //        String date4 = ParameterUtils.dateTemplateParse("${HHmmss+1/24/60}", new Date());
 //        String date5 = ParameterUtils.dateTemplateParse("${HH-1/24}", new Date());
-        System.out.println(date);
+//        System.out.println(date);
         System.out.println(date1);
 //        System.out.println(date2);
 //        System.out.println(date3);

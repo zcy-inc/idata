@@ -1,7 +1,9 @@
 package cn.zhengcaiyun.idata.dqc.utils;
 
 import cn.zhengcaiyun.idata.dqc.model.common.BizException;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -9,13 +11,28 @@ import java.util.regex.Pattern;
 
 public class RuleUtils {
 
+    public static String replaceSql(String sql,String tableName,String fieldName, Date date) {
+        if(StringUtils.isEmpty(sql)){
+            return sql;
+        }
+        sql = sql.replaceAll("\\$\\{tableName\\}",tableName).replaceAll("\\$\\{fieldName\\}",fieldName);
+        sql = ParameterUtils.dateTemplateParse(sql, new Date());
+
+        return sql;
+    }
+
     /**
      * 获取${}的占位符
      *
      * @param content
      * @return
      */
-    public static Set<String> getPlaceholder(String content) {
+    public static Set<String> getDatePlaceholder(String content) {
+        if(StringUtils.isEmpty(content)){
+            return new HashSet<>();
+        }
+        content = content.replaceAll("\\$\\{tableName\\}","").replaceAll("\\$\\{fieldName\\}","");
+
         Pattern pattern = Pattern.compile(ParameterUtils.DATE_PARSE_PATTERN);
         Matcher matcher = pattern.matcher(content);
 
@@ -25,7 +42,7 @@ public class RuleUtils {
             if (Pattern.matches(ParameterUtils.DATE_START_PATTERN, key)) {
                 continue;
             }
-            set.add(key);
+            set.add("${"+key+"}");
         }
         return set;
     }
@@ -36,10 +53,7 @@ public class RuleUtils {
      * @param content
      */
     public static void checkSql(String content) {
-        Set<String> set = getPlaceholder(content);
-        //移除系统参数的校验
-        set.remove("tableName");
-        set.remove("fieldName");
+        Set<String> set = getDatePlaceholder(content);
 
         if (set.size() > 1) {
             throw new BizException("分区表达式占位符只允许一种类型");

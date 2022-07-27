@@ -73,13 +73,16 @@ public class MonitorRuleController {
     @RequestMapping("/setStatus/{id}/{status}")
     public Result<Boolean> setStatus(@PathVariable Long id, @PathVariable Integer status) {
         monitorRuleService.setStatus(id, status);
+        //开启告警规则后初始化历史数据
+        if (status == 1) {
+            monitorRuleService.initHistory(id, OperatorContext.getCurrentOperator().getNickname());
+        }
         return Result.successResult();
     }
 
     @RequestMapping("/tryRun/{id}")
     public Result add(@PathVariable Long id) {
-        monitorRuleService.tryRun(id);
-        return Result.successResult();
+        return Result.successResult(monitorRuleService.tryRun(id));
     }
 
 }

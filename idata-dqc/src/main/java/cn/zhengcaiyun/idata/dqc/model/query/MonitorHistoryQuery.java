@@ -56,7 +56,7 @@ public class MonitorHistoryQuery extends BaseQuery{
     /**
      * 规则统计结果
      */
-    private String ruleVallue;
+    private String ruleValue;
     /**
      * 规则版本号（规则表的修改日期）
      */

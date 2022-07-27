@@ -20,7 +20,7 @@ public interface MonitorRuleDao {
     Integer getCount(@Param("query") MonitorRuleQuery query);
 
     @MapKey("tableName")
-    HashMap<String, MonitorTableVO> getRuleCountByTableName(@Param("tables") List<String> tables);
+    HashMap<String, MonitorTableVO> getRuleCountByTableName(@Param("tables") List<String> tables,@Param("baselineId")Long baselineId);
 
     @MapKey("baselineId")
     HashMap<Long, MonitorTableVO> getRuleCountByBaselineId(@Param("baselineIdList") List<Long> baselineIdList);

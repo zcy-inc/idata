@@ -52,7 +52,7 @@ public class MonitorHistory implements Serializable {
     /**
      * 规则统计结果
      */
-    private String ruleVallue;
+    private String ruleValue;
     /**
      * 规则版本号（规则表的修改日期）
      */
@@ -75,6 +75,24 @@ public class MonitorHistory implements Serializable {
     private Date editTime;
     
     private Integer alarmLevel;
+
+    private Integer alarm;
+
+    private String alarmReceivers;
+
+    private Double fixValue;
+
+    /**
+     * 开始值
+     */
+    private Double rangeStart;
+
+    /**
+     * 结束值
+     */
+    private Double rangeEnd;
+
+    private String content;
 
 }
 

@@ -22,7 +22,7 @@ public interface MonitorHistoryDao {
 
     int count(MonitorHistoryQuery query);
 
-    int insert(MonitorHistory monitorHistory);
+    int insert(@Param("entity") MonitorHistory monitorHistory);
 
     int insertBatch(@Param("entities") List<MonitorHistory> entities);
 

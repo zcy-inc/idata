@@ -63,7 +63,7 @@ public class MonitorTableController {
     }
 
     @RequestMapping("/getByPage")
-    public Result<PageResult<MonitorTableVO>> getByPage(MonitorTableQuery query) {
+    public Result<PageResult<MonitorTableVO>> getByPage(@RequestBody MonitorTableQuery query) {
         return Result.successResult(monitorTableService.getByPage(query));
     }
 

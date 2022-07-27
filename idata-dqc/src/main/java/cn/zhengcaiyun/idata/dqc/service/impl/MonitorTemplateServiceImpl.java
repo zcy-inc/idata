@@ -16,6 +16,7 @@ import cn.zhengcaiyun.idata.dqc.service.MonitorTemplateService;
 import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
     @Resource
     private MonitorTemplateDao monitorTemplateDao;
 
+    @Lazy
     @Autowired
     private MonitorRuleService monitorRuleService;
 
@@ -93,7 +95,7 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public MonitorTemplateVO update(MonitorTemplateVO vo) {
         MonitorTemplate template = Converter.MONITOR_TEMPLATE_CONVERTER.toDto(vo);
         String nickname = OperatorContext.getCurrentOperator().getNickname();

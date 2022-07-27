@@ -70,17 +70,17 @@ public class MonitorRuleVO {
 
     private Integer outputType;
 
-    private Long fixValue;
+    private Double fixValue;
 
     /**
      * 开始值
      */
-    private Long rangeStart;
+    private Double rangeStart;
 
     /**
      * 结束值
      */
-    private Long rangeEnd;
+    private Double rangeEnd;
 
     /**
      * 状态:0关闭，1开始

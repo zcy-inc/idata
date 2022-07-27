@@ -1,7 +1,7 @@
 package cn.zhengcaiyun.idata.dqc.model.enums;
 
 public enum RuleCheckTypeEnum {
-    ABS("绝对值","abs"),
+    FIX("固定值","fix"),
     PRE_PREIOD("上周期",  "pre_period");
     private String desc;
     private String value;

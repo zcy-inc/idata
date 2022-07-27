@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.dqc.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.dqc.dao.MonitorTableDao;
+import cn.zhengcaiyun.idata.dqc.dao.TableDao;
 import cn.zhengcaiyun.idata.dqc.model.common.Converter;
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
@@ -35,6 +36,9 @@ public class MonitorTableServiceImpl implements MonitorTableService {
     @Autowired
     private MonitorRuleService monitorRuleService;
 
+    @Autowired
+    private TableDao tableDao;
+
     @Override
     public MonitorTableVO getById(Long id) {
         MonitorTableVO vo = Converter.MONITOR_TABLE_CONVERTER.toVo(monitorTableDao.getById(id));
@@ -64,7 +68,8 @@ public class MonitorTableServiceImpl implements MonitorTableService {
             tableList.add(monitorTable.getTableName());
         }
 
-        HashMap<String, MonitorTableVO> tableMap = monitorRuleService.getRuleCountByTableName(tableList);
+        //获取表对应的规则数
+        HashMap<String, MonitorTableVO> tableMap = monitorRuleService.getRuleCountByTableName(tableList,query.getBaselineId());
         List<MonitorTableVO> voList = new ArrayList<>();
         for (MonitorTable monitorTable : list) {
             MonitorTableVO vo = Converter.MONITOR_TABLE_CONVERTER.toVo(monitorTable);
@@ -76,6 +81,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
 
         return page;
     }
+
 
     @Override
     public Result<MonitorTableVO> insert(MonitorTableVO vo) {
@@ -114,7 +120,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
      * @return 是否成功
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> delById(Long id, Boolean isBaseline) {
         MonitorTable tableVO = monitorTableDao.getById(id);
         if (tableVO == null) {

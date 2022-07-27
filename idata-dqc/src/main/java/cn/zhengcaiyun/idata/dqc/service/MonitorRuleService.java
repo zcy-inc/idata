@@ -25,7 +25,7 @@ public interface MonitorRuleService {
 
     PageResult<List<MonitorRuleVO>> getMonitorRules(MonitorRuleQuery query);
 
-    HashMap<String, MonitorTableVO> getRuleCountByTableName(List<String> tables);
+    HashMap<String, MonitorTableVO> getRuleCountByTableName(List<String> tables, Long baselineId);
 
     HashMap<Long, MonitorTableVO> getRuleCountByBaselineId(List<Long> baselineIdList);
 
@@ -38,6 +38,8 @@ public interface MonitorRuleService {
     boolean del(Long baselineId, String tableName);
 
     boolean setStatus(Long id, Integer status);
+
+    void initHistory(Long id, String nickname);
 
     List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex, boolean isBaseline);
 

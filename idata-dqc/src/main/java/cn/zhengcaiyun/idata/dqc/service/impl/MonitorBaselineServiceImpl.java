@@ -98,7 +98,7 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean delById(Long id) {
         //删除表、规则
         monitorRuleService.del(id, null);

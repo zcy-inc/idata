@@ -157,7 +157,7 @@
 
   <update id="updateAccessTime" >
     update dqc_monitor_rule set access_time=#{accessTime}
-    where id = #{ruleId}
+    where id = #{ruleId} and access_time!=curdate()
   </update>
 
   <select id="getByPage" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">

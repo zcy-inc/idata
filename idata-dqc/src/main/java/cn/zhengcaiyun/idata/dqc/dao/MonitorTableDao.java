@@ -23,9 +23,9 @@ public interface MonitorTableDao {
 
     List<MonitorTableVO> getByBaselineId(@Param("baselineId") Long baselineId);
 
-    List<MonitorTable> getByPage(MonitorTableQuery query);
+    List<MonitorTable> getByPage(@Param("query") MonitorTableQuery query);
 
-    int count(MonitorTableQuery query);
+    int count(@Param("query")MonitorTableQuery query);
 
     int insert(MonitorTable monitorTable);
 

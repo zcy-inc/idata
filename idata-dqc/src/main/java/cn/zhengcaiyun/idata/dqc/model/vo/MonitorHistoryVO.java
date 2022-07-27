@@ -75,7 +75,17 @@ public class MonitorHistoryVO {
     
     private Integer alarmLevel;
 
-    private Boolean alarm;
+    private Integer alarm;
+
+    private String alarmReceivers;
+
+    private String content;
+
+    private Double fixValue;
+
+    private Double rangeStart;
+
+    private Double rangeEnd;
 
 }
 

@@ -39,37 +39,37 @@
     </select>
 
     <!--查询指定行数据-->
-    <select id="getByPage" resultMap="DqcMonitorTableMap" parameterType="cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery">
+    <select id="getByPage" resultMap="DqcMonitorTableMap" >
         select
-          id, baseline_id, table_name, latest_alarm_level, access_time, creator, create_time, editor, edit_time
+          id, table_name, latest_alarm_level,   creator, create_time, editor, edit_time
         from dqc_monitor_table
-        where del = 0 and baseline_id=#{baselineId}
-        <if test="baselineId != null">
-            and baseline_id = #{baselineId}
+        where del = 0
+        <if test="query.baselineId != null">
+            and baseline_id = #{query.baselineId}
         </if>
-        <if test="tableName != null and tableName != ''">
-            and table_name = #{tableName}
+        <if test="query.tableName != null and query.tableName != ''">
+            and table_name = #{query.tableName}
         </if>
-        <if test="latestAlarmLevel != null">
-            and latest_alarm_level = #{latestAlarmLevel}
+        <if test="query.latestAlarmLevel != null">
+            and latest_alarm_level = #{query.latestAlarmLevel}
         </if>
         order by edit_time desc
-        limit #{startIndex}, #{pageSize}
+        limit #{query.startIndex}, #{query.pageSize}
     </select>
 
     <!--统计总行数-->
     <select id="count" resultType="java.lang.Integer" parameterType="cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery">
         select count(1)
         from dqc_monitor_table
-        where del = 0 and baseline_id=#{baselineId}
-        <if test="baselineId != null">
-            and baseline_id = #{baselineId}
+        where del = 0
+        <if test="query.baselineId != null">
+            and baseline_id = #{query.baselineId}
         </if>
-        <if test="tableName != null and tableName != ''">
-            and table_name = #{tableName}
+        <if test="query.tableName != null and query.tableName != ''">
+            and table_name = #{query.tableName}
         </if>
-        <if test="latestAlarmLevel != null">
-            and latest_alarm_level = #{latestAlarmLevel}
+        <if test="query.latestAlarmLevel != null">
+            and latest_alarm_level = #{query.latestAlarmLevel}
         </if>
     </select>
 

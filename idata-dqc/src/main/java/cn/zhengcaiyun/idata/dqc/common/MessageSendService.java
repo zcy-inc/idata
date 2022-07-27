@@ -59,18 +59,20 @@ public class MessageSendService {
         this.sengDingding("username", new String[]{username}, message);
     }
 
-    public void sengDingdingByNickname(String nickname, String message) {
-        this.sengDingding("nickname", new String[]{nickname}, message);
+    public void sengDingdingByNickname(String nickname,String title, String message) {
+        this.sengDingding("nickname", new String[]{nickname},title, message);
     }
 
-
+    public void sengDingding(String nameType, String[] names, String message) {
+        this.sengDingding(nameType,names,"告警",message);
+    }
     /**
      * 发送钉钉消息
      *
      * @param nameType:username,nickname
      * @param message
      */
-    public void sengDingding(String nameType, String[] names, String message) {
+    public void sengDingding(String nameType, String[] names, String title,String message) {
         List userList = new ArrayList();
         if ("nickname".equals(nameType)) {
             List<User> mobileList = userDao.getMobilesByNickname(names);
@@ -87,7 +89,7 @@ public class MessageSendService {
         header.setTemplateCode("dingding template");
 
         Map<String, Object> map = new HashMap<>();
-        map.put("dingdingtitle", "告警");
+        map.put("dingdingtitle", title);
         map.put("dingdingtext", message);
 
         MessageBody messageBody = new MessageBody();
