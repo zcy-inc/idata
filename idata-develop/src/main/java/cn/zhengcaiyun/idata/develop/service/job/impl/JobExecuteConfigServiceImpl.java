@@ -127,7 +127,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (configCombinationOptional.isEmpty()) return null;
 
         JobConfigCombinationDto combinationDto = JobConfigCombinationDto.from(configCombinationOptional.get());
-        combinationDto.setDependencies(fillDependenceInfo(combinationDto.getDependencies()));
+        combinationDto.setDependencies(fillDependenceInfo(combinationDto.getDependencies(), environment));
         combinationDto.setOutput(fillJobOutputInfo(combinationDto.getOutput()));
         return combinationDto;
     }
@@ -140,9 +140,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
         JobInfo jobInfo = jobInfoOptional.get();
         if (JobTypeEnum.SQL_SPARK.getCode().equals(jobInfo.getJobType())) {
-            return fillDependenceInfo(jobManager.deriveDependenciesForSparkSql(jobInfo, environment, version));
+            return fillDependenceInfo(jobManager.deriveDependenciesForSparkSql(jobInfo, environment, version), environment);
         } else if (JobTypeEnum.BACK_FLOW.getCode().equals(jobInfo.getJobType())) {
-            return fillDependenceInfo(jobManager.deriveDependenciesForBackFlow(jobInfo, environment, version));
+            return fillDependenceInfo(jobManager.deriveDependenciesForBackFlow(jobInfo, environment, version), environment);
         } else {
             throw new IllegalArgumentException("当前支持Spark Sql和数据回流作业自动获取依赖");
         }
@@ -423,7 +423,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         return output;
     }
 
-    private List<JobDependenceDto> fillDependenceInfo(List<JobDependenceDto> dependencies) {
+    private List<JobDependenceDto> fillDependenceInfo(List<JobDependenceDto> dependencies, String environment) {
         if (CollectionUtils.isEmpty(dependencies)) return dependencies;
 
         List<Long> jobIds = Lists.newArrayList();
@@ -445,6 +445,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             dagInfoMap = dagInfoList.stream().collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
         }
 
+        Map<Long, Integer> prevJobStateMap = Maps.newHashMap();
+        List<JobExecuteConfig> executeConfigList = jobExecuteConfigRepo.queryList(jobIds, environment);
+        for (JobExecuteConfig executeConfig : executeConfigList) {
+            prevJobStateMap.put(executeConfig.getJobId(), executeConfig.getRunningState());
+        }
+
         for (JobDependenceDto dto : dependencies) {
             JobInfo jobInfo = jobInfoMap.get(dto.getJobId());
             dto.setJobName(jobInfo == null ? "" : jobInfo.getName());
@@ -454,6 +460,8 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
             DAGInfo dagInfo = dagInfoMap.get(dto.getPrevJobDagId());
             dto.setPrevJobDagName(dagInfo == null ? "" : dagInfo.getName());
+
+            dto.setPrevJobRunningState(prevJobStateMap.getOrDefault(dto.getPrevJobId(), RunningStateEnum.pause.val));
         }
         return dependencies;
     }
