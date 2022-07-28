@@ -67,7 +67,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
 
   const getTablesData = () => {
     getBaselineTables({id: params.id}).then(res => {
-      const tableData = res.data.map(item => ({...item, showEdit: false}));
+      const tableData = res.data.map(item => ({...item, showEdit: false, partitioned: item.partitionExpr ? true : false}));
       setTableData(tableData);
       setOriginTableData(tableData);
       setTableModified(false);
