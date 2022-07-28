@@ -23,8 +23,8 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getTasksWrapped(1);
-  }, []);
+    getTasksWrapped();
+  }, [curPage]);
 
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();

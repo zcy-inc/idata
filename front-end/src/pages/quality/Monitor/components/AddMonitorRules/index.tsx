@@ -136,7 +136,8 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         monitorObj: newFormValues.monitorObj,
         type: newFormValues.ruleType,
         curPage: 1,
-        pageSize: 10000
+        pageSize: 10000,
+        status: 1
       }).then(res => {
         setTemplateList(res.data.data.map((item, index) => ({
           label: item.name,

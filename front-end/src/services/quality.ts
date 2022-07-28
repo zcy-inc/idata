@@ -188,7 +188,7 @@ export async function getLogs(params: {
 /**
  *  获取模板列表
  */
- export async function getTemplateList(data: {curPage: number, pageSize: number, monitorObj?: MonitorObj, type?: RuleType}) {
+ export async function getTemplateList(data: {curPage: number, pageSize: number, monitorObj?: MonitorObj, type?: RuleType, status: 0 | 1}) {
   return request<DefaultResponse & { data: {data: TemplateItem [], totalElements: number} } >('/api/dqc/monitorTemplate/getByPage', {
     method: 'POST',
     data

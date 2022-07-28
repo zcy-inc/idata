@@ -24,20 +24,19 @@ const Template: FC<{history: any}> = ({ history }) => {
   const [useInfo, setUserInfo] = useState({nickname: ''})
 
   useEffect(() => {
-    getTasksWrapped(1);
     getUseInfo().then(res => {
       setUserInfo(res.data);
     });
   }, []);
 
+  useEffect(() => {
+    getTasksWrapped();
+  }, [curPage])
+
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();
-    const condition: any = {
-      category: params.category,
-      type: params.type
-    };
     setLoading(true);
-    getTemplateList({ pageSize: 10, curPage: pageNum, ...condition })
+    getTemplateList({ pageSize: 10, curPage: pageNum, ...params })
       .then((res) => {
         setTotal(res.data.totalElements);
         setData(res.data.data);
