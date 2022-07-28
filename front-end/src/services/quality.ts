@@ -17,7 +17,7 @@ import type { DefaultResponse } from './global';
 /**
  * 获取监控列表
  */
-export async function getMonitorList(data: {tableName?: string; alarmLevel?: number; curPage: number; pageSize: number; baselineId: number}) {
+export async function getMonitorList(data: {tableName?: string; latestAlarmLevel?: number; curPage: number; pageSize: number; baselineId: number}) {
   return request<DefaultResponse & { data: {data: MonitorItem [], totalElements: number} }>('/api/dqc/monitorTable/getByPage', {
     method: 'POST',
     data

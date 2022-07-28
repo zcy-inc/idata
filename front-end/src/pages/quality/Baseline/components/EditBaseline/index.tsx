@@ -188,7 +188,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       setTableData([...tableData.slice(0, rowIndex), {...originRow}, ...tableData.slice(rowIndex + 1)])
     }
   }
-  
+
   const tryRun = (row: MonitorRuleItem) => {
     tryRunMonitorRule({
       ruleId: row.id,
@@ -246,14 +246,14 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => handleAddMonitorRule(row)}>
+         <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
             编辑
           </Button>
           <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
+            <Button danger type="text" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>

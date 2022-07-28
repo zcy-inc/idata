@@ -35,7 +35,6 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
   useEffect(() => {
-    getTasksWrapped(1);
     getBaseInfo();
   }, []);
 
@@ -44,10 +43,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   }, [currentPage])
 
   const getTasksWrapped = (pageNum: number = currentPage) => {
-    const params = form.getFieldsValue();
     const condition: any = {
       tableName: params.tableName,
-      alarmLevel: params.alarmLevel,
       baselineId: -1
     };
     setLoading(true);
@@ -122,6 +119,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     showDialog('监控日志' , {
       formProps: {
         params: {
+          baselineId: -1,
           ruleId: row.id
         },
       }
@@ -131,7 +129,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   const tryRun = (row: MonitorRuleItem) => {
     tryRunMonitorRule({
       ruleId: row.id,
-      baselineId: params.id
+      baselineId: -1
     }).then(() => {
       message.success('提交成功，试跑结束后结果将以钉钉形式发送');
     })
@@ -192,7 +190,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           <Button type="link" onClick={() => handleToggle(row)}>
             {row.status === 0 ? '启用' : '禁用'}
           </Button>
-          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
+          <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
             编辑
           </Button>
           <Button type="link" onClick={() => viewLogs(row)}>
@@ -201,8 +199,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 0}>
-            <Button type="link" disabled={row.status === 0}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 1}>
+            <Button type="link" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>

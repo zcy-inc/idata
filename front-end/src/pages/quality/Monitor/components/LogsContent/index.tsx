@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { getLogs } from '@/services/quality';
-import { Spin } from 'antd';
+import { Spin, Empty } from 'antd';
 import { alarmLevelList } from '@/constants/quality';
 import type { LogItem } from '@/types/quality';
 
@@ -39,9 +39,10 @@ const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
 
   return (
    <Spin spinning={loading}>
-      {contents.map((item, index) => <div style={{marginBottom: 10}} key={index}>
+    {contents?.length ? contents.map((item, index) => <div style={{marginBottom: 10}} key={index}>
         {`[${item.createTime}] ${item.comment}[${item.tableName}]，监控规则[${item.ruleName}]，规则内容[${getResult(item)}]，监控结果[${item.dataValue}]，${getAlarmLevel(item)}。`}
-      </div>)}
+      </div>) : <Empty description="暂无相关日志" />}
+      {}
    </Spin>
   );
 };

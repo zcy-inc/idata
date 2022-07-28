@@ -136,9 +136,9 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
         curPage: 1,
         pageSize: 10000
       }).then(res => {
-        setTemplateList(res.data.data.map(item => ({
+        setTemplateList(res.data.data.map((item, index) => ({
           label: item.name,
-          value: item.content,
+          value: item.content || index + '',
           id: item.id
         })))
       })

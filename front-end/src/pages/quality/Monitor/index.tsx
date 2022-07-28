@@ -13,7 +13,7 @@ import { alarmLevelList } from '@/constants/quality'
 
 import styles from './index.less';
 import AddMonitor from './components/AddMonitor'
-
+import LogsContent from './components/LogsContent';
 
 const Monitor: FC<{history: any}> = ({ history }) => {
   const [data, setData] = useState<MonitorItem[]>([]);
@@ -71,6 +71,16 @@ const Monitor: FC<{history: any}> = ({ history }) => {
       message.success('删除成功');
       getTasksWrapped();
     })
+  }
+
+  const viewLogs = () => {
+    showDialog('监控日志' , {
+      formProps: {
+        params: {
+          baselineId: -1
+        },
+      }
+    }, LogsContent)
   }
 
   const columns: ColumnsType<MonitorItem> = [
@@ -143,7 +153,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
       </ProForm>
       <div>
         <Button onClick={handleAddMonitor}>新增监控</Button>
-        <Button style={{float: 'right'}}>监控日志</Button>
+        <Button style={{float: 'right'}} onClick={viewLogs}>监控日志</Button>
       </div>
       <Table<MonitorItem>
         rowKey="id"
