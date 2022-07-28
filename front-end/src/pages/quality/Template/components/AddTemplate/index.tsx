@@ -31,7 +31,15 @@ const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
         label="监控对象"
         name="monitorObj"
         initialValue="table"
-        options={monitorObjList}
+        options={monitorObjList.map(item => {
+          if(item.value === 'field') {
+            return {
+              ...item,
+              disabled: true
+            }
+          }
+          return item
+        })}
       />
       <ProFormSelect
         label="维度"

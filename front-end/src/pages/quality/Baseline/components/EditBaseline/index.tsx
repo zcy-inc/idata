@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Prompt } from 'umi';
-import { Button, Form, Table, Input, message, Modal, Popconfirm } from 'antd';
+import { Button, Form, Table, Input, message, Modal, Popconfirm, Tooltip } from 'antd';
 import type { FC } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
-import showDialog from '@/utils/showDialog';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 import type { MonitorRuleItem, TableItem } from '@/types/quality';
 import {
@@ -24,7 +24,6 @@ import {
 import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/quality';
 import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
 import styles from './index.less';
-import LogsContent from '../../../Monitor/components/LogsContent'
 import TableSelect from '@/pages/quality/Monitor/components/TableSelect';
 
 const { Item } = Form;
@@ -275,7 +274,9 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
         /> : _
     },
     {
-      title: '时间分区表达式',
+      title: <span>时间分区表达式 <Tooltip title="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为${yyyyMMdd-1}">
+       <InfoCircleOutlined />
+      </Tooltip></span>,
       key: 'partitionExpr',
       dataIndex: 'partitionExpr',
       render: (_, row, index) => row.showEdit && row.partitioned ?
