@@ -75,7 +75,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       },
       formProps: {
         id: row?.id,
-        tableName: baseInfo.tableName
+        tableName: baseInfo.tableName,
+        baselineId: -1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -259,22 +260,23 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       />
       <div className={styles.container}>
         <div>基本信息
-          <div className={styles.operations}>
+          {originBaseInfo.partitionExpr && <div className={styles.operations}>
             {isEdit ? <>
               <Button onClick={onCancal} style={{marginRight: 8}}>取消</Button>
               <Button type="primary" onClick={updateMonitorInfo}>保存</Button>
             </> :
               <Button onClick={() => setIsEdit(true)} type="primary">编辑</Button>
             }
-          </div>
+          </div>}
         </div>
         <Form form={form} className={styles.form} layout="inline">
           <Item label="表名称">
             {baseInfo.tableName}
           </Item>
-          <Item label="时间分区表达式" name={isEdit ? 'partitionExpr' : undefined} rules={[{ required: isEdit, message: '请输入时间分区表达式' }]}>
+          {originBaseInfo.partitionExpr && <Item label="时间分区表达式" name={isEdit ? 'partitionExpr' : undefined} rules={[{ required: isEdit, message: '请输入时间分区表达式' }]}>
             {isEdit ? <Input placeholder='请输入' onChange={e => setBaseInfo({...baseInfo, partitionExpr: e.target.value})} /> : baseInfo.partitionExpr }
-          </Item>
+          </Item>}
+         
         </Form>
       </div>
     

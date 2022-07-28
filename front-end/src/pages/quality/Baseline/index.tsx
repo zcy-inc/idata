@@ -113,7 +113,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
       title: '操作',
       key: 'amContainerLogsUrl',
       dataIndex: 'amContainerLogsUrl',
-      width: 180,
+      width: 200,
       fixed: 'right',
       render: (_, row) => {
         return (

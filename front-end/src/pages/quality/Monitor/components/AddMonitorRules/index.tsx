@@ -24,7 +24,7 @@ const resetFieldMap = {
   checkType: ['fixValue', 'pre_period'],
 }
 
-const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, ref) => {
+const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> = ({id, tableName, baselineId}, ref) => {
   const [form] = Form.useForm();
   const [templateList, setTemplateList] = useState<{label: string; value: string, id: number} []>([]);
   const [recivers, setRecivers] = useState<{label: string; value: number} []>([]);
@@ -52,7 +52,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           return onFormChanges(values);
         });
 
-      } else {
+      } else if(tableName) {
         await getTableOwners({tableName}).then(res => {
           form.setFieldsValue({
             alarmReceivers: res.data
@@ -78,8 +78,10 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
   const getValue = (res: any) => {
     const params = !!id ? {...res, id} : res;
     params.alarmReceivers = params.alarmReceivers.join(',');
-    params.baselineId = -1;
-    params.tableName = tableName;
+    params.baselineId = baselineId;
+    if(tableName) {
+      params.tableName = tableName;
+    }
     if(params.ruleType === 'custom') {
       params.templateId = -1;
     } else {
@@ -145,7 +147,10 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
     }
 
     // 获取字段选择下拉列表
-    if((values.ruleType === 'system' && newFormValues.monitorObj === 'field') || (values.monitorObj === 'field' && newFormValues.ruleType === 'system')) {
+    if(tableName && (
+      (values.ruleType === 'system' && newFormValues.monitorObj === 'field') ||
+      (values.monitorObj === 'field' && newFormValues.ruleType === 'system')
+    )) {
       getFiledList({tableName}).then(res => {
         setFieldOptions(res.data?.map(item => ({label: item.name, value: item.name})) || []);
       })
@@ -310,6 +315,16 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
     }
   }
 
+  const transformedMonitorObjList = tableName ? monitorObjList : monitorObjList.map(item => {
+    if(item.value === 'field') {
+      return {
+        ...item,
+        disabled: true
+      }
+    }
+    return item
+  })
+
   return (
     <Spin spinning={loading}>
       <ProForm form={form} colon={false} className={styles.form} submitter={false} layout="horizontal" onValuesChange={onFormChanges}>
@@ -317,7 +332,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           label="监控对象"
           name="monitorObj"
           initialValue="table"
-          options={monitorObjList}
+          options={transformedMonitorObjList}
         />
         <ProFormSelect
           label="规则类型"

@@ -8,6 +8,14 @@
 }
 
 .form {
-  display: flex;
-  justify-content: space-around;
+  padding-left: 40px;
+  :global {
+    div.ant-form-item {
+      line-height: 20px;
+      margin: 20px 0;
+      & + .ant-form-item {
+        margin-left: 120px;
+      }
+    }
+  } 
 }

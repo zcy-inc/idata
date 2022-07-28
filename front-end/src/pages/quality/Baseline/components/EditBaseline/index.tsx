@@ -97,7 +97,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       },
       formProps: {
         id: row?.id,
-        tableName: baseInfo.tableName
+        baselineId: +params.id
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
