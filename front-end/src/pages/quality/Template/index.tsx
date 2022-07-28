@@ -12,6 +12,7 @@ import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTem
 import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
 
 import styles from './index.less';
+import moment from 'moment';
 
 
 const Template: FC<{history: any}> = ({ history }) => {
@@ -55,7 +56,7 @@ const Template: FC<{history: any}> = ({ history }) => {
           const handler = isEdit ? updateTemplate : addTemplate;
           const params = isEdit ? {...values, id: row.id} : values;
           dialog.showLoading();
-          handler(params).then(() => {
+          handler({...params, type: 'template'}).then(() => {
             message.success(`${isEdit ? '修改': '新增'}成功！`);
             done();
             getTasksWrapped();
@@ -109,7 +110,12 @@ const Template: FC<{history: any}> = ({ history }) => {
       render: (_) => monitorObjList.find(item => item.value === _)?.label || '-'
     },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
-    { title: '创建时间', key: 'createTime', dataIndex: 'createTime' },
+    {
+      title: '创建时间',
+      key: 'createTime',
+      dataIndex: 'createTime',
+      render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss')
+    },
     {
       title: '状态',
       key: 'status',
