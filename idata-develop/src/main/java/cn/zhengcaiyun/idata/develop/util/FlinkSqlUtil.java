@@ -33,7 +33,7 @@ import java.util.Map;
  **/
 public class FlinkSqlUtil {
 
-    public static final String MYSQL_TEMPLATE = "CREATE TABLE IF NOT EXISTS DemoTableJdbc ( \n" +
+    public static final String JDBC_TEMPLATE = "CREATE TABLE IF NOT EXISTS DemoTableJdbc ( \n" +
             "    id BIGINT, \n" +
             "    name STRING, \n" +
             "    cnt INT, \n" +
@@ -65,7 +65,49 @@ public class FlinkSqlUtil {
             "    'format' = 'json' \n" +
             ");";
 
-    public static String generateTemplate(String dataSourceType, String dataSourceUDCode) {
+    public static final String STARROCKS_SOURCE_TEMPLATE = "CREATE TABLE IF NOT EXISTS DemoSourceTableStarRocks ( \n" +
+            "    id BIGINT, \n" +
+            "    name STRING, \n" +
+            "    cnt INT, \n" +
+            "    status BOOLEAN, \n" +
+            "    rowtime TIMESTAMP_LTZ(3), \n" +
+            "    proctime AS PROCTIME(), \n" +
+            "    WATERMARK FOR rowtime AS rowtime - INTERVAL '5' SECOND, \n" +
+            "    PRIMARY KEY (id) NOT ENFORCED \n" +
+            ") WITH ( \n" +
+            "    'connector' = 'starrocks', \n" +
+            "    'jdbc-url' = '${%s}', \n" +
+            "    'scan-url' = '${%s}', \n" +
+            "    'username' = '${%s}', \n" +
+            "    'password' = '${%s}', \n" +
+            "    'database-name' = 'starrocks_source_db_demo', \n" +
+            "    'table-name' = 'starrocks_source_table_demo' \n" +
+            ");";
+
+    public static final String STARROCKS_SINK_TEMPLATE = "CREATE TABLE IF NOT EXISTS DemoSinkTableStarRocks ( \n" +
+            "    id BIGINT, \n" +
+            "    name STRING, \n" +
+            "    cnt INT, \n" +
+            "    status BOOLEAN, \n" +
+            "    rowtime TIMESTAMP_LTZ(3), \n" +
+            "    proctime AS PROCTIME(), \n" +
+            "    WATERMARK FOR rowtime AS rowtime - INTERVAL '5' SECOND, \n" +
+            "    PRIMARY KEY (id) NOT ENFORCED \n" +
+            ") WITH ( \n" +
+            "    'connector' = 'starrocks', \n" +
+            "    'jdbc-url' = '${%s}', \n" +
+            "    'load-url' = '${%s}', \n" +
+            "    'username' = '${%s}', \n" +
+            "    'password' = '${%s}', \n" +
+            "    'database-name' = 'starrocks_sink_db_demo', \n" +
+            "    'table-name' = 'starrocks_sink_table_demo', \n" +
+            "    'sink.max-retries' = '3', \n" +
+            "    'sink.buffer-flush.max-rows' = '500000', \n" +
+            "    'sink.buffer-flush.interval-ms' = '10000', \n" +
+            "    'sink.properties.format' = 'json' \n" +
+            ");";
+
+    public static String generateTemplate(String dataSourceType, String dataSourceUDCode, boolean isSink) {
         if (DataSourceTypeEnum.mysql.name().equals(dataSourceType)
                 || DataSourceTypeEnum.postgresql.name().equals(dataSourceType)) {
             return generateJDBCTemplate(dataSourceType, dataSourceUDCode);
@@ -73,6 +115,11 @@ public class FlinkSqlUtil {
 
         if (DataSourceTypeEnum.kafka.name().equals(dataSourceType)) {
             return generateKafkaTemplate(dataSourceType, dataSourceUDCode);
+        }
+
+        if (DataSourceTypeEnum.doris.name().equals(dataSourceType)
+                || DataSourceTypeEnum.starrocks.name().equals(dataSourceType)) {
+            return generateStarRocksTemplate(dataSourceType, dataSourceUDCode, isSink);
         }
         return "do not support " + dataSourceType + " now.\n";
     }
@@ -87,11 +134,16 @@ public class FlinkSqlUtil {
         if (DataSourceTypeEnum.kafka.name().equals(dataSourceType)) {
             return generateKafkaProperties(dataSourceType, dataSourceUDCode, sourceTypeEnum, dbConfigDto);
         }
+
+        if (DataSourceTypeEnum.doris.name().equals(dataSourceType)
+                || DataSourceTypeEnum.starrocks.name().equals(dataSourceType)) {
+            return generateStarRocksProperties(dataSourceType, dataSourceUDCode, dbConfigDto);
+        }
         throw new GeneralException("Flink do not support dataSourceType: " + dataSourceType);
     }
 
     public static String generateJDBCTemplate(String dataSourceType, String dataSourceUDCode) {
-        return String.format(MYSQL_TEMPLATE, generateJDBCKeyWord(dataSourceType, dataSourceUDCode));
+        return String.format(JDBC_TEMPLATE, generateJDBCKeyWord(dataSourceType, dataSourceUDCode));
     }
 
     public static String[] generateJDBCKeyWord(String dataSourceType, String dataSourceUDCode) {
@@ -131,6 +183,45 @@ public class FlinkSqlUtil {
         String serversKey = dataSourceType + "." + dataSourceUDCode + "." + "servers";
         String serversVal = dbConfigDto.getHost();
         props.put(serversKey, DesUtil.encrypt(serversVal));
+        return props;
+    }
+
+    public static String generateStarRocksTemplate(String dataSourceType, String dataSourceUDCode, boolean isSink) {
+        return String.format(isSink ? STARROCKS_SINK_TEMPLATE : STARROCKS_SOURCE_TEMPLATE, generateStarRocksKeyWord(dataSourceType, dataSourceUDCode, isSink));
+    }
+
+    public static String[] generateStarRocksKeyWord(String dataSourceType, String dataSourceUDCode, boolean isSink) {
+        String[] keywords = new String[4];
+        keywords[0] = dataSourceType + "." + dataSourceUDCode + "." + "jdbc-url";
+        if (isSink) {
+            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "load-url";
+        } else {
+            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "scan-url";
+        }
+        keywords[2] = dataSourceType + "." + dataSourceUDCode + "." + "username";
+        keywords[3] = dataSourceType + "." + dataSourceUDCode + "." + "password";
+        return keywords;
+    }
+
+    public static Map<String, String> generateStarRocksProperties(String dataSourceType, String dataSourceUDCode, DbConfigDto dbConfigDto) {
+        Map<String, String> props = Maps.newHashMap();
+        String jdbcUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "jdbc-url";
+        String jdbcUrlVal = String.format("jdbc:%s://%s:%d", DataSourceTypeEnum.mysql.name(), dbConfigDto.getHost(), dbConfigDto.getPort());
+        props.put(jdbcUrlKey, DesUtil.encrypt(jdbcUrlVal));
+
+        String scanUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "scan-url";
+        String scanUrlVal = String.format("%s:%d", dbConfigDto.getHost(), 8030);
+        props.put(scanUrlKey, DesUtil.encrypt(scanUrlVal));
+
+        String loadUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "load-url";
+        String loadUrlVal = String.format("%s:%d", dbConfigDto.getHost(), 8030);
+        props.put(loadUrlKey, DesUtil.encrypt(loadUrlVal));
+
+        String nameKey = dataSourceType + "." + dataSourceUDCode + "." + "username";
+        props.put(nameKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getUsername())));
+        String pwdKey = dataSourceType + "." + dataSourceUDCode + "." + "password";
+        props.put(pwdKey, DesUtil.encrypt(StringUtils.defaultString(dbConfigDto.getPassword())));
+
         return props;
     }
 }
