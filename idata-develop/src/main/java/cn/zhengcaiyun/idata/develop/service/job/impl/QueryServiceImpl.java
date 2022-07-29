@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
+import cn.zhengcaiyun.idata.connector.util.SqlDynamicParamTool;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.AutocompletionTipDto;
@@ -81,7 +82,7 @@ public class QueryServiceImpl implements QueryService {
         checkArgument(queryDto.getSessionKind() != null, "执行类型不能为空");
         if (LivySessionKindEnum.spark.equals(queryDto.getSessionKind())) {
             // sql调试默认参数替换
-            queryDto.setQuerySource(changeBizParseSql(queryDto.getQuerySource()));
+            queryDto.setQuerySource(SqlDynamicParamTool.replaceParam(queryDto.getQuerySource()));
         }
         return PojoUtil.copyOne(livyService.createStatement(queryDto), QueryStatementDto.class);
     }
