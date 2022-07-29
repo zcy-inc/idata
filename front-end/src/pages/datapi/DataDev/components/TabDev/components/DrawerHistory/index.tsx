@@ -110,8 +110,8 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
             },
             {
               title: '结束时间',
-              dataIndex: 'endTime	',
-              key: 'endTime	',
+              dataIndex: 'endTime',
+              key: 'endTime',
               render: (_) => _ ? moment(_).format(fmt) : '-',
               width: 200,
             },
