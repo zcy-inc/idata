@@ -1,27 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Prompt } from 'umi';
-import { EditableProTable } from '@ant-design/pro-table';
-import { Button, Form, Table, Input, message, Modal, Popconfirm } from 'antd';
+import { Button, Form, Table, Input, message, Modal, Popconfirm, Tooltip } from 'antd';
 import type { FC } from 'react';
-import type { ProColumns } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
-import showDialog from '@/utils/showDialog';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 import type { MonitorRuleItem, TableItem } from '@/types/quality';
-import { getBaseline, updateBaseline, getMonitorRules, addMonitorRule, updateMonitorRule, removeMonitorRule, getBaselineTables } from '@/services/quality';
+import {
+  getBaseline,
+  updateBaseline,
+  getMonitorRules,
+  addMonitorRule,
+  updateMonitorRule,
+  removeMonitorRule,
+  getBaselineTables,
+  addMonitor,
+  editMonitorInfo,
+  deleteMonitor,
+  tryRunMonitorRule
+} from '@/services/quality';
 import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/quality';
 import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
 import styles from './index.less';
-import LogsContent from '../../../Monitor/components/LogsContent'
 import TableSelect from '@/pages/quality/Monitor/components/TableSelect';
 
 const { Item } = Form;
 const EditBaseline: FC<{history: any}> = ({history}) => {
   const params = useParams<{id: string;}>();
   const [data, setData] = useState<MonitorRuleItem[]>([]);
-  const [tableData, setTableData] = useState<TableItem[]>([])
+  const [tableData, setTableData] = useState<TableItem[]>([]);
+  const [tableModified, setTableModified] = useState(false);
+  const [originTableData, setOriginTableData] = useState<TableItem[]>([]);
   const [baseInfo, setBaseInfo] = useState<{id: string; name: string; creator?: string;tableName: string;}>({id: params.id, name: '', tableName: ''})
   const [originBaseInfo, setOriginBaseInfo] = useState<{id: string; name: string; creator?: string;tableName: string;}>({id: params.id, name: '', tableName: ''})
   const [isEdit, setIsEdit] = useState(false);
@@ -31,13 +42,14 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const [form] = Form.useForm();
   useEffect(() => {
     getBaseInfo();
+    getTablesData();
   }, []);
 
   useEffect(() => {
-    getTasksWrapped();
+    getRulesWrapped();
   }, [currentPage])
 
-  const getTasksWrapped = (pageNum: number = currentPage) => {
+  const getRulesWrapped = (pageNum: number = currentPage) => {
     const condition: any = {
       tableName: baseInfo.tableName,
       baselineId: params.id
@@ -51,6 +63,15 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       .catch((err) => {})
       .finally(() => setLoading(false));
   };
+
+  const getTablesData = () => {
+    getBaselineTables({id: params.id}).then(res => {
+      const tableData = res.data.map(item => ({...item, showEdit: false, partitioned: item.partitionExpr ? true : false}));
+      setTableData(tableData);
+      setOriginTableData(tableData);
+      setTableModified(false);
+    });
+  }
 
   const getBaseInfo = () => {
     getBaseline({id: params.id}).then(res => {
@@ -75,7 +96,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       },
       formProps: {
         id: row?.id,
-        tableName: baseInfo.tableName
+        baselineId: +params.id
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -85,7 +106,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
           handler(params).then(() => {
             message.success(`${isEdit ? '编辑' : '新增'}成功`);
             done();
-            getTasksWrapped();
+            getRulesWrapped();
           })
         }).finally(() => {
           dialog.hideLoading();
@@ -105,6 +126,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
         const newBaseInfo = {...baseInfo, name: res.name}
         setBaseInfo(newBaseInfo);
         setOriginBaseInfo(newBaseInfo);
+        return;
       })
     })
   }
@@ -117,26 +139,78 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const handleDelete = (row: MonitorRuleItem) => {
     removeMonitorRule({id: row.id}).then(_ => {
       message.success('删除成功');
-      getTasksWrapped();
+      getRulesWrapped();
     })
   }
 
- const handleDeleteTables = (row: TableItem) => {}
-
-  const viewLogs = (row: MonitorRuleItem, type: 1 | 2) => {
-    showDialog(type === 1 ? '监控日志' : '试跑结果', {
-      formProps: {
-        params: {
-          ruleId: row.id
-        },
-        type
-      }
-    }, LogsContent)
+  const handleDeleteTables = (row: TableItem) => {
+    deleteMonitor({id: row.id, isBaseline: true}).then(res => {
+      message.success('删除成功！');
+      getTablesData();
+    })
   }
 
-  const handleTableSelectChange = (val, row) => {
-    console.log(val ,row);
-    tableData.find(item => item.id === row.rowKey);
+  const handleTableSelectChange = (tableName: string, partitioned: boolean, index: any) => {
+    setTableModified(true);
+    setTableData([...tableData.slice(0, index), {...tableData[index], partitioned, tableName}, ...tableData.slice(index + 1)]);
+  }
+
+  const handlePartitionChange = (val: string, index: number) => {
+    setTableModified(true);
+    setTableData([...tableData.slice(0, index), {...tableData[index], partitionExpr: val}, ...tableData.slice(index + 1)]);
+  }
+
+  const showEdit = (rowIndex: number, edit: boolean) => {
+    const exist = tableData.some(item => item.showEdit);
+    if(exist && edit) {
+      message.warning('请先保存正在编辑的行');
+      return;
+    }
+    setTableData([...tableData.slice(0, rowIndex), {...tableData[rowIndex], showEdit: edit}, ...tableData.slice(rowIndex + 1)])
+  }
+
+  const onSave = async (row: TableItem) => {
+    if(row.id === -9999) {
+      await addMonitor({tableName: row.tableName, partitionExpr:row.partitionExpr, baselineId: +params.id})
+    } else {
+      await editMonitorInfo({ partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
+    }
+    message.success('操作成功');
+    getTablesData();
+  }
+
+  const onCancel = (row: TableItem, rowIndex: number) => {
+    if(row.id === -9999) {
+      setTableData([...tableData.slice(0, rowIndex), ...tableData.slice(rowIndex + 1)])
+    } else {
+      const originRow = originTableData[rowIndex];
+      setTableData([...tableData.slice(0, rowIndex), {...originRow}, ...tableData.slice(rowIndex + 1)])
+    }
+  }
+
+  const tryRun = (row: MonitorRuleItem) => {
+    tryRunMonitorRule({
+      ruleId: row.id,
+      baselineId: params.id
+    }).then(() => {
+      message.success('提交成功，试跑结束后结果将以钉钉形式发送');
+    })
+  }
+
+  const addNewLine = () => {
+    const exist = tableData.some(item => item.showEdit);
+    if(exist) {
+      message.warning('请先保存正在编辑的行');
+      return;
+    }
+    const newRow = {
+      id: -9999,
+      showEdit: true,
+      partitioned: false,
+      partitionExpr: '',
+      tableName: undefined
+    }
+    setTableData([...tableData, newRow])
   }
 
   const columns:ColumnsType<MonitorRuleItem>  = [
@@ -171,14 +245,14 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => handleAddMonitorRule(row)}>
+         <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
             编辑
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 2)}>
+          <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}>
-            <Button danger type="text">
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
+            <Button danger type="text" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>
@@ -186,41 +260,46 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       ),
     },
   ];
-  
 
-  const tableColumns: ProColumns<TableItem> [] = [
+  const tableColumns: ColumnsType<TableItem> = [
     {
       title: '表英文名',
       key: 'tableName',
       dataIndex: 'tableName',
-      formItemProps: () => ({
-        rules: [{ required: true, message: '必填' }]
-      }),
-      renderFormItem: (_, row) => <TableSelect labelInValue onChange={(val: string) => handleTableSelectChange(val, row)} />
+      render: (_, row, index) =>
+        row.showEdit ? 
+        <TableSelect
+          value={_}
+          onChange={(val: string, partitioned: boolean) => handleTableSelectChange(val, partitioned, index)}
+        /> : _
     },
     {
-      title: '表中文名',
-      key: 'comment',
-      dataIndex: 'comment',
-      editable: false,
-      render: _ => _ || '-'
-    },
-    {
-      title: '时间分区表达式',
-      key: 'partitioned',
-      dataIndex: 'partitioned',
-      formItemProps: () => ({
-        rules: [{ required: true, message: '必填' }]
-      }),
+      title: <span>时间分区表达式 <Tooltip title="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为${yyyyMMdd-1}">
+       <InfoCircleOutlined />
+      </Tooltip></span>,
+      key: 'partitionExpr',
+      dataIndex: 'partitionExpr',
+      render: (_, row, index) => row.showEdit && row.partitioned ?
+        <Input
+          value={_}
+          placeholder="请输入"
+          onChange={e => handlePartitionChange(e.target.value, index)}
+        /> : _
     },
     {
       title: '操作',
-      valueType: 'option',
-      render: (text, row, _, action) => (
+      render: (text, row, index) => (
         <>
-         <Button type="link" onClick={() => action?.startEditable?.(row.id)}>
+          {row.showEdit ? <>
+            <Button type="link" onClick={() => onSave(row)}>
+              保存
+            </Button>
+            <Button type="link" onClick={() => onCancel(row, index)}>
+              取消
+            </Button>
+          </> :  <Button type="link" onClick={() => showEdit(index, true)}>
             编辑
-          </Button>
+          </Button>}
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDeleteTables(row)}>
             <Button danger type="text">
               删除
@@ -249,20 +328,27 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       }}
     >
       <Prompt
-        when={baseInfo.name !== originBaseInfo.name}
+        when={baseInfo.name !== originBaseInfo.name || tableModified}
         message={(location) => {
           Modal.confirm({
             title: '暂未保存您所做的更改，是否保存？',
-            content: '点击“保存”将保存信息并返回，点击“取消”停留在该页面',
+            content: '点击“保存”将保存信息并返回',
             okText: '保存',
-            cancelText: '取消',
+            cancelText: '不保存',
+            closable: true,
             onOk() {
               updateBaseInfo().then(() => {
                 history.push(location.pathname)
               })
             },
-            onCancel() {
-              // history.push(location.pathname);
+            onCancel(close) {
+              if(!close?.triggerCancel) {
+                setBaseInfo(originBaseInfo);
+                setTableModified(false);
+                setTimeout(() => {
+                  history.push(location.pathname);
+                }, 0)
+              }
             }
           });
           return false;
@@ -292,41 +378,22 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
 
       <div className={styles.container} style={{marginTop: 16}}>
         <p>表信息</p>
-        <EditableProTable<TableItem>
+        <Table<TableItem>
           rowKey="id"
-          maxLength={5}
-          scroll={{
-            x: 960,
-          }}
-          recordCreatorProps={{
-            position: 'bottom',
-            record: () => ({
-              id: +(Math.random() * 1000000).toFixed(0),
-              tableName: '',
-              comment: '-',
-              partitioned: ''
-            })
-          }}
-          loading={false}
           columns={tableColumns}
-          request={async () => {
-            const res = await getBaselineTables({id: params.id});
-            return {
-              data: res.data,
-              success: res.success
-            }
-          }}
-          value={tableData}
-          onChange={setTableData}
-          editable={{
-            type: 'multiple',
-            onSave: async (rowKey, data, row) => {
-              // console.log(rowKey, data, row);
-              // await waitTime(2000);
-            },
-            // onChange: setEditableRowKeys,
-          }}
+          dataSource={tableData}
+          scroll={{ x: 'max-content' }}
+          style={{ marginTop: 16 }}
+          loading={loading}
+          pagination={false}
         />
+        <Button
+          type="dashed"
+          style={{display: 'block', margin: '10px 0', width: '100%'}}
+          onClick={addNewLine}
+        >
+          添加一行数据
+        </Button>
       </div>
     
       <div className={styles.container} style={{marginTop: 16}}>

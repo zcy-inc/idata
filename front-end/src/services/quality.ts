@@ -17,7 +17,7 @@ import type { DefaultResponse } from './global';
 /**
  * 获取监控列表
  */
-export async function getMonitorList(data: {tableName?: string; alarmLevel?: number; curPage: number; pageSize: number; baselineId: number}) {
+export async function getMonitorList(data: {tableName?: string; latestAlarmLevel?: number; curPage: number; pageSize: number; baselineId: number}) {
   return request<DefaultResponse & { data: {data: MonitorItem [], totalElements: number} }>('/api/dqc/monitorTable/getByPage', {
     method: 'POST',
     data
@@ -27,7 +27,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 添加监控规则
  */
- export async function addMonitor(data: {tableName: string; partitionExpr?: string; baselineId: number}) {
+ export async function addMonitor(data: {tableName: string | undefined; partitionExpr?: string; baselineId: number}) {
   return request<DefaultResponse & { data: MonitorItem }>('/api/dqc/monitorTable/add', {
     method: 'POST',
     data
@@ -75,7 +75,7 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 修改监控表信息
  */
- export async function editMonitorInfo(data: {id: string;baselineId: number; partitionExpr: string; }) {
+ export async function editMonitorInfo(data: {id: string | number;baselineId: number; partitionExpr: string; }) {
   return request<DefaultResponse>('/api/dqc/monitorTable/update', {
     method: 'POST',
     data
@@ -124,10 +124,9 @@ export async function getMonitorList(data: {tableName?: string; alarmLevel?: num
 /**
  * 　试跑监控规则
  */
- export async function tryRunMonitorRule(data: {id: number;}) {
-  return request<DefaultResponse & { data: LogItem [] }>(`/api/dqc/monitorRule/tryRun/${data.id}`, {
-    method: 'GET',
-    data
+ export async function tryRunMonitorRule(data: {ruleId: number; baselineId: number | string}) {
+  return request<DefaultResponse & { data: LogItem [] }>(`/api/dqc/monitorRule/tryRun/${data.baselineId}/${data.ruleId}`, {
+    method: 'GET'
   });
 }
 
@@ -189,7 +188,7 @@ export async function getLogs(params: {
 /**
  *  获取模板列表
  */
- export async function getTemplateList(data: {curPage: number, pageSize: number, monitorObj?: MonitorObj, type?: RuleType}) {
+ export async function getTemplateList(data: {curPage: number, pageSize: number, monitorObj?: MonitorObj, type?: RuleType, status: 0 | 1}) {
   return request<DefaultResponse & { data: {data: TemplateItem [], totalElements: number} } >('/api/dqc/monitorTemplate/getByPage', {
     method: 'POST',
     data
@@ -317,7 +316,7 @@ export async function getLogs(params: {
  *  开启、停止基线
  */
  export async function getBaselineTables(data: { id: string | number; }) {
-  return request<DefaultResponse & { data: TableItem []} >(`/api/dqc/tables/get/${data.id}`, {
+  return request<DefaultResponse & { data: TableItem []} >(`api/dqc/monitorTable/tables/get/${data.id}`, {
     method: 'GET'
   });
 }

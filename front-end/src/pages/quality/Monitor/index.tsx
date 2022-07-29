@@ -13,7 +13,7 @@ import { alarmLevelList } from '@/constants/quality'
 
 import styles from './index.less';
 import AddMonitor from './components/AddMonitor'
-
+import LogsContent from './components/LogsContent';
 
 const Monitor: FC<{history: any}> = ({ history }) => {
   const [data, setData] = useState<MonitorItem[]>([]);
@@ -23,8 +23,8 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getTasksWrapped(1);
-  }, []);
+    getTasksWrapped();
+  }, [curPage]);
 
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();
@@ -73,9 +73,18 @@ const Monitor: FC<{history: any}> = ({ history }) => {
     })
   }
 
+  const viewLogs = () => {
+    showDialog('监控日志' , {
+      formProps: {
+        params: {
+          baselineId: -1
+        },
+      }
+    }, LogsContent)
+  }
+
   const columns: ColumnsType<MonitorItem> = [
     { title: '表英文名', key: 'tableName', dataIndex: 'tableName' },
-    { title: '表中文名', key: 'comment', dataIndex: 'comment'},
     { title: '最新执行时间', key: 'accessTime', dataIndex: 'accessTime' },
     {
       title: '实时告警情况',
@@ -118,7 +127,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
           name="latestAlarmLevel"
           label="告警等级"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={alarmLevelList}
         />
         <Button
@@ -144,7 +153,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
       </ProForm>
       <div>
         <Button onClick={handleAddMonitor}>新增监控</Button>
-        <Button style={{float: 'right'}}>监控日志</Button>
+        <Button style={{float: 'right'}} onClick={viewLogs}>监控日志</Button>
       </div>
       <Table<MonitorItem>
         rowKey="id"

@@ -14,7 +14,8 @@ import {
   addMonitorRule,
   updateMonitorRule,
   removeMonitorRule,
-  toggleMonitorRule
+  toggleMonitorRule,
+  tryRunMonitorRule
 } from '@/services/quality';
 import AddMonitorRules from '../AddMonitorRules';
 import LogsContent from '../LogsContent';
@@ -34,7 +35,6 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
   useEffect(() => {
-    getTasksWrapped(1);
     getBaseInfo();
   }, []);
 
@@ -43,10 +43,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
   }, [currentPage])
 
   const getTasksWrapped = (pageNum: number = currentPage) => {
-    const params = form.getFieldsValue();
     const condition: any = {
       tableName: params.tableName,
-      alarmLevel: params.alarmLevel,
       baselineId: -1
     };
     setLoading(true);
@@ -77,7 +75,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       },
       formProps: {
         id: row?.id,
-        tableName: baseInfo.tableName
+        tableName: baseInfo.tableName,
+        baselineId: -1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -107,6 +106,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
         const newBaseInfo = {...baseInfo, partitionExpr: res.partitionExpr}
         setBaseInfo(newBaseInfo);
         setOriginBaseInfo(newBaseInfo);
+        return;
       })
     })
   }
@@ -116,15 +116,24 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
     setIsEdit(false);
   }
 
-  const viewLogs = (row: MonitorRuleItem, type: 1 | 2) => {
-    showDialog(type === 1 ? '监控日志' : '试跑结果', {
+  const viewLogs = (row: MonitorRuleItem) => {
+    showDialog('监控日志' , {
       formProps: {
         params: {
+          baselineId: -1,
           ruleId: row.id
         },
-        type
       }
     }, LogsContent)
+  }
+
+  const tryRun = (row: MonitorRuleItem) => {
+    tryRunMonitorRule({
+      ruleId: row.id,
+      baselineId: -1
+    }).then(() => {
+      message.success('提交成功，试跑结束后结果将以钉钉形式发送');
+    })
   }
 
   const handleDelete = (row: MonitorRuleItem) => {
@@ -182,17 +191,17 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           <Button type="link" onClick={() => handleToggle(row)}>
             {row.status === 0 ? '启用' : '禁用'}
           </Button>
-          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
+          <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
             编辑
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 1)}>
+          <Button type="link" onClick={() => viewLogs(row)}>
             日志
           </Button>
-          <Button type="link" onClick={() => viewLogs(row, 2)}>
+          <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 0}>
-            <Button type="link" disabled={row.status === 0}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)}  disabled={row.status === 1}>
+            <Button type="link" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>
@@ -228,16 +237,22 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
         message={(location) => {
           Modal.confirm({
             title: '暂未保存您所做的更改，是否保存？',
-            content: '点击“保存”将保存信息并返回，点击“取消”停留在该页面',
+            content: '点击“保存”将保存信息并返回',
             okText: '保存',
-            cancelText: '取消',
+            cancelText: '不保存',
+            closable: true,
             onOk() {
               updateMonitorInfo().then(() => {
                 history.push(location.pathname)
               })
             },
-            onCancel() {
-              // history.push(location.pathname);
+            onCancel: async (close)  => {
+              if(!close?.triggerCancel) {
+                setBaseInfo(originBaseInfo);
+                setTimeout(() => {
+                  history.push(location.pathname);
+                }, 0)
+              }
             }
           });
           return false;
@@ -245,22 +260,23 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       />
       <div className={styles.container}>
         <div>基本信息
-          <div className={styles.operations}>
+          {originBaseInfo.partitionExpr && <div className={styles.operations}>
             {isEdit ? <>
               <Button onClick={onCancal} style={{marginRight: 8}}>取消</Button>
               <Button type="primary" onClick={updateMonitorInfo}>保存</Button>
             </> :
               <Button onClick={() => setIsEdit(true)} type="primary">编辑</Button>
             }
-          </div>
+          </div>}
         </div>
         <Form form={form} className={styles.form} layout="inline">
           <Item label="表名称">
             {baseInfo.tableName}
           </Item>
-          <Item label="时间分区表达式" name={isEdit ? 'partitionExpr' : undefined} rules={[{ required: isEdit, message: '请输入时间分区表达式' }]}>
+          {originBaseInfo.partitionExpr && <Item label="时间分区表达式" name={isEdit ? 'partitionExpr' : undefined} rules={[{ required: isEdit, message: '请输入时间分区表达式' }]}>
             {isEdit ? <Input placeholder='请输入' onChange={e => setBaseInfo({...baseInfo, partitionExpr: e.target.value})} /> : baseInfo.partitionExpr }
-          </Item>
+          </Item>}
+         
         </Form>
       </div>
     

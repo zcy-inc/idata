@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ProForm, { ProFormSelect } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
@@ -12,6 +12,7 @@ import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTem
 import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
 
 import styles from './index.less';
+import moment from 'moment';
 
 
 const Template: FC<{history: any}> = ({ history }) => {
@@ -23,20 +24,19 @@ const Template: FC<{history: any}> = ({ history }) => {
   const [useInfo, setUserInfo] = useState({nickname: ''})
 
   useEffect(() => {
-    getTasksWrapped(1);
     getUseInfo().then(res => {
       setUserInfo(res.data);
     });
   }, []);
 
+  useEffect(() => {
+    getTasksWrapped();
+  }, [curPage])
+
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();
-    const condition: any = {
-      category: params.category,
-      type: params.type
-    };
     setLoading(true);
-    getTemplateList({ pageSize: 10, curPage: pageNum, ...condition })
+    getTemplateList({ pageSize: 10, curPage: pageNum, ...params })
       .then((res) => {
         setTotal(res.data.totalElements);
         setData(res.data.data);
@@ -55,7 +55,7 @@ const Template: FC<{history: any}> = ({ history }) => {
           const handler = isEdit ? updateTemplate : addTemplate;
           const params = isEdit ? {...values, id: row.id} : values;
           dialog.showLoading();
-          handler(params).then(() => {
+          handler({...params, type: 'template'}).then(() => {
             message.success(`${isEdit ? '修改': '新增'}成功！`);
             done();
             getTasksWrapped();
@@ -109,7 +109,12 @@ const Template: FC<{history: any}> = ({ history }) => {
       render: (_) => monitorObjList.find(item => item.value === _)?.label || '-'
     },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
-    { title: '创建时间', key: 'createTime', dataIndex: 'createTime' },
+    {
+      title: '创建时间',
+      key: 'createTime',
+      dataIndex: 'createTime',
+      render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss')
+    },
     {
       title: '状态',
       key: 'status',
@@ -129,13 +134,13 @@ const Template: FC<{history: any}> = ({ history }) => {
         return (
           <>
           <Button type="link" onClick={() => toggleTemplte(row)}>
-            停用
+            {row.status === 0 ? '启用' : '停用'}
           </Button>
-          <Button type="link" onClick={() => handleAddTemplate(row)} disabled={row.status === 0}>
+          <Button type="link" onClick={() => handleAddTemplate(row)} disabled={row.status === 1}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 0}>
-            <Button type="link" disabled={row.status === 0}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
+            <Button type="link" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>
@@ -148,18 +153,25 @@ const Template: FC<{history: any}> = ({ history }) => {
   return (
     <PageContainer>
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
+        <ProFormText
+          name="name"
+          label="规则名称"
+          placeholder="请输入"
+          fieldProps={{ style: { width: 200 }, size: 'large' }}
+        />
         <ProFormSelect
           name="category"
           label="纬度"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={categoryList}
+          
         />
         <ProFormSelect
           name="type"
           label="规则类型"
           placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
+          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={ruleTypeList}
         />
         <Button

@@ -1,5 +1,5 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
-import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet, ProFormTextArea } from '@ant-design/pro-form';
 import { Form, Spin } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
@@ -24,7 +24,7 @@ const resetFieldMap = {
   checkType: ['fixValue', 'pre_period'],
 }
 
-const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, ref) => {
+const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> = ({id, tableName, baselineId}, ref) => {
   const [form] = Form.useForm();
   const [templateList, setTemplateList] = useState<{label: string; value: string, id: number} []>([]);
   const [recivers, setRecivers] = useState<{label: string; value: number} []>([]);
@@ -52,7 +52,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           return onFormChanges(values);
         });
 
-      } else {
+      } else if(tableName) {
         await getTableOwners({tableName}).then(res => {
           form.setFieldsValue({
             alarmReceivers: res.data
@@ -78,8 +78,10 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
   const getValue = (res: any) => {
     const params = !!id ? {...res, id} : res;
     params.alarmReceivers = params.alarmReceivers.join(',');
-    params.baselineId = -1;
-    params.tableName = tableName;
+    params.baselineId = baselineId;
+    if(tableName) {
+      params.tableName = tableName;
+    }
     if(params.ruleType === 'custom') {
       params.templateId = -1;
     } else {
@@ -89,6 +91,11 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
     }
     if (params.templateId === 'table_output_time') {
       params.content = moment(params.content).format('HH:mm');
+    }
+    if(params.transform) {
+      params.rangeStart = params.transform[0];
+      params.rangeEnd = params.transform[2];
+      delete params.transform;
     }
     return params;
   }
@@ -129,18 +136,22 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
         monitorObj: newFormValues.monitorObj,
         type: newFormValues.ruleType,
         curPage: 1,
-        pageSize: 10000
+        pageSize: 10000,
+        status: 1
       }).then(res => {
-        setTemplateList(res.data.data.map(item => ({
+        setTemplateList(res.data.data.map((item, index) => ({
           label: item.name,
-          value: item.content,
+          value: item.content || index + '',
           id: item.id
         })))
       })
     }
 
     // 获取字段选择下拉列表
-    if((values.ruleType === 'system' && newFormValues.monitorObj === 'field') || (values.monitorObj === 'field' && newFormValues.ruleType === 'system')) {
+    if(tableName && (
+      (values.ruleType === 'system' && newFormValues.monitorObj === 'field') ||
+      (values.monitorObj === 'field' && newFormValues.ruleType === 'system')
+    )) {
       getFiledList({tableName}).then(res => {
         setFieldOptions(res.data?.map(item => ({label: item.name, value: item.name})) || []);
       })
@@ -166,42 +177,41 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
       placeholder="请选择"
       rules={[{ validator: requiredValidator }]}
     />
-      {checkType === 'abs'?
+    {checkType === 'fix'&&
+      <ProFormText
+        placeholder="请选择"
+        name="fixValue"
+        label=" "
+        rules={[{ validator: requiredValidator }]}
+      />}
+    {['up', 'down'].includes(formValues.compareType) && formValues.checkType &&  <ProFormFieldSet
+        name="transform"
+        label=" "
+      >
+        <ProFormText
+          name="rangeStart"
+          placeholder="请选择"
+          rules={[{ validator: requiredValidator }]}
+          fieldProps={{
+            suffix: "%"
+          }}
+        />
+        <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
           placeholder="请选择"
-          name="fixValue"
-          label=" "
+          name="rangeEnd"
           rules={[{ validator: requiredValidator }]}
-        /> : checkType === 'pre_period' ?
-        <ProFormFieldSet
-          name="pre_period"
-          label=" "
-          transform={(value: any) => ({ rangeStart: value[0], rangeEnd: value[1] })}
-        >
-          <ProFormText
-            placeholder="请选择"
-            rules={[{ validator: requiredValidator }]}
-            fieldProps={{
-              suffix: "%"
-            }}
-          />
-          <span style={{lineHeight: '34px'}}>~</span>
-          <ProFormText
-            placeholder="请选择"
-            rules={[{ validator: requiredValidator }]}
-            fieldProps={{
-              suffix: "%"
-            }}
-          />
-      </ProFormFieldSet> : null
-    }
+          fieldProps={{
+            suffix: "%"
+          }}
+        />
+    </ProFormFieldSet>}
   </>
   }
 
   // 内置规则渲染
   const renderSystemRules = () => {
     const templateId = formValues.templateId;
-    console.log(templateId);
     if(templateId === 'table_output_time') { // 表产出时间
       return <ProFormTimePicker
         label=" "
@@ -228,9 +238,8 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
       />
     } else if(templateId === 'field_data_range') {
       return <ProFormFieldSet
-        name="fieldDataRange"
+        name="transform"
         label=" "
-        transform={(value: any) => ({ rangeStart: value[0], rangeEnd: value[1] })}
       >
         <ProFormText
           placeholder="请选择"
@@ -288,7 +297,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           placeholder="请输入"
           rules={[{ required: true, message: '请输入规则名称' }]}
         />
-        <ProFormText
+        <ProFormTextArea
           label="SQL"
           name="content"
           placeholder="请输入"
@@ -307,6 +316,16 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
     }
   }
 
+  const transformedMonitorObjList = tableName ? monitorObjList : monitorObjList.map(item => {
+    if(item.value === 'field') {
+      return {
+        ...item,
+        disabled: true
+      }
+    }
+    return item
+  })
+
   return (
     <Spin spinning={loading}>
       <ProForm form={form} colon={false} className={styles.form} submitter={false} layout="horizontal" onValuesChange={onFormChanges}>
@@ -314,7 +333,7 @@ const AddMonitorRule: FC<{id: number; tableName: string}> = ({id, tableName}, re
           label="监控对象"
           name="monitorObj"
           initialValue="table"
-          options={monitorObjList}
+          options={transformedMonitorObjList}
         />
         <ProFormSelect
           label="规则类型"

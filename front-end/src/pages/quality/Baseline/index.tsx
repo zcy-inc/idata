@@ -11,7 +11,7 @@ import { getBaselineList, addBaseline, deleteBaseline, toggleBaseline } from '@/
 import { statusList } from '@/constants/quality'
 import AddBaseline from './components/AddBaseline';
 import styles from './index.less';
-
+import LogsContent from '../Monitor/components/LogsContent'
 
 const Baseline: FC<{history: any}> = ({ history }) => {
   const [data, setData] = useState<BaselineItem[]>([]);
@@ -21,8 +21,8 @@ const Baseline: FC<{history: any}> = ({ history }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    getTasksWrapped(1);
-  }, []);
+    getTasksWrapped();
+  }, [curPage]);
 
   const getTasksWrapped = (pageNum: number = curPage) => {
     const params = form.getFieldsValue();
@@ -81,6 +81,16 @@ const Baseline: FC<{history: any}> = ({ history }) => {
     })
   }
 
+  const viewLogs = (row: BaselineItem) => {
+    showDialog('监控日志' , {
+      formProps: {
+        params: {
+          baselineId: row.id
+        },
+      }
+    }, LogsContent)
+  }
+
   const columns: ColumnsType<BaselineItem> = [
     { title: '规则名称', key: 'name', dataIndex: 'name' },
     { 
@@ -103,19 +113,22 @@ const Baseline: FC<{history: any}> = ({ history }) => {
       title: '操作',
       key: 'amContainerLogsUrl',
       dataIndex: 'amContainerLogsUrl',
-      width: 160,
+      width: 200,
       fixed: 'right',
       render: (_, row) => {
         return (
           <>
           <Button type="link" onClick={() => handleToggle(row)}>
-            停用
+            {row.status === 0 ? '启用' : '停用'}
           </Button>
-          <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)} disabled={row.status === 0}>
+          <Button type="link" onClick={() => viewLogs(row)}>
+            日志
+          </Button>
+          <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)} disabled={row.status === 1}>
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 0}>
-            <Button type="link" disabled={row.status === 0}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
+            <Button type="link" disabled={row.status === 1}>
               删除
             </Button>
           </Popconfirm>

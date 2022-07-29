@@ -7,9 +7,10 @@ export interface MonitorItem {
 
 export interface TableItem {
   id: number;
-  tableName: string;
-  comment: string;
-  partitioned: string;
+  tableName: string | undefined;
+  partitioned: boolean;
+  partitionExpr: string;
+  showEdit: boolean;
 }
 
 export type MonitorObj = 'table' | 'field';
