@@ -1,19 +1,29 @@
 package cn.zhengcaiyun.idata.dqc.service.impl;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.dqc.common.MessageSendService;
+import cn.zhengcaiyun.idata.dqc.dao.MonitorHistoryDao;
 import cn.zhengcaiyun.idata.dqc.dao.MonitorTableDao;
 import cn.zhengcaiyun.idata.dqc.dao.TableDao;
+import cn.zhengcaiyun.idata.dqc.model.common.BizException;
 import cn.zhengcaiyun.idata.dqc.model.common.Converter;
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
+import cn.zhengcaiyun.idata.dqc.model.enums.RuleCheckTypeEnum;
+import cn.zhengcaiyun.idata.dqc.model.enums.RuleTypeEnum;
+import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
+import cn.zhengcaiyun.idata.dqc.service.MonitorHistoryService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +49,12 @@ public class MonitorTableServiceImpl implements MonitorTableService {
     @Autowired
     private TableDao tableDao;
 
+    @Autowired
+    private MonitorHistoryDao monitorHistoryDao;
+
+    @Autowired
+    private MessageSendService messageSendService;
+
     @Override
     public MonitorTableVO getById(Long id) {
         MonitorTableVO vo = Converter.MONITOR_TABLE_CONVERTER.toVo(monitorTableDao.getById(id));
@@ -56,7 +72,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         PageResult page = new PageResult();
         page.setCurPage(query.getCurPage());
         page.setPageSize(query.getPageSize());
-        page.setTotalPages(count);
+        page.setTotalElements(count);
 
         if (count == 0) {
             page.setData(new ArrayList<>());
@@ -69,7 +85,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         }
 
         //获取表对应的规则数
-        HashMap<String, MonitorTableVO> tableMap = monitorRuleService.getRuleCountByTableName(tableList,query.getBaselineId());
+        HashMap<String, MonitorTableVO> tableMap = monitorRuleService.getRuleCountByTableName(tableList, query.getBaselineId());
         List<MonitorTableVO> voList = new ArrayList<>();
         for (MonitorTable monitorTable : list) {
             MonitorTableVO vo = Converter.MONITOR_TABLE_CONVERTER.toVo(monitorTable);
@@ -85,8 +101,8 @@ public class MonitorTableServiceImpl implements MonitorTableService {
 
     @Override
     public Result<MonitorTableVO> insert(MonitorTableVO vo) {
-        MonitorTable old = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
-        if(old !=null){
+        List<MonitorTable> oldList = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
+        if (oldList.size() > 0) {
             return Result.failureResult("该表已经存在，请勿重复创建");
         }
 
@@ -101,7 +117,47 @@ public class MonitorTableServiceImpl implements MonitorTableService {
 
         monitorTableDao.insert(monitorTable);
         vo.setId(monitorTable.getId());
+
+        //基线表新增后需要初始化规则历史数据
+        this.initHistory(vo, nickname);
         return Result.successResult(vo);
+    }
+
+    @Async
+    public void initHistory(MonitorTableVO vo, String nickname) {
+        if (vo.getBaselineId() == -1) {
+            return;
+        }
+
+        List<MonitorRuleVO> ruleList = monitorRuleService.getByBaselineId(vo.getBaselineId(), 1);
+        for (MonitorRuleVO rule : ruleList) {
+            rule.setPartitionExpr(vo.getPartitionExpr());
+            rule.setTableName(vo.getTableName());
+
+            if (!RuleCheckTypeEnum.PRE_PREIOD.getValue().equals(rule.getCheckType()) &&
+                    !(RuleTypeEnum.CUSTOME.getValue().equals(rule.getRuleType()) || RuleTypeEnum.TEMPLATE.getValue().equals(rule.getRuleType()))) {
+                continue;
+            }
+
+            MonitorHistoryVO historyVO = null;
+            try {
+                //校验sql是否正确
+                historyVO = monitorRuleService.getRuleQueryCount(rule);
+
+                //只有算上浮和下浮才初始化历史数据
+                if (RuleCheckTypeEnum.PRE_PREIOD.getValue().equals(rule.getCheckType())) {
+                    historyVO.setAlarm(0);
+                    monitorHistoryDao.insert(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
+                }
+            } catch (BizException e) {
+                monitorRuleService.setStatus(vo.getId(), 0);
+
+                //sql报错则将规则关闭
+                String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql[%s]", rule.getName(), historyVO.getSql());
+                messageSendService.sengDingdingByNickname(nickname, "数据质量规则配置错误", message);
+            }
+        }
+
     }
 
     @Override
@@ -127,6 +183,14 @@ public class MonitorTableServiceImpl implements MonitorTableService {
             return Result.failureResult("该表不存在");
         }
 
+        MonitorRuleQuery query = new MonitorRuleQuery();
+        query.setStatus(1);
+        query.setTableName(tableVO.getTableName());
+        if (monitorRuleService.getCount(query) > 0) {
+            return Result.failureResult("该表有开启的规则，请停止规则后再删除");
+        }
+
+        //非基线中的表，删除不需要删规则
         if (!isBaseline) {
             String tableName = tableVO.getTableName();
             monitorRuleService.del(-1L, tableName);

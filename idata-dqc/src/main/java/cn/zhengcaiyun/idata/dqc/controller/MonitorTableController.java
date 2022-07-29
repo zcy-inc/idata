@@ -7,6 +7,7 @@ import cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 import cn.zhengcaiyun.idata.dqc.service.TableService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
+import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,16 +50,23 @@ public class MonitorTableController {
             return Result.failureResult("该表为分区表，未填写分区信息");
         }
 
+        if (StringUtils.isNotEmpty(vo.getPartitionExpr()) && !RuleUtils.checkPartitionExpr(vo.getPartitionExpr())) {
+            return Result.failureResult("分区表达式格式填写错误");
+        }
+
         return monitorTableService.insert(vo);
     }
 
     @RequestMapping("/update")
     public Result<Boolean> update(@RequestBody MonitorTableVO vo) {
+        if (StringUtils.isNotEmpty(vo.getPartitionExpr()) && !RuleUtils.checkPartitionExpr(vo.getPartitionExpr())) {
+            return Result.failureResult("分区表达式格式填写错误");
+        }
         return Result.successResult(monitorTableService.update(vo));
     }
 
     @RequestMapping("/del/{id}/{isBaseline}")
-    public Result<Boolean> delById(@PathVariable("id") Long id,@PathVariable("isBaseline")Boolean isBaseline) {
+    public Result<Boolean> delById(@PathVariable("id") Long id, @PathVariable("isBaseline") Boolean isBaseline) {
         return monitorTableService.delById(id, isBaseline);
     }
 

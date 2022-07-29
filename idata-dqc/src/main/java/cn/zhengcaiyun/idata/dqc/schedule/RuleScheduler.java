@@ -43,7 +43,7 @@ public class RuleScheduler {
 
         //普通规则
         while (true) {
-            List<MonitorRuleVO> ruleList = monitorRuleService.getScheduleRuleList(types, startIndex, false);
+            List<MonitorRuleVO> ruleList = monitorRuleService.getScheduleRuleList(types, startIndex);
             if (CollectionUtils.isEmpty(ruleList)) {
                 break;
             }
@@ -55,7 +55,7 @@ public class RuleScheduler {
         startIndex = 0;
         //基线规则
         while (true) {
-            List<MonitorRuleVO> ruleList = monitorRuleService.getScheduleRuleList(types, startIndex, false);
+            List<MonitorRuleVO> ruleList = monitorRuleService.getBaselineScheduleRuleList(types, startIndex);
             if (CollectionUtils.isEmpty(ruleList)) {
                 break;
             }
@@ -65,7 +65,7 @@ public class RuleScheduler {
         }
     }
 
-//    @Transactional(rollbackFor = Exception.class)
+    //    @Transactional(rollbackFor = Exception.class)
     public void check(MonitorRuleVO rule) {
         if (MonitorTemplateEnum.TABLE_OUTPUT_TIME.getValue().equals(rule.getContent())) {
             Date now = new Date();

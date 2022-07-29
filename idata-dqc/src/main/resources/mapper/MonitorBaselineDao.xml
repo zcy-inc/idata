@@ -26,7 +26,7 @@
         from dqc_monitor_baseline
         where del=0
             <if test="name != null and name != ''">
-                and name = #{name}
+                and name like concat('%',#{name},'%')
             </if>
             <if test="status != null">
                 and status = #{status}
@@ -40,7 +40,7 @@
         from dqc_monitor_baseline
         where del=0
         <if test="name != null and name != ''">
-            and name = #{name}
+            and name like concat('%',#{name},'%')
         </if>
         <if test="status != null">
             and status = #{status}

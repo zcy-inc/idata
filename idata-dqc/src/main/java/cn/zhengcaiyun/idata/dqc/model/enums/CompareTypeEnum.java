@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.dqc.model.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * author:zheng
  * Date:2022/6/23
@@ -17,6 +20,13 @@ public enum CompareTypeEnum {
     private String desc;
     private String value;
 
+    private static final Map<String, CompareTypeEnum> MAP = new HashMap<>();
+
+    static {
+        for (CompareTypeEnum typeEnum : values()) {
+            MAP.put(typeEnum.getValue(), typeEnum);
+        }
+    }
     CompareTypeEnum(String desc, String value) {
         this.desc = desc;
         this.value = value;
@@ -36,5 +46,9 @@ public enum CompareTypeEnum {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public static CompareTypeEnum getEnum(String value) {
+        return MAP.get(value);
     }
 }

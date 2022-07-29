@@ -184,7 +184,9 @@
       and status=#{query.status}
     </if>
     order by edit_time desc
-    limit #{query.startIndex},#{query.pageSize}
+    <if test="query.notPage = null or query.notPage=false">
+      limit #{query.startIndex},#{query.pageSize}
+    </if>
   </select>
 
   <select id="getCount" resultType="java.lang.Integer">
@@ -209,7 +211,6 @@
     <if test="query.status != null">
       and status=#{query.status}
     </if>
-    limit #{query.startIndex},#{query.pageSize}
   </select>
 
   <select id="getRuleCountByTableName" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO">
@@ -259,7 +260,7 @@
             r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
     from dqc_monitor_baseline b
     inner join dqc_monitor_table t on b.id=t.baseline_id
-    inner join dqc_monitor_rule r on  b.id=r.baseline_id and r.table_name=t.table_name
+    inner join dqc_monitor_rule r on  b.id=r.baseline_id
     where b.status=1 and r.baseline_id=1 and r.status=1
           and (r.access_time = '' or r.access_time >= DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00'))
           and r.template_id in
@@ -290,7 +291,8 @@
             r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
     from dqc_monitor_baseline b
     inner join dqc_monitor_table t on b.id=t.baseline_id
-    inner join dqc_monitor_rule r on  b.id=r.baseline_id and r.table_name=t.table_name
-    where b.status=1 and r.baseline_id=1 and r.status=1 and r.table_name=#{tableName}
+    inner join dqc_monitor_rule r on  b.id=r.baseline_id
+    where b.status=1 and r.baseline_id=1 and r.status=1
+      and t.table_name in (select table_name from dqc_monitor_table where table_name=#{tableName} and baseline_id != -1)
   </select>
 </mapper>

@@ -49,7 +49,7 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
         PageResult page = new PageResult();
         page.setCurPage(query.getCurPage());
         page.setPageSize(query.getPageSize());
-        page.setTotalPages(count);
+        page.setTotalElements(count);
 
         if (count == 0) {
             page.setData(new ArrayList<>());

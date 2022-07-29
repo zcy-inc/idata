@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.dqc.service;
 
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
@@ -25,6 +26,8 @@ public interface MonitorRuleService {
 
     PageResult<List<MonitorRuleVO>> getMonitorRules(MonitorRuleQuery query);
 
+    List<MonitorRuleVO> getByBaselineId(Long baselineId, Integer status);
+
     HashMap<String, MonitorTableVO> getRuleCountByTableName(List<String> tables, Long baselineId);
 
     HashMap<Long, MonitorTableVO> getRuleCountByBaselineId(List<Long> baselineIdList);
@@ -39,12 +42,16 @@ public interface MonitorRuleService {
 
     boolean setStatus(Long id, Integer status);
 
+    MonitorHistoryVO getRuleQueryCount(MonitorRuleVO rule);
+
     void initHistory(Long id, String nickname);
 
-    List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex, boolean isBaseline);
+    List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex);
+
+    List<MonitorRuleVO> getBaselineScheduleRuleList(List<String> typeList, Integer startIndex);
 
     void analyse(Long jobId);
 
-    Result<MonitorHistoryVO> tryRun(Long id);
+    void tryRun(Long id, Long baselineId, String nickname);
 
 }

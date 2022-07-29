@@ -16,7 +16,7 @@
             `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,
             `data_value` dataValue, `rule_value` ruleValue, `version`,  `create_time` createTime
         from dqc_monitor_history
-        where rule_id = #{baselineId} and create_time > date_add(now(), interval -30 day)
+        where baseline_id = #{baselineId} and create_time > date_add(now(), interval -30 day)
         order by create_time desc
     </select>
 

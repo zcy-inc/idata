@@ -1,5 +1,8 @@
 package cn.zhengcaiyun.idata.dqc.model.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * author:zheng
  * Date:2022/6/23
@@ -36,4 +39,5 @@ public enum MonitorTemplateEnum {
     public void setValue(String value) {
         this.value = value;
     }
+
 }

@@ -11,12 +11,39 @@ import java.util.regex.Pattern;
 
 public class RuleUtils {
 
+    /**
+     * 校验分区表达式是否正确
+     * @param partitionExpr
+     * @return
+     */
+    public static boolean checkPartitionExpr(String partitionExpr){
+        if(StringUtils.isEmpty(partitionExpr)){
+            return false;
+        }
+        String[] exprs = partitionExpr.split(",");
+        for(String expr:exprs){
+            String[] arr = expr.split("=");
+            if(arr.length != 2){
+                return false;
+            }
+
+            try {
+                System.out.println(ParameterUtils.dateTemplateParse(arr[1],new Date()));
+                return true;
+            }catch (IllegalArgumentException e){
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     public static String replaceSql(String sql,String tableName,String fieldName, Date date) {
         if(StringUtils.isEmpty(sql)){
             return sql;
         }
         sql = sql.replaceAll("\\$\\{tableName\\}",tableName).replaceAll("\\$\\{fieldName\\}",fieldName);
-        sql = ParameterUtils.dateTemplateParse(sql, new Date());
+        sql = ParameterUtils.dateTemplateParse(sql, date);
 
         return sql;
     }
@@ -68,5 +95,9 @@ public class RuleUtils {
         } else {
             return new String[]{"dingding"};
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(RuleUtils.checkPartitionExpr("pt=${yy-ga9-7}"));
     }
 }

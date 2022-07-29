@@ -51,7 +51,7 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
         PageResult page = new PageResult();
         page.setCurPage(query.getCurPage());
         page.setPageSize(query.getPageSize());
-        page.setTotalPages(count);
+        page.setTotalElements(count);
 
         if (count == 0) {
             page.setData(new ArrayList<>());
@@ -87,6 +87,7 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
     public void check(MonitorTemplateVO vo) {
         RuleUtils.checkSql(vo.getContent());
 
+        Assert.isFalse(StringUtils.isEmpty(vo.getType()), "模板类型不能为空");
         Assert.isFalse(StringUtils.isEmpty(vo.getName()), "规则名称不能为空");
         Assert.isFalse(StringUtils.isEmpty(vo.getMonitorObj()), "监控对戏不能为空");
         Assert.isFalse(StringUtils.isEmpty(vo.getCategory()), "维度不能为空");

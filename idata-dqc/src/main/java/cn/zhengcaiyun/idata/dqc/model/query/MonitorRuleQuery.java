@@ -14,4 +14,5 @@ public class MonitorRuleQuery extends BaseQuery {
      */
     private String monitorObj;
     private Integer status;
+    private Boolean notPage;
 }

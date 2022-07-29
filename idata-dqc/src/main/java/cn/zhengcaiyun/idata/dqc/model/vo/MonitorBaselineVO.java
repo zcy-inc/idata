@@ -50,5 +50,7 @@ public class MonitorBaselineVO {
 
     private Integer tableCount;
 
+    private Long baselineId;
+
 }
 

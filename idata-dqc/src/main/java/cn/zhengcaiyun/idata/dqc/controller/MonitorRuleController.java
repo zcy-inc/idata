@@ -3,7 +3,9 @@ package cn.zhengcaiyun.idata.dqc.controller;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,9 +82,11 @@ public class MonitorRuleController {
         return Result.successResult();
     }
 
-    @RequestMapping("/tryRun/{id}")
-    public Result add(@PathVariable Long id) {
-        return Result.successResult(monitorRuleService.tryRun(id));
+    @RequestMapping("/tryRun/{baselineId}/{id}")
+    public Result<Boolean> add(@PathVariable Long id, @PathVariable Long baselineId) {
+        String nickname = OperatorContext.getCurrentOperator().getNickname();
+        monitorRuleService.tryRun(id, baselineId, nickname);
+        return Result.successResult();
     }
 
 }

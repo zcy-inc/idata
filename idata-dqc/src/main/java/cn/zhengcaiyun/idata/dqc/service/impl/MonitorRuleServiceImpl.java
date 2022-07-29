@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.dqc.utils.ParameterUtils;
 import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import io.swagger.models.auth.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,9 +86,14 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             return result;
         }
 
-        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType())) {
+        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType()) || RuleTypeEnum.SYSTEM.getValue().equals(vo.getRuleType())) {
             MonitorTemplateVO template = monitorTemplateService.getById(vo.getTemplateId());
             monitorRule.setContent(template.getContent());
+        }
+
+        //基线的时候没有表名
+        if (vo.getBaselineId() != -1) {
+            monitorRule.setTableName("");
         }
 
         monitorRule.setVersion(this.getRuleVersion(monitorRule));
@@ -107,9 +113,14 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             return result;
         }
 
-        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType())) {
+        if (RuleTypeEnum.TEMPLATE.getValue().equals(vo.getRuleType()) || RuleTypeEnum.SYSTEM.getValue().equals(vo.getRuleType())) {
             MonitorTemplateVO template = monitorTemplateService.getById(vo.getTemplateId());
             monitorRule.setContent(template.getContent());
+        }
+
+        //基线的时候没有表名
+        if (vo.getBaselineId() != -1) {
+            monitorRule.setTableName("");
         }
 
         monitorRule.setVersion(this.getRuleVersion(monitorRule));
@@ -124,9 +135,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
 
     private String getRuleVersion(MonitorRule rule) {
-        return DigestUtil.md5(rule.getFieldName() + rule.getRuleType() + rule.getTemplateId()
-                + rule.getMonitorObj() + rule.getCheckType() + rule.getCompareType()
-                + rule.getContent() + rule.getFixValue() + rule.getRangeStart() + rule.getRangeEnd());
+        return DigestUtil.md5(rule.getFieldName() + rule.getRuleType() + rule.getTemplateId() + rule.getMonitorObj() + rule.getCheckType() + rule.getCompareType() + rule.getContent() + rule.getFixValue() + rule.getRangeStart() + rule.getRangeEnd());
     }
 
     @Override
@@ -144,13 +153,18 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             RuleUtils.checkSql(vo.getContent());
         }
 
-        if (StringUtils.isEmpty(vo.getName()) || StringUtils.isEmpty(vo.getTableName()) || vo.getTemplateId() == null || StringUtils.isEmpty(vo.getMonitorObj()) || vo.getAlarmLevel() == null || StringUtils.isEmpty(vo.getRuleType())) {
+        if (vo.getBaselineId() == -1L && StringUtils.isEmpty(vo.getTableName())) {
+            return Result.failureResult("表名未传");
+        }
+
+        if (StringUtils.isEmpty(vo.getName()) || vo.getTemplateId() == null || StringUtils.isEmpty(vo.getMonitorObj()) || vo.getAlarmLevel() == null || StringUtils.isEmpty(vo.getRuleType())) {
             return Result.failureResult("参数不完整");
         }
 
         if (RuleTypeEnum.SYSTEM.name().equals(vo.getRuleType()) && MonitorObjEnum.FIELD.name().equals(vo.getMonitorObj()) && StringUtils.isEmpty(vo.getFieldName())) {
             return Result.failureResult("请选择字段");
         }
+
         if (RuleTypeEnum.CUSTOME.name().equals(vo.getRuleType()) && vo.getOutputType() == null) {
             return Result.failureResult("请选择输出类型");
         }
@@ -179,7 +193,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         PageResult page = new PageResult();
         page.setCurPage(query.getCurPage());
         page.setPageSize(query.getPageSize());
-        page.setTotalPages(count);
+        page.setTotalElements(count);
 
         if (count == 0) {
             page.setData(new ArrayList<>());
@@ -189,6 +203,15 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         page.setData(list);
 
         return page;
+    }
+
+    @Override
+    public List<MonitorRuleVO> getByBaselineId(Long baselineId, Integer status) {
+        MonitorRuleQuery query = new MonitorRuleQuery();
+        query.setBaselineId(baselineId);
+        query.setNotPage(true);
+        query.setStatus(status);
+        return monitorRuleDao.getByPage(query);
     }
 
     @Override
@@ -250,35 +273,39 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         MonitorRule rule = monitorRuleDao.getById(id);
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
 
-        if ((RuleTypeEnum.SYSTEM.getValue().equals(rule.getRuleType()) && MonitorTemplateEnum.TABLE_ROW.getValue().equals(rule.getContent())) ||
-                RuleTypeEnum.CUSTOME.getValue().equals(rule.getRuleType()) || RuleTypeEnum.TEMPLATE.getValue().equals(rule.getRuleType())) {
+        //涉及到上周期的规则需要初始化历史数据
+        if (RuleCheckTypeEnum.PRE_PREIOD.getValue().equals(vo.getCheckType())) {
+            this.calc(vo, nickname, true);
+        } else if (RuleTypeEnum.CUSTOME.getValue().equals(rule.getRuleType()) || RuleTypeEnum.TEMPLATE.getValue().equals(rule.getRuleType())) {
+            //如果是自定义或者模板规则，则校验sql的准确性
+            this.calc(vo, nickname, false);
+        }
+    }
 
-            MonitorTable monitorTable = monitorTableDao.getByTableName(rule.getTableName(), -1L);
+    private void calc(MonitorRuleVO vo, String nickname, boolean needInsert) {
+        List<MonitorTable> tableList = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
+        int count = 0;
+        for (MonitorTable monitorTable : tableList) {
             vo.setPartitionExpr(monitorTable.getPartitionExpr());
 
-            String compareType = rule.getCompareType();
             MonitorHistoryVO historyVO = null;
             try {
-                if (RuleTypeEnum.SYSTEM.getValue().equals(rule.getRuleType())
-                        && !CompareTypeEnum.UP.getValue().equals(compareType)
-                        && !CompareTypeEnum.DOWN.getValue().equals(compareType)) {
-                    return;
-                }
-
                 //校验sql是否正确
                 historyVO = this.getRuleQueryCount(vo);
 
                 //只有算上浮和下浮才初始化历史数据
-                if ((CompareTypeEnum.UP.getValue().equals(compareType) || CompareTypeEnum.DOWN.getValue().equals(compareType))
-                        && historyVO.getDataValue() != null) {
+                if (needInsert) {
                     historyVO.setAlarm(0);
                     monitorHistoryDao.insert(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
                 }
             } catch (BizException e) {
-                //sql报错则将规则关闭
-                this.setStatus(id, 0);
-                String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql[%s]", rule.getName(), historyVO.getSql());
-                messageSendService.sengDingdingByNickname(nickname, "数据质量规则配置错误", message);
+                if (count == 0) { //一个规则对应多张表的情况，只告警一次
+                    //sql报错则将规则关闭
+                    this.setStatus(vo.getId(), 0);
+                    String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql[%s]", vo.getName(), historyVO.getSql());
+                    messageSendService.sengDingdingByNickname(nickname, "数据质量规则配置错误", message);
+                }
+                count++;
             }
         }
     }
@@ -305,7 +332,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         if (RuleTypeEnum.SYSTEM.getValue().equals(rule.getRuleType())) {
             boolean isPartition = StringUtils.isEmpty(rule.getPartitionExpr()) ? false : true;
 
-            MonitorTemplateEnum templateEnum = MonitorTemplateEnum.valueOf(rule.getContent());
+            MonitorTemplateEnum templateEnum = MonitorTemplateEnum.valueOf(rule.getContent().toUpperCase());
             switch (templateEnum) {
                 case TABLE_ROW:
                     if (StringUtils.isNotEmpty(partitionExpr)) {
@@ -316,10 +343,11 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
                     break;
                 case FIELD_UNIQUE:
-                    sql = String.format("select count(*) num from %s group by %s having coung(*)>1 ", tableName, rule.getFieldName());
+                    sql = String.format("select count(*) num from %s group by %s having count(*)>1 ", tableName, rule.getFieldName());
                     if (isPartition) {
                         sql += "where " + condition;
                     }
+                    sql = "select count(*) from (" + sql + ")";
 
                     break;
                 case FIELD_ENUM_CONTENT:
@@ -384,16 +412,19 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         historyVO.setRangeEnd(rule.getRangeEnd());
         historyVO.setCreator("系统管理员");
         historyVO.setEditor("系统管理员");
+        historyVO.setCreateTime(new Date());
         return historyVO;
 
     }
 
     @Override
-    public List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex, boolean isBaseline) {
-        if (isBaseline) {
-            return monitorRuleDao.getBaselineScheduleRuleList(typeList, startIndex);
-        }
+    public List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex) {
         return monitorRuleDao.getScheduleRuleList(typeList, startIndex);
+    }
+
+    @Override
+    public List<MonitorRuleVO> getBaselineScheduleRuleList(List<String> typeList, Integer startIndex) {
+        return monitorRuleDao.getBaselineScheduleRuleList(typeList, startIndex);
     }
 
     /**
@@ -425,7 +456,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         ruleSet.addAll(list1);
         ruleSet.addAll(list2);
 
-        StringBuilder str = new StringBuilder("你在数据质量上监控的表" + tableName + "触发以下预警：");
         boolean isAlarm = false;
         List<MonitorHistory> historyList = new ArrayList<>();
         int count = 0;
@@ -436,14 +466,11 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
             if (historyVO.getAlarm() == 1) {
                 isAlarm = true;
-                str.append(String.format("规则'%s',预警值为%s，超过设置值", rule.getName(), historyVO.getDataValue()));
 
                 //只告警第一个规则
                 if (count == 0) {
-                    latestAlarmLevel = rule.getAlarmLevel();
+                    String message = getAlarmMessage(historyVO);
                     String[] nicknames = rule.getAlarmReceivers().split(",");
-                    String message = String.format("根据你在数据质量平台上配置的规则{%s}，监测到表%s的数据产出时间已超过设置时间%s",
-                            rule.getName(), rule.getContent());
                     messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message);
                 }
                 count++;
@@ -463,6 +490,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
     /**
      * 根据规则获取检测结果
+     *
      * @param rule
      * @return
      */
@@ -474,7 +502,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         boolean isAlarm = false;
         if (RuleTypeEnum.SYSTEM.getValue().equals(rule.getRuleType())) {
 
-            MonitorTemplateEnum templateEnum = MonitorTemplateEnum.valueOf(rule.getContent());
+            MonitorTemplateEnum templateEnum = MonitorTemplateEnum.valueOf(rule.getContent().toUpperCase());
             switch (templateEnum) {
                 case TABLE_ROW:
                     MonitorHistoryVO calc = this.getCalcRes(rule, count);
@@ -492,17 +520,17 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                     }
                     break;
                 case FIELD_ENUM_COUNT:
-                    if (count > rule.getFixValue()) {
+                    if (count > 0) {
                         isAlarm = true;
                     }
                     break;
                 case FIELD_DATA_RANGE:
-                    if (count > rule.getFixValue()) {
+                    if (count > 0) {
                         isAlarm = true;
                     }
                     break;
                 case FIELD_NOT_NULL:
-                    if (count > rule.getFixValue()) {
+                    if (count > 0) {
                         isAlarm = true;
                     }
                     break;
@@ -517,68 +545,87 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         return curHistory;
     }
 
+    /**
+     * @param rule
+     * @param count
+     * @return
+     */
     private MonitorHistoryVO getCalcRes(MonitorRuleVO rule, Long count) {
         MonitorHistoryVO historyVO = new MonitorHistoryVO();
 
-        CompareTypeEnum compareType = CompareTypeEnum.valueOf(rule.getCompareType());
+        Double fixValue = rule.getFixValue();//比较值
+
+        RuleCheckTypeEnum checkType = RuleCheckTypeEnum.getEnum(rule.getCheckType());
+
+        //只有调度作业会调到，所以最新一条数据比如是作业调度后监测的结果数据，而非临时作业监测的结果
+        if (RuleCheckTypeEnum.PRE_PREIOD == checkType) {
+            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), null);
+            if (old == null) { //试跑的时候没有历史数据
+                fixValue = 0d;
+            } else {
+                fixValue = Double.valueOf(old.getDataValue());
+            }
+        }
+
+        CompareTypeEnum compareType = CompareTypeEnum.getEnum(rule.getCompareType());
 
         boolean isAlarm = false;
         if (CompareTypeEnum.UP == compareType || CompareTypeEnum.DOWN == compareType) {
 //            String prePartition = ParameterUtils.getPreCycleDate(rule.getPartitionExpr(), new Date());
 //            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), prePartition);
 
-            //只有调度作业会调到，所以最新一条数据比如是作业调度后监测的结果数据，而非临时作业监测的结果
-            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), null);
-            Long oldValue = old.getDataValue();
+            //乘以100是为了转换成百分比
+            Double data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue)).multiply(new BigDecimal(100)).doubleValue();
+            historyVO.setRuleValue(data);
 
-            BigDecimal tmpData = new BigDecimal(count - oldValue).divide(new BigDecimal(oldValue));
-            historyVO.setRuleValue(tmpData.doubleValue());
-            if (RuleCheckTypeEnum.FIX.getValue().equals(rule.getCheckType())) {
-                tmpData = tmpData.negate();
-                historyVO.setRuleValue(tmpData.doubleValue());
-            }
-
-            Double data = tmpData.doubleValue();
-            Double rangeStart = rule.getRangeStart() / 100;
-            Double rangeEnd = rule.getRangeEnd() / 100;
-            //todo  逻辑需要校验下
-            if (!(data > 0 && data >= rangeStart && data <= rangeEnd)) {
+            if ((CompareTypeEnum.UP == compareType && data < 0) || (CompareTypeEnum.DOWN == compareType && data > 0)) {
                 isAlarm = true;
+            } else {
+                Double rangeStart = rule.getRangeStart();
+                Double rangeEnd = rule.getRangeEnd();
+
+                if (data < rangeStart || data > rangeEnd) {
+                    isAlarm = true;
+                }
             }
+
+
+        } else {
+            switch (compareType) {
+                case GREATER:
+                    if (count <= rule.getFixValue()) {
+                        isAlarm = true;
+                    }
+                    break;
+                case GREATER_OR_EQUAL:
+                    if (count < rule.getFixValue()) {
+                        isAlarm = true;
+                    }
+                    break;
+                case EQUAL:
+                    if (!count.equals(rule.getFixValue())) {
+                        isAlarm = true;
+                    }
+                    break;
+                case LESS:
+                    if (count >= rule.getFixValue()) {
+                        isAlarm = true;
+                    }
+                    break;
+                case LESS_OR_EQUAL:
+                    if (count > rule.getFixValue()) {
+                        isAlarm = true;
+                    }
+                    break;
+                case NOT_EQUAL:
+                    if (count.equals(rule.getFixValue())) {
+                        isAlarm = true;
+                    }
+                    break;
+            }
+
         }
 
-        switch (compareType) {
-            case GREATER:
-                if (count <= rule.getFixValue()) {
-                    isAlarm = true;
-                }
-                break;
-            case GREATER_OR_EQUAL:
-                if (count < rule.getFixValue()) {
-                    isAlarm = true;
-                }
-                break;
-            case EQUAL:
-                if (!count.equals(rule.getFixValue())) {
-                    isAlarm = true;
-                }
-                break;
-            case LESS:
-                if (count >= rule.getFixValue()) {
-                    isAlarm = true;
-                }
-                break;
-            case LESS_OR_EQUAL:
-                if (count > rule.getFixValue()) {
-                    isAlarm = true;
-                }
-                break;
-            case NOT_EQUAL:
-                if (count.equals(rule.getFixValue())) {
-                    isAlarm = true;
-                }
-                break;
-        }
 
         historyVO.setAlarm(isAlarm ? 1 : 0);
         return historyVO;
@@ -634,18 +681,49 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         }
     }
 
+    @Async
     @Override
-    public Result<MonitorHistoryVO> tryRun(Long id) {
+    public void tryRun(Long id, Long baselineId, String nickname) {
         MonitorRule rule = monitorRuleDao.getById(id);
         if (RuleTypeEnum.SYSTEM.getValue().equals(rule.getRuleType()) && MonitorTemplateEnum.TABLE_OUTPUT_TIME.getValue().equals(rule.getContent())) {
-            return Result.failureResult("表产出时间不支持试跑");
+            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "表产出时间不支持试跑");
         }
 
-        MonitorTable monitorTable = monitorTableDao.getByTableName(rule.getTableName(), -1L);
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
-        vo.setPartitionExpr(monitorTable.getPartitionExpr());
 
-        return Result.successResult(this.getRuleHistory(vo));
+        List<MonitorTable> tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
+        if (tableList.size() == 0) {
+            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "该规则未对应任何表，请正确配置后重试");
+            return;
+        }
+        StringBuilder str = new StringBuilder();
+        for (MonitorTable monitorTable : tableList) {
+            vo.setPartitionExpr(monitorTable.getPartitionExpr());
+            MonitorHistoryVO history = this.getRuleHistory(vo);
+            String message = getAlarmMessage(history);
+
+            str.append(message);
+        }
+
+
+        messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.toString());
+    }
+
+    private String getAlarmMessage(MonitorHistoryVO history) {
+        String message = "";
+        if (history.getFixValue() != null) {
+            message = "规则内容:[" + history.getFixValue().toString() + "],";
+        } else if (history.getRangeStart() != null) {
+            message = "规则内容:[" + history.getRangeStart() + "%-" + history.getRangeEnd() + "%], ";
+        }
+        String value = "监控结果:[" + (history.getRuleValue() == null ? history.getDataValue().toString() : history.getRuleValue().toString() )+ "], ";
+
+        return String.format("[%s] 表:[%s], 规则名称:[%s], %s %s 是否告警:[%s], 告警等级:[%s]\n",
+                DateUtils.format(history.getCreateTime(), "yyyy-MM-dd HH:mm:ss"), history.getTableName(),
+                history.getRuleName(), message, value,
+                history.getAlarm() == 1 ? "告警" : "未告警",
+                AlarmLevelEnum.getDest(history.getAlarmLevel()));
+
     }
 
 }
