@@ -52,8 +52,8 @@ const MonacoModal: FC<MonacoModalProps> = ({ visible, logParam, onClose }) => {
     try {
       const { success, data } = await getDevLog({
         ...logParam,
-        lineNum: 0,
-        skipLineNum: 2000,
+        lineNum: 2000,
+        skipLineNum: 0,
       });
       success && setLog(data);
     } catch (e) {
