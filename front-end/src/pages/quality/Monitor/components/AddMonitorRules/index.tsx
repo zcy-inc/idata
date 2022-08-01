@@ -26,7 +26,7 @@ const resetFieldMap = {
 
 const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> = ({id, tableName, baselineId}, ref) => {
   const [form] = Form.useForm();
-  const [templateList, setTemplateList] = useState<{label: string; value: string, id: number} []>([]);
+  const [templateList, setTemplateList] = useState<{label: string; value: number;} []>([]);
   const [recivers, setRecivers] = useState<{label: string; value: number} []>([]);
   const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({
@@ -86,10 +86,9 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
       params.templateId = -1;
     } else {
       const tempalteItem = templateList.find(template => template.value === params.templateId);
-      params.templateId = tempalteItem?.id;
       params.name = tempalteItem?.label;
     }
-    if (params.templateId === 'table_output_time') {
+    if (params.templateId === 2) {
       params.content = moment(params.content).format('HH:mm');
     }
     if(params.transform) {
@@ -119,7 +118,6 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     const key = Object.keys(values)[0] || '';
     if(resetFieldMap[key]) {
       let resetList = collectResetFields(resetFieldMap[key]);
-      console.log(resetList);
       const resetObj: Record<string, any> = {};
       resetList.forEach(filed => {
         resetObj[filed] = undefined;
@@ -139,10 +137,9 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         pageSize: 10000,
         status: 1
       }).then(res => {
-        setTemplateList(res.data.data.map((item, index) => ({
+        setTemplateList(res.data.data.map((item) => ({
           label: item.name,
-          value: item.content || index + '',
-          id: item.id
+          value: item.id,
         })))
       })
     }
@@ -212,7 +209,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
   // 内置规则渲染
   const renderSystemRules = () => {
     const templateId = formValues.templateId;
-    if(templateId === 'table_output_time') { // 表产出时间
+    if(templateId === 2) { // 表产出时间
       return <ProFormTimePicker
         label=" "
         rules={[{ validator: requiredValidator }]}
@@ -222,21 +219,21 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
           format: "HH:mm"
         }}
       />
-    } else if(templateId === 'field_enum_content') {
+    } else if(templateId === 4) {
       return <ProFormText
         label=" "
         rules={[{ validator: requiredValidator }]}
         name="content"
         placeholder="请输入字段枚举值，用英文逗号隔开"
       />
-    } else if(templateId === 'field_enum_count') {
+    } else if(templateId === 5) {
       return <ProFormText
         label=" "
         rules={[{ validator: requiredValidator }]}
         name="fixValue"
         placeholder="请输入字段枚举数量"
       />
-    } else if(templateId === 'field_data_range') {
+    } else if(templateId === 6) {
       return <ProFormFieldSet
         name="transform"
         label=" "
@@ -251,7 +248,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
           rules={[{ validator: requiredValidator }]}
         />
       </ProFormFieldSet>
-    } else if(templateId === 'table_row') { // 表行数
+    } else if(templateId === 1) { // 表行数
       return renderTemplateRules();
     }
     return null;

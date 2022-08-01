@@ -24,8 +24,9 @@ export interface MonitorRuleItem {
   baselineId: number;
   name: string;
   monitorObj: MonitorObj;
-  templateId: 2 | -1;
+  templateId: number;
   status: Status;
+  content?: string;
   tableName: string;
   ruleType: RuleType;
   alarmLevel: AlarmLevel;
