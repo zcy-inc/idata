@@ -24,10 +24,13 @@ export interface MonitorRuleItem {
   baselineId: number;
   name: string;
   monitorObj: MonitorObj;
-  templateId: 2 | -1;
+  templateId: number;
   status: Status;
+  content?: string;
   tableName: string;
   ruleType: RuleType;
+  rangeStart?: number;
+  rangeEnd?: number;
   alarmLevel: AlarmLevel;
   alarmReceivers: string;
 }

@@ -6,7 +6,7 @@ import { monitorObjList, outputTypeList, categoryList } from '@/constants/qualit
 import { getTemplate } from '@/services/quality';
 
 
-const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
+const AddTemplate: FC<{id?: number;disabled: boolean;}> = ({id, disabled= false}, ref) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -30,11 +30,13 @@ const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
       <ProFormRadio.Group
         label="监控对象"
         name="monitorObj"
+        disabled={disabled}
         initialValue="table"
         options={monitorObjList}
       />
       <ProFormSelect
         label="维度"
+        disabled={disabled}
         name="category"
         options={categoryList}
         placeholder="请选择"
@@ -42,12 +44,14 @@ const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
       />
       <ProFormText
         name="name"
+        disabled={disabled}
         label="规则名称"
         rules={[{ required: true, message: '请输入规则名称' }]}
         placeholder="请输入"
       />
       <ProFormTextArea
         name="content"
+        disabled={disabled}
         label="SQL"
         rules={[{ required: true, message: '请输入SQL' }]}
         placeholder="请输入"
@@ -59,6 +63,7 @@ const AddTemplate: FC<{id?: number}> = ({id}, ref) => {
       />
       <ProFormRadio.Group
         label="产出类型"
+        disabled={disabled}
         name="outputType"
         initialValue={2}
         options={outputTypeList}

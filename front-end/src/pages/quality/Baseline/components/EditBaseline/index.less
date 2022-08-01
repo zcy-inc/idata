@@ -1,6 +1,14 @@
 .container {
   background-color: #fff;
   padding: 12px 16px;
+  :global {
+    .ant-btn-dangerous.ant-btn-text[disabled],
+    .ant-btn-dangerous.ant-btn-text[disabled]:hover,
+    .ant-btn-dangerous.ant-btn-text[disabled]:focus,
+    .ant-btn-dangerous.ant-btn-text[disabled]:active {
+      color: #a4a6ad;
+    }
+  }
 }
 
 .operations {

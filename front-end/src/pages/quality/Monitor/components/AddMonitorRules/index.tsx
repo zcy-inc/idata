@@ -24,9 +24,9 @@ const resetFieldMap = {
   checkType: ['fixValue', 'pre_period'],
 }
 
-const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> = ({id, tableName, baselineId}, ref) => {
+const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; disabled: boolean;}> = ({id, tableName, baselineId, disabled = false}, ref) => {
   const [form] = Form.useForm();
-  const [templateList, setTemplateList] = useState<{label: string; value: string, id: number} []>([]);
+  const [templateList, setTemplateList] = useState<{label: string; value: number;} []>([]);
   const [recivers, setRecivers] = useState<{label: string; value: number} []>([]);
   const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>({
@@ -46,6 +46,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         await getMonitorRule({id}).then(res => {
           const values = {
             ...res.data,
+            transform: [res.data.rangeStart, null, res.data.rangeEnd],
             alarmReceivers: res.data?.alarmReceivers?.split(',') || []
           }
           form.setFieldsValue(values);
@@ -86,10 +87,9 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
       params.templateId = -1;
     } else {
       const tempalteItem = templateList.find(template => template.value === params.templateId);
-      params.templateId = tempalteItem?.id;
       params.name = tempalteItem?.label;
     }
-    if (params.templateId === 'table_output_time') {
+    if (params.templateId === 2) {
       params.content = moment(params.content).format('HH:mm');
     }
     if(params.transform) {
@@ -119,7 +119,6 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     const key = Object.keys(values)[0] || '';
     if(resetFieldMap[key]) {
       let resetList = collectResetFields(resetFieldMap[key]);
-      console.log(resetList);
       const resetObj: Record<string, any> = {};
       resetList.forEach(filed => {
         resetObj[filed] = undefined;
@@ -139,10 +138,9 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         pageSize: 10000,
         status: 1
       }).then(res => {
-        setTemplateList(res.data.data.map((item, index) => ({
+        setTemplateList(res.data.data.map((item) => ({
           label: item.name,
-          value: item.content || index + '',
-          id: item.id
+          value: item.id,
         })))
       })
     }
@@ -164,6 +162,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     const checkType = formValues.checkType;
     return <>
     <ProFormSelect
+      disabled={disabled}
       label=" "
       name="compareType"
       options={compareOptions}
@@ -172,6 +171,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     />
     <ProFormSelect
       label=" "
+      disabled={disabled}
       name="checkType"
       options={compareObjOptions}
       placeholder="请选择"
@@ -180,6 +180,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     {checkType === 'fix'&&
       <ProFormText
         placeholder="请选择"
+        disabled={disabled}
         name="fixValue"
         label=" "
         rules={[{ validator: requiredValidator }]}
@@ -189,8 +190,8 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         label=" "
       >
         <ProFormText
-          name="rangeStart"
           placeholder="请选择"
+          disabled={disabled}
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
             suffix: "%"
@@ -199,7 +200,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
           placeholder="请选择"
-          name="rangeEnd"
+          disabled={disabled}
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
             suffix: "%"
@@ -212,46 +213,51 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
   // 内置规则渲染
   const renderSystemRules = () => {
     const templateId = formValues.templateId;
-    if(templateId === 'table_output_time') { // 表产出时间
+    if(templateId === 2) { // 表产出时间
       return <ProFormTimePicker
         label=" "
         rules={[{ validator: requiredValidator }]}
         name="content"
+        disabled={disabled}
         placeholder="请选择表产出时间"
         fieldProps={{
           format: "HH:mm"
         }}
       />
-    } else if(templateId === 'field_enum_content') {
+    } else if(templateId === 4) {
       return <ProFormText
         label=" "
+        disabled={disabled}
         rules={[{ validator: requiredValidator }]}
         name="content"
         placeholder="请输入字段枚举值，用英文逗号隔开"
       />
-    } else if(templateId === 'field_enum_count') {
+    } else if(templateId === 5) {
       return <ProFormText
         label=" "
+        disabled={disabled}
         rules={[{ validator: requiredValidator }]}
         name="fixValue"
         placeholder="请输入字段枚举数量"
       />
-    } else if(templateId === 'field_data_range') {
+    } else if(templateId === 6) { // 范围
       return <ProFormFieldSet
         name="transform"
         label=" "
       >
         <ProFormText
+          disabled={disabled}
           placeholder="请选择"
           rules={[{ validator: requiredValidator }]}
         />
         <span style={{lineHeight: '34px'}}>-</span>
         <ProFormText
+          disabled={disabled}
           placeholder="请选择"
           rules={[{ validator: requiredValidator }]}
         />
       </ProFormFieldSet>
-    } else if(templateId === 'table_row') { // 表行数
+    } else if(templateId === 1) { // 表行数
       return renderTemplateRules();
     }
     return null;
@@ -262,6 +268,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     if(ruleType === 'system') {
       return <>
         {formValues.monitorObj === 'field' && <ProFormSelect
+            disabled={disabled}
             name="fieldName"
             label="字段名称"
             rules={[{ required: true, message: '请选择字段名称' }]}
@@ -271,6 +278,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         }
         <ProFormSelect
           name="templateId"
+          disabled={disabled}
           label="规则名称"
           rules={[{ required: true, message: '请选择规则名称' }]}
           options={templateList}
@@ -283,6 +291,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormSelect
           name="templateId"
           label="规则名称"
+          disabled={disabled}
           rules={[{ required: true, message: '请选择规则名称' }]}
           options={templateList}
           placeholder="请选择"
@@ -294,19 +303,22 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormText
           label="规则名称"
           name="name"
+          disabled={disabled}
           placeholder="请输入"
           rules={[{ required: true, message: '请输入规则名称' }]}
         />
         <ProFormTextArea
           label="SQL"
+          disabled={disabled}
           name="content"
           placeholder="请输入"
           rules={[{ required: true, message: '请输入SQL' }]}
         />
          <ProFormRadio.Group
           label="产出类型"
+          disabled={disabled}
           name="outputType"
-          initialValue={1}
+          initialValue={2}
           options={outputTypeList}
         />
         {renderTemplateRules()}
@@ -332,10 +344,12 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormRadio.Group
           label="监控对象"
           name="monitorObj"
+          disabled={disabled}
           initialValue="table"
           options={transformedMonitorObjList}
         />
         <ProFormSelect
+          disabled={disabled}
           label="规则类型"
           name="ruleType"
           options={ruleTypeList}
@@ -344,6 +358,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         />
         {renderRuleContent()}
         <ProFormSelect
+          disabled={disabled}
           name="alarmReceivers"
           label="告知人"
           tooltip="默认通知数仓表所属人"
@@ -354,6 +369,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         />
         <ProFormRadio.Group
           label="告警等级"
+          disabled={disabled}
           name="alarmLevel"
           tooltip={<>
             <div>告警等级为严重时，将通过电话+短信+钉钉进行告警；</div>

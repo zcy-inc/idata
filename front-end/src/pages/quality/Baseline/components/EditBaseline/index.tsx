@@ -7,7 +7,7 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
-import type { MonitorRuleItem, TableItem } from '@/types/quality';
+import type { MonitorRuleItem, TableItem, Status } from '@/types/quality';
 import {
   getBaseline,
   updateBaseline,
@@ -25,7 +25,13 @@ import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/qualit
 import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
 import styles from './index.less';
 import TableSelect from '@/pages/quality/Monitor/components/TableSelect';
-
+interface BaseInfoTypes {
+  id: string;
+  name: string;
+  creator?: string;
+  tableName: string;
+  status: Status
+}
 const { Item } = Form;
 const EditBaseline: FC<{history: any}> = ({history}) => {
   const params = useParams<{id: string;}>();
@@ -33,13 +39,15 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const [tableData, setTableData] = useState<TableItem[]>([]);
   const [tableModified, setTableModified] = useState(false);
   const [originTableData, setOriginTableData] = useState<TableItem[]>([]);
-  const [baseInfo, setBaseInfo] = useState<{id: string; name: string; creator?: string;tableName: string;}>({id: params.id, name: '', tableName: ''})
-  const [originBaseInfo, setOriginBaseInfo] = useState<{id: string; name: string; creator?: string;tableName: string;}>({id: params.id, name: '', tableName: ''})
+  const [baseInfo, setBaseInfo] = useState<BaseInfoTypes>({id: params.id, name: '', tableName: '', status: 1})
+  const [originBaseInfo, setOriginBaseInfo] = useState<BaseInfoTypes>({id: params.id, name: '', tableName: '', status: 1})
   const [isEdit, setIsEdit] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
+  const [countDown, setCountDown] = useState(0);
+
   useEffect(() => {
     getBaseInfo();
     getTablesData();
@@ -78,7 +86,8 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       const newBaseInfo = {
         ...baseInfo,
         name: res.data.name,
-        creator: res.data.creator
+        creator: res.data.creator,
+        status: res.data.status
       }
       setBaseInfo(newBaseInfo);
       setOriginBaseInfo(newBaseInfo);
@@ -96,7 +105,8 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       },
       formProps: {
         id: row?.id,
-        baselineId: +params.id
+        baselineId: +params.id,
+        disabled: baseInfo.status === 1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -245,14 +255,14 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
-         <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
+         <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             编辑
           </Button>
-          <Button type="link" onClick={() => tryRun(row)}>
+          <Button type="link" onClick={() => tryRun(row)} disabled={baseInfo.status === 1}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
-            <Button danger type="text" disabled={row.status === 1}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={baseInfo.status === 1}>
+            <Button danger type="text" disabled={baseInfo.status === 1}>
               删除
             </Button>
           </Popconfirm>
@@ -297,11 +307,11 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
             <Button type="link" onClick={() => onCancel(row, index)}>
               取消
             </Button>
-          </> :  <Button type="link" onClick={() => showEdit(index, true)}>
+          </> :  <Button type="link" onClick={() => showEdit(index, true)} disabled={baseInfo.status === 1}>
             编辑
           </Button>}
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDeleteTables(row)}>
-            <Button danger type="text">
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDeleteTables(row)} disabled={baseInfo.status === 1}>
+            <Button danger type="text" disabled={baseInfo.status === 1}>
               删除
             </Button>
           </Popconfirm>
@@ -362,7 +372,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
               <Button onClick={onCancal} style={{marginRight: 8}}>取消</Button>
               <Button type="primary" onClick={updateBaseInfo}>保存</Button>
             </> :
-              <Button onClick={() => setIsEdit(true)} type="primary">编辑</Button>
+              <Button onClick={() => setIsEdit(true)} type="primary" disabled={baseInfo.status === 1}>编辑</Button>
             }
           </div>
         </div>
@@ -391,6 +401,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
           type="dashed"
           style={{display: 'block', margin: '10px 0', width: '100%'}}
           onClick={addNewLine}
+          disabled={baseInfo.status === 1}
         >
           添加一行数据
         </Button>
@@ -398,7 +409,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     
       <div className={styles.container} style={{marginTop: 16}}>
         <p>监控信息</p>
-        <Button onClick={() => handleAddMonitorRule()}>新增监控规则</Button>
+        <Button onClick={() => handleAddMonitorRule()} disabled={baseInfo.status === 1}>新增监控规则</Button>
         <Table<MonitorRuleItem>
           rowKey="id"
           columns={columns}

@@ -76,7 +76,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       formProps: {
         id: row?.id,
         tableName: baseInfo.tableName,
-        baselineId: -1
+        baselineId: -1,
+        disabled: row?.status === 1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -191,8 +192,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
           <Button type="link" onClick={() => handleToggle(row)}>
             {row.status === 0 ? '启用' : '禁用'}
           </Button>
-          <Button type="link" onClick={() => handleAddMonitorRule(row)} disabled={row.status === 1}>
-            编辑
+          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
+            {row.status === 1 ? '查看' : '编辑'}
           </Button>
           <Button type="link" onClick={() => viewLogs(row)}>
             日志
