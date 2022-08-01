@@ -124,8 +124,8 @@ const Baseline: FC<{history: any}> = ({ history }) => {
           <Button type="link" onClick={() => viewLogs(row)}>
             日志
           </Button>
-          <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)} disabled={row.status === 1}>
-            编辑
+          <Button type="link" onClick={() => history.push(`/quality/baseline/edit/${row.id}`)}>
+            {row.status === 1 ? '查看' : '编辑'}
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
             <Button type="link" disabled={row.status === 1}>

@@ -48,7 +48,8 @@ const Template: FC<{history: any}> = ({ history }) => {
     const isEdit = !!row.id;
     showDrawer(`${isEdit ? '编辑' : '新建'}默认规则`, {
       formProps: {
-        id: row.id
+        id: row.id,
+        disabled: row.status ===1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((values: any) => {
@@ -136,8 +137,8 @@ const Template: FC<{history: any}> = ({ history }) => {
           <Button type="link" onClick={() => toggleTemplte(row)}>
             {row.status === 0 ? '启用' : '停用'}
           </Button>
-          <Button type="link" onClick={() => handleAddTemplate(row)} disabled={row.status === 1}>
-            编辑
+          <Button type="link" onClick={() => handleAddTemplate(row)}>
+            {row.status === 1 ? '查看' : '编辑'}
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
             <Button type="link" disabled={row.status === 1}>

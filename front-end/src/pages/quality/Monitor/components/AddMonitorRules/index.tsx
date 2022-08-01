@@ -24,7 +24,7 @@ const resetFieldMap = {
   checkType: ['fixValue', 'pre_period'],
 }
 
-const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> = ({id, tableName, baselineId}, ref) => {
+const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; disabled: boolean;}> = ({id, tableName, baselineId, disabled = false}, ref) => {
   const [form] = Form.useForm();
   const [templateList, setTemplateList] = useState<{label: string; value: number;} []>([]);
   const [recivers, setRecivers] = useState<{label: string; value: number} []>([]);
@@ -162,6 +162,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     const checkType = formValues.checkType;
     return <>
     <ProFormSelect
+      disabled={disabled}
       label=" "
       name="compareType"
       options={compareOptions}
@@ -170,6 +171,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     />
     <ProFormSelect
       label=" "
+      disabled={disabled}
       name="checkType"
       options={compareObjOptions}
       placeholder="请选择"
@@ -178,6 +180,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     {checkType === 'fix'&&
       <ProFormText
         placeholder="请选择"
+        disabled={disabled}
         name="fixValue"
         label=" "
         rules={[{ validator: requiredValidator }]}
@@ -188,6 +191,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
       >
         <ProFormText
           placeholder="请选择"
+          disabled={disabled}
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
             suffix: "%"
@@ -196,6 +200,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
           placeholder="请选择"
+          disabled={disabled}
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
             suffix: "%"
@@ -213,6 +218,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         label=" "
         rules={[{ validator: requiredValidator }]}
         name="content"
+        disabled={disabled}
         placeholder="请选择表产出时间"
         fieldProps={{
           format: "HH:mm"
@@ -221,6 +227,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     } else if(templateId === 4) {
       return <ProFormText
         label=" "
+        disabled={disabled}
         rules={[{ validator: requiredValidator }]}
         name="content"
         placeholder="请输入字段枚举值，用英文逗号隔开"
@@ -228,6 +235,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     } else if(templateId === 5) {
       return <ProFormText
         label=" "
+        disabled={disabled}
         rules={[{ validator: requiredValidator }]}
         name="fixValue"
         placeholder="请输入字段枚举数量"
@@ -238,11 +246,13 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         label=" "
       >
         <ProFormText
+          disabled={disabled}
           placeholder="请选择"
           rules={[{ validator: requiredValidator }]}
         />
         <span style={{lineHeight: '34px'}}>-</span>
         <ProFormText
+          disabled={disabled}
           placeholder="请选择"
           rules={[{ validator: requiredValidator }]}
         />
@@ -258,6 +268,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
     if(ruleType === 'system') {
       return <>
         {formValues.monitorObj === 'field' && <ProFormSelect
+            disabled={disabled}
             name="fieldName"
             label="字段名称"
             rules={[{ required: true, message: '请选择字段名称' }]}
@@ -267,6 +278,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         }
         <ProFormSelect
           name="templateId"
+          disabled={disabled}
           label="规则名称"
           rules={[{ required: true, message: '请选择规则名称' }]}
           options={templateList}
@@ -279,6 +291,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormSelect
           name="templateId"
           label="规则名称"
+          disabled={disabled}
           rules={[{ required: true, message: '请选择规则名称' }]}
           options={templateList}
           placeholder="请选择"
@@ -290,19 +303,22 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormText
           label="规则名称"
           name="name"
+          disabled={disabled}
           placeholder="请输入"
           rules={[{ required: true, message: '请输入规则名称' }]}
         />
         <ProFormTextArea
           label="SQL"
+          disabled={disabled}
           name="content"
           placeholder="请输入"
           rules={[{ required: true, message: '请输入SQL' }]}
         />
          <ProFormRadio.Group
           label="产出类型"
+          disabled={disabled}
           name="outputType"
-          initialValue={1}
+          initialValue={2}
           options={outputTypeList}
         />
         {renderTemplateRules()}
@@ -328,10 +344,12 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <ProFormRadio.Group
           label="监控对象"
           name="monitorObj"
+          disabled={disabled}
           initialValue="table"
           options={transformedMonitorObjList}
         />
         <ProFormSelect
+          disabled={disabled}
           label="规则类型"
           name="ruleType"
           options={ruleTypeList}
@@ -340,6 +358,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         />
         {renderRuleContent()}
         <ProFormSelect
+          disabled={disabled}
           name="alarmReceivers"
           label="告知人"
           tooltip="默认通知数仓表所属人"
@@ -350,6 +369,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         />
         <ProFormRadio.Group
           label="告警等级"
+          disabled={disabled}
           name="alarmLevel"
           tooltip={<>
             <div>告警等级为严重时，将通过电话+短信+钉钉进行告警；</div>
