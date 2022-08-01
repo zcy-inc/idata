@@ -32,7 +32,7 @@ import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
-import DrawerHistory from './components/DrawerHistory';
+import DrawerHistory from '../TabDev/components/DrawerHistory';
 import Mapping from './components/Mapping';
 import {
   SrcReadMode,
