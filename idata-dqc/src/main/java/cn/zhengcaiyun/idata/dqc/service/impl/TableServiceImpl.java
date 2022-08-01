@@ -129,7 +129,7 @@ public class TableServiceImpl implements TableService {
                 "from  hive.public.\"TBLS\"  a\n" +
                 "          join hive.public.\"TABLE_PARAMS\" b on a.\"TBL_ID\" = b.\"TBL_ID\"\n" +
                 "          join hive.public.\"DBS\" c on a.\"DB_ID\"=c.\"DB_ID\"\n" +
-                "where b.\"PARAM_KEY\" = 'numRows'\n" +
+                "where b.\"PARAM_KEY\" = 'numFiles'\n" +
                 "  and c.\"NAME\"='%s' and a.\"TBL_NAME\"='%s'", database, tableName);
         List<Map<String, Object>> list = postgreSqlDataProvider.query(postpreDatasource, sql);
         if (CollectionUtils.isEmpty(list)) {
@@ -137,7 +137,7 @@ public class TableServiceImpl implements TableService {
         }
         Map<String, Object> map = list.get(0);
 
-        return (Long) map.get("num");
+        return Long.parseLong(map.get("num").toString());
     }
 
     @Override

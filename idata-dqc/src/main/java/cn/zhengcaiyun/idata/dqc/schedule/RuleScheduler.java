@@ -38,12 +38,12 @@ public class RuleScheduler {
 
     @Scheduled(fixedDelay = 1000 * 5)
     public void schedule() {
-        List<String> types = Lists.newArrayList(MonitorTemplateEnum.TABLE_OUTPUT_TIME.getValue());
+        List<Long> templateIdList = Lists.newArrayList(MonitorTemplateEnum.TABLE_OUTPUT_TIME.getId());
         int startIndex = 0;
 
         //普通规则
         while (true) {
-            List<MonitorRuleVO> ruleList = monitorRuleService.getScheduleRuleList(types, startIndex);
+            List<MonitorRuleVO> ruleList = monitorRuleService.getScheduleRuleList(templateIdList, startIndex);
             if (CollectionUtils.isEmpty(ruleList)) {
                 break;
             }
@@ -55,7 +55,7 @@ public class RuleScheduler {
         startIndex = 0;
         //基线规则
         while (true) {
-            List<MonitorRuleVO> ruleList = monitorRuleService.getBaselineScheduleRuleList(types, startIndex);
+            List<MonitorRuleVO> ruleList = monitorRuleService.getBaselineScheduleRuleList(templateIdList, startIndex);
             if (CollectionUtils.isEmpty(ruleList)) {
                 break;
             }
@@ -67,7 +67,7 @@ public class RuleScheduler {
 
     //    @Transactional(rollbackFor = Exception.class)
     public void check(MonitorRuleVO rule) {
-        if (MonitorTemplateEnum.TABLE_OUTPUT_TIME.getValue().equals(rule.getContent())) {
+        if (MonitorTemplateEnum.TABLE_OUTPUT_TIME.getId().equals(rule.getTemplateId())) {
             Date now = new Date();
             String curDay = DateUtils.format(now, "yyyy-MM-dd");
 
@@ -91,11 +91,13 @@ public class RuleScheduler {
                 String tableAccessDay = DateUtils.format(new Date(hiveTable.getModifyTime()), "yyyy-MM-dd");
 
                 //默认数据每天更新一次
+                Integer alarm = 0;
                 if (!curDay.equals(tableAccessDay)) {
+                    alarm = 1;
+
                     String[] nicknames = rule.getAlarmReceivers().split(",");
                     String message = String.format("根据你在数据质量平台上配置的规则[%s]，监测到表[%s]的数据产出时间已超过设置时间%s",
                             rule.getName(), rule.getContent());
-
 
                     messageSendService.send(RuleUtils.getAlarmTypes(rule.getAlarmLevel()), nicknames, message);
                 }
@@ -116,10 +118,8 @@ public class RuleScheduler {
                 monitorHistory.setEditor("系统管理员");
                 monitorHistory.setAlarmLevel(rule.getAlarmLevel());
                 monitorHistory.setAlarmReceivers(rule.getAlarmReceivers());
-                monitorHistory.setFixValue(rule.getFixValue());
-                monitorHistory.setRangeStart(rule.getRangeStart());
-                monitorHistory.setRangeEnd(rule.getRangeEnd());
                 monitorHistory.setContent(rule.getContent());
+                monitorHistory.setAlarm(alarm);
 
                 monitorHistoryService.insert(monitorHistory);
             }

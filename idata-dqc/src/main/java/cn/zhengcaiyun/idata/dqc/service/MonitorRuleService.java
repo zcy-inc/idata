@@ -40,15 +40,15 @@ public interface MonitorRuleService {
 
     boolean del(Long baselineId, String tableName);
 
-    boolean setStatus(Long id, Integer status);
+    boolean setStatus(Long id, Integer status, String nickname);
 
     MonitorHistoryVO getRuleQueryCount(MonitorRuleVO rule);
 
     void initHistory(Long id, String nickname);
 
-    List<MonitorRuleVO> getScheduleRuleList(List<String> typeList, Integer startIndex);
+    List<MonitorRuleVO> getScheduleRuleList(List<Long> templateIdList, Integer startIndex);
 
-    List<MonitorRuleVO> getBaselineScheduleRuleList(List<String> typeList, Integer startIndex);
+    List<MonitorRuleVO> getBaselineScheduleRuleList(List<Long> templateIdList, Integer startIndex);
 
     void analyse(Long jobId);
 

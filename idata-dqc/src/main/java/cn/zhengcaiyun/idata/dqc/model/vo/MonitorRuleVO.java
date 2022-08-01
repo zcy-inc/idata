@@ -116,6 +116,8 @@ public class MonitorRuleVO {
 
     private MonitorHistoryVO monitorHistory;
 
+    private String sql;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -3,8 +3,8 @@
 <mapper namespace="cn.zhengcaiyun.idata.dqc.dao.MonitorHistoryDao">
 
     <select id="getByRuleId" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
-        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,
-          `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,
+        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,check_type checkType,
+          `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,compare_type compareType,baseline_id baselineId,template_id templateId,
           `data_value` dataValue, `rule_value` ruleValue, `version`,  `create_time` createTime
         from dqc_monitor_history
         where rule_id = #{ruleId} and version=#{version} and create_time > date_add(now(), interval -30 day)
@@ -12,8 +12,8 @@
     </select>
 
     <select id="getByBaselineId" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
-        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,
-            `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,
+        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,check_type checkType,
+            `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,compare_type compareType,baseline_id baselineId,template_id templateId,
             `data_value` dataValue, `rule_value` ruleValue, `version`,  `create_time` createTime
         from dqc_monitor_history
         where baseline_id = #{baselineId} and create_time > date_add(now(), interval -30 day)
@@ -22,7 +22,9 @@
 
     <select id="getByPage" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
         select
-          id, table_name, partition, rule_id, rule_name, rule_type, monitor_obj, data_value, sql, rule_value, version, creator, create_time, editor, edit_time, alarm_level
+          id, table_name tableName, partition, rule_id ruleId, rule_name ruleName, rule_type ruleType, monitor_obj monitorObj,
+          compare_type compareType, data_value dataValue, sql, rule_value ruleValue, version, creator, create_time createTime,
+            editor, edit_time editTime, alarm_level alarmLevel
         from dqc_monitor_history
         <where>
             <if test="tableName != null and tableName != ''">
@@ -128,31 +130,31 @@
 
     <insert id="insert" keyProperty="id" useGeneratedKeys="true" >
         insert into dqc_monitor_history
-            ( `table_name`, `partition`, `rule_id`, `rule_name`, `rule_type`, `monitor_obj`,
-              `alarm_level`, `alarm_receivers`, `fix_value`, `range_start`, `range_end`, `sql`, `alarm`,
+            ( `table_name`, `partition`, `rule_id`, `rule_name`, `rule_type`, `monitor_obj`,compare_type,
+              `alarm_level`, `alarm_receivers`, `fix_value`, `range_start`, `range_end`, `sql`, `alarm`,check_type,
               `data_value`, `rule_value`, `version`, `creator`, `create_time`, `editor`, `edit_time`)
         values
-            (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj},
-             #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},
+            (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj}, #{entity.compareType},
+             #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},#{entity.checkType},
              #{entity.dataValue},  #{entity.ruleValue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
     </insert>
 
     <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO `dqc_monitor_history`
-            ( `table_name`, `partition`, `rule_id`, `rule_name`, `rule_type`, `monitor_obj`,
-             `alarm_level`, `alarm_receivers`, `fix_value`, `range_start`, `range_end`, `sql`, `alarm`,
+            ( `table_name`, `partition`, `rule_id`, `rule_name`, `rule_type`, `monitor_obj`,compare_type,baseline_id,template_id,
+             `alarm_level`, `alarm_receivers`, `fix_value`, `range_start`, `range_end`, `sql`, `alarm`,check_type,
              `data_value`, `rule_value`, `version`, `creator`, `create_time`, `editor`, `edit_time`)
         values
         <foreach collection="entities" item="entity" separator=",">
-        (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj},
-            #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},
+        (#{entity.tableName}, #{entity.partition}, #{entity.ruleId}, #{entity.ruleName}, #{entity.ruleType}, #{entity.monitorObj}, #{entity.compareType},#{entity.baselineId}, #{entity.templateId},
+            #{entity.alarmLevel}, #{entity.alarmReceivers},#{entity.fixValue},#{entity.rangeStart},#{entity.rangeEnd},#{entity.sql},#{entity.alarm},#{entity.checkType},
             #{entity.dataValue},  #{entity.ruleValue}, #{entity.version}, #{entity.creator}, now(), #{entity.editor}, now())
         </foreach>
     </insert>
 
     <select id="getLatest" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
-        select id, table_name tableName, partition, rule_id ruleId, rule_name ruleName, rule_type ruleType, monitor_obj monitorObj,
-        data_value dataValue lastAccessTime, `sql`, rule_value ruleValue, version,
+        select id, table_name tableName, `partition`, rule_id ruleId, rule_name ruleName, rule_type ruleType, monitor_obj monitorObj,
+        data_value dataValue, `sql`, rule_value ruleValue, version,compare_type compareType,baseline_id baselineId,template_id templateId,
         creator, create_time createTime, editor, edit_time editTime, alarm_level alarmlevel
         from dqc_monitor_history
         where id in(

@@ -95,11 +95,8 @@ public class MonitorTemplateController {
                 return Result.failureResult("该模板有关联规则，停止规则后才能停用");
             }
         }
-        MonitorTemplateVO monitorTemplateVO = new MonitorTemplateVO();
-        monitorTemplateVO.setId(id);
-        monitorTemplateVO.setStatus(status);
-        monitorTemplateService.update(monitorTemplateVO);
-        return Result.successResult();
+
+        return Result.successResult(monitorTemplateService.setStatus(id,status));
     }
 
 }

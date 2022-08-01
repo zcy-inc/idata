@@ -117,4 +117,14 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
         return vo;
     }
 
+    @Override
+    public boolean setStatus(Long id, Integer status) {
+        MonitorTemplate monitorTemplate = new MonitorTemplate();
+        monitorTemplate.setId(id);
+        monitorTemplate.setStatus(status);
+        monitorTemplate.setEditor(OperatorContext.getCurrentOperator().getNickname());
+
+        return monitorTemplateDao.update(monitorTemplate) == 1 ? true : false;
+    }
+
 }

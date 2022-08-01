@@ -22,6 +22,8 @@ public interface MonitorTemplateService {
 
     MonitorTemplateVO update(MonitorTemplateVO monitorTemplate);
 
+    boolean setStatus( Long id,  Integer status);
+
     void check(MonitorTemplateVO monitorTemplate);
 
 }

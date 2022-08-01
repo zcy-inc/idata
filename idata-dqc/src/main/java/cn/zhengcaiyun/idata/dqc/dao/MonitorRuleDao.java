@@ -34,9 +34,9 @@ public interface MonitorRuleDao {
 
     int updateByTemplateId(@Param("rule") MonitorRule rule);
 
-    List<MonitorRuleVO> getScheduleRuleList(@Param("typeList") List<String> typeList, @Param("startIndex") Integer startIndex);
+    List<MonitorRuleVO> getScheduleRuleList(@Param("templateIdList") List<Long> templateIdList, @Param("startIndex") Integer startIndex);
 
-    List<MonitorRuleVO> getBaselineScheduleRuleList(@Param("typeList") List<String> typeList, @Param("startIndex") Integer startIndex);
+    List<MonitorRuleVO> getBaselineScheduleRuleList(@Param("templateIdList") List<Long> templateIdList, @Param("startIndex") Integer startIndex);
 
     List<MonitorRuleVO> getRulesByTable(@Param("tableName") String tableName);
 

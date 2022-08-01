@@ -87,5 +87,12 @@ public class MonitorHistoryVO {
 
     private Double rangeEnd;
 
+    private String compareType;
+
+    private String checkType;
+
+    private Long templateId;
+
+    public Long baselineId;
 }
 

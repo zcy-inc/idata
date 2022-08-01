@@ -4,17 +4,17 @@ package cn.zhengcaiyun.idata.dqc.model.common;
  * Created by zheng on 16/6/12.
  */
 public class Result<R> {
-    private String message;
+    private String msg;
     private boolean success;
     private R data;
 
-    public Result(String message, boolean success) {
-        this.message = message;
+    public Result(String msg, boolean success) {
+        this.msg = msg;
         this.success = success;
     }
 
-    public Result(String message, boolean success, R data) {
-        this.message = message;
+    public Result(String msg, boolean success, R data) {
+        this.msg = msg;
         this.success = success;
         this.data = data;
     }
@@ -27,12 +27,12 @@ public class Result<R> {
         this.data = data;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setmsg(String msg) {
+        this.msg = msg;
     }
 
-    public String getMessage() {
-        return message;
+    public String getmsg() {
+        return msg;
     }
 
     public boolean isSuccess() {
@@ -51,8 +51,8 @@ public class Result<R> {
         return new Result<R>(null, true, data);
     }
 
-    public static <R> Result<R> failureResult(String message) {
-        return new Result<R>(message, false, null);
+    public static <R> Result<R> failureResult(String msg) {
+        return new Result<R>(msg, false, null);
     }
 
 }

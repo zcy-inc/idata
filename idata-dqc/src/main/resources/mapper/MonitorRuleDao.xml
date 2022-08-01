@@ -118,6 +118,9 @@
       <if test="rule.monitorObj != null">
         monitor_obj = #{rule.monitorObj},
       </if>
+      <if test="rule.content != null">
+        content = #{rule.content},
+      </if>
         editor = #{rule.editor},
         edit_time = now()
      where template_id = #{rule.templateId}
@@ -147,7 +150,7 @@
       compare_type = #{rule.compareType},
       content = #{rule.content},
       output_type = #{rule.outputType},
-      fix_value = #{fixValue},
+      fix_value = #{rule.fixValue},
       range_start = #{rule.rangeStart},
       range_end = #{rule.rangeEnd},
       editor = #{rule.editor},
@@ -157,11 +160,11 @@
 
   <update id="updateAccessTime" >
     update dqc_monitor_rule set access_time=#{accessTime}
-    where id = #{ruleId} and access_time!=curdate()
+    where id = #{ruleId} and access_time!=concat('',curdate())
   </update>
 
   <select id="getByPage" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
-    select id, `table_name`,  `name`, rule_type, monitor_obj monitorObj, alarm_level alarmLevel,
+    select id, `table_name`,  `name`, rule_type ruleType, monitor_obj monitorObj, alarm_level alarmLevel,
            alarm_receivers alarmReceivers,`status`, editor, edit_time editTime
     from dqc_monitor_rule
     where del=0
@@ -243,13 +246,9 @@
     where r.baseline_id=-1 and r.status=1
           and (r.access_time = '' or r.access_time >= DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00'))
           and r.template_id in
-                (select id
-                 from dqc_monitor_template
-                 where monitor_obj='system' and content in
-                 <foreach collection="typeList" item="item" separator="," open="(" close=")">
-                   #{item}
-                 </foreach>
-                 )
+          <foreach collection="templateIdList" item="item" separator="," open="(" close=")">
+            #{item}
+          </foreach>
     limit #{startIndex},20
   </select>
 
@@ -264,13 +263,9 @@
     where b.status=1 and r.baseline_id=1 and r.status=1
           and (r.access_time = '' or r.access_time >= DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00'))
           and r.template_id in
-          (select id
-           from dqc_monitor_template
-           where monitor_obj='system' and content in
-           <foreach collection="typeList" item="item" separator="," open="(" close=")">
-             #{item}
-           </foreach>
-          )
+          <foreach collection="templateIdList" item="item" separator="," open="(" close=")">
+            #{item}
+          </foreach>
     limit #{startIndex},20
   </select>
 

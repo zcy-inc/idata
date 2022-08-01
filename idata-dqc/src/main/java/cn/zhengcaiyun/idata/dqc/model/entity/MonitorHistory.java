@@ -94,5 +94,13 @@ public class MonitorHistory implements Serializable {
 
     private String content;
 
+    private String compareType;
+
+    private Long templateId;
+
+    private Long baselineId;
+
+    private String checkType;
+
 }
 
