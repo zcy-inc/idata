@@ -77,6 +77,10 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
             style={{ marginTop: 16 }}
             accept="*"
             maxCount={1}
+            showUploadList={{
+              showRemoveIcon: false,
+              showPreviewIcon: false
+            }}
             customRequest={({ file, onSuccess, onError }) => {
               const formData = new FormData();
               formData.append('uploadFile', file);

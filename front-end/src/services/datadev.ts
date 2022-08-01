@@ -37,6 +37,7 @@ import type {
 } from '@/constants/datadev';
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
+import { getRequestUrl } from '@/utils/utils';
 
 /**
  * 标签 创建
@@ -200,7 +201,20 @@ export async function syncHive(data: { tableId: number }) {
     data,
   });
 }
-
+// 表 比较hive不同的相关信息提示
+export async function compareHiveChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/info`, {
+    method: 'POST',
+    data,
+  });
+}
+// 表 拉取hive信息
+export async function hiveTableChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/columns`, {
+    method: 'POST',
+    data,
+  });
+}
 /* ==================== DataDev ==================== */
 /**
  * 获取功能性文件树
@@ -217,6 +231,7 @@ export async function getFunctionTree() {
 // 获取指定的功能性文件夹树
 export async function getSpecifiedFunctionTree(data?: {
   belongFunctions: FolderBelong[];
+  includeFunFolders?:	boolean;
   keyWord?: string;
 }) {
   return request('/api/p1/dev/compositeFolders/folders/tree', {
@@ -257,7 +272,7 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
  * 导出作业
  */
  export async function jobExport(params: {jobIds: string}) {
-   window.open(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`)
+   window.open(getRequestUrl(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`))
   }
 
 /**
@@ -419,7 +434,7 @@ export async function offlineDAG(params: { id: Key }) {
 /**
  * 获取作业类型
  */
-export async function getTaskTypes(params: { catalog: TaskCategory }) {
+export async function getTaskTypes(params?: { catalog: TaskCategory }) {
   return request<DefaultResponse & { data: TaskType[] }>('/api/p1/dev/jobs/types', {
     method: 'GET',
     params,
@@ -855,7 +870,6 @@ export async function runQueryResult(params: {
   statementId: number;
   from?: number;
   size?: number;
-  selectSql: string;
 }) {
   return request<
     DefaultResponse & {
@@ -883,7 +897,54 @@ export async function runQueryResult(params: {
 }
 
 /**
- * 获取作业历史
+ * 数据开发-作业：获取作业历史
+ */
+ export async function getDevHistory(data: {
+  environment: string,
+  jobId: number;
+  startTime: number;
+  endTime: number;
+  pageNum: number;
+  pageSize: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        content: TaskHistoryItem[];
+        pageNum: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+      };
+    }
+  >(`/api/p1/dev/jobs/history/anotherPage`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 数据开发-作业：查看作业日志
+ */
+ export async function getDevLog(params: {
+  jobId: number;
+  env: string;
+  lineNum: number;
+  skipLineNum: number;
+  taskId: number;
+ }) {
+  return request<
+    DefaultResponse & {
+      data: string;
+    }
+  >(`/api/p1/dev/jobs/dependency/${params.jobId}/running/log`, {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 数据集成：获取作业历史
  */
 export async function getTaskHistory(data: {
   condition: {

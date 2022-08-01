@@ -17,6 +17,13 @@
 
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
+import com.google.common.collect.Maps;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -32,5 +39,17 @@ public enum RunningStateEnum {
     RunningStateEnum(int val, String desc) {
         this.val = val;
         this.desc = desc;
+    }
+
+    private static final Map<Integer, RunningStateEnum> map = Maps.newHashMap();
+
+    static {
+        Arrays.stream(RunningStateEnum.values())
+                .forEach(enumObj -> map.put(enumObj.val, enumObj));
+    }
+
+    public static Optional<RunningStateEnum> getEnum(Integer val) {
+        if (Objects.isNull(val)) return Optional.empty();
+        return Optional.ofNullable(map.get(val));
     }
 }

@@ -339,6 +339,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
     if (success) {
       message.success('刷新成功');
+      let scriptItem=data.map((item: {name : string}) => item.name).join();//字段名以','链接的字符串
+      form.setFieldsValue({scriptSelectColumns:scriptItem});//将最终字符串设置到对应文本框scriptSelectColumns
       setSrcColumns(data);
       setDestColumns([]);
     }
@@ -438,27 +440,29 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
   /**
    * 保存任务内容
    */
-  const onSave = async () => {
-    const srcMap = mapRef.current?.srcMap || {};
-    const destMap = mapRef.current?.destMap || {};
-    const srcCols: MappedColumn[] = Object.values(srcMap);
-    const destCols: MappedColumn[] = Object.values(destMap);
-    const values = form.getFieldsValue();
-    const params = {
-      configMode: DIConfigMode.VISUALIZATION,
-      ...values,
-      jobId: pane.id,
-      id: jobContent?.id,
-      version: jobContent?.version,
-      contentHash: jobContent?.contentHash,
-      srcCols,
-      destCols,
-    };
-    const { success } = await saveDIJobContent(params);
-    if (success) {
-      message.success('保存成功');
-      refreshVersions();
-    }
+  const onSave = () => {
+    form.validateFields().then(async () => {
+      const srcMap = mapRef.current?.srcMap || {};
+      const destMap = mapRef.current?.destMap || {};
+      const srcCols: MappedColumn[] = Object.values(srcMap);
+      const destCols: MappedColumn[] = Object.values(destMap);
+      const values = form.getFieldsValue();
+      const params = {
+        configMode: DIConfigMode.VISUALIZATION,
+        ...values,
+        jobId: pane.id,
+        id: jobContent?.id,
+        version: jobContent?.version,
+        contentHash: jobContent?.contentHash,
+        srcCols,
+        destCols,
+      };
+      const { success } = await saveDIJobContent(params);
+      if (success) {
+        message.success('保存成功');
+        refreshVersions();
+      }
+    });
   };
 
   /**
@@ -615,6 +619,13 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         </Fragment>,
       );
     }
+    if (basicInfo?.jobType === DIJobType.BACK_FLOW && srcDataSourceType === DataSourceType.HIVE) {
+      items.push(
+        <Item label="分区" name="srcTablePt" rules={ruleText} key="8">
+          <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
+        </Item>,
+      );
+    }
     return items;
   };
   const getDestItems = () => {
@@ -732,6 +743,15 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           {backFlowDestWriteModeNode}
           {batchWriteNode}
           {customParamsNode}
+        </Fragment>,
+      );
+    }
+    if (basicInfo?.jobType === DIJobType.BACK_FLOW && destDataSourceType === DataSourceType.DORIS) {
+      items.push(
+        <Fragment key="13">
+          <Item label="分区名称" name="destTablePt" rules={ruleText} key="13">
+            <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
+          </Item>
         </Fragment>,
       );
     }
@@ -862,7 +882,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
                 >
                   复制来源表
                 </Button>
-                {basicInfo?.jobType === DIJobType.DI && (
+                {Object.keys(DIJobType).includes(basicInfo?.jobType??'') && (
                   <Item name="configMode" rules={ruleSlct} noStyle>
                     <RadioGroup
                       options={diConfigOptions}

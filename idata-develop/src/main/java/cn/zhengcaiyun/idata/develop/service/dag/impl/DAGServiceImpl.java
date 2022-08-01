@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.dag.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
@@ -38,6 +39,7 @@ import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGScheduleDto;
 import cn.zhengcaiyun.idata.develop.event.dag.publisher.DagEventPublisher;
+import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
@@ -72,6 +74,8 @@ public class DAGServiceImpl implements DAGService {
     private final DevAccessService devAccessService;
     private final CompositeFolderRepo compositeFolderRepo;
 
+    private final JobScheduleManager jobScheduleManager;
+
     @Autowired
     public DAGServiceImpl(DAGRepo dagRepo,
                           DAGEventLogRepo dagEventLogRepo,
@@ -79,7 +83,8 @@ public class DAGServiceImpl implements DAGService {
                           DevTreeNodeLocalCache devTreeNodeLocalCache,
                           DagEventPublisher dagEventPublisher,
                           DevAccessService devAccessService,
-                          CompositeFolderRepo compositeFolderRepo) {
+                          CompositeFolderRepo compositeFolderRepo,
+                          JobScheduleManager jobScheduleManager) {
         this.dagRepo = dagRepo;
         this.dagEventLogRepo = dagEventLogRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
@@ -87,6 +92,7 @@ public class DAGServiceImpl implements DAGService {
         this.dagEventPublisher = dagEventPublisher;
         this.devAccessService = devAccessService;
         this.compositeFolderRepo = compositeFolderRepo;
+        this.jobScheduleManager = jobScheduleManager;
     }
 
     @Override
@@ -327,6 +333,11 @@ public class DAGServiceImpl implements DAGService {
         return dagInfoList.stream()
                 .map(DAGInfoDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Integer> cleanDagExecutionHistory(EnvEnum envEnum) {
+        return jobScheduleManager.cleanDagExecutionHistory(envEnum);
     }
 
     private List<DAGDependence> buildDependenceList(final Long currentDagId, List<Long> dependenceIds, Operator operator) {

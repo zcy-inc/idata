@@ -1,9 +1,12 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.hutool.core.date.DateTime;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.develop.condition.job.JobAnotherHistoryCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
 import com.github.pagehelper.PageInfo;
 
@@ -20,6 +23,7 @@ public interface JobHistoryService {
 
     /**
      * 分页任务历史
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -28,6 +32,7 @@ public interface JobHistoryService {
 
     /**
      * topN分组耗时duration
+     *
      * @param startDate
      * @param endDate
      * @param top
@@ -37,6 +42,7 @@ public interface JobHistoryService {
 
     /**
      * topN分组耗时cpu memory
+     *
      * @param startDate
      * @param endDate
      * @param top
@@ -46,6 +52,7 @@ public interface JobHistoryService {
 
     /**
      * 作业历史分页
+     *
      * @param startDateBegin
      * @param startDateEnd
      * @param finishDateBegin
@@ -62,6 +69,7 @@ public interface JobHistoryService {
 
     /**
      * 作业历史查询甘特图
+     *
      * @param startDate
      * @param layerCode
      * @param dagId
@@ -73,6 +81,7 @@ public interface JobHistoryService {
 
     /**
      * 任务最后运行时间
+     *
      * @param jobId
      * @return
      */
@@ -87,9 +96,20 @@ public interface JobHistoryService {
 
     /**
      * 甘特图返回变量格式转换并进行内部排序
+     *
      * @param list
      * @return
      */
     List<JobHistoryTableGanttDto> transform(List<JobHistoryGanttDto> list);
 
+    /**
+     * 分页查询作业运行历史
+     *
+     * @param jobId
+     * @param environment
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Page<JobAnotherHistoryDto> pagingJobHistory(JobAnotherHistoryCondition condition);
 }

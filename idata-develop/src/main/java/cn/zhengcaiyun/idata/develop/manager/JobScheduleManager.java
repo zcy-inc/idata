@@ -19,17 +19,28 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
-import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.IDagIntegrator;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.JobRunOverviewDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.PageInfoDto;
+import cn.zhengcaiyun.idata.develop.integration.schedule.dolphin.dto.TaskInstanceDto;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -42,12 +53,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JobScheduleManager {
 
     private final IJobIntegrator jobIntegrator;
+    private final IDagIntegrator dagIntegrator;
     private final JobInfoRepo jobInfoRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
 
     @Autowired
-    public JobScheduleManager(IJobIntegrator jobIntegrator, JobInfoRepo jobInfoRepo, JobExecuteConfigRepo jobExecuteConfigRepo) {
+    public JobScheduleManager(IJobIntegrator jobIntegrator,
+                              IDagIntegrator dagIntegrator,
+                              JobInfoRepo jobInfoRepo,
+                              JobExecuteConfigRepo jobExecuteConfigRepo) {
         this.jobIntegrator = jobIntegrator;
+        this.dagIntegrator = dagIntegrator;
         this.jobInfoRepo = jobInfoRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
     }
@@ -68,6 +84,7 @@ public class JobScheduleManager {
 
     /**
      * 取最近的实例运行记录
+     *
      * @param limit 记录数
      * @return
      */
@@ -81,5 +98,26 @@ public class JobScheduleManager {
         });
 
         return jobLatestRecords;
+    }
+
+    public Page<JobAnotherHistoryDto> pagingJobHistory(Long jobId, String environment, Date startTime, Date endTime,
+                                                       Integer pageNo, Integer pageSize) {
+        PageInfoDto<TaskInstanceDto> pageInfoDto = jobIntegrator.pagingJobHistory(jobId, environment, null, startTime, endTime, pageNo, pageSize);
+        if (Objects.isNull(pageInfoDto) || CollectionUtils.isEmpty(pageInfoDto.getTotalList())) {
+            return Page.empty();
+        }
+        List<TaskInstanceDto> taskInstanceDtoList = pageInfoDto.getTotalList();
+        List<JobAnotherHistoryDto> historyDtoList = taskInstanceDtoList.stream().map(taskInstanceDto -> {
+            JobAnotherHistoryDto historyDto = new JobAnotherHistoryDto();
+            BeanUtils.copyProperties(taskInstanceDto, historyDto);
+            historyDto.setJobId(jobId);
+            historyDto.setEnvironment(environment);
+            return historyDto;
+        }).collect(Collectors.toList());
+        return Page.newOne(historyDtoList, pageInfoDto.getTotal());
+    }
+
+    public List<Integer> cleanDagExecutionHistory(EnvEnum envEnum) {
+        return dagIntegrator.cleanExecutionHistory(envEnum.name());
     }
 }

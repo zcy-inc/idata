@@ -166,124 +166,127 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
    * 保存任务
    */
   const onSave = () => {
-    const values = form.getFieldsValue();
-    switch (task?.jobType) {
-      case TaskTypes.SQL_SPARK:
-      case TaskTypes.SQL_FLINK:
-        const dataSql = {
-          ...values,
-          jobId: pane.id,
-          jobType: task?.jobType,
-          version,
-        };
-        saveSqlSpark({ jobId: pane.id }, dataSql)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SPARK_JAR:
-        const dataSparkJar = {
-          jobId: pane.id,
-          jobType: TaskTypes.SPARK_JAR,
-          resourceHdfsPath: values.resourceHdfsPath,
-          appArguments: values.appArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-          mainClass: values.mainClass,
-          version,
-        };
-        saveSpark({ jobId: pane.id }, dataSparkJar)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SPARK_PYTHON:
-        const dataSparkPython = {
-          ...values,
-          jobId: pane.id,
-          jobType: TaskTypes.SPARK_PYTHON,
-          appArguments: values.appArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-          version,
-        };
-        saveSpark({ jobId: pane.id }, dataSparkPython)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SCRIPT_SHELL:
-        const dataScriptShell = {
-          ...values,
-          jobId: pane.id,
-          jobType: TaskTypes.SCRIPT_SHELL,
-          version,
-        };
-        saveScript({ jobId: pane.id }, dataScriptShell)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.SCRIPT_PYTHON:
-        const dataScriptPython = {
-          ...values,
-          jobId: pane.id,
-          jobType: TaskTypes.SCRIPT_SHELL,
-          scriptArguments: values.scriptArguments?.map((_: any) => ({
-            argumentValue: _.argumentValue,
-            argumentRemark: _.argumentRemark,
-          })),
-          version,
-        };
-        saveScript({ jobId: pane.id }, dataScriptPython)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      case TaskTypes.KYLIN:
-        const dataKylin = {
-          jobId: pane.id,
-          jobType: TaskTypes.KYLIN,
-          cubeName: values.cubeName,
-          buildType: values.buildType,
-          startTime: new Date(values.startTime).getTime(),
-          endTime: new Date(values.endTime).getTime(),
-          version,
-        };
-        saveKylin({ jobId: pane.id }, dataKylin)
-          .then((res) => {
-            if (res.success) {
-              message.success('保存成功');
-              refreshTask();
-            }
-          })
-          .catch((err) => {});
-        break;
-      default:
-        break;
-    }
+    form.validateFields().then(() => {
+      const values = form.getFieldsValue();
+      switch (task?.jobType) {
+        case TaskTypes.SQL_SPARK:
+        case TaskTypes.SQL_FLINK:
+          const dataSql = {
+            ...values,
+            jobId: pane.id,
+            jobType: task?.jobType,
+            version,
+          };
+          saveSqlSpark({ jobId: pane.id }, dataSql)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        case TaskTypes.SPARK_JAR:
+          const dataSparkJar = {
+            jobId: pane.id,
+            jobType: TaskTypes.SPARK_JAR,
+            resourceHdfsPath: values.resourceHdfsPath,
+            appArguments: values.appArguments?.map((_: any) => ({
+              argumentValue: _.argumentValue,
+              argumentRemark: _.argumentRemark,
+            })),
+            mainClass: values.mainClass,
+            version,
+          };
+          saveSpark({ jobId: pane.id }, dataSparkJar)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        case TaskTypes.SPARK_PYTHON:
+          const dataSparkPython = {
+            ...values,
+            jobId: pane.id,
+            jobType: TaskTypes.SPARK_PYTHON,
+            resourceHdfsPath: content.resourceHdfsPath,
+            appArguments: values.appArguments?.map((_: any) => ({
+              argumentValue: _.argumentValue,
+              argumentRemark: _.argumentRemark,
+            })),
+            version,
+          };
+          saveSpark({ jobId: pane.id }, dataSparkPython)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        case TaskTypes.SCRIPT_SHELL:
+          const dataScriptShell = {
+            ...values,
+            jobId: pane.id,
+            jobType: TaskTypes.SCRIPT_SHELL,
+            version,
+          };
+          saveScript({ jobId: pane.id }, dataScriptShell)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        case TaskTypes.SCRIPT_PYTHON:
+          const dataScriptPython = {
+            ...values,
+            jobId: pane.id,
+            jobType: TaskTypes.SCRIPT_SHELL,
+            scriptArguments: values.scriptArguments?.map((_: any) => ({
+              argumentValue: _.argumentValue,
+              argumentRemark: _.argumentRemark,
+            })),
+            version,
+          };
+          saveScript({ jobId: pane.id }, dataScriptPython)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        case TaskTypes.KYLIN:
+          const dataKylin = {
+            jobId: pane.id,
+            jobType: TaskTypes.KYLIN,
+            cubeName: values.cubeName,
+            buildType: values.buildType,
+            startTime: new Date(values.startTime).getTime(),
+            endTime: new Date(values.endTime).getTime(),
+            version,
+          };
+          saveKylin({ jobId: pane.id }, dataKylin)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
+        default:
+          break;
+      }
+    });
   };
 
   // 轮询 pyspark 调试结果
@@ -326,7 +329,6 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       sessionId,
       sessionKind: 'spark',
       statementId,
-      selectSql: getDebugCode(),
       from: pollingFrom.current,
       size: 10,
     })
@@ -347,9 +349,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         } else {
           pollingFrom.current = 0;
           const result = res.data.resultSet;
-          const resultHeader = res.data.resultHeader;
+          const resultHeader = res.data.resultHeader || [];
           setResults((pre) => [...pre, result]);
-          setResultHeader(resultHeader);
+          setResultHeader((pre) => [...pre, resultHeader]);
         }
       })
       .catch((err) => {});
@@ -764,6 +766,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             .then((res) => {
               if (res.success) {
                 message.success('提交成功');
+                refreshTask();
                 setVisibleSubmit(false);
                 return true;
               } else {

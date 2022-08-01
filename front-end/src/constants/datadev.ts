@@ -131,6 +131,16 @@ export const VersionStatusDisplayMap = {
   [VersionStatus.ARCHIVED]: '已归档',
 };
 
+export enum publishListStatusMode {
+  FINISHTASK = 'finishTask', // 已处理
+  WAITINGTASK = 'waitingTask', // 待处理
+}
+
+export const publishListStatus = {
+  [publishListStatusMode.FINISHTASK]:[2,4,9], // 已处理
+  [publishListStatusMode.WAITINGTASK]:[1], // 待处理
+}
+
 export enum EnvRunningState {
   PAUSED = 0,
   NORMAL = 1,

@@ -102,7 +102,8 @@ public class DataSourceApiImpl implements DataSourceApi {
         res.setPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
         res.setDbName(dbName);
         res.setDriverTypeEnum(DriverTypeEnum.ofDataSourceTypeEnum(DataSourceTypeEnum.valueOf(dataSource.getType().name())));
-
+        res.setHost(dbConfigDto.getHost());
+        res.setPort(dbConfigDto.getPort());
         return res;
     }
 

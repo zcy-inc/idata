@@ -2,6 +2,7 @@ import React from 'react';
 import { useModel } from 'umi';
 import { Empty, Tabs } from 'antd';
 import type { FC } from 'react';
+import { IconFont } from '@/components'
 import styles from './index.less';
 
 import { IPane } from '@/models/datadev';
@@ -17,6 +18,24 @@ import TabDev from '../TabDev';
 import TabFun from '../TabFun';
 
 const { TabPane } = Tabs;
+
+
+const paneTitleIcon = (belong: string) => {
+  switch (belong) {
+    case FolderBelong.DESIGNTABLE:
+      return 'icon-xinjianwenjianjia1'
+    case FolderBelong.DAG:
+      return 'icon-xinjianDAG'
+    case FolderBelong.DI:
+      return 'icon-xinjianDI'
+    case FolderBelong.DEVJOB:
+      return 'icon-xinjianzuoye'
+    case FolderBelong.DEVFUN:
+      return 'icon-xinjianhanshu'
+    default:
+      return '';
+  }
+};
 
 const Workbench: FC = ({}) => {
   const { panes, activeKey, onChangeTab, onRemovePane } = useModel('datadev', (ret) => ({
@@ -64,7 +83,7 @@ const Workbench: FC = ({}) => {
           {panes.map((pane) => (
             <TabPane
               className={styles['tab-pane']}
-              tab={<span title={pane.title}>{pane.title}</span>}
+              tab={<span title={pane.title}><IconFont style={{ marginRight: 8 }} type={paneTitleIcon(pane.belong)} />{pane.title}</span>}
               key={pane.key}
               closeIcon={<TabCloseIcon />}
               style={{ paddingBottom: pane.belong === FolderBelong.DEVJOB ? 24 : 88 }} // pane类型为作业时没有下面的操作栏，不需要留出高度

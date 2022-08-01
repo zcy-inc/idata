@@ -5,6 +5,7 @@ import { getTreeParents } from '@/utils/utils';
 
 export interface CascaderSelectProps extends Omit<CascaderProps<any>, 'value' | 'onChange'> {
   value?: React.Key;
+  includeFunFolders?: boolean;
   onChange?: (value?: React.Key) => void;
 }
 

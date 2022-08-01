@@ -260,6 +260,10 @@ public class JobInfoExecuteDetailDto {
         private Integer parallelism; //新版本
         private Map<String, String> destPropMap; //其余属性定义map
 
+        // 这俩个字段目前仅针对 hive -> doris 回流
+        private String srcTablePt; // 回流数据源（hive）的分区目录信息 例如pt=20220801
+        private String destTablePt; //目标数据源（doris）的分区别名，例如p20220801
+
         public BackFlowDetailDto() {
         }
 
@@ -378,6 +382,22 @@ public class JobInfoExecuteDetailDto {
         public void setParallelism(Integer parallelism) {
             this.parallelism = parallelism;
         }
+
+        public String getSrcTablePt() {
+            return srcTablePt;
+        }
+
+        public void setSrcTablePt(String srcTablePt) {
+            this.srcTablePt = srcTablePt;
+        }
+
+        public String getDestTablePt() {
+            return destTablePt;
+        }
+
+        public void setDestTablePt(String destTablePt) {
+            this.destTablePt = destTablePt;
+        }
     }
 
     public static class SqlJobDetailsDto extends JobInfoExecuteDetailDto {
@@ -416,6 +436,8 @@ public class JobInfoExecuteDetailDto {
          * 函数
          */
         private List<JobUdfDto> udfList; // udfs
+
+        private List<ExternalTableDto> externalTableList;
 
         public String getDestTable() {
             return destTable;
@@ -463,6 +485,66 @@ public class JobInfoExecuteDetailDto {
 
         public void setSourceSql(String sourceSql) {
             this.sourceSql = sourceSql;
+        }
+
+        public List<ExternalTableDto> getExternalTableList() {
+            return externalTableList;
+        }
+
+        public void setExternalTableList(List<ExternalTableDto> externalTableList) {
+            this.externalTableList = externalTableList;
+        }
+
+        public static class ExternalTableDto {
+            /**
+             * StarRocks
+             */
+            private String extSrcType;
+            private String extSrcUrl;
+            private String extSrcUsername;
+            private String extSrcPassword;
+
+            private List<String> extSrcTables;
+
+            public String getExtSrcType() {
+                return extSrcType;
+            }
+
+            public void setExtSrcType(String extSrcType) {
+                this.extSrcType = extSrcType;
+            }
+
+            public String getExtSrcUrl() {
+                return extSrcUrl;
+            }
+
+            public void setExtSrcUrl(String extSrcUrl) {
+                this.extSrcUrl = extSrcUrl;
+            }
+
+            public String getExtSrcUsername() {
+                return extSrcUsername;
+            }
+
+            public void setExtSrcUsername(String extSrcUsername) {
+                this.extSrcUsername = extSrcUsername;
+            }
+
+            public String getExtSrcPassword() {
+                return extSrcPassword;
+            }
+
+            public void setExtSrcPassword(String extSrcPassword) {
+                this.extSrcPassword = extSrcPassword;
+            }
+
+            public List<String> getExtSrcTables() {
+                return extSrcTables;
+            }
+
+            public void setExtSrcTables(List<String> extSrcTables) {
+                this.extSrcTables = extSrcTables;
+            }
         }
     }
 
@@ -605,6 +687,18 @@ public class JobInfoExecuteDetailDto {
          * flink版本
          */
         private String flinkVersion;
+        /**
+         * 是否从SavePoint启动
+         */
+        private Boolean startFromSavePoint;
+        /**
+         * flink job id
+         */
+        private String flinkJobId;
+        /**
+         * 目标表
+         */
+        private String destTableName;
 
         public String getJobVersion() {
             return jobVersion;
@@ -652,6 +746,274 @@ public class JobInfoExecuteDetailDto {
 
         public void setFlinkVersion(String flinkVersion) {
             this.flinkVersion = flinkVersion;
+        }
+
+        public Boolean getStartFromSavePoint() {
+            return startFromSavePoint;
+        }
+
+        public void setStartFromSavePoint(Boolean startFromSavePoint) {
+            this.startFromSavePoint = startFromSavePoint;
+        }
+
+        public String getFlinkJobId() {
+            return flinkJobId;
+        }
+
+        public void setFlinkJobId(String flinkJobId) {
+            this.flinkJobId = flinkJobId;
+        }
+
+        public String getDestTableName() {
+            return destTableName;
+        }
+
+        public void setDestTableName(String destTableName) {
+            this.destTableName = destTableName;
+        }
+    }
+
+    public static final class FlinkCDCJobDetailDto extends JobInfoExecuteDetailDto {
+
+        public FlinkCDCJobDetailDto() {
+        }
+
+        public FlinkCDCJobDetailDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        private String srcDbType;
+        private String srcHost;
+        private Integer srcPort;
+        private String srcUsername;
+        private String srcPassword;
+        private String srcDbName;
+
+        /**
+         * pgsql抽数时
+         */
+        private String srcSchema;
+
+        private List<CDCTableConfig> srcTableConfigs;
+
+        private Integer tableNum;
+
+        /**
+         * cdc目标数据源，目前用字符串，后续可以改成和HTool一直的枚举
+         * StarRocks, Kafka, Iceberg
+         */
+        private String destType;
+        private List<HostAndPort> destHostPorts;
+        private String destUsername;
+        private String destPassword;
+
+        private String jobVersion;
+
+        private Boolean published;
+
+        public static final class CDCTableConfig {
+            /**
+             * 可以传正则表达式：table_*，
+             * 或单表名：table_1，
+             * 或分表：table_[0-9]
+             */
+            private String tablePattern;
+            private Map<String, String> tableProp;
+
+            /**
+             * 初始化目标表，会删表重建
+             */
+            private Boolean initDestTable;
+            /**
+             * 从SavePoint启动flink job
+             */
+            private Boolean startFromSavePoint;
+
+            /**
+             * 当initFromSavePoint为true时，flinkJobId不为空则从savePoint启动flink job
+             */
+            private String flinkJobId;
+
+            public String getTablePattern() {
+                return tablePattern;
+            }
+
+            public void setTablePattern(String tablePattern) {
+                this.tablePattern = tablePattern;
+            }
+
+            public Map<String, String> getTableProp() {
+                return tableProp;
+            }
+
+            public void setTableProp(Map<String, String> tableProp) {
+                this.tableProp = tableProp;
+            }
+
+            public Boolean getInitDestTable() {
+                return initDestTable;
+            }
+
+            public void setInitDestTable(Boolean initDestTable) {
+                this.initDestTable = initDestTable;
+            }
+
+            public Boolean getStartFromSavePoint() {
+                return startFromSavePoint;
+            }
+
+            public void setStartFromSavePoint(Boolean startFromSavePoint) {
+                this.startFromSavePoint = startFromSavePoint;
+            }
+
+            public String getFlinkJobId() {
+                return flinkJobId;
+            }
+
+            public void setFlinkJobId(String flinkJobId) {
+                this.flinkJobId = flinkJobId;
+            }
+        }
+
+        public String getSrcDbType() {
+            return srcDbType;
+        }
+
+        public void setSrcDbType(String srcDbType) {
+            this.srcDbType = srcDbType;
+        }
+
+        public String getSrcHost() {
+            return srcHost;
+        }
+
+        public void setSrcHost(String srcHost) {
+            this.srcHost = srcHost;
+        }
+
+        public Integer getSrcPort() {
+            return srcPort;
+        }
+
+        public void setSrcPort(Integer srcPort) {
+            this.srcPort = srcPort;
+        }
+
+        public String getSrcUsername() {
+            return srcUsername;
+        }
+
+        public void setSrcUsername(String srcUsername) {
+            this.srcUsername = srcUsername;
+        }
+
+        public String getSrcPassword() {
+            return srcPassword;
+        }
+
+        public void setSrcPassword(String srcPassword) {
+            this.srcPassword = srcPassword;
+        }
+
+        public String getSrcDbName() {
+            return srcDbName;
+        }
+
+        public void setSrcDbName(String srcDbName) {
+            this.srcDbName = srcDbName;
+        }
+
+        public List<CDCTableConfig> getSrcTableConfigs() {
+            return srcTableConfigs;
+        }
+
+        public void setSrcTableConfigs(List<CDCTableConfig> srcTableConfigs) {
+            this.srcTableConfigs = srcTableConfigs;
+        }
+
+        public String getDestType() {
+            return destType;
+        }
+
+        public void setDestType(String destType) {
+            this.destType = destType;
+        }
+
+        public List<HostAndPort> getDestHostPorts() {
+            return destHostPorts;
+        }
+
+        public void setDestHostPorts(List<HostAndPort> destHostPorts) {
+            this.destHostPorts = destHostPorts;
+        }
+
+        public String getDestUsername() {
+            return destUsername;
+        }
+
+        public void setDestUsername(String destUsername) {
+            this.destUsername = destUsername;
+        }
+
+        public String getDestPassword() {
+            return destPassword;
+        }
+
+        public void setDestPassword(String destPassword) {
+            this.destPassword = destPassword;
+        }
+
+        public String getJobVersion() {
+            return jobVersion;
+        }
+
+        public void setJobVersion(String jobVersion) {
+            this.jobVersion = jobVersion;
+        }
+
+        public String getSrcSchema() {
+            return srcSchema;
+        }
+
+        public void setSrcSchema(String srcSchema) {
+            this.srcSchema = srcSchema;
+        }
+
+        public Integer getTableNum() {
+            return tableNum;
+        }
+
+        public void setTableNum(Integer tableNum) {
+            this.tableNum = tableNum;
+        }
+
+        public Boolean getPublished() {
+            return published;
+        }
+
+        public void setPublished(Boolean published) {
+            this.published = published;
+        }
+    }
+
+    public static class HostAndPort {
+        private String host;
+        private Integer port;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
         }
     }
 

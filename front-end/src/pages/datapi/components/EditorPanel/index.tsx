@@ -15,7 +15,7 @@ export interface EditorPanelProps {
   size: number | string;
   setSize: (size: number) => void;
   results: Record<string, unknown>[][];
-  resultHeader: string [];
+  resultHeader: string [][];
   removeResult?: (index: number) => void;
   maxSize?: number | string;
 }
@@ -101,7 +101,7 @@ export const EditorPanel: FC<EditorPanelProps> = ({
               >
                 <Table
                   className={styles.table}
-                  columns={calcColumns(resultHeader)}
+                  columns={calcColumns(resultHeader[i] || [])}
                   dataSource={result}
                   size="small"
                   pagination={{

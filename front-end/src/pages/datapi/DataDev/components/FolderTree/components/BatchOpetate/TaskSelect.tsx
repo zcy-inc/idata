@@ -7,11 +7,13 @@ import type { Job } from '@/types/datadev';
 import type { TreeNode } from '@/types/datadev';
 import SplitPane from 'react-split-pane';
 import Iconfont from '@/components/IconFont'
+import { getRequestUrl } from '@/utils/utils';
 import showDialog from '@/utils/showDialog';
 import FolderTreeItem from '../FolderTreeItem';
 import { TreeTitle } from '@/components';
 import type { UploadFile } from 'antd/lib/upload/interface';
 import ImportResult from './ImportResult';
+
 export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any, dialog:any}) => {
   const [tree, setTree] = useState<TreeNode []>([]);
   const [jobInfo, setJobInfo] = useState<Job []>([]);
@@ -219,6 +221,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
                   data: res.data || []
                 },
               }, ImportResult).then(() => {
+                done();
                 dialog.handleCancel();
               })
               return;
@@ -298,7 +301,7 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
       <Button icon={<Iconfont type="icon-yidong" />} onClick={onMove}>移动</Button>
       <Button icon={<Iconfont type="icon-fuzhi1" />} onClick={onCopy}>复制</Button>
       <Upload
-        action={`/api/p1/dev/jobs/import?destFolderId=${selectedKeys[0]}`}
+        action={getRequestUrl(`/api/p1/dev/jobs/import?destFolderId=${selectedKeys[0]}`)}
         style={{display: 'inline-block'}}
         showUploadList={false}
         onChange={onImport}

@@ -18,7 +18,9 @@
 package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
+import cn.zhengcaiyun.idata.connector.util.SqlDynamicParamTool;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -106,9 +108,11 @@ public class JobManager {
         String sql = contentSql.getSourceSql();
         checkArgument(StringUtils.isNotBlank(sql), "作业的SQL脚本为空");
 
+        // 替换动态参数，避免影响SQL解析
+        String replacedSql = SqlDynamicParamTool.replaceParam(sql);
         List<String> fromTables;
         try {
-            fromTables = SparkSqlUtil.getFromTables(sql, null);
+            fromTables = SparkSqlUtil.getFromTables(replacedSql, null);
         } catch (Exception ex) {
             return Lists.newArrayList();
         }
@@ -137,6 +141,7 @@ public class JobManager {
         List<Long> derivedDepJobIds = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(outputList)) {
             derivedDepJobIds.addAll(outputList.stream()
+                    .filter(jobOutput -> DataSourceTypeEnum.hive.name().equalsIgnoreCase(jobOutput.getDestDataSourceType()))
                     .map(JobOutput::getJobId)
                     .distinct()
                     .collect(Collectors.toList()));
@@ -150,8 +155,7 @@ public class JobManager {
                     .collect(Collectors.toList());
             derivedDepJobIds.addAll(jobInfoRepo.queryJobInfo(tempDepJobIds)
                     .stream()
-                    .filter(tempJobInfo -> JobTypeEnum.DI_BATCH.getCode().equals(tempJobInfo.getJobType())
-                            || JobTypeEnum.DI_STREAM.getCode().equals(tempJobInfo.getJobType()))
+                    .filter(tempJobInfo -> JobTypeEnum.DI_BATCH.getCode().equals(tempJobInfo.getJobType()))
                     .map(JobInfo::getId)
                     .collect(Collectors.toList()));
         }

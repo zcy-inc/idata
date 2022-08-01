@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 
+import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +162,16 @@ public class DIJobContentRequest extends JobContentBaseDto {
      *   目标库中间件的内置属性
      */
     private List<KeyValuePair<String, String>> destPropertyMap;
+
+    /**
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    private String srcTablePt;
+
+    /**
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    private String destTablePt;
 
     public String getSrcDbName() {
         return srcDbName;
@@ -400,5 +411,21 @@ public class DIJobContentRequest extends JobContentBaseDto {
 
     public void setScriptMergeSql(String scriptMergeSql) {
         this.scriptMergeSql = scriptMergeSql;
+    }
+
+    public String getSrcTablePt() {
+        return srcTablePt;
+    }
+
+    public void setSrcTablePt(String srcTablePt) {
+        this.srcTablePt = srcTablePt;
+    }
+
+    public String getDestTablePt() {
+        return destTablePt;
+    }
+
+    public void setDestTablePt(String destTablePt) {
+        this.destTablePt = destTablePt;
     }
 }

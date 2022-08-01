@@ -113,14 +113,14 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
       <ProForm.Item
         label="依赖的上游作业"
         addonAfter={
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
             <Button onClick={handleManualAdd}>添加</Button>
             <Button onClick={handleAutoAdd} style={{ marginLeft: 8 }}>
               自动推荐
             </Button>
           </div>
         }
-        style={{ width: 400 }}
+        style={{ width: '100%' }}
       >
         <Select
           options={jobOptions}
@@ -128,8 +128,8 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
           filterOption={(input: string, option?: DependenciesValue) =>
             !!(option && option.prevJobName.indexOf(input) >= 0)
           }
+          style={{ width: 400 }}
           fieldNames={{ label: 'prevJobName', value: 'prevJobId' }}
-          style={{ width: 300 }}
           onChange={(_, option) => setSelectDependency(option as DependenciesValue)}
         />
       </ProForm.Item>

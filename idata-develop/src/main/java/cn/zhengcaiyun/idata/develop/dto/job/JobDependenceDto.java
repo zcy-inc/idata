@@ -66,6 +66,10 @@ public class JobDependenceDto extends BaseDto {
      * 上游作业所属dag 名称
      */
     private String prevJobDagName;
+    /**
+     * 上游作业运行状态，0：暂停，1：恢复
+     */
+    private Integer prevJobRunningState;
 
     /**
      * 新添加的依赖
@@ -135,6 +139,14 @@ public class JobDependenceDto extends BaseDto {
 
     public void setPrevJobDagName(String prevJobDagName) {
         this.prevJobDagName = prevJobDagName;
+    }
+
+    public Integer getPrevJobRunningState() {
+        return prevJobRunningState;
+    }
+
+    public void setPrevJobRunningState(Integer prevJobRunningState) {
+        this.prevJobRunningState = prevJobRunningState;
     }
 
     public Boolean getFresh() {

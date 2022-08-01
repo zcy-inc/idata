@@ -16,8 +16,10 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.hutool.core.util.ReUtil;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoNewDTO;
 import cn.zhengcaiyun.idata.develop.dal.model.DevTableInfo;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnDetailsDto;
@@ -26,17 +28,31 @@ import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.CompareInfoDTO;
 import cn.zhengcaiyun.idata.connector.spi.hive.dto.SyncHiveDTO;
 import cn.zhengcaiyun.idata.develop.dto.table.*;
+import cn.zhengcaiyun.idata.develop.facade.ColumnFacade;
 import cn.zhengcaiyun.idata.develop.facade.MetadataFacade;
+import cn.zhengcaiyun.idata.develop.manager.TableScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.portal.model.request.dev.PullHiveInfoRequest;
+import cn.zhengcaiyun.idata.portal.model.response.dev.CompareInfoResponse;
+import cn.zhengcaiyun.idata.portal.model.response.dev.PullHiveResponse;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.nonNull;
 
 /**
  * @author caizhedong
@@ -53,9 +69,16 @@ public class TableInfoController {
     private TableInfoService tableInfoService;
     @Autowired
     private ColumnInfoService columnInfoService;
+    @Autowired
+    private TableScheduleManager tableScheduleManager;
+    @Autowired
+    private UacUserDao uacUserDao;
 
     @Autowired
     private MetadataFacade metadataFacade;
+
+    @Autowired
+    private ColumnFacade columnFacade;
 
     @GetMapping("tableInfo/{tableId}")
     public RestResult<TableInfoDto> findById(@PathVariable("tableId") Long tableId) {
@@ -109,6 +132,18 @@ public class TableInfoController {
     @PostMapping("tableInfo")
     public RestResult<TableInfoDto> addOrUpdateTable(@RequestBody TableInfoDto tableInfoDto,
                                                      HttpServletRequest request) throws IllegalAccessException {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfoDto.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+        long count = tableInfoDto.getColumnInfos().stream()
+                .map(e -> e.getColumnName().trim())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
         TableInfoDto echoTableInfo;
         if (tableInfoDto.getId() != null) {
             echoTableInfo = tableInfoService.edit(tableInfoDto, tokenService.getNickname(request));
@@ -165,6 +200,135 @@ public class TableInfoController {
     public RestResult<CompareInfoDTO> compareHiveInfo(@PathVariable("tableId") Long tableId) {
         return RestResult.success(metadataFacade.compareHive(tableId));
     }
+
+    /**
+     * 比较hive不同的相关信息提示
+     * @param tableInfo
+     * @return
+     */
+    @PostMapping("/pull/hive/info")
+    public RestResult<CompareInfoResponse> pullHiveInfo(@RequestBody TableInfoDto tableInfo) {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfo.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
+
+        CompareInfoResponse response = new CompareInfoResponse();
+        List<CompareInfoResponse.ChangeContentInfo> changeContentInfoList = new ArrayList<>();
+        response.setChangeContentInfoList(changeContentInfoList);
+
+        compareInfoNewDTO.getLessList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore("-");
+            changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
+            changeContentInfo.setChangeDescription("");//字段新增
+            changeContentInfo.setChangeType(1);
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        compareInfoNewDTO.getMoreList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore(e.getColumnName());
+            changeContentInfo.setColumnNameAfter("-");
+            changeContentInfo.setChangeDescription("");//字段删除
+            changeContentInfo.setChangeType(2);
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        compareInfoNewDTO.getDifferentList().forEach(e -> {
+            CompareInfoResponse.ChangeContentInfo changeContentInfo = new CompareInfoResponse.ChangeContentInfo();
+            changeContentInfo.setColumnNameBefore(e.getColumnName());
+            changeContentInfo.setColumnNameAfter(e.getHiveColumnName());
+            changeContentInfo.setChangeType(3);
+
+            StringBuilder stringBuilder = new StringBuilder("");//字段修改
+            if (e.getHiveColumnIndex() != e.getColumnIndex()) {
+                stringBuilder.append("排序变更：" + e.getColumnIndex() + " 改为 " + e.getHiveColumnIndex() + "\n");
+            }
+            if (!StringUtils.equalsIgnoreCase(e.getColumnType(), e.getHiveColumnType())) {
+                if (e.getHiveColumnType() != null) {
+                    stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType().toUpperCase(Locale.ROOT) + "\n");
+                } else {
+                    stringBuilder.append("字段类型：" + e.getColumnType() + " 改为 " + e.getHiveColumnType() + "\n");
+                }
+            }
+            if (!StringUtils.equalsIgnoreCase(e.getColumnComment(), e.getHiveColumnComment())) {
+                stringBuilder.append("字段中文名称：" + e.getColumnComment() + " 改为 " + e.getHiveColumnComment() + "\n");
+            }
+            if (e.isPartition() != e.isHivePartition()) {
+                stringBuilder.append("是否分区字段：" + e.isPartition() + " 改为 " + e.isHivePartition() + "\n");
+            }
+            changeContentInfo.setChangeDescription(stringBuilder.toString());
+
+            changeContentInfoList.add(changeContentInfo);
+        });
+
+        return RestResult.success(response);
+    }
+
+    /**
+     * 拉取hive信息覆盖的列信息
+     * @param tableInfo
+     * @return
+     */
+    @PostMapping("/pull/hive/columns")
+    public RestResult<List<ColumnInfoDto>> pullHive(@RequestBody TableInfoDto tableInfo) {
+        // 数据库字段名正则校验
+        String regex1 = "(^_([a-zA-Z0-9]_?)*$)|(^[a-zA-Z](_?[a-zA-Z0-9])*_?$)";
+        for (ColumnInfoDto columnInfoDto : tableInfo.getColumnInfos()) {
+            checkArgument(ReUtil.isMatch(regex1, columnInfoDto.getColumnName()), "您输入的【英文名称】：" + columnInfoDto.getColumnName() + " 格式不正确；提示：【首位可以是字母以及下划线。首位之后可以是字母，数字以及下划线。下划线后不能接下划线】");
+        }
+
+        long count = tableInfo.getColumnInfos().stream()
+                .map(e -> e.getColumnName())
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet()
+                .stream().filter(e -> e.getValue() > 1).count();
+        checkArgument(count == 0, "存在重复的字段名称");
+
+        String dbName = tableInfo.getTableLabels()
+                .stream()
+                .filter(e -> StringUtils.equalsIgnoreCase(e.getLabelCode(), "dbName:LABEL"))
+                .map(e -> e.getLabelParamValue())
+                .findFirst().get();
+
+        checkArgument(nonNull(dbName), "数据库为空");
+
+        tableInfo.setDbName(dbName);
+
+        CompareInfoNewDTO compareInfoNewDTO = columnFacade.compare(dbName, tableInfo.getTableName(), tableInfo.getColumnInfos());
+        List<ColumnInfoDto> list = columnFacade.overwriteList(tableInfo, compareInfoNewDTO);
+        return RestResult.success(list);
+    }
+
+    // 暂注释避免误同步
+//    @GetMapping("/syncSecurityColumn")
+//    public RestResult syncSecurityColumn(HttpServletRequest request) throws IllegalAccessException {
+//        UacUser user = uacUserDao.selectByPrimaryKey(tokenService.getUserId(request)).orElse(null);
+//        // 暂时控制权限，只允许系统管理员操作
+//        checkArgument(user != null && 2 == user.getSysAdmin(), "无权限同步ODS字段安全等级");
+//        return RestResult.success(tableScheduleManager.syncTableColumnsSecurity());
+//    }
+
 
 
 }

@@ -180,6 +180,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
         }
         dto.setAllocatedVCores(app.getAllocatedVCores());
         dto.setAllocatedMem(app.getAllocatedMB());
+        dto.setTrackingUrl(app.getTrackingUrl());
         return dto;
     }
 

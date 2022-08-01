@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.dag;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
@@ -48,5 +49,7 @@ public interface DAGService {
     Boolean saveDependence(Long id, List<Long> dependenceIds, Operator operator);
 
     List<DAGInfoDto> getDAGInfoList(DAGInfoCondition condition);
+
+    List<Integer> cleanDagExecutionHistory(EnvEnum envEnum);
 
 }

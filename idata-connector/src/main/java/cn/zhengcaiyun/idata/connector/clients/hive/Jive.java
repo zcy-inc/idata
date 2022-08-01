@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
 import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.clients.hive.util.JiveUtil;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -67,7 +68,7 @@ public class Jive extends BinaryJive {
             statement.execute(String.format("alter table `%s`.%s rename to `%s`.%s", dbName, sourceName, dbName, targetName));
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("rename fail!");
+            throw new GeneralException("[hive]：表重命名失败！");
         }
         return exist(dbName, targetName);
     }
@@ -83,7 +84,7 @@ public class Jive extends BinaryJive {
             statement.execute(ddl);
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("create fail!");
+            throw new GeneralException("[hive]：创建表DDL失败!");
         }
         MetadataInfo metadataInfo = JiveUtil.parseMetadataInfo(ddl);
         return exist(metadataInfo.getDbName(), metadataInfo.getTableName());
@@ -106,7 +107,11 @@ public class Jive extends BinaryJive {
             return createSql.toString();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("getCreateTableSql fail!");
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "Table not found")) {
+                throw new GeneralException("[hive]请确认是否存在表：" + dbName + "." + tableName);
+            } else {
+                throw new GeneralException("[hive]：获取创建表DDL 失败!");
+            }
         }
     }
 
@@ -131,7 +136,7 @@ public class Jive extends BinaryJive {
         } catch (SQLException e) {
             e.printStackTrace();
             success = false;
-            throw new GeneralException("addColumns fail!");
+            throw new GeneralException("[hive]：新增列失败!");
         }
         return success;
     }
@@ -155,7 +160,7 @@ public class Jive extends BinaryJive {
             success = true;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("changeColumn fail!");
+            throw new GeneralException("[hive]：修改列失败!");
         }
         return success;
     }
@@ -171,7 +176,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("getTableNameList fail!");
+            throw new GeneralException("[hive]：获取指定库下表数据!");
         }
         return tableList;
     }
@@ -185,7 +190,7 @@ public class Jive extends BinaryJive {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new GeneralException("getDbNameList fail!");
+            throw new GeneralException("[hive]：获取库名失败!");
         }
         return dbList;
     }
@@ -212,6 +217,17 @@ public class Jive extends BinaryJive {
         return JiveUtil.parseMetadataInfo(ddl);
     }
 
+    public static void main(String[] args) {
+        String ddl = "CREATE TABLE stag_tmp.test_employees (  \n" +
+                "    name STRING,  \n" +
+                "    salary FLOAT,  \n" +
+                "    age bigint,\n" +
+                "    sex String\n" +
+                ") PARTITIONED BY (country STRING, state STRING);";
+        JiveUtil.parseMetadataInfo(ddl);
+        System.out.println(JSON.toJSONString(JiveUtil.parseMetadataInfo(ddl)));
+    }
+
     /**
      * 获取普通列（非分区列）的元数据信息
      *
@@ -221,14 +237,55 @@ public class Jive extends BinaryJive {
      */
     public List<ColumnInfoDto> getColumnMetaInfo(String dbName, String tableName) {
         MetadataInfo metadataInfo = getMetadataInfo(dbName, tableName);
-        List<ColumnInfoDto> list = metadataInfo.getColumnList().stream().map(e -> {
+        List<ColumnInfoDto> list = new ArrayList<>();
+        int index = 0;
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getColumnList()) {
             ColumnInfoDto dto = new ColumnInfoDto();
             dto.setColumnType(e.getColumnType());
             dto.setColumnName(e.getColumnName());
             dto.setColumnComment(e.getColumnComment());
-            return dto;
-        }).collect(Collectors.toList());
+            dto.setColumnIndex(index);
+            dto.setPartition(false);
 
+            list.add(dto);
+            index++;
+        }
+        return list;
+    }
+
+    /**
+     * 获取列（包括分区列）的元数据信息
+     *
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    public List<ColumnInfoDto> getColumnMetaInfoIncludePartition(String dbName, String tableName) {
+        MetadataInfo metadataInfo = getMetadataInfo(dbName, tableName);
+        List<ColumnInfoDto> list = new ArrayList<>();
+        int index = 0;
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getColumnList()) {
+            ColumnInfoDto dto = new ColumnInfoDto();
+            dto.setColumnType(e.getColumnType());
+            dto.setColumnName(e.getColumnName());
+            dto.setColumnComment(e.getColumnComment());
+            dto.setColumnIndex(index);
+            dto.setPartition(false);
+
+            list.add(dto);
+            index++;
+        }
+        for (MetadataInfo.ColumnInfo e : metadataInfo.getPartitionColumnList()) {
+            ColumnInfoDto dto = new ColumnInfoDto();
+            dto.setColumnType(e.getColumnType());
+            dto.setColumnName(e.getColumnName());
+            dto.setColumnComment(e.getColumnComment());
+            dto.setColumnIndex(index);
+            dto.setPartition(true);
+
+            list.add(dto);
+            index++;
+        }
         return list;
     }
 

@@ -45,6 +45,8 @@ public interface IDagIntegrator {
 
     List<Integer> cleanHistory(Long dagId, String environment);
 
+    List<Integer> cleanExecutionHistory(String environment);
+
     @Deprecated
     void addDependence(DAGInfo currentDag, List<Long> jobInCurrentDag, List<Long> dependenceDagIds);
 
