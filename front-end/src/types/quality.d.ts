@@ -29,6 +29,8 @@ export interface MonitorRuleItem {
   content?: string;
   tableName: string;
   ruleType: RuleType;
+  rangeStart?: number;
+  rangeEnd?: number;
   alarmLevel: AlarmLevel;
   alarmReceivers: string;
 }

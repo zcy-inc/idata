@@ -46,6 +46,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         await getMonitorRule({id}).then(res => {
           const values = {
             ...res.data,
+            transform: [res.data.rangeStart, null, res.data.rangeEnd],
             alarmReceivers: res.data?.alarmReceivers?.split(',') || []
           }
           form.setFieldsValue(values);
@@ -186,7 +187,6 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         label=" "
       >
         <ProFormText
-          name="rangeStart"
           placeholder="请选择"
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
@@ -196,7 +196,6 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
           placeholder="请选择"
-          name="rangeEnd"
           rules={[{ validator: requiredValidator }]}
           fieldProps={{
             suffix: "%"
@@ -233,7 +232,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number}> =
         name="fixValue"
         placeholder="请输入字段枚举数量"
       />
-    } else if(templateId === 6) {
+    } else if(templateId === 6) { // 范围
       return <ProFormFieldSet
         name="transform"
         label=" "
