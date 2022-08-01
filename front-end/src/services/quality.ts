@@ -316,7 +316,7 @@ export async function getLogs(params: {
  *  开启、停止基线
  */
  export async function getBaselineTables(data: { id: string | number; }) {
-  return request<DefaultResponse & { data: TableItem []} >(`api/dqc/monitorTable/tables/get/${data.id}`, {
+  return request<DefaultResponse & { data: TableItem []} >(`/api/dqc/monitorTable/tables/get/${data.id}`, {
     method: 'GET'
   });
 }
