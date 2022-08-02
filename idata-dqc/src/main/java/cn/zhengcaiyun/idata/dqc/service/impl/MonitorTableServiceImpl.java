@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorHistoryService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
+import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -31,6 +32,10 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 数据质量被监控的表(DqcMonitorTable)表服务实现类
@@ -119,11 +124,10 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         vo.setId(monitorTable.getId());
 
         //基线表新增后需要初始化规则历史数据
-        this.initTableHistory(vo, nickname);
+        ExecutorServiceHelper.submit(()->this.initTableHistory(vo, nickname));
         return Result.successResult(vo);
     }
 
-    @Async
     public void initTableHistory(MonitorTableVO vo, String nickname) {
         if (vo.getBaselineId() == -1) {
             return;
@@ -167,7 +171,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         monitorTable.setEditor(nickname);
         monitorTableDao.update(monitorTable);
 
-        this.initTableHistory(vo, nickname);
+        ExecutorServiceHelper.submit(()->this.initTableHistory(vo, nickname));
         return true;
     }
 

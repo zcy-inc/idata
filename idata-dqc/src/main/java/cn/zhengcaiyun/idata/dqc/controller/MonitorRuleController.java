@@ -10,6 +10,7 @@ import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
+import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -86,7 +87,7 @@ public class MonitorRuleController {
             MonitorBaseline baseline = monitorBaselineService.getByRuleId(id);
             //普通规则或者基线开启
             if (baseline == null || (baseline != null && baseline.getStatus() == 1)) {
-                monitorRuleService.initHistoryByRule(id, OperatorContext.getCurrentOperator().getNickname());
+                ExecutorServiceHelper.submit(() -> monitorRuleService.initHistoryByRule(id, OperatorContext.getCurrentOperator().getNickname()));
             }
         }
         return Result.successResult();
@@ -95,7 +96,7 @@ public class MonitorRuleController {
     @RequestMapping("/tryRun/{baselineId}/{id}")
     public Result<Boolean> add(@PathVariable Long id, @PathVariable Long baselineId) {
         String nickname = OperatorContext.getCurrentOperator().getNickname();
-        monitorRuleService.tryRun(id, baselineId, nickname);
+        ExecutorServiceHelper.submit(() -> monitorRuleService.tryRun(id, baselineId, nickname));
         return Result.successResult();
     }
 

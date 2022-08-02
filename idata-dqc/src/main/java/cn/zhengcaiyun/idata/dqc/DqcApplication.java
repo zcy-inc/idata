@@ -19,7 +19,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableDubboConfiguration
 @EnableApolloConfig(value = {"application", "dev.common"})
-@EnableAsync
 public class DqcApplication {
     private static final Logger log = LoggerFactory.getLogger(DqcApplication.class);
 

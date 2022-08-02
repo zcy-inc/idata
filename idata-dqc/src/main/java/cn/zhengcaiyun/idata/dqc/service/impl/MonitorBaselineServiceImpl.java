@@ -12,6 +12,7 @@ import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
+import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -112,11 +113,10 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
         this.update(monitorBaselineVO);
 
         //开启基线初始化规则历史数据
-        this.initHistory(id,status);
+        ExecutorServiceHelper.submit(() -> this.initHistory(id, status));
         return true;
     }
 
-    @Async
     public void initHistory(Long id, Integer status) {
         if (status == 0) {
             return;
@@ -124,7 +124,7 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         List<MonitorRuleVO> ruleList = monitorRuleService.getByBaselineId(id, status);
         ruleList.parallelStream().forEach(rule -> {
-            monitorRuleService.initHistoryByRule(rule.getId(), nickname);
+            ExecutorServiceHelper.submit(()->monitorRuleService.initHistoryByRule(rule.getId(), nickname));
         });
     }
 

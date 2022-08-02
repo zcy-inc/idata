@@ -268,7 +268,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         return true;
     }
 
-    @Async
     public void initHistoryByRule(Long id, String nickname) {
         MonitorRule rule = monitorRuleDao.getById(id);
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
@@ -444,7 +443,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
      *
      * @param jobId
      */
-    @Async
     public void analyse(Long jobId) {
         JobOutputVO jobOutputVO = jobOutputDao.getById(jobId);
         String tableName = "";
@@ -703,7 +701,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         }
     }
 
-    @Async
     @Override
     public void tryRun(Long id, Long baselineId, String nickname) {
         MonitorRule rule = monitorRuleDao.getById(id);
