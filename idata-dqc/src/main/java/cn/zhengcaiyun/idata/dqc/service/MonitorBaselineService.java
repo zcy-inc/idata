@@ -15,11 +15,15 @@ public interface MonitorBaselineService {
 
     MonitorBaselineVO getById(Long id);
 
+    MonitorBaseline getByRuleId(Long ruleId);
+
     PageResult<MonitorBaselineVO> getByPage(MonitorBaselineQuery query);
 
     MonitorBaselineVO insert(MonitorBaselineVO monitorBaseline);
 
     boolean update(MonitorBaselineVO monitorBaseline);
+
+    boolean setStatus(Long id, Integer status);
 
     boolean delById(Long id);
 

@@ -70,6 +70,11 @@
         where id = #{id}
     </update>
 
+    <select id="getByRuleId" resultMap="MonitorBaselineMap">
+        select id,status from dqc_monitor_baseline
+        where id in(select baseline_id from dqc_monitor_rule where id = #{ruleId})
+    </select>
+
 
 </mapper>
 

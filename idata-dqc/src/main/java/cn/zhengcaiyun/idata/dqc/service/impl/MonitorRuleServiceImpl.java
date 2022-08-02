@@ -269,7 +269,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
     }
 
     @Async
-    public void initHistory(Long id, String nickname) {
+    public void initHistoryByRule(Long id, String nickname) {
         MonitorRule rule = monitorRuleDao.getById(id);
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
 

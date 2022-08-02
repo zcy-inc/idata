@@ -3,10 +3,12 @@ package cn.zhengcaiyun.idata.dqc.controller;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
+import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,9 @@ import java.util.List;
 public class MonitorRuleController {
     @Autowired
     private MonitorRuleService monitorRuleService;
+
+    @Autowired
+    private MonitorBaselineService monitorBaselineService;
 
     @RequestMapping("/add")
     public Result<MonitorRuleVO> add(@RequestBody MonitorRuleVO monitorRule) {
@@ -78,7 +83,11 @@ public class MonitorRuleController {
         monitorRuleService.setStatus(id, status, nickname);
         //开启告警规则后初始化历史数据
         if (status == 1) {
-            monitorRuleService.initHistory(id, OperatorContext.getCurrentOperator().getNickname());
+            MonitorBaseline baseline = monitorBaselineService.getByRuleId(id);
+            //普通规则或者基线开启
+            if (baseline == null || (baseline != null && baseline.getStatus() == 1)) {
+                monitorRuleService.initHistoryByRule(id, OperatorContext.getCurrentOperator().getNickname());
+            }
         }
         return Result.successResult();
     }

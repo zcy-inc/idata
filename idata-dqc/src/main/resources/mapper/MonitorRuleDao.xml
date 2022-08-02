@@ -194,7 +194,7 @@
     select `id`, `baseline_id` baselineId, `table_name` tableName, `field_name` fieldName, `name`, `rule_type` ruleType,
            `template_id` templateId, `monitor_obj` monitorObj, `alarm_level` alarmLevel, `alarm_receivers` alarmReceivers,
            `check_type` checkType, `compare_type` compareType, `content`, `output_type` outputType, `fix_value` fixValue,
-           `range_start` rangeStart, `range_end` rangeEnd, `status`
+           `range_start` rangeStart, `range_end` rangeEnd, `status`,version
     from dqc_monitor_rule
     where del=0  and baseline_id=#{baselineId}  and status=#{status}
   </select>

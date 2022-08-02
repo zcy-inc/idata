@@ -13,6 +13,7 @@ import cn.zhengcaiyun.idata.dqc.model.query.MonitorBaselineQuery;
  */
 public interface MonitorBaselineDao {
     MonitorBaseline getById(Long id);
+    MonitorBaseline getByRuleId(@Param("ruleId") Long ruleId);
 
     List<MonitorBaseline> getByPage(MonitorBaselineQuery query);
 

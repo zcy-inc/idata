@@ -7,11 +7,13 @@ import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorBaselineQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTableVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,11 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
     @Override
     public MonitorBaselineVO getById(Long id) {
         return Converter.MONITOR_BASELINE_CONVERTER.toVo(monitorBaselineDao.getById(id));
+    }
+
+    @Override
+    public MonitorBaseline getByRuleId(Long ruleId) {
+        return monitorBaselineDao.getByRuleId(ruleId);
     }
 
     @Override
@@ -95,6 +102,30 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
 
         monitorBaselineDao.update(baseline);
         return true;
+    }
+
+    @Override
+    public boolean setStatus(Long id, Integer status) {
+        MonitorBaselineVO monitorBaselineVO = new MonitorBaselineVO();
+        monitorBaselineVO.setStatus(status);
+        monitorBaselineVO.setId(id);
+        this.update(monitorBaselineVO);
+
+        //开启基线初始化规则历史数据
+        this.initHistory(id,status);
+        return true;
+    }
+
+    @Async
+    public void initHistory(Long id, Integer status) {
+        if (status == 0) {
+            return;
+        }
+        String nickname = OperatorContext.getCurrentOperator().getNickname();
+        List<MonitorRuleVO> ruleList = monitorRuleService.getByBaselineId(id, status);
+        ruleList.parallelStream().forEach(rule -> {
+            monitorRuleService.initHistoryByRule(rule.getId(), nickname);
+        });
     }
 
     @Override

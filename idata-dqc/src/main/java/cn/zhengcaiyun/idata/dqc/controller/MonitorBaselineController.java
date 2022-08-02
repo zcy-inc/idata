@@ -58,11 +58,8 @@ public class MonitorBaselineController {
     }
 
     @RequestMapping("setStatus/{id}/{status}")
-    public Result<Boolean> delById(@PathVariable Long id,@PathVariable Integer status) {
-        MonitorBaselineVO monitorBaselineVO = new MonitorBaselineVO();
-        monitorBaselineVO.setStatus(status);
-        monitorBaselineVO.setId(id);
-        return Result.successResult(monitorBaselineService.update(monitorBaselineVO));
+    public Result<Boolean> setStatus(@PathVariable Long id, @PathVariable Integer status) {
+        return Result.successResult(monitorBaselineService.setStatus(id, status));
     }
 
 }

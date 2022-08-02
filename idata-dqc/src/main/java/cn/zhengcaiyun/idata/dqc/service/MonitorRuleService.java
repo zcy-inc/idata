@@ -44,7 +44,7 @@ public interface MonitorRuleService {
 
     MonitorHistoryVO getRuleQueryCount(MonitorRuleVO rule);
 
-    void initHistory(Long id, String nickname);
+    void initHistoryByRule(Long id, String nickname);
 
     List<MonitorRuleVO> getScheduleRuleList(List<Long> templateIdList, Integer startIndex);
 

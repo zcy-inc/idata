@@ -119,12 +119,12 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         vo.setId(monitorTable.getId());
 
         //基线表新增后需要初始化规则历史数据
-        this.initHistory(vo, nickname);
+        this.initTableHistory(vo, nickname);
         return Result.successResult(vo);
     }
 
     @Async
-    public void initHistory(MonitorTableVO vo, String nickname) {
+    public void initTableHistory(MonitorTableVO vo, String nickname) {
         if (vo.getBaselineId() == -1) {
             return;
         }
@@ -167,7 +167,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         monitorTable.setEditor(nickname);
         monitorTableDao.update(monitorTable);
 
-        this.initHistory(vo, nickname);
+        this.initTableHistory(vo, nickname);
         return true;
     }
 
