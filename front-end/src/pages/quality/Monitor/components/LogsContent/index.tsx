@@ -30,29 +30,37 @@ const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
     return `监控[告警], 告警等级[${alarmLevelList.find(alarm => alarm.value === item.alarmLevel)?.label || '未知'}]`
   }
 
-  const getResult = (log: LogItem) => {
+  // 拼接规则内容模板
+  const getRuleContent = (log: LogItem) => {
     if(!log.compareType && log.rangeStart) {
-      return `${log.rangeStart}-${log.rangeEnd}`;
+      return `规则内容[${log.rangeStart}-${log.rangeEnd}]`;
     } else if(log.compareType) {
-      if(log.rangeStart) {
-        return log.compareType + log.fixValue;
+      log.compareType === 'up' ? '上浮' : log.compareType === 'down' ? '下降' : log.compareType;
+      log.fixValue = log.fixValue || '';
+      if(!log.rangeStart) {
+        return `规则内容[${log.compareType + log.fixValue}]`;
       } else {
-        return `${log.fixValue || ''}${log.compareType}${log.rangeStart ? `${log.rangeStart}%-${log.rangeEnd}%` : ''}`
+        return `规则内容[${log.fixValue}${log.compareType}${log.rangeStart ? `${log.rangeStart}%-${log.rangeEnd}%` : ''}]`;
       }
     } else {
       return '';
     }
-    // if(log.ruleType === "system" && log.ruleName==='表产出时间') {
-    //   return log.content;
-    // } else {
-    //   return log.fixValue || `${log.rangeStart}-${log.rangeEnd}`;
-    // }
+  }
+
+  // 拼接运行结果
+  const getRuleResult = (log: LogItem) => {
+    log.dataValue = log.dataValue || '';
+    if(log.compareType === 'up' ||log.compareType === 'down') {
+      return log.dataValue ? log.dataValue + '%' : log.dataValue
+    }
+    return log.dataValue;
+
   }
 
   return (
    <Spin spinning={loading}>
     {contents?.length ? contents.map((item, index) => <div style={{marginBottom: 10}} key={index}>
-        {`[${moment(item.createTime).format('YYYY-MM-DD HH:mm:ss')}] [${item.tableName}]，监控规则[${item.ruleName}]，规则内容[${getResult(item)}]，监控结果[${item.dataValue}]，${getAlarmLevel(item)}。`}
+        {`[${moment(item.createTime).format('YYYY-MM-DD HH:mm:ss')}] [${item.tableName}]，监控规则[${item.ruleName}]，${getRuleContent(item)}，监控结果[${getRuleResult(item)}]，${getAlarmLevel(item)}。`}
       </div>) : <Empty description="暂无相关日志" />}
       {}
    </Spin>
