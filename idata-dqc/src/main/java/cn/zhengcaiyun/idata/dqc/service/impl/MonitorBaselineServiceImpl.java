@@ -77,7 +77,7 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
     @Override
     public MonitorBaselineVO insert(MonitorBaselineVO vo) {
         MonitorBaseline baseline = Converter.MONITOR_BASELINE_CONVERTER.toDto(vo);
-        baseline.setStatus(1);
+        baseline.setStatus(0);
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         baseline.setCreator(nickname);
         baseline.setEditor(nickname);

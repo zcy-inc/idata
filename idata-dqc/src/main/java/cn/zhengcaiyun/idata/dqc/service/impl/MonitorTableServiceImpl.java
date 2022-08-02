@@ -150,7 +150,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
                     monitorHistoryDao.insert(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
                 }
             } catch (BizException e) {
-                monitorRuleService.setStatus(vo.getId(), 0,nickname);
+                monitorRuleService.setStatus(vo.getId(), 0, nickname);
 
                 //sql报错则将规则关闭
                 String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql[%s]", rule.getName(), historyVO.getSql());
@@ -166,6 +166,8 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         monitorTable.setEditor(nickname);
         monitorTableDao.update(monitorTable);
+
+        this.initHistory(vo, nickname);
         return true;
     }
 

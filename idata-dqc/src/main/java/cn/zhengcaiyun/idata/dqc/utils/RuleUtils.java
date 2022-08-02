@@ -42,7 +42,13 @@ public class RuleUtils {
         if(StringUtils.isEmpty(sql)){
             return sql;
         }
-        sql = sql.replaceAll("\\$\\{tableName\\}",tableName).replaceAll("\\$\\{fieldName\\}",fieldName);
+        if(StringUtils.isNotEmpty(tableName)){
+            sql = sql.replaceAll("\\$\\{tableName\\}",tableName);
+        }
+        if(StringUtils.isNotEmpty(fieldName)){
+            sql = sql.replaceAll("\\$\\{fieldName\\}",fieldName);
+        }
+
         sql = ParameterUtils.dateTemplateParse(sql, date);
 
         return sql;
@@ -89,9 +95,9 @@ public class RuleUtils {
 
     public static String[] getAlarmTypes(int alarmLevel) {
         if (alarmLevel == 3) {
-            return new String[]{"dingding", "meaasge", "phone"};
+            return new String[]{"dingding", "message", "phone"};
         } else if (alarmLevel == 2) {
-            return new String[]{"dingding", "meaasge"};
+            return new String[]{"dingding", "message"};
         } else {
             return new String[]{"dingding"};
         }

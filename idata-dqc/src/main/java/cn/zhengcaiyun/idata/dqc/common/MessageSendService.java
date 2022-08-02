@@ -123,7 +123,7 @@ public class MessageSendService {
 
             cn.gov.zcy.common.api.Response<VoiceResponse> response = communicationService.sendVoice(new VoiceRequest("idata_dqc", params, user.getMobile()));
             if (!response.isSuccess()) {
-                logger.error(String.format("发送电话语音消息失败：用户{%s},消息{%s},错误原因{%s}", user.getNickname(), message,
+                logger.error(String.format("发送电话语音消息失败：用户[%s],消息[%s],错误原因[%s]", user.getNickname(), message,
                         StringUtils.isEmpty(response.getMessage()) ? response.getCode() : response.getMessage()));
             }
         }
@@ -159,7 +159,7 @@ public class MessageSendService {
 
             cn.gov.zcy.common.api.Response<SmsResponse> response = communicationService.sendSms(new SmsRequest("idata_dqc", params, user.getMobile()));
             if (!response.isSuccess()) {
-                logger.error(String.format("发送短信消息失败：用户{%s},消息{%s},错误原因{%s}", user.getNickname(),
+                logger.error(String.format("发送短信消息失败：用户[%s],消息[%s],错误原因[%s]", user.getNickname(),message,
                         StringUtils.isEmpty(response.getMessage()) ? response.getCode() : response.getMessage()));
             }
         }

@@ -88,16 +88,19 @@ public class RuleScheduler {
 
                 String[] arr = rule.getTableName().split("\\.");
                 HiveTable hiveTable = tableService.getTableInfo(arr[0], arr[1], partition);
-                String tableAccessDay = DateUtils.format(new Date(hiveTable.getModifyTime()), "yyyy-MM-dd");
+                boolean isAlarm = false;
+                if (hiveTable == null) {
+                    isAlarm = true;
+                } else {
+                    String tableAccessDay = DateUtils.format(new Date(hiveTable.getModifyTime()), "yyyy-MM-dd");
+                    isAlarm = !curDay.equals(tableAccessDay);
+                }
 
                 //默认数据每天更新一次
-                Integer alarm = 0;
-                if (!curDay.equals(tableAccessDay)) {
-                    alarm = 1;
-
+                if (isAlarm) {
                     String[] nicknames = rule.getAlarmReceivers().split(",");
                     String message = String.format("根据你在数据质量平台上配置的规则[%s]，监测到表[%s]的数据产出时间已超过设置时间%s",
-                            rule.getName(), rule.getContent());
+                            rule.getName(), rule.getTableName(), rule.getContent());
 
                     messageSendService.send(RuleUtils.getAlarmTypes(rule.getAlarmLevel()), nicknames, message);
                 }
@@ -110,16 +113,13 @@ public class RuleScheduler {
                 monitorHistory.setRuleName(rule.getName());
                 monitorHistory.setRuleType(rule.getRuleType());
                 monitorHistory.setMonitorObj(rule.getMonitorObj());
-//                monitorHistory.setDataValue();
-//                monitorHistory.setSql();
-//                monitorHistory.setRuleValue();
                 monitorHistory.setVersion(rule.getVersion());
                 monitorHistory.setCreator("系统管理员");
                 monitorHistory.setEditor("系统管理员");
                 monitorHistory.setAlarmLevel(rule.getAlarmLevel());
                 monitorHistory.setAlarmReceivers(rule.getAlarmReceivers());
                 monitorHistory.setContent(rule.getContent());
-                monitorHistory.setAlarm(alarm);
+                monitorHistory.setAlarm(isAlarm ? 1 : 0);
 
                 monitorHistoryService.insert(monitorHistory);
             }

@@ -17,6 +17,8 @@ public interface MonitorRuleDao {
 
     List<MonitorRuleVO> getByPage(@Param("query") MonitorRuleQuery query);
 
+    List<MonitorRuleVO> getByBaselineId(@Param("baselineId") Long baselineId, @Param("status") Integer status) ;
+
     Integer getCount(@Param("query") MonitorRuleQuery query);
 
     @MapKey("tableName")

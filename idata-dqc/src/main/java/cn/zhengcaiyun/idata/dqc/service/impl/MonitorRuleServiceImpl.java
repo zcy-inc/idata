@@ -211,11 +211,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
     @Override
     public List<MonitorRuleVO> getByBaselineId(Long baselineId, Integer status) {
-        MonitorRuleQuery query = new MonitorRuleQuery();
-        query.setBaselineId(baselineId);
-        query.setNotPage(true);
-        query.setStatus(status);
-        return monitorRuleDao.getByPage(query);
+        return monitorRuleDao.getByBaselineId(baselineId,status);
     }
 
     @Override
@@ -290,6 +286,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         List<MonitorTable> tableList = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
         int count = 0;
         for (MonitorTable monitorTable : tableList) {
+            vo.setTableName(monitorTable.getTableName());
             vo.setPartitionExpr(monitorTable.getPartitionExpr());
 
             MonitorHistoryVO historyVO = null;
@@ -394,7 +391,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 //                rule.setPartitionCondition(curPartition);
 //            }
 
-            sql = RuleUtils.replaceSql(rule.getContent(), rule.getTableName(), rule.getTableName(), new Date());
+            sql = RuleUtils.replaceSql(rule.getContent(), rule.getTableName(), rule.getFieldName(), new Date());
         }
 
         rule.setSql(sql);
@@ -717,13 +714,14 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
 
-        List<MonitorTable> tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
+        List<MonitorTable>  tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
         if (tableList.size() == 0) {
             messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "该规则未对应任何表，请正确配置后重试");
             return;
         }
         StringBuilder str = new StringBuilder();
         for (MonitorTable monitorTable : tableList) {
+            vo.setTableName(monitorTable.getTableName());
             vo.setPartitionExpr(monitorTable.getPartitionExpr());
             MonitorHistoryVO history = this.getRuleHistory(vo);
             String message = getAlarmMessage(history);
