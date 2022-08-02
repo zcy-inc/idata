@@ -68,6 +68,7 @@ export interface LogItem {
   rangeStart?: string;
   rangeEnd?: string;
   fixValue?: string;
+  compareType?: string;
 }
 
 export interface BaselineItem {
