@@ -151,9 +151,9 @@ public class MonitorTableServiceImpl implements MonitorTableService {
                 }
             } catch (BizException e) {
                 monitorRuleService.setStatus(vo.getId(), 0, nickname);
-
+                String sql = historyVO == null ? "" : "执行sql[" + historyVO.getSql() + "]，";
                 //sql报错则将规则关闭
-                String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql[%s]", rule.getName(), historyVO.getSql());
+                String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，%s错误信息： %s", rule.getName(), sql, e.getMessage());
                 messageSendService.sengDingdingByNickname(nickname, "数据质量规则配置错误", message);
             }
         }
