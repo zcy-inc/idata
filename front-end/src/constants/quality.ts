@@ -16,7 +16,7 @@ export const ruleTypeList = [
 ];
 
 export const categoryList = [
-  {value: 'timely', label: '及时性'},
+  {value: 'timely', label: '时效性'},
   {value: 'accuracy', label: '准确性'},
   {value: 'integrity', label: '完整性'},
 ];
