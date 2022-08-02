@@ -58,7 +58,6 @@ export default [
             path: '/quality/monitor/list',
             component: './quality/Monitor',
             name: '监控管理',
-            // keepAlive: true,
             hideInMenu: true
           },
           {
@@ -74,7 +73,6 @@ export default [
         name: '模版管理',
         featureCode: 'F_MENU_DATA_QUALITY_TEMPLATE',
         component: './quality/Template',
-        // keepAlive: true,
       },
       {
         path: '/quality/baseline',
@@ -86,7 +84,6 @@ export default [
             path: '/quality/baseline/list',
             component: './quality/Baseline',
             name: '基线管理',
-            // keepAlive: true,
             hideInMenu: true
           },
           {
@@ -236,7 +233,6 @@ export default [
         path: '/measure/list',
         name: '指标',
         component: './Measure/List',
-        // keepAlive: true,
         featureCode: 'F_MENU_MEASURE_METRIC',
       },
       {
@@ -254,7 +250,6 @@ export default [
       {
         path: '/measure/modifier',
         name: '修饰词',
-        // keepAlive: true,
         component: './Measure/Modifier',
         featureCode: 'F_MENU_MEASURE_MODIFIER',
       },

@@ -4,6 +4,7 @@ import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
 import { PageContainer } from '@/components';
+import { KeepAlive } from 'umi';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDialog from '@/utils/showDialog';
 import type { BaselineItem } from '@/types/quality';
@@ -163,7 +164,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped(0)}
+          onClick={() => getTasksWrapped()}
         >
           查询
         </Button>
@@ -189,4 +190,6 @@ const Baseline: FC<{history: any}> = ({ history }) => {
   );
 };
 
-export default Baseline;
+export default ({history}: {history: any}) => <KeepAlive>
+  <Baseline history={history} />
+</KeepAlive>;

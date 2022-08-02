@@ -3,6 +3,7 @@ import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { Button, Form, Table, Popconfirm, message } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
+import { KeepAlive } from 'umi';
 import { PageContainer } from '@/components';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDialog from '@/utils/showDialog';
@@ -115,62 +116,64 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   ];
 
   return (
-    <PageContainer>
-      <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
-        <ProFormText
-          name="tableName"
-          label="表名称"
-          placeholder="请输入"
-          fieldProps={{ style: { width: 200 }, size: 'large' }}
-        />
-        <ProFormSelect
-          name="latestAlarmLevel"
-          label="告警等级"
-          placeholder="请选择"
-          fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
-          options={alarmLevelList}
-        />
-        <Button
-          size="large"
-          icon={<ReloadOutlined />}
-          style={{ margin: '0 0 24px 14px' }}
-          onClick={() => {
-            form.resetFields();
-            getTasksWrapped(1);
+      <PageContainer>
+        <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
+          <ProFormText
+            name="tableName"
+            label="表名称"
+            placeholder="请输入"
+            fieldProps={{ style: { width: 200 }, size: 'large' }}
+          />
+          <ProFormSelect
+            name="latestAlarmLevel"
+            label="告警等级"
+            placeholder="请选择"
+            fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
+            options={alarmLevelList}
+          />
+          <Button
+            size="large"
+            icon={<ReloadOutlined />}
+            style={{ margin: '0 0 24px 14px' }}
+            onClick={() => {
+              form.resetFields();
+              getTasksWrapped(1);
+            }}
+          >
+            重置
+          </Button>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SearchOutlined />}
+            style={{ margin: '0 0 24px 16px' }}
+            onClick={() => getTasksWrapped()}
+          >
+            查询
+          </Button>
+        </ProForm>
+        <div>
+          <Button onClick={handleAddMonitor}>新增监控</Button>
+          <Button style={{float: 'right'}} onClick={viewLogs}>监控日志</Button>
+        </div>
+        <Table<MonitorItem>
+          rowKey="id"
+          columns={columns}
+          dataSource={data}
+          scroll={{ x: 'max-content' }}
+          style={{ marginTop: 16 }}
+          loading={loading}
+          pagination={{
+            total,
+            showSizeChanger: false,
+            showTotal: (t) => `共${t}条`,
+            onChange: (page) => {setCurPage(page);console.log(page,123123)},
           }}
-        >
-          重置
-        </Button>
-        <Button
-          type="primary"
-          size="large"
-          icon={<SearchOutlined />}
-          style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped(0)}
-        >
-          查询
-        </Button>
-      </ProForm>
-      <div>
-        <Button onClick={handleAddMonitor}>新增监控</Button>
-        <Button style={{float: 'right'}} onClick={viewLogs}>监控日志</Button>
-      </div>
-      <Table<MonitorItem>
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        scroll={{ x: 'max-content' }}
-        style={{ marginTop: 16 }}
-        loading={loading}
-        pagination={{
-          total,
-          showSizeChanger: false,
-          showTotal: (t) => `共${t}条`,
-          onChange: (page) => setCurPage(page),
-        }}
-      />
-    </PageContainer>
+        />
+      </PageContainer>
   );
 };
 
-export default Monitor;
+export default ({history}: {history: any}) => <KeepAlive>
+   <Monitor history={history} />
+</KeepAlive>;

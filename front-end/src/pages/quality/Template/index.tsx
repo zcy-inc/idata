@@ -3,6 +3,7 @@ import ProForm, { ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { Button, Form, Table, Popconfirm, message, Modal } from 'antd';
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
+import { KeepAlive } from 'umi';
 import { PageContainer } from '@/components';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
@@ -188,7 +189,7 @@ const Template: FC<{history: any}> = ({ history }) => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped(0)}
+          onClick={() => getTasksWrapped()}
         >
           查询
         </Button>
@@ -214,4 +215,6 @@ const Template: FC<{history: any}> = ({ history }) => {
   );
 };
 
-export default Template;
+export default ({history}: {history: any}) => <KeepAlive>
+  <Template history={history} />
+</KeepAlive>;

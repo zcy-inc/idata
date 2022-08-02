@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ProFormSelect, ProFormText, QueryFilter } from '@ant-design/pro-form';
 import { Form, Space, Table, Button, message, Modal } from 'antd';
 import type { FC } from 'react';
+import { KeepAlive } from 'umi';
 import { PageContainer } from '@/components';
 import type { ColumnsType } from 'antd/lib/table/Table';
-import type  { MetricFloderItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
 import { MetricListItem } from '@/types/measure';
@@ -13,7 +13,7 @@ import CreateModifier from './components/CreateModifier';
 
 
 const { confirm } = Modal;
-const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
+const Modifier: FC = () => {
   const [data, setData] = useState<MetricListItem[]>([]);
   const [tables, setTables] = useState([]);
   const [total, setTotal] = useState(0);
@@ -35,7 +35,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
 
   useEffect(() => {
     getTableData(10 * (current - 1));
-  }, [currentNode, current])
+  }, [current])
 
   const getTableData = (offset: number) => {
     const params = form.getFieldsValue();
@@ -177,4 +177,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   );
 };
 
-export default DataSource;
+
+export default () => <KeepAlive>
+  <Modifier />
+</KeepAlive>;
