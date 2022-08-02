@@ -8,7 +8,7 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import showDrawer from '@/utils/showDrawer';
 import AddTemplate from './components/AddTemplate';
 import type { TemplateItem } from '@/types/quality';
-import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTemplate, getUseInfo } from '@/services/quality';
+import { getTemplateList, addTemplate, updateTemplate, removeTemplate, toggleTemplate } from '@/services/quality';
 import { ruleTypeList, categoryList, monitorObjList, statusList } from '@/constants/quality'
 
 import styles from './index.less';
@@ -21,12 +21,12 @@ const Template: FC<{history: any}> = ({ history }) => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const [useInfo, setUserInfo] = useState({nickname: ''})
+  // const [useInfo, setUserInfo] = useState({nickname: ''})
 
   useEffect(() => {
-    getUseInfo().then(res => {
-      setUserInfo(res.data);
-    });
+    // getUseInfo().then(res => {
+    //   setUserInfo(res.data);
+    // });
   }, []);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const Template: FC<{history: any}> = ({ history }) => {
       render: (_) => ruleTypeList.find(item => item.value === _)?.label || '-'
     },
     {
-      title: '纬度',
+      title: '维度',
       key: 'category',
       dataIndex: 'category',
       render: (_) => categoryList.find(item => item.value === _)?.label || '-'
@@ -129,9 +129,6 @@ const Template: FC<{history: any}> = ({ history }) => {
       width: 160,
       fixed: 'right',
       render: (_, row) => {
-        if(useInfo.nickname !== row.creator) {
-          return  '-';
-        }
         return (
           <>
           <Button type="link" onClick={() => toggleTemplte(row)}>
@@ -162,7 +159,7 @@ const Template: FC<{history: any}> = ({ history }) => {
         />
         <ProFormSelect
           name="category"
-          label="纬度"
+          label="维度"
           placeholder="请选择"
           fieldProps={{ style: { width: 200 }, size: 'large', allowClear: true }}
           options={categoryList}

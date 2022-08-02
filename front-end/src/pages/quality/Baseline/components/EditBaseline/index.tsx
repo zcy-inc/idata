@@ -19,7 +19,8 @@ import {
   addMonitor,
   editMonitorInfo,
   deleteMonitor,
-  tryRunMonitorRule
+  tryRunMonitorRule,
+  toggleMonitorRule
 } from '@/services/quality';
 import { alarmLevelList, ruleTypeList, monitorObjList } from '@/constants/quality';
 import AddMonitorRules from '../../../Monitor/components/AddMonitorRules';
@@ -46,7 +47,6 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
-  const [countDown, setCountDown] = useState(0);
 
   useEffect(() => {
     getBaseInfo();
@@ -106,7 +106,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       formProps: {
         id: row?.id,
         baselineId: +params.id,
-        disabled: baseInfo.status === 1
+        disabled: baseInfo.status === 1 || row?.status === 1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -183,7 +183,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     if(row.id === -9999) {
       await addMonitor({tableName: row.tableName, partitionExpr:row.partitionExpr, baselineId: +params.id})
     } else {
-      await editMonitorInfo({ partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
+      await editMonitorInfo({ tableName: row.tableName,partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
     }
     message.success('操作成功');
     getTablesData();
@@ -223,6 +223,19 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     setTableData([...tableData, newRow])
   }
 
+  const handleToggle = (row: MonitorRuleItem) => {
+    const isStop = row.status === 1;
+    Modal.confirm({
+      title: `确认要${isStop ? '停用' : '启用'}规则【${row.name}】吗？`,
+      onOk() {
+        toggleMonitorRule({id: row.id, status: isStop ? 0 : 1}).then(() => {
+          message.success(`${isStop ? '停用' : '启用'}成功`);
+          getRulesWrapped();
+        })
+      }
+    })
+  }
+
   const columns:ColumnsType<MonitorRuleItem>  = [
     { title: '规则名称', key: 'name', dataIndex: 'name' },
     {
@@ -255,6 +268,9 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       fixed: 'right',
       render: (_, row) => (
         <>
+         <Button type="link" onClick={() => handleToggle(row)} disabled={baseInfo.status === 1}>
+            {row.status === 0 ? '启用' : '禁用'}
+          </Button>
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             编辑
           </Button>
