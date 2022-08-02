@@ -665,7 +665,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
                 //数据质量sql查询结果只会是一行一列
                 if (resultSet.size() > 1) {
-                    throw new BizException("Sql查询失败，请检查数据质量sql是否正确");
+                    throw new BizException("Sql查询失败，仅支持一行一列返回结果的数据");
                 }
 
                 if (CollectionUtils.isEmpty(resultSet)) {
@@ -673,7 +673,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 } else {
                     Map<String, Object> resMap = resultSet.get(0);
                     if (resMap.size() != 1) {
-                        throw new BizException("Sql查询失败，请检查数据质量sql是否正确");
+                        throw new BizException("Sql查询失败，仅支持一行一列返回结果的数据");
                     }
 
                     Iterator<Map.Entry<String, Object>> iterator = resMap.entrySet().iterator();
@@ -689,7 +689,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             } else if (LivyOutputStatusEnum.error.equals(sqlResultDto.getOutputStatus())) {
                 String error = sqlResultDto.getResultSet().get(0).get("Error").toString();
                 logger.error("数据质量查询报错：" + error);
-                throw new BizException("Sql查询失败，请检查数据质量sql是否正确:" + error);
+                throw new BizException("Sql查询失败:" + error);
             }
 
 
