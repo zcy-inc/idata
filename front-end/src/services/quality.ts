@@ -75,7 +75,7 @@ export async function getMonitorList(data: {tableName?: string; latestAlarmLevel
 /**
  * 修改监控表信息
  */
- export async function editMonitorInfo(data: {id: string | number;baselineId: number; partitionExpr: string; }) {
+ export async function editMonitorInfo(data: {id: string | number;baselineId: number; partitionExpr: string; tableName: string | undefined;}) {
   return request<DefaultResponse>('/api/dqc/monitorTable/update', {
     method: 'POST',
     data

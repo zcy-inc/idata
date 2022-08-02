@@ -183,7 +183,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     if(row.id === -9999) {
       await addMonitor({tableName: row.tableName, partitionExpr:row.partitionExpr, baselineId: +params.id})
     } else {
-      await editMonitorInfo({ partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
+      await editMonitorInfo({ tableName: row.tableName,partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
     }
     message.success('操作成功');
     getTablesData();
