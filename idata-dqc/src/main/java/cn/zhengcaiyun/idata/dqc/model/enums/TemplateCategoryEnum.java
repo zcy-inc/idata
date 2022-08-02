@@ -3,7 +3,7 @@ package cn.zhengcaiyun.idata.dqc.model.enums;
 public enum TemplateCategoryEnum {
     INTEGRITY("完整性","integrity"),
     ACCURACY("准确性","accuracy"),
-    TIMELY("及时性",  "timely");
+    TIMELY("时效性",  "timely");
     private String desc;
     private String value;
     TemplateCategoryEnum(String desc, String value) {

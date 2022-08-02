@@ -35,7 +35,10 @@
         select
           id, baseline_id, table_name, `partition_expr`
         from dqc_monitor_table
-        where del=0 and table_name = #{tableName} and baseline_id=#{baselineId}
+        where del=0 and baseline_id=#{baselineId}
+        <if test="tableName!=null and tableName!=''">
+            and table_name = #{tableName}
+        </if>
     </select>
 
     <!--查询指定行数据-->

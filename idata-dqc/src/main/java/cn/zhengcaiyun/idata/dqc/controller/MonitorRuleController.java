@@ -41,9 +41,9 @@ public class MonitorRuleController {
             return Result.failureResult("规则启用中，需要停用才能编辑");
         }
 
-        if (!old.getCreator().equals(OperatorContext.getCurrentOperator().getNickname())) {
-            return Result.failureResult("您无权限编辑该规则");
-        }
+//        if (!old.getCreator().equals(OperatorContext.getCurrentOperator().getNickname())) {
+//            return Result.failureResult("您无权限编辑该规则");
+//        }
 
         return monitorRuleService.update(monitorRule);
     }
@@ -61,7 +61,7 @@ public class MonitorRuleController {
         return Result.successResult(monitorRuleService.getById(id));
     }
 
-    @RequestMapping("/del/{id}/")
+    @RequestMapping("/del/{id}")
     public Result<Boolean> delById(@PathVariable Long id) {
         MonitorRuleVO old = monitorRuleService.getById(id);
         if (old.getStatus() == 1) {
@@ -74,7 +74,8 @@ public class MonitorRuleController {
 
     @RequestMapping("/setStatus/{id}/{status}")
     public Result<Boolean> setStatus(@PathVariable Long id, @PathVariable Integer status) {
-        monitorRuleService.setStatus(id, status);
+        String nickname = OperatorContext.getCurrentOperator().getNickname();
+        monitorRuleService.setStatus(id, status, nickname);
         //开启告警规则后初始化历史数据
         if (status == 1) {
             monitorRuleService.initHistory(id, OperatorContext.getCurrentOperator().getNickname());
