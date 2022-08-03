@@ -141,8 +141,11 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public List<String> getOwners(String database, String tableName) {
-        return tableDao.getOwners(database, tableName);
+    public Set<String> getOwners(String database, String tableName) {
+        Set<String> set = new HashSet<>();
+        set.addAll(tableDao.getPwOwners(database, tableName));
+        set.addAll(tableDao.getDwOwners(database, tableName));
+        return set;
     }
 
     @Override

@@ -26,6 +26,6 @@ public interface TableService {
     List<Column> getColumns(String database, String tableName) throws IdataException;
 
     Long getTableCount(String database, String tableName);
-    List<String> getOwners(String database, String tableName);
+    Set<String> getOwners(String database, String tableName);
 
 }

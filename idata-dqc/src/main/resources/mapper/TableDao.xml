@@ -42,10 +42,23 @@
                            where t.table_name=#{tableName} and l.label_code ='dbName:LABEL' and l.label_param_value = #{database})
     </select>
 
-    <select id="getOwners" resultType="java.lang.String">
-        select  distinct label_param_value owner
+    <select id="getDwOwners" resultType="java.lang.String">
+        select nickname from uac_user
+        where id in(
+        select  label_param_value owner
         from dev_label
-        where label_code in('dwOwnerId:LABEL','pwOwnerId:LABEL')
+        where label_code in('dwOwnerId:LABEL')
+          and table_id in (select t.id
+                           from dev_table_info t
+                                    left join dev_label l on t.id = l.table_id
+                           where t.table_name=#{tableName} and l.label_code ='dbName:LABEL' and l.label_param_value = #{database})
+        )
+    </select>
+
+    <select id="getPwOwners" resultType="java.lang.String">
+        select  label_param_value owner
+        from dev_label
+        where label_code in('pwOwnerId:LABEL')
           and table_id in (select t.id
                            from dev_table_info t
                                     left join dev_label l on t.id = l.table_id
