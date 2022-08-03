@@ -52,6 +52,11 @@ public class MonitorBaselineServiceImpl implements MonitorBaselineService {
     }
 
     @Override
+    public List<MonitorBaseline> getByTemplateId(Long templateId, Integer status) {
+        return monitorBaselineDao.getByTemplateId(templateId,status);
+    }
+
+    @Override
     public PageResult<MonitorBaselineVO> getByPage(MonitorBaselineQuery query) {
         int count = monitorBaselineDao.count(query);
         PageResult page = new PageResult();

@@ -3,10 +3,12 @@ package cn.zhengcaiyun.idata.dqc.controller;
 import cn.hutool.core.lang.Assert;
 import cn.zhengcaiyun.idata.dqc.model.common.PageResult;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
+import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTemplateQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
+import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 数据质量模板表(DqcMonitorTemplate)表控制层
@@ -31,6 +34,9 @@ public class MonitorTemplateController {
 
     @Autowired
     private MonitorRuleService monitorRuleService;
+
+    @Autowired
+    private MonitorBaselineService monitorBaselineService;
 
     @RequestMapping("/add")
     public Result<MonitorTemplateVO> add(@RequestBody MonitorTemplateVO vo) {
@@ -87,6 +93,14 @@ public class MonitorTemplateController {
     public Result<Boolean> setStatus(@PathVariable Long id, @PathVariable Integer status) {
         //判断有无规则依赖
         if (status == 0) {
+            List<MonitorBaseline> baselineList = monitorBaselineService.getByTemplateId(id, 1);
+            if (baselineList.size() > 0) {
+                StringBuilder str = new StringBuilder();
+                for(MonitorBaseline monitorBaseline:baselineList){
+                    str.append(monitorBaseline.getName()+",");
+                }
+                return Result.failureResult("该模板有对应的基线为开启状态，请停止后再操作,基线："+str.toString().substring(0,str.length()-1));
+            }
             MonitorRuleQuery query = new MonitorRuleQuery();
             query.setTemplateId(id);
             query.setStatus(1);
@@ -96,7 +110,7 @@ public class MonitorTemplateController {
             }
         }
 
-        return Result.successResult(monitorTemplateService.setStatus(id,status));
+        return Result.successResult(monitorTemplateService.setStatus(id, status));
     }
 
 }

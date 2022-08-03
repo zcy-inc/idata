@@ -5,6 +5,8 @@ import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorBaselineQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorBaselineVO;
 
+import java.util.List;
+
 /**
  * 数据质量基线表(MonitorBaseline)表服务接口
  *
@@ -16,6 +18,8 @@ public interface MonitorBaselineService {
     MonitorBaselineVO getById(Long id);
 
     MonitorBaseline getByRuleId(Long ruleId);
+
+    List<MonitorBaseline> getByTemplateId(Long templateId, Integer status);
 
     PageResult<MonitorBaselineVO> getByPage(MonitorBaselineQuery query);
 

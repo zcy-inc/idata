@@ -8,8 +8,10 @@ import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorRuleQuery;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorHistoryVO;
 import cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
 import cn.zhengcaiyun.idata.dqc.service.MonitorBaselineService;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
+import cn.zhengcaiyun.idata.dqc.service.MonitorTemplateService;
 import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +33,9 @@ public class MonitorRuleController {
 
     @Autowired
     private MonitorBaselineService monitorBaselineService;
+
+    @Autowired
+    private MonitorTemplateService monitorTemplateService;
 
     @RequestMapping("/add")
     public Result<MonitorRuleVO> add(@RequestBody MonitorRuleVO monitorRule) {
@@ -80,6 +85,10 @@ public class MonitorRuleController {
 
     @RequestMapping("/setStatus/{id}/{status}")
     public Result<Boolean> setStatus(@PathVariable Long id, @PathVariable Integer status) {
+        MonitorTemplateVO templateVO = monitorTemplateService.getByRuleId(id);
+        if(templateVO != null && templateVO.getStatus()==0){
+            return Result.failureResult("该规则所选择的模板未开启，请开启后再操作");
+        }
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         monitorRuleService.setStatus(id, status, nickname);
         //开启告警规则后初始化历史数据

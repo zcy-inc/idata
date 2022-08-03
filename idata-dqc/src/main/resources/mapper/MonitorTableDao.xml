@@ -51,7 +51,7 @@
             and baseline_id = #{query.baselineId}
         </if>
         <if test="query.tableName != null and query.tableName != ''">
-            and table_name = #{query.tableName}
+            and table_name like concat('%',#{query.tableName},'%')
         </if>
         <if test="query.latestAlarmLevel != null">
             and latest_alarm_level = #{query.latestAlarmLevel}
@@ -59,7 +59,6 @@
         order by edit_time desc
         limit #{query.startIndex}, #{query.pageSize}
     </select>
-
     <!--统计总行数-->
     <select id="count" resultType="java.lang.Integer" parameterType="cn.zhengcaiyun.idata.dqc.model.query.MonitorTableQuery">
         select count(1)
@@ -69,7 +68,7 @@
             and baseline_id = #{query.baselineId}
         </if>
         <if test="query.tableName != null and query.tableName != ''">
-            and table_name = #{query.tableName}
+            and table_name like concat('%',#{query.tableName},'%')
         </if>
         <if test="query.latestAlarmLevel != null">
             and latest_alarm_level = #{query.latestAlarmLevel}

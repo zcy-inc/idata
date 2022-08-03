@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.dqc.dao;
 
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorBaselineQuery;
@@ -14,6 +15,8 @@ import cn.zhengcaiyun.idata.dqc.model.query.MonitorBaselineQuery;
 public interface MonitorBaselineDao {
     MonitorBaseline getById(Long id);
     MonitorBaseline getByRuleId(@Param("ruleId") Long ruleId);
+
+    List<MonitorBaseline> getByTemplateId(@Param("templateId") Long templateId,@Param("status") Integer status);
 
     List<MonitorBaseline> getByPage(MonitorBaselineQuery query);
 

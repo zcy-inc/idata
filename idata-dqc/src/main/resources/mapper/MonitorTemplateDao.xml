@@ -29,7 +29,8 @@
     <!--查询指定行数据-->
     <select id="getByPage" resultMap="DqcMonitorTemplateMap" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate">
         select
-          id, type, monitor_obj,if(type='system',content,'') content,  status, del, creator, create_time, editor, edit_time, name, category, output_type
+          id, type, monitor_obj,if(type='system',content,'') content,  status, del, creator, create_time, editor,
+          edit_time, name, category, output_type
         from dqc_monitor_template
         where del=0
             <if test="type != null and type != ''">
@@ -50,6 +51,7 @@
             <if test="category != null and category != ''">
                 and category = #{category}
             </if>
+        order by edit_time desc
         limit #{startIndex}, #{pageSize}
     </select>
 
@@ -120,6 +122,11 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="getByRuleId" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO">
+        select id,status from dqc_monitor_template
+        where id in(select template_id from dqc_monitor_rule where id =#{ruleId})
+    </select>
 
 </mapper>
 

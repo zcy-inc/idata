@@ -96,6 +96,11 @@ public class MonitorTemplateServiceImpl implements MonitorTemplateService {
     }
 
     @Override
+    public MonitorTemplateVO getByRuleId(Long ruleId) {
+        return monitorTemplateDao.getByRuleId(ruleId);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public MonitorTemplateVO update(MonitorTemplateVO vo) {
         MonitorTemplate template = Converter.MONITOR_TEMPLATE_CONVERTER.toDto(vo);

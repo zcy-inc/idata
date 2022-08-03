@@ -75,6 +75,11 @@
         where id in(select baseline_id from dqc_monitor_rule where id = #{ruleId})
     </select>
 
+    <select id="getByTemplateId" resultMap="MonitorBaselineMap">
+        select id,status,name from dqc_monitor_baseline
+        where id in(select  baseline_id from dqc_monitor_rule where template_id=#{templateId})
+        and status=#{status}
+    </select>
 
 </mapper>
 

@@ -2,6 +2,7 @@ package cn.zhengcaiyun.idata.dqc.dao;
 
 import cn.zhengcaiyun.idata.dqc.model.entity.MonitorTemplate;
 import cn.zhengcaiyun.idata.dqc.model.query.MonitorTemplateQuery;
+import cn.zhengcaiyun.idata.dqc.model.vo.MonitorTemplateVO;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public interface MonitorTemplateDao {
     int insert(MonitorTemplate dqcMonitorTemplate);
 
     int update(MonitorTemplate dqcMonitorTemplate);
+    MonitorTemplateVO getByRuleId(@Param("ruleId") Long ruleId);
 
 }
 
