@@ -1,5 +1,5 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
-import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet, ProFormTextArea } from '@ant-design/pro-form';
+import ProForm, { ProFormSelect, ProFormText, ProFormRadio, ProFormTimePicker, ProFormFieldSet, ProFormTextArea, ProFormDigit } from '@ant-design/pro-form';
 import { Form, Spin } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
@@ -15,6 +15,20 @@ const requiredValidator = (rule: any, value: any, callback: (arg0?: string) => a
   }
   return callback();
 }
+
+const numberValidator = (rule: any, value: any, callback: (arg0?: string) => any) => {
+  if(!value) {
+    return callback('必填')
+  } else if(isNaN(value)) {
+    return callback('请输入数字')
+  } else if(Number(value) < 0) {
+    return callback('请输入大于0的数字')
+  } else if(value.split('.')[1].length > 2) {
+    return callback('最多只允许保留两位小数')
+  }
+  return callback();
+}
+
 
 // 建立一个清楚的关系
 const resetFieldMap = {
@@ -179,29 +193,29 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
     />
     {checkType === 'fix'&&
       <ProFormText
-        placeholder="请选择"
+        placeholder="请输入"
         disabled={disabled}
         name="fixValue"
         label=" "
-        rules={[{ validator: requiredValidator }]}
+        rules={[{ validator: numberValidator }]}
       />}
     {['up', 'down'].includes(formValues.compareType) && formValues.checkType &&  <ProFormFieldSet
         name="transform"
         label=" "
       >
         <ProFormText
-          placeholder="请选择"
+          placeholder="请输入"
           disabled={disabled}
-          rules={[{ validator: requiredValidator }]}
+          rules={[{ validator: numberValidator }]}
           fieldProps={{
             suffix: "%"
           }}
         />
         <span style={{lineHeight: '34px'}}>~</span>
         <ProFormText
-          placeholder="请选择"
+          placeholder="请输入"
           disabled={disabled}
-          rules={[{ validator: requiredValidator }]}
+          rules={[{ validator: numberValidator }]}
           fieldProps={{
             suffix: "%"
           }}
@@ -221,7 +235,8 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
         disabled={disabled}
         placeholder="请选择表产出时间"
         fieldProps={{
-          format: "HH:mm"
+          format: "HH:mm",
+          style:{width: 200}
         }}
       />
     } else if(templateId === 4) {
@@ -248,13 +263,13 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
         <ProFormText
           disabled={disabled}
           placeholder="请选择"
-          rules={[{ validator: requiredValidator }]}
+          rules={[{ validator: numberValidator }]}
         />
         <span style={{lineHeight: '34px'}}>-</span>
         <ProFormText
           disabled={disabled}
           placeholder="请选择"
-          rules={[{ validator: requiredValidator }]}
+          rules={[{ validator: numberValidator }]}
         />
       </ProFormFieldSet>
     } else if(templateId === 1) { // 表行数

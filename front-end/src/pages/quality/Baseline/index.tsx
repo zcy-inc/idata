@@ -92,6 +92,14 @@ const Baseline: FC<{history: any}> = ({ history }) => {
     }, LogsContent)
   }
 
+  const onSearch = () => {
+    if(curPage !== 1) {
+      setCurPage(1);
+    } else {
+      getTasksWrapped();
+    }
+  }
+
   const columns: ColumnsType<BaselineItem> = [
     { title: '规则名称', key: 'name', dataIndex: 'name' },
     { 
@@ -164,7 +172,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => setCurPage(1)}
+          onClick={onSearch}
         >
           查询
         </Button>
@@ -181,6 +189,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
         loading={loading}
         pagination={{
           total,
+          current: curPage,
           showSizeChanger: false,
           showTotal: (t) => `共${t}条`,
           onChange: (page) => setCurPage(page),

@@ -108,7 +108,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       return editMonitorInfo({
         id: params.id,
         baselineId: -1,
-        partitionExpr: res.partitionExpr
+        partitionExpr: res.partitionExpr,
+        tableName: baseInfo.tableName
       }).then(() => {
         message.success('修改成功！');
         setIsEdit(false);
@@ -258,6 +259,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
             onCancel: async (close)  => {
               if(!close?.triggerCancel) {
                 setBaseInfo(originBaseInfo);
+                close();
                 setTimeout(() => {
                   history.push(location.pathname);
                 }, 0)

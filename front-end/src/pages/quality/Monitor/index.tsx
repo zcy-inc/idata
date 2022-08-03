@@ -66,6 +66,14 @@ const Monitor: FC<{history: any}> = ({ history }) => {
       }
     }, AddMonitor)
   }
+  
+  const onSearch = () => {
+    if(curPage !== 1) {
+      setCurPage(1);
+    } else {
+      getTasksWrapped();
+    }
+  }
 
   const handleDelete = (row: MonitorItem) => {
     deleteMonitor({id: row.id, isBaseline: false}).then(() => {
@@ -147,7 +155,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
             size="large"
             icon={<SearchOutlined />}
             style={{ margin: '0 0 24px 16px' }}
-            onClick={() => setCurPage(1)}
+            onClick={onSearch}
           >
             查询
           </Button>
@@ -165,6 +173,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
           loading={loading}
           pagination={{
             total,
+            current: curPage,
             showSizeChanger: false,
             showTotal: (t) => `共${t}条`,
             onChange: (page) => {setCurPage(page);console.log(page,123123)},

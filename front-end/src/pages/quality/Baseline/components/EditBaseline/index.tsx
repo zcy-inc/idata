@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Prompt } from 'umi';
-import { Button, Form, Table, Input, message, Modal, Popconfirm, Tooltip } from 'antd';
+import { Button, Form, Table, Input, message, Modal, Popconfirm, Tooltip, Row } from 'antd';
 import type { FC } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import type { ColumnsType } from 'antd/lib/table/Table';
@@ -100,12 +100,12 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const handleAddMonitorRule = (row?: MonitorRuleItem) => {
     const isEdit = !!row?.id;
     let operator = "";
-    if(row?.status === 1) {
+    if(baseInfo.status === 1 && row?.status === 1) {
       operator = '查看'
-    } else if(isEdit) {
-      operator = '编辑'
+    } else if(!isEdit) {
+      operator = '新增'
     } else {
-      operator = '新增';
+      operator = '编辑';
     }
     showDrawer(`${operator}基线规则`, {
       drawerProps: {
@@ -114,7 +114,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       formProps: {
         id: row?.id,
         baselineId: +params.id,
-        disabled: baseInfo.status === 1 || row?.status === 1
+        disabled: baseInfo.status === 1 && row?.status === 1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -174,7 +174,15 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
 
   const handleTableSelectChange = (tableName: string, partitioned: boolean, index: any) => {
     setTableModified(true);
-    setTableData([...tableData.slice(0, index), {...tableData[index], partitioned, tableName}, ...tableData.slice(index + 1)]);
+    setTableData([
+      ...tableData.slice(0, index),
+      {
+        ...tableData[index],
+        tableName,
+        partitioned,
+        partitionExpr:partitioned ? tableData[index].partitionExpr: ''
+      },
+      ...tableData.slice(index + 1)]);
   }
 
   const handlePartitionChange = (val: string, index: number) => {
@@ -284,7 +292,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
             {row.status === 0 ? '启用' : '禁用'}
           </Button>
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
-            编辑
+         {(row.status === 1 && baseInfo.status === 1) ? '查看' : '编辑'}
           </Button>
           <Button type="link" onClick={() => tryRun(row)} disabled={baseInfo.status === 1}>
             试跑
@@ -317,12 +325,12 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       </Tooltip></span>,
       key: 'partitionExpr',
       dataIndex: 'partitionExpr',
-      render: (_, row, index) => row.showEdit && row.partitioned ?
+      render: (_, row, index) => row.partitioned ? (row.showEdit ?
         <Input
           value={_}
           placeholder="请输入"
           onChange={e => handlePartitionChange(e.target.value, index)}
-        /> : _
+        /> : _ ) : '-'
     },
     {
       title: '操作',
@@ -383,6 +391,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
               if(!close?.triggerCancel) {
                 setBaseInfo(originBaseInfo);
                 setTableModified(false);
+                close();
                 setTimeout(() => {
                   history.push(location.pathname);
                 }, 0)
