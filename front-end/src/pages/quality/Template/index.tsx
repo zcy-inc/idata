@@ -47,7 +47,15 @@ const Template: FC<{history: any}> = ({ history }) => {
 
   const handleAddTemplate = (row: any = {}) => {
     const isEdit = !!row.id;
-    showDrawer(`${isEdit ? '编辑' : '新建'}默认规则`, {
+    let operator = '';
+    if(row?.status === 1) {
+      operator = '查看'
+    } else if(isEdit) {
+      operator = '编辑'
+    } else {
+      operator = '新增';
+    }
+    showDrawer(`${operator}规则`, {
       formProps: {
         id: row.id,
         disabled: row.status ===1
@@ -179,7 +187,7 @@ const Template: FC<{history: any}> = ({ history }) => {
           style={{ margin: '0 0 24px 14px' }}
           onClick={() => {
             form.resetFields();
-            getTasksWrapped(1);
+            getTasksWrapped();
           }}
         >
           重置
@@ -189,7 +197,7 @@ const Template: FC<{history: any}> = ({ history }) => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped()}
+          onClick={() => setCurPage(1)}
         >
           查询
         </Button>

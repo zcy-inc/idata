@@ -99,7 +99,15 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
 
   const handleAddMonitorRule = (row?: MonitorRuleItem) => {
     const isEdit = !!row?.id;
-    showDrawer(`${isEdit ? '编辑' : '新增'}监控规则`, {
+    let operator = "";
+    if(row?.status === 1) {
+      operator = '查看'
+    } else if(isEdit) {
+      operator = '编辑'
+    } else {
+      operator = '新增';
+    }
+    showDrawer(`${operator}基线规则`, {
       drawerProps: {
         width: 800
       },
@@ -153,7 +161,11 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     })
   }
 
-  const handleDeleteTables = (row: TableItem) => {
+  const handleDeleteTables = (row: TableItem, index: number) => {
+    if(row.id === -9999) {
+      setTableData([...tableData.slice(0,index), ...tableData.slice(index +1)])
+      return;
+    }
     deleteMonitor({id: row.id, isBaseline: true}).then(res => {
       message.success('删除成功！');
       getTablesData();
@@ -326,7 +338,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
           </> :  <Button type="link" onClick={() => showEdit(index, true)} disabled={baseInfo.status === 1}>
             编辑
           </Button>}
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDeleteTables(row)} disabled={baseInfo.status === 1}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDeleteTables(row, index)} disabled={baseInfo.status === 1}>
             <Button danger type="text" disabled={baseInfo.status === 1}>
               删除
             </Button>
@@ -347,7 +359,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
             },
             {
               path: '',
-              breadcrumbName: '基线编辑',
+              breadcrumbName: `基线${baseInfo.status === 1 ? '查看' : '编辑'}`,
             },
           ],
         },

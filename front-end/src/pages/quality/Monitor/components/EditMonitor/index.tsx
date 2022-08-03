@@ -69,7 +69,15 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
 
   const handleAddMonitorRule = (row?: MonitorRuleItem) => {
     const isEdit = !!row?.id;
-    showDrawer(`${isEdit ? '编辑' : '新增'}监控规则`, {
+    let operator = '';
+    if(row?.status === 1) {
+      operator = '查看'
+    } else if(isEdit) {
+      operator = '编辑'
+    } else {
+      operator = '新增';
+    }
+    showDrawer(`${operator}监控规则`, {
       drawerProps: {
         width: 800
       },
