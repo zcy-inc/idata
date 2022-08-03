@@ -154,7 +154,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
           style={{ margin: '0 0 24px 14px' }}
           onClick={() => {
             form.resetFields();
-            getTasksWrapped(1);
+            getTasksWrapped();
           }}
         >
           重置
@@ -164,7 +164,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped()}
+          onClick={() => setCurPage(1)}
         >
           查询
         </Button>
