@@ -289,7 +289,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       render: (_, row) => (
         <>
          <Button type="link" onClick={() => handleToggle(row)} disabled={baseInfo.status === 1}>
-            {row.status === 0 ? '启用' : '禁用'}
+            {row.status === 0 ? '启用' : '停用'}
           </Button>
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
          {(row.status === 1 && baseInfo.status === 1) ? '查看' : '编辑'}

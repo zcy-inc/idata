@@ -23,7 +23,7 @@ const numberValidator = (rule: any, value: any, callback: (arg0?: string) => any
     return callback('请输入数字')
   } else if(Number(value) < 0) {
     return callback('请输入大于0的数字')
-  } else if(value.split('.')[1].length > 2) {
+  } else if(value.split('.')[1]?.length > 2) {
     return callback('最多只允许保留两位小数')
   }
   return callback();
