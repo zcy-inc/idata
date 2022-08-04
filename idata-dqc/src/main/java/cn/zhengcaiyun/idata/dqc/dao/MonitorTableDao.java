@@ -32,6 +32,7 @@ public interface MonitorTableDao {
     int batchInsert(@Param("entities") List<MonitorTable> entities);
 
     int update(MonitorTable monitorTable);
+    int updateFull(MonitorTable monitorTable);
     int updateByTableName(MonitorTable monitorTable);
 
     int delByBaselineId(@Param("baselineId") Long baselineId, @Param("editor") String editor);

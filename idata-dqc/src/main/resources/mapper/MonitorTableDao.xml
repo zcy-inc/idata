@@ -113,6 +113,11 @@
         where id = #{id}
     </update>
 
+    <update id="updateFull" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
+        update dqc_monitor_table set partition_expr = #{partitionExpr},  editor = #{editor},edit_time = now()
+        where id = #{id}
+    </update>
+
     <update id="updateByTableName" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
         update dqc_monitor_table set
             <if test="latestAlarmLevel != null">

@@ -7,8 +7,11 @@ import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dqc")
@@ -16,10 +19,27 @@ public class DqcController {
     @Autowired
     private MonitorRuleService monitorRuleService;
 
-    @RequestMapping("/analyse/{jobId}")
-    public Result dqc(@PathVariable Long jobId) {
+    @Autowired
+    private MessageSendService messageSendService;
+
+    @RequestMapping("/analyse")
+    public Result dqc(@RequestBody Map<String,Object> param) {
+        if(param.get("jobId") == null ){
+            return Result.failureResult("jobId不能为空");
+        }
+        if(param.get("jobEndStatus") == null ){
+            return Result.failureResult("jobEndStatus不能为空");
+        }
+
+        Long jobId = (Long) param.get("jobId");
+        String jobEndStatus = param.get("jobEndStatus").toString();
+
+        System.out.println();
         ExecutorServiceHelper.submit(() -> monitorRuleService.analyse(jobId));
         return Result.successResult();
     }
+
+
+
 
 }

@@ -165,4 +165,34 @@ public class MessageSendService {
         }
     }
 
+//    public static String qryDutyPhone() {
+//        CloseableHttpClient httpclient = HttpClients.createDefault();
+//        CloseableHttpResponse response = null;
+//        try {
+//            HttpGet httpGet = new HttpGet(new URIBuilder(dutyPhoneUrl).build());
+//            response = httpclient.execute(httpGet);
+//            String get = EntityUtils.toString(response.getEntity(), Consts.UTF_8);
+//            JSONObject jsonObject = JSON.parseObject(get);
+//            if (!"true".equals(jsonObject.get("success").toString())) {
+//                logger.error("the error msg: {}", jsonObject.get("msg"));
+//                return null;
+//            }
+//            return jsonObject.get("data").toString();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                if (response != null) {
+//                    response.close();
+//                }
+//                if (httpclient != null) {
+//                    httpclient.close();
+//                }
+//            } catch (IOException e) {
+//                logger.error("close error ", e);
+//            }
+//        }
+//        return null;
+//    }
+
 }

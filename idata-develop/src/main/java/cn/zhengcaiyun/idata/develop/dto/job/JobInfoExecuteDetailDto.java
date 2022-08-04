@@ -50,6 +50,8 @@ public class JobInfoExecuteDetailDto {
      */
     private Map<String, String> confProp;
 
+    private boolean openDqc;
+
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
 
@@ -1087,5 +1089,13 @@ public class JobInfoExecuteDetailDto {
 
     public void setConfProp(Map<String, String> confProp) {
         this.confProp = confProp;
+    }
+
+    public boolean isOpenDqc() {
+        return openDqc;
+    }
+
+    public void setOpenDqc(boolean openDqc) {
+        this.openDqc = openDqc;
     }
 }

@@ -169,7 +169,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         MonitorTable monitorTable = Converter.MONITOR_TABLE_CONVERTER.toDto(vo);
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         monitorTable.setEditor(nickname);
-        monitorTableDao.update(monitorTable);
+        monitorTableDao.updateFull(monitorTable);
 
         ExecutorServiceHelper.submit(()->this.initTableHistory(vo, nickname));
         return true;
