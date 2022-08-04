@@ -31,11 +31,16 @@ public class DqcController {
             return Result.failureResult("jobEndStatus不能为空");
         }
 
-        Long jobId = (Long) param.get("jobId");
+        if(param.get("env") == null ){
+            return Result.failureResult("env不能为空");
+        }
+
+        Long jobId = Long.parseLong(param.get("jobId").toString());
         String jobEndStatus = param.get("jobEndStatus").toString();
+        String env = param.get("env").toString();
 
         System.out.println();
-        ExecutorServiceHelper.submit(() -> monitorRuleService.analyse(jobId));
+        ExecutorServiceHelper.submit(() -> monitorRuleService.analyse(jobId,env));
         return Result.successResult();
     }
 

@@ -749,7 +749,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         Integer count1 = monitorRuleDao.getRulesByTable(tableName);
         Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
 
-        return (count1 + count2) > 0 ? true : false;
+        return (count1 + count2) > 0 ;
     }
 
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
