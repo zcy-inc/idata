@@ -108,7 +108,8 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       return editMonitorInfo({
         id: params.id,
         baselineId: -1,
-        partitionExpr: res.partitionExpr
+        partitionExpr: res.partitionExpr,
+        tableName: baseInfo.tableName
       }).then(() => {
         message.success('修改成功！');
         setIsEdit(false);
@@ -198,7 +199,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
       render: (_, row) => (
         <>
           <Button type="link" onClick={() => handleToggle(row)}>
-            {row.status === 0 ? '启用' : '禁用'}
+            {row.status === 0 ? '启用' : '停用'}
           </Button>
           <Button type="link" onClick={() => handleAddMonitorRule(row)}>
             {row.status === 1 ? '查看' : '编辑'}
@@ -258,6 +259,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
             onCancel: async (close)  => {
               if(!close?.triggerCancel) {
                 setBaseInfo(originBaseInfo);
+                close();
                 setTimeout(() => {
                   history.push(location.pathname);
                 }, 0)
