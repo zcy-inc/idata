@@ -50,7 +50,7 @@ public interface MonitorRuleService {
 
     List<MonitorRuleVO> getBaselineScheduleRuleList(List<Long> templateIdList, Integer startIndex);
 
-    void analyse(Long jobId);
+    void analyse(Long jobId,String env);
 
     void tryRun(Long id, Long baselineId, String nickname);
 

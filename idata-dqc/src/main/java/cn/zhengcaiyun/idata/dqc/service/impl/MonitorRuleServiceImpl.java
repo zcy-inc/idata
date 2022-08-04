@@ -443,8 +443,8 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
      *
      * @param jobId
      */
-    public void analyse(Long jobId) {
-        JobOutputVO jobOutputVO = jobOutputDao.getById(jobId);
+    public void analyse(Long jobId,String env) {
+        JobOutputVO jobOutputVO = jobOutputDao.getByJobId(jobId,env);
         String tableName = "";
         if (jobOutputVO != null) {
             tableName = jobOutputVO.getDestTable();
