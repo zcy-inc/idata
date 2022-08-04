@@ -3,10 +3,7 @@
 <mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.MonitorRuleDao">
 
   <select id="getRulesByTable" resultType="java.lang.Integer">
-    select  r.id, r.baseline_id baselineId,r.table_name tableName,r.field_name tableName, r.name, r.rule_type ruleType,
-            r.template_id templateId, r.monitor_obj monitorObj, r.alarm_level alarmLevel, r.alarm_receivers alarmReceivers,
-            r.check_type checkType,  r.compare_type compareType, r.content,r.output_type outputType,r.fix_value fixValue,
-            r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
+    select  count(*)
     from dqc_monitor_rule r
     inner join dqc_monitor_table t on r.table_name=t.table_name
     where r.del=0 and t.del=0 and r.baseline_id=-1 and r.status=1 and r.table_name=#{tableName}
