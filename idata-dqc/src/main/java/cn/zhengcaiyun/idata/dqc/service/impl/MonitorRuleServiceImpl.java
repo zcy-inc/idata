@@ -211,7 +211,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
     @Override
     public List<MonitorRuleVO> getByBaselineId(Long baselineId, Integer status) {
-        return monitorRuleDao.getByBaselineId(baselineId,status);
+        return monitorRuleDao.getByBaselineId(baselineId, status);
     }
 
     @Override
@@ -443,13 +443,13 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
      *
      * @param jobId
      */
-    public void analyse(Long jobId,String env) {
-        JobOutputVO jobOutputVO = jobOutputDao.getByJobId(jobId,env);
+    public void analyse(Long jobId, String env) {
+        JobOutputVO jobOutputVO = jobOutputDao.getByJobId(jobId, env);
         String tableName = "";
         if (jobOutputVO != null) {
             tableName = jobOutputVO.getDestTable();
         } else {
-            JobOutputVO diJobOutput = jobOutputDao.getDIJobTable(jobId);
+            JobOutputVO diJobOutput = jobOutputDao.getDIJobTable(jobId, env);
             if (diJobOutput != null) {
                 tableName = diJobOutput.getDestTable();
             }
@@ -711,7 +711,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
         MonitorRuleVO vo = Converter.MONITOR_RULE_CONVERTER.toVo(rule);
 
-        List<MonitorTable>  tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
+        List<MonitorTable> tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
         if (tableList.size() == 0) {
             messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "该规则未对应任何表，请正确配置后重试");
             return;

@@ -10,9 +10,13 @@
     </select>
 
     <select id="getDIJobTable" resultType="cn.zhengcaiyun.idata.dqc.model.vo.JobOutputVO">
-        select dest_table destTable
+        select if(dest_table=null,src_tables,dest_table) destTable
         from dev_job_content_di
-        where del=0 and src_data_source_type='hive' and job_id = #{job_id}
+        where del=0
+          and (src_data_source_type='hive' or dest_data_source_type='hive')
+          and id in (select job_content_id
+                     from dev_job_publish_record
+                     where job_id=#{jobId}  and environment=#{env} and publish_status=2)
     </select>
 
 </mapper>

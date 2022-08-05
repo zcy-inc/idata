@@ -114,7 +114,7 @@
     </update>
 
     <update id="updateFull" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
-        update dqc_monitor_table set partition_expr = #{partitionExpr},  editor = #{editor},edit_time = now()
+        update dqc_monitor_table set partition_expr = #{partitionExpr},table_name = #{tableName},editor = #{editor},edit_time = now()
         where id = #{id}
     </update>
 
