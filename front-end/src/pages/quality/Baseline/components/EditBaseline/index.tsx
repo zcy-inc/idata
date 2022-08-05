@@ -359,6 +359,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   return (
     <PageContainer
       header={{
+        title: `基线${baseInfo.status === 1 ? '查看' : '编辑'}`,
         breadcrumb: {
           routes: [
             {
