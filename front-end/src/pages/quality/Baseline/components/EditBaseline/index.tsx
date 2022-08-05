@@ -100,7 +100,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const handleAddMonitorRule = (row?: MonitorRuleItem) => {
     const isEdit = !!row?.id;
     let operator = "";
-    if(baseInfo.status === 1 && row?.status === 1) {
+    if(baseInfo.status === 1 || row?.status === 1) {
       operator = '查看'
     } else if(!isEdit) {
       operator = '新增'
@@ -114,7 +114,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       formProps: {
         id: row?.id,
         baselineId: +params.id,
-        disabled: baseInfo.status === 1 && row?.status === 1
+        disabled: baseInfo.status === 1 || row?.status === 1
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((res: any) => {
@@ -292,13 +292,13 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
             {row.status === 0 ? '启用' : '停用'}
           </Button>
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
-         {(row.status === 1 && baseInfo.status === 1) ? '查看' : '编辑'}
+         {(row.status === 1 || baseInfo.status === 1) ? '查看' : '编辑'}
           </Button>
           <Button type="link" onClick={() => tryRun(row)} disabled={baseInfo.status === 1}>
             试跑
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={baseInfo.status === 1}>
-            <Button danger type="text" disabled={baseInfo.status === 1}>
+          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1 || baseInfo.status === 1}>
+            <Button danger type="text" disabled={row.status === 1 || baseInfo.status === 1}>
               删除
             </Button>
           </Popconfirm>

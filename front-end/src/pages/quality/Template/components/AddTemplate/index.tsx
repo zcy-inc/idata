@@ -65,7 +65,7 @@ const AddTemplate: FC<{id?: number;disabled: boolean;}> = ({id, disabled= false}
         label="产出类型"
         disabled={disabled}
         name="outputType"
-        initialValue={2}
+        initialValue={1}
         options={outputTypeList}
       />
     </ProForm>
