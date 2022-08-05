@@ -124,7 +124,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         vo.setId(monitorTable.getId());
 
         //基线表新增后需要初始化规则历史数据
-        ExecutorServiceHelper.submit(()->this.initTableHistory(vo, nickname));
+        ExecutorServiceHelper.submit(() -> this.initTableHistory(vo, nickname));
         return Result.successResult(vo);
     }
 
@@ -171,7 +171,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         monitorTable.setEditor(nickname);
         monitorTableDao.updateFull(monitorTable);
 
-        ExecutorServiceHelper.submit(()->this.initTableHistory(vo, nickname));
+        ExecutorServiceHelper.submit(() -> this.initTableHistory(vo, nickname));
         return true;
     }
 
@@ -192,7 +192,7 @@ public class MonitorTableServiceImpl implements MonitorTableService {
         MonitorRuleQuery query = new MonitorRuleQuery();
         query.setStatus(1);
         query.setTableName(tableVO.getTableName());
-        if (monitorRuleService.getCount(query) > 0) {
+        if (!isBaseline && monitorRuleService.getCount(query) > 0) {
             return Result.failureResult("该表有开启的规则，请停止规则后再删除");
         }
 

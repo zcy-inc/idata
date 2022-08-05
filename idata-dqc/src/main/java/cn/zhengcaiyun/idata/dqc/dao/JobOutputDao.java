@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Param;
 public interface JobOutputDao {
     JobOutputVO getByJobId(@Param("jobId") Long jobId,@Param("env") String env);
 
-    JobOutputVO getDIJobTable(@Param("jobId")Long jobId);
+    JobOutputVO getDIJobTable(@Param("jobId")Long jobId,@Param("env")String env);
 
 }
 
