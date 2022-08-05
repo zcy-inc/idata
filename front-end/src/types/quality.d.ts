@@ -1,3 +1,5 @@
+import { Moment } from 'moment';
+
 export interface MonitorItem {
   id: number;
   tableName: string;
@@ -26,12 +28,13 @@ export interface MonitorRuleItem {
   monitorObj: MonitorObj;
   templateId: number;
   status: Status;
-  content?: string;
+  content?: string | Moment;
   tableName: string;
   ruleType: RuleType;
   rangeStart?: number;
   rangeEnd?: number;
   alarmLevel: AlarmLevel;
+  outputType?: number;
   alarmReceivers: string;
 }
 

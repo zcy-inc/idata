@@ -17,6 +17,7 @@ const requiredValidator = (rule: any, value: any, callback: (arg0?: string) => a
 }
 
 const numberValidator = (rule: any, value: any, callback: (arg0?: string) => any) => {
+  value = value + '';
   if(!value) {
     return callback('必填')
   } else if(isNaN(value)) {
@@ -30,6 +31,8 @@ const numberValidator = (rule: any, value: any, callback: (arg0?: string) => any
 }
 
 const rangeValidator = (value: any, callback: (arg0?: string) => any, isStart: boolean, compreValue: string) => {
+  value = value + '';
+  compreValue = compreValue + '';
   if(!value) {
     return callback('必填')
   } else if(isNaN(value)) {
@@ -38,12 +41,11 @@ const rangeValidator = (value: any, callback: (arg0?: string) => any, isStart: b
     return callback('请输入大于0的数字')
   } else if(value.split('.')[1]?.length > 2) {
     return callback('最多只允许保留两位小数')
-  } else if((isStart && value > compreValue && compreValue) || (!isStart || value < compreValue && compreValue)) {
+  } else if((isStart && (value > compreValue) && compreValue) || (!isStart && (value < compreValue) && compreValue)) {
     return callback('范围起始不能大于范围结束')
   }
   return callback();
 }
-
 
 // 建立一个清楚的关系
 const resetFieldMap = {
@@ -75,7 +77,11 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
         await getMonitorRule({id}).then(res => {
           const values = {
             ...res.data,
-            alarmReceivers: res.data?.alarmReceivers?.split(',') || []
+            alarmReceivers: res.data?.alarmReceivers?.split(',') || [],
+            outputType: res.data.outputType || undefined
+          }
+          if(values.templateId === 2) {
+            values.content = moment(`1999-01-01 ${values.content}`);
           }
           form.setFieldsValue(values);
           return onFormChanges(values);
@@ -259,11 +265,11 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
         name="content"
         placeholder="请输入字段枚举值，用英文逗号隔开"
       />
-    } else if(templateId === 5) {
+    } else if(templateId === 5) { // 字段枚举数量
       return <ProFormText
         label=" "
         disabled={disabled}
-        rules={[{ validator: requiredValidator }]}
+        rules={[{ validator: numberValidator }]}
         name="fixValue"
         placeholder="请输入字段枚举数量"
       />
@@ -273,7 +279,8 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
           <ProFormText
             disabled={disabled}
             placeholder="请选择"
-            rules={[{ validator: numberValidator }]}
+            name="rangeStart"
+            rules={[{ validator: (rule, value, cb) => rangeValidator(value, cb, true, form.getFieldValue('rangeEnd')) }]}
             fieldProps={{
               className: 'inline-form-item'
             }}
@@ -284,7 +291,8 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
           <ProFormText
             disabled={disabled}
             placeholder="请选择"
-            rules={[{ validator: numberValidator }]}
+            name="rangeEnd"
+            rules={[{ validator: (rule, value, cb) => rangeValidator(value, cb, false, form.getFieldValue('rangeStart')) }]}
             fieldProps={{
               className: 'inline-form-item'
             }}

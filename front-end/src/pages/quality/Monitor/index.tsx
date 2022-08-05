@@ -58,6 +58,7 @@ const Monitor: FC<{history: any}> = ({ history }) => {
           }).then((res) => {
             done();
             const {tableName, id} = res.data;
+            getTasksWrapped();
             history.push(`/quality/monitor/edit/${id}/${tableName}`);
           }).finally(() => {
             dialog.hideLoading();
