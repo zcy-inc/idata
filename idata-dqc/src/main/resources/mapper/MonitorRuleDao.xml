@@ -212,9 +212,6 @@
     <if test="query.templateId != null">
       and template_id=#{query.templateId}
     </if>
-    <if test="query.baselineId != null">
-      and baseline_id=#{query.baselineId}
-    </if>
     <if test="query.monitorObj != null">
       and monitor_obj=#{query.monitorObj}
     </if>
@@ -283,7 +280,7 @@
             r.range_start rangeStart, r.range_end rangeEnd,t.partition_expr partitionExpr,r.version
     from dqc_monitor_rule r
     inner join dqc_monitor_table t on r.table_name=t.table_name
-    where r.del=0 and t.del=0 and r.baseline_id=-1 and r.status=1 and r.table_name=#{tableName}
+    where r.del=0 and t.del=0 and r.status=1 and r.baseline_id=-1 and r.table_name=#{tableName}
   </select>
 
   <select id="getBaselineRulesByTableName" resultType="cn.zhengcaiyun.idata.dqc.model.vo.MonitorRuleVO">
@@ -294,7 +291,7 @@
     from dqc_monitor_baseline b
     inner join dqc_monitor_table t on b.id=t.baseline_id
     inner join dqc_monitor_rule r on  b.id=r.baseline_id
-    where b.del=0 and r.del=0 and t.del=0 and b.status=1 and r.baseline_id=1 and r.status=1
+    where b.del=0 and r.del=0 and t.del=0 and b.status=1 and r.status=1 and r.baseline_id=1
       and t.table_name in (select table_name from dqc_monitor_table where table_name=#{tableName} and baseline_id != -1)
   </select>
 </mapper>

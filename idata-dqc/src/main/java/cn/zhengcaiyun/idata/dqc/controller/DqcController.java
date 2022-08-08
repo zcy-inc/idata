@@ -28,6 +28,8 @@ public class DqcController {
 
     @RequestMapping("/analyse")
     public Result dqc(@RequestBody Map<String, Object> param) {
+        logger.info(String.format("数据质量分析接口调用，jobId：%s,env:%s,jobEndStatus:%s", param.get("jobId"), param.get("env"), param.get("jobEndStatus")));
+
         if (param.get("jobId") == null) {
             return Result.failureResult("jobId不能为空");
         }
@@ -43,7 +45,6 @@ public class DqcController {
         String env = param.get("env").toString();
         String status = param.get("jobEndStatus").toString();
 
-        logger.info(String.format("数据质量分析接口调用，jobId：%s,env:%s,jobEndStatus:%s", jobId, env, status));
 
         //作业执行失败直接返回
         if (!"0".equals(status)) {
