@@ -29,6 +29,8 @@ import java.util.Map;
 public class DWLayerCodeMapTool {
     public static Map<String, String> codeMap = Maps.newHashMap();
 
+    public static Map<String, String> shortCodeMap = Maps.newHashMap();
+
     static {
         codeMap.put("ODS", "DW_LAYER_ODS:ENUM_VALUE");
         codeMap.put("ods", "DW_LAYER_ODS:ENUM_VALUE");
@@ -44,9 +46,20 @@ public class DWLayerCodeMapTool {
 
         codeMap.put("ADS", "DW_LAYER_ADS:ENUM_VALUE");
         codeMap.put("ads", "DW_LAYER_ADS:ENUM_VALUE");
+
+        shortCodeMap.put("DW_LAYER_ODS:ENUM_VALUE", "ODS");
+        shortCodeMap.put("DW_LAYER_DWD:ENUM_VALUE", "DWD");
+        shortCodeMap.put("DW_LAYER_DIM:ENUM_VALUE", "DIM");
+        shortCodeMap.put("DW_LAYER_DWS:ENUM_VALUE", "DWS");
+        shortCodeMap.put("DW_LAYER_ADS:ENUM_VALUE", "ADS");
     }
 
     public static String getCodeEnum(String code) {
         return codeMap.get(code);
     }
+
+    public static String getShortCode(String longCode) {
+        return shortCodeMap.get(longCode);
+    }
+
 }

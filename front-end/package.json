@@ -21,7 +21,7 @@
     "precommit": "lint-staged",
     "prettier": "prettier -c --write \"src/**/*\"",
     "start": "umi dev",
-    "start:dev": "cross-env REACT_APP_ENV=dev MOCK=none umi dev",
+    "start:dev": "cross-env REACT_APP_ENV=dev umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",
     "start:no-ui": "cross-env UMI_UI=none umi dev",
     "start:pre": "cross-env REACT_APP_ENV=pre umi dev",
@@ -30,7 +30,8 @@
     "test": "umi test",
     "test:all": "node ./tests/run-tests.js",
     "test:component": "umi test ./src/components",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions"
   },
   "lint-staged": {
     "**/*.less": "stylelint --syntax less",
@@ -55,7 +56,7 @@
     "@umijs/route-utils": "^1.0.33",
     "@zcy-data/idata-utils": "^1.0.11",
     "ahooks": "^2.10.12",
-    "antd": "^4.18.5",
+    "antd": "^4.20.1",
     "classnames": "^2.2.6",
     "dhtmlx-gantt": "^7.1.8",
     "echarts": "^5.2.2",
@@ -75,7 +76,7 @@
     "react-helmet-async": "^1.0.4",
     "react-monaco-editor": "^0.44.0",
     "react-split-pane": "^0.1.92",
-    "umi": "^3.2.14",
+    "umi": "^3.5.0",
     "umi-request": "^1.0.8",
     "use-merge-value": "^1.0.1",
     "uuid": "^8.3.2"
@@ -97,10 +98,9 @@
     "@umijs/plugin-esbuild": "^1.0.1",
     "@umijs/preset-ant-design-pro": "^1.2.0",
     "@umijs/preset-dumi": "^1.1.0-rc.6",
-    "@umijs/preset-react": "^1.7.4",
+    "@umijs/preset-react": "^2.1.4",
     "@umijs/preset-ui": "^2.2.9",
     "@umijs/yorkie": "^2.0.3",
-    "@zcy-data/plugin-proxy": "^1.0.4",
     "carlo": "^0.9.46",
     "cross-env": "^7.0.0",
     "cross-port-killer": "^1.1.1",
@@ -117,6 +117,9 @@
     "puppeteer-core": "^5.0.0",
     "stylelint": "^13.0.0",
     "typescript": "^4.0.3"
+  },
+  "resolutions": {
+    "@types/react": "17.0.0"
   },
   "engines": {
     "node": ">=10.0.0"

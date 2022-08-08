@@ -21,9 +21,14 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @description:
@@ -43,4 +48,39 @@ public interface DataSourceService {
     Boolean removeDataSource(Long id, Operator operator);
 
     Boolean testConnection(DataSourceTypeEnum dataSourceType, DbConfigDto dto);
+
+    String[] getDBTableColumns(Long id, String tableName);
+
+    /**
+     * 根据dataSourceId获取topic列表
+     * @param id
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    List<String> getTopics(Long id) throws ExecutionException, InterruptedException;
+
+    /**
+     * 获取该连接的所有的database/schema
+     * @param id
+     * @return
+     */
+    List<String> getHiveDbNames(Long id) ;
+
+    /**
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     * @param id
+     * @param dbName
+     * @return
+     */
+    List<String> getHiveTableNames(Long id, String dbName);
+
+    /**
+     * 获取列
+     * @param id
+     * @param dbName
+     * @param tableName
+     * @return
+     */
+    List<ColumnInfoDto> getTableColumns(Long id, String dbName, String tableName);
 }

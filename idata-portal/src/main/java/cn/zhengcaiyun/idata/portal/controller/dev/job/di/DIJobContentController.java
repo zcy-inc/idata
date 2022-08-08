@@ -18,11 +18,22 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentRequest;
+import cn.zhengcaiyun.idata.portal.model.response.job.DIJobContentResponse;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * job-content-controller
@@ -45,27 +56,98 @@ public class DIJobContentController {
     /**
      * 保存DI作业内容
      *
-     * @param jobId      作业id
-     * @param contentDto 作业内容信息
+     * @param jobId          作业id
+     * @param contentRequest 作业内容信息
      * @return
      */
     @PostMapping("/contents")
-    public RestResult<DIJobContentContentDto> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody DIJobContentContentDto contentDto) {
-        return RestResult.success(diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator()));
+    public RestResult<DIJobContentResponse> saveContent(@PathVariable("jobId") Long jobId,
+                                                        @RequestBody @Valid DIJobContentRequest contentRequest) {
+        Integer srcShardingNum = contentRequest.getSrcShardingNum();
+        String srcReadShardKey = contentRequest.getSrcReadShardKey();
+        if (srcShardingNum != null && srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
+            throw new GeneralException("分片数大于1时，切分键必填");
+        }
+
+
+        DIJobContentContentDto contentDto = new DIJobContentContentDto();
+        BeanUtils.copyProperties(contentRequest, contentDto);
+
+        // 前端的两个字段合并成一个
+        if (StringUtils.isNotEmpty(contentRequest.getSrcDbName())) {
+            contentDto.setSrcTables(contentRequest.getSrcDbName() + "." + contentRequest.getSrcTables());
+        }
+
+        // mapping_sql添加AS columnName
+        List<MappingColumnDto> destCols = contentDto.getDestCols();
+        if (CollectionUtils.isNotEmpty(destCols)) {
+            destCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS "))
+                    .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
+        }
+        List<MappingColumnDto> srcCols = contentDto.getSrcCols();
+        if (CollectionUtils.isNotEmpty(srcCols)) {
+            srcCols.stream()
+                    .filter(e -> StringUtils.isNotBlank(e.getMappingSql())
+                            && !StringUtils.containsIgnoreCase(e.getMappingSql(), " AS "))
+                    .forEach(e -> e.setMappingSql(e.getMappingSql() + " AS " + e.getName()));
+        }
+        DIJobContentContentDto dto = diJobContentService.save(jobId, contentDto, OperatorContext.getCurrentOperator());
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        // 1个字段拆成2个返回
+        String srcDataSourceType = response.getSrcDataSourceType();
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+        return RestResult.success(response);
     }
 
     /**
-     * 获取DI作业内容
+     * 适配获取DI作业内容
      *
      * @param jobId   作业id
      * @param version 作业版本号
      * @return
      */
     @GetMapping("/contents/{version}")
-    public RestResult<DIJobContentContentDto> getContent(@PathVariable("jobId") Long jobId,
-                                                         @PathVariable("version") Integer version) {
-        return RestResult.success(diJobContentService.get(jobId, version));
+    public RestResult<DIJobContentResponse> getContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
+        DIJobContentContentDto dto = diJobContentService.get(jobId, version);
+
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        String srcDataSourceType = response.getSrcDataSourceType();
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+
+        return RestResult.success(response);
     }
+
+    @GetMapping("/adapt/contents/{version}")
+    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
+        DIJobContentContentDto dto = diJobContentService.get(jobId, version);
+
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        String srcDataSourceType = response.getSrcDataSourceType();
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+
+        return RestResult.success(response);
+    }
+
 
 }

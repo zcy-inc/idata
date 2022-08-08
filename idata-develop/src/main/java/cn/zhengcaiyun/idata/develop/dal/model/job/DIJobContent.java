@@ -88,6 +88,20 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   来源为kafka数据类型的topic
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
+    private String srcTopic;
+
+    /**
+     * Database Column Remarks:
+     *   来源表方式，S：下拉选择；E：手动编辑
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    private String srcTablesFashion;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-读取模式，all：全量，incremental：增量
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
@@ -130,6 +144,13 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   目标为kafka的数据类的topic
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_topic")
+    private String destTopic;
+
+    /**
+     * Database Column Remarks:
      *   数据去向-目标表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table")
@@ -158,10 +179,73 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   目标库中间件的内置属性
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_properties")
+    private String destProperties;
+
+    /**
+     * Database Column Remarks:
+     *   多分片写入（并行度）
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_sharding_num")
+    private Integer destShardingNum;
+
+    /**
+     * Database Column Remarks:
+     *   单次批量写入数据条数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_bulk_num")
+    private Long destBulkNum;
+
+    /**
+     * Database Column Remarks:
      *   作业内容hash
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.content_hash")
     private String contentHash;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，作用同可视化src_columns
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
+    private String scriptSelectColumns;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化src_columns中primaryKey字段
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_key_columns")
+    private String scriptKeyColumns;
+
+    /**
+     * Database Column Remarks:
+     *   merge_sql的参数，json格式
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql_param")
+    private String scriptMergeSqlParam;
+
+    /**
+     * Database Column Remarks:
+     *   配置模式，1：可视化模式，2：脚本模式
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.config_mode")
+    private Integer configMode;
+
+    /**
+     * Database Column Remarks:
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_table_pt")
+    private String srcTablePt;
+
+    /**
+     * Database Column Remarks:
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table_pt")
+    private String destTablePt;
 
     /**
      * Database Column Remarks:
@@ -179,10 +263,38 @@ public class DIJobContent {
 
     /**
      * Database Column Remarks:
+     *   补充迁移旧版Idata的di_query字段。用于复杂sql或函数sql，解决除了单表的简单列映射之外的场景。
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
+    private String srcQuery;
+
+    /**
+     * Database Column Remarks:
      *   数据去向-字段信息，json格式
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     private String destColumns;
+
+    /**
+     * Database Column Remarks:
+     *   DI作业增量模式的mergeSql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    private String mergeSql;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化merge_sql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
+    private String scriptMergeSql;
+
+    /**
+     * Database Column Remarks:
+     *   脚本模式，同可视化src_query
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
+    private String scriptQuery;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.id")
     public Long getId() {
@@ -294,6 +406,26 @@ public class DIJobContent {
         this.srcDataSourceId = srcDataSourceId;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
+    public String getSrcTopic() {
+        return srcTopic;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_topic")
+    public void setSrcTopic(String srcTopic) {
+        this.srcTopic = srcTopic;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    public String getSrcTablesFashion() {
+        return srcTablesFashion;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    public void setSrcTablesFashion(String srcTablesFashion) {
+        this.srcTablesFashion = srcTablesFashion;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
     public String getSrcReadMode() {
         return srcReadMode;
@@ -354,6 +486,16 @@ public class DIJobContent {
         this.destDataSourceId = destDataSourceId;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_topic")
+    public String getDestTopic() {
+        return destTopic;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_topic")
+    public void setDestTopic(String destTopic) {
+        this.destTopic = destTopic;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table")
     public String getDestTable() {
         return destTable;
@@ -394,6 +536,36 @@ public class DIJobContent {
         this.destAfterWrite = destAfterWrite;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_properties")
+    public String getDestProperties() {
+        return destProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_properties")
+    public void setDestProperties(String destProperties) {
+        this.destProperties = destProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_sharding_num")
+    public Integer getDestShardingNum() {
+        return destShardingNum;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_sharding_num")
+    public void setDestShardingNum(Integer destShardingNum) {
+        this.destShardingNum = destShardingNum;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_bulk_num")
+    public Long getDestBulkNum() {
+        return destBulkNum;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_bulk_num")
+    public void setDestBulkNum(Long destBulkNum) {
+        this.destBulkNum = destBulkNum;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.content_hash")
     public String getContentHash() {
         return contentHash;
@@ -402,6 +574,66 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.content_hash")
     public void setContentHash(String contentHash) {
         this.contentHash = contentHash;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
+    public String getScriptSelectColumns() {
+        return scriptSelectColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
+    public void setScriptSelectColumns(String scriptSelectColumns) {
+        this.scriptSelectColumns = scriptSelectColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_key_columns")
+    public String getScriptKeyColumns() {
+        return scriptKeyColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_key_columns")
+    public void setScriptKeyColumns(String scriptKeyColumns) {
+        this.scriptKeyColumns = scriptKeyColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql_param")
+    public String getScriptMergeSqlParam() {
+        return scriptMergeSqlParam;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql_param")
+    public void setScriptMergeSqlParam(String scriptMergeSqlParam) {
+        this.scriptMergeSqlParam = scriptMergeSqlParam;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.config_mode")
+    public Integer getConfigMode() {
+        return configMode;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.config_mode")
+    public void setConfigMode(Integer configMode) {
+        this.configMode = configMode;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_table_pt")
+    public String getSrcTablePt() {
+        return srcTablePt;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_table_pt")
+    public void setSrcTablePt(String srcTablePt) {
+        this.srcTablePt = srcTablePt;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table_pt")
+    public String getDestTablePt() {
+        return destTablePt;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table_pt")
+    public void setDestTablePt(String destTablePt) {
+        this.destTablePt = destTablePt;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
@@ -424,6 +656,16 @@ public class DIJobContent {
         this.srcColumns = srcColumns;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
+    public String getSrcQuery() {
+        return srcQuery;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_query")
+    public void setSrcQuery(String srcQuery) {
+        this.srcQuery = srcQuery;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     public String getDestColumns() {
         return destColumns;
@@ -432,5 +674,35 @@ public class DIJobContent {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     public void setDestColumns(String destColumns) {
         this.destColumns = destColumns;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public String getMergeSql() {
+        return mergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public void setMergeSql(String mergeSql) {
+        this.mergeSql = mergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
+    public String getScriptMergeSql() {
+        return scriptMergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_merge_sql")
+    public void setScriptMergeSql(String scriptMergeSql) {
+        this.scriptMergeSql = scriptMergeSql;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
+    public String getScriptQuery() {
+        return scriptQuery;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_query")
+    public void setScriptQuery(String scriptQuery) {
+        this.scriptQuery = scriptQuery;
     }
 }

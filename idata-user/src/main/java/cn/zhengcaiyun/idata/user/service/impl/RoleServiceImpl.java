@@ -16,9 +16,16 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
+import cn.hutool.core.lang.tree.TreeNode;
+import cn.hutool.core.util.ReflectUtil;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
+import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDao;
+import cn.zhengcaiyun.idata.system.dal.dao.SysResourceDynamicSqlSupport;
+import cn.zhengcaiyun.idata.system.dal.model.SysResource;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
 import cn.zhengcaiyun.idata.system.dto.FolderTreeNodeDto;
 import cn.zhengcaiyun.idata.user.dto.RoleDto;
@@ -54,12 +61,18 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private UacRoleDao uacRoleDao;
+
     @Autowired
     private UacUserRoleDao uacUserRoleDao;
+
     @Autowired
     private UacRoleAccessDao uacRoleAccessDao;
+
     @Autowired
     private SystemService systemService;
+
+    @Autowired
+    private SysResourceDao sysResourceDao;
 
     @Override
     public Page<RoleDto> findRoles(Integer limit, Integer offset) {
@@ -116,7 +129,8 @@ public class RoleServiceImpl implements RoleService {
                         folderPermissionMap.put(key, add);
                     }
                 });
-        return systemService.getDevFolderTree(folderPermissionMap);
+        List<FolderTreeNodeDto> devFolderTree = systemService.getFolderTree(folderPermissionMap);
+        return devFolderTree;
     }
 
     @Override

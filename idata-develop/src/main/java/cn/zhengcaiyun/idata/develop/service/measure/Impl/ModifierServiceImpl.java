@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.develop.service.measure.Impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
@@ -28,14 +29,19 @@ import cn.zhengcaiyun.idata.develop.service.label.EnumService;
 import cn.zhengcaiyun.idata.develop.service.label.LabelService;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import scala.reflect.internal.Trees;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
@@ -58,13 +64,15 @@ public class ModifierServiceImpl implements ModifierService {
     @Autowired
     private DevTableInfoDao devTableInfoDao;
     @Autowired
+    private DevEnumValueDao devEnumValueDao;
+    @Autowired
     private LabelService labelService;
     @Autowired
     private ColumnInfoService columnInfoService;
     @Autowired
     private EnumService enumService;
 
-    private String[] modifierInfos = new String[]{"enName", "modifierEnum", "modifierDefine"};
+    private String[] modifierInfos = new String[]{"modifierDefine"};
     private final String MODIFIER_ENUM = "modifierEnum";
 
     @Override
@@ -110,16 +118,6 @@ public class ModifierServiceImpl implements ModifierService {
                 echoModifier.setColumnComment(modifierLabelList.get(0).getColumnComment());
                 echoModifier.setColumnDataType(modifierLabelList.get(0).getColumnDataType());
             }
-//            if (atomicTableId != null) {
-//                List<LabelDto> modifierLabelList = labelService.findLabelsByCode(modifier.getLabelCode());
-//                LabelDto echoModifierLabel = modifierLabelList.stream().filter(modifierLabel ->
-//                        modifierLabel.getTableId().equals(atomicTableId)).findAny()
-//                        .orElse(null);
-//                if (echoModifierLabel != null) {
-//                    echoModifier.setTableName(tableMap.get(atomicTableId));
-//                    echoModifier.setColumnName(echoModifierLabel.getColumnName());
-//                }
-//            }
             return echoModifier;
         }).collect(Collectors.toList());
         return echoModifierList;
@@ -136,13 +134,6 @@ public class ModifierServiceImpl implements ModifierService {
                 .build().render(RenderingStrategies.MYBATIS3))
                 .orElse(null);
         if (atomicLabel == null) { return null; }
-//        List<MeasureDto> echoModifierList = PojoUtil.copyList(devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
-//                        .from(devLabelDefine)
-//                        .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
-//                        .where(devLabelDefine.del, isNotEqualTo(1), and(devLabel.del, isNotEqualTo(1)),
-//                                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name())),
-//                                and(devLabel.tableId, isEqualTo(atomicLabel.getTableId())))
-//                        .build().render(RenderingStrategies.MYBATIS3)), MeasureDto.class);
         Set<String> modifierCodes = devLabelDefineDao.selectMany(select(devLabelDefine.allColumns())
                 .from(devLabelDefine)
                 .leftJoin(devLabel).on(devLabelDefine.labelCode, equalTo(devLabel.labelCode))
@@ -161,12 +152,16 @@ public class ModifierServiceImpl implements ModifierService {
     public MeasureDto create(MeasureDto modifier, String operator) {
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(modifier.getLabelName()), "修饰词名称不能为空");
-        checkArgument(isNotEmpty(modifier.getLabelTag()), "类型不能为空");
+        modifier.setLabelTag(LabelTagEnum.MODIFIER_LABEL.name());
+        modifier.setSubjectType(SubjectTypeEnum.COLUMN.name());
+        modifier.setFolderId(0L);
         DevLabelDefine checkModifier = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelName, isEqualTo(modifier.getLabelName()))))
+                and(devLabelDefine.labelName, isEqualTo(modifier.getLabelName())),
+                and(devLabelDefine.labelTag, isLike(LabelTagEnum.MODIFIER_LABEL.name()))))
                 .orElse(null);
         checkArgument(checkModifier == null, "修饰词已存在");
         checkArgument(modifier.getLabelAttributes() != null && modifier.getLabelAttributes().size() > 0, "基本信息不能为空");
+
         List<String> modifierInfoList = new ArrayList<>(Arrays.asList(modifierInfos));
         List<String> modifierAttributeKeyList = modifier.getLabelAttributes().stream().map(AttributeDto::getAttributeKey)
                 .collect(Collectors.toList());
@@ -174,8 +169,8 @@ public class ModifierServiceImpl implements ModifierService {
             modifierInfoList.removeAll(modifierAttributeKeyList);
             throw new IllegalArgumentException(String.join(",", modifierInfoList) + "不能为空");
         }
-        // 数据迁移相关，暂注释
-        checkArgument(modifier.getMeasureLabels() != null && modifier.getMeasureLabels().size() > 0, "关联信息不能为空");
+        checkArgument(modifier.getMeasureLabels() != null && modifier.getMeasureLabels().size() == 1, "修饰词来源不能为空");
+        checkArgument(StringUtils.isNotEmpty(modifier.getMeasureLabels().get(0).getLabelParamValue()), "枚举值不能为空");
 
         List<LabelDto> modifierLabelList = modifier.getMeasureLabels();
         // 校验关联信息
@@ -205,43 +200,21 @@ public class ModifierServiceImpl implements ModifierService {
 
         List<LabelDto> modifierLabelList = modifier.getMeasureLabels() != null && modifier.getMeasureLabels().size() > 0
                 ? modifier.getMeasureLabels() : null;
-        PojoUtil.copyTo(modifier, existModifier, "labelName", "labelAttributes", "folderId");
-        MeasureDto echoDimension = PojoUtil.copyOne(labelService.defineLabel(PojoUtil.copyOne(existModifier, LabelDefineDto.class), operator),
+        PojoUtil.copyTo(modifier, existModifier, "labelName", "labelAttributes");
+        MeasureDto echoModifier = PojoUtil.copyOne(labelService.defineLabel(PojoUtil.copyOne(existModifier, LabelDefineDto.class), operator),
                 MeasureDto.class);
         if (modifierLabelList != null) {
-            List<LabelDto> existModifierLabelList = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
+            LabelDto modifierLabel = modifierLabelList.get(0);
+            LabelDto existModifierLabel = PojoUtil.copyList(devLabelDao.selectMany(select(devLabel.allColumns())
                             .from(devLabel)
-                            .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode,
-                                    isEqualTo(modifier.getLabelCode())))
+                            .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(modifier.getLabelCode())))
                             .build().render(RenderingStrategies.MYBATIS3)),
-                    LabelDto.class);
-            Set<String> existModifierStr = existModifierLabelList.stream().map(existModifierLabel ->
-                    existModifierLabel.getTableId() + "_" + existModifierLabel.getColumnName())
-                    .collect(Collectors.toSet());
-            Set<String> modifierStr = modifierLabelList.stream().map(modifierLabel ->
-                    modifierLabel.getTableId() + "_" + modifierLabel.getColumnName())
-                    .collect(Collectors.toSet());
-            Set<String> addModifierStr = new HashSet<>(modifierStr);
-            addModifierStr.removeAll(existModifierStr);
-            modifierLabelList.forEach(modifierLabeL -> {
-                modifierLabeL.setLabelCode(modifier.getLabelCode());
-            });
-            List<LabelDto> addModifierLabelList = modifierLabelList.stream().filter(modifierLabel ->
-                    addModifierStr.contains(modifierLabel.getTableId() + "_" + modifierLabel.getColumnName())
-            ).collect(Collectors.toList());
-            Set<String> deleteModifierStr = new HashSet<>(existModifierStr);
-            deleteModifierStr.removeAll(modifierStr);
-            List<LabelDto> deleteModifierLabelList = existModifierLabelList.stream().filter(modifierLabel ->
-                    deleteModifierStr.contains(modifierLabel.getTableId() + "_" + modifierLabel.getColumnName())
-            ).collect(Collectors.toList());
-            List<LabelDto> addEchoModifierLabelList = addModifierLabelList.stream().map(modifierLabel ->
-                    labelService.label(modifierLabel, operator))
-                    .collect(Collectors.toList());
-            boolean isDelete = deleteModifierLabelList.stream().allMatch(deleteModifierLabel ->
-                    labelService.removeLabel(deleteModifierLabel, operator));
-            echoDimension.setMeasureLabels(labelService.findLabelsByCode(modifier.getLabelCode()));
+                    LabelDto.class).get(0);
+            modifierLabel.setLabelCode(modifier.getLabelCode());
+            labelService.label(modifierLabel, operator);
+            echoModifier.setMeasureLabels(labelService.findLabelsByCode(modifier.getLabelCode()));
         }
-        return echoDimension;
+        return echoModifier;
     }
 
     @Override
@@ -276,15 +249,58 @@ public class ModifierServiceImpl implements ModifierService {
         checkArgument(isNotEmpty(operator), "删除者不能为空");
         checkArgument(isNotEmpty(modifierCode), "修饰词Code不能为空");
         DevLabelDefine existDimension = devLabelDefineDao.selectOne(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
-                and(devLabelDefine.labelCode, isEqualTo(modifierCode)), and(devLabelDefine.labelTag,
-                        isEqualTo(LabelTagEnum.MODIFIER_LABEL_DISABLE.name()))))
+                and(devLabelDefine.labelCode, isEqualTo(modifierCode))))
                 .orElse(null);
-        checkArgument(existDimension != null, "修饰词未停用或不存在");
+        checkArgument(existDimension != null, "修饰词不存在");
         // 派生指标依赖校验
         List<String> relyDeriveMetricNameList = getRelyDeriveMetricName(modifierCode);
         checkArgument(relyDeriveMetricNameList.size() == 0,
                 String.join(",", relyDeriveMetricNameList) + "依赖该修饰词，不能删除");
         return labelService.deleteDefine(modifierCode, operator);
+    }
+
+    @Override
+    public int mergeOldModifiers() {
+        // 默认修饰词仅有一张事实表，冗余数据数仓已处理，将存在labelAttribute中的枚举存到label中的labelParam
+        List<LabelDefineDto> existModifierList = PojoUtil.copyList(devLabelDefineDao.select(c ->
+                c.where(devLabelDefine.del, isNotEqualTo(1), and(devLabelDefine.labelTag, isLike("%MODIFIER%")))),
+                LabelDefineDto.class, "labelCode", "labelAttributes");
+        List<String> modifierCodeList = existModifierList.stream().map(LabelDefineDto::getLabelCode).collect(Collectors.toList());
+        List<String> enumCodeList = enumService.getEnums().stream().map(EnumDto::getEnumCode).collect(Collectors.toList());
+        Map<String, List<DevEnumValue>> enumMap = devEnumValueDao.select(c -> c.where(devEnumValue.del, isNotEqualTo(1),
+                and(devEnumValue.enumCode, isIn(enumCodeList))))
+                .stream().collect(Collectors.groupingBy(DevEnumValue::getEnumCode));
+        Map<String, String> modifierEnumValueMap = modifierCodeList.stream()
+                .map(this::getModifierByCode)
+                .collect(Collectors.toMap(MeasureDto::getLabelCode, measure -> {
+                    AttributeDto attributeDto = measure.getLabelAttributes().stream()
+                            .filter(labelAttribute -> labelAttribute.getAttributeKey().equals(MODIFIER_ENUM))
+                            .findAny().orElse(null);
+                    return StringUtils.isNotEmpty(attributeDto.getEnumValue()) ? attributeDto.getEnumValue() : "";
+                }));
+        int total = 0;
+        for (String modifierCode : modifierCodeList) {
+            if (ObjectUtils.isNotEmpty(labelService.findLabelsByCode(modifierCode))) {
+                LabelDto modifierLabel = labelService.findLabelsByCode(modifierCode).get(0);
+                modifierLabel.setLabelParamValue(modifierEnumValueMap.getOrDefault(modifierCode, ""));
+                total += devLabelDao.updateByPrimaryKeySelective(PojoUtil.copyOne(modifierLabel, DevLabel.class,
+                        "id", "labelParamValue"));
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public List<DevLabelDefine> findModifiersByTableIds(String tableIds) {
+        List<Long> tableIdList = new ArrayList<>(Arrays.asList(tableIds.split(",")))
+                .stream().map(Long::valueOf).collect(Collectors.toList());
+        List<DevLabel> modifierLabelList = devLabelDao.select(c -> c.where(devLabel.del, isNotEqualTo(1),
+                and(devLabel.tableId, isIn(tableIdList))));
+        if (modifierLabelList.size() == 0) return new ArrayList<>();
+        List<String> modifierCodeList = modifierLabelList.stream().map(DevLabel::getLabelCode).collect(Collectors.toList());
+        return devLabelDefineDao.select(c -> c.where(devLabelDefine.del, isNotEqualTo(1),
+                and(devLabelDefine.labelCode, isIn(modifierCodeList)),
+                and(devLabelDefine.labelTag, isEqualTo(LabelTagEnum.MODIFIER_LABEL.name()))));
     }
 
     private MeasureDto getModifierByCode(String modifierCode) {
@@ -298,6 +314,9 @@ public class ModifierServiceImpl implements ModifierService {
                 .peek(labelAttribute -> {
                     if (MODIFIER_ENUM.equals(labelAttribute.getAttributeKey())) {
                         labelAttribute.setEnumName(enumService.getEnumName(labelAttribute.getAttributeValue()));
+                        List<String> enumValueList = enumService.getEnumValues(labelAttribute.getAttributeValue())
+                                .stream().map(EnumValueDto::getEnumValue).collect(Collectors.toList());
+                        labelAttribute.setEnumValue(String.join(",", enumValueList));
                     }
                 }).collect(Collectors.toList());
         echoModifier.setMeasureLabels(labelService.findLabelsByCode(modifierCode));

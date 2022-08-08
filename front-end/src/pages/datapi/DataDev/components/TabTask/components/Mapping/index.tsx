@@ -20,7 +20,7 @@ interface MapProps {
 const { Item } = Form;
 
 const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
-  { data: { srcColumns, destColumns } },
+  { data: { srcColumns = [], destColumns = [] } },
   ref,
 ) => {
   const [visible, setVisible] = useState(false);
@@ -38,7 +38,14 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
   }));
 
   const renderData = () => {
+
+    const deleteMap = (map: { [x: string]: any; }) => {
+      Object.keys(map).forEach(k => {
+        delete map[k];
+      })
+    }
     // 画来源表的节点
+    deleteMap(srcMap.current);
     const srcNodes = srcColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       srcMap.current[`${_.name}-src`] = _; // 赋srcMap的值
@@ -58,6 +65,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     });
 
     // 画去向表的节点
+    deleteMap(destMap.current);
     const destNodes = destColumns?.map((column, i) => {
       const _ = cloneDeep(column);
       destMap.current[`${_.name}-dest`] = _; // 赋destMap的值
@@ -65,7 +73,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         id: `${_.name}-dest`,
         x: 540,
         y: 100 + 40 * i,
-        label: `${_.primaryKey ? '🔑' : ''} ${_.name}`,
+        label: `${_.primaryKey ? '🔑 ' : ''} ${_.name} ${_.dataType || ''}`,
         tableType: 'dest',
         data: { name: _.name, dataType: _.dataType, primaryKey: _.primaryKey },
       };
@@ -290,7 +298,8 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     // if create-edge is canceled before ending, update the 'links' on the anchor-point circles
     // 调用 graph.remove / graph.removeItem 方法之后触发
     graph.on('afterremoveitem', (e: any) => {
-      if (e.item && e.item.source && e.item.target) {
+      // e.item.depth表示事件由改变edge触发，改方法只在点击联系时触发
+      if (e.item && e.item.source && e.item.target && e.item.depth !== 0) {
         const sourceNode = graph.findById(e.item.source);
         const targetNode = graph.findById(e.item.target);
         const { sourceAnchor, targetAnchor } = e.item;
@@ -364,21 +373,25 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
     });
     // 节点的点击功能
     graph.on('node:click', function (e: any) {
+      if(e.shape.cfg.name === 'anchor-point') { // 如果点击在锚点上
+        return;
+      }
       const node = e.item;
       const model = node._cfg.model;
       const data = model.data || {};
       if (model.tableType === 'src') {
         setVisible(true);
         setCurrentNode(model);
-        form.setFieldsValue({ mappingSql: model.data.mappingSql || '' });
+        model.data.mappingSql=srcMap.current[model.id].mappingSql;
+        form.setFieldsValue({ mappingSql:  model.data.mappingSql || '' });
       }
       if (model.tableType === 'dest') {
         if (model.data.primaryKey) {
-          graph.updateItem(node, { label: model.data.name, data: { ...data, primaryKey: false } });
+          graph.updateItem(node, { label: `${model.data.name} ${model.data.dataType}`, data: { ...data, primaryKey: false } });
           set(destMap.current, `[${model.id}].primaryKey`, false);
         } else {
           graph.updateItem(node, {
-            label: `🔑 ${model.data.name}`,
+            label: `🔑 ${model.data.name} ${model.data.dataType}`,
             data: { ...data, primaryKey: true },
           });
           set(destMap.current, `[${model.id}].primaryKey`, true);
@@ -401,6 +414,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = (
         onCancel={() => setVisible(false)}
         onOk={() => {
           const values = form.getFieldsValue();
+          //获取图表对应的节点，需要保证srcMap.current[currentNode.id]与之前点击的对象是同一个
           srcMap.current[currentNode.id].mappingSql = values.mappingSql;
           setCurrentNode(null);
           setVisible(false);

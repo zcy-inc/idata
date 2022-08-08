@@ -128,6 +128,8 @@ public class ClusterAppDto {
      */
     private String amContainerLogs;
 
+    private String trackingUrl;
+
     public String getAppId() {
         return appId;
     }
@@ -286,5 +288,13 @@ public class ClusterAppDto {
 
     public void setAmContainerLogs(String amContainerLogs) {
         this.amContainerLogs = amContainerLogs;
+    }
+
+    public String getTrackingUrl() {
+        return trackingUrl;
+    }
+
+    public void setTrackingUrl(String trackingUrl) {
+        this.trackingUrl = trackingUrl;
     }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, Tree, TreeProps } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import { debounce } from 'lodash';
-import { getAllParentsKey } from '@/utils/utils';
+import { getAllParentsKey, getWorkspacePrefix } from '@/utils/utils';
 import type { FeatureTreeNode, FolderNode } from '@/interfaces/global';
 import UnderLinedSearch from './components/SearchInput/UnderLinedSearch';
 import FeatureList from '../FeatureList';
@@ -96,7 +96,24 @@ const AuthSetting: React.FC<AuthSettingProps> = ({
         </span>
       );
 
-      const node: any = { ..._, key: treeType === 'feature' ? featureCode : cid };
+      const workspaceString = sessionStorage.getItem('workspace');
+      let workspacePrefix = '';
+      
+      if (workspaceString) {
+        try {
+          const workspaceJson = JSON.parse(workspaceString);
+          workspacePrefix = workspaceJson.urlPath || '';
+        } catch (e) {}
+      }
+
+      let key = '';
+      if (workspacePrefix === 'zcy') {
+        key = featureCode;
+      } else {
+        key = treeType === 'feature' ? featureCode : cid;
+      }
+
+      const node: any = { ..._, key };
       node.className = clsFolderRoot;
       node.title = title;
       parentCode && (node.parentId = parentCode);

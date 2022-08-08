@@ -223,7 +223,7 @@ public class MeasureApiImpl implements MeasureApi {
             measure.setMeasureId(measureIdMap.get(measure.getLabelCode()));
             measure.setMeasureDefine(measureDefineMap.get(measure.getLabelCode()));
             if (measure.getLabelTag().endsWith("METRIC_LABEL")) {
-                measure.setBizTypeValue(bizTypeMap.get(metricBizTypeCodeMap.get(measure.getLabelCode())));
+                measure.setBizProcessValue(bizTypeMap.get(metricBizTypeCodeMap.get(measure.getLabelCode())));
             }
         });
         return echoMeasureList;
@@ -249,7 +249,7 @@ public class MeasureApiImpl implements MeasureApi {
                     echoMetric.setMeasureDefine(attribute.getAttributeValue());
                 }
                 else if (attribute.getAttributeKey().equals(BIZ_TYPE_CODE)) {
-                    echoMetric.setBizTypeValue(bizTypeMap.get(attribute.getAttributeValue()));
+                    echoMetric.setBizProcessValue(bizTypeMap.get(attribute.getAttributeValue()));
                 }
                 else {
                     continue;

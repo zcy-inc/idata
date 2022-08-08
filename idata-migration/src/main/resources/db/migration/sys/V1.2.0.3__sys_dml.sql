@@ -1,0 +1,2 @@
+update idata.sys_config set value_one = '{"port":{"configValue":""},"host":{"configValue":""},"dbCatalog":{"configValue":""},"username":{"configValue":""}}' where key_one = 'trino-info' and value_one = '{}';
+update idata.sys_config set value_one = '{"yarn.addr":{"configValue":""},"idata.insert.erase.url":{"configValue":""},"idata.sql.rewrite.url":{"configValue":""},"idata.job.detail.url":{"configValue":""},"hdfs.addr":{"configValue":""},"idata.monitor.url":{"configValue":""}}' where key_one = 'htool-config' and value_one like '%kylin%';

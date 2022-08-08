@@ -35,7 +35,6 @@ import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +142,7 @@ public class TableQueryManager {
         return Long.parseLong(resultDto.getData().get(0).get(0));
     }
 
-    private ConnectionCfg getConnectionInfo() {
+    public ConnectionCfg getConnectionInfo() {
         SysConfig trinoConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("trino-info")))
                 .orElse(null);
         ConnectionCfg cfg = null;
@@ -177,8 +176,18 @@ public class TableQueryManager {
     }
 
     public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, DbConfigDto configDto, String tableName) {
+        String schema = configDto.getSchema();
+        String table = tableName;
+        if (StringUtils.isBlank(schema) && DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+            int dot_idx = tableName.indexOf(".");
+            if (dot_idx > 0) {
+                schema = tableName.substring(0, dot_idx);
+                table = tableName.substring(dot_idx + 1);
+            }
+        }
+
         return metadataQueryApi.getTableColumns(sourceTypeEnum, configDto.getHost(), configDto.getPort(),
-                configDto.getUsername(), configDto.getPassword(), configDto.getDbName(), configDto.getSchema(), tableName);
+                configDto.getUsername(), configDto.getPassword(), configDto.getDbName(), schema, table);
     }
 
     public List<ColumnInfoDto> getTablePrimaryKeys(DataSourceTypeEnum sourceTypeEnum, DbConfigDto configDto, String tableName) {

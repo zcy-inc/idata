@@ -22,14 +22,15 @@ const TabUDF: FC<TabUDFProps> = ({ pane }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [form] = Form.useForm();
 
-  const { getTreeWrapped, onRemovePane, replaceTab } = useModel('datadev', (_) => ({
-    replaceTab: _.replaceTab,
-    onRemovePane: _.onRemovePane,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { getTreeWrapped, onRemovePane, replaceTab, curNode } = useModel('datadev');
 
   useEffect(() => {
-    pane.id !== -1 && getUDFWrapped();
+    if (pane.id !== -1) {
+      getUDFWrapped();
+    } else if (mode === 'edit') {
+      const folderId = curNode?.id;
+      form.setFieldsValue({ folderId });
+    }
   }, [pane.id]);
 
   const getUDFWrapped = () => getUDF({ id: pane.id }).then((res) => setData(res.data));

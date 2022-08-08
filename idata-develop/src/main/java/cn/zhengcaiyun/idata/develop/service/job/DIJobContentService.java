@@ -18,7 +18,11 @@
 package cn.zhengcaiyun.idata.develop.service.job;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
+
+import java.util.List;
 
 /**
  * @description:
@@ -30,4 +34,12 @@ public interface DIJobContentService {
     DIJobContentContentDto save(Long jobId, DIJobContentContentDto contentDto, Operator operator);
 
     DIJobContentContentDto get(Long jobId, Integer version);
+
+    /**
+     * 封装query和mergesql
+     * @param contentDto
+     * @param jobType
+     */
+    void assembleQueryAndMergeSql(DIJobContentContentDto contentDto, String jobType);
+
 }

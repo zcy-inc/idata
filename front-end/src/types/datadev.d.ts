@@ -12,6 +12,8 @@ import {
   SchTimeOutStrategy,
   SchPriority,
   JobStatus,
+  DIJobType,
+  DISyncMode,
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -29,6 +31,13 @@ export interface TreeNode {
   className?: string;
   title?: any;
   key?: string;
+}
+
+export interface Job {
+  id: number;
+  name: string;
+  jobType: string;
+  displayVersion?: string;
 }
 
 // 平铺文件夹的类型
@@ -132,7 +141,7 @@ export interface TaskConfig {
     schDagId: number; // 调度配置-dag编号
     schRerunMode: SchRerunMode; // 调度配置-重跑配置
     schTimeOut: number; // 调度配置-超时时间
-    schDryRun: number; // 调度配置-是否空跑
+    schDryRun: number | string[]; // 调度配置-是否空跑
     execQueue: string; // 运行配置-队列
     execMaxParallelism: number; // 运行配置-作业最大并发数，配置为0时表示使用默认并发数
     execWarnLevel: string; // 运行配置-告警等级 时光的接口获取
@@ -176,6 +185,14 @@ export interface ConfiguredTaskListItem {
   dwLayerCode: string;
   dagId: number;
   dagName: string;
+}
+
+export interface DependenciesJob extends ConfiguredTaskListItem {
+  prevJobId: number;
+  prevJobDagId: number;
+  prevJobDagName: string;
+  prevJobName: string;
+  environment: Environments;
 }
 
 export interface SqlSparkContent {
@@ -256,6 +273,7 @@ export interface DependenceTreeNode {
 
 export interface UDF {
   commandFormat: string;
+  sourceName?: string;
   description: string;
   fileName: string;
   folderId: number;
@@ -266,4 +284,39 @@ export interface UDF {
   udfSample: string;
   udfType: string;
   id?: number;
+}
+
+export interface CreateDIJobDto {
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  remark?: string;
+}
+
+export interface DIJobBasicInfo {
+  id: number;
+  jobType: DIJobType;
+  syncMode: DISyncMode;
+  name: string;
+  dwLayerCode: string;
+  folderId: number;
+  creator: string;
+  status: 0 | 1; // 0 停用，1 启用
+  remark?: string;
+}
+
+export interface MergeSqlParamDto {
+  selectColumns: string;
+  keyColumns: string;
+  sourceTable: string;
+  destTable: string;
+  srcReadMode: string;
+  dataSourceType: string;
+  days?: number;
+}
+
+export interface DIJobContent {
+  id: save;
 }

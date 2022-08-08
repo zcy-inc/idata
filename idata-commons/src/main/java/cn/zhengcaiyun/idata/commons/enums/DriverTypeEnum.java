@@ -1,34 +1,34 @@
 package cn.zhengcaiyun.idata.commons.enums;
 
-import org.apache.commons.lang3.StringUtils;
-
 public enum DriverTypeEnum {
-    MySQL("mysql","com.mysql.jdbc.Driver"),
-    Hive("hive2","org.apache.hive.jdbc.HiveDriver"),
-    Postgres("postgresql","org.postgresql.Driver");
 
-    private String urlType;
-    private String driverName;
+    MySQL("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.mysql),
+    Doris("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
+    StarRocks("starrocks", "com.mysql.jdbc.Driver", DataSourceTypeEnum.starrocks),
+    DorisSql("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
+    Hive("hive2", "org.apache.hive.jdbc.HiveDriver", DataSourceTypeEnum.hive),
+    Postgres("postgresql", "org.postgresql.Driver", DataSourceTypeEnum.postgresql),
+    Phoenix("phoenix", "", DataSourceTypeEnum.phoenix),
+    Kafka("kafka", "", DataSourceTypeEnum.kafka),
+    Elasticsearch("elasticsearch", "", DataSourceTypeEnum.elasticsearch),
+    MSSQL("mssql", "com.microsoft.sqlserver.jdbc.SQLServerDriver", DataSourceTypeEnum.mssql);
 
-    DriverTypeEnum(String urlType, String driverName) {
+    public String urlType;
+    public String driverName;
+    public DataSourceTypeEnum dataSourceTypeEnum;
+
+    DriverTypeEnum(String urlType, String driverName, DataSourceTypeEnum dataSourceTypeEnum) {
         this.urlType = urlType;
         this.driverName = driverName;
+        this.dataSourceTypeEnum = dataSourceTypeEnum;
     }
 
-    public String getUrlType() {
-        return urlType;
-    }
-
-    public String getDriverName() {
-        return driverName;
-    }
-
-    public static DriverTypeEnum of (String urlType) {
+    public static DriverTypeEnum ofDataSourceTypeEnum(DataSourceTypeEnum dataSourceTypeEnum) {
         for (DriverTypeEnum type : DriverTypeEnum.values()) {
-            if (StringUtils.equalsIgnoreCase(type.urlType, urlType)) {
+            if (type.dataSourceTypeEnum == dataSourceTypeEnum) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("invalid type : " + urlType);
+        throw new IllegalArgumentException("invalid type : " + dataSourceTypeEnum);
     }
 }

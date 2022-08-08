@@ -94,8 +94,8 @@ const TaskHistory: FC = () => {
     },
     {
       title: '操作',
-      key: 'businessLogsUrl',
-      dataIndex: 'businessLogsUrl',
+      key: 'amContainerLogsUrl',
+      dataIndex: 'amContainerLogsUrl',
       fixed: 'right',
       render: (_) => (
         <a href={_} target="_blank">

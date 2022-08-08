@@ -4,8 +4,7 @@ import { cloneDeep, omit } from 'lodash';
 import type { TreeNode } from '@/interfaces/global';
 
 /* eslint no-useless-escape:0 import/prefer-default-export:0 */
-const reg =
-  /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
+const reg = /(((^https?:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)$/;
 
 export const isUrl = (path: string): boolean => reg.test(path);
 
@@ -55,14 +54,15 @@ export const getDeleteFn = <T = any>(
     });
 };
 
-export const getSuccessReqFn =
-  (msg: string) =>
-  async <R>(service: () => Promise<Tresponse<R>>, cb?: (result?: Tresponse<R>) => void) => {
-    const res = await service();
-    message.success(msg);
-    cb?.(res);
-    return res;
-  };
+export const getSuccessReqFn = (msg: string) => async <R>(
+  service: () => Promise<Tresponse<R>>,
+  cb?: (result?: Tresponse<R>) => void,
+) => {
+  const res = await service();
+  message.success(msg);
+  cb?.(res);
+  return res;
+};
 
 // 从本地存储获取当前工作区
 export const getCachedWs = () => {
@@ -86,7 +86,10 @@ export const getReqUrl = (url: string) => {
   return `/${ws}${url}`;
 };
 
-export const formatTreeData = <T extends TreeNode>(roots: T[], nodeFormatter: Function) => {
+export const formatTreeData = <T extends TreeNode<T>>(
+  roots: T[],
+  nodeFormatter?: (node: T) => TreeNode,
+) => {
   const holder = cloneDeep(roots);
   const loop = (nodes: T[]) => {
     if (Array.isArray(nodes)) {
@@ -95,7 +98,9 @@ export const formatTreeData = <T extends TreeNode>(roots: T[], nodeFormatter: Fu
         if (Array.isArray(node.children)) {
           loop(node.children);
         }
-        Object.assign(node, nodeFormatter(node));
+        if (nodeFormatter) {
+          Object.assign(node, nodeFormatter(node));
+        }
       }
     }
   };
@@ -104,9 +109,9 @@ export const formatTreeData = <T extends TreeNode>(roots: T[], nodeFormatter: Fu
 };
 
 // 根据指定的层级剪切树
-export const cutTreeData = <T extends TreeNode>(roots: T[], level: number) => {
+export const cutTreeData = <T extends TreeNode<T>>(roots: T[], level: number) => {
   const holder = cloneDeep(roots);
-  const stack: T[] = [];
+  const stack: TreeNode[] = [];
   const loop = (nodes: T[]) => {
     nodes?.forEach((node) => {
       stack.push(node);
@@ -125,7 +130,7 @@ export const cutTreeData = <T extends TreeNode>(roots: T[], level: number) => {
 };
 
 // 根据条件获取树中节点
-export const getTreeNode = <T extends TreeNode>(roots: T[], condition: (node: T) => boolean) => {
+export const getTreeNode = <T extends TreeNode<T>>(roots: T[], condition: (node: T) => boolean) => {
   const holder = cloneDeep(roots);
   let going = true;
   let target;
@@ -150,7 +155,7 @@ export const getTreeNode = <T extends TreeNode>(roots: T[], condition: (node: T)
 };
 
 // 获取所有满足指定条件的子节点列表
-export const getFlattenChildren = <T extends TreeNode>(
+export const getFlattenChildren = <T extends TreeNode<T>>(
   root: T,
   condition: (node: T) => boolean,
 ) => {
@@ -176,7 +181,7 @@ export const getFlattenChildren = <T extends TreeNode>(
 };
 
 // 更新某个树中某个节点
-export const updateTreeNode = <T extends TreeNode>(
+export const updateTreeNode = <T extends TreeNode<T>>(
   roots: T[],
   condition: (node: T) => boolean,
   updater: (node: T) => any,
@@ -205,7 +210,7 @@ export const updateTreeNode = <T extends TreeNode>(
 };
 
 // 树结构扁平化
-export const flatTreeData = <T extends TreeNode>(roots: T[], getKey: (node: T) => React.Key) => {
+export const flatTreeData = <T extends TreeNode<T>>(roots: T[], getKey: (node: T) => React.Key) => {
   const holder = cloneDeep(roots);
   const arr: (Omit<T, 'children'> & { pid?: React.Key })[] = [];
   const loop = (nodes: T[], pid?: React.Key) => {
@@ -225,7 +230,7 @@ export const flatTreeData = <T extends TreeNode>(roots: T[], getKey: (node: T) =
 };
 
 // 获取满足指定条件的所有节点的父节点key列表
-export const getAllParentsKey = <T extends TreeNode>(
+export const getAllParentsKey = <T extends TreeNode<T>>(
   roots: T[],
   getKey: (node: T) => React.Key,
   condition: (node: Omit<T, 'children'> & { pid?: React.Key }) => boolean,
@@ -241,10 +246,35 @@ export const getAllParentsKey = <T extends TreeNode>(
   return arr;
 };
 
-/**
- * combine request url
- */
-export const getRequestUrl = (url: string) => {
+// 获取树中指定节点的所有父节点
+export function getTreeParents<T extends TreeNode>(
+  roots: Array<T>,
+  getKey: (node: T) => React.Key,
+  key: React.Key,
+) {
+  const stack: Array<T> = [];
+  let going = true;
+
+  const walker = (array: Array<T>) => {
+    array.forEach((item) => {
+      if (!going) return;
+      stack.push(item);
+      if (getKey(item) === key) {
+        going = false;
+      } else if (item.children) {
+        walker(item.children as T[]);
+      } else {
+        stack.pop();
+      }
+    });
+    if (going) stack.pop();
+  };
+
+  walker(roots);
+  return stack;
+}
+
+export const getWorkspacePrefix = () => {
   const workspaceString = sessionStorage.getItem('workspace');
   let workspace = '';
   if (workspaceString) {
@@ -258,8 +288,55 @@ export const getRequestUrl = (url: string) => {
       workspace = '';
     }
   }
+
+  return workspace;
+};
+
+/**
+ * combine request url
+ */
+export const getRequestUrl = (url: string) => {
+  const workspace = getWorkspacePrefix();
   if (workspace) {
     return `/${workspace}${url}`;
   }
   return url;
+};
+
+/**
+ * 复制指定文本到粘贴板
+ * @param text
+ */
+export const copy = (text: string) => {
+  const textarea = document.createElement('textarea');
+  // 选中
+  textarea.style.position = 'absolute';
+  textarea.style.clipPath = 'polygon(0px 0px,0px 0px,0px 0px,0px 0px)';
+  // 赋值
+  textarea.value = text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  // 复制
+  document.execCommand('copy', true);
+
+  document.body.removeChild(textarea);
+};
+
+// 字符串高亮
+export const highlightText = ({
+  text,
+  keyWord,
+  color = 'red',
+}: {
+  text: string;
+  keyWord: string;
+  color?: string;
+}) => {
+  const index = text.indexOf(keyWord);
+  if (index > -1) {
+    const beforeStr = text.substring(0, index);
+    const afterStr = text.substring(index + keyWord.length);
+    return `${beforeStr}<span style="color: ${color}">${keyWord}</span>${afterStr}`;
+  }
+  return text;
 };

@@ -6,8 +6,8 @@ public interface CompositeFolderMyDao {
 
     /**
      * 使用id对name字段进行正则匹配
-     * @param folderId
+     * @param folderName
      * @return
      */
-    CompositeFolder selectByName(String folderId);
+    CompositeFolder selectByName(String folderName, String belong);
 }

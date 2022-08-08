@@ -26,6 +26,7 @@ import IconFont from '@/components/IconFont';
 import Title from '@/components/Title';
 import { FolderBelong } from '@/constants/datadev';
 import { Folder } from '@/types/datadev';
+import { DESIGNTABLEFolderFormItem } from '../../../../components/FolderFormItem';
 
 interface EditLabelsProps {
   form: FormInstance;
@@ -242,7 +243,14 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
       </Title>
       <ProForm layout="inline" colon={false} form={form} submitter={false}>
         {renderFormList()}
-        <ProFormSelect
+        <DESIGNTABLEFolderFormItem
+          label="位置"
+          style={{ width:'216px'}}
+          onChange={(v) => {
+            labelValues.current.set('folderId', v)
+          }}
+        />
+        {/* <ProFormSelect
           name="folderId"
           label="位置"
           width="md"
@@ -254,7 +262,7 @@ const EditLabels: ForwardRefRenderFunction<unknown, EditLabelsProps> = ({ form, 
             showSearch: true,
             filterOption: (input: string, option: any) => option.label.indexOf(input) >= 0,
           }}
-        />
+        /> */}
       </ProForm>
     </Fragment>
   );

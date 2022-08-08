@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao">
 
+
+    <insert id="insert">
+        insert dev_job_udf(id, del, creator, create_time, editor, edit_time, udf_name, udf_type, file_name, hdfs_path,
+            return_type, return_sample, folder_id, description, command_format, udf_sample, source_name)
+        values (#{id}, #{del}, #{creator}, #{createTime}, #{editor}, #{editTime}, #{udfName}, #{udfType}, #{fileName}, #{hdfsPath},
+            #{returnType}, #{returnSample}, #{folderId}, #{description}, #{commandFormat}, #{udfSample}, #{sourceName})
+    </insert>
+
     <select id="getConcatHdfsPath" resultType="java.lang.String">
         select GROUP_CONCAT(hdfs_path) from dev_job_udf
         where id in (<foreach collection="list" item="id" separator=",">#{id}</foreach>)

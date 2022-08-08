@@ -17,13 +17,18 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
+import cn.zhengcaiyun.idata.develop.dto.measure.DimTableDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
+import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
+import javolution.io.Struct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -42,6 +47,11 @@ public class MetricController {
     @Autowired
     private TokenService tokenService;
 
+    @GetMapping("metricFolderTree")
+    public RestResult<List<DevelopFolderTreeNodeDto>> getMetricFolderTree(@RequestParam(value = "treeNodeName", required = false) String treeNodeName) {
+        return RestResult.success();
+    }
+
     @GetMapping("metric")
     public RestResult<MeasureDto> findByCode(@RequestParam("metricCode") String metricCode) {
         return RestResult.success(metricService.findMetric(metricCode));
@@ -49,8 +59,14 @@ public class MetricController {
 
     @GetMapping("metrics")
     public RestResult<List<MeasureDto>> getMetrics(@RequestParam("labelTag") String labelTag,
-                                                    @RequestParam(value = "labelCode", required = false) String labelCode) {
+                                                   @RequestParam(value = "labelCode", required = false) String labelCode) {
         return RestResult.success(metricService.findMetrics(labelTag));
+    }
+
+    @GetMapping("tableDateColumns")
+    public RestResult<TableInfoDto> getTableDateColumns(@RequestParam("metricCode") String metricCode,
+                                                        @RequestParam(value = "isAllColumns", required = false) Boolean isAllColumns) {
+        return RestResult.success(metricService.getTableDateColumns(metricCode, isAllColumns));
     }
 
     @GetMapping("metricsOrDimensions")
@@ -59,9 +75,10 @@ public class MetricController {
         return RestResult.success(metricService.findMetricsOrDimensions(labelCodes, labelTag));
     }
 
-    @GetMapping("metricSql")
-    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode) {
-        return RestResult.success(metricService.getMetricSql(metricCode));
+    @PostMapping("metricSql")
+    public RestResult<String> getMetricsSql(@RequestParam("metricCode") String metricCode,
+                                            @RequestBody List<DimTableDto> dimTables) {
+        return RestResult.success(metricService.getMetricSql(metricCode, dimTables));
     }
 
     @PostMapping("metric")

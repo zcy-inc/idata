@@ -27,12 +27,6 @@ export default [
         featureCode: 'F_MENU_DATA_DEVELOP',
       },
       {
-        path: '/datapi/measure',
-        name: '指标库',
-        component: './datapi/Measures',
-        featureCode: 'F_MENU_MEASURE_MANAGE',
-      },
-      {
         path: '/datapi/datasource',
         name: '数据源管理',
         component: './datapi/DataSource',
@@ -40,7 +34,7 @@ export default [
       },
       {
         path: '/datapi/tasks',
-        name: '任务列表',
+        name: '作业审批',
         component: './datapi/Tasks',
         featureCode: 'F_MENU_JOB_LIST',
       },
@@ -171,6 +165,80 @@ export default [
         featureCode: 'F_MENU_JOB_MONITORING',
       },
     ],
+  },
+  {
+    path: '/measure',
+    name: '数据指标',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/6c565c17-cb18-4678-8049-0d7d6f387877.svg',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/c5e01666-c8e9-48dd-89a0-42d950117528.svg',
+    featureCode: 'F_MENU_MEASURE_MANAGE',
+    routes: [
+      {
+        path: '/measure/list',
+        name: '指标',
+        component: './Measure/List',
+        featureCode: 'F_MENU_MEASURE_METRIC',
+      },
+      {
+        path: '/measure/edit/:id?',
+        name: '编辑指标详情',
+        component: './Measure/Edit/EditMetric',
+        hideInMenu: true
+      },
+      {
+        path: '/measure/view/:id',
+        name: '查看指标详情',
+        component: './Measure/Edit/ViewMetric',
+        hideInMenu: true
+      },
+      {
+        path: '/measure/modifier',
+        name: '修饰词',
+        component: './Measure/Modifier',
+        featureCode: 'F_MENU_MEASURE_MODIFIER',
+      },
+    ]
+  },
+  // 后端不能配数据地图；菜单写死，不需要根据enable判断能否展开;先用F_MENU_MEASURE_MANAGE让它能显示
+  {
+    path:'/outLink1',
+    name:"数据地图",
+    outLink: '/',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/afdd0ff9-65b8-4602-b8b7-5a7ec45e124a.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/aa2f4114-78dd-47cc-b20d-c6a374a114e2.png',
+    featureCode: 'F_MENU_DATA_MAP',
+  },
+  {
+    path:'/outLink2',
+    name:"小采BI",
+    outLink: '/itable/#/itable/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/896839e6-18ee-4c86-896f-7201835a6175.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/896839e6-18ee-4c86-896f-7201835a6175.png',
+    featureCode: 'F_MENU_XIAOCAI_BI',
+  },
+  {
+    path:'/outLink3',
+    name:"数据质量",
+    outLink: '/idata-pro/#/data-quality/monitoring/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/92612579-f054-42c6-89aa-89dd2e92999d.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/0d46004d-ad86-4e57-b4b4-9721f881aaf4.png',
+    featureCode: 'F_MENU_DATA_QUALITY',
+  },
+  {
+    path:'/outLink4',
+    name:"DataPi",
+    outLink: '/idata/#/datapi/apiDevelop',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/acb20dc4-957e-40ff-8fdb-8379b5620e13.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/9d13ea38-5034-4aee-a5c6-7379f5a52111.png',
+    featureCode: 'F_MENU_DATAPI',
+  },
+  {
+    path:'/outLink5',
+    name:"浑仪",
+    outLink: '/behavior-analysis/rulesManage/list',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/533d7a4e-debf-46d6-9299-d547d325b86e.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/0a4656b2-ccd0-43e3-b366-01d572f3e707.png',
+    featureCode: 'F_MENU_HUNYI',
   },
   {
     component: './404',

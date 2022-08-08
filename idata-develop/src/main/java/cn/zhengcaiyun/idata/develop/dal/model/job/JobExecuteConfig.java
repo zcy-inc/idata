@@ -137,6 +137,13 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
+     *   executor cores
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    private Integer execCores;
+
+    /**
+     * Database Column Remarks:
      *   作业运行状态（环境级），0：暂停运行；1：恢复运行
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
@@ -148,6 +155,13 @@ public class JobExecuteConfig {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
     private String execEngine;
+
+    /**
+     * Database Column Remarks:
+     *   自定义参数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    private String extProperties;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
@@ -329,6 +343,16 @@ public class JobExecuteConfig {
         this.execWorkerMem = execWorkerMem;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    public Integer getExecCores() {
+        return execCores;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    public void setExecCores(Integer execCores) {
+        this.execCores = execCores;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
     public Integer getRunningState() {
         return runningState;
@@ -347,5 +371,15 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
     public void setExecEngine(String execEngine) {
         this.execEngine = execEngine;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    public String getExtProperties() {
+        return extProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    public void setExtProperties(String extProperties) {
+        this.extProperties = extProperties;
     }
 }

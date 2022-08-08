@@ -38,6 +38,17 @@ public class FolderTool {
         String finalNamePrefix = namePrefix;
         return folderList.stream()
                 .filter(compositeFolder -> compositeFolder.getName().startsWith(finalNamePrefix))
-                .findFirst();
+                .filter(compositeFolder -> {
+                    String folderName = compositeFolder.getName();
+                    String folderPrefix;
+                    int idx = folderName.indexOf("DI#_");
+                    if (idx > 0) {
+                        folderPrefix = folderName.substring(0, idx + 4);
+                    } else {
+                        folderPrefix = folderName.substring(0, folderName.indexOf("#_") + 2);
+                    }
+                    if (finalNamePrefix.equals(folderPrefix)) return true;
+                    return false;
+                }).findFirst();
     }
 }

@@ -6,9 +6,11 @@ import cn.zhengcaiyun.idata.system.api.SystemConfigApi;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.util.Objects;
 
@@ -16,6 +18,7 @@ import static cn.zhengcaiyun.idata.system.dal.dao.SysConfigDynamicSqlSupport.sys
 import static com.google.common.base.Preconditions.checkState;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
+@DependsOn("flywayInitializer")
 @Configuration
 public class ClientConfiguration {
 
@@ -31,7 +34,12 @@ public class ClientConfiguration {
         String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setJdbc(jdbcUrl);
-        return new HivePool(connectInfo);
+
+        GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
+        genericObjectPoolConfig.setTestOnBorrow(true);
+        genericObjectPoolConfig.setTestOnReturn(true);
+        genericObjectPoolConfig.setTestOnCreate(true);
+        return new HivePool(connectInfo, genericObjectPoolConfig);
     }
 
 }

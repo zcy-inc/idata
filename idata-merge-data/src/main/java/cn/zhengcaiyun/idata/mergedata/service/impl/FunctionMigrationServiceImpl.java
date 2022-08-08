@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.mergedata.service.impl;
 
 import cn.zhengcaiyun.idata.develop.dal.dao.folder.CompositeFolderMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.mergedata.dal.old.OldIDataDao;
@@ -27,7 +28,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
     private OldIDataDao oldIDataDao;
 
     @Autowired
-    private DevJobUdfDao devJobUdfDao;
+    private DevJobUdfMyDao devJobUdfMyDao;
 
     @Autowired
     private CompositeFolderMyDao compositeFolderMyDao;
@@ -48,6 +49,8 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
                 "       t2.hdfs_path as hdfsPath, " +
                 "       t1.return_type as returnType, " +
                 "       t1.folder_id as folderId, " +
+                "       t1.folder_id as folderId, " +
+                "       t1.source_name as source_name, " +
                 "       t1.description as description " +
                 "from metadata.spark_udf t1 left join metadata.file_resource t2 on t1.resource_id = t2.id;";
         List<Map<String, Object>> list = oldIDataDao.selectList(sql);
@@ -61,13 +64,12 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
                     if (newId == null) {
                         disMappingIds.add(devJobUdf.getFolderId());
                     }
-
                     return devJobUdf;
                 })
                 .collect(Collectors.toList());
 
         // 插入新数据库
-        jobUdfList.forEach(e -> devJobUdfDao.insert(e));
+        jobUdfList.forEach(e -> devJobUdfMyDao.insert(e));
 
         if (CollectionUtils.isNotEmpty(disMappingIds)) {
             List<MigrateResultDto> resultDtoList = new ArrayList<>();
@@ -81,7 +83,7 @@ public class FunctionMigrationServiceImpl implements FunctionMigrationService {
     }
 
     private Long getMappingFolderId(Long folderId) {
-        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(IdPadTool.padId(folderId + "") + "#_");
+        CompositeFolder compositeFolder = compositeFolderMyDao.selectByName(IdPadTool.padId(folderId + "") + "#_", "DEV.FUN");
         if (compositeFolder != null) {
             return compositeFolder.getId();
         }

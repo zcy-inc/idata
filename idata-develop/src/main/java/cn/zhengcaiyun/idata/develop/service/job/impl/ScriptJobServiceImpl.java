@@ -70,7 +70,8 @@ public class ScriptJobServiceImpl implements ScriptJobService {
             }
             else {
                 if (existJobContentScript.getEditable().equals(EditableEnum.YES.val)) {
-                    DevJobContentScript jobContentScript = PojoUtil.copyOne(scriptJobDto, DevJobContentScript.class);
+                    DevJobContentScript jobContentScript = PojoUtil.copyOne(scriptJobDto, DevJobContentScript.class,
+                            "del", "createTime", "jobId", "editable", "version", "sourceResource", "scriptArguments");
                     jobContentScript.setId(existJobContentScript.getId());
                     jobContentScript.setEditor(operator);
                     scriptJobRepo.update(jobContentScript);

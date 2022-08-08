@@ -30,5 +30,5 @@ public interface DAGMigrationService {
 
     List<MigrateResultDto> migrateFolder();
 
-    List<MigrateResultDto> migrateDAG();
+    List<MigrateResultDto> migrateDAG(String cluster, String env);
 }

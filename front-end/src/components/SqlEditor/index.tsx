@@ -46,10 +46,11 @@ const SqlEditor: FC<
       options={{
         automaticLayout: true,
         suggestOnTriggerCharacters: true,
+        fontSize: 18
       }}
       editorDidMount={async (editor, monacoInner) => {
         const {
-          basicAutocompletionTips,
+          basicAutocompletionTips = [],
           dbTableNames = [],
           columns = [],
         } = await getWords(props.language?.toUpperCase() as AutoCompletionLangs);

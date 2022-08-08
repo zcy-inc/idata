@@ -20,6 +20,9 @@ package cn.zhengcaiyun.idata.develop.service.measure;
 import cn.zhengcaiyun.idata.connector.bean.dto.QueryResultDto;
 import cn.zhengcaiyun.idata.develop.dto.query.MeasureDataQueryDto;
 
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * @description: 查询指标数据
  * @author: yangjianhua
@@ -33,4 +36,5 @@ public interface MeasureDataService {
      * @return
      */
     QueryResultDto queryMeasureData(MeasureDataQueryDto measureDataQueryDto);
+    List<String> queryModifierValues(Long tableId, String columnName) throws SQLException;
 }

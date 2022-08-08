@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -382,7 +383,7 @@ public class LabelServiceImpl implements LabelService {
 
         checkArgument(!checkSysLabelCode(labelCode), "系统依赖的标签不能删除");
         // 查表若被引用则不准被删
-        if (!checkSysLabelCode(labelCode)) {
+        if (!checkSysLabelCode(labelCode) && !checkMeasureLabel(labelDefine.getLabelTag())) {
             List<DevLabel> existLabelList = devLabelDao.select(c -> c.where(devLabel.del ,isNotEqualTo(1),
                     and(devLabel.labelCode, isEqualTo(labelCode))));
             checkArgument(ObjectUtils.isEmpty(existLabelList), "标签被依赖，不能删除");
@@ -394,9 +395,6 @@ public class LabelServiceImpl implements LabelService {
         devLabelDao.update(c -> c.set(devLabel.del).equalTo(1)
                 .where(devLabel.labelCode, isEqualTo(labelCode),
                         and(devLabel.del, isNotEqualTo(1))));
-        // clear cache
-//        devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DESIGN_LABEL);
-
         return true;
     }
 
@@ -416,7 +414,8 @@ public class LabelServiceImpl implements LabelService {
                 || LabelTagEnum.USER_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.ENUM_LABEL.name().equals(labelDefine.getLabelTag())
                 || LabelTagEnum.ENUM_VALUE_LABEL.name().equals(labelDefine.getLabelTag())
-                || LabelTagEnum.DIMENSION_LABEL.name().equals(labelDefine.getLabelTag())) {
+                || LabelTagEnum.DIMENSION_LABEL.name().equals(labelDefine.getLabelTag())
+                || LabelTagEnum.MODIFIER_LABEL.name().equals(labelDefine.getLabelTag())) {
                 checkArgument(labelDto.getLabelParamValue() != null, "labelParamValue不能为空");
         }
         else {
@@ -525,13 +524,16 @@ public class LabelServiceImpl implements LabelService {
     public Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames) {
         checkArgument(columnNames != null && columnNames.size() > 0, "columnNames不能为空");
         List<LabelDto> columnLabelList = devLabelMyDao.selectLabelsBySubject(tableId, String.join(",", columnNames));
-        List<String> columnEnumValueCodeList = columnLabelList.stream().filter(columnLabel ->
-                columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE")).collect(Collectors.toList())
+        List<LabelDto> t = columnLabelList.stream().filter(columnLabel ->
+                columnLabel.getLabelParamValue() != null && columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE"))
+                .collect(Collectors.toList());
+        List<String> columnEnumValueCodeList = t
                 .stream().map(LabelDto::getLabelParamValue).collect(Collectors.toList());
         Map<String, String> columnEnumMap = enumService.getEnumValues(columnEnumValueCodeList)
                 .stream().collect(Collectors.toMap(DevEnumValue::getValueCode, DevEnumValue::getEnumValue));
         columnLabelList.forEach(columnLabel -> {
-            if (columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE") && columnEnumMap.containsKey(columnLabel.getLabelParamValue())) {
+            if (columnLabel.getLabelParamValue() != null && columnLabel.getLabelParamValue().endsWith(":ENUM_VALUE")
+                    && columnEnumMap.containsKey(columnLabel.getLabelParamValue())) {
                 columnLabel.setEnumNameOrValue(columnEnumMap.get(columnLabel.getLabelParamValue()));
             }
         });
@@ -550,6 +552,11 @@ public class LabelServiceImpl implements LabelService {
                         and(devLabel.columnName, isEqual(labelDto.getColumnName())),
                         and(devLabel.del, isNotEqualTo(1))));
         return true;
+    }
+
+    @Override
+    public List<TimeDimEnum> findTimeDimEnums() {
+        return Arrays.asList(TimeDimEnum.values());
     }
 
     @Override
@@ -577,5 +584,11 @@ public class LabelServiceImpl implements LabelService {
     @Override
     public void deleteDeprecatedHiveColumn(Long columnId, String hiveColumnName) {
         devLabelMyDao.deleteDeprecatedHiveColumn(columnId, hiveColumnName);
+    }
+
+    private Boolean checkMeasureLabel(String labelTag) {
+        LabelTagEnum.valueOf(labelTag);
+        return labelTag.equals(LabelTagEnum.MODIFIER_LABEL.name()) || labelTag.equals(LabelTagEnum.MODIFIER_LABEL_DISABLE.name())
+                || labelTag.contains("_METRIC_LABEL_");
     }
 }

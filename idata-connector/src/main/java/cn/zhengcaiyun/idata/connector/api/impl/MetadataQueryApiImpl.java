@@ -19,17 +19,20 @@ package cn.zhengcaiyun.idata.connector.api.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.commons.exception.ExecuteSqlException;
 import cn.zhengcaiyun.idata.connector.api.MetadataQueryApi;
 import cn.zhengcaiyun.idata.connector.bean.dto.ColumnInfoDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.TableTechInfoDto;
+import cn.zhengcaiyun.idata.connector.clients.hive.ConnectInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.Jive;
 import cn.zhengcaiyun.idata.connector.clients.hive.model.MetadataInfo;
+import cn.zhengcaiyun.idata.connector.clients.hive.pool.HivePool;
 import cn.zhengcaiyun.idata.connector.spi.hive.HiveService;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,9 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     private HiveService hiveService;
     @Autowired
     private SysConfigDao sysConfigDao;
+
+    @Autowired
+    private HivePool hivePool;
 
     @Override
     public TableTechInfoDto getTableTechInfo(String db, String table) {
@@ -98,6 +104,10 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
                 String tableName = rs.getString("TABLE_NAME");  //表名
                 String tableType = rs.getString("TABLE_TYPE");  //表类型
                 String remarks = rs.getString("REMARKS");       //表备注
+                if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+                    String tableSchema = rs.getString("TABLE_SCHEM");
+                    tableName = tableSchema + "." + tableName;
+                }
                 tableNames.add(tableName);
             }
         } catch (SQLException ex) {
@@ -110,14 +120,14 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
     public List<ColumnInfoDto> getTableColumns(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String username, String password, String dbName, String schema, String tableName) {
         if (DataSourceTypeEnum.mysql != sourceTypeEnum && DataSourceTypeEnum.postgresql != sourceTypeEnum)
             return Lists.newArrayList();
-        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, schema);
+        String jdbcUrl = getJdbcUrl(sourceTypeEnum, host, port, dbName, null);
         if (StringUtils.isBlank(jdbcUrl)) {
             return Lists.newArrayList();
         }
 
         List<ColumnInfoDto> tableColumns = Lists.newArrayList();
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             ResultSet rs = conn.getMetaData().getColumns(dbName, "%", tableName, "%")) {
+             ResultSet rs = conn.getMetaData().getColumns(dbName, StringUtils.isBlank(schema) ? "%" : schema, tableName, "%")) {
             while (rs.next()) {
                 String columnName = rs.getString("COLUMN_NAME");  //列名
                 String dataTypeName = rs.getString("TYPE_NAME");  //java.sql.Types类型名称(列类型名称)

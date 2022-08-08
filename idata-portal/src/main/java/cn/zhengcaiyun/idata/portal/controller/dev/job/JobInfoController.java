@@ -18,7 +18,6 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
@@ -27,23 +26,27 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoUpdateRequest;
+import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
+import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
+import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import javax.validation.Valid;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * job-basic-controller
@@ -128,6 +131,35 @@ public class JobInfoController {
     }
 
     /**
+     * 新增DI作业接口
+     * 由于DI前端下拉和数据库模型映射不一致，需要做额外转换，所以单独addJobInfo()拉出一个接口
+     *
+     * @return
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/di")
+    public RestResult<JobInfoDto> addDIJobInfo(@RequestBody DIJobInfoAddRequest request) throws IllegalAccessException {
+        JobInfoDto jobInfoDto = new JobInfoDto();
+        BeanUtils.copyProperties(request, jobInfoDto);
+
+        String jobType = request.getJobType();
+        String syncMode = request.getSyncMode();
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        Table<String, String, JobTypeEnum> table = HashBasedTable.create();
+        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW);
+        table.put("DI", "BATCH", JobTypeEnum.DI_BATCH);
+        table.put("DI", "STREAM", JobTypeEnum.DI_STREAM);
+
+        // 映射成数据库的jobType
+        jobInfoDto.setJobType(table.get(jobType, syncMode));
+
+        Long id = jobInfoService.addJob(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (Objects.isNull(id)) return RestResult.error("新增作业失败", "");
+
+        return getJobInfo(id);
+    }
+
+    /**
      * 编辑作业信息
      *
      * @param jobInfoDto 作业基础信息
@@ -135,6 +167,36 @@ public class JobInfoController {
      */
     @PutMapping
     public RestResult<JobInfoDto> editJobInfo(@RequestBody JobInfoDto jobInfoDto) throws IllegalAccessException {
+        Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
+        if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
+
+        return getJobInfo(jobInfoDto.getId());
+    }
+
+    /**
+     * 编辑DI作业信息
+     *
+     * @param request 作业基础信息
+     * @return
+     */
+    @PutMapping("/di")
+    public RestResult<JobInfoDto> editDIJobInfo(@RequestBody @Valid DIJobInfoUpdateRequest request) throws IllegalAccessException {
+        JobInfoDto jobInfoDto = new JobInfoDto();
+        BeanUtils.copyProperties(request, jobInfoDto);
+
+        String jobType = request.getJobType();
+        String syncMode = request.getSyncMode();
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        Table<String, String, JobTypeEnum> table = HashBasedTable.create();
+        table.put("BACK_FLOW", "BATCH", JobTypeEnum.BACK_FLOW);
+        table.put("DI", "BATCH", JobTypeEnum.DI_BATCH);
+        table.put("DI", "STREAM", JobTypeEnum.DI_STREAM);
+
+        // 映射成数据库的jobType
+        jobInfoDto.setJobType(table.get(jobType, syncMode));
+        jobInfoDto.setEditTime(new Date());
+        jobInfoDto.setEditor(OperatorContext.getCurrentOperator().getNickname());
+
         Boolean ret = jobInfoService.editJobInfo(jobInfoDto, OperatorContext.getCurrentOperator());
         if (BooleanUtils.isFalse(ret)) return RestResult.error("编辑作业失败", "");
 
@@ -150,6 +212,38 @@ public class JobInfoController {
     @GetMapping("/{id}")
     public RestResult<JobInfoDto> getJobInfo(@PathVariable Long id) {
         return RestResult.success(jobInfoService.getJobInfo(id));
+    }
+
+    /**
+     * 适配获取作业信息
+     *
+     * @param id 作业id
+     * @return
+     */
+    @GetMapping("/di/{id}")
+    public RestResult<DIJobInfoResponse> getDIJobInfo(@PathVariable Long id) {
+        JobInfoDto jobInfo = jobInfoService.getJobInfo(id);
+
+        DIJobInfoResponse response = new DIJobInfoResponse();
+        BeanUtils.copyProperties(jobInfo, response);
+
+        //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
+        JobTypeEnum jobType = jobInfo.getJobType();
+        switch (jobType) {
+            case DI_STREAM:
+                response.setJobType("DI");
+                response.setSyncMode("STREAM");
+                break;
+            case DI_BATCH:
+                response.setJobType("DI");
+                response.setSyncMode("BATCH");
+                break;
+            case BACK_FLOW:
+                response.setJobType("BACK_FLOW");
+                response.setSyncMode("BATCH");
+                break;
+        }
+        return RestResult.success(response);
     }
 
     /**
@@ -240,6 +334,28 @@ public class JobInfoController {
             throw new IllegalAccessException("没有任务监控权限");
         }
         return RestResult.success(jobInfoService.pagingOverhangJob(condition, PageParam.of(limit, offset)));
+    }
+
+    /**
+     * 移动作业
+     *
+     * @param batchOperationReq 请求对象
+     * @return
+     */
+    @PostMapping("/move")
+    public RestResult<Boolean> moveJob(@RequestBody JobBatchOperationExtReq batchOperationReq) {
+        return RestResult.success(jobInfoService.moveJob(batchOperationReq.getJobIds(), batchOperationReq.getDestFolderId(), OperatorContext.getCurrentOperator()));
+    }
+
+    /**
+     * 获取作业扩展信息
+     *
+     * @param batchOperationReq
+     * @return
+     */
+    @PostMapping("/extInfo")
+    public RestResult<List<JobExtInfoDto>> getExtJobInfo(@RequestBody JobBatchOperationReq batchOperationReq) {
+        return RestResult.success(jobInfoService.getJobExtInfo(batchOperationReq.getJobIds()));
     }
 
 }

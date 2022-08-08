@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.dto.job;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlResultDto;
 
+import java.util.List;
+
 /**
  * @author caizhedong
  * @date 2021-11-22 上午10:58
@@ -26,12 +28,22 @@ import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySqlResultDto;
 
 public class QueryRunResultDto extends LivySqlResultDto {
     private LivySessionLogDto queryRunLog;
+    private List<String> resultHeader;
 
+    // GaS
     public LivySessionLogDto getQueryRunLog() {
         return queryRunLog;
     }
 
     public void setQueryRunLog(LivySessionLogDto queryRunLog) {
         this.queryRunLog = queryRunLog;
+    }
+
+    public List<String> getResultHeader() {
+        return resultHeader;
+    }
+
+    public void setResultHeader(List<String> resultHeader) {
+        this.resultHeader = resultHeader;
     }
 }

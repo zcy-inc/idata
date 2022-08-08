@@ -51,6 +51,9 @@ public class PageInfoDto<T> {
      */
     private Integer pageNo;
 
+    public PageInfoDto() {
+    }
+
     public PageInfoDto(Integer currentPage, Integer pageSize) {
         if (currentPage == null) {
             currentPage = 1;

@@ -4,12 +4,12 @@ import { Drawer, Table } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
 import { getTaskHistory } from '@/services/datadev';
-import { Task, TaskHistoryItem } from '@/types/datadev';
+import { DIJobBasicInfo, TaskHistoryItem } from '@/types/datadev';
 
 interface DrawerHistoryProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: DIJobBasicInfo;
 }
 const fmt = 'YYYY-MM-DD HH:mm:ss';
 
@@ -73,7 +73,7 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
             key: 'options',
             render: (_) => (
               <a href={_.businessLogsUrl} target="_blank">
-                查看
+                查看日志
               </a>
             ),
           },

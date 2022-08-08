@@ -115,4 +115,9 @@ public class DataSourceRepoImpl implements DataSourceRepo {
         return dataSourceDao.select(dsl -> dsl.where(dataSource.name, isEqualTo(name),
                 and(dataSource.del, isEqualTo(DEL_NO.val))));
     }
+
+    @Override
+    public List<DataSource> getDataSources() {
+        return dataSourceDao.select(dsl -> dsl.where(dataSource.del, isEqualTo(DEL_NO.val)));
+    }
 }

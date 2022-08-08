@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.mergedata.util;
 
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,27 @@ public class DagTool {
     public static Optional<DAGInfo> findDagByNewId(final Long newDagId, final List<DAGInfo> dagInfoList) {
         return dagInfoList.stream()
                 .filter(dagInfo -> dagInfo.getId().equals(newDagId))
+                .findFirst();
+    }
+
+    public static Optional<DAGInfo> findLayerDag(final String dwLayerCode, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getDwLayerCode().equals(dwLayerCode))
+                .findFirst();
+    }
+
+    public static Optional<DAGInfo> findLayerDagInName(final String layer, final List<DAGInfo> dagInfoList) {
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getName().indexOf(layer) > 0)
+                .findFirst();
+    }
+
+    public static Optional<DAGInfo> findDWDLayerDag(final String shortLayerCode, final List<DAGInfo> dagInfoList) {
+        if (StringUtils.isBlank(shortLayerCode)) {
+            return Optional.empty();
+        }
+        return dagInfoList.stream()
+                .filter(dagInfo -> dagInfo.getName().indexOf("DWD-1D-SUB-" + shortLayerCode.toUpperCase()) > 0)
                 .findFirst();
     }
 }

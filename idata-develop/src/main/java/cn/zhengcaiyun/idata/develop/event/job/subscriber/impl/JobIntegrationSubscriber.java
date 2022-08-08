@@ -19,6 +19,8 @@ package cn.zhengcaiyun.idata.develop.event.job.subscriber.impl;
 
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
+import cn.zhengcaiyun.idata.develop.constant.Constants;
+import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
@@ -28,6 +30,8 @@ import cn.zhengcaiyun.idata.develop.event.job.*;
 import cn.zhengcaiyun.idata.develop.event.job.bus.JobEventBus;
 import cn.zhengcaiyun.idata.develop.event.job.subscriber.IJobEventSubscriber;
 import cn.zhengcaiyun.idata.develop.integration.schedule.IJobIntegrator;
+import cn.zhengcaiyun.idata.develop.util.DagJobPair;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
@@ -37,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -138,6 +143,10 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
             }
             JobInfo jobInfo = jobInfoOptional.get();
             for (JobExecuteConfig executeConfig : executeConfigList) {
+                if (Constants.DEFAULT_DAG_ID == executeConfig.getSchDagId()) {
+                    LOGGER.warn("Job: {} dag id is 0, do not need to delete it.", event.getJobId());
+                    continue;
+                }
                 jobIntegrator.unBindDag(jobInfo, executeConfig.getSchDagId(), executeConfig.getEnvironment());
                 jobIntegrator.delete(jobInfo, executeConfig.getEnvironment());
             }
@@ -268,8 +277,9 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
     @Subscribe
     public void buildJobRelation(JobBuildPrevRelationEvent event) {
         try {
+            String environment = event.getEnvironment();
             Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(event.getJobId());
-            Optional<JobExecuteConfig> executeConfigOptional = jobExecuteConfigRepo.query(event.getJobId(), event.getEnvironment());
+            Optional<JobExecuteConfig> executeConfigOptional = jobExecuteConfigRepo.query(event.getJobId(), environment);
             if (jobInfoOptional.isEmpty()) {
                 event.processFailed("作业不存在");
                 return;
@@ -280,6 +290,31 @@ public class JobIntegrationSubscriber implements IJobEventSubscriber {
             }
             JobInfo jobInfo = jobInfoOptional.get();
             JobExecuteConfig executeConfig = executeConfigOptional.get();
+
+            // 查询前置作业状态，用于设置跨DAG依赖创建dependent节点时指定相同状态
+            List<DagJobPair> addingPrevRelations = event.getAddingPrevRelations();
+            if (!CollectionUtils.isEmpty(addingPrevRelations)) {
+                for (DagJobPair dagJobPair : addingPrevRelations) {
+                    if (executeConfig.getSchDagId().equals(dagJobPair.getDagId())) {
+                        continue;
+                    }
+
+                    List<Long> prevJobIds = dagJobPair.getJobIds();
+                    if (!CollectionUtils.isEmpty(prevJobIds)) {
+                        Map<Long, RunningStateEnum> jobStateMap = Maps.newHashMap();
+                        for (Long prevJobId : prevJobIds) {
+                            Optional<JobExecuteConfig> prevJobExecCfgOptional = jobExecuteConfigRepo.query(prevJobId, environment);
+                            if (prevJobExecCfgOptional.isPresent()) {
+                                Optional<RunningStateEnum> stateEnumOptional = RunningStateEnum.getEnum(prevJobExecCfgOptional.get().getRunningState());
+                                RunningStateEnum stateEnum = stateEnumOptional.isPresent() ? stateEnumOptional.get() : RunningStateEnum.resume;
+                                jobStateMap.put(prevJobId, stateEnum);
+                            }
+                        }
+                        dagJobPair.setJobStateMap(jobStateMap);
+                    }
+                }
+            }
+
             jobIntegrator.buildJobRelation(jobInfo, executeConfig, event.getEnvironment(),
                     event.getAddingPrevRelations(), event.getRemovingPrevRelations());
         } catch (ExternalIntegrationException iex) {

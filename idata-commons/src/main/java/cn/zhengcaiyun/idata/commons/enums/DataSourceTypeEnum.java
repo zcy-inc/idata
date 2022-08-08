@@ -41,6 +41,7 @@ public enum DataSourceTypeEnum {
     mssql,
     kafka,
     doris,
+    starrocks,
     csv,
     ;
 

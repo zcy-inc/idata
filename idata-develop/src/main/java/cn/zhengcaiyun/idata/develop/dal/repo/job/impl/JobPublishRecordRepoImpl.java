@@ -38,7 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.JOB_EXECUTE_CONFIG;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -96,9 +96,11 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                                 and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
                                 and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
                                 and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                                and(jobPublishRecord.publishStatus, isInWhenPresent(condition.getPublishStatusList())),
                                 and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
                                 and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
-                                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+                                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
                         ).orderBy(jobPublishRecord.id.descending())
                         .limit(limit).offset(offset)
         );
@@ -112,10 +114,29 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                 and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
                 and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                and(jobPublishRecord.publishStatus, isInWhenPresent(condition.getPublishStatusList())),
                 and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
                 and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
-                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator()))
+                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
         ));
+    }
+
+    @Override
+    public List<JobPublishRecord> queryList(JobPublishRecordCondition condition) {
+        return jobPublishRecordDao.select(dsl -> dsl.where(
+                jobPublishRecord.jobId, isEqualToWhenPresent(condition.getJobId()),
+                and(jobPublishRecord.jobId, isInWhenPresent(condition.getJobIds())),
+                and(jobPublishRecord.jobContentVersion, isEqualToWhenPresent(condition.getJobContentVersion())),
+                and(jobPublishRecord.jobContentId, isEqualToWhenPresent(condition.getJobContentId())),
+                and(jobPublishRecord.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(jobPublishRecord.publishStatus, isEqualToWhenPresent(condition.getPublishStatus())),
+                and(jobPublishRecord.publishStatus, isInWhenPresent(condition.getPublishStatusList())),
+                and(jobPublishRecord.jobTypeCode, isEqualToWhenPresent(condition.getJobTypeCode())),
+                and(jobPublishRecord.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
+                and(jobPublishRecord.creator, isEqualToWhenPresent(condition.getSubmitOperator())),
+                and(jobPublishRecord.del, isEqualTo(DeleteEnum.DEL_NO.val))
+        ).orderBy(jobPublishRecord.id.descending()));
     }
 
     @Override
@@ -203,9 +224,9 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                         and(jobPublishRecord.publishStatus, isEqualTo(PublishStatusEnum.PUBLISHED.val))));
 
         // 修改配置运行状态
-        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.runningState).equalTo(RunningStateEnum.resume.val)
-                .where(jobExecuteConfig.jobId, isEqualTo(record.getJobId()),
-                        and(jobExecuteConfig.environment, isEqualTo(record.getEnvironment()))));
+        jobExecuteConfigDao.update(dsl -> dsl.set(JOB_EXECUTE_CONFIG.runningState).equalTo(RunningStateEnum.resume.val)
+                .where(JOB_EXECUTE_CONFIG.jobId, isEqualTo(record.getJobId()),
+                        and(JOB_EXECUTE_CONFIG.environment, isEqualTo(record.getEnvironment()))));
 
         //更新状态为发布
         JobPublishRecord publishedRecord = new JobPublishRecord();

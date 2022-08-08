@@ -36,6 +36,7 @@ import org.dom4j.io.SAXReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -144,6 +145,24 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Transactional(rollbackFor = Throwable.class)
     public List<ConfigDto> editSystemConfigs(List<ConfigDto> configs, String editor) {
         return configs.stream().map(config -> editConfig(config, editor)).collect(Collectors.toList());
+    }
+
+    @Override
+    public String getValueWithCommon(String keyOne, String valueAttr) {
+        ConfigDto configDto = getSystemConfigByKey(keyOne);
+        ConfigValueDto configValueDto = configDto.getValueOne().get(valueAttr);
+        if (configValueDto == null) {
+            return null;
+        }
+        return configValueDto.getConfigValue();
+    }
+
+    @Override
+    public <T> T getValueWithCommon(String keyOne, String valueAttr, Class<T> clazz) {
+        String valueStr = getValueWithCommon(keyOne, valueAttr);
+        DefaultConversionService service = new DefaultConversionService();
+        checkArgument(service.canConvert(String.class, clazz), "conversionService error：类型不能转换");
+        return service.convert(valueStr, clazz);
     }
 
     private boolean checkJdbcConnection(ConnectionDto connection) {

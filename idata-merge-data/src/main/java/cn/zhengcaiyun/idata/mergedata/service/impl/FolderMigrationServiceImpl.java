@@ -56,26 +56,26 @@ public class FolderMigrationServiceImpl implements FolderMigrationService {
         doMigrate(udfList, udfIdMapping);
 
         // 2. 迁移数据表文件夹
-        sql =
-            "select t1.id, " +
-            "       t1.del, " +
-            "       t1.creator, " +
-            "       t1.editor, " +
-            "       t1.create_time as createTime, " +
-            "       t1.edit_time as editTime, " +
-            "       t1.folder_name as name, " +
-            "       'FOLDER' as type, " +
-            "       'DESIGN.TABLE' as belong, " +
-            "       t1.parent_id as parentId " +
-            "from idata.table_folder t1";
-        List<Map<String, Object>> tableFolderList = oldIDataDao.selectList(sql);
-        List<CompositeFolder> tableList = tableFolderList.stream()
-                .map(e -> JSON.parseObject(JSON.toJSONString(e), CompositeFolder.class))
-                .collect(Collectors.toList());
-        // 初始化顶层id，因为顶层文件夹id不插入
-        Map<Long, Long> tableIdMapping = new HashMap<>();
-        tableIdMapping.put(-1L, 10005L);
-        doMigrate(tableList, tableIdMapping);
+//        sql =
+//            "select t1.id, " +
+//            "       t1.del, " +
+//            "       t1.creator, " +
+//            "       t1.editor, " +
+//            "       t1.create_time as createTime, " +
+//            "       t1.edit_time as editTime, " +
+//            "       t1.folder_name as name, " +
+//            "       'FOLDER' as type, " +
+//            "       'DESIGN.TABLE' as belong, " +
+//            "       t1.parent_id as parentId " +
+//            "from idata.table_folder t1";
+//        List<Map<String, Object>> tableFolderList = oldIDataDao.selectList(sql);
+//        List<CompositeFolder> tableList = tableFolderList.stream()
+//                .map(e -> JSON.parseObject(JSON.toJSONString(e), CompositeFolder.class))
+//                .collect(Collectors.toList());
+//        // 初始化顶层id，因为顶层文件夹id不插入
+//        Map<Long, Long> tableIdMapping = new HashMap<>();
+//        tableIdMapping.put(-1L, 10005L);
+//        doMigrate(tableList, tableIdMapping);
 
         // 3. 迁移集成
         sql =

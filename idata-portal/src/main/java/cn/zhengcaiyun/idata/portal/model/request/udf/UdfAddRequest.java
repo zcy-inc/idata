@@ -84,6 +84,16 @@ public class UdfAddRequest {
     @ApiModelProperty("示例")
     private String udfSample;
 
+    /**
+     * java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）
+     */
+    private String sourceName;
+
+    /**
+     *   是否是全局类型函数，1：是，0：否
+     */
+    private Integer globalFun;
+
     public String getUdfName() {
         return udfName;
     }
@@ -162,5 +172,21 @@ public class UdfAddRequest {
 
     public void setUdfSample(String udfSample) {
         this.udfSample = udfSample;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public Integer getGlobalFun() {
+        return globalFun;
+    }
+
+    public void setGlobalFun(Integer globalFun) {
+        this.globalFun = globalFun;
     }
 }

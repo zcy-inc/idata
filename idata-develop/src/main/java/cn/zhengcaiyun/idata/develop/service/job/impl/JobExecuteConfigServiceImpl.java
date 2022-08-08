@@ -25,10 +25,8 @@ import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
-import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobWriteModeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.RunningStateEnum;
+import cn.zhengcaiyun.idata.develop.constant.Constants;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
@@ -101,9 +99,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         JobExecuteConfigDto executeConfigDto = dto.getExecuteConfig();
         List<JobDependenceDto> dependenceDtoList = dto.getDependencies();
         JobOutputDto outputDto = dto.getOutput();
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+
         checkExecuteConfig(executeConfigDto);
         checkDependConfig(jobId, dependenceDtoList);
-        checkOutputConfig(outputDto);
+        checkOutputConfig(jobInfoOptional.get(), outputDto);
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
         if (configCombinationOptional.isEmpty()) {
@@ -111,7 +112,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             addConfig(jobId, environment, executeConfigDto, dependenceDtoList, outputDto, operator);
         } else {
             JobConfigCombination configCombination = configCombinationOptional.get();
-            checkState(Objects.equals(RunningStateEnum.pause.val, configCombination.getExecuteConfig().getRunningState()), "作业在%s环境未暂停，不能修改配置", environment);
             updateConfig(jobId, environment, configCombination, executeConfigDto, dependenceDtoList, outputDto, operator);
         }
 
@@ -127,9 +127,25 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (configCombinationOptional.isEmpty()) return null;
 
         JobConfigCombinationDto combinationDto = JobConfigCombinationDto.from(configCombinationOptional.get());
-        combinationDto.setDependencies(fillDependenceInfo(combinationDto.getDependencies()));
+        combinationDto.setDependencies(fillDependenceInfo(combinationDto.getDependencies(), environment));
         combinationDto.setOutput(fillJobOutputInfo(combinationDto.getOutput()));
         return combinationDto;
+    }
+
+    @Override
+    public List<JobDependenceDto> deriveDependencies(Long jobId, String environment, Integer version) {
+        checkArgument(Objects.nonNull(jobId), "作业编号为空");
+        checkArgument(StringUtils.isNotBlank(environment), "环境参数为空");
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(jobId);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+        JobInfo jobInfo = jobInfoOptional.get();
+        if (JobTypeEnum.SQL_SPARK.getCode().equals(jobInfo.getJobType())) {
+            return fillDependenceInfo(jobManager.deriveDependenciesForSparkSql(jobInfo, environment, version), environment);
+        } else if (JobTypeEnum.BACK_FLOW.getCode().equals(jobInfo.getJobType())) {
+            return fillDependenceInfo(jobManager.deriveDependenciesForBackFlow(jobInfo, environment, version), environment);
+        } else {
+            throw new IllegalArgumentException("当前支持Spark Sql和数据回流作业自动获取依赖");
+        }
     }
 
     @Override
@@ -162,24 +178,36 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         // 更新作业输出
         jobOutputRepo.delete(jobId, environment);
         JobOutput output;
-        if (Objects.nonNull(outputDto)) {
+        if (Objects.nonNull(outputDto)
+                && Objects.nonNull(outputDto.getDestDataSourceId())
+                && StringUtils.isNotBlank(outputDto.getDestTable())) {
             output = buildOutputConfig(jobId, environment, outputDto, operator);
             jobOutputRepo.save(output);
         }
 
-        if (isDagChanged(executeConfig, existExecuteConfig)) {
-            if (hasPrevOrPostRelation(jobId, environment, dependenceList, existDependenceList)) {
-                throw new BizProcessException("作业存在上下游依赖关系，不能修改DAG");
-            }
-            changeDag(jobId, executeConfig, existExecuteConfig, environment, operator);
+        if (Constants.DEFAULT_DAG_ID == existExecuteConfig.getSchDagId()) {
+            bindDag(jobId, executeConfig.getSchDagId(), environment, true, operator);
+            addPrevJobDependency(jobId, environment, dependenceList, operator);
         } else {
-            // dag不变，只变更作业依赖
-            updatePrevJobDependency(jobId, environment, dependenceList, existDependenceList, operator);
-        }
+            if (isDagChanged(executeConfig, existExecuteConfig)) {
+                checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改DAG配置", environment);
+                if (hasPrevOrPostRelation(jobId, environment, dependenceList, existDependenceList)) {
+                    throw new BizProcessException("作业存在上下游依赖关系，请先去除依赖再修改DAG");
+                }
+                changeDag(jobId, executeConfig, existExecuteConfig, environment, operator);
+            } else {
+                // dag不变，只变更作业依赖
+                if (isChangePrevRelation(dependenceList, existDependenceList)) {
+                    checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改依赖配置", environment);
+                    updatePrevJobDependency(jobId, environment, dependenceList, existDependenceList, operator);
+                }
+            }
 
-        // 修改调度配置
-        if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
-            changeSchedule(jobId, environment, operator);
+            // 修改调度配置
+            if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
+                checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改调度配置", environment);
+                changeSchedule(jobId, environment, operator);
+            }
         }
     }
 
@@ -193,7 +221,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             jobDependenceRepo.addDependence(dependenceList);
         }
         JobOutput output;
-        if (Objects.nonNull(outputDto)) {
+        if (Objects.nonNull(outputDto)
+                && Objects.nonNull(outputDto.getDestDataSourceId())
+                && StringUtils.isNotBlank(outputDto.getDestTable())) {
             output = buildOutputConfig(jobId, environment, outputDto, operator);
             jobOutputRepo.save(output);
         }
@@ -204,16 +234,28 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private void changeDag(Long jobId, JobExecuteConfig executeConfig, JobExecuteConfig existExecuteConfig, String environment, Operator operator) {
         unbindDag(jobId, existExecuteConfig.getSchDagId(), environment, operator);
-        bindDag(jobId, executeConfig.getSchDagId(), environment, false, operator);
+        Boolean isFirstBind = Boolean.FALSE;
+        if (Objects.isNull(existExecuteConfig.getSchDagId()) || existExecuteConfig.getSchDagId() <= Constants.DEFAULT_DAG_ID) {
+            // 作业数据迁移时，dag id 默认为0，此时切换DAG需要新建DS任务
+            isFirstBind = Boolean.TRUE;
+        }
+        bindDag(jobId, executeConfig.getSchDagId(), environment, isFirstBind, operator);
     }
 
     private void bindDag(Long jobId, Long bindDagId, String environment, Boolean isFirstBind, Operator operator) {
+        if (Constants.DEFAULT_DAG_ID == bindDagId)
+            return;
+
         // 发布job绑定DAG事件
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_BIND_DAG, environment, isFirstBind ? "{\"firstBind\":true, \"bindDagId\":" + bindDagId + "}" : "{\"bindDagId\":" + bindDagId + "}", operator);
         jobEventPublisher.whenBindDag(eventLog, bindDagId, isFirstBind);
     }
 
     private void unbindDag(Long jobId, Long unbindDagId, String environment, Operator operator) {
+        if (Objects.isNull(unbindDagId) || unbindDagId <= Constants.DEFAULT_DAG_ID) {
+            // 作业数据迁移时，dag id 默认为0，此时切换DAG不需要解绑
+            return;
+        }
         // 发布job解绑DAG事件
         JobEventLog eventLog = jobManager.logEvent(jobId, EventTypeEnum.JOB_UNBIND_DAG, environment, "{\"unbindDagId\":" + unbindDagId + "}", operator);
         jobEventPublisher.whenUnBindDag(eventLog, unbindDagId);
@@ -226,8 +268,6 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     }
 
     private void updatePrevJobDependency(Long jobId, String environment, List<JobDependence> newDependenceList, List<JobDependence> oldDependenceList, Operator operator) {
-        if (!isChangePrevRelation(newDependenceList, oldDependenceList)) return;  // 依赖关系未变
-
         List<DagJobPair> addingPrevJobs = null;
         List<DagJobPair> removingPrevJobs = null;
         if (isOnlyAddingPrevRelation(newDependenceList, oldDependenceList)) {
@@ -344,7 +384,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
     private JobOutput buildOutputConfig(Long jobId, String environment, JobOutputDto dto, Operator operator) {
         dto.setOperator(operator);
-        if (JobWriteModeEnum.UPSERT.name().equals(dto.getDestWriteMode())) {
+        if (WriteModeEnum.SqlEnum.UPSERT.name().equals(dto.getDestWriteMode())) {
             checkArgument(StringUtils.isNotEmpty(dto.getJobTargetTablePk()), "写入模式为UPSERT时目标表主键不能为空");
         }
         JobOutput output = dto.toModel();
@@ -373,6 +413,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
     private JobOutputDto fillJobOutputInfo(JobOutputDto output) {
         if (Objects.isNull(output)) return null;
 
+        if (Constants.DEFAULT_DATASOURCE_ID == output.getDestDataSourceId()) {
+            return output;
+        }
         DataSourceDto dto = dataSourceApi.getDataSource(output.getDestDataSourceId());
         if (Objects.isNull(dto)) return output;
 
@@ -380,7 +423,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         return output;
     }
 
-    private List<JobDependenceDto> fillDependenceInfo(List<JobDependenceDto> dependencies) {
+    private List<JobDependenceDto> fillDependenceInfo(List<JobDependenceDto> dependencies, String environment) {
         if (CollectionUtils.isEmpty(dependencies)) return dependencies;
 
         List<Long> jobIds = Lists.newArrayList();
@@ -402,6 +445,12 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             dagInfoMap = dagInfoList.stream().collect(Collectors.toMap(DAGInfo::getId, Function.identity()));
         }
 
+        Map<Long, Integer> prevJobStateMap = Maps.newHashMap();
+        List<JobExecuteConfig> executeConfigList = jobExecuteConfigRepo.queryList(jobIds, environment);
+        for (JobExecuteConfig executeConfig : executeConfigList) {
+            prevJobStateMap.put(executeConfig.getJobId(), executeConfig.getRunningState());
+        }
+
         for (JobDependenceDto dto : dependencies) {
             JobInfo jobInfo = jobInfoMap.get(dto.getJobId());
             dto.setJobName(jobInfo == null ? "" : jobInfo.getName());
@@ -411,6 +460,8 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
 
             DAGInfo dagInfo = dagInfoMap.get(dto.getPrevJobDagId());
             dto.setPrevJobDagName(dagInfo == null ? "" : dagInfo.getName());
+
+            dto.setPrevJobRunningState(prevJobStateMap.getOrDefault(dto.getPrevJobId(), RunningStateEnum.pause.val));
         }
         return dependencies;
     }
@@ -420,8 +471,10 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkArgument(StringUtils.isNotBlank(dto.getSchRerunMode()), "重跑属性为空");
         checkArgument(StringUtils.isNotBlank(dto.getExecQueue()), "运行队列为空");
 
-        Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(dto.getSchDagId());
-        checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
+        if (Constants.DEFAULT_DAG_ID != dto.getSchDagId()) {
+            Optional<DAGInfo> dagInfoOptional = dagRepo.queryDAGInfo(dto.getSchDagId());
+            checkArgument(dagInfoOptional.isPresent(), "DAG不存在或已删除");
+        }
     }
 
     private void checkDependConfig(Long currentJobId, List<JobDependenceDto> dependenceDtoList) {
@@ -430,14 +483,17 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         Set<Long> prevJobSet = Sets.newHashSet();
         for (JobDependenceDto dto : dependenceDtoList) {
             checkArgument(Objects.nonNull(dto.getPrevJobId()), "上游作业为空");
-            checkArgument(Objects.nonNull(dto.getPrevJobDagId()), "上游作业所属DAG为空");
+            checkArgument(Objects.nonNull(dto.getPrevJobDagId()) && dto.getPrevJobDagId() != Constants.DEFAULT_DAG_ID, "上游作业所属DAG不合法");
             checkArgument(prevJobSet.add(dto.getPrevJobId()), "上游依赖存在重复作业");
             checkArgument(!Objects.equals(currentJobId, dto.getPrevJobId()), "上游依赖作业不能选择当前作业");
         }
     }
 
-    private void checkOutputConfig(JobOutputDto outputDto) {
+    private void checkOutputConfig(JobInfo jobInfo, JobOutputDto outputDto) {
         if (Objects.isNull(outputDto)) return;
+
+        if (!JobTypeEnum.SQL_SPARK.name().equals(jobInfo.getJobType()))
+            return;
 
         checkArgument(Objects.nonNull(outputDto.getDestDataSourceId()), "作业输出数据源为空");
         checkArgument(StringUtils.isNotBlank(outputDto.getDestDataSourceType()), "作业输出数据源类型为空");
@@ -451,8 +507,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         config.setExecQueue(Strings.nullToEmpty(config.getExecQueue()));
         config.setExecWarnLevel(Strings.nullToEmpty(config.getExecWarnLevel()));
         config.setSchTimeOutStrategy(Strings.nullToEmpty(config.getSchTimeOutStrategy()));
-        config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 2));
-        config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 2));
+        config.setExecDriverMem(MoreObjects.firstNonNull(config.getExecDriverMem(), 3));
+        config.setExecWorkerMem(MoreObjects.firstNonNull(config.getExecWorkerMem(), 4));
+        config.setExecCores(MoreObjects.firstNonNull(config.getExecCores(), 2));
         config.setSchPriority(MoreObjects.firstNonNull(config.getSchPriority(), JobPriorityEnum.middle.val));
     }
 }

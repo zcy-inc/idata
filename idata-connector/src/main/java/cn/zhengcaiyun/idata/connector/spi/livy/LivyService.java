@@ -25,9 +25,12 @@ import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyOutputStatusEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionStateEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyStatementStateEnum;
+import cn.zhengcaiyun.idata.system.common.constant.SystemConfigConstant;
+import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -49,14 +52,15 @@ public class LivyService {
     }};
     private final String DEFAULT_DRIVER_MEMORY = "1G";
     private final String DEFAULT_EXECUTOR_MEMORY = "2G";
+    private final String YARN_QUEUE = "root.offline";
 
-    @Value("${livy.baseUrl}")
-    private String LIVY_BASE_URL;
-    @Value("${livy.sessionMax}")
-    private Integer LIVY_SESSION_MAX;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     // TODO 暂时不考虑多进程
     public synchronized LivySessionDto getOrCreateSession(LivySessionKindEnum sessionKind) {
+        Integer livySessionMax = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_LIVY_CONFIG, SystemConfigConstant.LIVY_CONFIG_SESSION_MAX, Integer.class);
+
         LivySessionDto sessionDto = new LivySessionDto();
         Map<String, Object> sessions = sendToLivy(new HttpInput().setMethod("GET"),
                 new TypeReference<Map<String, Object>>() {
@@ -69,7 +73,7 @@ public class LivyService {
                 return sessionDto;
             }
         }
-        if (sessionList.size() >= LIVY_SESSION_MAX) {
+        if (sessionList.size() >= livySessionMax) {
             Map<String, Object> session = sessionList.get(new Random().nextInt(sessionList.size()));
             sessionDto.setSessionId((Integer) session.get("id"));
             return sessionDto;
@@ -79,6 +83,7 @@ public class LivyService {
         body.put("driverMemory", DEFAULT_DRIVER_MEMORY);
         body.put("executorMemory", DEFAULT_EXECUTOR_MEMORY);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
         Map<String, Object> session = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
                 },
@@ -103,7 +108,7 @@ public class LivyService {
 
         Map<String, Object> body = new HashMap<>();
         String code = LivySessionKindEnum.spark.equals(query.getSessionKind())
-                ? String.format("println(spark.sql(\"\"\"%s\"\"\").toJSON.collect.mkString(\"[\", \",\", \"]\"))", query.getQuerySource())
+                ? String.format("println(spark.sql(\"\"\"%s\"\"\").limit(500).toJSON.collect.mkString(\"[\", \",\", \"]\"))", query.getQuerySource())
                 : query.getQuerySource();
         body.put("kind", query.getSessionKind().name());
         // TODO 这里也可以执行ddl和dml，后续需要增加日志记录和权限控制
@@ -210,15 +215,11 @@ public class LivyService {
         }
     }
 
-    public LivySessionDto createBatches(String file, List<String> args, String driverMemory, String executorMemory) {
+    public LivySessionDto createBatches(String file, List<String> args) {
         Map<String, Object> body = new HashMap<>();
-        driverMemory = isNotEmpty(driverMemory) ? driverMemory : DEFAULT_DRIVER_MEMORY;
-        executorMemory = isNotEmpty(executorMemory) ? executorMemory : DEFAULT_EXECUTOR_MEMORY;
         body.put("file", file);
         body.put("args", args);
-        body.put("driverMemory", driverMemory);
-        body.put("executorMemory", executorMemory);
-        body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
 
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
@@ -334,8 +335,10 @@ public class LivyService {
     }
 
     private <T> T sendToLivy(HttpInput httpInput, TypeReference<T> typeReference, String uri, Object... uriParams) {
+        String livyURL = systemConfigService.getValueWithCommon(SystemConfigConstant.KEY_LIVY_CONFIG, SystemConfigConstant.LIVY_CONFIG_URL);
+
         String body = null;
-        httpInput.setUri(String.format(LIVY_BASE_URL + uri, uriParams));
+        httpInput.setUri(String.format(livyURL + uri, uriParams));
         try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
             body = response.body().string();
             if ((response.code() == 200 || response.code() == 201)

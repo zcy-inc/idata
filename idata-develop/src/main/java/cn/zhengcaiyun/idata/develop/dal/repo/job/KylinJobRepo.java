@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentKylin;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
@@ -28,9 +29,18 @@ import java.util.List;
 
 public interface KylinJobRepo {
     DevJobContentKylin query(Long jobId, Integer version);
+
     List<DevJobContentKylin> queryList(Long jobId);
+
     boolean add(DevJobContentKylin jobContentKylin);
+
     boolean update(DevJobContentKylin jobContentKylin);
+
     Integer newVersion(Long jobId);
+
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
+    Optional<DevJobContentKylin> queryLatest(Long jobId);
+
+    List<DevJobContentKylin> queryList(List<Long> ids);
 }

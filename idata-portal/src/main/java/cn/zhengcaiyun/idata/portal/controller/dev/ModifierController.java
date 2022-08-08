@@ -17,6 +17,7 @@
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.dal.model.DevLabelDefine;
 import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.service.measure.ModifierService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
@@ -51,6 +52,16 @@ public class ModifierController {
     @GetMapping("modifiersByAtomic")
     public RestResult<List<MeasureDto>> findByAtomicMetricCode(@RequestParam("atomicMetricCode") String atomicMetricCode) {
         return RestResult.success(modifierService.findModifiersByAtomicCode(atomicMetricCode));
+    }
+
+    @GetMapping("modifiers")
+    public RestResult<List<DevLabelDefine>> findByTableIds(@RequestParam("modifierTableIds") String modifierTableIds) {
+        return RestResult.success(modifierService.findModifiersByTableIds(modifierTableIds));
+    }
+
+    @GetMapping("mergeOldModifiers")
+    public int mergeOldModifiers() {
+        return modifierService.mergeOldModifiers();
     }
 
     @PostMapping("modifier")

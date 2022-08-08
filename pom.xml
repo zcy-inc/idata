@@ -77,9 +77,17 @@
         <mail.version>1.4.1</mail.version>
         <commons-pool2.version>2.10.0</commons-pool2.version>
         <hutool-all.version>5.3.5</hutool-all.version>
+        <spring-boot-starter-actuator.version>3.0.3-RELEASE</spring-boot-starter-actuator.version>
+        <expression.version>5.3.14</expression.version>
+        <sprint-beans.version>5.2.20.RELEASE</sprint-beans.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${sprint-beans.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.mybatis.dynamic-sql</groupId>
                 <artifactId>mybatis-dynamic-sql</artifactId>
@@ -222,6 +230,17 @@
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
                 <version>${mail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.gov.zcy.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot-starter-actuator.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate.validator</groupId>
+                        <artifactId>hibernate-validator</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -38,6 +38,8 @@ public interface JobPublishRecordRepo {
 
     long count(JobPublishRecordCondition condition);
 
+    List<JobPublishRecord> queryList(JobPublishRecordCondition condition);
+
     Long save(JobPublishRecord record);
 
     Boolean update(JobPublishRecord record);

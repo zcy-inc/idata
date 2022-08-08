@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.datasource.api;
 
 
+import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDetailDto;
 import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
 
 /**
@@ -27,4 +28,19 @@ import cn.zhengcaiyun.idata.datasource.api.dto.DataSourceDto;
  **/
 public interface DataSourceApi {
     DataSourceDto getDataSource(Long id);
+
+    /**
+     * bo返回
+     * @param id
+     * @param env env为null默认取第一条
+     * @return
+     */
+    DataSourceDetailDto getDataSourceDetail(Long id, String env);
+
+    /**
+     * 获取表主键，逗号分隔
+     * @return
+     * @throws Exception
+     */
+    String getPrimaryKey(Long id, String tableName);
 }

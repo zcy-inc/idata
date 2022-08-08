@@ -91,7 +91,7 @@ public class SparkJobServiceImpl implements SparkJobService {
                         hdfsService.modifyFile(existSparkJob.getResourceHdfsPath(), sparkJobDto.getPythonResource());
                     }
                     DevJobContentSpark jobContentSpark = PojoUtil.copyOne(sparkJobDto, DevJobContentSpark.class,
-                            "appArguments", "mainClass");
+                            "appArguments", "mainClass", "resourceHdfsPath");
                     jobContentSpark.setId(existJobContentSpark.getId());
                     jobContentSpark.setEditor(operator);
                     sparkJobRepo.update(jobContentSpark);

@@ -1,10 +1,15 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import javax.annotation.Generated;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @description:
@@ -78,14 +83,21 @@ public class JobExecuteConfigDto extends BaseDto {
     private Integer execWorkerMem;
 
     /**
+     * 运行配置-执行器核心数
+     */
+    private Integer execCores;
+
+    /**
      * 作业运行状态（环境级），0：暂停运行；1：恢复运行
      */
     private Integer runningState;
 
     /**
-     *   抽数配置
+     * 抽数配置
      */
     private String execEngine;
+
+    private List<KeyValuePair<String, String>> extProperties;
 
     public Long getId() {
         return id;
@@ -207,18 +219,42 @@ public class JobExecuteConfigDto extends BaseDto {
         this.execEngine = execEngine;
     }
 
+    public List<KeyValuePair<String, String>> getExtProperties() {
+        return extProperties;
+    }
+
+    public void setExtProperties(List<KeyValuePair<String, String>> extProperties) {
+        this.extProperties = extProperties;
+    }
+
+    public Integer getExecCores() {
+        return execCores;
+    }
+
+    public void setExecCores(Integer execCores) {
+        this.execCores = execCores;
+    }
+
     public static JobExecuteConfigDto from(JobExecuteConfig config) {
         JobExecuteConfigDto dto = new JobExecuteConfigDto();
         BeanUtils.copyProperties(config, dto);
 
         if (dto.getSchTimeOut() <= 0) dto.setSchTimeOut(null);
 
+        if (StringUtils.isNotBlank(config.getExtProperties())) {
+            dto.setExtProperties(new Gson().fromJson(config.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType()));
+        }
         return dto;
     }
 
     public JobExecuteConfig toModel() {
         JobExecuteConfig config = new JobExecuteConfig();
         BeanUtils.copyProperties(this, config);
+
+        if (!Objects.isNull(this.extProperties)) {
+            config.setExtProperties(new Gson().toJson(this.extProperties));
+        }
         return config;
     }
 }
