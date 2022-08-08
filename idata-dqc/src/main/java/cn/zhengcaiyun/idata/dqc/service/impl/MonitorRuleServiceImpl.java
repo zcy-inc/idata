@@ -31,13 +31,11 @@ import cn.zhengcaiyun.idata.dqc.utils.ParameterUtils;
 import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import io.swagger.models.auth.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -336,8 +334,10 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             switch (templateEnum) {
                 case TABLE_ROW:
                     if (StringUtils.isEmpty(partitionExpr)) {
-                        String[] arr = rule.getTableName().split("\\.");
-                        count = tableService.getTableCount(arr[0], arr[1]);
+//                        String[] arr = rule.getTableName().split("\\.");
+//                        count = tableService.getTableCount(arr[0], arr[1]);
+                        sql = String.format("select count(*) from %s ", rule.getTableName());
+
                     } else {
                         sql = String.format("select count(*) from %s where %s ", rule.getTableName(), curPartition);
                     }
@@ -471,19 +471,27 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         int count = 0;
         Integer latestAlarmLevel = null;
         for (MonitorRuleVO rule : ruleSet) {
-            MonitorHistoryVO historyVO = this.getRuleHistory(rule);
-            historyList.add(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
+            String[] nicknames = rule.getAlarmReceivers().split(",");
+            try {
+                MonitorHistoryVO historyVO = this.getRuleHistory(rule);
+                monitorHistoryDao.insert(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
 
-            if (historyVO.getAlarm() == 1) {
-                isAlarm = true;
+                if (historyVO.getAlarm() == 1) {
+                    isAlarm = true;
 
-                //只告警第一个规则
-                if (count == 0) {
-                    String message = getAlarmMessage(historyVO);
-                    String[] nicknames = rule.getAlarmReceivers().split(",");
-                    messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message);
+                    //只告警第一个规则
+                    if (count == 0) {
+                        latestAlarmLevel = rule.getAlarmLevel();
+                        String message = getAlarmMessage(historyVO);
+
+                        messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message);
+                    }
+                    count++;
                 }
-                count++;
+            } catch (Exception e) {
+                logger.error("数据质量规则", e);
+                messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s",tableName, rule.getName()));
+
             }
         }
 
@@ -493,7 +501,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             monitorTable.setLatestAlarmLevel(latestAlarmLevel);
             monitorTable.setAccessTime(DateUtils.getCurrentTime());
             monitorTableDao.updateByTableName(monitorTable);
-            monitorHistoryDao.insertBatch(historyList);
         }
 
     }

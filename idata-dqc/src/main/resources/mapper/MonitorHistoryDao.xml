@@ -3,18 +3,20 @@
 <mapper namespace="cn.zhengcaiyun.idata.dqc.dao.MonitorHistoryDao">
 
     <select id="getByRuleId" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
-        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,check_type checkType,
-          `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,compare_type compareType,baseline_id baselineId,template_id templateId,
-          `data_value` dataValue, `rule_value` ruleValue, `version`,  `create_time` createTime
+        select `id`, `table_name` tableName, `partition`, `rule_id` ruleId, `baseline_id` baselineId, `template_id` templateId, `rule_name` ruleName,
+               `rule_type` ruleType, `monitor_obj` monitorObj, `alarm_level` alarmLevel, `alarm_receivers` alarmReceivers,
+               `compare_type` compareType, `check_type` checkType, `content`, `fix_value` fixvalue, `range_start` rangestart,
+               `range_end` rangeEnd, `alarm`, `data_value` dataValue, `rule_value` ruleValue, `version`, `creator`, `create_time`
         from dqc_monitor_history
         where rule_id = #{ruleId} and version=#{version} and create_time > date_add(now(), interval -30 day)
         order by create_time desc
     </select>
 
     <select id="getByBaselineId" resultType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorHistory">
-        select id,`table_name` tableName, `partition`,  `rule_name` ruleName, `rule_type` ruleType, `monitor_obj` monitorObj,check_type checkType,
-            `fix_value` fixValue, `range_start` rangeStart, `range_end` rangeEnd, `alarm`,compare_type compareType,baseline_id baselineId,template_id templateId,
-            `data_value` dataValue, `rule_value` ruleValue, `version`,  `create_time` createTime
+        select  `id`, `table_name` tableName, `partition`, `rule_id` ruleId, `baseline_id` baselineId, `template_id` templateId, `rule_name` ruleName,
+                `rule_type` ruleType, `monitor_obj` monitorObj, `alarm_level` alarmLevel, `alarm_receivers` alarmReceivers,
+                `compare_type` compareType, `check_type` checkType, `content`, `fix_value` fixvalue, `range_start` rangestart,
+                `range_end` rangeEnd, `alarm`, `data_value` dataValue, `rule_value` ruleValue, `version`, `creator`, `create_time`
         from dqc_monitor_history
         where baseline_id = #{baselineId} and create_time > date_add(now(), interval -30 day)
         order by create_time desc
