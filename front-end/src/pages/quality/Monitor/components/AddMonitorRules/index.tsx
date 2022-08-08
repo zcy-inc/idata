@@ -360,7 +360,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
           label="产出类型"
           disabled={disabled}
           name="outputType"
-          initialValue={2}
+          initialValue={1}
           options={outputTypeList}
         />
         {renderTemplateRules()}

@@ -43,7 +43,7 @@ export const statusList = [
 ];
 
 export const outputTypeList = [
-  {value: 2, label: '数值'}
+  {value: 1, label: '数值'}
 ];
 
 export enum operatorEnum {
