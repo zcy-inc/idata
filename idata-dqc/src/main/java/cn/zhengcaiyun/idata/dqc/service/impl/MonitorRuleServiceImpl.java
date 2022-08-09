@@ -538,7 +538,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                     }
                     break;
                 case FIELD_ENUM_COUNT:
-                    if (count > 0) {
+                    if (Long.parseLong(count.toString()) > rule.getFixValue().doubleValue()) {
                         isAlarm = true;
                     }
                     break;
@@ -579,7 +579,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
         //只有调度作业会调到，所以最新一条数据比如是作业调度后监测的结果数据，而非临时作业监测的结果
         if (RuleCheckTypeEnum.PRE_PREIOD == checkType) {
-            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), rule.getTableName(),null);
+            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), rule.getTableName(), null);
             if (old == null) { //试跑的时候没有历史数据
                 fixValue = 0d;
             } else {
@@ -597,7 +597,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             Double data = 0d;
             if (fixValue != 0) {
                 //乘以100是为了转换成百分比
-                data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue),2,BigDecimal.ROUND_CEILING).multiply(new BigDecimal(100)).doubleValue();
+                data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue), 2, BigDecimal.ROUND_CEILING).multiply(new BigDecimal(100)).doubleValue();
             }
             historyVO.setRuleValue(data);
 
@@ -735,11 +735,15 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 str.append(message + "\n");
             } catch (Exception e) {
                 logger.error("数据质量试跑报错:" + tableName, e);
-                str.append(String.format("表%s执行报错，错误信息%s\n", tableName, e.getMessage()));
+                String errorMsg = String.format("表%s执行报错，错误信息%s\n", tableName, e.getMessage());
+                messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", errorMsg.length() > 400 ? errorMsg.substring(0, 400) : errorMsg);
             }
         }
 
-        messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.toString().substring(0, str.length() - 1));
+        if (StringUtils.isNotEmpty(str)) {
+            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.substring(0, str.length() - 1));
+        }
+
     }
 
     private String getAlarmMessage(MonitorHistoryVO history) {
@@ -763,6 +767,8 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 message = "规则内容:[" + fixValue + compareType + range + "], ";
             }
 
+        } else if (history.getFixValue() != null) {
+            message = "规则内容:[" + Math.round(history.getFixValue()) + "], ";
         }
 
         String value = "监控结果:[" + (history.getRuleValue() == null ? history.getDataValue().toString() : history.getRuleValue().toString()) + "], ";
@@ -770,13 +776,13 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             value = "监控结果:[" + (history.getRuleValue() == null ? history.getDataValue().toString() : history.getRuleValue().toString()) + "%], ";
         }
 
-        return String.format("[%s] 表:[%s], 规则名称:[%s], %s %s 是否告警:[%s], 告警等级:[%s]\n",
+        return String.format("[%s] 表:[%s], 规则名称:[%s], %s %s 是否告警:[%s] %s\n",
                 DateUtils.format(history.getCreateTime(), "yyyy-MM-dd HH:mm:ss"), history.getTableName(),
                 history.getRuleName(), message, value,
                 history.getAlarm() == 1 ? "告警" : "未告警",
-                AlarmLevelEnum.getDest(history.getAlarmLevel()));
-
+                history.getAlarm() == 1 ? String.format(", 告警等级:[%s]", AlarmLevelEnum.getDest(history.getAlarmLevel())) : "");
     }
+
 
 }
 
