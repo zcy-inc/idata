@@ -84,6 +84,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
 
   const viewLogs = (row: BaselineItem) => {
     showDialog('监控日志' , {
+      hideFooter: true,
       formProps: {
         params: {
           baselineId: row.id

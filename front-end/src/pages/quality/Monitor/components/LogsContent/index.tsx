@@ -59,10 +59,11 @@ const AddMonitor: FC<{params: any;}> = ({params = {}}, ref) => {
 
   return (
    <Spin spinning={loading}>
-    {contents?.length ? contents.map((item, index) => <div style={{marginBottom: 10}} key={index}>
+    <div  style={{maxHeight: 400, overflow: 'auto'}}>
+      {contents?.length ? contents.map((item, index) => <div style={{marginBottom: 10}} key={index}>
         {`[${moment(item.createTime).format('YYYY-MM-DD HH:mm:ss')}] [${item.tableName}]，监控规则[${item.ruleName}]，${getRuleContent(item)}，监控结果[${getRuleResult(item)}]，${getAlarmLevel(item)}。`}
       </div>) : <Empty description="暂无相关日志" />}
-      {}
+    </div>
    </Spin>
   );
 };
