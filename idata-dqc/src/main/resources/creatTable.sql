@@ -20,7 +20,7 @@ CREATE TABLE `dqc_monitor_table`
 (
     `id`                 bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `baseline_id`        bigint(20) NOT NULL DEFAULT '-1' COMMENT '基线id,没有基线默认-1',
-    `table_name`         varchar(200) NOT NULL DEFAULT '' COMMENT '表名',
+    `table_name`         varchar(190) NOT NULL DEFAULT '' COMMENT '表名',
     `partition_expr`     varchar(200) NOT NULL DEFAULT '' COMMENT '分区信息',
     `latest_alarm_level` int(5) DEFAULT NULL COMMENT '告警等级，1一般，2重要，3严重',
     `access_time`        varchar(50)  NOT NULL DEFAULT '' COMMENT '最新规则执行时间',
@@ -38,8 +38,8 @@ CREATE TABLE `dqc_monitor_rule`
 (
     `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `baseline_id`     bigint(20) NOT NULL COMMENT '基线id,没有基线默认-1',
-    `table_name`      varchar(200) NOT NULL DEFAULT '' COMMENT '表名名称',
-    `field_name`      varchar(200)          DEFAULT '' COMMENT '字段名称',
+    `table_name`      varchar(190) NOT NULL DEFAULT '' COMMENT '表名名称',
+    `field_name`      varchar(190)          DEFAULT '' COMMENT '字段名称',
     `name`            varchar(200) NOT NULL COMMENT '规则名称',
     `rule_type`       varchar(50)  NOT NULL DEFAULT '' COMMENT '规则类型，system内置规则，template模板规则，custom自定义规则',
     `template_id`     bigint(20) NOT NULL DEFAULT '-1' COMMENT '模板规则id',
@@ -71,7 +71,7 @@ CREATE TABLE `dqc_monitor_rule`
 CREATE TABLE `dqc_monitor_baseline`
 (
     `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `name`        varchar(200) NOT NULL DEFAULT '' COMMENT '基线名称',
+    `name`        varchar(190) NOT NULL DEFAULT '' COMMENT '基线名称',
     `status`      int(5) NOT NULL DEFAULT '1' COMMENT '状态:0关闭，1开始',
     `del`         tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
     `creator`     varchar(20)  NOT NULL COMMENT '创建者',
@@ -85,7 +85,7 @@ CREATE TABLE `dqc_monitor_baseline`
 CREATE TABLE `dqc_monitor_history`
 (
     `id`              bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `table_name`      varchar(200) NOT NULL DEFAULT '' COMMENT '表名',
+    `table_name`      varchar(190) NOT NULL DEFAULT '' COMMENT '表名',
     `partition`       varchar(200) NOT NULL DEFAULT '' COMMENT '分区',
     `rule_id`         bigint(20) NOT NULL COMMENT '监控规则id',
     `baseline_id`     bigint(20) DEFAULT NULL COMMENT '基线id',
@@ -101,7 +101,7 @@ CREATE TABLE `dqc_monitor_history`
     `fix_value`       decimal(10, 3)        DEFAULT NULL COMMENT '固定值',
     `range_start`     decimal(10, 3)        DEFAULT NULL COMMENT '开始值',
     `range_end`       decimal(10, 3)        DEFAULT NULL COMMENT '结束值',
-    `sql`             varchar(2048)         DEFAULT '' COMMENT '查询sql',
+    `run_sql`             varchar(2048)         DEFAULT '' COMMENT '查询sql',
     `alarm`           int(5) NOT NULL DEFAULT '0' COMMENT '是否告警0不告警，1告警',
     `data_value`      bigint(20) DEFAULT NULL COMMENT '查询结果',
     `rule_value`      decimal(20, 3)        DEFAULT NULL COMMENT '规则统计结果',

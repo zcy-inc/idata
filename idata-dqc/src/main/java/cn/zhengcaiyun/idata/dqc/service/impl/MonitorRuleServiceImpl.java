@@ -405,7 +405,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         MonitorHistoryVO historyVO = new MonitorHistoryVO();
         historyVO.setPartition(curPartition);
         historyVO.setDataValue(count);
-        historyVO.setSql(sql);
+        historyVO.setRunSql(sql);
         historyVO.setTableName(rule.getTableName());
         historyVO.setTemplateId(rule.getTemplateId());
         historyVO.setBaselineId(rule.getBaselineId());

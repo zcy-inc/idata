@@ -47,7 +47,7 @@ public class MonitorHistoryVO {
     /**
      * 查询sql
      */
-    private String sql;
+    private String runSql;
     /**
      * 规则统计结果
      */

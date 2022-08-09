@@ -48,7 +48,7 @@ public class MonitorHistory implements Serializable {
     /**
      * 查询sql
      */
-    private String sql;
+    private String runSql;
     /**
      * 规则统计结果
      */
