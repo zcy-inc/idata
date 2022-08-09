@@ -24,7 +24,7 @@ public interface MonitorTableService {
 
     Result<MonitorTableVO> insert(MonitorTableVO monitorTable);
 
-    boolean update(MonitorTableVO monitorTable);
+    Result<Boolean> update(MonitorTableVO monitorTable);
 
     Result<Boolean> delById(Long id, Boolean isBaseline);
 

@@ -8,7 +8,7 @@
                `compare_type` compareType, `check_type` checkType, `content`, `fix_value` fixvalue, `range_start` rangestart,
                `range_end` rangeEnd, `alarm`, `data_value` dataValue, `rule_value` ruleValue, `version`, `creator`, `create_time`
         from dqc_monitor_history
-        where rule_id = #{ruleId} and version=#{version} and create_time > date_add(now(), interval -30 day)
+        where rule_id = #{ruleId} and create_time > date_add(now(), interval -30 day)
         order by create_time desc
     </select>
 

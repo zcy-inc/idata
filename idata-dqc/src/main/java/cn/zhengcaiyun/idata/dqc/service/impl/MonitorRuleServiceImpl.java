@@ -490,7 +490,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 }
             } catch (Exception e) {
                 logger.error("数据质量规则", e);
-                messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s",tableName, rule.getName()));
+                messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s", tableName, rule.getName()));
 
             }
         }
@@ -725,14 +725,18 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         }
         StringBuilder str = new StringBuilder();
         for (MonitorTable monitorTable : tableList) {
-            vo.setTableName(monitorTable.getTableName());
+            String tableName = monitorTable.getTableName();
+            vo.setTableName(tableName);
             vo.setPartitionExpr(monitorTable.getPartitionExpr());
-            MonitorHistoryVO history = this.getRuleHistory(vo);
-            String message = getAlarmMessage(history);
-
-            str.append(message);
+            try {
+                MonitorHistoryVO history = this.getRuleHistory(vo);
+                String message = getAlarmMessage(history);
+                str.append(message);
+            } catch (Exception e) {
+                logger.error("数据质量试跑报错:"+tableName, e);
+                str.append(String.format("表%s执行报错，错误信息%s", tableName, e.getMessage()));
+            }
         }
-
 
         messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.toString());
     }

@@ -165,14 +165,22 @@ public class MonitorTableServiceImpl implements MonitorTableService {
     }
 
     @Override
-    public boolean update(MonitorTableVO vo) {
+    public Result<Boolean> update(MonitorTableVO vo) {
+        List<MonitorTable> oldList = monitorTableDao.getByTableName(vo.getTableName(), vo.getBaselineId());
+        if (oldList.size() > 0) {
+            for(MonitorTable old:oldList){
+                if(!old.getId().equals(vo.getId())){
+                    return Result.failureResult("该表已经存在，请勿重复创建");
+                }
+            }
+        }
         MonitorTable monitorTable = Converter.MONITOR_TABLE_CONVERTER.toDto(vo);
         String nickname = OperatorContext.getCurrentOperator().getNickname();
         monitorTable.setEditor(nickname);
         monitorTableDao.updateFull(monitorTable);
 
         ExecutorServiceHelper.submit(() -> this.initTableHistory(vo, nickname));
-        return true;
+        return Result.successResult();
     }
 
     /**

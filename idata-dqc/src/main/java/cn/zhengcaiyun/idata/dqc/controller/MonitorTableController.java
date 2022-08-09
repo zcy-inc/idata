@@ -62,7 +62,8 @@ public class MonitorTableController {
         if (StringUtils.isNotEmpty(vo.getPartitionExpr()) && !RuleUtils.checkPartitionExpr(vo.getPartitionExpr())) {
             return Result.failureResult("分区表达式格式填写错误");
         }
-        return Result.successResult(monitorTableService.update(vo));
+
+        return monitorTableService.update(vo);
     }
 
     @RequestMapping("/del/{id}/{isBaseline}")
