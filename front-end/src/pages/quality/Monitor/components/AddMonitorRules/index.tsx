@@ -382,7 +382,7 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
 
   return (
     <Spin spinning={loading}>
-      <ProForm form={form} colon={false} className={styles.form} submitter={false} layout="horizontal" onValuesChange={onFormChanges}>
+      <ProForm form={form} colon={false} className={styles['form']} submitter={false} layout="horizontal" onValuesChange={onFormChanges}>
         <ProFormRadio.Group
           label="监控对象"
           name="monitorObj"

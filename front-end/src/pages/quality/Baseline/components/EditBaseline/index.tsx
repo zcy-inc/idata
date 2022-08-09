@@ -47,6 +47,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [form] = Form.useForm();
+  const [tableForm] = Form.useForm();
 
   useEffect(() => {
     getBaseInfo();
@@ -77,6 +78,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       const tableData = res.data.map(item => ({...item, showEdit: false, partitioned: item.partitionExpr ? true : false}));
       setTableData(tableData);
       setOriginTableData(tableData);
+      tableForm.setFieldsValue(tableData)
       setTableModified(false);
     });
   }
@@ -199,14 +201,17 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
     setTableData([...tableData.slice(0, rowIndex), {...tableData[rowIndex], showEdit: edit}, ...tableData.slice(rowIndex + 1)])
   }
 
-  const onSave = async (row: TableItem) => {
-    if(row.id === -9999) {
-      await addMonitor({tableName: row.tableName, partitionExpr:row.partitionExpr, baselineId: +params.id})
-    } else {
-      await editMonitorInfo({ tableName: row.tableName,partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
-    }
-    message.success('操作成功');
-    getTablesData();
+  const onSave = (row: TableItem) => {
+    tableForm.validateFields().then(async res => {
+      console.log(res);
+      if(row.id === -9999) {
+        await addMonitor({tableName: row.tableName, partitionExpr:row.partitionExpr, baselineId: +params.id})
+      } else {
+        await editMonitorInfo({ tableName: row.tableName,partitionExpr:row.partitionExpr, baselineId: +params.id, id: row.id })
+      }
+      message.success('操作成功');
+      getTablesData();
+    })
   }
 
   const onCancel = (row: TableItem, rowIndex: number) => {
@@ -294,7 +299,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
          <Button type="link" onClick={() => handleAddMonitorRule(row)}>
          {(row.status === 1 || baseInfo.status === 1) ? '查看' : '编辑'}
           </Button>
-          <Button type="link" onClick={() => tryRun(row)} disabled={baseInfo.status === 1}>
+          <Button type="link" onClick={() => tryRun(row)}>
             试跑
           </Button>
           <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1 || baseInfo.status === 1}>
@@ -312,28 +317,35 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
       title: '表英文名',
       key: 'tableName',
       dataIndex: 'tableName',
+      width:240,
       render: (_, row, index) =>
-        row.showEdit ? 
-        <TableSelect
-          value={_}
-          onChange={(val: string, partitioned: boolean) => handleTableSelectChange(val, partitioned, index)}
-        /> : _
+        row.showEdit ?
+        <Item rules={[{ required: true, message: '' }]} name={[index, 'tableName']}>
+          <TableSelect
+            onChange={(val: string, partitioned: boolean) => handleTableSelectChange(val, partitioned, index)}
+          />
+        </Item>
+        : _
     },
     {
       title: <span>时间分区表达式 <Tooltip title="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为${yyyyMMdd-1}">
        <InfoCircleOutlined />
       </Tooltip></span>,
       key: 'partitionExpr',
+      width:240,
       dataIndex: 'partitionExpr',
       render: (_, row, index) => row.partitioned ? (row.showEdit ?
-        <Input
-          value={_}
-          placeholder="请输入"
-          onChange={e => handlePartitionChange(e.target.value, index)}
-        /> : _ ) : '-'
+        <Item rules={[{ required: true, message: '' }]} name={[index, 'partitionExpr']}>
+          <Input
+            placeholder="请输入"
+            onChange={e => handlePartitionChange(e.target.value, index)}
+          />
+        </Item>
+         : _ ) : '-'
     },
     {
       title: '操作',
+      width:200,
       render: (text, row, index) => (
         <>
           {row.showEdit ? <>
@@ -426,15 +438,18 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
 
       <div className={styles.container} style={{marginTop: 16}}>
         <p>表信息</p>
-        <Table<TableItem>
-          rowKey="id"
-          columns={tableColumns}
-          dataSource={tableData}
-          scroll={{ x: 'max-content' }}
-          style={{ marginTop: 16 }}
-          loading={loading}
-          pagination={false}
-        />
+        <Form form={tableForm} className={styles['table-form']}>
+          <Table<TableItem>
+            rowKey="id"
+            columns={tableColumns}
+            dataSource={tableData}
+            scroll={{ x: 'max-content' }}
+            style={{ marginTop: 16 }}
+            loading={loading}
+            pagination={false}
+          />
+        </Form>
+       
         <Button
           type="dashed"
           style={{display: 'block', margin: '10px 0', width: '100%'}}
