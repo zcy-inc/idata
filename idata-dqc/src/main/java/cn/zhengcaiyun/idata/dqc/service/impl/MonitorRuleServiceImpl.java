@@ -597,7 +597,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             Double data = 0d;
             if (fixValue != 0) {
                 //乘以100是为了转换成百分比
-                data = new BigDecimal(count - fixValue).multiply(new BigDecimal(100)).setScale(2).divide(new BigDecimal(fixValue),BigDecimal.ROUND_CEILING).doubleValue();
+                data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue),2,BigDecimal.ROUND_CEILING).multiply(new BigDecimal(100)).doubleValue();
             }
             historyVO.setRuleValue(data);
 
@@ -747,7 +747,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         if (CompareTypeEnum.UP.getValue().equals(compareType)) {
             compareType = "上浮";
         } else if (CompareTypeEnum.DOWN.getValue().equals(compareType)) {
-            compareType = "下浮";
+            compareType = "下降";
         }
 
         String message = "";
