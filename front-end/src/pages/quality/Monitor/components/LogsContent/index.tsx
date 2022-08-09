@@ -6,7 +6,7 @@ import { alarmLevelList } from '@/constants/quality';
 import type { LogItem } from '@/types/quality';
 import moment from 'moment';
 
-const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
+const AddMonitor: FC<{params: any;}> = ({params = {}}, ref) => {
   const [contents, setContents] = useState<LogItem []>([]);
   const [loading, setLoading] = useState(false);
 
@@ -35,12 +35,12 @@ const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
     if(!log.compareType && log.rangeStart) {
       return `规则内容[${log.rangeStart}-${log.rangeEnd}]`;
     } else if(log.compareType) {
-      log.compareType = log.compareType === 'up' ? '上浮' : log.compareType === 'down' ? '下降' : log.compareType;
+      const compareType = log.compareType === 'up' ? '上浮' : log.compareType === 'down' ? '下降' : log.compareType;
       log.fixValue = log.fixValue || '';
       if(!log.rangeStart) {
-        return `规则内容[${log.compareType + log.fixValue}]`;
+        return `规则内容[${compareType + log.fixValue}]`;
       } else {
-        return `规则内容[${log.fixValue}${log.compareType}${log.rangeStart ? `${log.rangeStart}%-${log.rangeEnd}%` : ''}]`;
+        return `规则内容[${log.fixValue}${compareType}${log.rangeStart ? `${log.rangeStart}%-${log.rangeEnd}%` : ''}]`;
       }
     } else {
       return '';
@@ -51,7 +51,7 @@ const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
   const getRuleResult = (log: LogItem) => {
     log.dataValue = log.dataValue || '';
     if(log.compareType === 'up' ||log.compareType === 'down') {
-      return log.dataValue ? log.dataValue + '%' : log.dataValue
+      return log.ruleValue ? log.ruleValue + '%' : log.dataValue
     }
     return log.dataValue;
 
