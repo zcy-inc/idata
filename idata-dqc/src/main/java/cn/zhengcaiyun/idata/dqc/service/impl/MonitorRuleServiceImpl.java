@@ -736,6 +736,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             } catch (Exception e) {
                 logger.error("数据质量试跑报错:" + tableName, e);
                 String errorMsg = String.format("表%s执行报错，错误信息%s\n", tableName, e.getMessage());
+                //钉钉消息太长发不出去
                 messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", errorMsg.length() > 400 ? errorMsg.substring(0, 400) : errorMsg);
             }
         }
