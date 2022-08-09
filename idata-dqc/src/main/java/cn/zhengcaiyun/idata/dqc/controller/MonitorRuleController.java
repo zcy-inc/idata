@@ -96,7 +96,7 @@ public class MonitorRuleController {
             MonitorBaseline baseline = monitorBaselineService.getByRuleId(id);
             //普通规则或者基线开启
             if (baseline == null || (baseline != null && baseline.getStatus() == 1)) {
-                ExecutorServiceHelper.submit(() -> monitorRuleService.initHistoryByRule(id, OperatorContext.getCurrentOperator().getNickname()));
+                ExecutorServiceHelper.submit(() -> monitorRuleService.initHistoryByRule(id, nickname));
             }
         }
         return Result.successResult();
