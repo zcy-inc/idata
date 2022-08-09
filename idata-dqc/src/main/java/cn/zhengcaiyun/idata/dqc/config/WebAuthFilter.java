@@ -18,10 +18,7 @@ package cn.zhengcaiyun.idata.dqc.config;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.system.dal.dao.SysFeatureDao;
-import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.service.TokenService;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,20 +43,11 @@ public class WebAuthFilter implements Filter {
 
     private final String[] featureTypes = {"F_MENU", "F_ICON"};
 
-//    @Value("${access.mode:#{null}}")
-//    private String ACCESS_MODE;
     @Value("${idataEtl.checkToken:#{null}}")
     private String IDATA_ETL_CHECK_TOKEN;
 
     @Autowired
     private TokenService tokenService;
-    @Autowired
-    private UacUserDao uacUserDao;
-    @Autowired
-    private UserAccessService userAccessService;
-    @Autowired
-    private SysFeatureDao sysFeatureDao;
-
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
@@ -68,8 +56,7 @@ public class WebAuthFilter implements Filter {
         MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest((HttpServletRequest) servletRequest);
         if (mutableRequest.getHeader("Authorization") != null) {
             token = mutableRequest.getHeader("Authorization");
-        }
-        else {
+        } else {
             Cookie tokenCookie = WebUtils.getCookie((HttpServletRequest) servletRequest, "Authorization");
             token = (tokenCookie != null ? tokenCookie.getValue() : null);
             if (token != null) {
@@ -78,7 +65,7 @@ public class WebAuthFilter implements Filter {
         }
         String path = ((HttpServletRequest) servletRequest).getRequestURI();
         if (path.contains("/v2/api-docs")
-                || path.contains("/p0/") ) {
+                || path.contains("/p0/")) {
             filterChain.doFilter(mutableRequest, servletResponse);
             return;
         }
@@ -166,30 +153,30 @@ public class WebAuthFilter implements Filter {
         }
     }
 
-    private void setCurrentOperator(String token){
+    private void setCurrentOperator(String token) {
         OperatorContext.setCurrentOperator(OperatorContext.from(token));
     }
 
-    private void clearCurrentOperator(){
+    private void clearCurrentOperator() {
         OperatorContext.clearCurrentOperator();
     }
 
     static class MutableHttpServletRequest extends HttpServletRequestWrapper {
         private final Map<String, String> customHeaders;
 
-        MutableHttpServletRequest(HttpServletRequest request){
+        MutableHttpServletRequest(HttpServletRequest request) {
             super(request);
             this.customHeaders = new HashMap<>();
         }
 
-        void putHeader(String name, String value){
+        void putHeader(String name, String value) {
             this.customHeaders.put(name, value);
         }
 
         public String getHeader(String name) {
             String headerValue = customHeaders.get(name);
 
-            if (headerValue != null){
+            if (headerValue != null) {
                 return headerValue;
             }
             return ((HttpServletRequest) getRequest()).getHeader(name);
