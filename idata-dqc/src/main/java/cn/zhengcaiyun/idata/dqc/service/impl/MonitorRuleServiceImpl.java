@@ -339,7 +339,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                         sql = String.format("select count(*) from %s ", rule.getTableName());
 
                     } else {
-                        sql = String.format("select count(*) from %s where %s ", rule.getTableName(), curPartition);
+                        sql = String.format("select count(*) from %s where %s ", rule.getTableName(), condition);
                     }
 
                     break;
@@ -569,7 +569,8 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
      * @param count
      * @return
      */
-    private MonitorHistoryVO getCalcRes(MonitorRuleVO rule, Long count) {
+    private MonitorHistoryVO getCalcRes(MonitorRuleVO rule, Long originCount) {
+        Double count = originCount.doubleValue();
         MonitorHistoryVO historyVO = new MonitorHistoryVO();
 
         Double fixValue = rule.getFixValue();//比较值
@@ -578,7 +579,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
         //只有调度作业会调到，所以最新一条数据比如是作业调度后监测的结果数据，而非临时作业监测的结果
         if (RuleCheckTypeEnum.PRE_PREIOD == checkType) {
-            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), null);
+            MonitorHistory old = monitorHistoryDao.getLatest(rule.getId(), rule.getTableName(),null);
             if (old == null) { //试跑的时候没有历史数据
                 fixValue = 0d;
             } else {
@@ -596,7 +597,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             Double data = 0d;
             if (fixValue != 0) {
                 //乘以100是为了转换成百分比
-                data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue)).multiply(new BigDecimal(100)).doubleValue();
+                data = new BigDecimal(count - fixValue).divide(new BigDecimal(fixValue),BigDecimal.ROUND_CEILING).multiply(new BigDecimal(100)).doubleValue();
             }
             historyVO.setRuleValue(data);
 
@@ -625,7 +626,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                     }
                     break;
                 case EQUAL:
-                    if (!count.equals(fixValue)) {
+                    if (count.compareTo(fixValue) == 1) {
                         isAlarm = true;
                     }
                     break;
@@ -640,7 +641,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                     }
                     break;
                 case NOT_EQUAL:
-                    if (count.equals(fixValue)) {
+                    if (count.compareTo(fixValue) == 0) {
                         isAlarm = true;
                     }
                     break;
@@ -731,14 +732,14 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
             try {
                 MonitorHistoryVO history = this.getRuleHistory(vo);
                 String message = getAlarmMessage(history);
-                str.append(message);
+                str.append(message + "\n");
             } catch (Exception e) {
-                logger.error("数据质量试跑报错:"+tableName, e);
-                str.append(String.format("表%s执行报错，错误信息%s", tableName, e.getMessage()));
+                logger.error("数据质量试跑报错:" + tableName, e);
+                str.append(String.format("表%s执行报错，错误信息%s\n", tableName, e.getMessage()));
             }
         }
 
-        messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.toString());
+        messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.toString().substring(0, str.length() - 1));
     }
 
     private String getAlarmMessage(MonitorHistoryVO history) {

@@ -26,7 +26,7 @@ public interface MonitorHistoryDao {
 
     int insertBatch(@Param("entities") List<MonitorHistory> entities);
 
-    MonitorHistory getLatest(@Param("ruleId") Long ruleId, @Param("partition") String partition);
+    MonitorHistory getLatest(@Param("ruleId") Long ruleId, @Param("tableName") String tableName, @Param("partition") String partition);
 
 }
 

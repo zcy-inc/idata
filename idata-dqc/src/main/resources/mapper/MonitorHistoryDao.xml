@@ -162,7 +162,7 @@
         where id in(
         select max(id)
         from dqc_monitor_history
-        where rule_id = #{ruleId}
+        where rule_id = #{ruleId} and table_name=#{tableName}
         <if test="partition != null and partition != ''">
             `partition` = #{partition}
         </if>
