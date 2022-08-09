@@ -84,7 +84,9 @@ const Monitor: FC<{history: any}> = ({ history }) => {
   }
 
   const viewLogs = () => {
-    showDialog('监控日志' , {}, LogsContent)
+    showDialog('监控日志' , {
+      hideFooter: true,
+    }, LogsContent)
   }
 
   const columns: ColumnsType<MonitorItem> = [

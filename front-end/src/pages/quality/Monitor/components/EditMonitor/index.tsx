@@ -128,6 +128,7 @@ const EditMonitor: FC<{history: any}> = ({history}) => {
 
   const viewLogs = (row: MonitorRuleItem) => {
     showDialog('监控日志' , {
+      hideFooter: true,
       formProps: {
         params: {
           baselineId: -1,
