@@ -35,7 +35,7 @@ const AddMonitor: FC<{params: any;}> = ({params}, ref) => {
     if(!log.compareType && log.rangeStart) {
       return `规则内容[${log.rangeStart}-${log.rangeEnd}]`;
     } else if(log.compareType) {
-      log.compareType === 'up' ? '上浮' : log.compareType === 'down' ? '下降' : log.compareType;
+      log.compareType = log.compareType === 'up' ? '上浮' : log.compareType === 'down' ? '下降' : log.compareType;
       log.fixValue = log.fixValue || '';
       if(!log.rangeStart) {
         return `规则内容[${log.compareType + log.fixValue}]`;
