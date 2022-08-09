@@ -18,7 +18,10 @@
                 `compare_type` compareType, `check_type` checkType, `content`, `fix_value` fixvalue, `range_start` rangestart,
                 `range_end` rangeEnd, `alarm`, `data_value` dataValue, `rule_value` ruleValue, `version`, `creator`, `create_time`
         from dqc_monitor_history
-        where baseline_id = #{baselineId} and create_time > date_add(now(), interval -30 day)
+        where create_time > date_add(now(), interval -30 day)
+        <if test="baselineId!=null">
+            and baseline_id = #{baselineId}
+        </if>
         order by create_time desc
     </select>
 
