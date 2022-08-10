@@ -64,8 +64,7 @@ public class WebAuthFilter implements Filter {
             }
         }
         String path = ((HttpServletRequest) servletRequest).getRequestURI();
-        if (path.contains("/v2/api-docs")
-                || path.contains("/p0/")) {
+        if (path.contains("/v2/api-docs") || path.contains("/p0/")  || path.contains("/ok.html")) {
             filterChain.doFilter(mutableRequest, servletResponse);
             return;
         }

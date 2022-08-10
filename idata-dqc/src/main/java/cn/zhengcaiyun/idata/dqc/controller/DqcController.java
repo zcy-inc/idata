@@ -25,6 +25,10 @@ public class DqcController {
 
     @Autowired
     private MessageSendService messageSendService;
+    @RequestMapping("/ok.html")
+    public String ok(){
+        return "ok";
+    }
 
     @RequestMapping("/analyse")
     public Result dqc(@RequestBody Map<String, Object> param) {
