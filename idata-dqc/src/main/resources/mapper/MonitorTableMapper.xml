@@ -44,7 +44,7 @@
     <!--查询指定行数据-->
     <select id="getByPage" resultMap="DqcMonitorTableMap" >
         select
-          id, table_name, latest_alarm_level,   creator, create_time, editor, edit_time
+          id, table_name, latest_alarm_level, access_time,  creator, create_time, editor, edit_time
         from dqc_monitor_table
         where del = 0
         <if test="query.baselineId != null">
@@ -118,15 +118,17 @@
         where id = #{id}
     </update>
 
-    <update id="updateByTableName" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
-        update dqc_monitor_table set
+    <update id="updateAccessTime" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorTable">
+        update dqc_monitor_table
+        <set>
             <if test="latestAlarmLevel != null">
                 latest_alarm_level = #{latestAlarmLevel},
             </if>
             <if test="accessTime != null">
                 access_time = #{accessTime},
             </if>
-        where table_name = #{tableName}
+        </set>
+        where table_name = #{tableName} and baseline_id=#{baselineId}
     </update>
 
     <update id="delByBaselineId">

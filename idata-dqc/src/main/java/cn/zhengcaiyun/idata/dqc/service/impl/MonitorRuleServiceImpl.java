@@ -487,20 +487,20 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                         messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message);
                     }
                     count++;
+
+                    //更新最新的告警时间
+                    MonitorTable monitorTable = new MonitorTable();
+                    monitorTable.setBaselineId(rule.getBaselineId());
+                    monitorTable.setTableName(tableName);
+                    monitorTable.setLatestAlarmLevel(latestAlarmLevel);
+                    monitorTable.setAccessTime(DateUtils.getCurrentTime());
+                    monitorTableDao.updateAccessTime(monitorTable);
                 }
             } catch (Exception e) {
                 logger.error("数据质量规则", e);
                 messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s", tableName, rule.getName()));
 
             }
-        }
-
-        if (isAlarm) {
-            MonitorTable monitorTable = new MonitorTable();
-            monitorTable.setTableName(tableName);
-            monitorTable.setLatestAlarmLevel(latestAlarmLevel);
-            monitorTable.setAccessTime(DateUtils.getCurrentTime());
-            monitorTableDao.updateByTableName(monitorTable);
         }
 
     }

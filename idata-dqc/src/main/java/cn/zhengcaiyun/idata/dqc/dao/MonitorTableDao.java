@@ -19,6 +19,7 @@ import java.util.List;
 public interface MonitorTableDao {
 
     List<MonitorTable> getByTableName(@Param("tableName")String tableName,@Param("baselineId") Long baselineId);
+
     MonitorTable getById(Long id);
 
     List<MonitorTableVO> getByBaselineId(@Param("baselineId") Long baselineId);
@@ -32,8 +33,10 @@ public interface MonitorTableDao {
     int batchInsert(@Param("entities") List<MonitorTable> entities);
 
     int update(MonitorTable monitorTable);
+
     int updateFull(MonitorTable monitorTable);
-    int updateByTableName(MonitorTable monitorTable);
+
+    int updateAccessTime(MonitorTable monitorTable);
 
     int delByBaselineId(@Param("baselineId") Long baselineId, @Param("editor") String editor);
 
