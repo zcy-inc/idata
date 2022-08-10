@@ -1,4 +1,4 @@
-本地启动增加参数：-Denv=UAT -Dapollo.cluster=preliminary
+本地启动增加参数（指定apollo环境）：-Denv=UAT -Dapollo.cluster=preliminary
 
 
 --登录私库
