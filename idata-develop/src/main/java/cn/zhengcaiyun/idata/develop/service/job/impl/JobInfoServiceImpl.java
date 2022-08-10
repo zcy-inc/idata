@@ -78,6 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -130,6 +131,9 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final MonitorRuleDao monitorRuleDao;
 
     private final DIStreamJobContentRepo diStreamJobContentRepo;
+
+    @Value("${dqc.open:false}")
+    private boolean dqcOpen ;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -746,6 +750,9 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     private boolean needDqc(String tableName){
+        if (!dqcOpen) {
+            return false;
+        }
         Integer count1 = monitorRuleDao.getRulesByTable(tableName);
         Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
 

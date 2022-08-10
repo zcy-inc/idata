@@ -36,7 +36,7 @@ public class RuleScheduler {
     @Autowired
     private MonitorHistoryService monitorHistoryService;
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedDelay = 1000 * 60)
     public void schedule() {
         List<Long> templateIdList = Lists.newArrayList(MonitorTemplateEnum.TABLE_OUTPUT_TIME.getId());
         int startIndex = 0;
