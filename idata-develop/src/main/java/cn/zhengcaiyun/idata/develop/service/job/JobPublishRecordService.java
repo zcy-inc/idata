@@ -44,4 +44,10 @@ public interface JobPublishRecordService {
     Boolean reject(List<Long> ids, String remark, Operator operator);
 
     List<JobPublishRecord> findJobs(JobPublishRecordCondition condition);
+
+    /**
+     * 删除发布版本
+     * @param id
+     */
+    boolean delete(Long id);
 }

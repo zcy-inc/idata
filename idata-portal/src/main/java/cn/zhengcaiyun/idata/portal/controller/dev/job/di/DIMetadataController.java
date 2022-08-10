@@ -1,9 +1,12 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.portal.model.response.NameValueResponse;
+import cn.zhengcaiyun.idata.portal.model.response.job.DIJobDatasourceResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +56,60 @@ public class DIMetadataController {
             list.add(new NameValueResponse<>("实时", "STREAM"));
         }
         return RestResult.success(list);
+    }
+
+    /**
+     * 加载数据源
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     * @return
+     */
+    @GetMapping("/datasource-type")
+    public RestResult<DIJobDatasourceResponse> loadDatasourceType(@RequestParam("jobType") String jobType) {
+        JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
+        DIJobDatasourceResponse response = new DIJobDatasourceResponse();
+        switch (jobTypeEnum) {
+            case DI_BATCH:
+            case DI_STREAM:
+                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name()}));
+                response.setDestList(Arrays.asList(new String[]{"hive"}));
+                break;
+            case BACK_FLOW:
+                response.setFromList(Arrays.asList(new String[]{"hive"}));
+                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(),
+                        DataSourceTypeEnum.elasticsearch.name(), DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()}));
+                break;
+        }
+        return RestResult.success(response);
+    }
+
+    /**
+     * 加载执行引擎
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     * @return
+     */
+    @GetMapping("/engine-type")
+    public RestResult<List<String>> loadEngineType(@RequestParam("jobType") String jobType) {
+        JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
+        DIJobDatasourceResponse response = new DIJobDatasourceResponse();
+        switch (jobTypeEnum) {
+            case DI_BATCH:
+            case DI_STREAM:
+            case BACK_FLOW:
+                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.DORIS.name()}));
+            case KYLIN:
+                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.KYLIN.name()}));
+            case SQL_FLINK:
+                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.FLINK.name()}));
+            case SQL_SPARK:
+                return RestResult.success(Arrays.asList());
+            case SPARK_PYTHON:
+            case SPARK_JAR:
+                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SPARK.name()}));
+            case SCRIPT_PYTHON:
+            case SCRIPT_SHELL:
+                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.KYLIN.name()}));
+        }
+        return RestResult.success(new ArrayList<>());
     }
 
 }

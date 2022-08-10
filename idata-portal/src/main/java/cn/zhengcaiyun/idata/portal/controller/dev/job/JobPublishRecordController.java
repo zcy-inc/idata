@@ -24,6 +24,7 @@ import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
+import cn.zhengcaiyun.idata.portal.model.request.IdRequest;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -71,6 +72,20 @@ public class JobPublishRecordController {
             throw new IllegalAccessException("没有任务列表权限");
         }
         return RestResult.success(jobPublishRecordService.paging(condition, PageParam.of(limit, offset)));
+    }
+
+    /**
+     * 分页查询版本发布记录
+     *
+     * @param idRequest
+     * @return
+     */
+    @PostMapping("/delete")
+    public RestResult<Boolean> deleteJobPublishRecord(@RequestBody IdRequest idRequest) throws IllegalAccessException {
+        if (!userAccessService.checkAccess(OperatorContext.getCurrentOperator().getId(), JOB_LIST_ACCESS_CODE)) {
+            throw new IllegalAccessException("没有任务列表权限");
+        }
+        return RestResult.success(jobPublishRecordService.delete(idRequest.getId()));
     }
 
     /**

@@ -95,7 +95,7 @@ public class JobInfoExecuteDetailDto {
          */
         private Integer srcShardingNum;
         /**
-         * TODO
+         * 合并SQL
          */
         private String mergeSql;
         /**
@@ -110,6 +110,16 @@ public class JobInfoExecuteDetailDto {
          * 数据来源-字段信息
          */
         private List<MappingColumnDto> srcCols; // diColumns
+        /**
+         * 数据去向-写入前语句
+         * @return
+         */
+        private String destBeforeWrite;
+        /**
+         * 数据去向-写入后语句
+         * @return
+         */
+        private String destAfterWrite;
 
         public String getSrcDataType() {
             return srcDataType;
@@ -239,6 +249,22 @@ public class JobInfoExecuteDetailDto {
         public void setSrcReadMode(SrcReadModeEnum srcReadMode) {
             this.srcReadMode = srcReadMode;
         }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
+        }
     }
 
     public static class BackFlowDetailDto extends JobInfoExecuteDetailDto {
@@ -264,6 +290,16 @@ public class JobInfoExecuteDetailDto {
         private String srcTablePt; // 回流数据源（hive）的分区目录信息 例如pt=20220801
         private String destTablePt; //目标数据源（doris）的分区别名，例如p20220801
 
+        /**
+         * 数据去向-写入前语句
+         * @return
+         */
+        private String destBeforeWrite;
+        /**
+         * 数据去向-写入后语句
+         * @return
+         */
+        private String destAfterWrite;
         public BackFlowDetailDto() {
         }
 
@@ -397,6 +433,22 @@ public class JobInfoExecuteDetailDto {
 
         public void setDestTablePt(String destTablePt) {
             this.destTablePt = destTablePt;
+        }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
         }
     }
 
