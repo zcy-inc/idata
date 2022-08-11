@@ -1,8 +1,6 @@
 package cn.zhengcaiyun.idata.dqc;
 
 
-import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
-import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +15,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(scanBasePackages = {"cn.zhengcaiyun.idata"})
 @MapperScan({"cn.zhengcaiyun.idata.*.dal.dao", "cn.zhengcaiyun.idata.dqc.dao"})
 @EnableScheduling
-@EnableDubboConfiguration
-@EnableApolloConfig(value = {"application", "dev.common"})
 public class DqcApplication {
     private static final Logger log = LoggerFactory.getLogger(DqcApplication.class);
 

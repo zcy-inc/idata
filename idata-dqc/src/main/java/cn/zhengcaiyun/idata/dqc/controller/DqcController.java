@@ -27,6 +27,8 @@ public class DqcController {
     private MessageSendService messageSendService;
     @RequestMapping("/ok.html")
     public String ok(){
+//        messageSendService.send(new String[]{"sms"},new String[]{"元宿"},"测试消息");
+        messageSendService.send(new String[]{"dingding","phone","sms"},new String[]{"元宿"},"测试消息");
         return "ok";
     }
 
