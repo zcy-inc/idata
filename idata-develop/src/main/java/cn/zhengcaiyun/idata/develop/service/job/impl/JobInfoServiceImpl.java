@@ -793,7 +793,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
             checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
-            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? "-" : dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });
 
@@ -803,7 +803,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
             checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
-            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), dataSourceConfigDto.getDataSourceUDCode(),
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? "-" : dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });
 

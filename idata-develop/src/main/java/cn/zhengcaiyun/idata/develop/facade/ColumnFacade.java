@@ -129,7 +129,6 @@ public class ColumnFacade {
         List<ColumnInfoDto> localColumnInfoList = tableInfo.getColumnInfos();
         String dbName = tableInfo.getDbName();
         String tableName = tableInfo.getTableName();
-        Long tableId = tableInfo.getId();
 
         Map<String, String> hiveTypeMapping = enumService.getCodeMapByEnumValue(COLUMN_TYPE_ENUM);
         Map<String, String> localTypeMapping = new HashMap<>();

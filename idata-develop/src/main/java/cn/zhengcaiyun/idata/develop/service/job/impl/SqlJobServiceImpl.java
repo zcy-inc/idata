@@ -21,7 +21,6 @@ import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
@@ -32,12 +31,16 @@ import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
 import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -118,12 +121,14 @@ public class SqlJobServiceImpl implements SqlJobService {
         if (CollectionUtils.isNotEmpty(flinkSourceConfigs)) {
             sqlBuilder.append("-- source table template ").append("\n");
             flinkSourceConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? "-" : config.getDataSourceUDCode(), false))
+                            .append("\n\n"));
         }
         if (CollectionUtils.isNotEmpty(flinkSinkConfigs)) {
             sqlBuilder.append("-- sink table template ").append("\n");
             flinkSinkConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), config.getDataSourceUDCode())).append("\n\n"));
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? "-" : config.getDataSourceUDCode(), true))
+                            .append("\n\n"));
         }
         sqlBuilder.append("-- business code ").append("\n");
         return sqlBuilder.toString();

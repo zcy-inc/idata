@@ -112,6 +112,8 @@ public class JobScheduleManager {
             BeanUtils.copyProperties(taskInstanceDto, historyDto);
             historyDto.setJobId(jobId);
             historyDto.setEnvironment(environment);
+            historyDto.setTaskInstanceId(taskInstanceDto.getId());
+            historyDto.setTaskInstanceName(taskInstanceDto.getName());
             return historyDto;
         }).collect(Collectors.toList());
         return Page.newOne(historyDtoList, pageInfoDto.getTotal());

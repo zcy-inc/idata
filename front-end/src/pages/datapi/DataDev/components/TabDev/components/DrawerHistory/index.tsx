@@ -3,7 +3,7 @@ import moment from 'moment';
 import { Drawer, Table, Tabs } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
-import { Task, TaskHistoryItem } from '@/types/datadev';
+import { Task, TaskHistoryItem, DIJobBasicInfo } from '@/types/datadev';
 import { getDevHistory } from '@/services/datadev';
 import { Environments } from '@/constants/datasource';
 import MonacoModal from '@/pages/datapi/DataDev/components/TabDev/components/MonacoModal';
@@ -11,7 +11,7 @@ import MonacoModal from '@/pages/datapi/DataDev/components/TabDev/components/Mon
 interface DrawerHistoryProps {
   visible: boolean;
   onClose: () => void;
-  data?: Task;
+  data?: Task | DIJobBasicInfo;
 }
 interface Log {
   jobId?: number;
@@ -110,8 +110,8 @@ const DrawerHistory: FC<DrawerHistoryProps> = ({ visible, onClose, data }) => {
             },
             {
               title: '结束时间',
-              dataIndex: 'endTime	',
-              key: 'endTime	',
+              dataIndex: 'endTime',
+              key: 'endTime',
               render: (_) => _ ? moment(_).format(fmt) : '-',
               width: 200,
             },

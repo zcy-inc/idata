@@ -32,7 +32,7 @@ import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
 import DrawerBasic from './components/DrawerBasic';
 import DrawerConfig from './components/DrawerConfig';
 import DrawerVersion from './components/DrawerVersion';
-import DrawerHistory from './components/DrawerHistory';
+import DrawerHistory from '../TabDev/components/DrawerHistory';
 import Mapping from './components/Mapping';
 import {
   SrcReadMode,
@@ -621,7 +621,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     }
     if (basicInfo?.jobType === DIJobType.BACK_FLOW && srcDataSourceType === DataSourceType.HIVE) {
       items.push(
-        <Item label="分区" name="srcTablePt" rules={ruleText} key="8">
+        <Item label="分区" name="srcTablePt" key="8">
           <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
         </Item>,
       );
@@ -749,7 +749,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     if (basicInfo?.jobType === DIJobType.BACK_FLOW && destDataSourceType === DataSourceType.DORIS) {
       items.push(
         <Fragment key="13">
-          <Item label="分区名称" name="destTablePt" rules={ruleText} key="13">
+          <Item label="分区名称" name="destTablePt" key="13">
             <Input size="large" style={{ maxWidth, minWidth }} placeholder="请输入" />
           </Item>
         </Fragment>,

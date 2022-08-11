@@ -80,7 +80,7 @@ Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.126
 
 
 ### migrate   folder/function/job/model
-GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=stag&jobId=2508
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=3184
 Content-Type: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjQ5MzEzMTg4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.G9ZkPNlV25GwUe7Xjl1AC0vXSGE0pgHTw7r2doySLmmRW4DSwrG9UEDJNAc6mqL009CEgV7nGlARFGd1HJ9VYw
 
