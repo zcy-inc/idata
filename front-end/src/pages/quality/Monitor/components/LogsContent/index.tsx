@@ -49,7 +49,7 @@ const AddMonitor: FC<{params: any;}> = ({params = {}}, ref) => {
 
   // 拼接运行结果
   const getRuleResult = (log: LogItem) => {
-    log.dataValue = log.dataValue || '';
+    log.dataValue = (log.dataValue || log.dataValue === 0) ? log.dataValue : '';
     if(log.compareType === 'up' ||log.compareType === 'down') {
       return log.ruleValue ? log.ruleValue + '%' : log.dataValue
     }

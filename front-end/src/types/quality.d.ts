@@ -66,7 +66,7 @@ export interface LogItem {
   alarm: number;
   ruleType: RuleType;
   ruleValue: string;
-  dataValue: string;
+  dataValue: number | string;
   alarmLevel?: AlarmLevel
   content?: string;
   rangeStart?: string;
