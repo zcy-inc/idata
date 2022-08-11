@@ -154,11 +154,12 @@ const Template: FC<{history: any}> = ({ history }) => {
           <Button type="link" onClick={() => handleAddTemplate(row)}>
             {row.status === 1 ? '查看' : '编辑'}
           </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
+          {row.type !== 'system' &&  <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(row)} disabled={row.status === 1}>
             <Button type="link" disabled={row.status === 1}>
               删除
             </Button>
-          </Popconfirm>
+          </Popconfirm>}
+         
         </>
         )
       },

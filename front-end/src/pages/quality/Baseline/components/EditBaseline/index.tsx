@@ -328,7 +328,7 @@ const EditBaseline: FC<{history: any}> = ({history}) => {
         : _
     },
     {
-      title: <span>时间分区表达式 <Tooltip title="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为${yyyyMMdd-1}">
+      title: <span>时间分区表达式 <Tooltip title="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为dt=${yyyyMMdd-1}">
        <InfoCircleOutlined />
       </Tooltip></span>,
       key: 'partitionExpr',

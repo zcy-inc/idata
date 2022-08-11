@@ -31,7 +31,7 @@ const AddMonitor: FC = ({}, ref) => {
         <TableSelect onChange={handleTableChange} />
       </Item>
       {partitioned && <ProFormText
-        tooltip="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为${yyyyMMdd-1}"
+        tooltip="当前只支持日期形式的分区，示例：若分区格式为yyyyMMdd，表为t+1的数据，则分区表达式填写为dt=${yyyyMMdd-1}"
         name="partitionExpr"
         label="时间分区表达式"
         rules={[{ required: true, message: '请输入时间分区表达式' }]}

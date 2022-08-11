@@ -1,6 +1,6 @@
 export const alarmLevelList = [
   {value: 1, label: '一般'},
-  {value: 2, label: '重要'},
+  // {value: 2, label: '重要'},
   {value: 3, label: '严重'},
 ];
 

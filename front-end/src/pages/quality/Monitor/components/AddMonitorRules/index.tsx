@@ -41,7 +41,7 @@ const rangeValidator = (value: any, callback: (arg0?: string) => any, isStart: b
     return callback('请输入大于0的数字')
   } else if(value.split('.')[1]?.length > 2) {
     return callback('最多只允许保留两位小数')
-  } else if((isStart && (value > compreValue) && compreValue) || (!isStart && (value < compreValue) && compreValue)) {
+  } else if((isStart && (Number(value) > Number(compreValue)) && compreValue) || (!isStart && (Number(value) < Number(compreValue)) && compreValue)) {
     return callback('范围起始不能大于范围结束')
   }
   return callback();
