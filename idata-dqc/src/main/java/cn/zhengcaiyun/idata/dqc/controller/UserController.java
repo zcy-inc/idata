@@ -4,6 +4,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.dqc.model.entity.User;
 import cn.zhengcaiyun.idata.dqc.service.UserService;
+import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,7 +27,11 @@ public class UserController {
 
     @RequestMapping("getList")
     public Result<List<User>> getList(String name) {
-        return Result.successResult(userService.getList(name));
+        List<User> userList = userService.getList(name);
+        User dwDuty = new User();
+        dwDuty.setNickname(RuleUtils.DW_DUTY);
+        userList.add(dwDuty);
+        return Result.successResult(userList);
     }
 
     @RequestMapping("getCur")

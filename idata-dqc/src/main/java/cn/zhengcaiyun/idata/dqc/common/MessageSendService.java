@@ -8,6 +8,7 @@ import cn.zhengcaiyun.idata.dqc.dao.UserDao;
 import cn.zhengcaiyun.idata.dqc.model.common.BizException;
 import cn.zhengcaiyun.idata.dqc.model.entity.User;
 import cn.zhengcaiyun.idata.dqc.utils.HttpService;
+import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -57,8 +58,8 @@ public class MessageSendService {
     @Value("${sms.client.app.uri}")
     private String smsClientAppUri;
 
-    @Value("${sms.alert.key}")
-    private String smsAlertKey;
+    @Value("${alert.key}")
+    private String alertKey;
 
     @Value("${phone.client.app.uri}")
     private String phoneClientAppUri;
@@ -72,9 +73,6 @@ public class MessageSendService {
     @Value("${phone.client.app.key}")
     private String phoneClientAppKey;
 
-    @Value("${phone.alert.key}")
-    private String phoneAlertKey;
-
     @Value("${dingding.webhook}")
     private String dingdingWebhook;
 
@@ -83,27 +81,35 @@ public class MessageSendService {
      * @param nicknames
      * @param message
      */
-    public void send(String[] types, String[] nicknames, String message) {
+    public void send(String[] types, String[] nicknames, String message, String tableName, String ruleName) {
         for (String type : types) {
             if ("phone".equals(type)) {
-                this.zcyOpenVoice("nickname", nicknames, message);
+                this.zcyOpenVoice(nicknames);
             } else if ("sms".equals(type)) {
-                this.zcyOpenSms("nickname", nicknames, message);
+                this.zcyOpenSms(nicknames, tableName, ruleName);
             } else {
-                this.sendToDingDing("nickname", nicknames, message);
+                this.sendToDingDing(nicknames, message);
             }
         }
     }
 
-    public void sendToDingDing(String nameType, String[] names, String message) {
+    public void sendToDingDing(String[] nicknames, String message) {
         List<String> mobiles = new ArrayList();
-        if ("nickname".equals(nameType)) {
-            List<User> mobileList = userDao.getMobilesByNickname(names);
+        if (nicknames.length > 0) {
+            List<User> mobileList = userDao.getMobilesByNickname(nicknames);
             for (User user : mobileList) {
                 mobiles.add(user.getMobile());
             }
-        } else {
-            mobiles = Lists.newArrayList(names);
+        }
+        for (String nickname : nicknames) {
+            if (RuleUtils.DW_DUTY.equals(nickname)) {
+                mobiles.add(this.getDutyPhone());
+                break;
+            }
+        }
+
+        if (mobiles.size() == 0) {
+            return;
         }
         this.sendDingGroup(dingdingWebhook, message, mobiles.toArray(new String[mobiles.size()]));
     }
@@ -147,8 +153,8 @@ public class MessageSendService {
 //        this.sengDingding("username", new String[]{username}, message);
 //    }
 
-    public void sengDingdingByNickname(String nickname, String title, String message) {
-        this.sendToDingDing("nickname", new String[]{nickname}, message);
+    public void sengDingdingByNickname(String nickname, String message) {
+        this.sendToDingDing(new String[]{nickname}, message);
     }
 //
 //    public void sengDingding(String nameType, String[] names, String message) {
@@ -253,13 +259,13 @@ public class MessageSendService {
 //            }
 //        }
 //    }
-    public void sendDutyPhone(String message) {
+    public void sendDutyPhone() {
         String mobile = this.getDutyPhone();
         if (StringUtils.isEmpty(mobile)) {
             return;
         }
 
-        this.zcyOpenVoice(mobile, message);
+        this.zcyOpenVoice(mobile);
     }
 
     private String getDutyPhone() {
@@ -292,19 +298,21 @@ public class MessageSendService {
         return null;
     }
 
-    public void zcyOpenVoice(String nameType, String[] names, String message) {
-        List<User> mobileList = null;
-        if ("username".equals(nameType)) {
-            mobileList = userDao.getMobilesByUsername(names);
-        } else {
-            mobileList = userDao.getMobilesByNickname(names);
+    public void zcyOpenVoice(String[] nicknames) {
+        for (String nickname : nicknames) {
+            if (RuleUtils.DW_DUTY.equals(nickname)) {
+                this.zcyOpenVoice(this.getDutyPhone());
+            }
         }
-        for (User user : mobileList) {
-            this.zcyOpenVoice(user.getMobile(), message);
+        if (nicknames.length > 0) {
+            List<User> mobileList = userDao.getMobilesByNickname(nicknames);
+            for (User user : mobileList) {
+                this.zcyOpenVoice(user.getMobile());
+            }
         }
     }
 
-    public boolean zcyOpenVoice(String phone, String message) {
+    public boolean zcyOpenVoice(String phone) {
         try {
             ZcyClient zcyOpenClient = new ZcyClient();
             JSONObject params = new JSONObject();
@@ -313,7 +321,7 @@ public class MessageSendService {
             JSONObject nodes = new JSONObject();
             nodes.put("phone", phone);
             nodes.put("context", params);
-            nodes.put("key", phoneAlertKey);
+            nodes.put("key", alertKey);
             Map<String, Object> bodyMap = new HashMap<>();
             bodyMap.put("_data_", nodes.toString());
             String code = zcyOpenClient.doPost(phoneClientAppHost, phoneClientAppUri, phoneClientAppKey, phoneClientAppSecret, HttpMethod.POST, bodyMap);
@@ -324,29 +332,29 @@ public class MessageSendService {
         return false;
     }
 
-    public void zcyOpenSms(String nameType, String[] names, String message) {
-        List<User> mobileList = null;
-        if ("username".equals(nameType)) {
-            mobileList = userDao.getMobilesByUsername(names);
-        } else {
-            mobileList = userDao.getMobilesByNickname(names);
+    public void zcyOpenSms(String[] nicknames, String tableName, String ruleName) {
+        for (String nickname : nicknames) {
+            if (RuleUtils.DW_DUTY.equals(nickname)) {
+                this.zcyOpenSms(this.getDutyPhone(), tableName, ruleName);
+                break;
+            }
         }
+
+        List<User> mobileList = userDao.getMobilesByNickname(nicknames);
         for (User user : mobileList) {
-            this.zcyOpenSms(user.getMobile(), message);
+            this.zcyOpenSms(user.getMobile(), tableName, ruleName);
         }
     }
 
-    public boolean zcyOpenSms(String phone, String message) {
+    public boolean zcyOpenSms(String phone, String tableName, String ruleName) {
         try {
             ZcyClient zcyOpenClient = new ZcyClient();
             JSONObject params = new JSONObject();
-            params.put("tableName", "test");
-            params.put("ruleName", "rule");
-//            params.put("userName", "nickname");
-//            params.put("message", message);
+            params.put("tableName", tableName);
+            params.put("ruleName", ruleName);
             JSONObject nodes = new JSONObject();
             nodes.put("phones", phone);
-            nodes.put("key", smsAlertKey);
+            nodes.put("key", alertKey);
             nodes.put("context", params);
             Map<String, Object> bodyMap = new HashMap<>();
             bodyMap.put("_data_", nodes.toString());

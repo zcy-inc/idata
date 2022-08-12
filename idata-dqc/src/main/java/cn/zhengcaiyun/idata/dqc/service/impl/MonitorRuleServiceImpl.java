@@ -301,7 +301,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                     //sql报错则将规则关闭
                     this.setStatus(vo.getId(), 0, nickname);
                     String message = String.format("你在数据质量上配置的规则[%s]校验错误，请检查配置/SQL是否正确，执行sql [ %s ]", vo.getName(), vo.getSql());
-                    messageSendService.sengDingdingByNickname(nickname, "数据质量规则配置错误", message);
+                    messageSendService.sengDingdingByNickname(nickname, message);
                 }
                 count++;
             }
@@ -466,8 +466,6 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
         ruleSet.addAll(list1);
         ruleSet.addAll(list2);
 
-        boolean isAlarm = false;
-        List<MonitorHistory> historyList = new ArrayList<>();
         int count = 0;
         Integer latestAlarmLevel = null;
         for (MonitorRuleVO rule : ruleSet) {
@@ -477,14 +475,12 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 monitorHistoryDao.insert(Converter.MONITOR_HISTORY_CONVERTER.toDto(historyVO));
 
                 if (historyVO.getAlarm() == 1) {
-                    isAlarm = true;
-
                     //只告警第一个规则
                     if (count == 0) {
                         latestAlarmLevel = rule.getAlarmLevel();
                         String message = getAlarmMessage(historyVO);
 
-                        messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message);
+                        messageSendService.send(RuleUtils.getAlarmTypes(latestAlarmLevel), nicknames, message,rule.getTableName(),rule.getName());
                     }
                     count++;
 
@@ -498,7 +494,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 }
             } catch (Exception e) {
                 logger.error("数据质量规则", e);
-                messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s", tableName, rule.getName()));
+                messageSendService.send(new String[]{"dingding"}, nicknames, String.format("你在数据质量配置的规则有问题,表：%s，规则名称:%s"), tableName, rule.getName());
 
             }
         }
@@ -713,7 +709,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
     public void tryRun(Long id, Long baselineId, String nickname) {
         MonitorRule rule = monitorRuleDao.getById(id);
         if (MonitorTemplateEnum.TABLE_OUTPUT_TIME.getId().equals(rule.getTemplateId())) {
-            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "表产出时间不支持试跑");
+            messageSendService.sengDingdingByNickname(nickname,  "表产出时间不支持试跑");
             return;
         }
 
@@ -721,7 +717,7 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
 
         List<MonitorTable> tableList = monitorTableDao.getByTableName(rule.getTableName(), baselineId);
         if (tableList.size() == 0) {
-            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", "该规则未对应任何表，请正确配置后重试");
+            messageSendService.sengDingdingByNickname(nickname, "该规则未对应任何表，请正确配置后重试");
             return;
         }
         StringBuilder str = new StringBuilder();
@@ -737,12 +733,12 @@ public class MonitorRuleServiceImpl implements MonitorRuleService {
                 logger.error("数据质量试跑报错:" + tableName, e);
                 String errorMsg = String.format("表%s执行报错，错误信息%s\n", tableName, e.getMessage());
                 //钉钉消息太长发不出去
-                messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", errorMsg.length() > 400 ? errorMsg.substring(0, 400) : errorMsg);
+                messageSendService.sengDingdingByNickname(nickname,  errorMsg.length() > 400 ? errorMsg.substring(0, 400) : errorMsg);
             }
         }
 
         if (StringUtils.isNotEmpty(str)) {
-            messageSendService.sengDingdingByNickname(nickname, "数据质量试跑结果", str.substring(0, str.length() - 1));
+            messageSendService.sengDingdingByNickname(nickname,  str.substring(0, str.length() - 1));
         }
 
     }

@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RuleUtils {
+    public static String DW_DUTY = "数仓值班";
 
     /**
      * 校验分区表达式是否正确

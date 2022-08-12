@@ -4,6 +4,7 @@ import cn.zhengcaiyun.idata.dqc.common.MessageSendService;
 import cn.zhengcaiyun.idata.dqc.model.common.Result;
 import cn.zhengcaiyun.idata.dqc.service.MonitorRuleService;
 import cn.zhengcaiyun.idata.dqc.utils.ExecutorServiceHelper;
+import cn.zhengcaiyun.idata.dqc.utils.RuleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,13 @@ public class DqcController {
 
     @Autowired
     private MessageSendService messageSendService;
+
     @RequestMapping("/ok.html")
-    public String ok(){
+    public String ok() {
 //        messageSendService.send(new String[]{"sms"},new String[]{"元宿"},"测试消息");
-        messageSendService.send(new String[]{"dingding","phone","sms"},new String[]{"元宿"},"测试消息");
+//        messageSendService.sendDutyPhone();
+        messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", 1, "prod"));
+//        messageSendService.send(new String[]{"dingding", "phone", "sms"}, new String[]{RuleUtils.DW_DUTY}, "测试消息","tableName","rule");
         return "ok";
     }
 
@@ -55,7 +59,8 @@ public class DqcController {
         //作业执行失败直接返回
         if (!"0".equals(status)) {
             logger.error(String.format("作业%s执行失败", jobId));
-            messageSendService.sendDutyPhone(String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", jobId, env));
+            messageSendService.sendDutyPhone();
+            messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", jobId, env));
             return Result.failureResult("作业执行失败，已经发送语音电话到值班人员");
         }
 

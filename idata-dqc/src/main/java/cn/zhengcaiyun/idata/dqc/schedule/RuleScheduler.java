@@ -102,7 +102,7 @@ public class RuleScheduler {
                     String message = String.format("根据你在数据质量平台上配置的规则[%s]，监测到表[%s]的数据产出时间已超过设置时间%s",
                             rule.getName(), rule.getTableName(), rule.getContent());
 
-                    messageSendService.send(RuleUtils.getAlarmTypes(rule.getAlarmLevel()), nicknames, message);
+                    messageSendService.send(RuleUtils.getAlarmTypes(rule.getAlarmLevel()), nicknames, message,rule.getTableName(),rule.getName());
                 }
 
 
