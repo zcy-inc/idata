@@ -132,3 +132,11 @@ VALUES (1, '表行数', 'system', 'table', 'table_row', 'integrity', 1, 1, 0, '�
         '系统管理员', '2022-07-04 10:28:24'),
        (7, '字段值不为空', 'system', 'field', 'field_not_null', 'accuracy', 1, 1, 0, '系统管理员', '2022-06-30 20:19:17', '系统管理员',
         '2022-07-04 10:28:24');
+
+
+INSERT INTO `sys_feature` (`del`, `create_time`, `edit_time`, `feature_code`, `feature_name`, `feature_type`, `parent_code`, `feature_url_path`)
+VALUES
+    ( 0, '2021-04-02 16:45:02.947', '2021-04-02 16:45:02.947', 'F_MENU_DATA_QUALITY', '数据质量', 'F_MENU', NULL, ''),
+    ( 0, '2022-07-15 10:25:03.494', '2022-07-15 10:25:03.494', 'F_MENU_DATA_QUALITY_MONITOR', '监控管理', 'F_MENU', 'F_MENU_DATA_QUALITY', ''),
+    ( 0, '2022-07-15 10:25:03.496', '2022-07-15 10:25:03.496', 'F_MENU_DATA_QUALITY_TEMPLATE', '规则模版管理', 'F_MENU', 'F_MENU_DATA_QUALITY', ''),
+    ( 0, '2022-07-15 10:25:03.498', '2022-07-15 10:25:03.498', 'F_MENU_DATA_QUALITY_BASE_LINE', '基线管理', 'F_MENU', 'F_MENU_DATA_QUALITY', '');
