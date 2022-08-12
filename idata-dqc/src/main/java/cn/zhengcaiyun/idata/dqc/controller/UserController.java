@@ -30,7 +30,7 @@ public class UserController {
         List<User> userList = userService.getList(name);
         User dwDuty = new User();
         dwDuty.setNickname(RuleUtils.DW_DUTY);
-        userList.add(dwDuty);
+        userList.add(0,dwDuty);
         return Result.successResult(userList);
     }
 
