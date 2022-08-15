@@ -192,11 +192,11 @@ public class FlinkSqlUtil {
 
     public static String[] generateStarRocksKeyWord(String dataSourceType, String dataSourceUDCode, boolean isSink) {
         String[] keywords = new String[4];
-        keywords[0] = dataSourceType + "." + dataSourceUDCode + "." + "jdbc-url";
+        keywords[0] = dataSourceType + "." + dataSourceUDCode + "." + "jdbcUrl";
         if (isSink) {
-            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "load-url";
+            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "loadUrl";
         } else {
-            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "scan-url";
+            keywords[1] = dataSourceType + "." + dataSourceUDCode + "." + "scanUrl";
         }
         keywords[2] = dataSourceType + "." + dataSourceUDCode + "." + "username";
         keywords[3] = dataSourceType + "." + dataSourceUDCode + "." + "password";
@@ -205,15 +205,15 @@ public class FlinkSqlUtil {
 
     public static Map<String, String> generateStarRocksProperties(String dataSourceType, String dataSourceUDCode, DbConfigDto dbConfigDto) {
         Map<String, String> props = Maps.newHashMap();
-        String jdbcUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "jdbc-url";
+        String jdbcUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "jdbcUrl";
         String jdbcUrlVal = String.format("jdbc:%s://%s:%d", DataSourceTypeEnum.mysql.name(), dbConfigDto.getHost(), dbConfigDto.getPort());
         props.put(jdbcUrlKey, DesUtil.encrypt(jdbcUrlVal));
 
-        String scanUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "scan-url";
+        String scanUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "scanUrl";
         String scanUrlVal = String.format("%s:%d", dbConfigDto.getHost(), 8030);
         props.put(scanUrlKey, DesUtil.encrypt(scanUrlVal));
 
-        String loadUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "load-url";
+        String loadUrlKey = dataSourceType + "." + dataSourceUDCode + "." + "loadUrl";
         String loadUrlVal = String.format("%s:%d", dbConfigDto.getHost(), 8030);
         props.put(loadUrlKey, DesUtil.encrypt(loadUrlVal));
 
