@@ -133,7 +133,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final DIStreamJobContentRepo diStreamJobContentRepo;
 
     @Value("${dqc.open:false}")
-    private boolean dqcOpen ;
+    private boolean dqcOpen;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -749,14 +749,14 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
     }
 
-    private boolean needDqc(String tableName){
+    private boolean needDqc(String tableName) {
         if (!dqcOpen) {
             return false;
         }
         Integer count1 = monitorRuleDao.getRulesByTable(tableName);
         Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
 
-        return (count1 + count2) > 0 ;
+        return (count1 + count2) > 0;
     }
 
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
@@ -793,7 +793,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
             checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
-            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? "-" : dataSourceConfigDto.getDataSourceUDCode(),
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? dataSourceConfigDto.getDataSourceId().toString() : dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });
 
@@ -803,7 +803,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     .filter(dbConfig -> dbConfig.getEnv().name().equals(env))
                     .findFirst().orElse(null);
             checkArgument(Objects.nonNull(dbConfigDto), "Flink作业数据源不合法, jobId:%s，环境:%s", jobId, env);
-            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? "-" : dataSourceConfigDto.getDataSourceUDCode(),
+            privacyProps.putAll(FlinkSqlUtil.generateProperties(dataSourceConfigDto.getDataSourceType(), StringUtils.isBlank(dataSourceConfigDto.getDataSourceUDCode()) ? dataSourceConfigDto.getDataSourceId().toString() : dataSourceConfigDto.getDataSourceUDCode(),
                     dataSourceDto.getType(), dbConfigDto));
         });
 
