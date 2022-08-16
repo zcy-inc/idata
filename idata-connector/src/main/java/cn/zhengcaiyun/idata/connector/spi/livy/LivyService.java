@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.connector.spi.livy;
 
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
 import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.*;

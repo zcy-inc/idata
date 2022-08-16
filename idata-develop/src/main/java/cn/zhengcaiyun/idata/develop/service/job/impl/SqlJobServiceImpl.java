@@ -121,13 +121,13 @@ public class SqlJobServiceImpl implements SqlJobService {
         if (CollectionUtils.isNotEmpty(flinkSourceConfigs)) {
             sqlBuilder.append("-- source table template ").append("\n");
             flinkSourceConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? "-" : config.getDataSourceUDCode(), false))
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? config.getDataSourceId().toString() : config.getDataSourceUDCode(), false))
                             .append("\n\n"));
         }
         if (CollectionUtils.isNotEmpty(flinkSinkConfigs)) {
             sqlBuilder.append("-- sink table template ").append("\n");
             flinkSinkConfigs.stream()
-                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? "-" : config.getDataSourceUDCode(), true))
+                    .forEach(config -> sqlBuilder.append(FlinkSqlUtil.generateTemplate(config.getDataSourceType(), StringUtils.isBlank(config.getDataSourceUDCode()) ? config.getDataSourceId().toString() : config.getDataSourceUDCode(), true))
                             .append("\n\n"));
         }
         sqlBuilder.append("-- business code ").append("\n");

@@ -1,16 +1,50 @@
-export enum alarmLevelEnum {
-  NORMAL = 'NORMAL',
-  GENERAL = 'GENERAL',
-  IMPORTANT = 'IMPORTANT',
-  SERIOUS = 'SERIOUS',
-}
+export const alarmLevelList = [
+  {value: 1, label: '一般'},
+  // {value: 2, label: '重要'},
+  {value: 3, label: '严重'},
+];
 
-export const alarmLevelMap = new Map([
-  [alarmLevelEnum.NORMAL, '无'],
-  [alarmLevelEnum.GENERAL, '一般'],
-  [alarmLevelEnum.IMPORTANT, '重要'],
-  [alarmLevelEnum.SERIOUS, '严重'],
-]);
+export const monitorObjList = [
+  {value: 'table', label: '表'},
+  {value: 'field', label: '字段'},
+];
+
+export const ruleTypeList = [
+  {value: 'system', label: '内置规则'},
+  {value: 'template', label: '模版规则'},
+  {value: 'custom', label: '自定义规则'},
+];
+
+export const categoryList = [
+  {value: 'timely', label: '时效性'},
+  {value: 'accuracy', label: '准确性'},
+  {value: 'integrity', label: '完整性'},
+];
+
+export const compareOptions = [
+  {value: '>', label: '大于'},
+  {value: '>=', label: '大于等于'},
+  {value: '=', label: '等于'},
+  {value: '<', label: '小于'},
+  {value: '<=', label: '小于等于'},
+  {value: '<>', label: '不等于'},
+  {value: 'up', label: '上浮'},
+  {value: 'down', label: '下降'},
+];
+
+export const compareObjOptions = [
+  {value: 'fix', label: '固定值'},
+  {value: 'pre_period', label: '上周期'}
+];
+
+export const statusList = [
+  {value: 1, label: '已启用'},
+  {value: 0, label: '未启用'},
+];
+
+export const outputTypeList = [
+  {value: 1, label: '数值'}
+];
 
 export enum operatorEnum {
   BETWEEN = 'between',
