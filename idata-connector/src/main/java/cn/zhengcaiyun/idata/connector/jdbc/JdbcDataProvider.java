@@ -4,10 +4,10 @@ import cn.zhengcaiyun.idata.connector.jdbc.model.Column;
 import cn.zhengcaiyun.idata.connector.jdbc.model.DatasourceDriver;
 import cn.zhengcaiyun.idata.connector.jdbc.model.DatasourceParam;
 import cn.zhengcaiyun.idata.connector.jdbc.model.IdataException;
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,28 +44,23 @@ public class JdbcDataProvider {
     }
 
     private DataSource getSource(DatasourceParam datasource, boolean pooled) throws Exception {
-        Map<String, String> conf = new HashMap<>();
-
-        conf.put(DruidDataSourceFactory.PROP_DRIVERCLASSNAME, datasourceMap.get(datasource.getType()));
-        conf.put(DruidDataSourceFactory.PROP_USERNAME, datasource.getUsername());
-        conf.put(DruidDataSourceFactory.PROP_PASSWORD, datasource.getPassword());
-        conf.put(DruidDataSourceFactory.PROP_URL, datasource.getJdbcUrl());
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(datasource.getJdbcUrl());
+        hikariConfig.setDriverClassName(datasourceMap.get(datasource.getType()));
+        hikariConfig.setUsername( datasource.getUsername());
+        hikariConfig.setPassword(datasource.getPassword());
 
         if (pooled) {
-            conf.put(DruidDataSourceFactory.PROP_MAXACTIVE, String.valueOf(DS_CONN_MAX_ACTIVE));
-            conf.put(DruidDataSourceFactory.PROP_INITIALSIZE, String.valueOf(DS_CONN_INIT_ACTIVE));
+            hikariConfig.setMaximumPoolSize( DS_CONN_MAX_ACTIVE);
+            hikariConfig.setMinimumIdle(DS_CONN_INIT_ACTIVE);
         } else {
-            conf.put(DruidDataSourceFactory.PROP_MAXACTIVE, "1");
-            conf.put(DruidDataSourceFactory.PROP_INITIALSIZE, "1");
+            hikariConfig.setMaximumPoolSize( 1);
+            hikariConfig.setMinimumIdle(1);
         }
 
-        DruidDataSource druidDS = (DruidDataSource) DruidDataSourceFactory.createDataSource(conf);
-        druidDS.setMaxWait(DS_CONN_MAX_WAIT);
-        druidDS.setKeepAlive(true);
-        druidDS.setBreakAfterAcquireFailure(true);
-        druidDS.setConnectionErrorRetryAttempts(DS_CONN_RETRY_NUM);
+        hikariConfig.setConnectionTimeout(DS_CONN_MAX_WAIT);
 
-        return druidDS;
+        return new HikariDataSource(hikariConfig);
     }
 
     private Connection getConn(DatasourceParam datasource) throws Exception {
