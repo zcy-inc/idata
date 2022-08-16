@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.dqc.dao.JobOutputDao">
+
+
+    <select id="getByJobId" resultType="cn.zhengcaiyun.idata.dqc.model.vo.JobOutputVO">
+        select  environment , dest_data_source_id destDataSourceId, dest_table destTable
+        from dev_job_output
+        where del=0 and dest_data_source_type='hive' and job_id = #{jobId} and environment=#{env}
+    </select>
+
+    <select id="getDIJobTable" resultType="cn.zhengcaiyun.idata.dqc.model.vo.JobOutputVO">
+        select if(dest_table=null,src_tables,dest_table) destTable
+        from dev_job_content_di
+        where del=0
+          and (src_data_source_type='hive' or dest_data_source_type='hive')
+          and id in (select job_content_id
+                     from dev_job_publish_record
+                     where job_id=#{jobId}  and environment=#{env} and publish_status=2)
+    </select>
+
+</mapper>
+

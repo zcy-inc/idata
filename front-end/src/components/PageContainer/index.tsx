@@ -1,5 +1,4 @@
 import React, { Fragment, useContext } from 'react';
-import { Breadcrumb } from 'antd';
 import cls from 'classnames';
 import { RouteContext } from '@ant-design/pro-layout';
 import styles from './index.less';
@@ -46,7 +45,9 @@ const PageContainer: React.FC<PageContainerProps> = ({
         <dd>{extra}</dd>
       </dl> */}
       <h1 className={styles.title}>{value.title}</h1>
-      <div className={contentCls}>{children}</div>
+      <div className={contentCls}>
+        { children }
+      </div>
     </div>
   );
 };

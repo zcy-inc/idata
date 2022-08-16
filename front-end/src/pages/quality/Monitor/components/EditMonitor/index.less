@@ -1,0 +1,21 @@
+.container {
+  background-color: #fff;
+  padding: 12px 16px;
+}
+
+.operations {
+  float: right;
+}
+
+.form {
+  padding-left: 40px;
+  :global {
+    div.ant-form-item {
+      line-height: 20px;
+      margin: 20px 0;
+      & + .ant-form-item {
+        margin-left: 120px;
+      }
+    }
+  } 
+}

@@ -38,6 +38,7 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.MonitorRuleDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
@@ -77,6 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -126,7 +128,12 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
 
+    private final MonitorRuleDao monitorRuleDao;
+
     private final DIStreamJobContentRepo diStreamJobContentRepo;
+
+    @Value("${dqc.open:false}")
+    private boolean dqcOpen ;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -151,7 +158,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                               SparkJobRepo sparkJobRepo,
                               ScriptJobRepo scriptJobRepo,
                               KylinJobRepo kylinJobRepo,
-                              DIStreamJobContentRepo diStreamJobContentRepo) {
+                              DIStreamJobContentRepo diStreamJobContentRepo,
+                              MonitorRuleDao monitorRuleDao) {
         this.devJobInfoMyDao = devJobInfoMyDao;
         this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
@@ -176,6 +184,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
         this.diStreamJobContentRepo = diStreamJobContentRepo;
+        this.monitorRuleDao = monitorRuleDao;
     }
 
     @Override
@@ -452,6 +461,8 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
         jobInfoExecuteDetailDto.setConfProp(confProp);
 
+        //
+
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
@@ -571,8 +582,10 @@ public class JobInfoServiceImpl implements JobInfoService {
                 String diSrcTables = EnvRuleHelper.handlerDbTableName(srcDiDsName, diSrcRawTable, env);
                 diResponse.setSrcTables(diSrcTables);
                 DataSourceTypeEnum destDiDsTypeEnum = dataSourceApi.getDataSourceDetail(diJobContent.getDestDataSourceId(), env).getDataSourceTypeEnum();
-                diResponse.setDestTable(EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env));
+                String destTable = EnvRuleHelper.handlerDbTableName(destDiDsTypeEnum, diResponse.getDestTable(), env);
+                diResponse.setDestTable(destTable);
 
+                diResponse.setOpenDqc(this.needDqc(destTable));
 
                 return diResponse;
             case SQL_SPARK:
@@ -675,6 +688,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
                 sqlResponse.setExternalTableList(externalTableList);
 
+                sqlResponse.setOpenDqc(this.needDqc(sqlResponse.getDestTable()));
                 return sqlResponse;
             case SPARK_PYTHON:
             case SPARK_JAR:
@@ -733,6 +747,16 @@ public class JobInfoServiceImpl implements JobInfoService {
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
         }
+    }
+
+    private boolean needDqc(String tableName){
+        if (!dqcOpen) {
+            return false;
+        }
+        Integer count1 = monitorRuleDao.getRulesByTable(tableName);
+        Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
+
+        return (count1 + count2) > 0 ;
     }
 
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,

@@ -76,7 +76,8 @@
     "react-helmet-async": "^1.0.4",
     "react-monaco-editor": "^0.44.0",
     "react-split-pane": "^0.1.92",
-    "umi": "^3.5.0",
+    "umi": "^3.2.14",
+    "umi-plugin-keep-alive": "0.0.1-beta.34",
     "umi-request": "^1.0.8",
     "use-merge-value": "^1.0.1",
     "uuid": "^8.3.2"
@@ -98,7 +99,7 @@
     "@umijs/plugin-esbuild": "^1.0.1",
     "@umijs/preset-ant-design-pro": "^1.2.0",
     "@umijs/preset-dumi": "^1.1.0-rc.6",
-    "@umijs/preset-react": "^2.1.4",
+    "@umijs/preset-react": "^1.7.4",
     "@umijs/preset-ui": "^2.2.9",
     "@umijs/yorkie": "^2.0.3",
     "carlo": "^0.9.46",

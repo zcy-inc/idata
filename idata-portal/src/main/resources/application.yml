@@ -94,4 +94,7 @@ zcy:
 idataEtl:
   checkToken: 89f30cec4f8fbc0ccdca079d025be0d4
 
+dqc:
+  open: true
+
 
