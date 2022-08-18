@@ -15,23 +15,27 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.commons.util;
+package cn.zhengcaiyun.idata.develop.dal.repo.job;
+
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobTable;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2021-10-11 15:21
+ * @create: 2022-08-16 17:44
  **/
-public class MybatisHelper {
-    public static String appendWildCards(String in) {
-        return "%" + in + "%";
-    }
+public interface DIStreamJobTableRepo {
 
-    public static String appendLeftWildCards(String in) {
-        return "%" + in;
-    }
+    void save(List<DIStreamJobTable> contents);
 
-    public static String appendRightWildCards(String in) {
-        return in + "%";
-    }
+    int delete(Long jobId, Integer version);
+
+    List<DIStreamJobTable> query(Long jobId, Integer version);
+
+    Set<Long> queryJobIdBySrcTable(String srcTable);
+
+    Set<Long> queryJobIdByShardingTable(String srcBaseTable);
 }

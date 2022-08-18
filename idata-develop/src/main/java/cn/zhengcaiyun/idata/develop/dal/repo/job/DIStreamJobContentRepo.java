@@ -17,9 +17,12 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.job;
 
+import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobContent;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @description:
@@ -28,5 +31,21 @@ import java.util.Optional;
  **/
 public interface DIStreamJobContentRepo {
 
+    Long save(DIStreamJobContent content);
+
+    Boolean update(DIStreamJobContent content);
+
+    Integer newVersion(Long jobId);
+
+    Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
     Optional<DIStreamJobContent> query(Long jobId, Integer version);
+
+    Optional<DIStreamJobContent> queryLatest(Long jobId);
+
+    List<DIStreamJobContent> queryList(Long jobId);
+
+    List<DIStreamJobContent> queryByDataSource(Long srcDataSourceId, Long destDataSourceId);
+
+    Set<Long> queryJobIdByDataSource(Long srcDataSourceId, Long destDataSourceId);
 }
