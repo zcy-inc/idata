@@ -25,11 +25,29 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
  */
 
 public class JobContentBaseDto extends BaseDto {
+    /**
+     * 作业内容id
+     */
     private Long id;
+    /**
+     * 作业id
+     */
     private Long jobId;
+    /**
+     * 是否可编辑
+     */
     private Integer editable;
+    /**
+     * 版本号
+     */
     private Integer version;
+    /**
+     * 版本号-格式化
+     */
     private String versionDisplay;
+    /**
+     * 作业类型
+     */
     private JobTypeEnum jobType;
 
     // GaS
