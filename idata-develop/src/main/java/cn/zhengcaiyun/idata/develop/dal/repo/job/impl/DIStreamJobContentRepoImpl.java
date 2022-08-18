@@ -102,6 +102,12 @@ public class DIStreamJobContentRepoImpl implements DIStreamJobContentRepo {
     }
 
     @Override
+    public List<DIStreamJobContent> queryList(List<Long> ids) {
+        return diStreamJobContentDao.select(dsl -> dsl.where(DI_STREAM_JOB_CONTENT.id, isIn(ids),
+                and(DI_STREAM_JOB_CONTENT.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
     public List<DIStreamJobContent> queryByDataSource(Long srcDataSourceId, Long destDataSourceId) {
         return diStreamJobContentDao.select(dsl -> dsl.where(DI_STREAM_JOB_CONTENT.srcDataSourceId, isEqualTo(srcDataSourceId),
                 and(DI_STREAM_JOB_CONTENT.destDataSourceId, isEqualTo(destDataSourceId)),

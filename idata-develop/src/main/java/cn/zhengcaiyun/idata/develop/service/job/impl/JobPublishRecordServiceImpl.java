@@ -119,6 +119,8 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         record.setApproveRemark(Strings.nullToEmpty(remark));
         record.setApproveTime(new Date());
         jobPublishManager.publish(record, operator);
+
+        // todo 添加实时实例
         return Boolean.TRUE;
     }
 

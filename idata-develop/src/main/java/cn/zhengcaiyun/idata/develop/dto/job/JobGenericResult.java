@@ -22,7 +22,7 @@ package cn.zhengcaiyun.idata.develop.dto.job;
  * @author: yangjianhua
  * @create: 2022-04-28 14:41
  **/
-public class JobExtraOperateResult {
+public class JobGenericResult {
 
     private String jobName;
     private Boolean success;

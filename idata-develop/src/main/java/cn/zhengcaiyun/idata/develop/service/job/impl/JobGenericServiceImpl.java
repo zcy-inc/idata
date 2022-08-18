@@ -35,7 +35,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.kylin.KylinJobDto;
 import cn.zhengcaiyun.idata.develop.dto.job.script.ScriptJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
-import cn.zhengcaiyun.idata.develop.manager.JobExtraOperationManager;
+import cn.zhengcaiyun.idata.develop.manager.JobGenericManager;
 import cn.zhengcaiyun.idata.develop.service.job.*;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.google.common.base.Strings;
@@ -59,7 +59,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @create: 2022-04-28 14:35
  **/
 @Service
-public class JobExtraOperationServiceImpl implements JobExtraOperationService {
+public class JobGenericServiceImpl implements JobGenericService {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -71,7 +71,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private final SparkJobService sparkJobService;
     private final ScriptJobService scriptJobService;
     private final KylinJobService kylinJobService;
-    private final JobExtraOperationManager jobExtraOperationManager;
+    private final JobGenericManager jobGenericManager;
     private final DIJobContentRepo diJobContentRepo;
     private final SqlJobRepo sqlJobRepo;
     private final SparkJobRepo sparkJobRepo;
@@ -80,21 +80,21 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     private final CompositeFolderRepo compositeFolderRepo;
 
 
-    public JobExtraOperationServiceImpl(JobInfoService jobInfoService,
-                                        JobExecuteConfigService jobExecuteConfigService,
-                                        JobPublishRecordRepo jobPublishRecordRepo,
-                                        DIJobContentService diJobContentService,
-                                        SqlJobService sqlJobService,
-                                        SparkJobService sparkJobService,
-                                        ScriptJobService scriptJobService,
-                                        KylinJobService kylinJobService,
-                                        JobExtraOperationManager jobExtraOperationManager,
-                                        DIJobContentRepo diJobContentRepo,
-                                        SqlJobRepo sqlJobRepo,
-                                        SparkJobRepo sparkJobRepo,
-                                        ScriptJobRepo scriptJobRepo,
-                                        KylinJobRepo kylinJobRepo,
-                                        CompositeFolderRepo compositeFolderRepo) {
+    public JobGenericServiceImpl(JobInfoService jobInfoService,
+                                 JobExecuteConfigService jobExecuteConfigService,
+                                 JobPublishRecordRepo jobPublishRecordRepo,
+                                 DIJobContentService diJobContentService,
+                                 SqlJobService sqlJobService,
+                                 SparkJobService sparkJobService,
+                                 ScriptJobService scriptJobService,
+                                 KylinJobService kylinJobService,
+                                 JobGenericManager jobGenericManager,
+                                 DIJobContentRepo diJobContentRepo,
+                                 SqlJobRepo sqlJobRepo,
+                                 SparkJobRepo sparkJobRepo,
+                                 ScriptJobRepo scriptJobRepo,
+                                 KylinJobRepo kylinJobRepo,
+                                 CompositeFolderRepo compositeFolderRepo) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -103,7 +103,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         this.sparkJobService = sparkJobService;
         this.scriptJobService = scriptJobService;
         this.kylinJobService = kylinJobService;
-        this.jobExtraOperationManager = jobExtraOperationManager;
+        this.jobGenericManager = jobGenericManager;
         this.diJobContentRepo = diJobContentRepo;
         this.sqlJobRepo = sqlJobRepo;
         this.sparkJobRepo = sparkJobRepo;
@@ -113,26 +113,26 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     }
 
     @Override
-    public List<JobExtraOperateResult> copyJobTo(List<Long> jobIds, Long destFolderId, Operator operator) {
+    public List<JobGenericResult> copyJobTo(List<Long> jobIds, Long destFolderId, Operator operator) {
         Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
         checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
         checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
 
-        List<JobExtraOperateResult> resultList = Lists.newArrayList();
+        List<JobGenericResult> resultList = Lists.newArrayList();
         for (Long jobId : jobIds) {
-            JobExtraOperateResult result = copyJobTo(jobId, destFolderId, operator);
+            JobGenericResult result = copyJobTo(jobId, destFolderId, operator);
             resultList.add(result);
         }
         return resultList;
     }
 
     @Override
-    public JobExtraOperateResult copyJobTo(Long jobId, Long destFolderId, Operator operator) {
+    public JobGenericResult copyJobTo(Long jobId, Long destFolderId, Operator operator) {
         Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
         checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
         checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
 
-        JobExtraOperateResult result = new JobExtraOperateResult();
+        JobGenericResult result = new JobGenericResult();
         result.setJobName("作业编号：" + jobId);
         try {
             boolean fromImport = false;
@@ -141,7 +141,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
             result.setJobName(jobOriginName);
 
             cleanOutJobReplication(jobReplicationDto, destFolderId, fromImport);
-            jobExtraOperationManager.saveJobReplication(jobReplicationDto, fromImport, operator);
+            jobGenericManager.saveJobReplication(jobReplicationDto, fromImport, operator);
 
             result.setSuccess(Boolean.TRUE);
         } catch (Exception ex) {
@@ -162,7 +162,7 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
     }
 
     @Override
-    public List<JobExtraOperateResult> importJob(String jobJson, Long destFolderId, Operator operator) {
+    public List<JobGenericResult> importJob(String jobJson, Long destFolderId, Operator operator) {
         Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(destFolderId);
         checkArgument(folderOptional.isPresent(), "目标文件夹不存在");
         checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "目标文件夹不能是模块根目录");
@@ -176,14 +176,14 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         }
         checkArgument(CollectionUtils.isNotEmpty(replicationDtoList), "导入数据为空");
 
-        List<JobExtraOperateResult> results = Lists.newArrayList();
+        List<JobGenericResult> results = Lists.newArrayList();
         for (JobReplicationDto replicationDto : replicationDtoList) {
-            JobExtraOperateResult result = new JobExtraOperateResult();
+            JobGenericResult result = new JobGenericResult();
             result.setJobName(replicationDto.getJobInfoDto().getName());
             try {
                 boolean fromImport = true;
                 cleanOutJobReplication(replicationDto, destFolderId, fromImport);
-                jobExtraOperationManager.saveJobReplication(replicationDto, fromImport, operator);
+                jobGenericManager.saveJobReplication(replicationDto, fromImport, operator);
 
                 result.setSuccess(Boolean.TRUE);
             } catch (Exception ex) {
@@ -199,6 +199,9 @@ public class JobExtraOperationServiceImpl implements JobExtraOperationService {
         JobReplicationDto jobReplicationDto = new JobReplicationDto();
 
         JobInfoDto jobInfoDto = jobInfoService.getJobInfo(jobId);
+        checkArgument(!JobTypeEnum.DI_STREAM.getCode().equals(jobInfoDto.getJobType())
+                && !JobTypeEnum.SQL_FLINK.getCode().equals(jobInfoDto.getJobType()), "批量操作暂不支持实时作业");
+
         jobReplicationDto.setJobInfoDto(jobInfoDto);
 
         Map<EnvEnum, JobConfigCombinationDto> jobConfigCombinationDtoMap = Maps.newHashMap();

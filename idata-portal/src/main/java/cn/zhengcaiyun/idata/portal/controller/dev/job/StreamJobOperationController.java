@@ -15,25 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.context.Operator;
-import cn.zhengcaiyun.idata.develop.dto.job.JobExtraOperateResult;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 /**
- * @description:
+ * @description: 实时作业运维管理
  * @author: yangjianhua
- * @create: 2022-04-28 14:28
+ * @create: 2022-08-18 15:46
  **/
-public interface JobExtraOperationService {
-
-    List<JobExtraOperateResult> copyJobTo(List<Long> jobIds, Long destFolderId, Operator operator);
-
-    JobExtraOperateResult copyJobTo(Long jobId, Long destFolderId, Operator operator);
-
-    String exportJobJson(List<Long> jobIds);
-
-    List<JobExtraOperateResult> importJob(String jobJson, Long destFolderId, Operator operator);
+public class StreamJobOperationController {
 }

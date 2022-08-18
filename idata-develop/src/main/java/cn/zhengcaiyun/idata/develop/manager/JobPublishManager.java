@@ -114,6 +114,7 @@ public class JobPublishManager {
     private void postSubmit(JobPublishRecord publishRecord, Operator operator) {
         // 预发环境直接发布
         if (EnvEnum.stag.name().equals(publishRecord.getEnvironment())) {
+            // todo 实时作业不能直接发布
             //更新状态为发布
             publish(publishRecord, operator);
         }

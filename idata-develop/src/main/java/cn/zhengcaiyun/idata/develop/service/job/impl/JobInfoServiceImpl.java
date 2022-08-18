@@ -276,6 +276,8 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
         JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
+
+        // todo 判断实时作业是否运行实例状态
         return ret;
     }
 
@@ -317,6 +319,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     public Boolean runJob(Long id, String environment, Operator operator) {
+        // todo 不能运行实时抽数作业
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
@@ -934,6 +937,18 @@ public class JobInfoServiceImpl implements JobInfoService {
         if (JobTypeEnum.DI_BATCH == typeEnum || JobTypeEnum.BACK_FLOW == typeEnum) {
             List<DIJobContent> contentList = diJobContentRepo.queryList(jobPublishContentIds);
             for (DIJobContent content : contentList) {
+                if (!jobVersionMap.containsKey(content.getJobId())) {
+                    JobContentVersionDto versionDto = new JobContentVersionDto();
+                    versionDto.setJobId(content.getJobId());
+                    versionDto.setVersion(content.getVersion());
+                    versionDto.setVersionDisplay(JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+                    versionDto.setEnvironment(publishedEnvEnum.name());
+                    jobVersionMap.put(content.getJobId(), versionDto);
+                }
+            }
+        } else if (JobTypeEnum.DI_STREAM == typeEnum) {
+            List<DIStreamJobContent> contentList = diStreamJobContentRepo.queryList(jobPublishContentIds);
+            for (DIStreamJobContent content : contentList) {
                 if (!jobVersionMap.containsKey(content.getJobId())) {
                     JobContentVersionDto versionDto = new JobContentVersionDto();
                     versionDto.setJobId(content.getJobId());

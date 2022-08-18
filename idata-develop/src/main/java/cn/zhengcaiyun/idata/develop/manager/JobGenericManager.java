@@ -43,7 +43,7 @@ import java.util.Map;
  * @create: 2022-05-05 15:05
  **/
 @Component
-public class JobExtraOperationManager {
+public class JobGenericManager {
 
     private final JobInfoService jobInfoService;
     private final JobExecuteConfigService jobExecuteConfigService;
@@ -53,13 +53,13 @@ public class JobExtraOperationManager {
     private final ScriptJobService scriptJobService;
     private final KylinJobService kylinJobService;
 
-    public JobExtraOperationManager(JobInfoService jobInfoService,
-                                    JobExecuteConfigService jobExecuteConfigService,
-                                    DIJobContentService diJobContentService,
-                                    SqlJobService sqlJobService,
-                                    SparkJobService sparkJobService,
-                                    ScriptJobService scriptJobService,
-                                    KylinJobService kylinJobService) {
+    public JobGenericManager(JobInfoService jobInfoService,
+                             JobExecuteConfigService jobExecuteConfigService,
+                             DIJobContentService diJobContentService,
+                             SqlJobService sqlJobService,
+                             SparkJobService sparkJobService,
+                             ScriptJobService scriptJobService,
+                             KylinJobService kylinJobService) {
         this.jobInfoService = jobInfoService;
         this.jobExecuteConfigService = jobExecuteConfigService;
         this.diJobContentService = diJobContentService;

@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.dal.repo.dag.impl;
 
+import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceCustomizeDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.dag.DAGDependenceDao;
@@ -162,6 +163,7 @@ public class DAGRepoImpl implements DAGRepo {
         return dagInfoDao.select(dsl -> dsl.where(dag_info.del, isEqualTo(DEL_NO.val),
                 and(dag_info.dwLayerCode, isEqualToWhenPresent(condition.getDwLayerCode())),
                 and(dag_info.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(dag_info.name, isLikeWhenPresent(condition.getNamePattern()).map(MybatisHelper::appendWildCards)),
                 and(dag_info.status, isEqualToWhenPresent(condition.getStatus()))));
     }
 

@@ -66,6 +66,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
     private final JobContentSqlRepo jobContentSqlRepo;
+    private final DIStreamJobContentRepo diStreamJobContentRepo;
 
     @Autowired
     public JobContentCommonServiceImpl(DIJobContentRepo diJobContentRepo,
@@ -78,7 +79,8 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                                        SparkJobRepo sparkJobRepo,
                                        ScriptJobRepo scriptJobRepo,
                                        KylinJobRepo kylinJobRepo,
-                                       JobContentSqlRepo jobContentSqlRepo) {
+                                       JobContentSqlRepo jobContentSqlRepo,
+                                       DIStreamJobContentRepo diStreamJobContentRepo) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -90,6 +92,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
         this.jobContentSqlRepo = jobContentSqlRepo;
+        this.diStreamJobContentRepo = diStreamJobContentRepo;
     }
 
     @Override
@@ -139,9 +142,12 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         content.setJobId(jobId);
         content.setVersion(version);
         if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
-                || JobTypeEnum.DI_STREAM.getCode().equals(jobType)
                 || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
             Optional<DIJobContent> jobContentOptional = diJobContentRepo.query(jobId, version);
+            checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
+            content.setId(jobContentOptional.get().getId());
+        } else if (JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+            Optional<DIStreamJobContent> jobContentOptional = diStreamJobContentRepo.query(jobId, version);
             checkArgument(jobContentOptional.isPresent(), "作业版本不存在");
             content.setId(jobContentOptional.get().getId());
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
@@ -175,17 +181,23 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         } catch (Exception e) {
             throw new IllegalArgumentException("作业类型有误");
         }
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType) || JobTypeEnum.DI_STREAM.getCode().equals(jobType) || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
+                || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(diJobContentRepo.queryList(jobId), JobContentBaseDto.class,
+                    "jobId", "version", "createTime");
+        } else if (JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+            contentList = PojoUtil.copyList(diStreamJobContentRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
                 || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sqlJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType) || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
+                || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(sparkJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
-        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType) || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
+                || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
             contentList = PojoUtil.copyList(scriptJobRepo.queryList(jobId), JobContentBaseDto.class,
                     "jobId", "version", "createTime");
         } else {

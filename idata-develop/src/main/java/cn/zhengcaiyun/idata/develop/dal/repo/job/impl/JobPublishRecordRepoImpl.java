@@ -58,6 +58,7 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
     private final SparkJobRepo sparkJobRepo;
     private final ScriptJobRepo scriptJobRepo;
     private final KylinJobRepo kylinJobRepo;
+    private final DIStreamJobContentRepo diStreamJobContentRepo;
 
     @Autowired
     public JobPublishRecordRepoImpl(JobPublishRecordDao jobPublishRecordDao,
@@ -67,7 +68,8 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
                                     SqlJobRepo sqlJobRepo,
                                     SparkJobRepo sparkJobRepo,
                                     ScriptJobRepo scriptJobRepo,
-                                    KylinJobRepo kylinJobRepo) {
+                                    KylinJobRepo kylinJobRepo,
+                                    DIStreamJobContentRepo diStreamJobContentRepo) {
         this.jobPublishRecordDao = jobPublishRecordDao;
         this.jobExecuteConfigDao = jobExecuteConfigDao;
         this.diJobContentRepo = diJobContentRepo;
@@ -76,6 +78,7 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
         this.sparkJobRepo = sparkJobRepo;
         this.scriptJobRepo = scriptJobRepo;
         this.kylinJobRepo = kylinJobRepo;
+        this.diStreamJobContentRepo = diStreamJobContentRepo;
     }
 
     @Override
@@ -186,11 +189,13 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
             String jobType = record.getJobTypeCode();
             // 第一次提交
             // 更新不同作业的可编辑状态
-            diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
             if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
-                    || JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+                    || JobTypeEnum.BACK_FLOW.getCode().equals(jobType)) {
                 diJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
-            } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
+            } else if (JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
+                diStreamJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
+            } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
+                    || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
                 sqlJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
             } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
                     || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {

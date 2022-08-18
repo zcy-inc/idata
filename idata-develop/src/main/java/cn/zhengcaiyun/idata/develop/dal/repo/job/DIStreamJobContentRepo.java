@@ -45,6 +45,8 @@ public interface DIStreamJobContentRepo {
 
     List<DIStreamJobContent> queryList(Long jobId);
 
+    List<DIStreamJobContent> queryList(List<Long> ids);
+
     List<DIStreamJobContent> queryByDataSource(Long srcDataSourceId, Long destDataSourceId);
 
     Set<Long> queryJobIdByDataSource(Long srcDataSourceId, Long destDataSourceId);

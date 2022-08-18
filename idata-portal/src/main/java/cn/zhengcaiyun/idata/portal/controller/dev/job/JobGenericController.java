@@ -20,8 +20,8 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
-import cn.zhengcaiyun.idata.develop.dto.job.JobExtraOperateResult;
-import cn.zhengcaiyun.idata.develop.service.job.JobExtraOperationService;
+import cn.zhengcaiyun.idata.develop.dto.job.JobGenericResult;
+import cn.zhengcaiyun.idata.develop.service.job.JobGenericService;
 import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
 import cn.zhengcaiyun.idata.portal.util.ExportUtil;
 import org.apache.commons.compress.utils.Lists;
@@ -38,20 +38,20 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * Job-Extra-Operation-Controller
+ * Job-Generic-Controller
  *
- * @description:
+ * @description: 作业一般操作
  * @author: yangjianhua
  * @create: 2022-05-06 09:41
  **/
 @RestController
 @RequestMapping(path = "/p1/dev/jobs/")
-public class JobExtraOperationController {
+public class JobGenericController {
 
-    private final JobExtraOperationService jobExtraOperationService;
+    private final JobGenericService jobExtraOperationService;
 
     @Autowired
-    public JobExtraOperationController(JobExtraOperationService jobExtraOperationService) {
+    public JobGenericController(JobGenericService jobExtraOperationService) {
         this.jobExtraOperationService = jobExtraOperationService;
     }
 
@@ -63,7 +63,7 @@ public class JobExtraOperationController {
      * @return
      */
     @PostMapping("/copy")
-    public RestResult<List<JobExtraOperateResult>> copyJob(@RequestBody JobBatchOperationExtReq batchOperationReq) {
+    public RestResult<List<JobGenericResult>> copyJob(@RequestBody JobBatchOperationExtReq batchOperationReq) {
         return RestResult.success(jobExtraOperationService.copyJobTo(batchOperationReq.getJobIds(), batchOperationReq.getDestFolderId(), OperatorContext.getCurrentOperator()));
     }
 
@@ -95,8 +95,8 @@ public class JobExtraOperationController {
      * @return
      */
     @PostMapping("/import")
-    public RestResult<List<JobExtraOperateResult>> importJob(@RequestPart MultipartFile file,
-                                                             @RequestParam Long destFolderId) {
+    public RestResult<List<JobGenericResult>> importJob(@RequestPart MultipartFile file,
+                                                        @RequestParam Long destFolderId) {
         checkArgument(!file.isEmpty(), "上传的文件不能为空");
         checkArgument(file.getSize() > 0, "上传的文件大小需要大于0kb");
         String originFileName = file.getOriginalFilename();
