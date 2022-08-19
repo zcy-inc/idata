@@ -842,6 +842,7 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     private JobInfoExecuteDetailDto getFlinkCDCJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
                                                          Integer jobVersion) {
+        return null;
         // dryRun不需要发布，正常调用jobVersion > 0
         Integer version = jobVersion;
         boolean published = false;
@@ -859,7 +860,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         Optional<DIStreamJobContent> contentOptional = diStreamJobContentRepo.query(jobId, version);
         checkArgument(contentOptional.isPresent(), String.format("未查询到可用的FlinkCDC作业内容, jobId:%s，环境:%s，版本:%s", jobId, env, version));
         DIStreamJobContent jobContent = contentOptional.get();
-        checkArgument(StringUtils.isNotBlank(jobContent.getCdcTables()), String.format("FlinkCDC作业表配置不合法, jobId:%s，环境:%s，版本:%s", jobId, env, version));
+//        checkArgument(StringUtils.isNotBlank(jobContent.getCdcTables()), String.format("FlinkCDC作业表配置不合法, jobId:%s，环境:%s，版本:%s", jobId, env, version));
 //        JobInfoExecuteDetailDto.FlinkCDCJobDetailDto cdcJobDetailDto = new JobInfoExecuteDetailDto.FlinkCDCJobDetailDto(baseJobDetailDto);
         JobInfoExecuteDetailDto.FlinkCDCJobDetailDto cdcJobDetailDto = JSON.parseObject(jobContent.getCdcTables(), JobInfoExecuteDetailDto.FlinkCDCJobDetailDto.class);
         BeanUtils.copyProperties(baseJobDetailDto, cdcJobDetailDto);

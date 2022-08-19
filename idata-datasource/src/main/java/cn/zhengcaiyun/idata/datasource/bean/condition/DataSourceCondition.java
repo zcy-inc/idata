@@ -33,6 +33,11 @@ public class DataSourceCondition {
     private DataSourceTypeEnum type;
 
     /**
+     * 数据源类型，多选过滤，逗号分割
+     */
+    private String types;
+
+    /**
      * 数据源名称
      */
     private String name;
@@ -64,5 +69,13 @@ public class DataSourceCondition {
 
     public void setEnv(EnvEnum env) {
         this.env = env;
+    }
+
+    public String getTypes() {
+        return types;
+    }
+
+    public void setTypes(String types) {
+        this.types = types;
     }
 }
