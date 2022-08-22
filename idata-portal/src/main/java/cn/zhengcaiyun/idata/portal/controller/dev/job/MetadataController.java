@@ -85,7 +85,7 @@ public class MetadataController {
     }
 
     /**
-     * 加载DI数据源
+     * 加载数据源
      * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
      * @return
      */
@@ -119,7 +119,7 @@ public class MetadataController {
             case SCRIPT_SHELL:
             case KYLIN:
                 response.setExternalList(new ArrayList<>());
-                response.setFromList(DataSourceTypeEnum.getAllNames());
+                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.hive.name()}));
                 response.setDestList(DataSourceTypeEnum.getAllNames());
                 break;
         }

@@ -109,7 +109,7 @@ public class DataSourceApiImpl implements DataSourceApi {
 
     private String getJdbcUrl(DataSourceTypeEnum sourceTypeEnum, String host, Integer port, String dbName) {
         String protocol = null;
-        if (DataSourceTypeEnum.mysql == sourceTypeEnum || DataSourceTypeEnum.doris == sourceTypeEnum) {
+        if (DataSourceTypeEnum.mysql == sourceTypeEnum || DataSourceTypeEnum.starrocks == sourceTypeEnum) {
             protocol = "mysql";
         } else if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
             protocol = "postgresql";

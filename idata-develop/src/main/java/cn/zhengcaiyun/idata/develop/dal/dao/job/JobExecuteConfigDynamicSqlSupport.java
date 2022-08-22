@@ -164,6 +164,13 @@ public final class JobExecuteConfigDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
     public static final SqlColumn<String> extProperties = JOB_EXECUTE_CONFIG.extProperties;
 
+    /**
+     * Database Column Remarks:
+     *   0:否，1:是
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    public static final SqlColumn<Integer> isOpenMergeFile = JOB_EXECUTE_CONFIG.isOpenMergeFile;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     public static final class JobExecuteConfig extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -209,6 +216,8 @@ public final class JobExecuteConfigDynamicSqlSupport {
         public final SqlColumn<String> execEngine = column("exec_engine", JDBCType.VARCHAR);
 
         public final SqlColumn<String> extProperties = column("ext_properties", JDBCType.VARCHAR);
+
+        public final SqlColumn<Integer> isOpenMergeFile = column("is_open_merge_file", JDBCType.INTEGER);
 
         public JobExecuteConfig() {
             super("dev_job_execute_config");

@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
 import java.util.List;
 import java.util.Objects;
 
@@ -97,7 +98,15 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     private String execEngine;
 
+    /**
+     * 自定义参数
+     */
     private List<KeyValuePair<String, String>> extProperties;
+
+    /**
+     *  开启小文件合并 0:否，1:是
+     */
+    private Integer isOpenMergeFile;
 
     public Long getId() {
         return id;
@@ -233,6 +242,14 @@ public class JobExecuteConfigDto extends BaseDto {
 
     public void setExecCores(Integer execCores) {
         this.execCores = execCores;
+    }
+
+    public Integer getIsOpenMergeFile() {
+        return isOpenMergeFile;
+    }
+
+    public void setIsOpenMergeFile(Integer isOpenMergeFile) {
+        this.isOpenMergeFile = isOpenMergeFile;
     }
 
     public static JobExecuteConfigDto from(JobExecuteConfig config) {

@@ -38,7 +38,7 @@ public enum DataSourceTypeEnum {
     elasticsearch,
     mssql,
     kafka,
-    doris,
+//    doris,
     starrocks,
     csv,
     ;
