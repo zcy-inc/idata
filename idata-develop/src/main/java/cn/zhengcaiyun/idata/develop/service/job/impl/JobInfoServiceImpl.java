@@ -667,7 +667,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     }
                     if (!CollectionUtils.isEmpty(extTableDtoList)) {
                         for (SqlJobExternalTableDto extTableDto : extTableDtoList) {
-                            checkArgument(DataSourceTypeEnum.doris.name().equals(extTableDto.getDataSourceType())
+                            checkArgument(DataSourceTypeEnum.starrocks.name().equals(extTableDto.getDataSourceType())
                                             || DataSourceTypeEnum.starrocks.name().equals(extTableDto.getDataSourceType()),
                                     String.format("作业外部表目前支持doris或starrocks, jobId:%s，环境:%s", id.toString(), env));
 
