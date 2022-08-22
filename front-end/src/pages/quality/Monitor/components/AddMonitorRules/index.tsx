@@ -316,6 +316,9 @@ const AddMonitorRule: FC<{id: number; tableName?: string, baselineId: number; di
             rules={[{ required: true, message: '请选择字段名称' }]}
             options={fieldOptions}
             placeholder="请选择"
+            fieldProps={{
+              showSearch: true
+            }}
           />
         }
         <ProFormSelect
