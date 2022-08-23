@@ -106,6 +106,11 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkDependConfig(jobId, dependenceDtoList);
         checkOutputConfig(jobInfoOptional.get(), outputDto);
 
+        // SPARK_SQL作业校验执行引擎必填
+        if (jobInfoOptional.get().getJobType().equals(JobTypeEnum.SQL_SPARK.getCode())) {
+            checkArgument(StringUtils.isNotEmpty(dto.getExecuteConfig().getExecEngine()), "SPARK_SQL作业：执行引擎项必填");
+        }
+
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
         if (configCombinationOptional.isEmpty()) {
             // 新增配置
@@ -207,6 +212,11 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
                 checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改调度配置", environment);
                 changeSchedule(jobId, environment, operator);
+            }
+
+            // 修改DS配置
+            if (isDsConfigChanged(executeConfig, existExecuteConfig)) {
+                checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改DS配置", environment);
             }
         }
     }
@@ -316,6 +326,13 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (!Objects.equals(newConfig.getSchTimeOut(), oldConfig.getSchTimeOut())) return true;
 
         if (!Objects.equals(newConfig.getSchTimeOutStrategy(), oldConfig.getSchTimeOutStrategy())) return true;
+
+        return false;
+    }
+
+    private boolean isDsConfigChanged(JobExecuteConfig newConfig, JobExecuteConfig oldConfig) {
+        // 判断作业优先级、超时和超时策略是否变更，如变更需要同步调度系统
+        if (!Objects.equals(newConfig.getCustomParams(), oldConfig.getCustomParams())) return true;
 
         return false;
     }

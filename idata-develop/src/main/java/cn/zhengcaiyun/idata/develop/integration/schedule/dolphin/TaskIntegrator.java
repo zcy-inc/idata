@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.integration.schedule.dolphin;
 
 import cn.hutool.core.date.DateUtil;
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.commons.exception.ExternalIntegrationException;
 import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobPriorityEnum;
@@ -40,6 +41,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -674,6 +677,22 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
         JSONObject taskJson = JSONObject.parseObject("{\"code\":null,\"name\":\"task-template-1\",\"description\":\"It is a task\",\"taskType\":\"SHELL\"," + "\"taskParams\":{\"resourceList\":[],\"localParams\":[],\"rawScript\":\"run_etl\",\"dependence\":{},\"conditionResult\":{\"successNode\":[],\"failedNode\":[]},\"waitStartTimeout\":{},\"switchResult\":{}}," + "\"flag\":\"NO\",\"taskPriority\":\"MEDIUM\",\"workerGroup\":\"default\",\"failRetryTimes\":\"2\",\"failRetryInterval\":\"5\"," + "\"timeoutFlag\":\"OPEN\",\"timeoutNotifyStrategy\":\"WARN,FAILED\",\"timeout\":30,\"delayTime\":\"0\",\"environmentCode\":-1}");
         taskJson.put("name", buildJobName(jobInfo));
         taskJson.getJSONObject("taskParams").put("rawScript", String.format("run_etl jobId=%d env=%s", jobInfo.getId(), executeConfig.getEnvironment()));
+
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(executeConfig.getCustomParams())) {
+            List<KeyValuePair<String, String>> customParams = new Gson().fromJson(executeConfig.getCustomParams(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType());
+            List<JSONObject> customParamList = new ArrayList<>();
+            customParams.forEach(e -> {
+                JSONObject elem = new JSONObject();
+                elem.put("prop", e.getKey());
+                elem.put("direct", "IN");
+                elem.put("type", "VARCHAR");
+                elem.put("value", e.getValue());
+                customParamList.add(elem);
+            });
+            taskJson.getJSONObject("taskParams").put("localParams", new Gson().toJson(customParamList));
+        }
+
         taskJson.put("flag", "NO");
         taskJson.put("taskPriority", getJobPriority(executeConfig));
         taskJson.put("workerGroup", getDSWorkGroup(executeConfig.getEnvironment()));

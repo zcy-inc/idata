@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, execCores, runningState, execEngine, extProperties, isOpenMergeFile);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, execCores, runningState, execEngine, extProperties, isOpenMergeFile, customParams);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -79,7 +79,8 @@ public interface JobExecuteConfigDao {
         @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_engine", property="execEngine", jdbcType=JdbcType.VARCHAR),
         @Result(column="ext_properties", property="extProperties", jdbcType=JdbcType.VARCHAR),
-        @Result(column="is_open_merge_file", property="isOpenMergeFile", jdbcType=JdbcType.INTEGER)
+        @Result(column="is_open_merge_file", property="isOpenMergeFile", jdbcType=JdbcType.INTEGER),
+        @Result(column="custom_params", property="customParams", jdbcType=JdbcType.VARCHAR)
     })
     List<JobExecuteConfig> selectMany(SelectStatementProvider selectStatement);
 
@@ -129,6 +130,7 @@ public interface JobExecuteConfigDao {
             .map(execEngine).toProperty("execEngine")
             .map(extProperties).toProperty("extProperties")
             .map(isOpenMergeFile).toProperty("isOpenMergeFile")
+            .map(customParams).toProperty("customParams")
         );
     }
 
@@ -157,6 +159,7 @@ public interface JobExecuteConfigDao {
             .map(execEngine).toPropertyWhenPresent("execEngine", record::getExecEngine)
             .map(extProperties).toPropertyWhenPresent("extProperties", record::getExtProperties)
             .map(isOpenMergeFile).toPropertyWhenPresent("isOpenMergeFile", record::getIsOpenMergeFile)
+            .map(customParams).toPropertyWhenPresent("customParams", record::getCustomParams)
         );
     }
 
@@ -210,7 +213,8 @@ public interface JobExecuteConfigDao {
                 .set(runningState).equalTo(record::getRunningState)
                 .set(execEngine).equalTo(record::getExecEngine)
                 .set(extProperties).equalTo(record::getExtProperties)
-                .set(isOpenMergeFile).equalTo(record::getIsOpenMergeFile);
+                .set(isOpenMergeFile).equalTo(record::getIsOpenMergeFile)
+                .set(customParams).equalTo(record::getCustomParams);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -236,7 +240,8 @@ public interface JobExecuteConfigDao {
                 .set(runningState).equalToWhenPresent(record::getRunningState)
                 .set(execEngine).equalToWhenPresent(record::getExecEngine)
                 .set(extProperties).equalToWhenPresent(record::getExtProperties)
-                .set(isOpenMergeFile).equalToWhenPresent(record::getIsOpenMergeFile);
+                .set(isOpenMergeFile).equalToWhenPresent(record::getIsOpenMergeFile)
+                .set(customParams).equalToWhenPresent(record::getCustomParams);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -264,6 +269,7 @@ public interface JobExecuteConfigDao {
             .set(execEngine).equalTo(record::getExecEngine)
             .set(extProperties).equalTo(record::getExtProperties)
             .set(isOpenMergeFile).equalTo(record::getIsOpenMergeFile)
+            .set(customParams).equalTo(record::getCustomParams)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -293,6 +299,7 @@ public interface JobExecuteConfigDao {
             .set(execEngine).equalToWhenPresent(record::getExecEngine)
             .set(extProperties).equalToWhenPresent(record::getExtProperties)
             .set(isOpenMergeFile).equalToWhenPresent(record::getIsOpenMergeFile)
+            .set(customParams).equalToWhenPresent(record::getCustomParams)
             .where(id, isEqualTo(record::getId))
         );
     }
