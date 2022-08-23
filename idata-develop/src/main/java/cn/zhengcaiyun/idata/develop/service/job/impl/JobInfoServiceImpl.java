@@ -59,6 +59,7 @@ import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
 import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.helper.rule.EnvRuleHelper;
 import cn.zhengcaiyun.idata.develop.manager.JobManager;
+import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
@@ -131,6 +132,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     private final MonitorRuleDao monitorRuleDao;
 
     private final DIStreamJobContentRepo diStreamJobContentRepo;
+    private final JobPublishManager jobPublishManager;
 
     @Value("${dqc.open:false}")
     private boolean dqcOpen;
@@ -159,7 +161,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                               ScriptJobRepo scriptJobRepo,
                               KylinJobRepo kylinJobRepo,
                               DIStreamJobContentRepo diStreamJobContentRepo,
-                              MonitorRuleDao monitorRuleDao) {
+                              MonitorRuleDao monitorRuleDao, JobPublishManager jobPublishManager) {
         this.devJobInfoMyDao = devJobInfoMyDao;
         this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
@@ -185,6 +187,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.kylinJobRepo = kylinJobRepo;
         this.diStreamJobContentRepo = diStreamJobContentRepo;
         this.monitorRuleDao = monitorRuleDao;
+        this.jobPublishManager = jobPublishManager;
     }
 
     @Override
@@ -291,7 +294,7 @@ public class JobInfoServiceImpl implements JobInfoService {
         JobExecuteConfig executeConfig = configOptional.get();
         checkState(Objects.equals(RunningStateEnum.pause.val, executeConfig.getRunningState()), "作业在%s环境已运行，勿重复操作", environment);
         //作业未发布，不能恢复运行
-        checkState(isJobPublished(id, environment), "作业未发布，不能恢复");
+        checkState(jobPublishManager.isJobPublished(id, environment), "作业未发布，不能恢复");
 
         jobExecuteConfigRepo.switchRunningState(executeConfig.getId(), RunningStateEnum.resume, operator.getNickname());
         // 发布job恢复事件
@@ -319,24 +322,24 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Override
     public Boolean runJob(Long id, String environment, Operator operator) {
-        // todo 不能运行实时抽数作业
         checkArgument(Objects.nonNull(id), "作业编号参数为空");
         checkArgument(StringUtils.isNotBlank(environment), "作业环境参数为空");
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(id);
+        checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+        JobInfo jobInfo = jobInfoOptional.get();
+        checkArgument(!JobTypeEnum.DI_STREAM.getCode().equals(jobInfo.getJobType())
+                && !JobTypeEnum.SQL_FLINK.getCode().equals(jobInfo.getJobType()), "请在实时作业运行管理页面操作");
+
         Optional<JobExecuteConfig> configOptional = jobExecuteConfigRepo.query(id, environment);
         checkArgument(configOptional.isPresent(), "%s环境未配置调度配置，不能运行", environment);
         JobExecuteConfig executeConfig = configOptional.get();
-        checkState(Objects.nonNull(executeConfig.getSchDagId()), "作业在%s环境未关联DAG，请先关联DAG", environment);
         //作业未发布，不能恢复运行
-        checkState(isJobPublished(id, environment), "作业未发布，不能运行");
-        checkState(Objects.equals(RunningStateEnum.resume.val, executeConfig.getRunningState()), "作业在%s环境已暂停，请先恢复", environment);
-        // dag 必须上线
-        checkState(isDAGOnline(executeConfig.getSchDagId()), "作业关联DAG未上线，请先上线DAG");
+        checkState(jobPublishManager.isJobPublished(id, environment), "作业未发布，不能运行");
 
-        jobScheduleManager.runJob(id, environment, false);
+        jobScheduleManager.runJob(jobInfo, executeConfig, environment, false);
         return Boolean.TRUE;
     }
 
-    // TODO 进勇脚本支持
     @Override
     public JobDryRunDto dryRunJob(Long jobId, Integer version) {
         return null;
@@ -1054,14 +1057,6 @@ public class JobInfoServiceImpl implements JobInfoService {
         checkArgument(Objects.nonNull(dto.getFolderId()), "作业所属文件夹为空");
         checkArgument(Objects.nonNull(dto.getJobType()), "作业类型为空");
         checkArgument(JobTypeEnum.getEnum(dto.getJobType().toString()).isPresent(), "作业类型有误");
-    }
-
-    private boolean isJobPublished(Long jobId, String environment) {
-        JobPublishRecordCondition condition = new JobPublishRecordCondition();
-        condition.setJobId(jobId);
-        condition.setEnvironment(environment);
-        condition.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
-        return jobPublishRecordRepo.count(condition) > 0;
     }
 
     private boolean isDAGOnline(Long dagId) {

@@ -21,6 +21,9 @@ import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
 import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.core.http.HttpInput;
+import cn.zhengcaiyun.idata.develop.manager.FlinkJobManager;
+import cn.zhengcaiyun.idata.develop.manager.StreamJobFlinkInfoManager;
+import cn.zhengcaiyun.idata.develop.manager.StreamJobInstanceManager;
 import cn.zhengcaiyun.idata.develop.service.job.FlinkJobCommonService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -40,48 +43,37 @@ import java.util.List;
 @Service
 public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
 
-    private final ResourceManagerService resourceManagerService;
+    private final FlinkJobManager flinkJobManager;
+    private final StreamJobInstanceManager streamJobInstanceManager;
+    private final StreamJobFlinkInfoManager streamJobFlinkInfoManager;
 
     @Autowired
-    public FlinkJobCommonServiceImpl(ResourceManagerService resourceManagerService) {
-        this.resourceManagerService = resourceManagerService;
+    public FlinkJobCommonServiceImpl(FlinkJobManager flinkJobManager,
+                                     StreamJobInstanceManager streamJobInstanceManager,
+                                     StreamJobFlinkInfoManager streamJobFlinkInfoManager) {
+        this.flinkJobManager = flinkJobManager;
+        this.streamJobInstanceManager = streamJobInstanceManager;
+        this.streamJobFlinkInfoManager = streamJobFlinkInfoManager;
     }
 
     @Override
-    public void fetchFlinkJobId() {
-        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchRunningClusterApps(null);
+    public void fetchAndSetFlinkJobRunningInfo() {
+        // 获取flink app信息
+        List<ClusterAppDto> clusterAppDtoList = flinkJobManager.fetchFlinkApp();
         if (CollectionUtils.isEmpty(clusterAppDtoList)) {
             return;
         }
 
-        for (ClusterAppDto appDto : clusterAppDtoList) {
-            if (appDto.getAppName().startsWith("FlinkCDC-")) {
-                processCDCJob(appDto);
-            }
+        for (ClusterAppDto appDto:clusterAppDtoList){
+            // 获取 flink job 信息
+
+            // 设置运行实例信息
+
+            // 设置flink id 信息
         }
+
+
+
     }
 
-    private void processCDCJob(ClusterAppDto appDto) {
-        String trackingUrl = appDto.getTrackingUrl();
-        if (StringUtils.isBlank(trackingUrl)) {
-            return;
-        }
-
-        String flinkJobUrl = trackingUrl + "jobs/overview";
-        HttpInput httpInput = new HttpInput();
-        httpInput.setServerName("Flink Job Manager");
-        httpInput.setUri(flinkJobUrl);
-        httpInput.setMethod("GET");
-
-        JSONObject result = HttpClientUtil.executeHttpRequest(httpInput, new TypeReference<JSONObject>() {
-        });
-        JSONArray jobs = result.getJSONArray("jobs");
-        for (int i = 0; i < jobs.size(); i++) {
-            JSONObject jobObject = (JSONObject) jobs.get(i);
-            String name = (String) jobObject.get("name");
-            String jid = (String) jobObject.get("jid");
-            Long startTime = (Long) jobObject.get("start-time");
-            Integer duration = (Integer) jobObject.get("duration");
-        }
-    }
 }

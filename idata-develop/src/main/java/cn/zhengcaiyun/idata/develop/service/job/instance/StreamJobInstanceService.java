@@ -15,15 +15,27 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.service.job.instance;
+
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
+import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobInstanceDto;
+import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobRunParamDto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-22 17:30
  **/
-public interface FlinkJobCommonService {
+public interface StreamJobInstanceService {
 
-    void fetchAndSetFlinkJobRunningInfo();
+    Page<StreamJobInstanceDto> paging(StreamJobInstanceCondition condition, PageParam pageParam);
 
+    Boolean start(Long id, StreamJobRunParamDto runParamDto, Operator operator);
+
+    Boolean stop(Long id, Operator operator);
+
+    Boolean destroy(Long id, Operator operator);
 }
