@@ -68,7 +68,7 @@ public class DIRuleHelper {
 
         DataSourceTypeEnum dataSourceTypeEnum = DataSourceTypeEnum.valueOf(contentDto.getSrcDataSourceType());
         // 回流 + 目标源为doris 不构建sql
-        if (BACK_FLOW == jobType && DataSourceTypeEnum.doris == dataSourceTypeEnum) {
+        if (BACK_FLOW == jobType && DataSourceTypeEnum.starrocks == dataSourceTypeEnum) {
             if (StringUtils.isNotEmpty(contentDto.getSrcReadFilter())) {
                 throw new GeneralException("回流到doris，不支持过滤条件");
             }
@@ -103,7 +103,7 @@ public class DIRuleHelper {
      */
     public static boolean buildQuery(String jobType, Integer configMode, String srcReadFilter, List<MappingColumnDto> srcCols, DataSourceTypeEnum dataSourceTypeEnum) {
         // 回流 + 目标源为doris 不构建sql
-        if (StringUtils.containsIgnoreCase(jobType, "BACK_FLOW") && DataSourceTypeEnum.doris == dataSourceTypeEnum) {
+        if (StringUtils.containsIgnoreCase(jobType, "BACK_FLOW") && DataSourceTypeEnum.starrocks == dataSourceTypeEnum) {
             return false;
         }
 
@@ -244,7 +244,7 @@ public class DIRuleHelper {
                 if (EngineTypeEnum.SQOOP == engineTypeEnum) {
                     return false;
                 }
-                if (destDataSourceTypeEnum == DataSourceTypeEnum.doris) {
+                if (destDataSourceTypeEnum == DataSourceTypeEnum.starrocks) {
                     return false;
                 }
                 break;

@@ -15,6 +15,11 @@ public class DIJobDatasourceResponse {
     private List<String> fromList;
 
     /**
+     * 外部表数据类型
+     */
+    private List<String> externalList;
+
+    /**
      * 去向数据类型
      */
     private List<String> destList;
@@ -33,5 +38,13 @@ public class DIJobDatasourceResponse {
 
     public void setDestList(List<String> destList) {
         this.destList = destList;
+    }
+
+    public List<String> getExternalList() {
+        return externalList;
+    }
+
+    public void setExternalList(List<String> externalList) {
+        this.externalList = externalList;
     }
 }

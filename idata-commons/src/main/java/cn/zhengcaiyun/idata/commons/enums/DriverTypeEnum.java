@@ -3,9 +3,9 @@ package cn.zhengcaiyun.idata.commons.enums;
 public enum DriverTypeEnum {
 
     MySQL("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.mysql),
-    Doris("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
+//    Doris("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
     StarRocks("starrocks", "com.mysql.jdbc.Driver", DataSourceTypeEnum.starrocks),
-    DorisSql("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
+//    DorisSql("mysql", "com.mysql.jdbc.Driver", DataSourceTypeEnum.doris),
     Hive("hive2", "org.apache.hive.jdbc.HiveDriver", DataSourceTypeEnum.hive),
     Postgres("postgresql", "org.postgresql.Driver", DataSourceTypeEnum.postgresql),
     Phoenix("phoenix", "", DataSourceTypeEnum.phoenix),

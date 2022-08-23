@@ -440,8 +440,8 @@ public class JobMigrationServiceImpl implements JobMigrationService {
             checkArgument(dataSourceOptional.isPresent(), "旧作业[%s]未找到迁移后的数据源", oldJobId);
             DataSource dataSource = dataSourceOptional.get();
             // 回流doris只需要配置执行引擎，作业输出不配置在配置数据中，改为数据回流类型作业
-            if (DataSourceTypeEnum.doris.name().equalsIgnoreCase(dataSource.getType())) {
-                executeConfigDto.setExecEngine(EngineTypeEnum.DORIS.name());
+            if (DataSourceTypeEnum.starrocks.name().equalsIgnoreCase(dataSource.getType())) {
+                executeConfigDto.setExecEngine(EngineTypeEnum.STARROCKS.name());
                 if (jobInfoDto.getId() == null) {
                     jobInfoDto.setJobType(JobTypeEnum.BACK_FLOW);
                 }

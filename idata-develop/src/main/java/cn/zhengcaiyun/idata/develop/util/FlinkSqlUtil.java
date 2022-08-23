@@ -117,7 +117,7 @@ public class FlinkSqlUtil {
             return generateKafkaTemplate(dataSourceType, dataSourceUDCode);
         }
 
-        if (DataSourceTypeEnum.doris.name().equals(dataSourceType)
+        if (DataSourceTypeEnum.starrocks.name().equals(dataSourceType)
                 || DataSourceTypeEnum.starrocks.name().equals(dataSourceType)) {
             return generateStarRocksTemplate(dataSourceType, dataSourceUDCode, isSink);
         }
@@ -135,7 +135,7 @@ public class FlinkSqlUtil {
             return generateKafkaProperties(dataSourceType, dataSourceUDCode, sourceTypeEnum, dbConfigDto);
         }
 
-        if (DataSourceTypeEnum.doris.name().equals(dataSourceType)
+        if (DataSourceTypeEnum.starrocks.name().equals(dataSourceType)
                 || DataSourceTypeEnum.starrocks.name().equals(dataSourceType)) {
             return generateStarRocksProperties(dataSourceType, dataSourceUDCode, dbConfigDto);
         }
