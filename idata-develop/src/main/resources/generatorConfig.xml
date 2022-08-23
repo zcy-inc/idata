@@ -23,9 +23,9 @@
         <!--            <property name="enableSubPackages" value="false"/>-->
         <!--        </sqlMapGenerator>-->
 
-        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job" targetProject="src/main/java"/>
+        <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.model.job.instance" targetProject="src/main/java"/>
 
-        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job" targetProject="src/main/java"/>
+        <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.develop.dal.dao.job.instance" targetProject="src/main/java"/>
 
 
         <!--        <table tableName="dev_label_define" mapperName="DevLabelDefineDao">-->
@@ -130,15 +130,25 @@
         <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
         <!--        </table>-->
 
-        <table tableName="dev_job_content_di_stream" domainObjectName="DIStreamJobContent" mapperName="DIStreamJobContentDao">
+<!--        <table tableName="dev_job_content_di_stream" domainObjectName="DIStreamJobContent" mapperName="DIStreamJobContentDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true"/>-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="dev_job_content_di_stream_table" domainObjectName="DIStreamJobTable" mapperName="DIStreamJobTableDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true"/>-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--            <columnOverride column="editable" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+        <table tableName="dev_stream_job_instance" domainObjectName="StreamJobInstance" mapperName="StreamJobInstanceDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
             <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="editable" javaType="java.lang.Integer"/>
         </table>
-        <table tableName="dev_job_content_di_stream_table" domainObjectName="DIStreamJobTable" mapperName="DIStreamJobTableDao">
+        <table tableName="dev_stream_job_flink_info" domainObjectName="StreamJobFlinkInfo" mapperName="StreamJobFlinkInfoDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
             <columnOverride column="del" javaType="java.lang.Integer"/>
-            <columnOverride column="editable" javaType="java.lang.Integer"/>
         </table>
+
     </context>
 </generatorConfiguration>
