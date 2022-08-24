@@ -31,6 +31,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
+import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
@@ -205,6 +206,19 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                     "jobId", "version", "createTime");
         }
         return contentList;
+    }
+
+    @Override
+    public Map<Integer, String> getJobContentVersion(Long jobId, String jobType) {
+        Map<Integer, String> versionMap = Maps.newHashMap();
+        List<JobContentBaseDto> contentList = getJobContents(jobId, jobType);
+        if (CollectionUtils.isEmpty(contentList)) {
+            return versionMap;
+        }
+        for (JobContentBaseDto content : contentList) {
+            versionMap.put(content.getVersion(), JobVersionHelper.getVersionDisplay(content.getVersion(), content.getCreateTime()));
+        }
+        return versionMap;
     }
 
     @Override

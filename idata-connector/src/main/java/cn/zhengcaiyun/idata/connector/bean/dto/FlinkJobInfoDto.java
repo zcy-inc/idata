@@ -15,15 +15,48 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.connector.bean.dto;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-23 20:30
  **/
-public interface FlinkJobCommonService {
+public class FlinkJobInfoDto {
+    private String name;
+    private String jid;
+    private Long startTime;
+    private Integer duration;
 
-    void fetchAndSetFlinkJobRunningInfo();
+    public String getName() {
+        return name;
+    }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getJid() {
+        return jid;
+    }
+
+    public void setJid(String jid) {
+        this.jid = jid;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
 }

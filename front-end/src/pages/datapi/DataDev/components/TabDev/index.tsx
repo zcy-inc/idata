@@ -77,7 +77,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [debugLoading, setDebugLoading] = useState(false);
+  const [isDebuging, setIsDebuging] = useState(false);
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -301,7 +301,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       .then((res) => {
         if (
           res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED
+          res.data.statementState !== StatementState.CANCELED &&
+          isDebuging
         ) {
           setTimeout(() => {
             fetchPysparkQueryResult({
@@ -310,6 +311,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             });
           }, 2000);
         } else {
+          setIsDebuging(false);
           const logs = get(res, 'data.pythonResults', '');
           setLog([logs]);
         }
@@ -335,7 +337,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       .then((res) => {
         if (
           res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED
+          res.data.statementState !== StatementState.CANCELED &&
+          isDebuging
         ) {
           pollingFrom.current = pollingFrom.current + 10;
           const logs = get(res, 'data.queryRunLog.log', []);
@@ -347,6 +350,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             });
           }, 2000);
         } else {
+          setIsDebuging(false);
           pollingFrom.current = 0;
           const result = res.data.resultSet;
           const resultHeader = res.data.resultHeader || [];
@@ -361,26 +365,33 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
    * 调试选中代码段
    */
   const onDebug = async () => {
-    const value = getDebugCode();
-    if (typeof value !== 'string') {
-      return message.error('请选择代码');
-    }
-    setDebugLoading(true);
-    handleExpandChange(true);
-    switch (task?.jobType) {
-      case TaskTypes.SQL_SPARK: {
-        const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
-        fetchSparkQueryResult(data);
-        break;
+    if(isDebuging) {
+      setIsDebuging(false);
+      setTimeout(() => {
+        message.success('已停止调试！')
+      }, 2000)
+    } else {
+      setIsDebuging(true);
+      const value = getDebugCode();
+      if (typeof value !== 'string') {
+        return message.error('请选择代码');
       }
-      case TaskTypes.SPARK_PYTHON:
-      case TaskTypes.SCRIPT_PYTHON: {
-        const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
-        fetchPysparkQueryResult(data);
-        break;
+      handleExpandChange(true);
+      switch (task?.jobType) {
+        case TaskTypes.SQL_SPARK: {
+          const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
+          fetchSparkQueryResult(data);
+          break;
+        }
+        case TaskTypes.SPARK_PYTHON:
+        case TaskTypes.SCRIPT_PYTHON: {
+          const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
+          fetchPysparkQueryResult(data);
+          break;
+        }
       }
     }
-    setDebugLoading(false);
+  
   };
 
   const tryRun = () => {
@@ -418,12 +429,11 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DEBUG,
-      <Tooltip title="调试" key="8">
+      <Tooltip title={`${isDebuging ? '停止': '开始'}调试`} key="8">
         <Button
           className={styles.btn}
           icon={<IconFont type="icon-tiaoshi" />}
           onClick={onDebug}
-          loading={debugLoading}
         />
       </Tooltip>,
     ],

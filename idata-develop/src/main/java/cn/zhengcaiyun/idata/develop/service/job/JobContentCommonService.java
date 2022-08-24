@@ -20,9 +20,9 @@ package cn.zhengcaiyun.idata.develop.service.job;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentVersionDto;
-import cn.zhengcaiyun.idata.develop.dto.job.SubmitJobDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -39,8 +39,11 @@ public interface JobContentCommonService {
 
     List<JobContentBaseDto> getJobContents(Long jobId, String jobType);
 
+    Map<Integer, String> getJobContentVersion(Long jobId, String jobType);
+
     /**
      * 是否绑定了UDF
+     *
      * @param id
      * @return
      */

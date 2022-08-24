@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.dal.repo.job.instance.impl;
+
+import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobFlinkInfoRepo;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-22 16:05
  **/
-public interface FlinkJobCommonService {
-
-    void fetchAndSetFlinkJobRunningInfo();
-
+public class StreamJobFlinkInfoRepoImpl implements StreamJobFlinkInfoRepo {
 }

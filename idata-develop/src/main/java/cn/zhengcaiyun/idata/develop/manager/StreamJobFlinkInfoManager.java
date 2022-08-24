@@ -15,15 +15,12 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.manager;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-23 20:23
  **/
-public interface FlinkJobCommonService {
-
-    void fetchAndSetFlinkJobRunningInfo();
-
+public class StreamJobFlinkInfoManager {
 }

@@ -15,15 +15,28 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.manager;
+
+import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobFlinkInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobInstanceRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-22 17:44
  **/
-public interface FlinkJobCommonService {
+@Component
+public class StreamJobInstanceManager {
 
-    void fetchAndSetFlinkJobRunningInfo();
+    private final StreamJobInstanceRepo streamJobInstanceRepo;
+    private final StreamJobFlinkInfoRepo streamJobFlinkInfoRepo;
 
+    @Autowired
+    public StreamJobInstanceManager(StreamJobInstanceRepo streamJobInstanceRepo,
+                                    StreamJobFlinkInfoRepo streamJobFlinkInfoRepo) {
+        this.streamJobInstanceRepo = streamJobInstanceRepo;
+        this.streamJobFlinkInfoRepo = streamJobFlinkInfoRepo;
+    }
 }
