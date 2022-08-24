@@ -4,6 +4,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.commons.util.MyStringUtil;
 import cn.zhengcaiyun.idata.connector.spi.hdfs.HdfsService;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
@@ -15,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -73,8 +75,12 @@ public class JobUdfController {
         udf.setCreator(OperatorContext.getCurrentOperator().getNickname());
         udf.setDel(DeleteEnum.DEL_NO.val);
         udf.setCreateTime(new Date());
-        String hdfsPath = udfAddRequest.getHdfsPath();
-        udf.setHdfsPath(hdfsService.getHdfsPrefix() + hdfsPath);
+        if (udfAddRequest.isAutoRecommendFileName()) {
+            udf.setFileName(MyStringUtil.getFileName(udfAddRequest.getHdfsPath()));
+        }
+        if (StringUtils.equalsIgnoreCase("PythonFunction", udfAddRequest.getUdfType()) && StringUtils.isEmpty(udfAddRequest.getSourceName())) {
+            udf.setSourceName(MyStringUtil.removeFileSuffix(udf.getFileName()));
+        }
         Long id = udfService.add(udf);
         return RestResult.success(udfService.findById(id));
     }
@@ -92,8 +98,14 @@ public class JobUdfController {
         udf.setEditor(OperatorContext.getCurrentOperator().getNickname());
         udf.setEditTime(new Date());
         udf.setDel(DeleteEnum.DEL_NO.val);
-        String hdfsPath = udfUpdateRequest.getHdfsPath();
-        udf.setHdfsPath(hdfsService.getHdfsPrefix() + hdfsPath);
+
+        if (udfUpdateRequest.isAutoRecommendFileName()) {
+            udf.setFileName(MyStringUtil.getFileName(udfUpdateRequest.getHdfsPath()));
+        }
+
+        if (StringUtils.equalsIgnoreCase("PythonFunction", udfUpdateRequest.getUdfType()) && StringUtils.isEmpty(udfUpdateRequest.getSourceName())) {
+            udf.setSourceName(MyStringUtil.removeFileSuffix(udf.getFileName()));
+        }
         udfService.update(udf);
         return RestResult.success(udfService.findById(id));
     }

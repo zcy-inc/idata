@@ -86,7 +86,7 @@ PUT http://localhost:9527/api/p1/dev/udf
 Content-Type: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjUxLCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjM4ODM2NTI2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.a2M22PTGMMq-t21fJzOHXGmu7-ft0C4CP9kdZ1czzx8LPzFwrlHlKJyP1s9N3L0f906NOQhLZ_1sJ-oak57MmQ
 
-{"id":"6", "udfName":"udfName12062", "udfType":"udfType12062", "fileName":"fileName12062", "hdfsPath":"/tmp/shiyin/udf/1638750228216_AD密码重置指导.docx", "returnType": "xxx12062", "folderId":0}
+{"udfName":"json_array_transform","udfType":"JavaFunction","fileName":"uploadFile","hdfsPath":"hdfs://nameservice1/idata/upload/udf/1661248425685_hdfs-analyse-1.0-jar-with-dependencies.jar","returnType":"String","returnSample":"JSON字符串","folderId":12143,"description":"1","commandFormat":"1","udfSample":"1","sourceName":"com.zcy.bigdata.history.list.JsonArrayTransform","id":65}
 
 ###新增udf
 POST http://localhost:8080/api/p1/dev/udf

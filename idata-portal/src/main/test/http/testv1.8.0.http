@@ -1,5 +1,17 @@
+POST http://localhost:8080/api/p1/dev/udf
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; _gid=GA1.2.89162075.1661257524; redirect=http%3A%2F%2Fpaas.cai-inc.com%2Fzcm; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjYxNDE5NjA4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.sAwH55zti-JZZd4U2bnLAtU3mXTMbHoA6EJsb4h3HzykLsHkpfB8FY4fccOzuwkrGzOL50_KNXXMhGWpEO49tA
+
+{"udfName":"beisheng5","udfType":"PythonFunction","fileName":"uploadFile","hdfsPath":"/staging_idata/upload/udf/1661340524479_json_transform.py","returnType":"Timestamp","returnSample":"1","folderId":11574,"description":"q","commandFormat":"q","udfSample":"q"}
+
+###
 GET http://localhost:8080/api/p1/das/datasources?limit=999&offset=0&types=KAFKA,postgresql
 Accept: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; redirect=; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjYwODk3Mzg2LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.JdI3WKzkbpKrq2ceA7HRueJtfvTPRKr8qm9bQnbnlBtBazfaTpiEFkvzHR8gXcEcOpw849x1Y4q-E7DOhMfsMQ
 
-###
+### 更细udf
+PUT http://localhost:8080/api/p1/dev/udf
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; _gid=GA1.2.89162075.1661257524; redirect=http%3A%2F%2Fpaas.cai-inc.com%2Fzcm; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjYxNDE5NjA4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.sAwH55zti-JZZd4U2bnLAtU3mXTMbHoA6EJsb4h3HzykLsHkpfB8FY4fccOzuwkrGzOL50_KNXXMhGWpEO49tA
+
+{"udfName":"beisheng5","udfType":"PythonFunction","fileName":"uploadFile","hdfsPath":"/staging_idata/upload/udf/1661340876741_json_transform.py","returnType":"Boolean","returnSample":"Integer","folderId":11574,"description":"1","commandFormat":"1","udfSample":"1","id":19}

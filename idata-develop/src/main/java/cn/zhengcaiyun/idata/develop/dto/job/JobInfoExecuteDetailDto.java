@@ -1,5 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
