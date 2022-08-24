@@ -368,7 +368,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     if(isDebuging) {
       setIsDebuging(false);
       setTimeout(() => {
-        message.success('已停止调试！')˜
+        message.success('已停止调试！')
       }, 2000)
     } else {
       setIsDebuging(true);
