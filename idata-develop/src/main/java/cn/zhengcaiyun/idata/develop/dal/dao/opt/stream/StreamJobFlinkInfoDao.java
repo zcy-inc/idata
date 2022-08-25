@@ -1,9 +1,9 @@
-package cn.zhengcaiyun.idata.develop.dal.dao.job.instance;
+package cn.zhengcaiyun.idata.develop.dal.dao.opt.stream;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.instance.StreamJobFlinkInfoDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.develop.dal.dao.opt.stream.StreamJobFlinkInfoDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobFlinkInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobFlinkInfo;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;

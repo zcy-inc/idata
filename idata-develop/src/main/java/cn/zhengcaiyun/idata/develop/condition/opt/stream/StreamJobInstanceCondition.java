@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.condition.job.instance;
+package cn.zhengcaiyun.idata.develop.condition.opt.stream;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ public class StreamJobInstanceCondition {
     private String environment;
 
     /**
-     * 运行实例状态，0：待启动，1：启动中，2：运行中，6：启动失败，7：运行异常，8：已停止，9：已下线
+     * 运行实例状态，0：待启动，1：启动中，2：运行中，7：已失败，8：已停止，9：已下线
      */
     private List<Integer> statusList;
 

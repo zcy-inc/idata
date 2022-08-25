@@ -19,11 +19,13 @@ package cn.zhengcaiyun.idata.develop.validator;
 
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIStreamJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIStreamJobTableDto;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -43,10 +45,11 @@ public class DIStreamJobContentValidator {
 
         List<DIStreamJobTableDto> tableDtoList = contentDto.getTableDtoList();
         checkArgument(CollectionUtils.isNotEmpty(tableDtoList), "同步表配置为空");
+        Set<String> srcTableSet = Sets.newHashSet();
         for (DIStreamJobTableDto tableDto : tableDtoList) {
             checkArgument(StringUtils.isNotBlank(tableDto.getSrcTable()), "同步表配置 - 来源表名为空");
             checkArgument(StringUtils.isNotBlank(tableDto.getDestTable()), "同步表配置 - 去向表名为空");
-            checkArgument(Objects.nonNull(tableDto.getForceInit()), "同步表配置 - 是否强制初始化参数配置不正确");
+            checkArgument(srcTableSet.add(tableDto.getSrcTable()), "同步表配置 - 同一来源表多次配置");
         }
     }
 }

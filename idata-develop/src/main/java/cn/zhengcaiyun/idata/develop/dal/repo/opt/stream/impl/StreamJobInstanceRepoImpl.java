@@ -15,24 +15,24 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job.instance.impl;
+package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
-import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.instance.StreamJobInstanceDao;
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobInstance;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobInstanceRepo;
+import cn.zhengcaiyun.idata.develop.dal.dao.opt.stream.StreamJobInstanceDao;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
+import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobInstanceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.instance.StreamJobInstanceDynamicSqlSupport.STREAM_JOB_INSTANCE;
+import static cn.zhengcaiyun.idata.develop.dal.dao.opt.stream.StreamJobInstanceDynamicSqlSupport.STREAM_JOB_INSTANCE;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -121,6 +121,13 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
         streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(statusEnum.val)
                 .set(STREAM_JOB_INSTANCE.editor).equalTo(operator)
                 .where(STREAM_JOB_INSTANCE.id, isIn(ids)));
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean updateStatus(Long id, StreamJobInstanceStatusEnum statusEnum) {
+        streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(statusEnum.val)
+                .where(STREAM_JOB_INSTANCE.id, isEqualTo(id)));
         return Boolean.TRUE;
     }
 

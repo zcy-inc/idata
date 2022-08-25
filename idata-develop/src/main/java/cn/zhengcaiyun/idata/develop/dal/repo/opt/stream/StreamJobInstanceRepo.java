@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job.instance;
+package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
-import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobInstance;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +46,8 @@ public interface StreamJobInstanceRepo {
     Boolean update(StreamJobInstance instance);
 
     Boolean updateStatus(List<Long> ids, StreamJobInstanceStatusEnum statusEnum, String operator);
+
+    Boolean updateStatus(Long id, StreamJobInstanceStatusEnum statusEnum);
 
     Boolean updateRunParam(Long id, String runParams, String operator);
 

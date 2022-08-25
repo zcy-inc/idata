@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dto.job.instance;
+package cn.zhengcaiyun.idata.develop.dto.opt.stream;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class StreamJobRunParamDto {
 
     public static class DIStreamRunParam {
         /**
-         * 强制初始化表
+         * 强制初始化表集合
          */
         private List<String> forceInitTables;
 

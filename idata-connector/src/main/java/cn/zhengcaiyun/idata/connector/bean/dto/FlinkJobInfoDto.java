@@ -25,6 +25,18 @@ package cn.zhengcaiyun.idata.connector.bean.dto;
 public class FlinkJobInfoDto {
     private String name;
     private String jid;
+    /**
+     * Created
+     * Running
+     * Finished
+     * Failed
+     * Canceled
+     * Failing
+     * Canceling
+     * Restarting
+     * Suspended
+     */
+    private String state;
     private Long startTime;
     private Integer duration;
 
@@ -58,5 +70,13 @@ public class FlinkJobInfoDto {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
