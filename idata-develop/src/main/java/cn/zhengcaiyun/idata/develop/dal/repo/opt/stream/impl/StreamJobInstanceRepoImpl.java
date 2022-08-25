@@ -71,7 +71,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                         and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
-                ).orderBy(STREAM_JOB_INSTANCE.id.descending())
+                ).orderBy(STREAM_JOB_INSTANCE.editTime.descending())
                 .limit(limit).offset(offset));
     }
 
@@ -155,7 +155,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isIn(instanceStatusList)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 
     @Override
@@ -164,7 +164,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isIn(instanceStatusList)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 
     @Override
@@ -173,6 +173,6 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isEqualTo(statusEnum.val)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 }

@@ -64,8 +64,9 @@ public class StreamJobFlinkInfoRepoImpl implements StreamJobFlinkInfoRepo {
     @Override
     public List<StreamJobFlinkInfo> queryList(Long jobId, String env, String secondaryId) {
         return streamJobFlinkInfoDao.select(dsl -> dsl.where(STREAM_JOB_FLINK_INFO.jobId, isEqualTo(jobId),
-                and(STREAM_JOB_FLINK_INFO.environment, isEqualTo(env)),
-                and(STREAM_JOB_FLINK_INFO.secondaryId, isEqualToWhenPresent(secondaryId)),
-                and(STREAM_JOB_FLINK_INFO.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+                        and(STREAM_JOB_FLINK_INFO.environment, isEqualTo(env)),
+                        and(STREAM_JOB_FLINK_INFO.secondaryId, isEqualToWhenPresent(secondaryId)),
+                        and(STREAM_JOB_FLINK_INFO.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(STREAM_JOB_FLINK_INFO.id.descending()));
     }
 }

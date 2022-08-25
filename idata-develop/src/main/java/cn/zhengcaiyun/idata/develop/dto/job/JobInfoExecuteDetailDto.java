@@ -1,7 +1,5 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONUtil;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -116,11 +114,13 @@ public class JobInfoExecuteDetailDto {
         private List<MappingColumnDto> srcCols; // diColumns
         /**
          * 数据去向-写入前语句
+         *
          * @return
          */
         private String destBeforeWrite;
         /**
          * 数据去向-写入后语句
+         *
          * @return
          */
         private String destAfterWrite;
@@ -296,14 +296,17 @@ public class JobInfoExecuteDetailDto {
 
         /**
          * 数据去向-写入前语句
+         *
          * @return
          */
         private String destBeforeWrite;
         /**
          * 数据去向-写入后语句
+         *
          * @return
          */
         private String destAfterWrite;
+
         public BackFlowDetailDto() {
         }
 

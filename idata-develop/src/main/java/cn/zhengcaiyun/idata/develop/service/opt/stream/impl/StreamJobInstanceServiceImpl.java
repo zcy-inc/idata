@@ -212,8 +212,8 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toSet());
         return jobTableList.stream()
-                .map(DIStreamJobTable::getDestTable)
-                .filter(destTable -> checkPointTables.contains(destTable))
+                .filter(jobTable -> checkPointTables.contains(jobTable.getDestTable()))
+                .map(DIStreamJobTable::getSrcTable)
                 .collect(Collectors.toList());
     }
 
