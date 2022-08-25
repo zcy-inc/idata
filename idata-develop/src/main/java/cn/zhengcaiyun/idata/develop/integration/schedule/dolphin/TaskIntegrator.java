@@ -690,7 +690,7 @@ public class TaskIntegrator extends DolphinIntegrationAdapter implements IJobInt
                 elem.put("value", e.getValue());
                 customParamList.add(elem);
             });
-            taskJson.getJSONObject("taskParams").put("localParams", new Gson().toJson(customParamList));
+            taskJson.getJSONObject("taskParams").put("localParams", customParamList);
         }
 
         taskJson.put("flag", "NO");

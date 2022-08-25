@@ -278,7 +278,7 @@ public class JobExecuteConfigDto extends BaseDto {
         }
 
         if (StringUtils.isNotBlank(config.getCustomParams())) {
-            dto.setExtProperties(new Gson().fromJson(config.getCustomParams(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            dto.setCustomParams(new Gson().fromJson(config.getCustomParams(), new TypeToken<List<KeyValuePair<String, String>>>() {
             }.getType()));
         }
         return dto;
@@ -292,7 +292,7 @@ public class JobExecuteConfigDto extends BaseDto {
             config.setExtProperties(new Gson().toJson(this.extProperties));
         }
         if (!Objects.isNull(this.customParams)) {
-            config.setExtProperties(new Gson().toJson(this.customParams));
+            config.setCustomParams(new Gson().toJson(this.customParams));
         }
         return config;
     }

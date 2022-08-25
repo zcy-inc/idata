@@ -1,3 +1,10 @@
+POST http://localhost:8080/api/p1/dev/jobs/2619/environments/stag/configs
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjYxNDE5NjA4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.sAwH55zti-JZZd4U2bnLAtU3mXTMbHoA6EJsb4h3HzykLsHkpfB8FY4fccOzuwkrGzOL50_KNXXMhGWpEO49tA
+
+{"executeConfig":{"schDryRun":0,"schDagId":19,"execQueue":"root.offline","schTimeOut":3600,"schTimeOutStrategy":"alarm","schRerunMode":"always","execWarnLevel":"ALARM_LEVEL_MEDIUM:ENUM_VALUE","schPriority":2,"execEngine":"SQOOP","execDriverMem":3,"execWorkerMem":4,"execCores":2,"extProperties":[{"key":"be_num","value":"1333"},{"key":"e www","value":"223"}],"customParams":[{"key":"be_nu232","value":"1333"},{"key":"e2ww2","value":"223"}]}}
+
+###
 POST http://localhost:8080/api/p1/dev/udf
 Content-Type: application/json
 Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; _gid=GA1.2.89162075.1661257524; redirect=http%3A%2F%2Fpaas.cai-inc.com%2Fzcm; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjYxNDE5NjA4LCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.sAwH55zti-JZZd4U2bnLAtU3mXTMbHoA6EJsb4h3HzykLsHkpfB8FY4fccOzuwkrGzOL50_KNXXMhGWpEO49tA

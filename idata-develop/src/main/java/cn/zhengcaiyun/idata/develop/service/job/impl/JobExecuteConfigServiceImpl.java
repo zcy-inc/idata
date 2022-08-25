@@ -208,15 +208,10 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
                 }
             }
 
-            // 修改调度配置
-            if (isScheduleConfigChanged(executeConfig, existExecuteConfig)) {
+            // 修改调度配置 || 修改DS配置
+            if (isScheduleConfigChanged(executeConfig, existExecuteConfig) || isDsConfigChanged(executeConfig, existExecuteConfig)) {
                 checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改调度配置", environment);
                 changeSchedule(jobId, environment, operator);
-            }
-
-            // 修改DS配置
-            if (isDsConfigChanged(executeConfig, existExecuteConfig)) {
-                checkState(Objects.equals(RunningStateEnum.pause.val, existExecuteConfig.getRunningState()), "请先在%s环境暂停作业，再修改DS配置", environment);
             }
         }
     }
