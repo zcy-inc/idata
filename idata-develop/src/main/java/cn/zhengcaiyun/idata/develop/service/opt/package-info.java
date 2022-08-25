@@ -15,14 +15,4 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job.instance.impl;
-
-import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobFlinkInfoRepo;
-
-/**
- * @description:
- * @author: yangjianhua
- * @create: 2022-08-22 16:05
- **/
-public class StreamJobFlinkInfoRepoImpl implements StreamJobFlinkInfoRepo {
-}
+package cn.zhengcaiyun.idata.develop.service.opt;

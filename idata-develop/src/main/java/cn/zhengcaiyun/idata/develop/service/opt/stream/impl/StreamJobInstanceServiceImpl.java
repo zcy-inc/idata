@@ -15,28 +15,35 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job.instance.impl;
+package cn.zhengcaiyun.idata.develop.service.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
-import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
+import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobInstance;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobFlinkInfoRepo;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobInstanceRepo;
-import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobInstanceDto;
-import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobRunParamDto;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobTable;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobFlinkInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.DIStreamJobContentRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.job.DIStreamJobTableRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobFlinkInfoRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobInstanceRepo;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
 import cn.zhengcaiyun.idata.develop.manager.FlinkJobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
-import cn.zhengcaiyun.idata.develop.service.job.instance.StreamJobInstanceService;
+import cn.zhengcaiyun.idata.develop.service.opt.stream.StreamJobInstanceService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +65,8 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
 
     private final StreamJobInstanceRepo streamJobInstanceRepo;
     private final StreamJobFlinkInfoRepo streamJobFlinkInfoRepo;
+    private final DIStreamJobContentRepo diStreamJobContentRepo;
+    private final DIStreamJobTableRepo diStreamJobTableRepo;
     private final JobContentCommonService jobContentCommonService;
     private final JobScheduleManager jobScheduleManager;
     private final JobPublishManager jobPublishManager;
@@ -66,12 +75,16 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
     @Autowired
     public StreamJobInstanceServiceImpl(StreamJobInstanceRepo streamJobInstanceRepo,
                                         StreamJobFlinkInfoRepo streamJobFlinkInfoRepo,
+                                        DIStreamJobContentRepo diStreamJobContentRepo,
+                                        DIStreamJobTableRepo diStreamJobTableRepo,
                                         JobContentCommonService jobContentCommonService,
                                         JobScheduleManager jobScheduleManager,
                                         JobPublishManager jobPublishManager,
                                         FlinkJobManager flinkJobManager) {
         this.streamJobInstanceRepo = streamJobInstanceRepo;
         this.streamJobFlinkInfoRepo = streamJobFlinkInfoRepo;
+        this.diStreamJobContentRepo = diStreamJobContentRepo;
+        this.diStreamJobTableRepo = diStreamJobTableRepo;
         this.jobContentCommonService = jobContentCommonService;
         this.jobScheduleManager = jobScheduleManager;
         this.jobPublishManager = jobPublishManager;
@@ -129,6 +142,10 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
             checkState(afterStartInstanceIds.size() > 0, "作业存在已启动或已停止实例，先下线该实例再启动");
         }
 
+        List<ClusterAppDto> existAppDtoList = flinkJobManager.fetchFlinkApp(jobId, env);
+        checkArgument(CollectionUtils.isEmpty(existAppDtoList), "Yarn已有同名作业 %s 在运行，应用id：%s 不能启动",
+                existAppDtoList.get(0).getAppName(), existAppDtoList.get(0).getAppId());
+
         // 先保存参数
         if (Objects.nonNull(runParamDto)) {
             streamJobInstanceRepo.updateRunParam(id, new Gson().toJson(runParamDto), operator.getNickname());
@@ -171,6 +188,33 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
                 "待启动或已停止实例可以操作下线");
         streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.DESTROYED, operator.getNickname());
         return Boolean.TRUE;
+    }
+
+    @Override
+    public List<String> getForceInitTable(Long id) {
+        Optional<StreamJobInstance> instanceOptional = streamJobInstanceRepo.query(id);
+        checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
+        StreamJobInstance jobInstance = instanceOptional.get();
+        if (!JobTypeEnum.DI_STREAM.getCode().equals(jobInstance.getJobTypeCode())) {
+            return Lists.newArrayList();
+        }
+        List<DIStreamJobTable> jobTableList = diStreamJobTableRepo.query(jobInstance.getJobId(), jobInstance.getJobContentVersion());
+        if (CollectionUtils.isEmpty(jobTableList)) {
+            return Lists.newArrayList();
+        }
+
+        List<StreamJobFlinkInfo> flinkInfoList = streamJobFlinkInfoRepo.queryList(jobInstance.getJobId(), jobInstance.getEnvironment(), null);
+        if (CollectionUtils.isEmpty(flinkInfoList)) {
+            return Lists.newArrayList();
+        }
+        Set<String> checkPointTables = flinkInfoList.stream()
+                .map(StreamJobFlinkInfo::getSecondaryId)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        return jobTableList.stream()
+                .map(DIStreamJobTable::getDestTable)
+                .filter(destTable -> checkPointTables.contains(destTable))
+                .collect(Collectors.toList());
     }
 
     private Map<Long, Map<Integer, String>> getJobVersionDisplay(List<StreamJobInstance> recordList) {

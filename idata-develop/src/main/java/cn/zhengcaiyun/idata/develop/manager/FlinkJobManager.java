@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.manager;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.bean.dto.FlinkJobInfoDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
@@ -48,8 +49,8 @@ public class FlinkJobManager {
         this.resourceManagerService = resourceManagerService;
     }
 
-    public List<ClusterAppDto> fetchFlinkApp() {
-        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchRunningClusterApps(null);
+    public List<ClusterAppDto> fetchRunningFlinkApp(EnvEnum envEnum) {
+        List<ClusterAppDto> clusterAppDtoList = resourceManagerService.fetchRunningClusterApps(envEnum);
         if (CollectionUtils.isEmpty(clusterAppDtoList)) {
             return Lists.newArrayList();
         }
@@ -76,16 +77,20 @@ public class FlinkJobManager {
         }
     }
 
-    public List<FlinkJobInfoDto> fetchFlinkJobInfo(ClusterAppDto appDto) {
+    public String getFlinkAppUrl(ClusterAppDto appDto) {
         String trackingUrl = appDto.getTrackingUrl();
         if (StringUtils.isBlank(trackingUrl)) {
-            return Lists.newArrayList();
+            return null;
         }
 
-        String flinkJobUrl = trackingUrl + "jobs/overview";
+        String flinkAppUrl = trackingUrl + "jobs/overview";
+        return flinkAppUrl;
+    }
+
+    public List<FlinkJobInfoDto> fetchFlinkJobInfo(String flinkAppUrl) {
         HttpInput httpInput = new HttpInput();
         httpInput.setServerName("Flink Job Manager");
-        httpInput.setUri(flinkJobUrl);
+        httpInput.setUri(flinkAppUrl);
         httpInput.setMethod("GET");
 
         JSONObject result = HttpClientUtil.executeHttpRequest(httpInput, new TypeReference<JSONObject>() {
@@ -96,12 +101,14 @@ public class FlinkJobManager {
             JSONObject jobObject = (JSONObject) jobs.get(i);
             String name = (String) jobObject.get("name");
             String jid = (String) jobObject.get("jid");
+            String state = (String) jobObject.get("state");
             Long startTime = (Long) jobObject.get("start-time");
             Integer duration = (Integer) jobObject.get("duration");
 
             FlinkJobInfoDto dto = new FlinkJobInfoDto();
             dto.setName(name);
             dto.setJid(jid);
+            dto.setState(state);
             dto.setStartTime(startTime);
             dto.setDuration(duration);
             jobInfoDtoList.add(dto);
