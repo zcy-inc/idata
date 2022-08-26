@@ -27,6 +27,12 @@ import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
  * @create: 2021-09-17 17:19
  **/
 public class DevTreeNodeDto extends TreeNodeDto<Long, DevTreeNodeDto> {
+
+    /**
+     * 具体所属类别，如 DI_STREAM, DI_BATCH, SQL_FLINK 等
+     */
+    private String concreteBelong;
+
     @Override
     public boolean canHasChildren() {
         return TreeNodeTypeEnum.FUNCTION.name().equals(super.getType())
@@ -41,5 +47,13 @@ public class DevTreeNodeDto extends TreeNodeDto<Long, DevTreeNodeDto> {
         nodeDto.setBelong(folder.getBelong());
         nodeDto.setParentId(folder.getParentId());
         return nodeDto;
+    }
+
+    public String getConcreteBelong() {
+        return concreteBelong;
+    }
+
+    public void setConcreteBelong(String concreteBelong) {
+        this.concreteBelong = concreteBelong;
     }
 }

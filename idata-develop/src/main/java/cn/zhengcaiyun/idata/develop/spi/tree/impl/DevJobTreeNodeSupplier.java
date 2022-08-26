@@ -77,6 +77,7 @@ public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier<JobInfo> {
         dto.setParentId(bizRecord.getFolderId());
         dto.setType(TreeNodeTypeEnum.RECORD.name());
         dto.setBelong(moduleEnum.code);
+        dto.setConcreteBelong(bizRecord.getJobType());
         return dto;
     }
 }
