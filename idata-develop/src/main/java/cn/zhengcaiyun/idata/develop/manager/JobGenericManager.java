@@ -137,7 +137,7 @@ public class JobGenericManager {
         contentDto.setEditable(EditableEnum.YES.val);
         if (fromImport) {
             contentDto.setUdfIds(null);
-            contentDto.setExternalTables(null);
+            contentDto.setExtTables(null);
             contentDto.setExtConfig(null);
         }
 
