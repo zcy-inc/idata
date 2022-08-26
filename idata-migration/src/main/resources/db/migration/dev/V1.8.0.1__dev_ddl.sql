@@ -1,3 +1,8 @@
+alter table dev_job_execute_config
+    add is_open_merge_file int(5) default 0 null comment '开启小文件合并 0:否，1:是';
+
+alter table dev_job_execute_config
+    add custom_params varchar(1000) null comment 'DS自定义参数';
 
 ALTER TABLE `dev_job_content_di_stream`
     CHANGE `cdc_tables` `cdc_config` text NOT NULL COMMENT 'cdc配置';
