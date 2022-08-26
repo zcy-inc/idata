@@ -11,6 +11,7 @@ import {
   Row,
   Select,
   Tabs,
+  Switch,
 } from 'antd';
 import { get, pick } from 'lodash';
 import type { FC } from 'react';
@@ -24,10 +25,10 @@ import {
   getEnumValues,
   getExecuteQueues,
   saveTaskConfig,
+  getExecEngineOptions,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import {
-  ExecEngine,
   SchPriority,
   TaskTypes,
   execCoresOptions,
@@ -57,6 +58,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [dataSource, setDataSource] = useState<DataSourceItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
+  const [execEngineOptions, setExecEngineOptions] = useState<{ name: string; code: string }[]>([]);
   const [destWriteMode, setDestWriteMode] = useState('');
 
   const [stagForm] = Form.useForm();
@@ -76,6 +78,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getDataSourceList({ limit: 999, offset: 0 })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
+      getExecEngineOptions({ jobType: data?.jobType??'' }).then((res) => setExecEngineOptions(res.data))
     }
   }, [visible]);
 
@@ -172,28 +175,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         }
       })
       .catch((err) => {});
-  };
-
-  const renderExecEngineOptions = () => {
-    switch (data?.jobType) {
-      case TaskTypes.SQL_SPARK:
-      case TaskTypes.SCRIPT_PYTHON:
-      case TaskTypes.SCRIPT_SHELL:
-        return [
-          { label: 'SPARK', value: ExecEngine.SPARK },
-          { label: 'SQOOP', value: ExecEngine.SQOOP },
-          { label: 'KYLIN', value: ExecEngine.KYLIN },
-        ];
-      case TaskTypes.SPARK_PYTHON:
-      case TaskTypes.SPARK_JAR:
-        return [{ label: 'SPARK', value: ExecEngine.SPARK }];
-      case TaskTypes.KYLIN:
-        return [{ label: 'KYLIN', value: ExecEngine.KYLIN }];
-      case TaskTypes.SQL_FLINK:
-        return [{ label: 'FLINK', value: ExecEngine.FLINK }];
-      default:
-        return [];
-    }
   };
 
   const initialValues = {
@@ -324,7 +305,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   size="large"
                   style={{ width }}
                   placeholder="请选择"
-                  options={renderExecEngineOptions()}
+                  options={execEngineOptions.map((_) => ({ label: _, value: _ }))}
                 />
               </Item>
               <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
@@ -354,6 +335,9 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
               <Item name="extProperties" label="自定义参数">
                 <MapInput style={{ width }} />
               </Item>
+              {data?.jobType === TaskTypes.SQL_SPARK && (<Item name="isOpenMergeFile" label="合并小文件">
+                <Switch/>
+              </Item>)}
               <Title>依赖配置</Title>
               <DependenciesFormItem
                 name="dependencies"

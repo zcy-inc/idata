@@ -648,6 +648,19 @@ export async function getDataDevConfig(params: { jobId: number; environment: Env
 }
 
 /**
+ * 获取加载执行引擎
+ */
+ export async function getExecEngineOptions(params: { jobType: string }) {
+  return request<DefaultResponse & { data: any }>(
+    `/api/p1/dev/jobs/engine-type`,
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
  * 保存数据开发配置信息
  */
 export async function saveTaskConfig(

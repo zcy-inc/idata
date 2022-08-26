@@ -102,6 +102,12 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
     },
     { title: '所属DAG', dataIndex: 'prevJobDagName', key: 'prevJobDagName', width: '45%' },
     {
+      title: '作业状态',
+      key: 'prevJobRunningState',
+      width: 100,
+      render: (_) => _?'下线':'上线',
+    },
+    {
       title: '操作',
       key: 'option',
       width: 80,

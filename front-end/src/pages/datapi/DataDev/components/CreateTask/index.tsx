@@ -13,6 +13,7 @@ import {
   getDIJobTypes,
   getDISyncMode,
 } from '@/services/datadev';
+import { FolderBelong } from '@/constants/datadev';
 import { DIFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
@@ -25,7 +26,7 @@ const rules = [{ required: true, message: '请选择' }];
 const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [form] = Form.useForm();
-  const { visibleTask, setVisibleTask, getTreeWrapped, curNode } = useModel('datadev');
+  const { visibleTask, setVisibleTask, getTreeWrapped, curNode, onSelectNewTab } = useModel('datadev');
 
   useEffect(() => {
     const folderId = curNode?.id;
@@ -38,11 +39,11 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   });
 
   const handleCreateDI = async (values: CreateDIJobDto) => {
-    const { success, msg } = await createDIJob(values);
+    const { success, data, msg } = await createDIJob(values);
     if (success) {
       message.success('创建作业成功');
       setVisibleTask(false);
-      getTreeWrapped();
+      getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DI, data));
     } else {
       message.success(`创建作业失败: ${msg}`);
     }

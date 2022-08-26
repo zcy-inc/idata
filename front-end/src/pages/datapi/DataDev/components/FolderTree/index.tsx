@@ -47,7 +47,9 @@ const FolderTree: FC = () => {
     setVisibleDev,
     setCurLabel,
     folderList,
-    onRemovePane
+    onRemovePane,
+    selectedKeys,
+    setSelectedKeys,
   } = useModel('datadev', (_) => ({
     tree: _.tree,
     onRemovePane: _.onRemovePane,
@@ -70,6 +72,8 @@ const FolderTree: FC = () => {
     setVisibleDev: _.setVisibleDev,
     setCurLabel: _.setCurLabel,
     folderList: _.folderList,
+    selectedKeys: _.selectedKeys,
+    setSelectedKeys: _.setSelectedKeys,
   }));
   useEffect(() => {
     setKeyWord('');
@@ -368,6 +372,9 @@ const FolderTree: FC = () => {
       }
     },BatchOpetate);
   }
+
+  const onSelect = (cid: React.Key[], info: any) => setSelectedKeys(cid);
+
   return (
     <div className="folder-tree">
       <div className={styles['operation-list']}>
@@ -443,10 +450,12 @@ const FolderTree: FC = () => {
             blockNode
             expandedKeys={expandedKeys}
             autoExpandParent={autoExpandParent}
+            selectedKeys={selectedKeys}
             onExpand={(keys) => {
               setExpandedKeys(keys);
               setAutoExpandParent(false);
             }}
+            onSelect={onSelect}
           />
         </div>
       ) : (
