@@ -54,7 +54,7 @@ public class DIStreamJobTableRepoImpl implements DIStreamJobTableRepo {
 
     @Override
     public void save(List<DIStreamJobTable> contents) {
-//        streamJobTableCustomizeDao.insertMultiple(contents);
+        streamJobTableCustomizeDao.insertMultiple(contents);
     }
 
     @Override

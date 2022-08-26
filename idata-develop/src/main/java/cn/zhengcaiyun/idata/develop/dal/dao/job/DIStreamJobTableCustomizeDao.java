@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobTable;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.dynamic.sql.BasicColumn;
@@ -56,5 +57,4 @@ public interface DIStreamJobTableCustomizeDao {
                         .map(tableCdcProps).toProperty("tableCdcProps")
         );
     }
-
 }
