@@ -95,7 +95,7 @@ public class MetadataController {
         DIJobDatasourceResponse response = new DIJobDatasourceResponse();
         switch (jobTypeEnum) {
             case DI_STREAM:
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.hive.name()}));
+                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name()}));
                 response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()}));
                 break;
             case DI_BATCH:
