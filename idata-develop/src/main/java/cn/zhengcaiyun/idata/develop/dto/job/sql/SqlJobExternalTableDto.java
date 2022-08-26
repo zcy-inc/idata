@@ -26,9 +26,18 @@ import java.util.List;
  **/
 public class SqlJobExternalTableDto {
 
+    /**
+     * 数据源类型
+     */
     private String dataSourceType;
+    /**
+     * 数据源id
+     */
     private Long dataSourceId;
 
+    /**
+     * 表配置
+     */
     private List<ExternalTableInfo> tables;
 
     public String getDataSourceType() {
@@ -56,7 +65,13 @@ public class SqlJobExternalTableDto {
     }
 
     public static class ExternalTableInfo {
+        /**
+         * 表名
+         */
         private String tableName;
+        /**
+         * 表别名
+         */
         private String tableAlias;
 
         public String getTableName() {

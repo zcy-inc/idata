@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dto.job.instance;
+package cn.zhengcaiyun.idata.develop.dto.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobInstance;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

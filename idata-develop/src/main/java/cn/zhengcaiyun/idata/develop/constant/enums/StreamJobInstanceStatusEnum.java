@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @description: 运行实例状态，0：待启动，1：启动中，2：运行中，6：启动失败，7：运行异常，8：已停止，9：已下线
+ * @description: 运行实例状态，0：待启动，1：启动中，2：运行中，7：已失败，8：已停止，9：已下线
  * @author: yangjianhua
  * @create: 2022-08-22 16:21
  **/
@@ -33,8 +33,7 @@ public enum StreamJobInstanceStatusEnum {
     WAIT_START(0, "待启动"),
     STARTING(1, "启动中"),
     RUNNING(2, "运行中"),
-    START_FAILED(6, "启动失败"),
-    RUN_ABNORMAL(7, "运行异常"),
+    FAILED(7, "已失败"),
     STOPPED(8, "已停止"),
     DESTROYED(9, "已下线"),
     ;
@@ -49,7 +48,7 @@ public enum StreamJobInstanceStatusEnum {
 
     private static final Map<Integer, StreamJobInstanceStatusEnum> map = Maps.newHashMap();
 
-    private static final List<StreamJobInstanceStatusEnum> START_TO_STOP_STATUS = Lists.newArrayList(STARTING, RUNNING, START_FAILED, RUN_ABNORMAL, STOPPED);
+    private static final List<StreamJobInstanceStatusEnum> START_TO_STOP_STATUS = Lists.newArrayList(STARTING, RUNNING, FAILED, STOPPED);
 
     static {
         Arrays.stream(StreamJobInstanceStatusEnum.values())

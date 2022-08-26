@@ -15,17 +15,23 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
+package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream;
 
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobFlinkInfo;
+
+import java.util.List;
 
 /**
  * @description:
  * @author: yangjianhua
- * @create: 2022-07-12 17:02
+ * @create: 2022-08-22 16:05
  **/
-public interface FlinkJobCommonService {
+public interface StreamJobFlinkInfoRepo {
 
-    void fetchAndSetFlinkJobRunningInfo(EnvEnum envEnum);
+    Long save(StreamJobFlinkInfo info);
+
+    Boolean delete(Long jobId, String env, String secondaryId);
+
+    List<StreamJobFlinkInfo> queryList(Long jobId, String env, String secondaryId);
 
 }

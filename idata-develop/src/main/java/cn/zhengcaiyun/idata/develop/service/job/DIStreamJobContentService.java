@@ -20,6 +20,8 @@ package cn.zhengcaiyun.idata.develop.service.job;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIStreamJobContentDto;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -30,4 +32,6 @@ public interface DIStreamJobContentService {
     Integer save(Long jobId, DIStreamJobContentDto contentDto, Operator operator);
 
     DIStreamJobContentDto get(Long jobId, Integer version);
+
+    List<String> transformDestTable(String srcDataSourceType, Long srcDataSourceId, String destDataSourceType, List<String> srcTables, Integer enableSharding);
 }

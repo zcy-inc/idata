@@ -15,17 +15,4 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job;
-
-import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
-
-/**
- * @description:
- * @author: yangjianhua
- * @create: 2022-07-12 17:02
- **/
-public interface FlinkJobCommonService {
-
-    void fetchAndSetFlinkJobRunningInfo(EnvEnum envEnum);
-
-}
+package cn.zhengcaiyun.idata.portal.controller.dev.opt;

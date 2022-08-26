@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.develop.dal.dao.job.instance;
+package cn.zhengcaiyun.idata.develop.dal.dao.opt.stream;
 
 import java.sql.JDBCType;
 import java.util.Date;

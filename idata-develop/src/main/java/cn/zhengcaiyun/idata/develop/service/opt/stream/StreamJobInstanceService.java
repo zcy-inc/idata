@@ -15,14 +15,16 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.service.job.instance;
+package cn.zhengcaiyun.idata.develop.service.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
-import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
-import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobInstanceDto;
-import cn.zhengcaiyun.idata.develop.dto.job.instance.StreamJobRunParamDto;
+import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
+
+import java.util.List;
 
 /**
  * @description:
@@ -38,4 +40,6 @@ public interface StreamJobInstanceService {
     Boolean stop(Long id, Operator operator);
 
     Boolean destroy(Long id, Operator operator);
+
+    List<String> getForceInitTable(Long id);
 }

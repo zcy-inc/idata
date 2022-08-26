@@ -18,8 +18,8 @@ create table if not exists dev_job_content_di_stream_table
     job_content_version    int(11) unsigned    not null comment '作业内容版本号',
     src_table              varchar(200)        not null comment '数据来源-表',
     dest_table             varchar(200)        not null comment '数据去向-表',
-    sharding               int(4) default 0    not null comment '是否分表',
-    force_init             int(4)              not null comment '是否强制初始化，0：否，1：是',
+    sharding               int(4) default 0    not null comment '是否分表，0：否，1：是',
+    force_init             int(4) default 0    not null comment '是否强制初始化，0：否，1：是',
     table_cdc_props        text                not null comment '表cdc配置'
 ) engine = innodb
   auto_increment = 1000

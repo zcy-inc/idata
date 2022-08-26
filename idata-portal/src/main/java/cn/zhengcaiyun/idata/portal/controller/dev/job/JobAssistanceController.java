@@ -24,6 +24,9 @@ import cn.zhengcaiyun.idata.develop.constant.enums.ExecuteQueueEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
+import cn.zhengcaiyun.idata.develop.service.job.DIStreamJobContentService;
+import com.google.common.base.Splitter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +38,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * job-assistance-controller
@@ -48,13 +53,16 @@ import java.util.stream.Collectors;
 public class JobAssistanceController {
 
     private final DAGService dagService;
+    private final DIStreamJobContentService diStreamJobContentService;
 
     @Value("stream.job.dag.pattern:Flink-Dummy-")
     private String streamDagPattern;
 
     @Autowired
-    public JobAssistanceController(DAGService dagService) {
+    public JobAssistanceController(DAGService dagService,
+                                   DIStreamJobContentService diStreamJobContentService) {
         this.dagService = dagService;
+        this.diStreamJobContentService = diStreamJobContentService;
     }
 
     /**
@@ -99,6 +107,27 @@ public class JobAssistanceController {
                     .map(queueEnum -> new SingleCodePair<String>(queueEnum.code, queueEnum.name))
                     .collect(Collectors.toList()));
         }
+    }
+
+    /**
+     * 获取转换目标表
+     *
+     * @param srcDataSourceType  数据来源-数据源类型
+     * @param srcDataSourceId    数据来源-数据源id
+     * @param destDataSourceType 数据去向-数据源类型
+     * @param srcTables          数据来源表，多个表以 , 号分隔
+     * @param enableSharding     是否开启分表支持，0：否，1：是
+     * @return
+     */
+    @GetMapping("/DIStreamDestTable")
+    public RestResult<List<String>> transformDIStreamDestTable(@RequestParam(value = "srcDataSourceType") String srcDataSourceType,
+                                                               @RequestParam(value = "srcDataSourceId") Long srcDataSourceId,
+                                                               @RequestParam(value = "destDataSourceType") String destDataSourceType,
+                                                               @RequestParam(value = "srcTables") String srcTables,
+                                                               @RequestParam(value = "enableSharding") Integer enableSharding) {
+        checkArgument(StringUtils.isNotBlank(srcTables), "获取目标表名 - 来源表名为空");
+        List<String> srcTableList = Splitter.on(",").omitEmptyStrings().splitToList(srcTables);
+        return RestResult.success(diStreamJobContentService.transformDestTable(srcDataSourceType, srcDataSourceId, destDataSourceType, srcTableList, enableSharding));
     }
 
     public static class DagCond extends DAGInfoCondition {

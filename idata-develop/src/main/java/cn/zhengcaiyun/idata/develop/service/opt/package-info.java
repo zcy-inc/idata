@@ -15,22 +15,4 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job.instance;
-
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobFlinkInfo;
-
-import java.util.List;
-
-/**
- * @description:
- * @author: yangjianhua
- * @create: 2022-08-22 16:05
- **/
-public interface StreamJobFlinkInfoRepo {
-
-    Long save(StreamJobFlinkInfo info);
-
-    Boolean delete(Long jobId, String secondaryId);
-
-    List<StreamJobFlinkInfo> queryList(Long jobId, String secondaryId);
-}
+package cn.zhengcaiyun.idata.develop.service.opt;

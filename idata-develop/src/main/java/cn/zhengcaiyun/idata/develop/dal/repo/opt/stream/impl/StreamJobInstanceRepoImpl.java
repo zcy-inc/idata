@@ -15,24 +15,24 @@
  * limitations under the License.
  */
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job.instance.impl;
+package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
-import cn.zhengcaiyun.idata.develop.condition.job.instance.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.instance.StreamJobInstanceDao;
-import cn.zhengcaiyun.idata.develop.dal.model.job.instance.StreamJobInstance;
-import cn.zhengcaiyun.idata.develop.dal.repo.job.instance.StreamJobInstanceRepo;
+import cn.zhengcaiyun.idata.develop.dal.dao.opt.stream.StreamJobInstanceDao;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
+import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobInstanceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.instance.StreamJobInstanceDynamicSqlSupport.STREAM_JOB_INSTANCE;
+import static cn.zhengcaiyun.idata.develop.dal.dao.opt.stream.StreamJobInstanceDynamicSqlSupport.STREAM_JOB_INSTANCE;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -71,7 +71,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                         and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
-                ).orderBy(STREAM_JOB_INSTANCE.id.descending())
+                ).orderBy(STREAM_JOB_INSTANCE.editTime.descending())
                 .limit(limit).offset(offset));
     }
 
@@ -125,6 +125,13 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
     }
 
     @Override
+    public Boolean updateStatus(Long id, StreamJobInstanceStatusEnum statusEnum) {
+        streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(statusEnum.val)
+                .where(STREAM_JOB_INSTANCE.id, isEqualTo(id)));
+        return Boolean.TRUE;
+    }
+
+    @Override
     public Boolean updateRunParam(Long id, String runParams, String operator) {
         streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.runParams).equalTo(runParams)
                 .set(STREAM_JOB_INSTANCE.editor).equalTo(operator)
@@ -148,7 +155,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isIn(instanceStatusList)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 
     @Override
@@ -157,7 +164,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isIn(instanceStatusList)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 
     @Override
@@ -166,6 +173,6 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualTo(env)),
                         and(STREAM_JOB_INSTANCE.status, isEqualTo(statusEnum.val)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val)))
-                .orderBy(STREAM_JOB_INSTANCE.id));
+                .orderBy(STREAM_JOB_INSTANCE.id.descending()));
     }
 }
