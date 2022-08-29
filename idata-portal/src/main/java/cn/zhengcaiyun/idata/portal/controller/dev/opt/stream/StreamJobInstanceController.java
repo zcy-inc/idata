@@ -55,7 +55,7 @@ public class StreamJobInstanceController {
      * @return
      * @throws IllegalAccessException
      */
-    @GetMapping("/page")
+    @PostMapping("/page")
     public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(StreamJobInstanceCondition condition,
                                                                           @RequestParam(value = "limit") Long limit,
                                                                           @RequestParam(value = "offset") Long offset) throws IllegalAccessException {

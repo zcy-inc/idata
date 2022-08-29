@@ -109,6 +109,7 @@ public class DIStreamJobContentDto extends JobContentBaseDto {
     public DIStreamJobContent toModel() {
         DIStreamJobContent model = new DIStreamJobContent();
         BeanUtils.copyProperties(this, model);
+        model.setCdcConfig("");
         return model;
     }
 }
