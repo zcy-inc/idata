@@ -100,7 +100,7 @@ public class SqlJobServiceImpl implements SqlJobService {
         if (startNewVersion) {
             DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class,
                     "jobId", "sourceSql", "udfIds");
-            if (!Objects.nonNull(sqlJobDto.getExtConfig())) {
+            if (Objects.nonNull(sqlJobDto.getExtConfig())) {
                 jobContentSql.setExtendConfigs(new Gson().toJson(sqlJobDto.getExtConfig()));
             }
             if (Objects.nonNull(sqlJobDto.getExtTables())) {
