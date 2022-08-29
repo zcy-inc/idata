@@ -75,7 +75,7 @@ public class JobPublishRecordController {
     }
 
     /**
-     * 分页查询版本发布记录
+     * DI作业版本删除
      *
      * @param idRequest
      * @return
