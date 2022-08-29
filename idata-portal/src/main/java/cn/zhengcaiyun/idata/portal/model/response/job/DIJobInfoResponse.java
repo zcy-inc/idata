@@ -29,6 +29,11 @@ public class DIJobInfoResponse extends BaseDto {
     private String jobType;
 
     /**
+     * 作业类型：仅当渲染DI作业的时候，和jobType值有区别，为了前端页面渲染，jobType为DI而jobTypeEnum是实际值
+     */
+    private JobTypeEnum jobTypeEnum;
+
+    /**
      * BATCH/STREAM
      */
     private String syncMode;
@@ -111,5 +116,13 @@ public class DIJobInfoResponse extends BaseDto {
 
     public void setSyncMode(String syncMode) {
         this.syncMode = syncMode;
+    }
+
+    public JobTypeEnum getJobTypeEnum() {
+        return jobTypeEnum;
+    }
+
+    public void setJobTypeEnum(JobTypeEnum jobTypeEnum) {
+        this.jobTypeEnum = jobTypeEnum;
     }
 }

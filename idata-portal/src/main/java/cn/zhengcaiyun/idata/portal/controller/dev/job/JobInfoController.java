@@ -229,6 +229,7 @@ public class JobInfoController {
 
         //此处硬编码，原始数据是一个字段存两种信息，目前无法扩展，后续需要梳理枚举整合进去，目前无法融入到 JobTypeEnum
         JobTypeEnum jobType = jobInfo.getJobType();
+        response.setJobTypeEnum(jobType);
         switch (jobType) {
             case DI_STREAM:
                 response.setJobType("DI");
