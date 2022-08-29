@@ -55,7 +55,7 @@ public class JobAssistanceController {
     private final DAGService dagService;
     private final DIStreamJobContentService diStreamJobContentService;
 
-    @Value("stream.job.dag.pattern:Flink-Dummy-")
+    @Value("${stream.job.dag.pattern:Flink-Dummy-}")
     private String streamDagPattern;
 
     @Autowired

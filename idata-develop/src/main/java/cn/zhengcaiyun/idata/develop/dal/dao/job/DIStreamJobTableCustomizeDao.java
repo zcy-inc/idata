@@ -48,7 +48,8 @@ public interface DIStreamJobTableCustomizeDao {
 
     default int insertMultiple(Collection<DIStreamJobTable> records) {
         return MyBatis3Utils.insertMultiple(this::insertMultiple, records, DI_STREAM_JOB_TABLE, c ->
-                c.map(jobContentId).toProperty("jobContentId")
+                c.map(jobId).toProperty("jobId")
+                        .map(jobContentId).toProperty("jobContentId")
                         .map(jobContentVersion).toProperty("jobContentVersion")
                         .map(srcTable).toProperty("srcTable")
                         .map(destTable).toProperty("destTable")

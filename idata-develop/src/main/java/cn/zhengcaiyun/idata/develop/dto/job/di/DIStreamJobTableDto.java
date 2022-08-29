@@ -172,6 +172,8 @@ public class DIStreamJobTableDto {
         } else {
             model.setTableCdcProps("");
         }
+        // 暂无用，先设置为0
+        model.setForceInit(0);
         return model;
     }
 }
