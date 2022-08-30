@@ -129,8 +129,7 @@ public class LivyService {
     public void cancelStatement(LivyStatementDto statement) {
         sendToLivy(new HttpInput().setMethod("POST"),
                 new TypeReference<String>() {
-                },
-                "/sessions/%d/statements/%d/cancel", statement.getSessionId(), statement.getStatementId());
+                }, "/sessions/%d/statements/%d/cancel", statement.getSessionId(), statement.getStatementId());
     }
 
     public LivySqlResultDto queryResult(Integer sessionId, Integer statementId, LivySessionKindEnum sessionKind) {
