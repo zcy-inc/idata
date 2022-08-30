@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.service.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -92,8 +91,8 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
     }
 
     @Override
-    public Page<StreamJobInstanceDto> paging(StreamJobInstanceCondition condition, PageParam pageParam) {
-        Page<StreamJobInstance> page = streamJobInstanceRepo.paging(condition, pageParam);
+    public Page<StreamJobInstanceDto> paging(StreamJobInstanceCondition condition) {
+        Page<StreamJobInstance> page = streamJobInstanceRepo.paging(condition);
         if (ObjectUtils.isEmpty(page.getContent())) {
             return Page.empty();
         }

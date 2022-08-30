@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
@@ -51,11 +50,11 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
     }
 
     @Override
-    public Page<StreamJobInstance> paging(StreamJobInstanceCondition condition, PageParam pageParam) {
+    public Page<StreamJobInstance> paging(StreamJobInstanceCondition condition) {
         long total = count(condition);
         List<StreamJobInstance> recordList = null;
         if (total > 0) {
-            recordList = queryList(condition, pageParam.getLimit(), pageParam.getOffset());
+            recordList = queryList(condition, condition.getLimit(), condition.getOffset());
         }
         return Page.newOne(recordList, total);
     }
