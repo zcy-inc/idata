@@ -18,7 +18,9 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
+import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
+import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyStatementStateEnum;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
 import cn.zhengcaiyun.idata.connector.util.SqlDynamicParamTool;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
@@ -94,7 +96,17 @@ public class QueryServiceImpl implements QueryService {
         QueryRunResultDto queryRunResult = PojoUtil.copyOne(livyService.queryResult(sessionId, statementId,
                 LivySessionKindEnum.valueOf(sessionKind)), QueryRunResultDto.class);
         if (LivySessionKindEnum.spark.name().equals(sessionKind)) {
-            queryRunResult.setQueryRunLog(livyService.queryLog(sessionId, from, size));
+            LivySessionLogDto livySessionLogDto = livyService.queryLog(sessionId, from, size);
+            if (LivyStatementStateEnum.waiting.equals(queryRunResult.getStatementState())
+                    || livySessionLogDto.getLog() == null || livySessionLogDto.getLog().size() == 0) {
+                List<String> stateLog = new ArrayList<>();
+                stateLog.add("已提交...");
+                if (livySessionLogDto.getLog() != null) {
+                    stateLog.addAll(livySessionLogDto.getLog());
+                }
+                livySessionLogDto.setLog(stateLog);
+            }
+            queryRunResult.setQueryRunLog(livySessionLogDto);
         }
 
         // 字段为null处理
@@ -146,6 +158,32 @@ public class QueryServiceImpl implements QueryService {
         echo.setColumns(columnDetailsList);
         echo.setBasicAutocompletionTips(Arrays.asList(baseAutocompletionTimValue.split(",")));
         return echo;
+    }
+
+    @Override
+    public Boolean cancelStatement(QueryStatementDto queryStatementDto) {
+        livyService.cancelStatement(queryStatementDto);
+        return true;
+    }
+
+    private String getStateMsg(LivyStatementStateEnum statementState) {
+        switch (statementState) {
+            case waiting:
+                return "已提交...";
+            case running:
+                return "正在执行中";
+            case available:
+                return "执行完成";
+            case cancelling:
+                return "正在取消";
+            case cancelled:
+                return "已取消";
+            case error:
+                return "执行失败";
+            default:
+                break;
+        }
+        return "执行失败";
     }
 
     private String changeBizParseSql(String sourceSql) {
