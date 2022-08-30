@@ -1031,7 +1031,7 @@ public class JobInfoServiceImpl implements JobInfoService {
             cdcTableConfig.setTableProp(Maps.newHashMap());
             srcTableConfigs.add(cdcTableConfig);
         }
-
+        cdcJobDetailDto.setSrcTableConfigs(srcTableConfigs);
         cdcJobDetailDto.setJobVersion(version.toString());
         cdcJobDetailDto.setPublished(published);
 

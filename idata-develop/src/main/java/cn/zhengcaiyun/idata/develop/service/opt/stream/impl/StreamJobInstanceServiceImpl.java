@@ -125,10 +125,11 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         Optional<StreamJobInstance> instanceOptional = streamJobInstanceRepo.query(id);
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
+        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == jobInstance.getStatus(), "运行实例状态不是待启动状态，不能启动");
+
         Long jobId = jobInstance.getJobId();
         Integer version = jobInstance.getJobContentVersion();
         String env = jobInstance.getEnvironment();
-
         // 当前版本是否发布版本
         checkState(jobPublishManager.isJobPublished(jobId, version, env), "当前所选版本不是发布状态，不能启动");
         List<Integer> queryStatusList = StreamJobInstanceStatusEnum.getStartToStopStatusValList();
@@ -142,8 +143,9 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         }
 
         List<ClusterAppDto> existAppDtoList = flinkJobManager.fetchFlinkApp(jobId, env);
-        checkArgument(CollectionUtils.isEmpty(existAppDtoList), "Yarn已有同名作业 %s 在运行，应用id：%s 不能启动",
-                existAppDtoList.get(0).getAppName(), existAppDtoList.get(0).getAppId());
+        boolean notExistApp = CollectionUtils.isEmpty(existAppDtoList);
+        checkArgument(notExistApp, "Yarn已有同名作业 %s 在运行，应用id：%s 不能启动",
+                notExistApp ? "" : existAppDtoList.get(0).getAppName(), notExistApp ? "" : existAppDtoList.get(0).getAppId());
 
         // 先保存参数
         if (Objects.nonNull(runParamDto)) {
