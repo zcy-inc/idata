@@ -68,6 +68,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                         and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                         and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                        and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                         and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
@@ -83,6 +84,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                 and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                 and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                 and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
@@ -97,6 +99,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                 and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                 and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                 and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))

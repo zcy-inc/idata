@@ -50,6 +50,10 @@ public class StreamJobInstanceCondition {
      * 责任人
      */
     private String owner;
+    /**
+     * 责任人 - 模糊查询
+     */
+    private String ownerPattern;
 
     /**
      * 环境
@@ -99,6 +103,14 @@ public class StreamJobInstanceCondition {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getOwnerPattern() {
+        return ownerPattern;
+    }
+
+    public void setOwnerPattern(String ownerPattern) {
+        this.ownerPattern = ownerPattern;
     }
 
     public String getEnvironment() {
