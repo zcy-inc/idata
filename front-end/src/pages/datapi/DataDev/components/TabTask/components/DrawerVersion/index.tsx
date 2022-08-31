@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, Table } from 'antd';
+import { Drawer, Table, Button, Popconfirm, message } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
 import { DIJobBasicInfo } from '@/types/datadev';
-import { getTasks } from '@/services/task';
+import { getTasks, deleteTasks } from '@/services/task';
 import { TaskListItem } from '@/types/tasks';
 import moment from 'moment';
-import { VersionStatusDisplayMap } from '@/constants/datadev';
+import { VersionStatusDisplayMap, VersionStatus } from '@/constants/datadev';
 
 interface DrawerConfigProps {
   visible: boolean;
@@ -32,6 +32,13 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       })
       .catch((err) => {});
   };
+
+  const handleDelete = (row: any) => {
+    deleteTasks({id: row.id}).then(res => {
+      message.success('删除成功！');
+      getTasksWrapped(0);
+    })
+  }
 
   return (
     <Drawer
@@ -80,6 +87,20 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
             key: 'approveTime',
             width: 170,
             render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss'),
+          },
+          {
+            title: '操作',
+            dataIndex: 'publishStatus',
+            key: 'publishStatus',
+            width: 170,
+            render: (text, row) => text === VersionStatus.ARCHIVED && <Popconfirm
+              title={<div><span style={{color: 'red'}}>删除后不可恢复</span>, 你确定要删除该版本吗？</div>}
+              onConfirm={() => handleDelete(row)}
+            >
+              <Button type="link" danger>
+                删除
+              </Button>
+            </Popconfirm>,
           },
         ]}
         dataSource={versions}
