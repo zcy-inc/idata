@@ -69,7 +69,7 @@ public class StreamJobInstanceManager {
     public void updateJobInstanceStatusFromStarting(StreamJobInstance jobInstance, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>> flinkAppTuple) {
         LocalDateTime startTime = LocalDateTime.ofInstant(jobInstance.getEditTime().toInstant(), ZoneId.systemDefault());
         if (Objects.isNull(flinkAppTuple)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(60);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(90);
             if (startTime.isBefore(secondsBefore)) {
                 // 60秒后没有获取到 running yarn app，设置为失败状态
                 StreamJobInstance updateInstance = new StreamJobInstance();
@@ -94,7 +94,7 @@ public class StreamJobInstanceManager {
     public void updateJobInstanceStatusFromRunning(StreamJobInstance jobInstance, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>> flinkAppTuple) {
         LocalDateTime runningTime = LocalDateTime.ofInstant(jobInstance.getEditTime().toInstant(), ZoneId.systemDefault());
         if (Objects.isNull(flinkAppTuple)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(15);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(30);
             if (runningTime.isBefore(secondsBefore)) {
                 // 15秒后没有获取到 running yarn app，设置为失败状态
                 StreamJobInstance updateInstance = new StreamJobInstance();
@@ -118,7 +118,7 @@ public class StreamJobInstanceManager {
 
     public StreamJobInstanceStatusEnum parseStatusFromStarting(LocalDateTime startTime, List<FlinkJobInfoDto> flinkJobInfoDtoList) {
         if (CollectionUtils.isEmpty(flinkJobInfoDtoList)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(60);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(90);
             if (startTime.isBefore(secondsBefore)) {
                 // 60秒后没有获取到 flink job，设置为失败状态
                 return StreamJobInstanceStatusEnum.FAILED;
@@ -155,7 +155,7 @@ public class StreamJobInstanceManager {
 
     public StreamJobInstanceStatusEnum parseStatusFromRunning(LocalDateTime runningTime, List<FlinkJobInfoDto> flinkJobInfoDtoList) {
         if (CollectionUtils.isEmpty(flinkJobInfoDtoList)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(15);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(30);
             if (runningTime.isBefore(secondsBefore)) {
                 // 15秒后没有获取到 flink job，设置为失败状态
                 return StreamJobInstanceStatusEnum.FAILED;
@@ -194,9 +194,9 @@ public class StreamJobInstanceManager {
          * Suspended
          */
         String state = flinkJobInfoDto.getState();
-        if ("Created".equals(state)) {
+        if ("created".equalsIgnoreCase(state)) {
             return StreamJobInstanceStatusEnum.STARTING;
-        } else if ("Running".equals(state) || "Finished".equals(state)) {
+        } else if ("Running".equalsIgnoreCase(state) || "Finished".equalsIgnoreCase(state)) {
             return StreamJobInstanceStatusEnum.RUNNING;
         } else {
             return StreamJobInstanceStatusEnum.FAILED;
