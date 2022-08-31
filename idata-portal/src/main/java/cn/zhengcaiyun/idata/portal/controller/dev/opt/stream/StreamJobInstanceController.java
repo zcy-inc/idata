@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.portal.controller.dev.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
@@ -56,11 +55,9 @@ public class StreamJobInstanceController {
      * @throws IllegalAccessException
      */
     @PostMapping("/page")
-    public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(StreamJobInstanceCondition condition,
-                                                                          @RequestParam(value = "limit") Long limit,
-                                                                          @RequestParam(value = "offset") Long offset) throws IllegalAccessException {
+    public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(@RequestBody StreamJobInstanceCondition condition) throws IllegalAccessException {
         // todo 加权限控制
-        return RestResult.success(streamJobInstanceService.paging(condition, PageParam.of(limit, offset)));
+        return RestResult.success(streamJobInstanceService.paging(condition));
     }
 
     /**

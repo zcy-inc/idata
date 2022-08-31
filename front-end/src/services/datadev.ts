@@ -576,8 +576,8 @@ export async function submitTask(
 /**
  * 获取DAG列表
  */
-export async function getDAGList(params: { environment: Environments; dwLayerCode?: string }) {
-  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
+export async function getDAGList(params: { environment: Environments; jobType: string }) {
+  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/jobs/assistance/dags/list', {
     method: 'GET',
     params,
   });
@@ -586,11 +586,25 @@ export async function getDAGList(params: { environment: Environments; dwLayerCod
 /**
  * 获取运行队列
  */
-export async function getExecuteQueues() {
+export async function getExecuteQueues(params: {jobType: string}) {
   return request<DefaultResponse & { data: { name: string; code: string }[] }>(
-    '/api/p1/dev/executeQueues',
+    '/api/p1/dev/jobs/assistance/executeQueues',
     {
       method: 'GET',
+      params
+    },
+  );
+}
+
+/**
+ * 获取执行引擎联动
+ */
+ export async function getEngineType(params: {jobType: string}) {
+  return request<DefaultResponse & { data: string[] }>(
+    '/api/p1/dev/jobs/engine-type',
+    {
+      method: 'GET',
+      params
     },
   );
 }
@@ -1175,6 +1189,26 @@ export async function getDIJobBasicInfo(jobId: number) {
 }
 
 /**
+ * 获取实时抽数作业内容
+ */
+ export async function getStreamJobBasicInfo({jobId, version} : {jobId: number; version: number}) {
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents/${version}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取转换目标表表名
+ */
+ export async function getDestTableName(params: any) {
+  return request('/api/p1/dev/jobs/assistance/DIStreamDestTable', {
+    params
+  }).then(
+    ({ data }) => data,
+  );
+}
+
+/**
  * 保存DI作业基础信息
  */
 export async function saveDIJobBasicInfo(data: unknown) {
@@ -1197,6 +1231,17 @@ export async function getDIJobContent({ jobId, version }: { jobId: number; versi
 export async function saveDIJobContent(data: any) {
   const { jobId } = data;
   return request(`/api/p1/dev/jobs/${jobId}/di/contents`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 保存实时抽数作业内容
+ */
+ export async function saveStreamJobContent(data: any) {
+  const { jobId } = data;
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents`, {
     method: 'POST',
     data,
   });

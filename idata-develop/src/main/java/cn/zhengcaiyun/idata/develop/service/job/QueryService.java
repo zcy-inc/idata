@@ -29,4 +29,5 @@ public interface QueryService {
     QueryStatementDto runQuery(QueryDto queryDto);
     QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind, Integer from, Integer size);
     AutocompletionTipDto getAutocompletionTipConfigs(String autocompletionType);
+    Boolean cancelStatement(QueryStatementDto queryStatementDto);
 }

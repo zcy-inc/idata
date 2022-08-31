@@ -30,6 +30,18 @@ export async function getTasks(params: {
 }
 
 /**
+ * 查询版本发布记录
+ */
+ export async function deleteTasks(data: {
+  id: number
+}) {
+  return request('/api/p1/dev/jobs/publishRecords/delete', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
  * 发布版本
  */
 export async function publishTask(data: { recordIds: number[] }) {

@@ -11,6 +11,18 @@ export interface DataSourceItem {
   editTime: string;
 }
 
+export interface ActualTableItem {
+  id?: number;
+  srcTable: {
+    inputMode: 'S' | 'M';
+    rawTable: string | undefined;
+    tableIdxBegin?: string;
+    tableIdxEnd?: string;
+  };
+  destTable: string | undefined;
+  tableCdcPropList: {key: string; value: string} []
+}
+
 export interface CSVItem extends DataSourceItem {
   fileName: string;
 }

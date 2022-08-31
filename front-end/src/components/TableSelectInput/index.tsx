@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC } from 'react';
-import { Tooltip } from 'antd'
+import { Tooltip, Select } from 'antd'
 import { RetweetOutlined } from '@ant-design/icons';
 import { DefaultOptionType } from 'antd/es/select';
 import JoinSelect from '../JoinSelect';
@@ -24,7 +24,11 @@ const TableSelectInput: FC<{
   options: DefaultOptionType[];
   onRefresh?: () => void;
   onChange?: (val: TableSelectInputValue) => void;
-}> = ({ onRefresh, style, options, onChange, value = {} }) => {
+  onBlur?: (val: TableSelectInputValue) => void;
+  showChange?: boolean;
+  disabled: boolean;
+  selectMode?: "multiple" | "single";
+}> = ({ onRefresh, style, options, onChange,onBlur, value = {}, showChange = true, disabled = false, selectMode = 'multiple' }) => {
   const inputMode = value?.inputMode || Mode.SELECT;
 
   const changeMode = () => {
@@ -50,6 +54,7 @@ const TableSelectInput: FC<{
   const onSelect = (v?: string) => {
     const newValue: TableSelectInputValue = { inputMode: Mode.SELECT, rawTable: v };
     onChange?.(newValue);
+    onBlur?.(newValue);
   };
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +63,7 @@ const TableSelectInput: FC<{
   };
 
   return (
-    <div className={styles.wp} style={style}>
+    <div className={`${styles.wp} table-select-input`} style={style}>
       {inputMode === Mode.INPUT && (
         <div className={styles.inpWp}>
           <input
@@ -66,6 +71,8 @@ const TableSelectInput: FC<{
             className={styles.inp}
             type="text"
             onChange={handleInput}
+            disabled={disabled}
+            onBlur={() => onBlur && onBlur(value)}
           />
           <div className={styles.numWp}>
             [
@@ -74,26 +81,33 @@ const TableSelectInput: FC<{
               value={value?.tableIdxBegin}
               type="number"
               onChange={changeStart}
+              onBlur={() => onBlur && onBlur(value)}
+              disabled={disabled}
             />
             -
             <input
               className={styles.num}
               value={value?.tableIdxEnd}
               type="number"
+              onBlur={() => onBlur && onBlur(value)}
               onChange={changeEnd}
+              disabled={disabled}
             />
             ]
           </div>
         </div>
       )}
+
       {inputMode === Mode.SELECT && (
-        <JoinSelect size="large" options={options} value={value?.rawTable} onChange={onSelect} />
+        selectMode === 'single' ?
+        <Select size="large" options={options} value={value?.rawTable} onChange={onSelect} disabled={disabled} /> :
+        <JoinSelect size="large" options={options} value={value?.rawTable} onChange={onSelect} disabled={disabled} />
       )}
       <div className={styles.extra}>
-        <Tooltip title="切换模式">
-        <RetweetOutlined onClick={changeMode} style={{ marginRight: 8 }} />
-        </Tooltip>
-        <a onClick={onRefresh}>刷新视图</a>
+        {showChange &&  <Tooltip title="切换模式">
+          <RetweetOutlined onClick={changeMode} style={{ marginRight: 8 }} />
+        </Tooltip>}
+        {onRefresh && <a onClick={onRefresh}>刷新视图</a>}
       </div>
     </div>
   );

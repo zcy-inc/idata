@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.develop.condition.opt.stream;
 
+import cn.zhengcaiyun.idata.commons.pojo.PageCondition;
+
 import java.util.List;
 
 /**
@@ -24,7 +26,7 @@ import java.util.List;
  * @author: yangjianhua
  * @create: 2022-08-22 16:45
  **/
-public class StreamJobInstanceCondition {
+public class StreamJobInstanceCondition extends PageCondition {
 
     /**
      * 作业id
@@ -50,6 +52,10 @@ public class StreamJobInstanceCondition {
      * 责任人
      */
     private String owner;
+    /**
+     * 责任人 - 模糊查询
+     */
+    private String ownerPattern;
 
     /**
      * 环境
@@ -99,6 +105,14 @@ public class StreamJobInstanceCondition {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getOwnerPattern() {
+        return ownerPattern;
+    }
+
+    public void setOwnerPattern(String ownerPattern) {
+        this.ownerPattern = ownerPattern;
     }
 
     public String getEnvironment() {

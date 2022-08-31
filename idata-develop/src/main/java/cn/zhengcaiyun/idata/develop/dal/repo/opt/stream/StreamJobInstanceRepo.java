@@ -18,7 +18,6 @@
 package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
@@ -33,7 +32,7 @@ import java.util.Optional;
  **/
 public interface StreamJobInstanceRepo {
 
-    Page<StreamJobInstance> paging(StreamJobInstanceCondition condition, PageParam pageParam);
+    Page<StreamJobInstance> paging(StreamJobInstanceCondition condition);
 
     List<StreamJobInstance> queryList(StreamJobInstanceCondition condition, long limit, long offset);
 

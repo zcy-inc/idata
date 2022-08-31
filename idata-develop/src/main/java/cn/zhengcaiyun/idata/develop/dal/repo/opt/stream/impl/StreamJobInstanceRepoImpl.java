@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.MybatisHelper;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
@@ -51,11 +50,11 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
     }
 
     @Override
-    public Page<StreamJobInstance> paging(StreamJobInstanceCondition condition, PageParam pageParam) {
+    public Page<StreamJobInstance> paging(StreamJobInstanceCondition condition) {
         long total = count(condition);
         List<StreamJobInstance> recordList = null;
         if (total > 0) {
-            recordList = queryList(condition, pageParam.getLimit(), pageParam.getOffset());
+            recordList = queryList(condition, condition.getLimit(), condition.getOffset());
         }
         return Page.newOne(recordList, total);
     }
@@ -68,6 +67,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                         and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                         and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                         and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                        and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                         and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                         and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
@@ -83,6 +83,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                 and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                 and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                 and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))
@@ -97,6 +98,7 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
                 and(STREAM_JOB_INSTANCE.environment, isEqualToWhenPresent(condition.getEnvironment())),
                 and(STREAM_JOB_INSTANCE.jobTypeCode, isEqualToWhenPresent(condition.getJobType())),
                 and(STREAM_JOB_INSTANCE.owner, isEqualToWhenPresent(condition.getOwner())),
+                and(STREAM_JOB_INSTANCE.owner, isLikeWhenPresent(condition.getOwnerPattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.status, isInWhenPresent(condition.getStatusList())),
                 and(STREAM_JOB_INSTANCE.jobName, isLikeWhenPresent(condition.getJobNamePattern()).map(MybatisHelper::appendWildCards)),
                 and(STREAM_JOB_INSTANCE.del, isEqualTo(DeleteEnum.DEL_NO.val))

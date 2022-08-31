@@ -106,7 +106,7 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
       onClose={onClose}
       destroyOnClose
       width={780}
-      title="配置"
+      title="基本信息"
       footer={
         <Button size="large" onClick={onSave}>
           保存
@@ -119,10 +119,12 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
         padding: '12px 28px',
       }}
     >
-      <Title>基本配置</Title>
       <Form form={form} layout="horizontal" colon={false}>
         <Item name="name" label="作业名称" rules={ruleText}>
           <Input size="large" style={{ width: widthL }} placeholder="请输入" />
+        </Item>
+        <Item name="id" label="ID" rules={ruleText}>
+          <Input size="large" style={{ width: widthL }} placeholder="请选择" disabled />
         </Item>
         <Item name="jobType" label="作业类型" rules={ruleSelc}>
           <Select

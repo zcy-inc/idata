@@ -25,7 +25,7 @@ import {
   getEnumValues,
   getExecuteQueues,
   saveTaskConfig,
-  getExecEngineOptions,
+  getEngineType,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import {
@@ -58,7 +58,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [dataSource, setDataSource] = useState<DataSourceItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
-  const [execEngineOptions, setExecEngineOptions] = useState<{ name: string; code: string }[]>([]);
+  const [execEngineOptions, setExecEngineOptions] = useState<{ label: string; value: string }[]>([]);
   const [destWriteMode, setDestWriteMode] = useState('');
 
   const [stagForm] = Form.useForm();
@@ -72,13 +72,15 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
         .then((res) => setSecurity(res.data))
         .catch((err) => {});
-      getExecuteQueues()
+      getExecuteQueues({jobType: (data as Task).jobType})
         .then((res) => setExecuteQueues(res.data))
         .catch((err) => {});
+      getEngineType({ jobType: (data as Task).jobType })
+      .then((res) => setExecEngineOptions(res.data?.map((item: string) => ({label: item, value: item}))))
+      .catch((err) => {});
       getDataSourceList({ limit: 999, offset: 0 })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
-      getExecEngineOptions({ jobType: data?.jobType??'' }).then((res) => setExecEngineOptions(res.data))
     }
   }, [visible]);
 
@@ -113,8 +115,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
-    getDAGList({ environment })
+    getDAGList({ environment, jobType: (data as Task).jobType })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
 
@@ -305,7 +306,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   size="large"
                   style={{ width }}
                   placeholder="请选择"
-                  options={execEngineOptions.map((_) => ({ label: _, value: _ }))}
+                  options={execEngineOptions}
                 />
               </Item>
               <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>

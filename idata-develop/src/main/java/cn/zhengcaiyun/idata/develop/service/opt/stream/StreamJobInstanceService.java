@@ -19,7 +19,6 @@ package cn.zhengcaiyun.idata.develop.service.opt.stream;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
@@ -33,7 +32,7 @@ import java.util.List;
  **/
 public interface StreamJobInstanceService {
 
-    Page<StreamJobInstanceDto> paging(StreamJobInstanceCondition condition, PageParam pageParam);
+    Page<StreamJobInstanceDto> paging(StreamJobInstanceCondition condition);
 
     Boolean start(Long id, StreamJobRunParamDto runParamDto, Operator operator);
 

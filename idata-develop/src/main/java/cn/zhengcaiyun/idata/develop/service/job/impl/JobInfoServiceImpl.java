@@ -945,7 +945,9 @@ public class JobInfoServiceImpl implements JobInfoService {
         List<String> forceInitTables = null;
         if (StringUtils.isNotBlank(runParams)) {
             streamJobRunParamDto = new Gson().fromJson(runParams, StreamJobRunParamDto.class);
-            forceInitTables = streamJobRunParamDto.getDiStreamRunParam().getForceInitTables();
+            if (BooleanUtils.isTrue(streamJobRunParamDto.getForceInit())) {
+                forceInitTables = streamJobRunParamDto.getInitDITables();
+            }
         }
         List<String> finalForceInitTables = forceInitTables == null ? new ArrayList<>() : forceInitTables;
 
@@ -1031,7 +1033,7 @@ public class JobInfoServiceImpl implements JobInfoService {
             cdcTableConfig.setTableProp(Maps.newHashMap());
             srcTableConfigs.add(cdcTableConfig);
         }
-
+        cdcJobDetailDto.setSrcTableConfigs(srcTableConfigs);
         cdcJobDetailDto.setJobVersion(version.toString());
         cdcJobDetailDto.setPublished(published);
 
