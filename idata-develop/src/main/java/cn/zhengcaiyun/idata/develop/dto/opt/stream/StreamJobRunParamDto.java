@@ -27,47 +27,28 @@ import java.util.List;
 public class StreamJobRunParamDto {
 
     /**
-     * DI_STREAM 作业运行参数
+     * 启动时是否强制初始化
      */
-    private DIStreamRunParam diStreamRunParam;
+    private Boolean forceInit;
 
     /**
-     * SQL_FLINK 作业运行参数
+     * DI_STREAM作业，forceInit为true时，输入强制初始化表集合（非必填）
      */
-    private FlinkSqlRunParam flinkSqlRunParam;
+    private List<String> initDITables;
 
-    public static class DIStreamRunParam {
-        /**
-         * 强制初始化表集合
-         */
-        private List<String> forceInitTables;
-
-        public List<String> getForceInitTables() {
-            return forceInitTables;
-        }
-
-        public void setForceInitTables(List<String> forceInitTables) {
-            this.forceInitTables = forceInitTables;
-        }
+    public Boolean getForceInit() {
+        return forceInit;
     }
 
-    public static class FlinkSqlRunParam {
-
+    public void setForceInit(Boolean forceInit) {
+        this.forceInit = forceInit;
     }
 
-    public DIStreamRunParam getDiStreamRunParam() {
-        return diStreamRunParam;
+    public List<String> getInitDITables() {
+        return initDITables;
     }
 
-    public void setDiStreamRunParam(DIStreamRunParam diStreamRunParam) {
-        this.diStreamRunParam = diStreamRunParam;
-    }
-
-    public FlinkSqlRunParam getFlinkSqlRunParam() {
-        return flinkSqlRunParam;
-    }
-
-    public void setFlinkSqlRunParam(FlinkSqlRunParam flinkSqlRunParam) {
-        this.flinkSqlRunParam = flinkSqlRunParam;
+    public void setInitDITables(List<String> initDITables) {
+        this.initDITables = initDITables;
     }
 }
