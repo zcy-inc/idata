@@ -55,7 +55,7 @@ public class StreamJobInstanceController {
      * @throws IllegalAccessException
      */
     @PostMapping("/page")
-    public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(StreamJobInstanceCondition condition) throws IllegalAccessException {
+    public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(@RequestBody StreamJobInstanceCondition condition) throws IllegalAccessException {
         // todo 加权限控制
         return RestResult.success(streamJobInstanceService.paging(condition));
     }
