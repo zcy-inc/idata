@@ -49,7 +49,7 @@ const Stream: FC<{}> = ({}) => {
           formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
             return startJob({
               id: row.id,
-              diStreamRunParam: res
+              initDITables: res.forceInitTables
             })
           }).then(() => {
             message.success("操作成功！");
@@ -174,7 +174,8 @@ const Stream: FC<{}> = ({}) => {
           placeholder="请选择"
           options={statusList}
           fieldProps={{
-            mode: "multiple"
+            mode: "multiple",
+            maxTagCount: 2
           }}
         />
         <ProFormText

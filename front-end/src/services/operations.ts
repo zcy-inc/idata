@@ -300,11 +300,9 @@ export async function getStreamJobs(data: {
 // 启动作业
 export async function startJob(data: {
   id: number;
-  diStreamRunParam: {
-    forceInitTables: string[];
-  }
+  initDITables: string[];
 }) {
-  const {id , ...rest} = data
+  const {id , ...rest} = data;
   return request(`/api/p1/opt/stream/instances/${id}/start`, {
     method: 'POST',
     data: rest

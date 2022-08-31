@@ -35,7 +35,12 @@ export const EditorPanel: FC<EditorPanelProps> = ({
   const [height, setHeight] = useState(500);
 
   const calcColumns = (resultHeader: string[]) => {
-    return resultHeader.map((key) => ({ title: key, dataIndex: key, key }));
+    return resultHeader.map((key) => ({
+      title: key,
+      dataIndex: key,
+      key,
+      render: (text: any) => JSON.stringify(text)
+    }));
   };
 
   useEffect(() => {
