@@ -6,7 +6,7 @@ import { IconFont } from '@/components'
 import styles from './index.less';
 
 import { IPane } from '@/models/datadev';
-import { FolderBelong } from '@/constants/datadev';
+import { FolderBelong, ContentBelong } from '@/constants/datadev';
 
 import TabCloseIcon from '@/components/TabCloseIcon';
 // import ViewLabel from '../ViewLabel';
@@ -14,6 +14,7 @@ import TabCloseIcon from '@/components/TabCloseIcon';
 import TabTable from '../TabTable';
 import TabDAG from '../TabDAG';
 import TabTask from '../TabTask';
+import TabTaskActual from '../TabTaskActual';
 import TabDev from '../TabDev';
 import TabFun from '../TabFun';
 
@@ -57,7 +58,11 @@ const Workbench: FC = ({}) => {
       case FolderBelong.DAG:
         return <TabDAG {...paneProps} />;
       case FolderBelong.DI:
-        return <TabTask {...paneProps} />;
+        if(pane.concreteBelong === ContentBelong.STREAM) {
+          return <TabTaskActual {...paneProps} />;
+        } else {
+          return <TabTask {...paneProps} />;
+        }
       case FolderBelong.DEVJOB:
         return <TabDev {...paneProps} />;
       case FolderBelong.DEVFUN:

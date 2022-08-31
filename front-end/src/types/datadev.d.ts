@@ -14,6 +14,7 @@ import {
   JobStatus,
   DIJobType,
   DISyncMode,
+  ContentBelong
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -27,6 +28,7 @@ export interface TreeNode {
   parentCid?: string;
   parentId?: number;
   children?: TreeNode[];
+  concreteBelong?: ContentBelong;
   // 以下是Antd树组件需要的属性
   className?: string;
   title?: any;
@@ -305,6 +307,7 @@ export interface DIJobBasicInfo {
   creator: string;
   status: 0 | 1; // 0 停用，1 启用
   remark?: string;
+  jobTypeEnum: string;
 }
 
 export interface MergeSqlParamDto {

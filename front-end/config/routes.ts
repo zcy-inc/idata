@@ -203,6 +203,12 @@ export default [
         featureCode: 'F_MENU_OPS_DASHBOARD',
       },
       {
+        path: '/operations/stream',
+        name: '实时作业',
+        component: './operations/Stream',
+        featureCode: 'F_MENU_STREAM_JOB_OPT',
+      },
+      {
         path: '/operations/taskHistory',
         name: '作业历史',
         component: './operations/TaskHistory',

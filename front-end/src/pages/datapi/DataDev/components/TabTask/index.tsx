@@ -27,10 +27,12 @@ import {
   getTableNames,
   getColumns,
   getWriteModeEnum,
+  saveDIJobBasicInfo,
+  saveTaskConfig
 } from '@/services/datadev';
 import { MappedColumn, TaskTable, TaskVersion } from '@/types/datadev';
-import DrawerBasic from './components/DrawerBasic';
-import DrawerConfig from './components/DrawerConfig';
+import Basic from '../TabTaskActual/components/Basic';
+import Config from '../TabTaskActual/components/Config';
 import DrawerVersion from './components/DrawerVersion';
 import DrawerHistory from '../TabDev/components/DrawerHistory';
 import Mapping from './components/Mapping';
@@ -51,7 +53,7 @@ import IconRun from './components/IconRun';
 import IconPause from './components/IconPause';
 import { ModalForm } from '@ant-design/pro-form';
 import { DefaultOptionType } from 'antd/lib/select';
-
+import showDrawer from '@/utils/showDrawer';
 export interface TabTaskProps {
   pane: IPane;
 }
@@ -195,13 +197,12 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     destMap: { [key: string]: any };
   }>(null);
 
-  const [visibleBasic, setVisibleBasic] = useState(false);
-  const [visibleConfig, setVisibleConfig] = useState(false);
   const [visibleVersion, setVisibleVersion] = useState(false);
   const [visibleHistory, setVisibleHistory] = useState(false);
 
-  const { getTreeWrapped, onRemovePane } = useModel('datadev', (_) => ({
+  const { getTreeWrapped, onRemovePane, replaceTab } = useModel('datadev', (_) => ({
     onRemovePane: _.onRemovePane,
+    replaceTab: _.replaceTab,
     getTreeWrapped: _.getTreeWrapped,
   }));
   const formInitialValues = {
@@ -500,6 +501,54 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
     return `${_.versionDisplay}-${env}-${verState}${runState}`;
   };
 
+  const showBaseInfo = () => {
+    showDrawer('基本信息', {
+      formProps: {
+        data: basicInfo
+      },
+      beforeConfirm: (dialog, form, done) => {
+        const values = form.onSave();
+        dialog.showLoading();
+        saveDIJobBasicInfo(values).then((res) => {
+          message.success('保存成功');
+          getTreeWrapped();
+          replaceTab({
+            oldKey: pane.cid,
+            newKey: pane.cid,
+            title: res.data.name,
+            pane,
+          });
+          refreshBasicInfo();
+          done();
+        }).finally(() => {
+          dialog.hideLoading();
+        })
+      }
+    }, Basic)
+  }
+
+  const showConfig = () => {
+    showDrawer('配置', {
+      formProps: {
+        data: basicInfo
+      },
+      drawerProps: {
+        width: 780
+      },
+      beforeConfirm: (dialog, form, done) => {
+        const { values, activeKey } = form.getValues();
+        dialog.showLoading();
+        saveTaskConfig({ jobId: pane.id, environment: activeKey }, values).then(() => {
+          message.success('保存成功');
+          refreshBasicInfo();
+          done();
+        }).finally(() => {
+          dialog.hideLoading();
+        })
+      }
+    }, Config)
+  }
+
   const onBeforeConfigModeChange = (_: any, { label }: Option) =>
     new Promise((resolve) => {
       confirm({
@@ -516,7 +565,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           return resolve('');
         },
       });
-    });
+  });
 
   const getSrcFormItems = () => {
     const items = [];
@@ -845,8 +894,8 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           extra={
             <Space size={16}>
               <a onClick={() => onAction('run')}>单次运行</a>
-              <a onClick={() => setVisibleBasic(true)}>基本信息</a>
-              <a onClick={() => setVisibleConfig(true)}>配置</a>
+              <a onClick={showBaseInfo}>基本信息</a>
+              <a onClick={showConfig}>配置</a>
               <a onClick={() => setVisibleVersion(true)}>版本</a>
               <a onClick={() => setVisibleHistory(true)}>历史</a>
             </Space>
@@ -1034,18 +1083,6 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       </div>
       {!!basicInfo && (
         <Fragment>
-          <DrawerBasic
-            visible={visibleBasic}
-            onClose={() => setVisibleBasic(false)}
-            data={basicInfo}
-            pane={pane}
-            refreshBasicInfo={refreshBasicInfo}
-          />
-          <DrawerConfig
-            visible={visibleConfig}
-            onClose={() => setVisibleConfig(false)}
-            data={basicInfo}
-          />
           <DrawerVersion
             visible={visibleVersion}
             onClose={() => setVisibleVersion(false)}

@@ -18,6 +18,12 @@ export enum FolderBelong {
   DEVFUN = 'DEV.FUN', // 数据开发-函数
 }
 
+export enum ContentBelong {
+  STREAM = 'DI_STREAM', // 实时作业
+  BATCH = 'DI_BATCH', // 离线作业
+  SQLFLINK = 'SQL_FLINK', // SQL_FLINK
+}
+
 // 功能性文件夹icon
 export const funcFolderIconMap = {
   [FolderBelong.DESIGN]: 'icon-shujukaifa-shucangsheji',

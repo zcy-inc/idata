@@ -13,6 +13,16 @@ export async function getDataSourceTypes() {
 }
 
 /**
+ * 获取新数据源类型
+ */
+ export async function getNewDataSourceTypes(params: {jobType: string}) {
+  return request<DefaultResponse & { data: {fromList: DataSourceTypes[]; externalList: DataSourceTypes[];destList: DataSourceTypes[];} }>('/api/p1/dev/jobs/meta/datasource-type', {
+    method: 'GET',
+    params
+  });
+}
+
+/**
  * 获取环境
  */
 export async function getEnvironments() {
