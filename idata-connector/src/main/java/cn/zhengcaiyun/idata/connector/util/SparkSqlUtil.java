@@ -11,7 +11,10 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -185,7 +188,7 @@ public class SparkSqlUtil {
 //        System.out.println(sqls);
 //    }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws ParseException {
         String sql = "--******************************************************************--\n" +
                 "--******功能说明：DWS层日志域前端点击使用信息天增量表\n" +
                 "--******输出表：dws.dws_log_front_clk_basic_inc_d\n" +
@@ -447,20 +450,29 @@ public class SparkSqlUtil {
                 "\n" +
                 "\n" +
                 "\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizdate};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizdate};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${bizdate};";
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate-1d};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizyear};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizyear-1Y};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizquarter};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizquarter};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${dt};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${0};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${.&};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizmonth};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizmonth-1m};\n" +
+                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${day};";
+//        String sql = "${dt} from ${day-1d};${bizquarter} from ${bizquarter}!!!${bizyear} from {0}!!!${day}";
         String newSql = SqlDynamicParamTool.replaceParam(sql);
-        List<String> fromTables;
-        try {
-            fromTables = SparkSqlUtil.getFromTables(newSql, null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+//        List<String> fromTables;
+//        try {
+//            fromTables = SparkSqlUtil.getFromTables(newSql, null);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
 
 //        String add_db = SparkSqlUtil.addDatabaseEnv(sql,"stag_");
-        Map<String, String> map = SparkSqlUtil.insertErase(newSql);
-        System.out.println("");
+//        Map<String, String> map = SparkSqlUtil.insertErase(newSql);
+//        System.out.println(sql);
+        System.out.println(newSql);
     }
 }

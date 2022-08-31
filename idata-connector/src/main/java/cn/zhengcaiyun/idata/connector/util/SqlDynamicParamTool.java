@@ -39,29 +39,47 @@ public class SqlDynamicParamTool {
     public static String replaceParam(String sourceSql) {
         Map<String, String> paramMap = getParamMap();
         sourceSql = sourceSql.replace("{0}", paramMap.get("day"));
-        String[] sourceSqls = sourceSql.split("[${}]");
-        List<String> sourceSqlList = Arrays.asList(sourceSqls);
-        List<String> sqlList = new ArrayList<>();
-        Map<Integer, String> bizChangeMap = new HashMap<>();
-        for (int i = 0; i < sourceSqlList.size(); i++) {
-            String sql = sourceSqlList.get(i);
-            if ("".equals(sql)) {
-                if (i < sourceSqlList.size() - 1) {
-                    String nextSql = sourceSqlList.get(i + 1);
-                    if (PARAMS.contains(nextSql)) {
-                        bizChangeMap.put(i + 1, paramMap.get(nextSql));
-                    } else if (nextSql.contains("+") || nextSql.contains("-")) {
-                        bizChangeMap.put(i + 1, getParsedDate(nextSql, paramMap));
-                    }
-                }
+        Stack<String> sqlStack = new Stack<>();
+        List<Integer> indexList = new ArrayList<>();
+        for(int i = 0; i < sourceSql.length(); i++) {
+            String subStr = sourceSql.substring(i, i + 1);
+            if (i + 1 < sourceSql.length() && sqlStack.size() == 0 && "$".equals(subStr)
+                    && "{".equals(sourceSql.substring(i + 1, i + 2))) {
+                indexList.add(i);
+                sqlStack.push("${");
+            }
+            else if (sqlStack.size() > 0 && "}".equals(subStr)) {
+                indexList.add(i + 1);
+                sqlStack.pop();
             }
         }
-        for (int i = 0; i < sourceSqlList.size(); i++) {
-            if (!"".equals(sourceSqlList.get(i))) {
-                if (bizChangeMap.containsKey(i)) {
-                    sqlList.add(bizChangeMap.get(i));
-                } else {
-                    sqlList.add(sourceSqlList.get(i));
+        if (!indexList.contains(sourceSql.length())) {
+            indexList.add(sourceSql.length());
+        }
+        // 处理字符串是否从index为0开始替换，影响判断list中bizParam的取值范围
+        int listSplitRemainder = indexList.contains(0) ? 1 : 0;
+        if (!indexList.contains(0)) {
+            indexList.add(0, 0);
+        }
+        // 必定包括起始index
+        if (indexList.size() == 2) return sourceSql;
+        List<String> sqlList = new ArrayList<>();
+        for (int i = 0; i < indexList.size() - 1; i++) {
+            String sql = sourceSql.substring(indexList.get(i), indexList.get(i + 1));
+            if (i % 2 == listSplitRemainder) {
+                sqlList.add(sql);
+            }
+            else {
+                String bizParamKey = sourceSql.substring(indexList.get(i) + 2, indexList.get(i + 1) - 1);
+                if (PARAMS.contains(bizParamKey)) {
+                    sqlList.add(paramMap.get(bizParamKey));
+                }
+                else if ((bizParamKey.contains("+") && PARAMS.contains(bizParamKey.split("\\+")[0]))
+                        || (bizParamKey.contains("-") && PARAMS.contains(bizParamKey.split("-")[0]))) {
+                    sqlList.add(getParsedDate(bizParamKey, paramMap));
+                }
+                else {
+                    sqlList.add(sql);
                 }
             }
         }
@@ -73,6 +91,8 @@ public class SqlDynamicParamTool {
         LocalDate localDate = LocalDate.now().plusDays(-1L);
         DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
         String yesterday = yyyyMMdd.format(localDate);
+        DateTimeFormatter yyyyMMddCriteria = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String yesterdayCriteria = yyyyMMddCriteria.format(localDate);
         DateTimeFormatter yyyyMM = DateTimeFormatter.ofPattern("yyyyMM");
         String month = yyyyMM.format(localDate);
         DateTimeFormatter yyyy = DateTimeFormatter.ofPattern("yyyy");
@@ -82,6 +102,7 @@ public class SqlDynamicParamTool {
         paramMap.put("bizquarter", yearQuarter(localDate));
         paramMap.put("bizyear", year);
         paramMap.put("day", yesterday);
+        paramMap.put("dt", yesterdayCriteria);
         return paramMap;
     }
 
@@ -98,9 +119,7 @@ public class SqlDynamicParamTool {
         int offset = NumberUtils.toInt(exp.substring(index, exp.length() - 1));
         String rKey = exp.substring(0, index);
         String dateValue = param.get(rKey);
-        String format = dateValue.length() == 2 ? "HH" :
-                dateValue.length() == 4 ? "HHmm" :
-                        dateValue.length() == 8 ? "yyyyMMdd" : "yyyy-MM-dd";
+        String format = formatPattern(dateValue.length());
         try {
             Date date = DateUtils.parseDate(dateValue, format);
             if (unit == 'Y' || unit == 'y') {
@@ -109,8 +128,6 @@ public class SqlDynamicParamTool {
                 date = DateUtils.addMonths(date, offset);
             } else if (unit == 'D' || unit == 'd') {
                 date = DateUtils.addDays(date, offset);
-            } else if (unit == 'H' || unit == 'h') {
-                date = DateUtils.addHours(date, offset);
             } else {
                 date = DateUtils.addMinutes(date, offset);
             }
@@ -118,5 +135,29 @@ public class SqlDynamicParamTool {
         } catch (Exception e) {
             throw new IllegalArgumentException("The timeExp " + exp + " is not support expression.");
         }
+    }
+
+    private static String formatPattern(int len) {
+        String format;
+        switch (len) {
+            case 2:
+                format = "HH";
+                break;
+            case 4:
+                format = "yyyy";
+                break;
+            case 6:
+                format = "yyyyMM";
+                break;
+            case 7:
+                format = "yyyy-MM";
+                break;
+            case 8:
+                format = "yyyyMMdd";
+                break;
+            default:
+                format = "yyyy-MM-dd";
+        }
+        return format;
     }
 }

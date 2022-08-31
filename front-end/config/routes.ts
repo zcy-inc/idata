@@ -262,7 +262,7 @@ export default [
     ]
   },
   {
-    path:'/outLink1',
+    path:'/outLink',
     name:"数据地图",
     outLink: '/',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/afdd0ff9-65b8-4602-b8b7-5a7ec45e124a.png',
@@ -270,7 +270,7 @@ export default [
     featureCode: 'F_MENU_DATA_MAP',
   },
   {
-    path:'/outLink2',
+    path:'/outLink',
     name:"小采BI",
     outLink: '/itable/#/itable/list',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/896839e6-18ee-4c86-896f-7201835a6175.png',
@@ -279,7 +279,7 @@ export default [
   },
  
   {
-    path:'/outLink4',
+    path:'/outLink',
     name:"DataPi",
     outLink: '/idata/#/datapi/apiDevelop',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/acb20dc4-957e-40ff-8fdb-8379b5620e13.png',
@@ -287,12 +287,20 @@ export default [
     featureCode: 'F_MENU_DATAPI',
   },
   {
-    path:'/outLink5',
+    path:'/outLink',
     name:"浑仪",
     outLink: '/behavior-analysis/rulesManage/list',
     iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/533d7a4e-debf-46d6-9299-d547d325b86e.png',
     iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/0a4656b2-ccd0-43e3-b366-01d572f3e707.png',
     featureCode: 'F_MENU_HUNYI',
+  },
+  {
+    path:'/outLink',
+    name:"小采DA",
+    outLink: '/da',
+    iconActive: 'https://sitecdn.zcycdn.com/f2e-assets/b1da873c-9f66-4e6d-9f5e-6510a7863ad0.png',
+    iconDefault: 'https://sitecdn.zcycdn.com/f2e-assets/8a0a4715-6220-446b-864a-5eade021d85f.png',
+    featureCode: 'F_MENU_IDAS',
   },
   {
     component: './404',

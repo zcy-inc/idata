@@ -148,9 +148,9 @@ const Template: FC<{history: any}> = ({ history }) => {
       render: (_, row) => {
         return (
           <>
-          <Button type="link" onClick={() => toggleTemplte(row)}>
+          {row.type !== 'system' &&  <Button type="link" onClick={() => toggleTemplte(row)}>
             {row.status === 0 ? '启用' : '停用'}
-          </Button>
+          </Button>}
           <Button type="link" onClick={() => handleAddTemplate(row)}>
             {row.status === 1 ? '查看' : '编辑'}
           </Button>
