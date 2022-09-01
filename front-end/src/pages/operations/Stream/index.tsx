@@ -32,7 +32,7 @@ const Stream: FC<{}> = ({}) => {
   // 启动/停止
   const toggleState = (row: StreamListItem, isStop: boolean) => {
     if(isStop) {
-      stopJob({id: row.jobId}).then(() => {
+      stopJob({id: row.id}).then(() => {
         message.success("操作成功！");
         refresh();
       })
