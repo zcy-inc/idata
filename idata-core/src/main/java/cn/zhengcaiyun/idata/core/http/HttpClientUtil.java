@@ -95,7 +95,7 @@ public class HttpClientUtil {
         String body = null;
         try (Response response = HttpClientUtil.executeHttpRequest(httpInput)) {
             body = Objects.requireNonNull(response.body()).string();
-            if (response.code() == 200 || response.code() == 201) {
+            if (response.code() == 200 || response.code() == 201 || response.code() == 202) {
                 if (String.class.equals(typeReference.getType())) {
                     return (T) body;
                 }

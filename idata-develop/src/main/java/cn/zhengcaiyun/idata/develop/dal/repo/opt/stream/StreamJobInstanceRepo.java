@@ -44,9 +44,11 @@ public interface StreamJobInstanceRepo {
 
     Boolean update(StreamJobInstance instance);
 
-    Boolean updateStatus(List<Long> ids, StreamJobInstanceStatusEnum statusEnum, String operator);
+    Boolean updateStatus(List<Long> ids, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus, String operator);
 
-    Boolean updateStatus(Long id, StreamJobInstanceStatusEnum statusEnum);
+    Boolean updateStatus(Long id, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus, String operator);
+
+    Boolean updateStatus(Long id, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus);
 
     Boolean updateRunParam(Long id, String runParams, String operator);
 

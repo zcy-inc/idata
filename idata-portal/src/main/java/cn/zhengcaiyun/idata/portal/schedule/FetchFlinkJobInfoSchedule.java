@@ -42,7 +42,7 @@ public class FetchFlinkJobInfoSchedule {
         this.flinkJobCommonService = flinkJobCommonService;
     }
 
-//    @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 1000)
+    @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 1000)
     public void fetchFlinkJobInfo() {
         LOGGER.info("Start to fetchAndSetFlinkJobRunningInfo for prod ... ...");
         flinkJobCommonService.fetchAndSetFlinkJobRunningInfo(EnvEnum.prod);

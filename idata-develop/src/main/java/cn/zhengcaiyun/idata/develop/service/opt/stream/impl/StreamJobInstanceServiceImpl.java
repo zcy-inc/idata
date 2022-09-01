@@ -152,9 +152,11 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
             streamJobInstanceRepo.updateRunParam(id, new Gson().toJson(runParamDto), operator.getNickname());
         }
         // 更新作业状态，若状态更新后，启动失败，可以先操作停止作业，再重新启动
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.STARTING, operator.getNickname());
-        // 启动作业
-        jobScheduleManager.runJob(jobId, env, false);
+        boolean statusChanged = streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.STARTING, jobInstance.getStatus(), operator.getNickname());
+        if (statusChanged) {
+            // 启动作业
+            jobScheduleManager.runJob(jobId, env, false);
+        }
         return Boolean.TRUE;
     }
 
@@ -171,8 +173,10 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val != status
                         && StreamJobInstanceStatusEnum.DESTROYED.val != status,
                 "待启动或已下线实例不需要停止");
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.STOPPED, operator.getNickname());
-        flinkJobManager.stopFlinkApp(jobId, env);
+        boolean statusChanged = streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.STOPPED, jobInstance.getStatus(), operator.getNickname());
+        if (statusChanged) {
+            flinkJobManager.stopFlinkApp(jobId, env);
+        }
         return Boolean.TRUE;
     }
 
@@ -187,7 +191,7 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == status
                         || StreamJobInstanceStatusEnum.STOPPED.val == status,
                 "待启动或已停止实例可以操作下线");
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.DESTROYED, operator.getNickname());
+        streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.DESTROYED, jobInstance.getStatus(), operator.getNickname());
         return Boolean.TRUE;
     }
 
