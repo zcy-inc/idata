@@ -39,7 +39,7 @@ const Stream: FC<{}> = ({}) => {
     } else {
       showDialog('启动任务',{
         formProps: {
-          id: row.jobId
+          id: row.id
         },
         modalProps: {
           width: 500
