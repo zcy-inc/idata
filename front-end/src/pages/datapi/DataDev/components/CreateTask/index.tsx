@@ -13,7 +13,7 @@ import {
   getDIJobTypes,
   getDISyncMode,
 } from '@/services/datadev';
-import { FolderBelong } from '@/constants/datadev';
+import { FolderBelong, ContentBelong } from '@/constants/datadev';
 import { DIFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
@@ -43,7 +43,10 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     if (success) {
       message.success('创建作业成功');
       setVisibleTask(false);
-      getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DI, data));
+      getTreeWrapped().then(_ => {
+        const concreteBelong = values.syncMode === 'STREAM' ? ContentBelong.STREAM : ContentBelong.BATCH;
+        onSelectNewTab(FolderBelong.DI, concreteBelong, data)
+      });
     } else {
       message.success(`创建作业失败: ${msg}`);
     }

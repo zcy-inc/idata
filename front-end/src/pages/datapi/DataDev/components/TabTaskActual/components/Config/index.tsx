@@ -137,7 +137,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ data, isStream = false }, ref) =>
       execDriverMem: 3,
       execWorkerMem: 4,
       execCores: defaultExecCores,
-      execQueue: 'root.offline',
+      execQueue: '',
     },
   };
 
