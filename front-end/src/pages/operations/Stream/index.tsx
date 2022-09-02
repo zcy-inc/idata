@@ -13,6 +13,7 @@ import StartJob from './components/StartJob';
 import Detail from './components/Detail';
 import showDialog from '@/utils/showDialog';
 import showDrawer from '@/utils/showDrawer';
+import moment from 'moment';
 
 const Stream: FC<{}> = ({}) => {
   const [form] = Form.useForm();
@@ -77,6 +78,10 @@ const Stream: FC<{}> = ({}) => {
       drawerProps: {
         width: 1000
       },
+      formProps: {
+        jobId: row.jobId,
+        version: row.jobContentVersion
+      },
       btns: {
         positive: false,
         negetive: false
@@ -85,12 +90,13 @@ const Stream: FC<{}> = ({}) => {
   }
 
   const columns: ColumnsType<StreamListItem> = [
-    { title: '任务ID', key: 'jobId', dataIndex: 'jobId' },
+    { title: '任务ID', key: 'jobId', dataIndex: 'jobId', width: 80 },
     {
       title: '任务名称',
       key: 'jobName',
       dataIndex: 'jobName',
-      width: 120,
+      width: 200,
+      ellipsis: true,
       render: (text, row) => {
         return <Button onClick={() => showDetail(row)} type="link">{text}</Button>
       }
@@ -99,21 +105,35 @@ const Stream: FC<{}> = ({}) => {
       title: '任务状态',
       key: 'status',
       dataIndex: 'status',
+      width: 100,
       render: (text, row) => {
         return statusList.find(item => item.value === text)?.label
       }
     },
-    { title: '版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay' },
-    { title: '环境', key: 'environment', dataIndex: 'environment' },
-    { title: '责任人', key: 'owner', dataIndex: 'owner', width: 100 },
-    { title: '运行开始时间', key: 'runStartTime', dataIndex: 'runStartTime', width:180 },
-    { title: '最近操作时间', key: 'editTime', dataIndex: 'editTime',  width:180 },
-    { title: '最近操作人', key: 'editor', dataIndex: 'editor',  width:110 },
+    { title: '版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay', width: 150, ellipsis: true, },
+    { title: '环境', key: 'environment', dataIndex: 'environment', width: 100, },
+    { title: '责任人', key: 'owner', dataIndex: 'owner', width: 90 },
+    {
+      title: '运行开始时间',
+      key: 'runStartTime',
+      dataIndex: 'runStartTime',
+      width:180,
+      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
+    },
+    {
+      title: '最近操作时间',
+      key: 'editTime',
+      dataIndex: 'editTime',
+      width:180,
+      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
+    },
+    { title: '最近操作人', key: 'editor', dataIndex: 'editor',  width: 110 },
     {
       title: '操作',
       key: 'status',
       dataIndex: 'status',
       fixed: 'right',
+      width: 160,
       render: (text, row) => {
         if(text !== 9) {
           return <>
