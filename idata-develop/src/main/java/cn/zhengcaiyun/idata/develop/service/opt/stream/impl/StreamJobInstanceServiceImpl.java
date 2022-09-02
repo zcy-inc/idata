@@ -125,7 +125,8 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         Optional<StreamJobInstance> instanceOptional = streamJobInstanceRepo.query(id);
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
-        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == jobInstance.getStatus(), "运行实例状态不是待启动状态，不能启动");
+        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == jobInstance.getStatus()
+                || StreamJobInstanceStatusEnum.STOPPED.val == jobInstance.getStatus(), "运行实例状态不是待启动或已停止状态，不能启动");
 
         Long jobId = jobInstance.getJobId();
         Integer version = jobInstance.getJobContentVersion();
@@ -169,10 +170,9 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         Long jobId = jobInstance.getJobId();
         String env = jobInstance.getEnvironment();
         Integer status = jobInstance.getStatus();
-        checkArgument(StreamJobInstanceStatusEnum.STOPPED.val != status, "作业已停止");
-        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val != status
-                        && StreamJobInstanceStatusEnum.DESTROYED.val != status,
-                "待启动或已下线实例不需要停止");
+        checkArgument(StreamJobInstanceStatusEnum.RUNNING.val == status
+                        || StreamJobInstanceStatusEnum.FAILED.val == status,
+                "运行中和已失败的实例可以停止");
         boolean statusChanged = streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.STOPPED, jobInstance.getStatus(), operator.getNickname());
         if (statusChanged) {
             flinkJobManager.stopFlinkApp(jobId, env);
@@ -187,7 +187,6 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
         Integer status = jobInstance.getStatus();
-        checkArgument(StreamJobInstanceStatusEnum.DESTROYED.val != status, "作业已下线");
         checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == status
                         || StreamJobInstanceStatusEnum.STOPPED.val == status,
                 "待启动或已停止实例可以操作下线");
