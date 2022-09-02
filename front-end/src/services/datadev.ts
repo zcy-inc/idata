@@ -1176,7 +1176,7 @@ export async function getDISyncMode(params: { jobType: string }) {
  * 新增DI
  */
 export async function createDIJob(data: CreateDIJobDto) {
-  return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
+  return request<Tresponse<Task>>('/api/p1/dev/jobs/di', { method: 'POST', data });
 }
 
 /**
