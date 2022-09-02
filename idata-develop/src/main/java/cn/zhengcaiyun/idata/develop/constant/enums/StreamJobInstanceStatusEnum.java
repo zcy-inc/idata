@@ -49,6 +49,7 @@ public enum StreamJobInstanceStatusEnum {
     private static final Map<Integer, StreamJobInstanceStatusEnum> map = Maps.newHashMap();
 
     private static final List<StreamJobInstanceStatusEnum> START_TO_STOP_STATUS = Lists.newArrayList(STARTING, RUNNING, FAILED, STOPPED);
+    private static final List<StreamJobInstanceStatusEnum> NOT_DESTROYED = Lists.newArrayList(WAIT_START, STARTING, RUNNING, FAILED, STOPPED);
 
     static {
         Arrays.stream(StreamJobInstanceStatusEnum.values())
@@ -66,6 +67,16 @@ public enum StreamJobInstanceStatusEnum {
 
     public static List<Integer> getStartToStopStatusValList() {
         return START_TO_STOP_STATUS.stream()
+                .map(statusEnum -> statusEnum.val)
+                .collect(Collectors.toList());
+    }
+
+    public static List<StreamJobInstanceStatusEnum> getNotDestroyedStatusList() {
+        return NOT_DESTROYED;
+    }
+
+    public static List<Integer> getNotDestroyedStatusValList() {
+        return NOT_DESTROYED.stream()
                 .map(statusEnum -> statusEnum.val)
                 .collect(Collectors.toList());
     }
