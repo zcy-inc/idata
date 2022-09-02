@@ -140,7 +140,7 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
                     .map(StreamJobInstance::getId)
                     .filter(tempId -> !tempId.equals(id))
                     .collect(Collectors.toSet());
-            checkState(afterStartInstanceIds.size() > 0, "作业存在已启动或已停止实例，先下线该实例再启动");
+            checkState(afterStartInstanceIds.size() == 0, "作业存在已启动或已停止实例，先下线该实例再启动");
         }
 
         List<ClusterAppDto> existAppDtoList = flinkJobManager.fetchFlinkApp(jobId, env);
