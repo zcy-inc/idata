@@ -60,6 +60,7 @@ const ViewUDF: FC<ViewUDFProps> = ({ data }) => {
         <Item label="描述">{data?.description || '-'}</Item>
         <Item label="命令格式">{data?.commandFormat || '-'}</Item>
         <Item label="示例">{data?.udfSample || '-'}</Item>
+        <Item label="全局函数">{data?.globalFun ? '开' : '关'}</Item>
       </Descriptions>
     </div>
   );

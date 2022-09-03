@@ -42,6 +42,7 @@ import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
 import { useJob, VersionOption } from '../../../hooks/useJob';
 import { useEditorPanel } from '../../../hooks/useEditorPanel';
+import { transformAlias } from '@/components/TableNameInput';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -170,6 +171,30 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       const values = form.getFieldsValue();
       switch (task?.jobType) {
         case TaskTypes.SQL_SPARK:
+          const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds } = values;
+          const param = {
+            extTables: {
+              dataSourceType: srcDataSourceType,
+              dataSourceId: srcDataSourceId.key,
+              tables: srcTableNamse.map((table: { name: any; }) => ({
+                tableName: table.name,
+                tableAlias: transformAlias(srcDataSourceType, table.name),
+              }))
+            },
+            udfIds,
+            jobId: pane.id,
+            jobType: task?.jobType,
+            version,
+          };
+          saveSqlSpark({ jobId: pane.id }, param)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
         case TaskTypes.SQL_FLINK:
           const dataSql = {
             ...values,

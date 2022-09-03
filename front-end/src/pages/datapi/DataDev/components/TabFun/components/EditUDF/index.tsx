@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Select, Upload } from 'antd';
+import { Button, Form, Input, Select, Upload, Switch } from 'antd';
 import type { FC } from 'react';
 import type { FormInstance } from 'antd';
 import { UDF } from '@/types/datadev';
@@ -36,6 +36,7 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
         description: data.description,
         commandFormat: data.commandFormat,
         udfSample: data.udfSample,
+        globalFun: data.globalFun === 1 ? true : false,
       };
       form.setFieldsValue(values);
       setHdfsPath(data.hdfsPath);
@@ -142,6 +143,9 @@ const EditUDF: FC<EditUDFProps> = ({ data, form }) => {
         </Item>
         <Item name="udfSample" label="示例" rules={ruleText}>
           <Input placeholder="请输入" size="large" style={{ width }} />
+        </Item>
+        <Item name="globalFun" label="全局函数" valuePropName="checked">
+          <Switch />
         </Item>
       </Form>
     </div>

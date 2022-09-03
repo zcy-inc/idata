@@ -35,7 +35,7 @@ import {
   defaultExecCores,
   // SchRerunMode,
 } from '@/constants/datadev';
-import { getDataSourceList } from '@/services/datasource';
+import { getDataSourceList, getDataSourceTypesNew } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
 import { DependenciesFormItem } from '../../../../../components/DependenciesFormItem';
 
@@ -78,9 +78,17 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getEngineType({ jobType: (data as Task).jobType })
       .then((res) => setExecEngineOptions(res.data?.map((item: string) => ({label: item, value: item}))))
       .catch((err) => {});
-      getDataSourceList({ limit: 999, offset: 0 })
+
+      const { syncMode, jobType } = data as Task;
+      const jobTypeParam = syncMode ? `DI_${syncMode}` : jobType;
+      debugger;
+      getDataSourceTypesNew(jobTypeParam).then((res) => {
+        // TODO:luzhu 有的没有destList怎么办，用externalList？已有接口参数是type啊而不是types
+        const destList = res?.data?.destList || res?.data?.externalList || [];
+        getDataSourceList({ limit: 999, offset: 0, type: destList.join(',') })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
+      });
     }
   }, [visible]);
 
@@ -300,6 +308,16 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   ]}
                 />
               </Item>
+              {
+                data?.jobType === TaskTypes.SQL_SPARK && (
+                  <>
+                    <Title>参数配置</Title>
+                    <Item name="customParams" label="自定义参数">
+                      <MapInput style={{ width }} />
+                    </Item>
+                  </>
+                )
+              }
               <Title>运行配置</Title>
               <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
                 <Select
