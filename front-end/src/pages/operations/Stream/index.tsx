@@ -51,7 +51,7 @@ const Stream: FC<{}> = ({}) => {
             return startJob({
               id: row.id,
               initDITables: res.forceInitTables,
-              forceInit: !!res.forceInitTables.length
+              forceInit: !!res.forceInitTables?.length
             })
           }).then(() => {
             message.success("操作成功！");
