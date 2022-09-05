@@ -152,15 +152,9 @@ const Stream: FC<{}> = ({}) => {
               <Button type="link" disabled={text === 1} onClick={() => toggleState(row, false)}>
                 启动
               </Button>}
-            <Popconfirm
-              title={<div>如果任务为运行中，<span style={{color:'red'}}>下线将自动停止任务</span>。你确定要下线该任务吗？</div>}
-              onConfirm={() => offLine(row)}
-              disabled={[1, 2, 7].includes(text)}
-            >
               <Button type="link" disabled={[1, 2, 7].includes(text)}>
                 下线
               </Button>
-            </Popconfirm>
             {row.externalUrl && <Button
               type="link"
               onClick={() => window.open(row.externalUrl)}
