@@ -177,7 +177,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           const param = {
             extTables: [{
               dataSourceType: srcDataSourceType,
-              dataSourceId: srcDataSourceId.key,
+              dataSourceId: srcDataSourceId,
               tables: srcTableNamse.map((table: { name: any; }) => ({
                 tableName: table.name,
                 tableAlias: transformAlias(srcDataSourceType, table.name),

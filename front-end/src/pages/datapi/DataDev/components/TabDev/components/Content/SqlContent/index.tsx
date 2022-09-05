@@ -55,10 +55,10 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
           setExternalList(res.data && res.data.externalList as never[]);
         });
         const { extTables = [{}] } =  content;
-        const { dataSourceType, dataSourceId = {}, tables = [] } = extTables[0];
+        const { dataSourceType, dataSourceId, tables = [] } = extTables[0];
         form.setFieldsValue({
           srcDataSourceType: dataSourceType,
-          srcDataSourceId: dataSourceId.key, // TODO:luzhu 新增外部表 回显tableName
+          srcDataSourceId: dataSourceId,
           srcTableNamse: tables.map((table: { tableName: any;tableAlias:any }) => ({
             name: table.tableName,
             alias: table.tableAlias
@@ -88,8 +88,8 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
       offset: 0,
     }).then((res) => {
       const option = res?.data?.content.map((p) => ({
-        value: p.name,
-        key: p.id,
+        value: p.id,
+        label: p.name,
       }));
       setSrcDSOption(option as []);
     });
@@ -187,7 +187,6 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                 placeholder="请选择"
                 options={srcDSOptions}
                 showSearch
-                labelInValue
                 filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
               />
             </Item>
