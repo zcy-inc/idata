@@ -752,7 +752,22 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         <MapInput style={{ maxWidth, minWidth }} />
       </Item>
     );
-    // TODO: luzhu导入写入模式
+    if (basicInfo?.jobType === DIJobType.BACK_FLOW) {
+      items.push(
+        <Fragment key="9">
+          {destTableNode}
+          <Item name="destBeforeWrite" label="导入前准备语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据前执行的SQL脚本" />
+          </Item>
+          <Item name="destAfterWrite" label="导入后完成语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据后执行的SQL脚本" />
+          </Item>
+          <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
+            <Radio.Group options={diWriteModeOptions} />
+          </Item>
+        </Fragment>,
+      );
+    }
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
         <Fragment key="9">
