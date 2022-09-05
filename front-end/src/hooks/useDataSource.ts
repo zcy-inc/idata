@@ -11,7 +11,7 @@ export type DSOption = DataSourceItem & DefaultOptionType;
 const useDataSource = (basicInfo: {jobType?: string, syncMode?:string}) => {
   // 获取数据源类型列表
   const { jobType = DIJobType.BACK_FLOW, syncMode } = basicInfo || {};
-  const jobTypeParam = syncMode ? `DI_${syncMode}` : jobType;
+  const jobTypeParam = jobType === 'BACK_FLOW' ? jobType : `${jobType}_${syncMode}`;
   const { data }  = useRequest(() => getDataSourceTypesNew(jobTypeParam).then(({ data }) => data));
   const destOptions: Array<{ label: any; value: any; }> = data && data.destList && data.destList.map((type: any) => ({ label: type, value: type }));
   const fromOptions: Array<{ label: any; value: any; }> = data && data.fromList && data.fromList.map((type: any) => ({ label: type, value: type }));
