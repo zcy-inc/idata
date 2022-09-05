@@ -156,7 +156,7 @@ const TabTaskActualContent: ForwardRefRenderFunction<any, ContentProps> = ({ bas
         const matchString = matchs[0].slice(1, matchs[0].length - 1);
         return {
           inputMode: Mode.INPUT,
-          rawTable: srcTable.replace(`_${matchs[0]}`, ''),
+          rawTable: srcTable.replace(`${matchs[0]}`, ''),
           tableIdxBegin: matchString.split('-')[0],
           tableIdxEnd: matchString.split('-')[1],
         }

@@ -50,7 +50,8 @@ const Stream: FC<{}> = ({}) => {
           formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
             return startJob({
               id: row.id,
-              initDITables: res.forceInitTables
+              initDITables: res.forceInitTables,
+              forceInit: !!res.forceInitTables.length
             })
           }).then(() => {
             message.success("操作成功！");
