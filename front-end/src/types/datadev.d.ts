@@ -89,6 +89,7 @@ export interface Task {
   folderId: number;
   creator: string;
   language?: TaskTypes;
+  syncMode?: string;
 }
 
 export interface TaskVersion {
@@ -200,8 +201,9 @@ export interface DependenciesJob extends ConfiguredTaskListItem {
 export interface SqlSparkContent {
   jobId: number;
   jobType: TaskTypes;
-  sourceSql: string;
-  externalTables: string;
+  sourceSql?: string;
+  externalTables?: object;
+  extTables?: Array;
   id?: number;
   editable?: number;
   version?: number;
@@ -274,6 +276,7 @@ export interface DependenceTreeNode {
 }
 
 export interface UDF {
+  globalFun: any;
   commandFormat: string;
   sourceName?: string;
   description: string;

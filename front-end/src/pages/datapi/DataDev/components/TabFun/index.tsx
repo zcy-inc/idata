@@ -41,6 +41,7 @@ const TabUDF: FC<TabUDFProps> = ({ pane }) => {
       .validateFields()
       .then(() => {
         const values = form.getFieldsValue();
+        values.globalFun = Number(values.globalFun);
         delete values.upload;
         if (pane.id === -1) {
           createUDF(values)

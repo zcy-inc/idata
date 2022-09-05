@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useRequest } from 'ahooks';
 import type { DataSourceItem } from '@/types/datasource';
-import { getDataSourceList, getDataSourceTypes } from '@/services/datasource';
+import { getDataSourceList, getDataSourceTypesNew } from '@/services/datasource';
 import { DefaultOptionType } from 'antd/lib/select';
+import { DIJobType } from '@/constants/datadev';
 
 export type DSOption = DataSourceItem & DefaultOptionType;
 
 // 数据源类型 和 数据源名称列表
-const useDataSource = () => {
+const useDataSource = (basicInfo: {jobType?: string, syncMode?:string}) => {
   // 获取数据源类型列表
-  const { data: typeList = [] } = useRequest(() => getDataSourceTypes().then(({ data }) => data));
-  const typeOptions = typeList.map((type) => ({ label: type, value: type }));
+  const { jobType = DIJobType.BACK_FLOW, syncMode } = basicInfo || {};
+  const jobTypeParam = syncMode ? `DI_${syncMode}` : jobType;
+  const { data }  = useRequest(() => getDataSourceTypesNew(jobTypeParam).then(({ data }) => data));
+  const destOptions: Array<{ label: any; value: any; }> = data && data.destList && data.destList.map((type: any) => ({ label: type, value: type }));
+  const fromOptions: Array<{ label: any; value: any; }> = data && data.fromList && data.fromList.map((type: any) => ({ label: type, value: type }));
   const [sourceListMap, setSourceListMap] = useState<Record<string | number, DataSourceItem[]>>({});
+
   // 数据源名称列表
   const fetchSourceList = async (typeKey: string | number, type?: string) => {
     if (type) {
@@ -33,8 +38,8 @@ const useDataSource = () => {
   };
 
   return {
-    typeList,
-    typeOptions,
+    destOptions,
+    fromOptions,
     fetchSourceList,
     getSourceOptions,
   };

@@ -160,12 +160,14 @@ public class JobPublishManager {
 
     private Long createStreamJobInstance(JobPublishRecord publishRecord) {
         // 设置所有待运行实例状态为下线
-        List<StreamJobInstance> waitStartInstances = streamJobInstanceRepo.queryList(publishRecord.getJobId(), publishRecord.getEnvironment(), StreamJobInstanceStatusEnum.WAIT_START);
+        List<StreamJobInstance> waitStartInstances = streamJobInstanceRepo.queryList(publishRecord.getJobId(), publishRecord.getEnvironment(),
+                StreamJobInstanceStatusEnum.WAIT_START);
         if (CollectionUtils.isNotEmpty(waitStartInstances)) {
             List<Long> instanceIds = waitStartInstances.stream()
                     .map(StreamJobInstance::getId)
                     .collect(Collectors.toList());
-            streamJobInstanceRepo.updateStatus(instanceIds, StreamJobInstanceStatusEnum.DESTROYED, publishRecord.getCreator());
+            streamJobInstanceRepo.updateStatus(instanceIds, StreamJobInstanceStatusEnum.DESTROYED,
+                    StreamJobInstanceStatusEnum.WAIT_START.val, publishRecord.getCreator());
         }
 
         List<Integer> queryStatusList = StreamJobInstanceStatusEnum.getStartToStopStatusValList();

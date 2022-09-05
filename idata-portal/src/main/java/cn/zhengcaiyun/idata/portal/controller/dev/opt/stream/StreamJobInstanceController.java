@@ -21,9 +21,11 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
+import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
 import cn.zhengcaiyun.idata.develop.service.opt.stream.StreamJobInstanceService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,6 +59,9 @@ public class StreamJobInstanceController {
     @PostMapping("/page")
     public RestResult<Page<StreamJobInstanceDto>> pagingStreamJobInstance(@RequestBody StreamJobInstanceCondition condition) throws IllegalAccessException {
         // todo 加权限控制
+        if (CollectionUtils.isEmpty(condition.getStatusList())) {
+            condition.setStatusList(StreamJobInstanceStatusEnum.getNotDestroyedStatusValList());
+        }
         return RestResult.success(streamJobInstanceService.paging(condition));
     }
 

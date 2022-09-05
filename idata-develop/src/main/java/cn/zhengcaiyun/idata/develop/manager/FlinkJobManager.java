@@ -77,14 +77,12 @@ public class FlinkJobManager {
         }
     }
 
-    public String getFlinkAppUrl(ClusterAppDto appDto) {
+    public String getFlinkAppBaseUrl(ClusterAppDto appDto) {
         String trackingUrl = appDto.getTrackingUrl();
         if (StringUtils.isBlank(trackingUrl)) {
             return null;
         }
-
-        String flinkAppUrl = trackingUrl + "jobs/overview";
-        return flinkAppUrl;
+        return trackingUrl;
     }
 
     public List<FlinkJobInfoDto> fetchFlinkJobInfo(String flinkAppUrl) {

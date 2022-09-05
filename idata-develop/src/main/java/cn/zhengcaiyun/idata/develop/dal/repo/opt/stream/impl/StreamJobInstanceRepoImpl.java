@@ -119,18 +119,26 @@ public class StreamJobInstanceRepoImpl implements StreamJobInstanceRepo {
     }
 
     @Override
-    public Boolean updateStatus(List<Long> ids, StreamJobInstanceStatusEnum statusEnum, String operator) {
-        streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(statusEnum.val)
+    public Boolean updateStatus(List<Long> ids, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus, String operator) {
+        return streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(newStatusEnum.val)
                 .set(STREAM_JOB_INSTANCE.editor).equalTo(operator)
-                .where(STREAM_JOB_INSTANCE.id, isIn(ids)));
-        return Boolean.TRUE;
+                .where(STREAM_JOB_INSTANCE.id, isIn(ids),
+                        and(STREAM_JOB_INSTANCE.status, isEqualTo(oldStatus)))) > 0;
     }
 
     @Override
-    public Boolean updateStatus(Long id, StreamJobInstanceStatusEnum statusEnum) {
-        streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(statusEnum.val)
-                .where(STREAM_JOB_INSTANCE.id, isEqualTo(id)));
-        return Boolean.TRUE;
+    public Boolean updateStatus(Long id, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus, String operator) {
+        return streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(newStatusEnum.val)
+                .set(STREAM_JOB_INSTANCE.editor).equalTo(operator)
+                .where(STREAM_JOB_INSTANCE.id, isEqualTo(id),
+                        and(STREAM_JOB_INSTANCE.status, isEqualTo(oldStatus)))) > 0;
+    }
+
+    @Override
+    public Boolean updateStatus(Long id, StreamJobInstanceStatusEnum newStatusEnum, int oldStatus) {
+        return streamJobInstanceDao.update(dsl -> dsl.set(STREAM_JOB_INSTANCE.status).equalTo(newStatusEnum.val)
+                .where(STREAM_JOB_INSTANCE.id, isEqualTo(id),
+                        and(STREAM_JOB_INSTANCE.status, isEqualTo(oldStatus)))) > 0;
     }
 
     @Override

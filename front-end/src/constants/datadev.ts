@@ -216,6 +216,7 @@ export enum DataSourceType {
   POSTGRESQL = 'postgresql',
   PHOENIX = 'phoenix',
   DORIS = 'doris',
+  STARROCKS = 'starrocks',
   ELASTICSEARCH = 'elasticsearch',
 }
 

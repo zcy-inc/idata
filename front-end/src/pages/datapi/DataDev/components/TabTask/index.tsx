@@ -54,6 +54,7 @@ import IconPause from './components/IconPause';
 import { ModalForm } from '@ant-design/pro-form';
 import { DefaultOptionType } from 'antd/lib/select';
 import showDrawer from '@/utils/showDrawer';
+
 export interface TabTaskProps {
   pane: IPane;
 }
@@ -160,8 +161,9 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
       },
     },
   );
+  
   // 数据来源-数据源
-  const { typeOptions: dataSourceOptions, getSourceOptions, fetchSourceList } = useDataSource();
+  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobType: basicInfo?.jobType, syncMode: basicInfo?.syncMode});
   const getSrcDSOptions = (type: string) => fetchSourceList(DataSources.SRC, type);
   const getDestDSOptions = (type: string) => fetchSourceList(DataSources.DEST, type);
   const srcDSOptions = getSourceOptions(DataSources.SRC);
@@ -579,7 +581,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           size="large"
           style={{ maxWidth, minWidth }}
           placeholder="请选择"
-          options={dataSourceOptions}
+          options={fromOptions}
           showSearch
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
           onChange={() => form.resetFields(['srcDataSourceId', 'srcTables'])}
@@ -685,7 +687,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           size="large"
           style={{ maxWidth, minWidth }}
           placeholder="请选择"
-          options={dataSourceOptions}
+          options={destOptions}
           showSearch
           filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
           onChange={() => form.resetFields(['destDataSourceId'])}
@@ -750,6 +752,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         <MapInput style={{ maxWidth, minWidth }} />
       </Item>
     );
+    // TODO: luzhu导入写入模式
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
         <Fragment key="9">
@@ -785,7 +788,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
           {customParamsNode}
         </Fragment>,
       );
-    } else if ([DataSourceType.DORIS, DataSourceType.ELASTICSEARCH].includes(destDataSourceType)) {
+    } else if ([DataSourceType.STARROCKS, DataSourceType.ELASTICSEARCH].includes(destDataSourceType)) {
       items.push(
         <Fragment key="12">
           {destTableNode}
@@ -795,7 +798,7 @@ const TabTask: FC<TabTaskProps> = ({ pane }) => {
         </Fragment>,
       );
     }
-    if (basicInfo?.jobType === DIJobType.BACK_FLOW && destDataSourceType === DataSourceType.DORIS) {
+    if (basicInfo?.jobType === DIJobType.BACK_FLOW && destDataSourceType === DataSourceType.STARROCKS) {
       items.push(
         <Fragment key="13">
           <Item label="分区名称" name="destTablePt" key="13">

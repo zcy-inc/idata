@@ -30,9 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,14 +71,11 @@ public class StreamJobInstanceManager {
     public void updateJobInstanceStatusFromStarting(StreamJobInstance jobInstance, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>> flinkAppTuple) {
         LocalDateTime startTime = LocalDateTime.ofInstant(jobInstance.getEditTime().toInstant(), ZoneId.systemDefault());
         if (Objects.isNull(flinkAppTuple)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(60);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(90);
             if (startTime.isBefore(secondsBefore)) {
-                // 60秒后没有获取到 running yarn app，设置为失败状态
-                StreamJobInstance updateInstance = new StreamJobInstance();
-                updateInstance.setId(jobInstance.getId());
-                updateInstance.setStatus(StreamJobInstanceStatusEnum.FAILED.val);
-                updateInstance.setExternalUrl("");
-                streamJobInstanceRepo.update(updateInstance);
+                // 90秒后没有获取到 running yarn app，设置为失败状态
+                streamJobInstanceRepo.updateStatus(jobInstance.getId(), StreamJobInstanceStatusEnum.FAILED,
+                        jobInstance.getStatus());
             }
         } else {
             List<FlinkJobInfoDto> flinkJobInfoDtoList = flinkAppTuple._f3;
@@ -84,9 +83,12 @@ public class StreamJobInstanceManager {
             if (StreamJobInstanceStatusEnum.STARTING != flinkJobStatus) {
                 StreamJobInstance updateInstance = new StreamJobInstance();
                 updateInstance.setId(jobInstance.getId());
-                updateInstance.setStatus(flinkJobStatus.val);
                 updateInstance.setExternalUrl(StringUtils.defaultString(flinkAppTuple._f2));
+                if (StreamJobInstanceStatusEnum.RUNNING == flinkJobStatus) {
+                    updateInstance.setRunStartTime(parseJobStartTime(flinkAppTuple));
+                }
                 streamJobInstanceRepo.update(updateInstance);
+                streamJobInstanceRepo.updateStatus(jobInstance.getId(), flinkJobStatus, jobInstance.getStatus());
             }
         }
     }
@@ -94,33 +96,25 @@ public class StreamJobInstanceManager {
     public void updateJobInstanceStatusFromRunning(StreamJobInstance jobInstance, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>> flinkAppTuple) {
         LocalDateTime runningTime = LocalDateTime.ofInstant(jobInstance.getEditTime().toInstant(), ZoneId.systemDefault());
         if (Objects.isNull(flinkAppTuple)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(15);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(30);
             if (runningTime.isBefore(secondsBefore)) {
-                // 15秒后没有获取到 running yarn app，设置为失败状态
-                StreamJobInstance updateInstance = new StreamJobInstance();
-                updateInstance.setId(jobInstance.getId());
-                updateInstance.setStatus(StreamJobInstanceStatusEnum.FAILED.val);
-                updateInstance.setExternalUrl("");
-                streamJobInstanceRepo.update(updateInstance);
+                // 30秒后没有获取到 running yarn app，设置为失败状态
+                streamJobInstanceRepo.updateStatus(jobInstance.getId(), StreamJobInstanceStatusEnum.FAILED, jobInstance.getStatus());
             }
         } else {
             List<FlinkJobInfoDto> flinkJobInfoDtoList = flinkAppTuple._f3;
             StreamJobInstanceStatusEnum flinkJobStatus = parseStatusFromRunning(runningTime, flinkJobInfoDtoList);
             if (StreamJobInstanceStatusEnum.RUNNING != flinkJobStatus) {
-                StreamJobInstance updateInstance = new StreamJobInstance();
-                updateInstance.setId(jobInstance.getId());
-                updateInstance.setStatus(flinkJobStatus.val);
-                updateInstance.setExternalUrl(StringUtils.defaultString(flinkAppTuple._f2));
-                streamJobInstanceRepo.update(updateInstance);
+                streamJobInstanceRepo.updateStatus(jobInstance.getId(), flinkJobStatus, jobInstance.getStatus());
             }
         }
     }
 
     public StreamJobInstanceStatusEnum parseStatusFromStarting(LocalDateTime startTime, List<FlinkJobInfoDto> flinkJobInfoDtoList) {
         if (CollectionUtils.isEmpty(flinkJobInfoDtoList)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(60);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(90);
             if (startTime.isBefore(secondsBefore)) {
-                // 60秒后没有获取到 flink job，设置为失败状态
+                // 90秒后没有获取到 flink job，设置为失败状态
                 return StreamJobInstanceStatusEnum.FAILED;
             } else {
                 return StreamJobInstanceStatusEnum.STARTING;
@@ -155,9 +149,9 @@ public class StreamJobInstanceManager {
 
     public StreamJobInstanceStatusEnum parseStatusFromRunning(LocalDateTime runningTime, List<FlinkJobInfoDto> flinkJobInfoDtoList) {
         if (CollectionUtils.isEmpty(flinkJobInfoDtoList)) {
-            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(15);
+            LocalDateTime secondsBefore = LocalDateTime.now().minusSeconds(30);
             if (runningTime.isBefore(secondsBefore)) {
-                // 15秒后没有获取到 flink job，设置为失败状态
+                // 30秒后没有获取到 flink job，设置为失败状态
                 return StreamJobInstanceStatusEnum.FAILED;
             } else {
                 return StreamJobInstanceStatusEnum.RUNNING;
@@ -194,12 +188,32 @@ public class StreamJobInstanceManager {
          * Suspended
          */
         String state = flinkJobInfoDto.getState();
-        if ("Created".equals(state)) {
+        if ("created".equalsIgnoreCase(state)) {
             return StreamJobInstanceStatusEnum.STARTING;
-        } else if ("Running".equals(state) || "Finished".equals(state)) {
+        } else if ("Running".equalsIgnoreCase(state) || "Finished".equalsIgnoreCase(state)) {
             return StreamJobInstanceStatusEnum.RUNNING;
         } else {
             return StreamJobInstanceStatusEnum.FAILED;
         }
+    }
+
+    private Date parseJobStartTime(Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>> flinkAppTuple) {
+        if (Objects.isNull(flinkAppTuple)) return null;
+
+        List<FlinkJobInfoDto> jobInfoDtoList = flinkAppTuple._f3;
+        if (CollectionUtils.isEmpty(jobInfoDtoList)) return null;
+
+        Date startTime = null;
+        for (FlinkJobInfoDto jobInfoDto : jobInfoDtoList) {
+            Long startTimestamp = jobInfoDto.getStartTime();
+            if (Objects.nonNull(startTimestamp)) {
+                try {
+                    startTime = Date.from(Instant.ofEpochMilli(startTimestamp));
+                } catch (Exception ex) {
+                }
+            }
+            if (Objects.nonNull(startTime)) break;
+        }
+        return startTime;
     }
 }

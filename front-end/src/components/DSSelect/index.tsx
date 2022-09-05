@@ -91,6 +91,8 @@ export interface DataSourceSelectProps {
   onChange?: (value: ItemValue[]) => void;
   fetchTemplate?: (value: ItemValue[]) => Promise<string>;
   quantityCustom?: boolean;
+  jobType: string;
+  isDest: boolean;
 }
 
 const DataSourceSelect: FC<DataSourceSelectProps> = ({
@@ -98,6 +100,8 @@ const DataSourceSelect: FC<DataSourceSelectProps> = ({
   onChange,
   quantityCustom,
   fetchTemplate,
+  jobType,
+  isDest,
 }) => {
   const [innerValue, setInnerValue] = useState<ItemValue[]>([]);
 
@@ -108,8 +112,8 @@ const DataSourceSelect: FC<DataSourceSelectProps> = ({
       setInnerValue(value);
     }
   }, [value]);
-
-  const { typeOptions, fetchSourceList, getSourceOptions } = useDataSource();
+  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobType});
+  const typeOptions = isDest ? destOptions : fromOptions;
   const handleTypeChange = (index: number) => (type?: string) => {
     fetchSourceList(index, type);
   };

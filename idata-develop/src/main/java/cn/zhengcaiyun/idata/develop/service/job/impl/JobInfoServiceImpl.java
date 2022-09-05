@@ -863,7 +863,17 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         // 设置checkpoint
         List<StreamJobFlinkInfo> flinkInfoList = streamJobFlinkInfoRepo.queryList(jobId, env, null);
-        if (CollectionUtils.isEmpty(flinkInfoList)) {
+        List<StreamJobInstance> jobInstances = streamJobInstanceRepo.queryList(jobId, env, StreamJobInstanceStatusEnum.STARTING);
+        checkArgument(!CollectionUtils.isEmpty(jobInstances), "作业不存在已启动的实例");
+        String runParams = jobInstances.get(0).getRunParams();
+        boolean forceInit = false;
+        if (StringUtils.isNotBlank(runParams)) {
+            StreamJobRunParamDto streamJobRunParamDto = new Gson().fromJson(runParams, StreamJobRunParamDto.class);
+            if (BooleanUtils.isTrue(streamJobRunParamDto.getForceInit())) {
+                forceInit = true;
+            }
+        }
+        if (forceInit || CollectionUtils.isEmpty(flinkInfoList)) {
             flinkSqlResponse.setStartFromSavePoint(Boolean.FALSE);
             flinkSqlResponse.setFlinkJobId("");
         } else {
@@ -939,17 +949,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         List<StreamJobFlinkInfo> flinkInfoList = streamJobFlinkInfoRepo.queryList(jobId, env, null);
         List<StreamJobInstance> jobInstances = streamJobInstanceRepo.queryList(jobId, env, StreamJobInstanceStatusEnum.STARTING);
-        checkArgument(!CollectionUtils.isEmpty(jobInstances), "作业运行实例不存在");
+        checkArgument(!CollectionUtils.isEmpty(jobInstances), "作业不存在已启动的实例");
         String runParams = jobInstances.get(0).getRunParams();
         StreamJobRunParamDto streamJobRunParamDto;
-        List<String> forceInitTables = null;
-        if (StringUtils.isNotBlank(runParams)) {
-            streamJobRunParamDto = new Gson().fromJson(runParams, StreamJobRunParamDto.class);
-            if (BooleanUtils.isTrue(streamJobRunParamDto.getForceInit())) {
-                forceInitTables = streamJobRunParamDto.getInitDITables();
-            }
-        }
-        List<String> finalForceInitTables = forceInitTables == null ? new ArrayList<>() : forceInitTables;
 
         List<JobInfoExecuteDetailDto.FlinkCDCJobDetailDto.CDCTableConfig> srcTableConfigs = new ArrayList<>();
         /**
@@ -960,6 +962,15 @@ public class JobInfoServiceImpl implements JobInfoService {
                 || DataSourceTypeEnum.postgresql.name().equals(jobContent.getSrcDataSourceType()))
                 && DataSourceTypeEnum.starrocks.name().equals(jobContent.getDestDataSourceType())) {
             cdcJobDetailDto.setDestType("StarRocks");
+            List<String> forceInitTables = null;
+            if (StringUtils.isNotBlank(runParams)) {
+                streamJobRunParamDto = new Gson().fromJson(runParams, StreamJobRunParamDto.class);
+                if (BooleanUtils.isTrue(streamJobRunParamDto.getForceInit())) {
+                    forceInitTables = streamJobRunParamDto.getInitDITables();
+                }
+            }
+            List<String> finalForceInitTables = forceInitTables == null ? new ArrayList<>() : forceInitTables;
+
             Map<String, String> tableFlinkIdMap = new HashMap<>();
             if (!CollectionUtils.isEmpty(flinkInfoList)) {
                 flinkInfoList.stream().forEach(flinkInfo -> {
@@ -1005,13 +1016,20 @@ public class JobInfoServiceImpl implements JobInfoService {
                 || DataSourceTypeEnum.postgresql.name().equals(jobContent.getSrcDataSourceType()))
                 && DataSourceTypeEnum.kafka.name().equals(jobContent.getDestDataSourceType())) {
             cdcJobDetailDto.setDestType("Kafka");
+            boolean forceInit = false;
+            if (StringUtils.isNotBlank(runParams)) {
+                streamJobRunParamDto = new Gson().fromJson(runParams, StreamJobRunParamDto.class);
+                if (BooleanUtils.isTrue(streamJobRunParamDto.getForceInit())) {
+                    forceInit = true;
+                }
+            }
             String flinkJobId = null;
             if (!CollectionUtils.isEmpty(flinkInfoList)) {
                 flinkJobId = flinkInfoList.get(0).getFlinkJobId();
             }
 
             JobInfoExecuteDetailDto.FlinkCDCJobDetailDto.CDCTableConfig cdcTableConfig = new JobInfoExecuteDetailDto.FlinkCDCJobDetailDto.CDCTableConfig();
-            if (StringUtils.isNotBlank(flinkJobId)) {
+            if (!forceInit && StringUtils.isNotBlank(flinkJobId)) {
                 cdcTableConfig.setInitDestTable(false);
                 cdcTableConfig.setStartFromSavePoint(true);
                 cdcTableConfig.setFlinkJobId(flinkJobId);

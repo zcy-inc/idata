@@ -73,7 +73,6 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
   }
 
   const srcItemRules = (value: any, rowIndex: number) => {
-    debugger;
     if(!value) {
       return Promise.reject();
     } else if(value.inputMode === 'E' && (!value.rawTable || !value.tableIdxBegin || !value.tableIdxEnd)) {

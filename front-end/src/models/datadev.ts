@@ -64,10 +64,10 @@ export default () => {
    * V1.8 新增DI/作业直接打开编辑器和树 一帧
    * cid = record+belong+id
    */
-    const onSelectNewTab =  (belong:FolderBelong,data: Task) => {
+    const onSelectNewTab =  (belong:FolderBelong,concreteBelong: string, data: Task) => {
       const cid:string = `${FolderTypes.RECORD}_${belong}_${data.id}`
-      onViewTree({...data, belong, cid} as unknown as TreeNode);
-      setSelectedKeys([cid])
+      onViewTree({...data, belong, cid, concreteBelong} as unknown as TreeNode);
+      setSelectedKeys([cid]);
     }
 
   /**

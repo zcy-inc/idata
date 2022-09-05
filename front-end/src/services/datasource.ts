@@ -12,6 +12,19 @@ export async function getDataSourceTypes() {
   });
 }
 
+export async function getDataSourceTypesNew(jobType: string) {
+  return request<DefaultResponse & { data: {
+    destList?: Array<string>,
+    fromList?: Array<string>,
+    externalList?: Array<string>,
+  } }>('/api/p1/dev/jobs/meta/datasource-type', {
+    method: 'GET',
+    params: {
+      jobType
+    }
+  });
+}
+
 /**
  * 获取新数据源类型
  */
@@ -43,6 +56,7 @@ export async function deleteDataSource(params: { id: number }) {
  */
 export async function getDataSourceList(params: {
   type?: string;
+  types?: string;
   name?: string;
   env?: Environments;
   limit: number;

@@ -125,7 +125,8 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         Optional<StreamJobInstance> instanceOptional = streamJobInstanceRepo.query(id);
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
-        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == jobInstance.getStatus(), "运行实例状态不是待启动状态，不能启动");
+        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == jobInstance.getStatus()
+                || StreamJobInstanceStatusEnum.STOPPED.val == jobInstance.getStatus(), "运行实例状态不是待启动或已停止状态，不能启动");
 
         Long jobId = jobInstance.getJobId();
         Integer version = jobInstance.getJobContentVersion();
@@ -139,7 +140,7 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
                     .map(StreamJobInstance::getId)
                     .filter(tempId -> !tempId.equals(id))
                     .collect(Collectors.toSet());
-            checkState(afterStartInstanceIds.size() > 0, "作业存在已启动或已停止实例，先下线该实例再启动");
+            checkState(afterStartInstanceIds.size() == 0, "作业存在已启动或已停止实例，先下线该实例再启动");
         }
 
         List<ClusterAppDto> existAppDtoList = flinkJobManager.fetchFlinkApp(jobId, env);
@@ -152,9 +153,11 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
             streamJobInstanceRepo.updateRunParam(id, new Gson().toJson(runParamDto), operator.getNickname());
         }
         // 更新作业状态，若状态更新后，启动失败，可以先操作停止作业，再重新启动
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.STARTING, operator.getNickname());
-        // 启动作业
-        jobScheduleManager.runJob(jobId, env, false);
+        boolean statusChanged = streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.STARTING, jobInstance.getStatus(), operator.getNickname());
+        if (statusChanged) {
+            // 启动作业
+            jobScheduleManager.runJob(jobId, env, false);
+        }
         return Boolean.TRUE;
     }
 
@@ -167,12 +170,13 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         Long jobId = jobInstance.getJobId();
         String env = jobInstance.getEnvironment();
         Integer status = jobInstance.getStatus();
-        checkArgument(StreamJobInstanceStatusEnum.STOPPED.val != status, "作业已停止");
-        checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val != status
-                        && StreamJobInstanceStatusEnum.DESTROYED.val != status,
-                "待启动或已下线实例不需要停止");
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.STOPPED, operator.getNickname());
-        flinkJobManager.stopFlinkApp(jobId, env);
+        checkArgument(StreamJobInstanceStatusEnum.RUNNING.val == status
+                        || StreamJobInstanceStatusEnum.FAILED.val == status,
+                "运行中和已失败的实例可以停止");
+        boolean statusChanged = streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.STOPPED, jobInstance.getStatus(), operator.getNickname());
+        if (statusChanged) {
+            flinkJobManager.stopFlinkApp(jobId, env);
+        }
         return Boolean.TRUE;
     }
 
@@ -183,11 +187,10 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
         Integer status = jobInstance.getStatus();
-        checkArgument(StreamJobInstanceStatusEnum.DESTROYED.val != status, "作业已下线");
         checkArgument(StreamJobInstanceStatusEnum.WAIT_START.val == status
                         || StreamJobInstanceStatusEnum.STOPPED.val == status,
                 "待启动或已停止实例可以操作下线");
-        streamJobInstanceRepo.updateStatus(Lists.newArrayList(id), StreamJobInstanceStatusEnum.DESTROYED, operator.getNickname());
+        streamJobInstanceRepo.updateStatus(id, StreamJobInstanceStatusEnum.DESTROYED, jobInstance.getStatus(), operator.getNickname());
         return Boolean.TRUE;
     }
 

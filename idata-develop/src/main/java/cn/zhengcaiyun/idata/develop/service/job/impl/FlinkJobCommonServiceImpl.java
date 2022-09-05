@@ -78,17 +78,21 @@ public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
         Map<Long, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>>> flinkAppMap = Maps.newHashMap();
         for (ClusterAppDto appDto : clusterAppDtoList) {
             List<FlinkJobInfoDto> flinkJobInfoDtoList = null;
-            String flinkAppUrl = flinkJobManager.getFlinkAppUrl(appDto);
-            if (StringUtils.isNotBlank(flinkAppUrl)) {
+            String flinkAppBaseUrl = flinkJobManager.getFlinkAppBaseUrl(appDto);
+            String flinkWebUrl = null;
+            String flinkApiUrl;
+            if (StringUtils.isNotBlank(flinkAppBaseUrl)) {
                 try {
+                    flinkApiUrl = flinkAppBaseUrl + "jobs/overview";
+                    flinkWebUrl = flinkAppBaseUrl + "#/overview";
                     // 获取 flink job 信息
-                    flinkJobInfoDtoList = flinkJobManager.fetchFlinkJobInfo(flinkAppUrl);
+                    flinkJobInfoDtoList = flinkJobManager.fetchFlinkJobInfo(flinkApiUrl);
                 } catch (Exception ex) {
                     LOGGER.warn("Fetch flink job info exception. ClusterAppDto: {}, ex: {}", appDto, Throwables.getStackTraceAsString(ex));
                 }
             }
 
-            flinkAppMap.put(appDto.getJobId(), new Tuple3<>(appDto, flinkAppUrl, flinkJobInfoDtoList));
+            flinkAppMap.put(appDto.getJobId(), new Tuple3<>(appDto, StringUtils.defaultString(flinkWebUrl), flinkJobInfoDtoList));
         }
 
         // 更新运行实例信息

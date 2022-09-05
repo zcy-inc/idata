@@ -190,6 +190,7 @@ export interface StreamListItem {
   jobId: number;
   jobName: string;
   status: number;
+  jobContentVersion: number;
   jobContentVersionDisplay: string;
   environment: string;
   owner: string;
