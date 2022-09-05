@@ -81,8 +81,6 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
       return Promise.reject(' ');
     } else  {
       const exist = data.find((item: any, index: number) => {
-        console.log(item.srcTable.rawTable);
-        console.log(value.rawTable);
         return item.srcTable.rawTable === value.rawTable && rowIndex !== index
       });
       return exist ? Promise.reject(' ') : Promise.resolve();
@@ -99,7 +97,7 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
         srcDataSourceId,
         destDataSourceType,
         enableSharding: enableSharding ? 1 : 0,
-        srcTables: inputMode === "E" ? `${rawTable}_${tableIdxBegin}_${tableIdxEnd}` : rawTable
+        srcTables: inputMode === "E" ? `${rawTable}[${tableIdxBegin}-${tableIdxEnd}]` : rawTable
       }).then(data => data[0]);
       onChange([
         ...data.slice(0, rowIndex),
