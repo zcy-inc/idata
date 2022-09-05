@@ -322,7 +322,7 @@ export async function stopJob(data: {
 export async function destoryJob(data: {
   id: number;
 }) {
-  return request(`/api/p1/opt/stream/instances/${data.id}/destory`, {
+  return request(`/api/p1/opt/stream/instances/${data.id}/destroy`, {
     method: 'POST'
   });
 }

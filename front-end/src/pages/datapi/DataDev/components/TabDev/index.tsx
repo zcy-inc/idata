@@ -27,6 +27,7 @@ import {
   submitTask,
   tyrRun,
   getTyrRunLog,
+  cancelQuery
 } from '@/services/datadev';
 import { IconFont } from '@/components';
 import DrawerBasic from './components/DrawerBasic';
@@ -79,6 +80,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [isDebuging, setIsDebuging] = useState(false);
+  const [enableStop, setEnableStop] = useState(false);
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -321,8 +323,14 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }) => {
-    runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
+  }, isStop = !enableStop) => {
+    if(!isStop) {
+      cancelQuery({sessionId,statementId}).then(() => {
+        message.success('已停止调试');
+        setIsDebuging(false);
+      })
+    } else {
+      runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
       .then((res) => {
         if (
           res.data.statementState !== StatementState.AVAILABLE &&
@@ -337,11 +345,14 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           }, 2000);
         } else {
           setIsDebuging(false);
+          setEnableStop(false)
           const logs = get(res, 'data.pythonResults', '');
           setLog([logs]);
         }
       })
       .catch((err) => {});
+    }
+ 
   };
 
   // 轮询 spark 调试结果
@@ -351,50 +362,56 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }) => {
-    runQueryResult({
-      sessionId,
-      sessionKind: 'spark',
-      statementId,
-      from: pollingFrom.current,
-      size: 10,
-    })
-      .then((res) => {
-        if (
-          res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED &&
-          isDebuging
-        ) {
-          pollingFrom.current = pollingFrom.current + 10;
-          const logs = get(res, 'data.queryRunLog.log', []);
-          setLog((pre) => [...pre, ...logs]);
-          setTimeout(() => {
-            fetchSparkQueryResult({
-              sessionId,
-              statementId,
-            });
-          }, 2000);
-        } else {
-          setIsDebuging(false);
-          pollingFrom.current = 0;
-          const result = res.data.resultSet;
-          const resultHeader = res.data.resultHeader || [];
-          setResults((pre) => [...pre, result]);
-          setResultHeader((pre) => [...pre, resultHeader]);
-        }
+  }, isStop = !enableStop) => {
+    if(!isStop) {
+      cancelQuery({sessionId,statementId}).then(() => {
+        message.success('已停止调试');
+        setIsDebuging(false);
       })
-      .catch((err) => {});
+    } else {
+      runQueryResult({
+        sessionId,
+        sessionKind: 'spark',
+        statementId,
+        from: pollingFrom.current,
+        size: 10,
+      })
+        .then((res) => {
+          if (
+            res.data.statementState !== StatementState.AVAILABLE &&
+            res.data.statementState !== StatementState.CANCELED &&
+            isDebuging
+          ) {
+            pollingFrom.current = pollingFrom.current + 10;
+            const logs = get(res, 'data.queryRunLog.log', []);
+            setLog((pre) => [...pre, ...logs]);
+            setTimeout(() => {
+              fetchSparkQueryResult({
+                sessionId,
+                statementId,
+              });
+            }, 2000);
+          } else {
+            setIsDebuging(false);
+            setEnableStop(false);
+            pollingFrom.current = 0;
+            const result = res.data.resultSet;
+            const resultHeader = res.data.resultHeader || [];
+            setResults((pre) => [...pre, result]);
+            setResultHeader((pre) => [...pre, resultHeader]);
+          }
+        })
+        .catch((err) => {});
+    }
+  
   };
 
   /**
    * 调试选中代码段
    */
   const onDebug = async () => {
-    if(isDebuging) {
-      setIsDebuging(false);
-      setTimeout(() => {
-        message.success('已停止调试！')
-      }, 2000)
+    if(enableStop) {
+     setEnableStop(false);
     } else {
       setIsDebuging(true);
       const value = getDebugCode();
@@ -405,13 +422,15 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       switch (task?.jobType) {
         case TaskTypes.SQL_SPARK: {
           const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
-          fetchSparkQueryResult(data);
+          setEnableStop(true);
+          fetchSparkQueryResult(data, true);
           break;
         }
         case TaskTypes.SPARK_PYTHON:
         case TaskTypes.SCRIPT_PYTHON: {
           const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
-          fetchPysparkQueryResult(data);
+          setEnableStop(true);
+          fetchPysparkQueryResult(data, true);
           break;
         }
       }
@@ -454,9 +473,10 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DEBUG,
-      <Tooltip title={`${isDebuging ? '停止': '开始'}调试`} key="8">
+      <Tooltip title={`${enableStop ? '停止': '开始'}调试`} key="8">
         <Button
           className={styles.btn}
+          loading={isDebuging && !enableStop}
           icon={<IconFont type="icon-tiaoshi" />}
           onClick={onDebug}
         />
