@@ -29,7 +29,7 @@ GET http://localhost:8080/api/p0/job/execute-detail?env=prod&jobId=3107
 Accept: application/json
 
 ###
-GET http://idata-staging.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=2549
+GET http://idata.cai-inc.com/api/p0/job/execute-detail?env=prod&jobId=3401
 Accept: application/json
 
 ###

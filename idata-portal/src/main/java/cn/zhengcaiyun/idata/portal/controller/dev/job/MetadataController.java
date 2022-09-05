@@ -109,6 +109,9 @@ public class MetadataController {
                 break;
             case SQL_SPARK:
                 response.setExternalList(Arrays.asList(new String[]{DataSourceTypeEnum.starrocks.name()}));
+                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.hive.name(), DataSourceTypeEnum.presto.name(),
+                        DataSourceTypeEnum.kylin.name(), DataSourceTypeEnum.phoenix.name(), DataSourceTypeEnum.elasticsearch.name(), DataSourceTypeEnum.mssql.name(), DataSourceTypeEnum.kafka.name(),
+                        DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.csv.name(), }));
                 break;
             case SQL_FLINK:
                 response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()}));
