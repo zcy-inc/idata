@@ -48,33 +48,17 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   }, []);
 
   useEffect(() => {
-    // TODO:luzhu 新增外部表 回显
     if (content) {
-      // const contentNew = {
-      //   udfIds: "7,8,9",
-      //   extTables: {
-      //     dataSourceId: {
-      //       key: 364,
-      //     },
-      //     dataSourceType: 'starrocks',
-      //     tables: [
-      //       {
-      //         tableName: 'db.ert',
-      //         tableAlias: 'starrocks_db_ert'
-      //       }
-      //     ],
-      //   }
-      // };
       form.setFieldsValue(content);
       if (task.jobType === TaskTypes.SQL_SPARK) {
         getDataSourceTypesNew(task.jobType).then((res) => {
           setExternalList(res.data && res.data.externalList as never[]);
         });
-        const { extTables } =  content;
-        const { dataSourceType, dataSourceId = {}, tables = [] } = extTables || {};
+        const { extTables = [{}] } =  content;
+        const { dataSourceType, dataSourceId = {}, tables = [] } = extTables[0];
         form.setFieldsValue({
           srcDataSourceType: dataSourceType,
-          srcDataSourceId: dataSourceId.key,
+          srcDataSourceId: dataSourceId.key, // TODO:luzhu 新增外部表 回显tableName
           srcTableNamse: tables.map((table: { tableName: any;tableAlias:any }) => ({
             name: table.tableName,
             alias: table.tableAlias

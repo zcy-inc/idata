@@ -81,11 +81,9 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
 
       const { syncMode, jobType } = data as Task;
       const jobTypeParam = syncMode ? `DI_${syncMode}` : jobType;
-      debugger;
       getDataSourceTypesNew(jobTypeParam).then((res) => {
-        // TODO:luzhu 有的没有destList怎么办，用externalList？已有接口参数是type啊而不是types
-        const destList = res?.data?.destList || res?.data?.externalList || [];
-        getDataSourceList({ limit: 999, offset: 0, type: destList.join(',') })
+        const destList = res?.data?.destList || [];
+        getDataSourceList({ limit: 999, offset: 0, types: destList.join(',') })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
       });

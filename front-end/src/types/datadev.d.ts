@@ -203,7 +203,7 @@ export interface SqlSparkContent {
   jobType: TaskTypes;
   sourceSql?: string;
   externalTables?: object;
-  extTables?: object;
+  extTables?: Array;
   id?: number;
   editable?: number;
   version?: number;

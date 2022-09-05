@@ -56,6 +56,7 @@ export async function deleteDataSource(params: { id: number }) {
  */
 export async function getDataSourceList(params: {
   type?: string;
+  types?: string;
   name?: string;
   env?: Environments;
   limit: number;
