@@ -80,10 +80,7 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
     } else if(value.inputMode === 'S' && !value.rawTable) {
       return Promise.reject(' ');
     } else  {
-      const exist = data.find((item: any, index: number) => {
-        return item.srcTable.rawTable === value.rawTable && rowIndex !== index
-      });
-      return exist ? Promise.reject(' ') : Promise.resolve();
+      return Promise.resolve();
     }
   }
 

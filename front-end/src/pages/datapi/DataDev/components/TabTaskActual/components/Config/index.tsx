@@ -133,11 +133,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ data, isStream = false }, ref) =>
       schRerunMode: 'always',
       execWarnLevel: 'ALARM_LEVEL_MEDIUM:ENUM_VALUE',
       schPriority: 2,
-      execEngine: 'SQOOP',
+      execEngine: undefined,
       execDriverMem: 3,
       execWorkerMem: 4,
       execCores: defaultExecCores,
-      execQueue: '',
+      execQueue: undefined,
     },
   };
 

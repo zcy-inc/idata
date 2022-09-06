@@ -192,7 +192,7 @@ const TabTaskActualContent: ForwardRefRenderFunction<any, ContentProps> = ({ bas
   const handleFormValuesChange = async (values: any, allValues: Record<string, any>) => {
     if(values.enableSharding === false || values.enableSharding || values.srcDataSourceId || values.srcDataSourceType) {
       // 针对table重新赋值
-      if(values.enableSharding) { // 开关提示
+      if(values.enableSharding || values.enableSharding === false) { // 开关提示
         await Modal.confirm({
           title: '切换后将丢失现在的表配置信息，请确认切换？',
           onOk(){
@@ -202,7 +202,7 @@ const TabTaskActualContent: ForwardRefRenderFunction<any, ContentProps> = ({ bas
             form.setFieldsValue(newJobContent);
           },
           onCancel(){
-            allValues.enableSharding = false;
+            allValues.enableSharding = !allValues.enableSharding;
             const newJobContent = Object.assign({}, jobContent, allValues)
             setJobContent(newJobContent);
             form.setFieldsValue(newJobContent);
