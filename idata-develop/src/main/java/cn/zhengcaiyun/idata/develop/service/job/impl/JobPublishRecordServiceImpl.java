@@ -162,7 +162,7 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     @Override
     public boolean delete(Long id) {
         JobPublishRecord jobPublishRecord = jobPublishRecordRepo.query(id).get();
-        checkArgument(jobPublishRecord.getPublishStatus() == PublishStatusEnum.PUBLISHED.val, "禁止删除已发布版本");
+        checkArgument(jobPublishRecord.getPublishStatus() != PublishStatusEnum.PUBLISHED.val, "禁止删除已发布版本");
         jobPublishRecord.setDel(WhetherEnum.YES.val);
         return jobPublishRecordRepo.update(jobPublishRecord);
     }
