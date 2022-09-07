@@ -175,10 +175,10 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         case TaskTypes.SQL_SPARK:
           const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds } = values;
           const param = {
-            extTables: [{
+            extTables: srcDataSourceType && [{
               dataSourceType: srcDataSourceType,
               dataSourceId: srcDataSourceId,
-              tables: srcTableNamse.map((table: { name: any; }) => ({
+              tables: srcTableNamse && srcTableNamse.map((table: { name: any; }) => ({
                 tableName: table.name,
                 tableAlias: transformAlias(srcDataSourceType, table.name),
               }))

@@ -104,16 +104,15 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   const saveDevSetting = () => {
     const values = form.getFieldsValue();
     const {srcDataSourceId, srcDataSourceType, srcTableNamse} = values;
-    if (srcDataSourceType) {
-      if (!srcDataSourceId) {
-        message.error('请选择数据源名称');
-        return;
-      } else {
-        if (!srcTableNamse) {
-          message.error('请输入表名');
-          return;
-        }
-      }
+    if (!srcDataSourceId) {
+      message.error('请选择数据源名称');
+      return;
+    } else if (!srcDataSourceType) {
+      message.error('请选择数据源名称');
+      return;
+    } else if (!srcTableNamse.length) {
+      message.error('请输入表名');
+      return;
     }
     onCancel();
   };
@@ -176,6 +175,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                 placeholder="请选择数据源类型"
                 options={externalList.map(value => ({value, label: value}))}
                 showSearch
+                allowClear={true}
                 filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
                 onChange={onDataSourceChange}
               />
@@ -187,6 +187,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                 placeholder="请选择"
                 options={srcDSOptions}
                 showSearch
+                allowClear={true}
                 filterOption={(v: string, option: any) => option.label.indexOf(v) >= 0}
               />
             </Item>
