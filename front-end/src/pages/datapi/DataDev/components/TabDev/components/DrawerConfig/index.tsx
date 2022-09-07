@@ -60,6 +60,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
   const [execEngineOptions, setExecEngineOptions] = useState<{ label: string; value: string }[]>([]);
   const [destWriteMode, setDestWriteMode] = useState('');
+  const [openMergeFilechecked, setOpenMergeFilechecked] = useState<boolean>(false);
 
   const [stagForm] = Form.useForm();
   const [prodForm] = Form.useForm();
@@ -108,7 +109,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           executeConfig.schDryRun = [];
         }
-
+        // 合并最小文件
+        if(data?.jobType === TaskTypes.SQL_SPARK){
+          executeConfig.isOpenMergeFile = !!executeConfig.isOpenMergeFile
+          setOpenMergeFilechecked(executeConfig.isOpenMergeFile)
+        }
         setDestWriteMode(output.destWriteMode || 'OVERWRITE');
         // 赋值调度配置
         if (environment === Environments.STAG) {
@@ -117,6 +122,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         if (environment === Environments.PROD) {
           prodForm.setFieldsValue({ ...executeConfig, ...output, dependencies });
         }
+
       })
       .catch((err) => {});
 
@@ -124,6 +130,8 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     getDAGList({ environment, jobType: (data as Task).jobType })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
+
+  const onOpenMergeFileChange = (checked: boolean) => setOpenMergeFilechecked(checked);
 
   const onSave = (environment: Environments) => {
     let values: any = {};
@@ -143,6 +151,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     // 处理超时时间
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
+    }
+    // 合并最小文件
+    if(data?.jobType === TaskTypes.SQL_SPARK){
+      values.isOpenMergeFile = +values.isOpenMergeFile
     }
 
     const destDataSourceId = values.destDataSourceId;
@@ -353,7 +365,7 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                 <MapInput style={{ width }} />
               </Item>
               {data?.jobType === TaskTypes.SQL_SPARK && (<Item name="isOpenMergeFile" label="合并小文件">
-                <Switch/>
+                <Switch checked={openMergeFilechecked} onChange={onOpenMergeFileChange}/>
               </Item>)}
               <Title>依赖配置</Title>
               <DependenciesFormItem
