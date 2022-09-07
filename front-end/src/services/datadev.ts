@@ -889,6 +889,26 @@ export async function runQuery(data: {
 }
 
 /**
+ * 停止调试
+ */
+ export async function cancelQuery(data: {
+  sessionId: number;
+  statementId: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        sessionId: number;
+        statementId: number;
+      };
+    }
+  >('/api/p1/dev/jobs/cancelQuery', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
  * 查询结果runQueryResult
  */
 export async function runQueryResult(params: {

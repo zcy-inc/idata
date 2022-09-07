@@ -301,6 +301,7 @@ export async function getStreamJobs(data: {
 export async function startJob(data: {
   id: number;
   initDITables: string[];
+  forceInit: boolean;
 }) {
   const {id , ...rest} = data;
   return request(`/api/p1/opt/stream/instances/${id}/start`, {
@@ -322,7 +323,7 @@ export async function stopJob(data: {
 export async function destoryJob(data: {
   id: number;
 }) {
-  return request(`/api/p1/opt/stream/instances/${data.id}/destory`, {
+  return request(`/api/p1/opt/stream/instances/${data.id}/destroy`, {
     method: 'POST'
   });
 }

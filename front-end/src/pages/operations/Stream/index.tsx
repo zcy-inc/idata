@@ -50,7 +50,8 @@ const Stream: FC<{}> = ({}) => {
           formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
             return startJob({
               id: row.id,
-              initDITables: res.forceInitTables
+              initDITables: res.forceInitTables,
+              forceInit: !!res.forceInitTables?.length
             })
           }).then(() => {
             message.success("操作成功！");
@@ -140,10 +141,10 @@ const Stream: FC<{}> = ({}) => {
             {[2, 7].includes(text) ?
               <Popconfirm
                 title="你确定要停止该任务吗？"
-                onConfirm={() => offLine(row)}
+                onConfirm={() => toggleState(row, true)}
                 disabled={text === 1}
               >
-                <Button type="link" disabled={text === 1} onClick={() => toggleState(row, true)}>
+                <Button type="link" disabled={text === 1}>
                   停止
                 </Button>
               </Popconfirm>
@@ -151,15 +152,16 @@ const Stream: FC<{}> = ({}) => {
               <Button type="link" disabled={text === 1} onClick={() => toggleState(row, false)}>
                 启动
               </Button>}
-            <Popconfirm
-              title={<div>如果任务为运行中，<span style={{color:'red'}}>下线将自动停止任务</span>。你确定要下线该任务吗？</div>}
-              onConfirm={() => offLine(row)}
-              disabled={[1, 2, 7].includes(text)}
-            >
-              <Button type="link" disabled={[1, 2, 7].includes(text)}>
+              <Popconfirm
+                title="再次上线，需要重新提交审批。你确定要下线该任务吗？"
+                onConfirm={() => offLine(row)}
+                disabled={[1, 2, 7].includes(text)}
+              >
+                 <Button type="link" disabled={[1, 2, 7].includes(text)}>
                 下线
               </Button>
-            </Popconfirm>
+              </Popconfirm>
+            
             {row.externalUrl && <Button
               type="link"
               onClick={() => window.open(row.externalUrl)}

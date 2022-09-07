@@ -162,7 +162,7 @@ public class DIStreamJobContentServiceImpl implements DIStreamJobContentService 
                 int idx = srcTable.indexOf("[");
                 checkArgument(idx > 0, "分表表名配置不合法");
                 String destBaseTable = srcTable.substring(0, idx);
-                return Lists.newArrayList("ods_" + dbName + "_" + destBaseTable + "__shard");
+                return Lists.newArrayList("ods_" + dbName + "_" + destBaseTable + "_shard");
             }
         } else {
             throw new IllegalArgumentException(String.format("暂不支持去向数据源类型%s", destDataSourceType));

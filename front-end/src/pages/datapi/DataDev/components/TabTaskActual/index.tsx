@@ -162,7 +162,7 @@ const TabTaskActual: FC<TabTaskProps> = ({ pane }) => {
         ...jobContent,
         tableDtoList: jobContent.tableDtoList.map((item: any) => ({
           ...item,
-          srcTable: item.srcTable.inputMode === "E" ? `${item.srcTable.rawTable}_${item.tableIdxBegin}_${item.tableIdxEnd}` : item.srcTable.rawTable
+          srcTable: item.srcTable.inputMode === "E" ? `${item.srcTable.rawTable}[${item.srcTable.tableIdxBegin}-${item.srcTable.tableIdxEnd}]` : item.srcTable.rawTable
         })),
         enableSharding: jobContent.enableSharding ? 1 : 0,
         jobId: pane.id,
