@@ -71,9 +71,6 @@ public class FlinkJobCommonServiceImpl implements FlinkJobCommonService {
     public void fetchAndSetFlinkJobRunningInfo(EnvEnum envEnum) {
         // 获取flink app信息
         List<ClusterAppDto> clusterAppDtoList = flinkJobManager.fetchRunningFlinkApp(envEnum);
-        if (CollectionUtils.isEmpty(clusterAppDtoList)) {
-            return;
-        }
 
         Map<Long, Tuple3<ClusterAppDto, String, List<FlinkJobInfoDto>>> flinkAppMap = Maps.newHashMap();
         for (ClusterAppDto appDto : clusterAppDtoList) {
