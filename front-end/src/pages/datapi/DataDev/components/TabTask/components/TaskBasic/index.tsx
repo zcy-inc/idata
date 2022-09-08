@@ -160,7 +160,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   );
   
   // 数据来源-数据源
-  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobType: basicInfo?.jobType, syncMode: basicInfo?.syncMode});
+  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobTypeEnum: basicInfo?.jobTypeEnum});
   const getSrcDSOptions = (type: string) => fetchSourceList(DataSources.SRC, type);
   const getDestDSOptions = (type: string) => fetchSourceList(DataSources.DEST, type);
   const srcDSOptions = getSourceOptions(DataSources.SRC);

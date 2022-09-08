@@ -3,15 +3,14 @@ import { useRequest } from 'ahooks';
 import type { DataSourceItem } from '@/types/datasource';
 import { getDataSourceList, getDataSourceTypesNew } from '@/services/datasource';
 import { DefaultOptionType } from 'antd/lib/select';
-import { DIJobType } from '@/constants/datadev';
 
 export type DSOption = DataSourceItem & DefaultOptionType;
 
 // 数据源类型 和 数据源名称列表
-const useDataSource = (basicInfo: {jobType?: string, syncMode?:string}) => {
+const useDataSource = (basicInfo: {jobType?: string, jobTypeEnum?:string}) => {
   // 获取数据源类型列表
-  const { jobType = DIJobType.BACK_FLOW, syncMode } = basicInfo || {};
-  const jobTypeParam = jobType === 'BACK_FLOW' ? jobType : `${jobType}_${syncMode}`;
+  const { jobType = '', jobTypeEnum = '' } = basicInfo || {};
+  const jobTypeParam = jobType ? jobType : jobTypeEnum;
   const { data }  = useRequest(() => getDataSourceTypesNew(jobTypeParam).then(({ data }) => data));
   const destOptions: Array<{ label: any; value: any; }> = data && data.destList && data.destList.map((type: any) => ({ label: type, value: type }));
   const fromOptions: Array<{ label: any; value: any; }> = data && data.fromList && data.fromList.map((type: any) => ({ label: type, value: type }));
