@@ -116,6 +116,7 @@ public class MetadataController {
             case SQL_FLINK:
                 response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()}));
                 response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()}));
+                break;
             case SPARK_PYTHON:
             case SPARK_JAR:
             case SCRIPT_PYTHON:
