@@ -75,10 +75,17 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
   const srcItemRules = (value: any, rowIndex: number) => {
     if(!value) {
       return Promise.reject();
-    } else if(value.inputMode === 'E' && (!value.rawTable || !value.tableIdxBegin || !value.tableIdxEnd)) {
-      return Promise.reject();
+    } else if(value.inputMode === 'E') {
+      if (!value.rawTable || !value.tableIdxBegin || !value.tableIdxEnd) {
+        return Promise.reject();
+      } else if(isNaN(value.tableIdxBegin) || isNaN(value.tableIdxEnd)) {
+        return Promise.reject();
+      } else if(Number(value.tableIdxBegin) < 0 || Number(value.tableIdxEnd) < 0) {
+        return Promise.reject();
+      }
+      return Promise.resolve();
     } else if(value.inputMode === 'S' && !value.rawTable) {
-      return Promise.reject(' ');
+      return Promise.reject();
     } else  {
       return Promise.resolve();
     }
