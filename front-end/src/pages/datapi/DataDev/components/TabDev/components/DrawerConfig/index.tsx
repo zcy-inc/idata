@@ -328,45 +328,51 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   </>
                 )
               }
-              <Title>运行配置</Title>
-              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execEngineOptions}
-                />
-              </Item>
-              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execDriverMemOptions}
-                />
-              </Item>
-              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execWorkerMemOptions}
-                />
-              </Item>
-              <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execCoresOptions}
-                />
-              </Item>
-              <Item name="extProperties" label="自定义参数">
-                <MapInput style={{ width }} />
-              </Item>
-              {data?.jobType === TaskTypes.SQL_SPARK && (<Item name="isOpenMergeFile" label="合并小文件">
-                <Switch checked={openMergeFilechecked} onChange={onOpenMergeFileChange}/>
-              </Item>)}
+              {
+                ![TaskTypes.SCRIPT_PYTHON, TaskTypes.SCRIPT_SHELL].includes(data?.jobType) && (
+                  <>
+                    <Title>运行配置</Title>
+                    <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execEngineOptions}
+                      />
+                    </Item>
+                    <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execDriverMemOptions}
+                      />
+                    </Item>
+                    <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execWorkerMemOptions}
+                      />
+                    </Item>
+                    <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execCoresOptions}
+                      />
+                    </Item>
+                    <Item name="extProperties" label="自定义参数">
+                      <MapInput style={{ width }} />
+                    </Item>
+                    {data?.jobType === TaskTypes.SQL_SPARK && (<Item name="isOpenMergeFile" label="合并小文件">
+                      <Switch checked={openMergeFilechecked} onChange={onOpenMergeFileChange}/>
+                    </Item>)}
+                  </>
+                )
+              }
               <Title>依赖配置</Title>
               <DependenciesFormItem
                 name="dependencies"
