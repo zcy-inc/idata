@@ -199,8 +199,8 @@ public class JobGenericServiceImpl implements JobGenericService {
         JobReplicationDto jobReplicationDto = new JobReplicationDto();
 
         JobInfoDto jobInfoDto = jobInfoService.getJobInfo(jobId);
-        checkArgument(!JobTypeEnum.DI_STREAM.getCode().equals(jobInfoDto.getJobType())
-                && !JobTypeEnum.SQL_FLINK.getCode().equals(jobInfoDto.getJobType()), "批量操作暂不支持实时作业");
+        checkArgument(JobTypeEnum.DI_STREAM != jobInfoDto.getJobType()
+                && JobTypeEnum.SQL_FLINK != jobInfoDto.getJobType(), "批量操作暂不支持实时作业");
 
         jobReplicationDto.setJobInfoDto(jobInfoDto);
 
