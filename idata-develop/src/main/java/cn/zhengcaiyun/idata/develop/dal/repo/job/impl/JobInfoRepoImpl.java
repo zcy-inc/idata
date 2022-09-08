@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIStreamJobContentDynamicSqlSupport.DI_STREAM_JOB_CONTENT;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIStreamJobTableDynamicSqlSupport.DI_STREAM_JOB_TABLE;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamicSqlSupport.devJobContentKylin;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
@@ -63,6 +64,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
     private final DevJobContentKylinDao devJobContentKylinDao;
     private final JobOutputDao jobOutputDao;
     private final JobDependenceDao jobDependenceDao;
+    private final DIStreamJobContentDao diStreamJobContentDao;
     private final DIStreamJobTableDao diStreamJobTableDao;
 
 
@@ -77,6 +79,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                            DevJobContentKylinDao devJobContentKylinDao,
                            JobOutputDao jobOutputDao,
                            JobDependenceDao jobDependenceDao,
+                           DIStreamJobContentDao diStreamJobContentDao,
                            DIStreamJobTableDao diStreamJobTableDao) {
         this.jobInfoDao = jobInfoDao;
         this.jobExecuteConfigDao = jobExecuteConfigDao;
@@ -88,6 +91,7 @@ public class JobInfoRepoImpl implements JobInfoRepo {
         this.devJobContentKylinDao = devJobContentKylinDao;
         this.jobOutputDao = jobOutputDao;
         this.jobDependenceDao = jobDependenceDao;
+        this.diStreamJobContentDao = diStreamJobContentDao;
         this.diStreamJobTableDao = diStreamJobTableDao;
     }
 
@@ -152,9 +156,10 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                     .set(DI_JOB_CONTENT.editor).equalTo(operator)
                     .where(DI_JOB_CONTENT.jobId, isEqualTo(jobId)));
         } else if (JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
-            diStreamJobTableDao.update(dsl -> dsl.set(DI_STREAM_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
+            diStreamJobContentDao.update(dsl -> dsl.set(DI_STREAM_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
                     .set(DI_STREAM_JOB_CONTENT.editor).equalTo(operator)
                     .where(DI_STREAM_JOB_CONTENT.jobId, isEqualTo(jobId)));
+            diStreamJobTableDao.delete(dsl -> dsl.where(DI_STREAM_JOB_TABLE.jobId, isEqualTo(jobId)));
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
                 || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
             devJobContentSqlDao.update(dsl -> dsl.set(devJobContentSql.del).equalTo(DeleteEnum.DEL_YES.val)
