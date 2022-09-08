@@ -173,7 +173,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       const values = form.getFieldsValue();
       switch (task?.jobType) {
         case TaskTypes.SQL_SPARK:
-          const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds } = values;
+          const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds, sourceSql } = values;
           const param = {
             extTables: srcDataSourceType && [{
               dataSourceType: srcDataSourceType,
@@ -184,6 +184,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
               }))
             }],
             udfIds,
+            sourceSql,
             jobId: pane.id,
             jobType: task?.jobType,
             version,
