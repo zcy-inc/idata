@@ -121,9 +121,6 @@ const DrawerBasic: FC<DrawerBasicProps> = ({ visible, onClose, data, pane, getTa
     >
       <Title>基本信息</Title>
       <Form form={form} layout="horizontal" colon={false}>
-        <Item name="id" label="作业ID">
-          <p style={{transform: 'translateY(6px)'}}>{data && data.id}</p>
-        </Item>
         <Item name="name" label="作业名称" rules={ruleText}>
           <Input size="large" style={{ width: widthL }} placeholder="请输入" />
         </Item>
