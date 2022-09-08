@@ -160,7 +160,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   );
   
   // 数据来源-数据源
-  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobType: basicInfo?.jobType, syncMode: basicInfo?.syncMode});
+  const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobTypeEnum: basicInfo?.jobTypeEnum});
   const getSrcDSOptions = (type: string) => fetchSourceList(DataSources.SRC, type);
   const getDestDSOptions = (type: string) => fetchSourceList(DataSources.DEST, type);
   const srcDSOptions = getSourceOptions(DataSources.SRC);
@@ -749,22 +749,6 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
         <MapInput style={{ maxWidth, minWidth }} />
       </Item>
     );
-    if (basicInfo?.jobType === DIJobType.BACK_FLOW) {
-      items.push(
-        <Fragment key="9">
-          {destTableNode}
-          <Item name="destBeforeWrite" label="导入前准备语句">
-            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据前执行的SQL脚本" />
-          </Item>
-          <Item name="destAfterWrite" label="导入后完成语句">
-            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据后执行的SQL脚本" />
-          </Item>
-          <Item name="destWriteMode" label="写入模式" rules={ruleSlct}>
-            <Radio.Group options={diWriteModeOptions} />
-          </Item>
-        </Fragment>,
-      );
-    }
     if (basicInfo?.jobType === DIJobType.DI) {
       items.push(
         <Fragment key="9">
@@ -807,6 +791,18 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
           {backFlowDestWriteModeNode}
           {batchWriteNode}
           {customParamsNode}
+        </Fragment>,
+      );
+    }
+    if (basicInfo?.jobType === DIJobType.BACK_FLOW) {
+      items.push(
+        <Fragment key="9">
+          <Item name="destBeforeWrite" label="导入前准备语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据前执行的SQL脚本" />
+          </Item>
+          <Item name="destAfterWrite" label="导入后完成语句">
+            <TextArea style={{ maxWidth, minWidth }} placeholder="请输入导入数据后执行的SQL脚本" />
+          </Item>
         </Fragment>,
       );
     }
