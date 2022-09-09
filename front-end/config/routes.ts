@@ -89,7 +89,7 @@ export default [
           {
             path: '/quality/baseline/edit/:id',
             name: '基线编辑',
-            component: './quality/baseline/components/EditBaseline',
+            component: './quality/Baseline/components/EditBaseline',
             hideInMenu: true
           },
         ]
