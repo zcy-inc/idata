@@ -158,7 +158,9 @@ const ActualTable: FC<ActualTableProps> = ({ tableOptions, jobContent, onChange,
             </Item>
             {!isView &&  <>
               <MinusCircleOutlined onClick={() => removeParams(rowIndex, index)} style={{color: '#ff5753'}} />
-              {index === fields.length - 1 && <PlusCircleOutlined onClick={() => addParams(rowIndex)} style={{color: '#1890ff'}} />}
+              {(index === fields.length - 1) && (fields.length < 20) && <PlusCircleOutlined
+              onClick={() => addParams(rowIndex)}
+              style={{color: '#1890ff'}} />}
             </> }
           </Space>
         )) : isView ? null : <PlusCircleOutlined

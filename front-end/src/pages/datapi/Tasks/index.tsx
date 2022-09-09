@@ -53,7 +53,7 @@ const defaultColumns: ColumnsType<TaskListItem> = [
     title: '处理时间',
     key: 'approveTime',
     dataIndex: 'approveTime',
-    render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss'),
+    render: (_) => _ ? moment(_).format('YYYY-MM-DD HH:mm:ss') : '',
   },
 ];
 
