@@ -335,8 +335,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       .then((res) => {
         if (
           res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED &&
-          isDebuging
+          res.data.statementState !== StatementState.CANCELED
         ) {
           setTimeout(() => {
             fetchPysparkQueryResult({
@@ -380,8 +379,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         .then((res) => {
           if (
             res.data.statementState !== StatementState.AVAILABLE &&
-            res.data.statementState !== StatementState.CANCELED &&
-            isDebuging
+            res.data.statementState !== StatementState.CANCELED
           ) {
             pollingFrom.current = pollingFrom.current + 10;
             const logs = get(res, 'data.queryRunLog.log', []);

@@ -216,6 +216,10 @@ const TabTaskActualContent: ForwardRefRenderFunction<any, ContentProps> = ({ bas
     if(values.srcDataSourceType) {
       allValues.srcDataSourceId = undefined;
     }
+
+    if(values.destDataSourceType) {
+      allValues.destDataSourceId = undefined;
+    }
    
     for(let index = 0; index<allValues.tableDtoList.length; index++) {
       allValues.tableDtoList[index].destTable = jobContent.tableDtoList[index].destTable;
