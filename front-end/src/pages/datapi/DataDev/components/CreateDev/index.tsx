@@ -10,7 +10,7 @@ import {
   getEnumValues,
   getTaskTypes,
 } from '@/services/datadev';
-import { TaskCategory, TaskTypes, FolderBelong } from '@/constants/datadev';
+import { TaskCategory, TaskTypes, FolderBelong, ContentBelong } from '@/constants/datadev';
 import { TaskType } from '@/types/datadev';
 import { DEVJOBFolderFormItem } from '../../../components/FolderFormItem';
 
@@ -80,7 +80,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
             if (res.success) {
               message.success('创建作业成功');
               setVisibleDev(false);
-              getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DEVJOB,res.data));
+              const concreteBelong = values.syncMode === 'STREAM' ? ContentBelong.STREAM : ContentBelong.BATCH;
+              getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DEVJOB, concreteBelong, res.data));
             } else {
               message.success(`创建作业失败: ${res.msg}`);
             }
