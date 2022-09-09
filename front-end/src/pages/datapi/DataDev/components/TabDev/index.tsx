@@ -81,6 +81,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [loadingAction, setLoadingAction] = useState(false);
   const [isDebuging, setIsDebuging] = useState(false);
   const [enableStop, setEnableStop] = useState(false);
+  const enableStopRef = useRef<boolean>(false);
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -324,8 +325,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }, isStop = !enableStop) => {
-    if(!isStop) {
+  }, isStop = !enableStopRef.current) => {
+    if(isStop) {
       cancelQuery({sessionId,statementId}).then(() => {
         message.success('已停止调试');
         setIsDebuging(false);
@@ -345,7 +346,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           }, 2000);
         } else {
           setIsDebuging(false);
-          setEnableStop(false)
+          setEnableStop(false);
+          enableStopRef.current = false;
           const logs = get(res, 'data.pythonResults', '');
           setLog([logs]);
         }
@@ -362,8 +364,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }, isStop = !enableStop) => {
-    if(!isStop) {
+  }, isStop = !enableStopRef.current) => {
+    if(isStop) {
       cancelQuery({sessionId,statementId}).then(() => {
         message.success('已停止调试');
         setIsDebuging(false);
@@ -393,6 +395,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           } else {
             setIsDebuging(false);
             setEnableStop(false);
+            enableStopRef.current = false;
             pollingFrom.current = 0;
             const result = res.data.resultSet;
             const resultHeader = res.data.resultHeader || [];
@@ -411,6 +414,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const onDebug = async () => {
     if(enableStop) {
      setEnableStop(false);
+     enableStopRef.current = false;
     } else {
       setIsDebuging(true);
       const value = getDebugCode();
@@ -422,14 +426,16 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
         case TaskTypes.SQL_SPARK: {
           const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
           setEnableStop(true);
-          fetchSparkQueryResult(data, true);
+          enableStopRef.current = true;
+          fetchSparkQueryResult(data);
           break;
         }
         case TaskTypes.SPARK_PYTHON:
         case TaskTypes.SCRIPT_PYTHON: {
           const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
           setEnableStop(true);
-          fetchPysparkQueryResult(data, true);
+          enableStopRef.current = true;
+          fetchPysparkQueryResult(data);
           break;
         }
       }
