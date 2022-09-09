@@ -91,11 +91,12 @@ const Stream: FC<{}> = ({}) => {
   }
 
   const columns: ColumnsType<StreamListItem> = [
-    { title: '任务ID', key: 'jobId', dataIndex: 'jobId', width: 80 },
+    { title: '任务ID', key: 'jobId', dataIndex: 'jobId', width: 80, fixed: 'left' },
     {
       title: '任务名称',
       key: 'jobName',
       dataIndex: 'jobName',
+      fixed: 'left',
       width: 200,
       ellipsis: true,
       render: (text, row) => {
@@ -107,11 +108,12 @@ const Stream: FC<{}> = ({}) => {
       key: 'status',
       dataIndex: 'status',
       width: 100,
+      fixed: 'left',
       render: (text, row) => {
         return statusList.find(item => item.value === text)?.label
       }
     },
-    { title: '版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay', width: 150, ellipsis: true, },
+    { title: '版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay', width: 150, },
     { title: '环境', key: 'environment', dataIndex: 'environment', width: 100, },
     { title: '责任人', key: 'owner', dataIndex: 'owner', width: 90 },
     {
@@ -202,13 +204,14 @@ const Stream: FC<{}> = ({}) => {
         />
         <ProFormText
           name="ownerPattern"
-          label="负责人"
+          label="责任人"
           placeholder="请输入"
         />
       </QueryFilter>
       <Table<StreamListItem>
         rowKey="id"
         columns={columns}
+        scroll={{ x: 1500 }}
         {...tableProps}
       />
     </PageContainer>
