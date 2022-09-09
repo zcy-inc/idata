@@ -220,10 +220,11 @@ const TabTaskActualContent: ForwardRefRenderFunction<any, ContentProps> = ({ bas
     if(values.destDataSourceType) {
       allValues.destDataSourceId = undefined;
     }
-   
+   if (allValues.tableDtoList) {
     for(let index = 0; index<allValues.tableDtoList.length; index++) {
       allValues.tableDtoList[index].destTable = jobContent.tableDtoList[index].destTable;
     }
+   }
     const newJobContent = Object.assign({}, jobContent, allValues)
     setJobContent(newJobContent);
     form.setFieldsValue(newJobContent);

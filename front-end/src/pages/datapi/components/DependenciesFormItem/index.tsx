@@ -105,7 +105,7 @@ export const DependenciesInput: FC<DependenciesInputProps> = ({
       title: '作业状态',
       key: 'prevJobRunningState',
       width: 100,
-      render: (_) => _?'下线':'上线',
+      render: (_) => _?'上线':'下线',
     },
     {
       title: '操作',

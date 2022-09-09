@@ -65,6 +65,11 @@ enum DataSources {
   DEST,
 }
 
+enum Mode {
+  INPUT = 'E',
+  SELECT = 'S',
+}
+
 const { confirm } = Modal;
 const { Item } = Form;
 const { TextArea } = Input;
@@ -190,6 +195,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   const [actionType, setActionType] = useState<ActionType>('run');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [inputMode, setInputMode] = useState<Mode | undefined>(Mode.SELECT);
 
   const mapRef = useRef<{
     srcMap: { [key: string]: any };
@@ -347,13 +353,22 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   };
 
   const refreshDiSrcVisualise = async () => {
-    const { rawTable, tableIdxBegin } = (srcTableConfig || {});
-    const table = `${rawTable}${tableIdxBegin}`
-    if (!table) {
+    const { rawTable, tableIdxBegin, tableIdxEnd } = (srcTableConfig || {});
+
+    if (inputMode === Mode.INPUT) {
+      if (!rawTable) {
+        return message.info('请填写表');
+      }
+      if (!tableIdxBegin || !tableIdxEnd) {
+        return message.info('请填写范围');
+      }
+    }
+    if (inputMode === Mode.SELECT && !rawTable) {
       return message.info('请选择表');
     }
     let success = false;
     let data = [];
+    const table = inputMode === Mode.INPUT ? `${rawTable}${tableIdxBegin}` : rawTable;
     if (srcDataSourceType === DataSourceType.HIVE) {
       const res1 = await getColumns({
         dataSourceId: srcDataSourceId,
@@ -605,6 +620,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
           <TableSelectInput
             options={options}
             style={{ maxWidth, minWidth }}
+            onChange={({inputMode}) => {setInputMode(inputMode)}}
             onRefresh={refreshDiSrcVisualise}
           />
         </Item>,
