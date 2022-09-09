@@ -347,7 +347,8 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   };
 
   const refreshDiSrcVisualise = async () => {
-    const table = srcTableConfig?.rawTable;
+    const { rawTable, tableIdxBegin } = (srcTableConfig || {});
+    const table = `${rawTable}${tableIdxBegin}`
     if (!table) {
       return message.info('请选择表');
     }
