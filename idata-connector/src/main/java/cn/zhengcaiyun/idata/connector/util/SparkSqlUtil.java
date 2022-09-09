@@ -4,23 +4,21 @@ import cn.zhengcaiyun.idata.connector.parser.CaseChangingCharStream;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlBaseListener;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlLexer;
 import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
-import com.google.common.collect.Lists;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.ParseException;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 public class SparkSqlUtil {
+
+    public static String[] splitToMultiSql(String multiSql) {
+        return (multiSql + " ").replaceAll("\n", " \n").split("; ", -1);
+    }
 
     public static String addDatabaseEnv(String sql, String env) {
         SparkSqlLexer lexer = new SparkSqlLexer(new CaseChangingCharStream(CharStreams.fromString(sql), true));
@@ -189,290 +187,110 @@ public class SparkSqlUtil {
 //    }
 
     public static void main(String[] args) throws ParseException {
-        String sql = "--******************************************************************--\n" +
-                "--******功能说明：DWS层日志域前端点击使用信息天增量表\n" +
-                "--******输出表：dws.dws_log_front_clk_basic_inc_d\n" +
-                "--******开发人员：青禾\n" +
-                "--******开发时间：2022-05-24\n" +
-                "--******修改记录：\n" +
-                "--******变更日期      变更人      变更描述\n" +
-                "--******************************************************************--\n" +
-                "--*\n" +
-                "--* 依赖源表：\n" +
-                "--* dwd.dwd_log_front_clk_basic_inc_d\n" +
-                "--******************************************************************--\n" +
-                "--取页面聚合事，b段值转换\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${bizdate};\n" +
-                "create table if not exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${bizdate}  stored as orc as\n" +
-                "select\n" +
-                " regexp_replace(regexp_replace(url,'^\\https',''),'\\^http','') as url\n" +
-                ",utmcnt_a\n" +
-                ",utmcnt_b\n" +
-                "from dim.dim_log_busi_module_map\n" +
-                "where is_url_union=1\n" +
-                "group by\n" +
-                " regexp_replace(regexp_replace(url,'^\\https',''),'\\^http','')\n" +
-                ",utmcnt_a\n" +
-                ",utmcnt_b\n" +
-                ";\n" +
-                "--全局事件，d段值唯一\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizdate};\n" +
-                "create table if not exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizdate}  stored as orc as\n" +
-                "select\n" +
-                " utmcnt_d\n" +
-                "from dim.dim_log_evt_map\n" +
-                "where is_glbl=1\n" +
-                "group by\n" +
-                " utmcnt_d\n" +
-                ";\n" +
+        String sql = "--删除临时表\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_item_unit_map;\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_catagory_unit_detail;\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_unit_exchanges;\n" +
                 "\n" +
-                "--事件汇总\n" +
-                "--1.取出全局事件，构造全局事件code:evt_code=utmcnt_d\n" +
-                "--2.取出内置事件，构造内置事件code：log_type=1 ,evt_code=page_in, log_type=3 ,evt_code=page_out\n" +
-                "--3.对于事件类型异常值处理：取log_type=2，除了evt_type='click',其他处理为'other'\n" +
-                "--4.新增一列:url中去除掉首次出现的传输协议（http/https)\n" +
-                "--5.新增一列:排序字段rnk\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizdate};\n" +
-                "create table if not exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizdate}  stored as orc as\n" +
-                "select\n" +
-                " substring(create_time,0,4)  as t_year\n" +
-                ",substring(create_time,0,7)  as t_month\n" +
-                ",pltfm_type\n" +
-                ",busi_catg_code\n" +
-                ",busi_catg_name\n" +
-                ",busi_module_code\n" +
-                ",busi_module_name\n" +
-                ",app_type_code\n" +
-                ",app_type_name\n" +
-                ",if(t2.busi_module_code in ('VACCINE_ZLB_H5','VACCINE_ALI_PAY_H5'),t2.uuid,t2.opt_id)   as opt_id\n" +
-                ",user_type_code\n" +
-                ",user_type_name\n" +
-                ",district_code\n" +
-                ",district_name\n" +
-                ",district_type\n" +
-                ",district_type_id\n" +
-                ",district_type_name\n" +
-                ",district_level\n" +
-                ",district_city_code\n" +
-                ",district_city_name\n" +
-                ",district_province_code\n" +
-                ",district_province_name\n" +
-                ",utmcnt_a\n" +
-                ",utmcnt_b\n" +
-                ",utmcnt_c\n" +
-                ",t2.utmcnt_d\n" +
-                ",case when log_type='2' and t1.utmcnt_d!=''   then t1.utmcnt_d\n" +
-                "      when log_type='1' then 'page_in'\n" +
-                "      when log_type='3' then 'page_out' end  as evt_code\n" +
-                ",case when log_type='2' and evt_type ='click' then 'click'\n" +
-                "      when log_type='2' and evt_type!='click' then 'other' end  as evt_type\n" +
-                ",log_type\n" +
-                ",referrer\n" +
-                ",url\n" +
-                ",regexp_replace(regexp_replace(url,'^\\https',''),'\\^http','') as url_new\n" +
-                ",url_host\n" +
-                ",url_path\n" +
-                ",url_origin\n" +
-                ",device_mdl\n" +
-                ",os_version\n" +
-                ",browser_version\n" +
-                ",browser_core\n" +
-                ",ip\n" +
-                ",net_type\n" +
-                ",from_unixtime(cast(t2.client_tms/1000 as bigint), 'yyyy-MM-dd HH:mm:ss')     as  client_date\n" +
-                ",pt\n" +
-                ",count(1)  as click_cnt\n" +
-                ",if(t1.utmcnt_d is not null,1,0) as is_glbl\n" +
-                ",row_number() over(partition by pt  order by if(t2.busi_module_code in ('VACCINE_ZLB_H5','VACCINE_ALI_PAY_H5'),t2.uuid,t2.opt_id),utmcnt_a,utmcnt_b,utmcnt_c,t2.utmcnt_d) as rnk\n" +
-                "from dwd.dwd_log_front_clk_basic_inc_d  as t2\n" +
-                "left join  tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizdate} as t1\n" +
-                "on t1.utmcnt_d=t2.utmcnt_d and t2.pt='${bizdate}'\n" +
-                "where t2.pt='${bizdate}'\n" +
-                "---and t2.utmcnt_a in ('a0002','a0004','av001','web-arena-front','app-merchant','web-stark-front','web-business-saas-front')\n" +
-                "group by\n" +
-                " substring(create_time,0,4)\n" +
-                ",substring(create_time,0,7)\n" +
-                ",pltfm_type\n" +
-                ",busi_catg_code\n" +
-                ",busi_catg_name\n" +
-                ",busi_module_code\n" +
-                ",busi_module_name\n" +
-                ",app_type_code\n" +
-                ",app_type_name\n" +
-                ",if(t2.busi_module_code in ('VACCINE_ZLB_H5','VACCINE_ALI_PAY_H5'),t2.uuid,t2.opt_id)\n" +
-                ",user_type_code\n" +
-                ",user_type_name\n" +
-                ",district_code\n" +
-                ",district_name\n" +
-                ",district_type\n" +
-                ",district_type_id\n" +
-                ",district_type_name\n" +
-                ",district_level\n" +
-                ",district_city_code\n" +
-                ",district_city_name\n" +
-                ",district_province_code\n" +
-                ",district_province_name\n" +
-                ",utmcnt_a\n" +
-                ",utmcnt_b\n" +
-                ",utmcnt_c\n" +
-                ",t2.utmcnt_d\n" +
-                ",case when log_type='2' and t1.utmcnt_d!=''   then t1.utmcnt_d\n" +
-                "      when log_type='1' then 'page_in'\n" +
-                "      when log_type='3' then 'page_out' end\n" +
-                ",case when log_type='2' and evt_type ='click' then 'click'\n" +
-                "      when log_type='2' and evt_type!='click' then 'other' end\n" +
-                ",log_type\n" +
-                ",referrer\n" +
-                ",url\n" +
-                ",regexp_replace(regexp_replace(url,'^\\https',''),'\\^http','')\n" +
-                ",url_host\n" +
-                ",url_path\n" +
-                ",url_origin\n" +
-                ",device_mdl\n" +
-                ",os_version\n" +
-                ",browser_version\n" +
-                ",browser_core\n" +
-                ",ip\n" +
-                ",net_type\n" +
-                ",from_unixtime(cast(t2.client_tms/1000 as bigint), 'yyyy-MM-dd HH:mm:ss')\n" +
-                ",pt\n" +
-                ",if(t1.utmcnt_d is not null,1,0)\n" +
-                ";\n" +
-                "\n" +
-                "--取出按路径聚合的页面，b段值转换\n" +
-                "--处理规则：优先取第一个匹配上的数据\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate};\n" +
-                "create table if not exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate}  stored as orc as\n" +
-                "select\n" +
-                " t1.utmcnt_b\n" +
-                ",rnk\n" +
-                ",t2.url_new\n" +
-                ",pt\n" +
-                "from tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizdate}  as t2\n" +
-                "left join tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${bizdate}  as t1\n" +
-                "  on  t2.utmcnt_a=t1.utmcnt_a\n" +
-                "where t2.url_new  regexp concat('\\^',t1.url)\n" +
-                ";\n" +
-                "\n" +
-                "insert overwrite table  ads.ads_hunyi_evt_clk_cnt_inc_d partition(pt='${bizdate}')\n" +
-                "select\n" +
-                " t_year\n" +
-                ",t_month\n" +
-                ",pltfm_type\n" +
-                ",busi_catg_code\n" +
-                ",busi_catg_name\n" +
-                ",busi_module_code\n" +
-                ",busi_module_name\n" +
-                ",app_type_code\n" +
-                ",app_type_name\n" +
-                ",opt_id\n" +
-                ",user_type_code\n" +
-                ",user_type_name\n" +
-                ",district_code\n" +
-                ",district_name\n" +
-                ",district_type\n" +
-                ",district_type_id\n" +
-                ",district_type_name\n" +
-                ",district_level\n" +
-                ",district_city_code\n" +
-                ",district_city_name\n" +
-                ",district_province_code\n" +
-                ",district_province_name\n" +
-                ",utmcnt_a\n" +
-                ",coalesce(t2.utmcnt_b,t1.utmcnt_b) as utmcnt_b\n" +
-                ",case when log_type in('1','3') then evt_code\n" +
-                "      when is_glbl=1  then concat(evt_code,'#', evt_type)\n" +
-                "      when coalesce(evt_code,'') =''  then concat_ws('#',utmcnt_a,coalesce(t2.utmcnt_b,t1.utmcnt_b) ,utmcnt_c,utmcnt_d, evt_type)\n" +
-                "      end as evt_code\n" +
-                ",evt_type as evt_type_cdoe\n" +
-                ",log_type\n" +
-                ",referrer\n" +
-                ",url\n" +
-                ",url_host\n" +
-                ",url_path\n" +
-                ",url_origin\n" +
-                ",device_mdl\n" +
-                ",os_version\n" +
-                ",browser_version\n" +
-                ",browser_core\n" +
-                ",ip\n" +
-                ",net_type\n" +
-                ",client_date\n" +
-                ",sum(click_cnt)  as click_cnt\n" +
-                "--,pt\n" +
-                "from tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizdate} as t1\n" +
-                "left join tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate}  as t2\n" +
-                "  on t1.pt=t2.pt and t1.rnk=t2.rnk\n" +
-                "group by\n" +
-                " t_year\n" +
-                ",t_month\n" +
-                ",pltfm_type\n" +
-                ",busi_catg_code\n" +
-                ",busi_catg_name\n" +
-                ",busi_module_code\n" +
-                ",busi_module_name\n" +
-                ",app_type_code\n" +
-                ",app_type_name\n" +
-                ",opt_id\n" +
-                ",user_type_code\n" +
-                ",user_type_name\n" +
-                ",district_code\n" +
-                ",district_name\n" +
-                ",district_type\n" +
-                ",district_type_id\n" +
-                ",district_type_name\n" +
-                ",district_level\n" +
-                ",district_city_code\n" +
-                ",district_city_name\n" +
-                ",district_province_code\n" +
-                ",district_province_name\n" +
-                ",utmcnt_a\n" +
-                ",coalesce(t2.utmcnt_b,t1.utmcnt_b)\n" +
-                ",case when log_type in('1','3') then evt_code\n" +
-                "      when is_glbl=1  then concat(evt_code,'#', evt_type)\n" +
-                "      when coalesce(evt_code,'') =''   then concat_ws('#',utmcnt_a,coalesce(t2.utmcnt_b,t1.utmcnt_b) ,utmcnt_c,utmcnt_d, evt_type)\n" +
-                "      end\n" +
-                ",evt_type\n" +
-                ",log_type\n" +
-                ",referrer\n" +
-                ",url\n" +
-                ",url_host\n" +
-                ",url_path\n" +
-                ",url_origin\n" +
-                ",device_mdl\n" +
-                ",os_version\n" +
-                ",browser_version\n" +
-                ",browser_core\n" +
-                ",ip\n" +
-                ",net_type\n" +
-                ",client_date\n" +
-                ";\n" +
+                "--商品自定义转换系数\n" +
+                "CREATE TABLE IF NOT EXISTS tmp.tmp_4303_item_unit_map STORED AS ORC AS\n" +
+                "select item_id\n" +
+                "      ,cast(get_json_object(ext_json, '$.CATE_STANDARD_UNIT_EXCHANGE_RATE') as DOUBLE) as exchange_rate --标准单位转换系数\n" +
+                "      ,get_json_object(ext_json, '$.CATE_STANDARD_UNIT') as standard_unit --商品自定义标准单位\n" +
+                "      ,get_json_object(ext_json, '$.ZCY_PRODUCT_ID') as product_id --产品ID\n" +
+                "  from ods.ods_db_item_zcy_item_ext_info\n" +
+                " where ext_json like '%CATE_STANDARD_UNIT_EXCHANGE_RATE%'\n" +
+                "   and status = 1;\n" +
                 "\n" +
                 "\n" +
+                "--没有商品自定义转换系数，通过类目标准单位转换关系\n" +
+                "CREATE TABLE IF NOT EXISTS tmp.tmp_4303_catagory_unit_detail STORED AS ORC AS\n" +
+                "select t1.id            as item_id\n" +
+                "      ,get_json_object(t1.extra_json, '$.unit')        as item_unit --商品单位\n" +
+                "      ,get_json_object(t2.ext_json, '$.STANDARD_UNIT') as standard_unit --类目标准单位\n" +
+                "      ,get_json_object(t3.ext_json, '$.ZCY_PRODUCT_ID') as product_id --产品ID\n" +
+                "  from ods.ods_db_item_parana_items t1\n" +
+                "  join ods.ods_db_item_standard_parana_category_attributes t2 \n" +
+                "    on t1.category_id = t2.category_id\n" +
+                "  left join ods.ods_db_item_zcy_item_ext_info t3\n" +
+                "    on t1.id = t3.item_id\n" +
+                " where t2.attr_key = '计量单位'\n" +
+                "   and get_json_object(t1.extra_json, '$.unit') is not null\n" +
+                "   and get_json_object(t2.ext_json, '$.STANDARD_UNIT') is not null;\n" +
                 "\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_url_join_${bizdate-1d};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizyear};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_evt_${bizyear-1Y};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizquarter};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizquarter};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${dt};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${0};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${.&};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizmonth};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_evt_${bizmonth-1m};\n" +
-                "drop table if exists tmp.tmp_ads_hunyi_evt_clk_cnt_inc_d_global_url_${day};";
-//        String sql = "${dt} from ${day-1d};${bizquarter} from ${bizquarter}!!!${bizyear} from {0}!!!${day}";
-        String newSql = SqlDynamicParamTool.replaceParam(sql);
-//        List<String> fromTables;
-//        try {
-//            fromTables = SparkSqlUtil.getFromTables(newSql, null);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
+                "--单位转换关系表，加工出： 商品单位 * 转换系数 = 标准单位 的关系表\n" +
+                "--单位转换关系表只有一条，如：斤<-->公斤，需要自己加工出公斤<-->斤的关系\n" +
+                "CREATE TABLE IF NOT EXISTS tmp.tmp_4303_unit_exchanges STORED AS ORC AS\n" +
+                "select to_unit          as item_unit      --商品单位\n" +
+                "      ,from_unit        as standard_unit  --标准单位\n" +
+                "      ,cast(exchange_rate as DOUBLE)    as exchange_rate  --转换系数X，关系：商品单位 * X = 标准单位\n" +
+                "      ,cast(exchange_rate as DOUBLE)    as molecular      --转换系数分子\n" +
+                "      ,1                as denominator    --转换系数分母\n" +
+                "  from ods.ods_db_item_standard_zcy_unit_exchanges\n" +
+                "union\n" +
+                "select from_unit        as item_unit      --商品单位\n" +
+                "      ,to_unit          as standard_unit  --标准单位\n" +
+                "      ,cast(1/exchange_rate as DOUBLE)  as exchange_rate  --转换系数X，关系：商品单位 * X = 标准单位\n" +
+                "      ,1                as molecular      --转换系数分子\n" +
+                "      ,cast(exchange_rate as DOUBLE)    as denominator    --转换系数分母\n" +
+                "  from ods.ods_db_item_standard_zcy_unit_exchanges;\n" +
+                "\n" +
+                "INSERT OVERWRITE TABLE dim.dim_item_standard_unit_mapping\n" +
+                "--商品通过类目标准单位获取转换系数\n" +
+                "select t1.item_id              as item_id    --商品ID\n" +
+                "      ,t1.item_unit            as item_unit  --商品单位\n" +
+                "      ,t1.standard_unit        as standard_unit --标准单位\n" +
+                "      ,t2.exchange_rate        as exchange_rate --转换系数\n" +
+                "      ,t2.molecular            as molecular --转换系数分子\n" +
+                "      ,t2.denominator          as denominator --转换系数分母\n" +
+                "      ,'类目'                   as type --通过类目获取\n" +
+                "      ,t1.product_id           as product_id --产品ID\n" +
+                "  from tmp.tmp_4303_catagory_unit_detail t1\n" +
+                "  join tmp.tmp_4303_unit_exchanges t2\n" +
+                "    on t1.item_unit = t2.item_unit\n" +
+                "   and t1.standard_unit = t2.standard_unit\n" +
+                "  left join tmp.tmp_4303_item_unit_map t3\n" +
+                "    on t1.item_id = t3.item_id\n" +
+                " where t3.item_id is null --优先取商品的自定义转换关系\n" +
+                "union all\n" +
+                "--获取商品自定义转换系数\n" +
+                "select t1.item_id              as item_id    --商品ID\n" +
+                "      ,null                    as item_unit  --商品单位\n" +
+                "      ,t1.standard_unit        as standard_unit --标准单位\n" +
+                "      ,t1.exchange_rate        as exchange_rate --转换系数\n" +
+                "      ,t1.exchange_rate        as molecular      --转换系数分子\n" +
+                "      ,1                       as denominator    --转换系数分母\n" +
+                "      ,'自定义'                 as type --通过类目获取\n" +
+                "      ,t1.product_id           as product_id --产品ID\n" +
+                "  from tmp.tmp_4303_item_unit_map t1;\n" +
+                "\n" +
+                "--删除临时表\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_item_unit_map;\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_catagory_unit_detail;\n" +
+                "DROP TABLE IF EXISTS tmp.tmp_4303_unit_exchanges;";
+        Map<String, String> customParams = new HashMap<>();
+//        String sql = "select ${dt} as a, ${ bizquarter } c from tmp.tmp_table_1 where b = ${day-1d};\nselect ${bizquarter}!!!${bizyear} as d,  {0} !!!${day2} as e from tmp.tmp_table_2";
+        String newSql = SqlDynamicParamTool.replaceDynamicParam(sql, customParams, (d_param) -> "d-202203");
+        String[] multiSqlArray = SparkSqlUtil.splitToMultiSql(newSql);
+
+        List<String> fromTables;
+        try {
+            String singleSql = "";
+            fromTables = SparkSqlUtil.getFromTables(singleSql, null);
+            for (String tempTbl : fromTables) {
+                System.out.println(tempTbl);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
 //        String add_db = SparkSqlUtil.addDatabaseEnv(sql,"stag_");
 //        Map<String, String> map = SparkSqlUtil.insertErase(newSql);
 //        System.out.println(sql);
-        System.out.println(newSql);
+
+//        System.out.println(newSql);
+//        for (String tempSql : multiSqlArray) {
+//            System.out.println(tempSql);
+//        }
     }
 }

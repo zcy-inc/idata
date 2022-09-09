@@ -26,6 +26,9 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @description:
@@ -36,19 +39,64 @@ public class SqlDynamicParamTool {
 
     private static final Set<String> PARAMS = Sets.newHashSet("bizdate", "bizmonth", "bizquarter", "bizyear", "day", "dt");
 
+    public static String replaceDynamicParam(String sourceSql) {
+        return replaceDynamicParam(sourceSql, null);
+    }
+
+    public static String replaceDynamicParam(String sourceSql, Map<String, String> customParams) {
+        return replaceDynamicParam(sourceSql, customParams, null);
+    }
+
+    public static String replaceDynamicParam(String sourceSql, Map<String, String> customParams, Function<String, String> defaultReplaceFunction) {
+        Map<String, String> paramMap = getWithCustomParamMap(customParams);
+        String placeholderPattern = "(\\$)?\\{(.+?)\\}";
+        Pattern pattern = Pattern.compile(placeholderPattern);
+        Matcher matcher = pattern.matcher(sourceSql);
+        StringBuilder builder = new StringBuilder();
+        while (matcher.find()) {
+            String placeholderSymbol = matcher.group(1);
+            String placeholderKey = matcher.group(2).trim();
+            String replaceVal;
+            if ("0".equals(placeholderKey) && Objects.isNull(placeholderSymbol)) {
+                replaceVal = paramMap.get("day");
+            } else if (placeholderKey.contains("+") || placeholderKey.contains("-")) {
+                replaceVal = getParsedDate(placeholderKey, paramMap);
+            } else {
+                replaceVal = paramMap.get(placeholderKey);
+            }
+            if (replaceVal == null && defaultReplaceFunction != null) {
+                replaceVal = defaultReplaceFunction.apply(placeholderKey);
+            }
+            if (replaceVal != null) {
+                matcher.appendReplacement(builder, replaceVal);
+            }
+        }
+        matcher.appendTail(builder);
+        return builder.toString();
+    }
+
+    private static Map<String, String> getWithCustomParamMap(Map<String, String> customParams) {
+        Map<String, String> paramMap = getParamMap();
+        if (customParams != null && customParams.size() > 0) {
+            for (Map.Entry<String, String> entry : customParams.entrySet()) {
+                paramMap.putIfAbsent(entry.getKey(), entry.getValue());
+            }
+        }
+        return paramMap;
+    }
+
     public static String replaceParam(String sourceSql) {
         Map<String, String> paramMap = getParamMap();
         sourceSql = sourceSql.replace("{0}", paramMap.get("day"));
         Stack<String> sqlStack = new Stack<>();
         List<Integer> indexList = new ArrayList<>();
-        for(int i = 0; i < sourceSql.length(); i++) {
+        for (int i = 0; i < sourceSql.length(); i++) {
             String subStr = sourceSql.substring(i, i + 1);
             if (i + 1 < sourceSql.length() && sqlStack.size() == 0 && "$".equals(subStr)
                     && "{".equals(sourceSql.substring(i + 1, i + 2))) {
                 indexList.add(i);
                 sqlStack.push("${");
-            }
-            else if (sqlStack.size() > 0 && "}".equals(subStr)) {
+            } else if (sqlStack.size() > 0 && "}".equals(subStr)) {
                 indexList.add(i + 1);
                 sqlStack.pop();
             }
@@ -68,17 +116,14 @@ public class SqlDynamicParamTool {
             String sql = sourceSql.substring(indexList.get(i), indexList.get(i + 1));
             if (i % 2 == listSplitRemainder) {
                 sqlList.add(sql);
-            }
-            else {
+            } else {
                 String bizParamKey = sourceSql.substring(indexList.get(i) + 2, indexList.get(i + 1) - 1);
                 if (PARAMS.contains(bizParamKey)) {
                     sqlList.add(paramMap.get(bizParamKey));
-                }
-                else if ((bizParamKey.contains("+") && PARAMS.contains(bizParamKey.split("\\+")[0]))
+                } else if ((bizParamKey.contains("+") && PARAMS.contains(bizParamKey.split("\\+")[0]))
                         || (bizParamKey.contains("-") && PARAMS.contains(bizParamKey.split("-")[0]))) {
                     sqlList.add(getParsedDate(bizParamKey, paramMap));
-                }
-                else {
+                } else {
                     sqlList.add(sql);
                 }
             }
