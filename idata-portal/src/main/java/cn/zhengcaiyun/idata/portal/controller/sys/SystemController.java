@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
@@ -97,6 +98,11 @@ public class SystemController {
             throw new IllegalAccessException("没有LDAP配置权限");
         }
         return RestResult.success(systemConfigService.getSystemConfigs(ConfigTypeEnum.LDAP.name()));
+    }
+
+    @GetMapping("/p1/sys/features")
+    public RestResult<List<SysFeature>> getFeatures() {
+        return RestResult.success(systemConfigService.getFeatures(null));
     }
 
     @PostMapping("/p1/sys/xmlConfigValue")
