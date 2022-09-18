@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,8 +102,9 @@ public class SystemController {
     }
 
     @GetMapping("/p1/sys/features")
-    public RestResult<List<SysFeature>> getFeatures() {
-        return RestResult.success(systemConfigService.getFeatures(null));
+    public RestResult<List<SysFeature>> getFeaturesByCodes(@RequestParam(value = "featureCodes", required = false) String featureCodes) {
+        List<String> featureCodeList = featureCodes != null ? Arrays.asList(featureCodes.split(",")) : null;
+        return RestResult.success(systemConfigService.getFeaturesByCodes(featureCodeList));
     }
 
     @PostMapping("/p1/sys/xmlConfigValue")

@@ -105,7 +105,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Override
     public List<SysFeature> getFeaturesByCodes(List<String> featureCodes) {
         if (featureCodes == null) {
-            sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1)));
+            return sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1)));
         }
         return sysFeatureDao.select(c -> c.where(sysFeature.del, isNotEqualTo(1),
                 and(sysFeature.featureCode, isIn(featureCodes))));

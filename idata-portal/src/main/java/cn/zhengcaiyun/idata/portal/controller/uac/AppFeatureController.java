@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.portal.controller.uac;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
+import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.user.dto.AppInfoDto;
 import cn.zhengcaiyun.idata.user.dto.RoleDto;
@@ -47,7 +48,9 @@ public class AppFeatureController {
 
     @GetMapping("/apps")
     public RestResult<Page<AppInfoDto>> findApps(@RequestParam(value = "limit", required = false) Integer limit,
-                                                  @RequestParam(value = "offset", required = false) Integer offset) {
+                                                 @RequestParam(value = "offset", required = false) Integer offset) {
+        limit = limit != null ? limit : (int) PageParam.DEFAULT_LIMIT;
+        offset = offset != null ? offset : 0;
         return RestResult.success(appFeatureService.findApps(limit, offset));
     }
 

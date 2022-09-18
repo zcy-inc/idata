@@ -31,23 +31,24 @@ import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.AppFeatureService;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.user.dal.dao.UacAppFeatureDynamicSqlSupport.uacAppFeature;
 import static cn.zhengcaiyun.idata.user.dal.dao.UacAppInfoDynamicSqlSupport.uacAppInfo;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
  * @date 2022-09-18 下午1:56
  */
+
+@Service
 public class AppFeatureServiceImpl implements AppFeatureService {
 
     @Autowired
@@ -59,6 +60,7 @@ public class AppFeatureServiceImpl implements AppFeatureService {
 
     private final String[] appInfoFields = {"id", "del", "createTime", "creator", "editTime", "editor",
             "appName", "appKey", "appSecret", "description"};
+    private final String FEATURE_CODE_PREFIX = "F_MENU_";
 
     @Override
     public AppInfoDto findById(Long id) {
@@ -69,10 +71,11 @@ public class AppFeatureServiceImpl implements AppFeatureService {
                 .get();
 
         AppInfoDto echo = PojoUtil.copyOne(appInfo, AppInfoDto.class, appInfoFields);
-        List<SysFeature> featureList = systemConfigService
-                .getFeaturesByCodes(Arrays.asList(appFeature.getFeatureCodes().split(",")));
+        // 恢复F_MENU前缀
+        List<String> featureCodeList = changeOriginalFeatureCodes(Arrays.asList(appFeature.getFeatureCodes().split(",")));
+        List<SysFeature> featureList = systemConfigService.getFeaturesByCodes(featureCodeList);
         echo.setAppFeatures(featureList);
-        echo.setFeatureCodes(appFeature.getFeatureCodes());
+        echo.setFeatureCodes(String.join(",", featureCodeList));
         return echo;
     }
 
@@ -81,6 +84,7 @@ public class AppFeatureServiceImpl implements AppFeatureService {
         List<UacAppInfo> appInfoList = uacAppInfoDao.select(c -> c.where(uacAppInfo.del, isNotEqualTo(1))
                 .orderBy(uacAppInfo.editTime.descending())
                 .limit(limit).offset(offset));
+        if (appInfoList.size() == 0) return Page.newOne(new ArrayList<>(), 0L);
         List<String> appKeyList = appInfoList.stream().map(UacAppInfo::getAppKey).collect(Collectors.toList());
         List<UacAppFeature> appFeatureList = uacAppFeatureDao.select(c -> c.where(uacAppFeature.del, isNotEqualTo(1),
                 and(uacAppFeature.appKey, isIn(appKeyList))));
@@ -91,7 +95,8 @@ public class AppFeatureServiceImpl implements AppFeatureService {
         Map<String, List<SysFeature>> appFeaturesMap = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : appFeatureCodesMap.entrySet()) {
             List<SysFeature> featureList = allFeatureList.stream()
-                    .filter(c -> entry.getValue().contains(c.getFeatureCode()))
+                    // 恢复F_MENU前缀
+                    .filter(c -> changeOriginalFeatureCodes(entry.getValue()).contains(c.getFeatureCode()))
                     .collect(Collectors.toList());
             appFeaturesMap.put(entry.getKey(), featureList);
         }
@@ -107,6 +112,10 @@ public class AppFeatureServiceImpl implements AppFeatureService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public AppInfoDto add(AppInfoDto appInfoDto) {
+        UacAppInfo dupNameAppInfo = uacAppInfoDao.selectOne(c -> c.where(uacAppInfo.del, isNotEqualTo(1),
+                and(uacAppInfo.appName, isEqualTo(appInfoDto.getAppName()))))
+                .orElse(null);
+        checkArgument(dupNameAppInfo == null, "应用名称重复，新建失败");
         // appInfo
         UacAppInfo appInfo = PojoUtil.copyOne(appInfoDto, UacAppInfo.class, appInfoFields);
         appInfo.setEditor(appInfoDto.getCreator());
@@ -118,31 +127,48 @@ public class AppFeatureServiceImpl implements AppFeatureService {
         appFeature.setCreator(appInfoDto.getCreator());
         appFeature.setEditor(appInfoDto.getCreator());
         appFeature.setAppKey(appInfo.getAppKey());
-        appFeature.setFeatureCodes(appInfoDto.getFeatureCodes());
+        // 去除F_MENU前缀
+        appFeature.setFeatureCodes(appInfoDto.getFeatureCodes().replaceAll(FEATURE_CODE_PREFIX, ""));
+        uacAppFeatureDao.insertSelective(appFeature);
         return findById(appInfo.getId());
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public AppInfoDto update(AppInfoDto appInfoDto) {
-        UacAppInfo appInfo = uacAppInfoDao.selectByPrimaryKey(appInfoDto.getId())
+        UacAppInfo existAppInfo = uacAppInfoDao.selectByPrimaryKey(appInfoDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("应用不存在"));
+        UacAppInfo dupNameAppInfo = uacAppInfoDao.selectOne(c -> c.where(uacAppInfo.del, isNotEqualTo(1),
+                and(uacAppInfo.appName, isEqualTo(appInfoDto.getAppName()))))
+                .orElse(null);
+        checkArgument(dupNameAppInfo == null, "应用名称重复，新建失败");
         UacAppFeature appFeature = uacAppFeatureDao.selectOne(c ->
-                c.where(uacAppFeature.del, isNotEqualTo(1), and(uacAppFeature.appKey, isEqualTo(appInfo.getAppKey()))))
+                c.where(uacAppFeature.del, isNotEqualTo(1), and(uacAppFeature.appKey, isEqualTo(existAppInfo.getAppKey()))))
                 .get();
 
         // appInfo
-        appInfo.setEditor(appInfoDto.getEditor());
-        appInfo.setEditTime(new Timestamp(System.currentTimeMillis()));
-        appInfo.setAppName(appInfoDto.getAppName());
-        appInfo.setDescription(appInfoDto.getDescription());
-        uacAppInfoDao.updateByPrimaryKeySelective(appInfo);
+        UacAppInfo newAppInfo = new UacAppInfo();
+        newAppInfo.setId(appInfoDto.getId());
+        newAppInfo.setEditor(appInfoDto.getEditor());
+        newAppInfo.setEditTime(new Timestamp(System.currentTimeMillis()));
+        newAppInfo.setAppName(appInfoDto.getAppName());
+        newAppInfo.setDescription(appInfoDto.getDescription());
+        uacAppInfoDao.updateByPrimaryKeySelective(newAppInfo);
         // appFeature
         // 为保持列表修改时间倒序，均更新
-        appFeature.setEditor(appInfoDto.getEditor());
-        appFeature.setEditTime(new Timestamp(System.currentTimeMillis()));
-        appFeature.setFeatureCodes(appInfoDto.getFeatureCodes());
-        uacAppFeatureDao.updateByPrimaryKeySelective(appFeature);
+        UacAppFeature newAppFeature = new UacAppFeature();
+        newAppFeature.setId(appFeature.getId());
+        newAppFeature.setEditor(appInfoDto.getEditor());
+        newAppFeature.setEditTime(new Timestamp(System.currentTimeMillis()));
+        newAppFeature.setFeatureCodes(appInfoDto.getFeatureCodes().replaceAll(FEATURE_CODE_PREFIX, ""));
+        uacAppFeatureDao.updateByPrimaryKeySelective(newAppFeature);
         return findById(appInfoDto.getId());
+    }
+
+    // 原始featureCode为F_MENU_featureCode
+    private List<String> changeOriginalFeatureCodes(List<String> featureCodes) {
+        return featureCodes.stream()
+                .map(featureCode -> FEATURE_CODE_PREFIX + featureCode)
+                .collect(Collectors.toList());
     }
 }
