@@ -102,10 +102,17 @@ public class DIStreamJobContent {
 
     /**
      * Database Column Remarks:
-     *   数据来源-来源表
+     *   是否开启分表支持，0：否，1：是
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_tables")
-    private String cdcTables;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.enable_sharding")
+    private Integer enableSharding;
+
+    /**
+     * Database Column Remarks:
+     *   cdc配置
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_config")
+    private String cdcConfig;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.id")
     public Long getId() {
@@ -237,13 +244,23 @@ public class DIStreamJobContent {
         this.destDataSourceId = destDataSourceId;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_tables")
-    public String getCdcTables() {
-        return cdcTables;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.enable_sharding")
+    public Integer getEnableSharding() {
+        return enableSharding;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_tables")
-    public void setCdcTables(String cdcTables) {
-        this.cdcTables = cdcTables;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.enable_sharding")
+    public void setEnableSharding(Integer enableSharding) {
+        this.enableSharding = enableSharding;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_config")
+    public String getCdcConfig() {
+        return cdcConfig;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_config")
+    public void setCdcConfig(String cdcConfig) {
+        this.cdcConfig = cdcConfig;
     }
 }

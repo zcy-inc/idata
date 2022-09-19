@@ -27,6 +27,7 @@ import {
   submitTask,
   tyrRun,
   getTyrRunLog,
+  cancelQuery
 } from '@/services/datadev';
 import { IconFont } from '@/components';
 import DrawerBasic from './components/DrawerBasic';
@@ -42,6 +43,7 @@ import ScriptPython from './components/Content/ScriptPython';
 import Kylin from './components/Content/Kylin';
 import { useJob, VersionOption } from '../../../hooks/useJob';
 import { useEditorPanel } from '../../../hooks/useEditorPanel';
+import { transformAlias } from '@/components/TableNameInput';
 
 export interface TabTaskProps {
   pane: IPane;
@@ -77,7 +79,9 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const [actionType, setActionType] = useState('');
   const [visibleAction, setVisibleAction] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [debugLoading, setDebugLoading] = useState(false);
+  const [isDebuging, setIsDebuging] = useState(false);
+  const [enableStop, setEnableStop] = useState(false);
+  const enableStopRef = useRef<boolean>(false);
   // 提交
   const [visibleSubmit, setVisibleSubmit] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -170,6 +174,31 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       const values = form.getFieldsValue();
       switch (task?.jobType) {
         case TaskTypes.SQL_SPARK:
+          const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds, sourceSql } = values;
+          const param = {
+            extTables: srcDataSourceType && [{
+              dataSourceType: srcDataSourceType,
+              dataSourceId: srcDataSourceId,
+              tables: srcTableNamse && srcTableNamse.map((table: { name: any; }) => ({
+                tableName: table.name,
+                tableAlias: transformAlias(srcDataSourceType, table.name),
+              }))
+            }],
+            udfIds,
+            sourceSql,
+            jobId: pane.id,
+            jobType: task?.jobType,
+            version,
+          };
+          saveSqlSpark({ jobId: pane.id }, param)
+            .then((res) => {
+              if (res.success) {
+                message.success('保存成功');
+                refreshTask();
+              }
+            })
+            .catch((err) => {});
+          break;
         case TaskTypes.SQL_FLINK:
           const dataSql = {
             ...values,
@@ -296,8 +325,14 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }) => {
-    runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
+  }, isStop = !enableStopRef.current) => {
+    if(isStop) {
+      cancelQuery({sessionId,statementId}).then(() => {
+        message.success('已停止调试');
+        setIsDebuging(false);
+      })
+    } else {
+      runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
       .then((res) => {
         if (
           res.data.statementState !== StatementState.AVAILABLE &&
@@ -310,11 +345,16 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             });
           }, 2000);
         } else {
+          setIsDebuging(false);
+          setEnableStop(false);
+          enableStopRef.current = false;
           const logs = get(res, 'data.pythonResults', '');
           setLog([logs]);
         }
       })
       .catch((err) => {});
+    }
+ 
   };
 
   // 轮询 spark 调试结果
@@ -324,63 +364,83 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   }: {
     sessionId: number;
     statementId: number;
-  }) => {
-    runQueryResult({
-      sessionId,
-      sessionKind: 'spark',
-      statementId,
-      from: pollingFrom.current,
-      size: 10,
-    })
-      .then((res) => {
-        if (
-          res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED
-        ) {
-          pollingFrom.current = pollingFrom.current + 10;
-          const logs = get(res, 'data.queryRunLog.log', []);
-          setLog((pre) => [...pre, ...logs]);
-          setTimeout(() => {
-            fetchSparkQueryResult({
-              sessionId,
-              statementId,
-            });
-          }, 2000);
-        } else {
-          pollingFrom.current = 0;
-          const result = res.data.resultSet;
-          const resultHeader = res.data.resultHeader || [];
-          setResults((pre) => [...pre, result]);
-          setResultHeader((pre) => [...pre, resultHeader]);
-        }
+  }, isStop = !enableStopRef.current) => {
+    if(isStop) {
+      cancelQuery({sessionId,statementId}).then(() => {
+        message.success('已停止调试');
+        setIsDebuging(false);
       })
-      .catch((err) => {});
+    } else {
+      runQueryResult({
+        sessionId,
+        sessionKind: 'spark',
+        statementId,
+        from: pollingFrom.current,
+        size: 10,
+      })
+        .then((res) => {
+          if (
+            res.data.statementState !== StatementState.AVAILABLE &&
+            res.data.statementState !== StatementState.CANCELED
+          ) {
+            pollingFrom.current = pollingFrom.current + 10;
+            const logs = get(res, 'data.queryRunLog.log', []);
+            setLog((pre) => [...pre, ...logs]);
+            setTimeout(() => {
+              fetchSparkQueryResult({
+                sessionId,
+                statementId,
+              });
+            }, 2000);
+          } else {
+            setIsDebuging(false);
+            setEnableStop(false);
+            enableStopRef.current = false;
+            pollingFrom.current = 0;
+            const result = res.data.resultSet;
+            const resultHeader = res.data.resultHeader || [];
+            setResults((pre) => [...pre, result]);
+            setResultHeader((pre) => [...pre, resultHeader]);
+          }
+        })
+        .catch((err) => {});
+    }
+  
   };
 
   /**
    * 调试选中代码段
    */
   const onDebug = async () => {
-    const value = getDebugCode();
-    if (typeof value !== 'string') {
-      return message.error('请选择代码');
-    }
-    setDebugLoading(true);
-    handleExpandChange(true);
-    switch (task?.jobType) {
-      case TaskTypes.SQL_SPARK: {
-        const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
-        fetchSparkQueryResult(data);
-        break;
+    if(enableStop) {
+     setEnableStop(false);
+     enableStopRef.current = false;
+    } else {
+      setIsDebuging(true);
+      const value = getDebugCode();
+      if (typeof value !== 'string') {
+        return message.error('请选择代码');
       }
-      case TaskTypes.SPARK_PYTHON:
-      case TaskTypes.SCRIPT_PYTHON: {
-        const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
-        fetchPysparkQueryResult(data);
-        break;
+      handleExpandChange(true);
+      switch (task?.jobType) {
+        case TaskTypes.SQL_SPARK: {
+          const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
+          setEnableStop(true);
+          enableStopRef.current = true;
+          fetchSparkQueryResult(data);
+          break;
+        }
+        case TaskTypes.SPARK_PYTHON:
+        case TaskTypes.SCRIPT_PYTHON: {
+          const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
+          setEnableStop(true);
+          enableStopRef.current = true;
+          fetchPysparkQueryResult(data);
+          break;
+        }
       }
     }
-    setDebugLoading(false);
+  
   };
 
   const tryRun = () => {
@@ -418,12 +478,12 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DEBUG,
-      <Tooltip title="调试" key="8">
+      <Tooltip title={`${enableStop ? '停止': '开始'}调试`} key="8">
         <Button
           className={styles.btn}
+          loading={isDebuging && !enableStop}
           icon={<IconFont type="icon-tiaoshi" />}
           onClick={onDebug}
-          loading={debugLoading}
         />
       </Tooltip>,
     ],

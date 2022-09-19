@@ -183,3 +183,19 @@ export interface Overhang {
   remark: string;
   creator: string;
 }
+
+// 实时作业列表
+export interface StreamListItem {
+  id: number;
+  jobId: number;
+  jobName: string;
+  status: number;
+  jobContentVersion: number;
+  jobContentVersionDisplay: string;
+  environment: string;
+  owner: string;
+  runStartTime: string;
+  editTime: string;
+  editor: string;
+  externalUrl?: string;
+}

@@ -163,6 +163,20 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
     private String extProperties;
 
+    /**
+     * Database Column Remarks:
+     *   开启小文件合并 0:否，1:是
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    private Integer isOpenMergeFile;
+
+    /**
+     * Database Column Remarks:
+     *   DS自定义参数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    private String customParams;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
         return id;
@@ -381,5 +395,25 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
     public void setExtProperties(String extProperties) {
         this.extProperties = extProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    public Integer getIsOpenMergeFile() {
+        return isOpenMergeFile;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    public void setIsOpenMergeFile(Integer isOpenMergeFile) {
+        this.isOpenMergeFile = isOpenMergeFile;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    public String getCustomParams() {
+        return customParams;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    public void setCustomParams(String customParams) {
+        this.customParams = customParams;
     }
 }

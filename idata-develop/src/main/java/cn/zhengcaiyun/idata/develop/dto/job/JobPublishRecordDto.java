@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import org.springframework.beans.BeanUtils;
 
@@ -86,6 +87,10 @@ public class JobPublishRecordDto extends BaseDto {
      * 审批备注
      */
     private String approveRemark;
+    /**
+     * 审批结果
+     */
+    private String approveResult;
 
     public Long getId() {
         return id;
@@ -207,9 +212,26 @@ public class JobPublishRecordDto extends BaseDto {
         this.jobContentVersionDisplay = jobContentVersionDisplay;
     }
 
+    public String getApproveResult() {
+        return approveResult;
+    }
+
+    public void setApproveResult(String approveResult) {
+        this.approveResult = approveResult;
+    }
+
     public static JobPublishRecordDto from(JobPublishRecord record) {
         JobPublishRecordDto dto = new JobPublishRecordDto();
         BeanUtils.copyProperties(record, dto);
+
+        if (PublishStatusEnum.REJECTED.val == record.getPublishStatus()) {
+            dto.setApproveResult("驳回");
+        } else if (PublishStatusEnum.PUBLISHED.val == record.getPublishStatus()
+                || PublishStatusEnum.ARCHIVED.val == record.getPublishStatus()) {
+            dto.setApproveResult("发布");
+        } else {
+            dto.setApproveResult("");
+        }
         return dto;
     }
 

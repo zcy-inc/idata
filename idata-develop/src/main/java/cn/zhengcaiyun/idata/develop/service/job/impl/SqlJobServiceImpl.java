@@ -27,8 +27,10 @@ import cn.zhengcaiyun.idata.develop.dal.repo.job.SqlJobRepo;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.DryRunDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.FlinkSqlJobExtendConfigDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
+import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExternalTableDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
 import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +71,10 @@ public class SqlJobServiceImpl implements SqlJobService {
         Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(sqlJobDto.getJobId());
         checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
 
+        if (CollectionUtils.isNotEmpty(sqlJobDto.getExtTables())) {
+            checkExtTables(sqlJobDto.getExtTables());
+        }
+
         Integer version = sqlJobDto.getVersion();
         boolean startNewVersion = false;
         if (Objects.nonNull(version)) {
@@ -93,9 +99,14 @@ public class SqlJobServiceImpl implements SqlJobService {
 
         if (startNewVersion) {
             DevJobContentSql jobContentSql = PojoUtil.copyOne(sqlJobDto, DevJobContentSql.class,
-                    "jobId", "sourceSql", "udfIds", "externalTables");
-            if (!Objects.isNull(sqlJobDto.getExtConfig())) {
+                    "jobId", "sourceSql", "udfIds");
+            if (Objects.nonNull(sqlJobDto.getExtConfig())) {
                 jobContentSql.setExtendConfigs(new Gson().toJson(sqlJobDto.getExtConfig()));
+            }
+            if (Objects.nonNull(sqlJobDto.getExtTables())) {
+                jobContentSql.setExternalTables(JSON.toJSONString(sqlJobDto.getExtTables()));
+            } else {
+                jobContentSql.setExternalTables("");
             }
             version = sqlJobRepo.newVersion(sqlJobDto.getJobId());
             jobContentSql.setVersion(version);
@@ -145,6 +156,20 @@ public class SqlJobServiceImpl implements SqlJobService {
 
         List<String> args = Arrays.asList(dryRunDto.getJobId().toString(), dryRunDto.getJobVersion().toString());
         return livyService.createBatches(LIVY_DRY_RUN_PY_FILE, args);
+    }
+
+    private void checkExtTables(List<SqlJobExternalTableDto> extTables) {
+        for (SqlJobExternalTableDto externalTableDto : extTables) {
+            checkArgument(StringUtils.isNotBlank(externalTableDto.getDataSourceType()), "外部表 - 数据源类型为空");
+            checkArgument(Objects.nonNull(externalTableDto.getDataSourceId()), "外部表 - 数据源为空");
+            List<SqlJobExternalTableDto.ExternalTableInfo> tables = externalTableDto.getTables();
+            checkArgument(CollectionUtils.isNotEmpty(tables), "外部表 - 表配置为空");
+            for (SqlJobExternalTableDto.ExternalTableInfo tableInfo : tables) {
+                checkArgument(StringUtils.isNotBlank(tableInfo.getTableName()), "外部表 - 表名为空");
+                checkArgument(tableInfo.getTableName().indexOf(".") > 0, "外部表 - 表名未包含库名");
+                checkArgument(StringUtils.isNotBlank(tableInfo.getTableAlias()), "外部表 - 表别名为空");
+            }
+        }
     }
 
 }

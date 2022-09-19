@@ -22,7 +22,7 @@ public class EnvRuleHelper {
             return rawTable;
         }
 
-        if (StringUtils.equalsIgnoreCase(dataSourceName, DataSourceTypeEnum.doris.name())) {
+        if (StringUtils.equalsIgnoreCase(dataSourceName, DataSourceTypeEnum.starrocks.name())) {
             return env + "_" + rawTable;
         }
         if (StringUtils.equalsIgnoreCase(dataSourceName, DataSourceTypeEnum.hive.name())) {

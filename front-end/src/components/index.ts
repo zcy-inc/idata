@@ -3,6 +3,7 @@ import IconFont from './IconFont';
 import Operation from './Operation';
 import TiledTable from './TiledTable';
 import RightContent from './RightContent';
+import TableNameInput from './TableNameInput';
 
 export * from './Hn';
 
@@ -24,4 +25,4 @@ export * from './CascaderSelect';
 
 export { default as JoinSelect } from './JoinSelect';
 
-export { IconFont, Operation, SearchPanel, RightContent, TiledTable };
+export { IconFont, Operation, SearchPanel, RightContent, TiledTable, TableNameInput };

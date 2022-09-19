@@ -103,10 +103,17 @@ public final class DIStreamJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   数据来源-来源表
+     *   是否开启分表支持，0：否，1：是
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_tables")
-    public static final SqlColumn<String> cdcTables = DI_STREAM_JOB_CONTENT.cdcTables;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.enable_sharding")
+    public static final SqlColumn<Integer> enableSharding = DI_STREAM_JOB_CONTENT.enableSharding;
+
+    /**
+     * Database Column Remarks:
+     *   cdc配置
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di_stream.cdc_config")
+    public static final SqlColumn<String> cdcConfig = DI_STREAM_JOB_CONTENT.cdcConfig;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di_stream")
     public static final class DIStreamJobContent extends SqlTable {
@@ -136,7 +143,9 @@ public final class DIStreamJobContentDynamicSqlSupport {
 
         public final SqlColumn<Long> destDataSourceId = column("dest_data_source_id", JDBCType.BIGINT);
 
-        public final SqlColumn<String> cdcTables = column("cdc_tables", JDBCType.LONGVARCHAR);
+        public final SqlColumn<Integer> enableSharding = column("enable_sharding", JDBCType.INTEGER);
+
+        public final SqlColumn<String> cdcConfig = column("cdc_config", JDBCType.LONGVARCHAR);
 
         public DIStreamJobContent() {
             super("dev_job_content_di_stream");

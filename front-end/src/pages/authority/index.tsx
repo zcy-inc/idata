@@ -56,6 +56,10 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
       tabList={tabList}
       tabActiveKey={getTabKey()}
       onTabChange={handleTabChange}
+      header={{
+        title: '角色管理',
+        breadcrumb: {},
+      }}
     >
       <div className="zcy-content"  >
         {props.children}

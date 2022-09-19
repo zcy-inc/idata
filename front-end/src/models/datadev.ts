@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getTree } from '@/services/datadev';
-import { TreeNode } from '@/types/datadev';
+import { TreeNode, Task } from '@/types/datadev';
 import { newEnum, newTable, newDAG, mockTree, newFun } from './constants';
-import { FolderBelong } from '@/constants/datadev';
+import { FolderBelong,FolderTypes } from '@/constants/datadev';
 
 export interface IPane extends TreeNode {
   mode: 'view' | 'edit';
@@ -24,6 +24,7 @@ export default () => {
   const [visibleTask, setVisibleTask] = useState<boolean>(false);
   const [visibleDev, setVisibleDev] = useState<boolean>(false);
   const [curLabel, setCurLabel] = useState(-1); // 存储label的id，用来判断新建和编辑
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);// 树的选中节点 cid且唯一[xxx]
   const folderList = useRef<FolderListItem[]>([]);
 
   useEffect(() => {
@@ -58,6 +59,16 @@ export default () => {
    * 切换当前 active 的tab
    */
   const onChangeTab = useCallback((key) => setActiveKey(key), [panes]);
+
+   /**
+   * V1.8 新增DI/作业直接打开编辑器和树 一帧
+   * cid = record+belong+id
+   */
+    const onSelectNewTab =  (belong:FolderBelong,concreteBelong: string, data: Task) => {
+      const cid:string = `${FolderTypes.RECORD}_${belong}_${data.id}`
+      onViewTree({...data, belong, cid, concreteBelong} as unknown as TreeNode);
+      setSelectedKeys([cid]);
+    }
 
   /**
    * 增加一个 view mode 的tab
@@ -202,5 +213,8 @@ export default () => {
     setVisibleTask,
     visibleDev,
     setVisibleDev,
+    selectedKeys, 
+    setSelectedKeys,
+    onSelectNewTab
   };
 };

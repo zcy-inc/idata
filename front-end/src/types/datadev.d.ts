@@ -14,6 +14,7 @@ import {
   JobStatus,
   DIJobType,
   DISyncMode,
+  ContentBelong
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -27,6 +28,7 @@ export interface TreeNode {
   parentCid?: string;
   parentId?: number;
   children?: TreeNode[];
+  concreteBelong?: ContentBelong;
   // 以下是Antd树组件需要的属性
   className?: string;
   title?: any;
@@ -87,6 +89,7 @@ export interface Task {
   folderId: number;
   creator: string;
   language?: TaskTypes;
+  syncMode?: string;
 }
 
 export interface TaskVersion {
@@ -198,8 +201,9 @@ export interface DependenciesJob extends ConfiguredTaskListItem {
 export interface SqlSparkContent {
   jobId: number;
   jobType: TaskTypes;
-  sourceSql: string;
-  externalTables: string;
+  sourceSql?: string;
+  externalTables?: object;
+  extTables?: Array;
   id?: number;
   editable?: number;
   version?: number;
@@ -272,6 +276,7 @@ export interface DependenceTreeNode {
 }
 
 export interface UDF {
+  globalFun: any;
   commandFormat: string;
   sourceName?: string;
   description: string;
@@ -305,6 +310,7 @@ export interface DIJobBasicInfo {
   creator: string;
   status: 0 | 1; // 0 停用，1 启用
   remark?: string;
+  jobTypeEnum: string;
 }
 
 export interface MergeSqlParamDto {

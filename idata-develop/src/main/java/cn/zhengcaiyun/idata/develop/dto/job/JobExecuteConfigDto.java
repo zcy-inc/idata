@@ -6,8 +6,10 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.dynamic.sql.SqlColumn;
 import org.springframework.beans.BeanUtils;
 
+import javax.annotation.Generated;
 import java.util.List;
 import java.util.Objects;
 
@@ -97,7 +99,20 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     private String execEngine;
 
+    /**
+     * 自定义参数
+     */
     private List<KeyValuePair<String, String>> extProperties;
+
+    /**
+     *  开启小文件合并 0:否，1:是
+     */
+    private Integer isOpenMergeFile;
+
+    /**
+     *   DS自定义参数
+     */
+    public List<KeyValuePair<String, String>> customParams;
 
     public Long getId() {
         return id;
@@ -235,6 +250,22 @@ public class JobExecuteConfigDto extends BaseDto {
         this.execCores = execCores;
     }
 
+    public Integer getIsOpenMergeFile() {
+        return isOpenMergeFile;
+    }
+
+    public void setIsOpenMergeFile(Integer isOpenMergeFile) {
+        this.isOpenMergeFile = isOpenMergeFile;
+    }
+
+    public List<KeyValuePair<String, String>> getCustomParams() {
+        return customParams;
+    }
+
+    public void setCustomParams(List<KeyValuePair<String, String>> customParams) {
+        this.customParams = customParams;
+    }
+
     public static JobExecuteConfigDto from(JobExecuteConfig config) {
         JobExecuteConfigDto dto = new JobExecuteConfigDto();
         BeanUtils.copyProperties(config, dto);
@@ -243,6 +274,11 @@ public class JobExecuteConfigDto extends BaseDto {
 
         if (StringUtils.isNotBlank(config.getExtProperties())) {
             dto.setExtProperties(new Gson().fromJson(config.getExtProperties(), new TypeToken<List<KeyValuePair<String, String>>>() {
+            }.getType()));
+        }
+
+        if (StringUtils.isNotBlank(config.getCustomParams())) {
+            dto.setCustomParams(new Gson().fromJson(config.getCustomParams(), new TypeToken<List<KeyValuePair<String, String>>>() {
             }.getType()));
         }
         return dto;
@@ -254,6 +290,9 @@ public class JobExecuteConfigDto extends BaseDto {
 
         if (!Objects.isNull(this.extProperties)) {
             config.setExtProperties(new Gson().toJson(this.extProperties));
+        }
+        if (!Objects.isNull(this.customParams)) {
+            config.setCustomParams(new Gson().toJson(this.customParams));
         }
         return config;
     }

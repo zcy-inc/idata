@@ -109,14 +109,24 @@ public class JobManager {
         checkArgument(StringUtils.isNotBlank(sql), "作业的SQL脚本为空");
 
         // 替换动态参数，避免影响SQL解析
-        String replacedSql = SqlDynamicParamTool.replaceParam(sql);
-        List<String> fromTables;
-        try {
-            fromTables = SparkSqlUtil.getFromTables(replacedSql, null);
-        } catch (Exception ex) {
-            return Lists.newArrayList();
+        String replacedSql = SqlDynamicParamTool.replaceDynamicParam(sql, null, (extParam) -> "dummy_param");
+        String[] multiSqlArray = SparkSqlUtil.splitToMultiSql(replacedSql);
+        List<String> totalFromTables = Lists.newArrayList();
+        for (String singleSql : multiSqlArray) {
+            try {
+                List<String> subFromTables = SparkSqlUtil.getFromTables(singleSql.trim(), null);
+                if (CollectionUtils.isNotEmpty(subFromTables)) {
+                    totalFromTables.addAll(subFromTables);
+                }
+            } catch (Exception ex) {
+            }
         }
-        return deriveJobDependencies(jobInfo, environment, fromTables);
+        List<String> finalTables = totalFromTables.stream()
+                .filter(tempTable -> tempTable.contains("."))
+                .distinct()
+                .collect(Collectors.toList());
+
+        return deriveJobDependencies(jobInfo, environment, finalTables);
     }
 
     public List<JobDependenceDto> deriveDependenciesForBackFlow(JobInfo jobInfo, String environment, Integer version) {

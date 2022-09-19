@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.WhetherEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
@@ -156,6 +157,14 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     @Override
     public List<JobPublishRecord> findJobs(JobPublishRecordCondition condition) {
         return jobPublishRecordRepo.queryList(condition);
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        JobPublishRecord jobPublishRecord = jobPublishRecordRepo.query(id).get();
+        checkArgument(jobPublishRecord.getPublishStatus() != PublishStatusEnum.PUBLISHED.val, "禁止删除已发布版本");
+        jobPublishRecord.setDel(WhetherEnum.YES.val);
+        return jobPublishRecordRepo.update(jobPublishRecord);
     }
 
     private Map<String, String> getDwLayer() {

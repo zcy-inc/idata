@@ -576,8 +576,8 @@ export async function submitTask(
 /**
  * 获取DAG列表
  */
-export async function getDAGList(params: { environment: Environments; dwLayerCode?: string }) {
-  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
+export async function getDAGList(params: { environment: Environments; jobType: string }) {
+  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/jobs/assistance/dags/list', {
     method: 'GET',
     params,
   });
@@ -586,11 +586,25 @@ export async function getDAGList(params: { environment: Environments; dwLayerCod
 /**
  * 获取运行队列
  */
-export async function getExecuteQueues() {
+export async function getExecuteQueues(params: {jobType: string}) {
   return request<DefaultResponse & { data: { name: string; code: string }[] }>(
-    '/api/p1/dev/executeQueues',
+    '/api/p1/dev/jobs/assistance/executeQueues',
     {
       method: 'GET',
+      params
+    },
+  );
+}
+
+/**
+ * 获取执行引擎联动
+ */
+ export async function getEngineType(params: {jobType: string}) {
+  return request<DefaultResponse & { data: string[] }>(
+    '/api/p1/dev/jobs/engine-type',
+    {
+      method: 'GET',
+      params
     },
   );
 }
@@ -643,6 +657,19 @@ export async function getDataDevConfig(params: { jobId: number; environment: Env
     `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
     {
       method: 'GET',
+    },
+  );
+}
+
+/**
+ * 获取加载执行引擎
+ */
+ export async function getExecEngineOptions(params: { jobType: string }) {
+  return request<DefaultResponse & { data: any }>(
+    `/api/p1/dev/jobs/engine-type`,
+    {
+      method: 'GET',
+      params,
     },
   );
 }
@@ -856,6 +883,26 @@ export async function runQuery(data: {
       };
     }
   >('/api/p1/dev/jobs/runQuery', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 停止调试
+ */
+ export async function cancelQuery(data: {
+  sessionId: number;
+  statementId: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        sessionId: number;
+        statementId: number;
+      };
+    }
+  >('/api/p1/dev/jobs/cancelQuery', {
     method: 'POST',
     data,
   });
@@ -1149,7 +1196,7 @@ export async function getDISyncMode(params: { jobType: string }) {
  * 新增DI
  */
 export async function createDIJob(data: CreateDIJobDto) {
-  return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
+  return request<Tresponse<Task>>('/api/p1/dev/jobs/di', { method: 'POST', data });
 }
 
 /**
@@ -1157,6 +1204,26 @@ export async function createDIJob(data: CreateDIJobDto) {
  */
 export async function getDIJobBasicInfo(jobId: number) {
   return request<Tresponse<DIJobBasicInfo>>(`/api/p1/dev/jobs/di/${jobId}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取实时抽数作业内容
+ */
+ export async function getStreamJobBasicInfo({jobId, version} : {jobId: number; version: number}) {
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents/${version}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取转换目标表表名
+ */
+ export async function getDestTableName(params: any) {
+  return request('/api/p1/dev/jobs/assistance/DIStreamDestTable', {
+    params
+  }).then(
     ({ data }) => data,
   );
 }
@@ -1184,6 +1251,17 @@ export async function getDIJobContent({ jobId, version }: { jobId: number; versi
 export async function saveDIJobContent(data: any) {
   const { jobId } = data;
   return request(`/api/p1/dev/jobs/${jobId}/di/contents`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 保存实时抽数作业内容
+ */
+ export async function saveStreamJobContent(data: any) {
+  const { jobId } = data;
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents`, {
     method: 'POST',
     data,
   });

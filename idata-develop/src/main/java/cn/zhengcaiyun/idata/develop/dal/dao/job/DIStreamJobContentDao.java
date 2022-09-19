@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DIStreamJobContentDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di_stream")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, destDataSourceType, destDataSourceId, cdcTables);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, srcDataSourceType, srcDataSourceId, destDataSourceType, destDataSourceId, enableSharding, cdcConfig);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di_stream")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -70,7 +70,8 @@ public interface DIStreamJobContentDao {
         @Result(column="src_data_source_id", property="srcDataSourceId", jdbcType=JdbcType.BIGINT),
         @Result(column="dest_data_source_type", property="destDataSourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="dest_data_source_id", property="destDataSourceId", jdbcType=JdbcType.BIGINT),
-        @Result(column="cdc_tables", property="cdcTables", jdbcType=JdbcType.LONGVARCHAR)
+        @Result(column="enable_sharding", property="enableSharding", jdbcType=JdbcType.INTEGER),
+        @Result(column="cdc_config", property="cdcConfig", jdbcType=JdbcType.LONGVARCHAR)
     })
     List<DIStreamJobContent> selectMany(SelectStatementProvider selectStatement);
 
@@ -110,7 +111,8 @@ public interface DIStreamJobContentDao {
             .map(srcDataSourceId).toProperty("srcDataSourceId")
             .map(destDataSourceType).toProperty("destDataSourceType")
             .map(destDataSourceId).toProperty("destDataSourceId")
-            .map(cdcTables).toProperty("cdcTables")
+            .map(enableSharding).toProperty("enableSharding")
+            .map(cdcConfig).toProperty("cdcConfig")
         );
     }
 
@@ -129,7 +131,8 @@ public interface DIStreamJobContentDao {
             .map(srcDataSourceId).toPropertyWhenPresent("srcDataSourceId", record::getSrcDataSourceId)
             .map(destDataSourceType).toPropertyWhenPresent("destDataSourceType", record::getDestDataSourceType)
             .map(destDataSourceId).toPropertyWhenPresent("destDataSourceId", record::getDestDataSourceId)
-            .map(cdcTables).toPropertyWhenPresent("cdcTables", record::getCdcTables)
+            .map(enableSharding).toPropertyWhenPresent("enableSharding", record::getEnableSharding)
+            .map(cdcConfig).toPropertyWhenPresent("cdcConfig", record::getCdcConfig)
         );
     }
 
@@ -174,7 +177,8 @@ public interface DIStreamJobContentDao {
                 .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
                 .set(destDataSourceType).equalTo(record::getDestDataSourceType)
                 .set(destDataSourceId).equalTo(record::getDestDataSourceId)
-                .set(cdcTables).equalTo(record::getCdcTables);
+                .set(enableSharding).equalTo(record::getEnableSharding)
+                .set(cdcConfig).equalTo(record::getCdcConfig);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di_stream")
@@ -191,7 +195,8 @@ public interface DIStreamJobContentDao {
                 .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
                 .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
                 .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
-                .set(cdcTables).equalToWhenPresent(record::getCdcTables);
+                .set(enableSharding).equalToWhenPresent(record::getEnableSharding)
+                .set(cdcConfig).equalToWhenPresent(record::getCdcConfig);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_di_stream")
@@ -209,7 +214,8 @@ public interface DIStreamJobContentDao {
             .set(srcDataSourceId).equalTo(record::getSrcDataSourceId)
             .set(destDataSourceType).equalTo(record::getDestDataSourceType)
             .set(destDataSourceId).equalTo(record::getDestDataSourceId)
-            .set(cdcTables).equalTo(record::getCdcTables)
+            .set(enableSharding).equalTo(record::getEnableSharding)
+            .set(cdcConfig).equalTo(record::getCdcConfig)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -229,7 +235,8 @@ public interface DIStreamJobContentDao {
             .set(srcDataSourceId).equalToWhenPresent(record::getSrcDataSourceId)
             .set(destDataSourceType).equalToWhenPresent(record::getDestDataSourceType)
             .set(destDataSourceId).equalToWhenPresent(record::getDestDataSourceId)
-            .set(cdcTables).equalToWhenPresent(record::getCdcTables)
+            .set(enableSharding).equalToWhenPresent(record::getEnableSharding)
+            .set(cdcConfig).equalToWhenPresent(record::getCdcConfig)
             .where(id, isEqualTo(record::getId))
         );
     }

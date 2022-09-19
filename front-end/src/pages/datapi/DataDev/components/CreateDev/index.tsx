@@ -10,7 +10,7 @@ import {
   getEnumValues,
   getTaskTypes,
 } from '@/services/datadev';
-import { TaskCategory, TaskTypes } from '@/constants/datadev';
+import { TaskCategory, TaskTypes, FolderBelong, ContentBelong } from '@/constants/datadev';
 import { TaskType } from '@/types/datadev';
 import { DEVJOBFolderFormItem } from '../../../components/FolderFormItem';
 
@@ -27,7 +27,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [taskType, setTaskType] = useState<TaskCategory>();
   const [languages, setLanguages] = useState<TaskType[]>([]);
   const [form] = Form.useForm();
-  const { visibleDev, setVisibleDev, getTreeWrapped, curNode } = useModel('datadev');
+  const { visibleDev, setVisibleDev, getTreeWrapped, curNode, onSelectNewTab } = useModel('datadev');
 
   useEffect(() => {
     const folderId = curNode?.id;
@@ -80,7 +80,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
             if (res.success) {
               message.success('创建作业成功');
               setVisibleDev(false);
-              getTreeWrapped();
+              const concreteBelong = values.syncMode === 'STREAM' ? ContentBelong.STREAM : ContentBelong.BATCH;
+              getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DEVJOB, concreteBelong, res.data));
             } else {
               message.success(`创建作业失败: ${res.msg}`);
             }

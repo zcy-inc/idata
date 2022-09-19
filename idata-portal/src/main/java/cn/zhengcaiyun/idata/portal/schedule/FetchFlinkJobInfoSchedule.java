@@ -17,10 +17,12 @@
 
 package cn.zhengcaiyun.idata.portal.schedule;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.service.job.FlinkJobCommonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,10 +42,14 @@ public class FetchFlinkJobInfoSchedule {
         this.flinkJobCommonService = flinkJobCommonService;
     }
 
-    //    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 1000)
     public void fetchFlinkJobInfo() {
-        LOGGER.info("Start to fetchFlinkJobInfo... ...");
-        flinkJobCommonService.fetchFlinkJobId();
-        LOGGER.info("End to flinkJobCommonService... ...");
+        LOGGER.info("Start to fetchAndSetFlinkJobRunningInfo for prod ... ...");
+        flinkJobCommonService.fetchAndSetFlinkJobRunningInfo(EnvEnum.prod);
+        LOGGER.info("End to fetchAndSetFlinkJobRunningInfo for prod ... ...");
+
+        LOGGER.info("Start to fetchAndSetFlinkJobRunningInfo for stag ... ...");
+        flinkJobCommonService.fetchAndSetFlinkJobRunningInfo(EnvEnum.stag);
+        LOGGER.info("End to fetchAndSetFlinkJobRunningInfo for stag ... ...");
     }
 }

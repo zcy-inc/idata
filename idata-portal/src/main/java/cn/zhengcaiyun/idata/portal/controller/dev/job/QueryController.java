@@ -65,4 +65,10 @@ public class QueryController {
         sessionLogDto.setState(livyService.getBatchesState(sessionId));
         return RestResult.success(sessionLogDto);
     }
+
+    @PostMapping("/cancelQuery")
+    public RestResult cancelQuery(@RequestBody QueryStatementDto queryStatementDto) {
+        queryService.cancelStatement(queryStatementDto);
+        return RestResult.success();
+    }
 }

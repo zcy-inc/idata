@@ -13,7 +13,8 @@ import type {
   ScheduleListItem,
   UsageOverview,
   DagItem,
-  EnumItem
+  EnumItem,
+  StreamListItem
 } from '@/types/operations';
 import { request } from 'umi';
 import type { DefaultResponse } from './global';
@@ -272,5 +273,66 @@ export async function getOverhang(params: {
   >('/api/p1/dev/jobs/overhangPage', {
     method: 'GET',
     params,
+  });
+}
+
+// 获取实时作业列表
+export async function getStreamJobs(data: {
+  jobNamePattern: string;
+  owner: string;
+  statusList: string [];
+  offset: number;
+  limit: number;
+}) {
+  return request<
+    DefaultResponse& {
+     data: {
+      content: StreamListItem [];
+      total: number
+     }
+    }
+  >('/api/p1/opt/stream/instances/page', {
+    method: 'POST',
+    data,
+  });
+}
+
+// 启动作业
+export async function startJob(data: {
+  id: number;
+  initDITables: string[];
+  forceInit: boolean;
+}) {
+  const {id , ...rest} = data;
+  return request(`/api/p1/opt/stream/instances/${id}/start`, {
+    method: 'POST',
+    data: rest
+  });
+}
+
+// 停止作业
+export async function stopJob(data: {
+  id: number;
+}) {
+  return request(`/api/p1/opt/stream/instances/${data.id}/stop`, {
+    method: 'POST'
+  });
+}
+
+// 停止作业
+export async function destoryJob(data: {
+  id: number;
+}) {
+  return request(`/api/p1/opt/stream/instances/${data.id}/destroy`, {
+    method: 'POST'
+  });
+}
+
+// 查询强制初始化表集合
+export async function getForceList(data: {
+  id: number;
+}) {
+  return request(`/api/p1/opt/stream/instances/${data.id}/forceInitTables`, {
+    method: 'GET'
   });
 }

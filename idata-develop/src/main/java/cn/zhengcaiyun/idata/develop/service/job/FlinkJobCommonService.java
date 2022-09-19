@@ -17,6 +17,8 @@
 
 package cn.zhengcaiyun.idata.develop.service.job;
 
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -24,6 +26,6 @@ package cn.zhengcaiyun.idata.develop.service.job;
  **/
 public interface FlinkJobCommonService {
 
-    void fetchFlinkJobId();
+    void fetchAndSetFlinkJobRunningInfo(EnvEnum envEnum);
 
 }

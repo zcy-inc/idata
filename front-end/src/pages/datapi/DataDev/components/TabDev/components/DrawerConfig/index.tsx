@@ -11,6 +11,7 @@ import {
   Row,
   Select,
   Tabs,
+  Switch,
 } from 'antd';
 import { get, pick } from 'lodash';
 import type { FC } from 'react';
@@ -24,17 +25,17 @@ import {
   getEnumValues,
   getExecuteQueues,
   saveTaskConfig,
+  getEngineType,
 } from '@/services/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 import {
-  ExecEngine,
   SchPriority,
   TaskTypes,
   execCoresOptions,
   defaultExecCores,
   // SchRerunMode,
 } from '@/constants/datadev';
-import { getDataSourceList } from '@/services/datasource';
+import { getDataSourceList, getDataSourceTypesNew } from '@/services/datasource';
 import { DataSourceItem } from '@/types/datasource';
 import { DependenciesFormItem } from '../../../../../components/DependenciesFormItem';
 
@@ -57,7 +58,9 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [dataSource, setDataSource] = useState<DataSourceItem[]>([]);
   const [security, setSecurity] = useState<{ enumValue: string; valueCode: string }[]>([]);
   const [executeQueues, setExecuteQueues] = useState<{ name: string; code: string }[]>([]);
+  const [execEngineOptions, setExecEngineOptions] = useState<{ label: string; value: string }[]>([]);
   const [destWriteMode, setDestWriteMode] = useState('');
+  const [openMergeFilechecked, setOpenMergeFilechecked] = useState<boolean>(false);
 
   const [stagForm] = Form.useForm();
   const [prodForm] = Form.useForm();
@@ -70,12 +73,21 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       getEnumValues({ enumCode: 'alarmLayerEnum:ENUM' })
         .then((res) => setSecurity(res.data))
         .catch((err) => {});
-      getExecuteQueues()
+      getExecuteQueues({jobType: (data as Task).jobType})
         .then((res) => setExecuteQueues(res.data))
         .catch((err) => {});
-      getDataSourceList({ limit: 999, offset: 0 })
+      getEngineType({ jobType: (data as Task).jobType })
+      .then((res) => setExecEngineOptions(res.data?.map((item: string) => ({label: item, value: item}))))
+      .catch((err) => {});
+
+      const { syncMode, jobType } = data as Task;
+      const jobTypeParam = syncMode ? `DI_${syncMode}` : jobType;
+      getDataSourceTypesNew(jobTypeParam).then((res) => {
+        const destList = res?.data?.destList || [];
+        getDataSourceList({ limit: 999, offset: 0, types: destList.join(',') })
         .then((res) => setDataSource(res.data.content || []))
         .catch((err) => {});
+      });
     }
   }, [visible]);
 
@@ -97,7 +109,11 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         } else {
           executeConfig.schDryRun = [];
         }
-
+        // 合并最小文件
+        if(data?.jobType === TaskTypes.SQL_SPARK){
+          executeConfig.isOpenMergeFile = !!executeConfig.isOpenMergeFile
+          setOpenMergeFilechecked(executeConfig.isOpenMergeFile)
+        }
         setDestWriteMode(output.destWriteMode || 'OVERWRITE');
         // 赋值调度配置
         if (environment === Environments.STAG) {
@@ -106,14 +122,16 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         if (environment === Environments.PROD) {
           prodForm.setFieldsValue({ ...executeConfig, ...output, dependencies });
         }
+
       })
       .catch((err) => {});
 
   const getDAGListWrapped = (environment: Environments) =>
-    // getDAGList({ dwLayerCode: data?.dwLayerCode as string, environment })
-    getDAGList({ environment })
+    getDAGList({ environment, jobType: (data as Task).jobType })
       .then((res) => setDAGList(res.data))
       .catch((err) => {});
+
+  const onOpenMergeFileChange = (checked: boolean) => setOpenMergeFilechecked(checked);
 
   const onSave = (environment: Environments) => {
     let values: any = {};
@@ -133,6 +151,10 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
     // 处理超时时间
     if (!Number.isNaN(values.schTimeOut)) {
       values.schTimeOut = values.schTimeOut * 60;
+    }
+    // 合并最小文件
+    if(data?.jobType === TaskTypes.SQL_SPARK){
+      values.isOpenMergeFile = +values.isOpenMergeFile
     }
 
     const destDataSourceId = values.destDataSourceId;
@@ -172,28 +194,6 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         }
       })
       .catch((err) => {});
-  };
-
-  const renderExecEngineOptions = () => {
-    switch (data?.jobType) {
-      case TaskTypes.SQL_SPARK:
-      case TaskTypes.SCRIPT_PYTHON:
-      case TaskTypes.SCRIPT_SHELL:
-        return [
-          { label: 'SPARK', value: ExecEngine.SPARK },
-          { label: 'SQOOP', value: ExecEngine.SQOOP },
-          { label: 'KYLIN', value: ExecEngine.KYLIN },
-        ];
-      case TaskTypes.SPARK_PYTHON:
-      case TaskTypes.SPARK_JAR:
-        return [{ label: 'SPARK', value: ExecEngine.SPARK }];
-      case TaskTypes.KYLIN:
-        return [{ label: 'KYLIN', value: ExecEngine.KYLIN }];
-      case TaskTypes.SQL_FLINK:
-        return [{ label: 'FLINK', value: ExecEngine.FLINK }];
-      default:
-        return [];
-    }
   };
 
   const initialValues = {
@@ -318,42 +318,61 @@ const DrawerConfig: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
                   ]}
                 />
               </Item>
-              <Title>运行配置</Title>
-              <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={renderExecEngineOptions()}
-                />
-              </Item>
-              <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execDriverMemOptions}
-                />
-              </Item>
-              <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execWorkerMemOptions}
-                />
-              </Item>
-              <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
-                <Select
-                  size="large"
-                  style={{ width }}
-                  placeholder="请选择"
-                  options={execCoresOptions}
-                />
-              </Item>
-              <Item name="extProperties" label="自定义参数">
-                <MapInput style={{ width }} />
-              </Item>
+              {
+                data?.jobType === TaskTypes.SQL_SPARK && (
+                  <>
+                    <Title>参数配置</Title>
+                    <Item name="customParams" label="自定义参数">
+                      <MapInput style={{ width }} />
+                    </Item>
+                  </>
+                )
+              }
+              {
+                ![TaskTypes.SCRIPT_PYTHON, TaskTypes.SCRIPT_SHELL].includes(data?.jobType) && (
+                  <>
+                    <Title>运行配置</Title>
+                    <Item name="execEngine" label="执行引擎" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execEngineOptions}
+                      />
+                    </Item>
+                    <Item name="execDriverMem" label="Driver Memory" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execDriverMemOptions}
+                      />
+                    </Item>
+                    <Item name="execWorkerMem" label="Executor Memory" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execWorkerMemOptions}
+                      />
+                    </Item>
+                    <Item name="execCores" label="Executor Cores" rules={ruleSelc}>
+                      <Select
+                        size="large"
+                        style={{ width }}
+                        placeholder="请选择"
+                        options={execCoresOptions}
+                      />
+                    </Item>
+                    <Item name="extProperties" label="自定义参数">
+                      <MapInput style={{ width }} />
+                    </Item>
+                    {data?.jobType === TaskTypes.SQL_SPARK && (<Item name="isOpenMergeFile" label="合并小文件">
+                      <Switch checked={openMergeFilechecked} onChange={onOpenMergeFileChange}/>
+                    </Item>)}
+                  </>
+                )
+              }
               <Title>依赖配置</Title>
               <DependenciesFormItem
                 name="dependencies"

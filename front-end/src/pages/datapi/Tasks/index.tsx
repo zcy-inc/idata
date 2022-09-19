@@ -39,6 +39,22 @@ const defaultColumns: ColumnsType<TaskListItem> = [
     dataIndex: 'createTime',
     render: (_) => moment(_).format('YYYY-MM-DD HH:mm:ss'),
   },
+  {
+    title: '审批人',
+    key: 'approveOperator',
+    dataIndex: 'approveOperator',
+  },
+  {
+    title: '审批结果',
+    key: 'approveResult',
+    dataIndex: 'approveResult',
+  },
+  {
+    title: '处理时间',
+    key: 'approveTime',
+    dataIndex: 'approveTime',
+    render: (_) => _ ? moment(_).format('YYYY-MM-DD HH:mm:ss') : '',
+  },
 ];
 
 const DataSource: FC = () => {

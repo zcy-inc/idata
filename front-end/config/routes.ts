@@ -89,7 +89,7 @@ export default [
           {
             path: '/quality/baseline/edit/:id',
             name: '基线编辑',
-            component: './quality/baseline/components/EditBaseline',
+            component: './quality/Baseline/components/EditBaseline',
             hideInMenu: true
           },
         ]
@@ -207,6 +207,12 @@ export default [
         name: '运维看板',
         component: './operations/Dashboard',
         featureCode: 'F_MENU_OPS_DASHBOARD',
+      },
+      {
+        path: '/operations/stream',
+        name: '实时作业',
+        component: './operations/Stream',
+        featureCode: 'F_MENU_STREAM_JOB_OPT',
       },
       {
         path: '/operations/taskHistory',
