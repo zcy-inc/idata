@@ -167,6 +167,12 @@ export default [
         ],
       },
       {
+        path: '/configuration/apps',
+        name: '应用管理',
+        component: './Apps',
+        featureCode: 'F_MENU_APP_MANAGE',
+      },
+      {
         path: '/configuration/integrated',
         name: '集成配置',
         component: './Integrated',
