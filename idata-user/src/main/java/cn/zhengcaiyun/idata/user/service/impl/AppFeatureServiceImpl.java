@@ -142,7 +142,7 @@ public class AppFeatureServiceImpl implements AppFeatureService {
         UacAppInfo existAppInfo = uacAppInfoDao.selectByPrimaryKey(appInfoDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("应用不存在"));
         UacAppInfo dupNameAppInfo = uacAppInfoDao.selectOne(c -> c.where(uacAppInfo.del, isNotEqualTo(1),
-                and(uacAppInfo.appName, isEqualTo(appInfoDto.getAppName()))))
+                and(uacAppInfo.appName, isEqualTo(appInfoDto.getAppName())), and(uacAppInfo.id, isNotEqualTo(appInfoDto.getId()))))
                 .orElse(null);
         checkArgument(dupNameAppInfo == null, "应用名称重复，新建失败");
         UacAppFeature appFeature = uacAppFeatureDao.selectOne(c ->
