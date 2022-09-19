@@ -16,7 +16,6 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
-import cn.zhengcaiyun.idata.commons.encrypt.RandomUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.commons.util.AppRandomUtil;
@@ -80,14 +79,18 @@ public class AppFeatureServiceImpl implements AppFeatureService {
     }
 
     @Override
-    public Page<AppInfoDto> findApps(Integer limit, Integer offset) {
-        List<UacAppInfo> appInfoList = uacAppInfoDao.select(c -> c.where(uacAppInfo.del, isNotEqualTo(1))
-                .orderBy(uacAppInfo.editTime.descending())
-                .limit(limit).offset(offset));
-        if (appInfoList.size() == 0) return Page.newOne(new ArrayList<>(), 0L);
-        List<String> appKeyList = appInfoList.stream().map(UacAppInfo::getAppKey).collect(Collectors.toList());
-        List<UacAppFeature> appFeatureList = uacAppFeatureDao.select(c -> c.where(uacAppFeature.del, isNotEqualTo(1),
-                and(uacAppFeature.appKey, isIn(appKeyList))));
+    public Page<AppInfoDto> findApps(String featureCode, Integer limit, Integer offset) {
+        var builder = select(uacAppFeature.allColumns()).from(uacAppFeature).where(uacAppFeature.del, isNotEqualTo(1));
+        if (featureCode != null) {
+            builder.and(uacAppFeature.featureCodes, isLike("%" + featureCode + "%"));
+        }
+        List<UacAppFeature> appFeatureList = uacAppFeatureDao.selectMany(builder.orderBy(uacAppFeature.editTime.descending()).limit(limit).offset(offset)
+                .build().render(RenderingStrategies.MYBATIS3));
+        if (appFeatureList.size() == 0) return Page.newOne(new ArrayList<>(), 0L);
+
+        List<String> appKeyList = appFeatureList.stream().map(UacAppFeature::getAppKey).collect(Collectors.toList());
+        List<UacAppInfo> appInfoList = uacAppInfoDao.select(c -> c.where(uacAppInfo.del, isNotEqualTo(1),
+                and(uacAppInfo.appKey, isIn(appKeyList))));
         List<SysFeature> allFeatureList = systemConfigService.getFeaturesByCodes(null);
         Map<String, List<String>> appFeatureCodesMap = appFeatureList.stream()
                 .collect(Collectors.toMap(UacAppFeature::getAppKey,

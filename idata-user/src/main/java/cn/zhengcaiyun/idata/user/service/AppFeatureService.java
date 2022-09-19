@@ -26,7 +26,7 @@ import cn.zhengcaiyun.idata.user.dto.AppInfoDto;
 
 public interface AppFeatureService {
     AppInfoDto findById(Long id);
-    Page<AppInfoDto> findApps(Integer limit, Integer offset);
+    Page<AppInfoDto> findApps(String featureCode, Integer limit, Integer offset);
     AppInfoDto add(AppInfoDto appInfoDto);
     AppInfoDto update(AppInfoDto appInfoDto);
 }

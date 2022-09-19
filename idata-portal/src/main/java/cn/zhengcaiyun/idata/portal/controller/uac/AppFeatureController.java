@@ -47,11 +47,12 @@ public class AppFeatureController {
     private AppFeatureService appFeatureService;
 
     @GetMapping("/apps")
-    public RestResult<Page<AppInfoDto>> findApps(@RequestParam(value = "limit", required = false) Integer limit,
+    public RestResult<Page<AppInfoDto>> findApps(@RequestParam(value = "featureCode", required = false) String featureCode,
+                                                 @RequestParam(value = "limit", required = false) Integer limit,
                                                  @RequestParam(value = "offset", required = false) Integer offset) {
         limit = limit != null ? limit : (int) PageParam.DEFAULT_LIMIT;
         offset = offset != null ? offset : 0;
-        return RestResult.success(appFeatureService.findApps(limit, offset));
+        return RestResult.success(appFeatureService.findApps(featureCode, limit, offset));
     }
 
     @PostMapping("/app")
