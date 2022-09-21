@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.zhengcaiyun.idata.user.dal.dao.UacAppFeatureDynamicSqlSupport.uacAppFeature;
@@ -91,23 +92,21 @@ public class AppFeatureServiceImpl implements AppFeatureService {
         List<String> appKeyList = appFeatureList.stream().map(UacAppFeature::getAppKey).collect(Collectors.toList());
         List<UacAppInfo> appInfoList = uacAppInfoDao.select(c -> c.where(uacAppInfo.del, isNotEqualTo(1),
                 and(uacAppInfo.appKey, isIn(appKeyList))));
+        Map<String, UacAppInfo> appInfoMap = appInfoList.stream()
+                .collect(Collectors.toMap(UacAppInfo::getAppKey, Function.identity()));
         List<SysFeature> allFeatureList = systemConfigService.getFeaturesByCodes(null);
-        Map<String, List<String>> appFeatureCodesMap = appFeatureList.stream()
-                .collect(Collectors.toMap(UacAppFeature::getAppKey,
-                        appFeature -> Arrays.asList(appFeature.getFeatureCodes().split(","))));
-        Map<String, List<SysFeature>> appFeaturesMap = new HashMap<>();
-        for (Map.Entry<String, List<String>> entry : appFeatureCodesMap.entrySet()) {
+        List<AppInfoDto> echoList = new ArrayList<>();
+        for (UacAppFeature appFeature : appFeatureList) {
+            List<String> appFeatureCodeList = Arrays.asList(appFeature.getFeatureCodes().split(","));
             List<SysFeature> featureList = allFeatureList.stream()
                     // 恢复F_MENU前缀
-                    .filter(c -> changeOriginalFeatureCodes(entry.getValue()).contains(c.getFeatureCode()))
+                    .filter(c -> changeOriginalFeatureCodes(appFeatureCodeList).contains(c.getFeatureCode()))
                     .collect(Collectors.toList());
-            appFeaturesMap.put(entry.getKey(), featureList);
+            AppInfoDto echo = PojoUtil.copyOne(appInfoMap.get(appFeature.getAppKey()), AppInfoDto.class, appInfoFields);
+            echo.setFeatureCodes(appFeature.getFeatureCodes());
+            echo.setAppFeatures(featureList);
+            echoList.add(echo);
         }
-        List<AppInfoDto> echoList = PojoUtil.copyList(appInfoList, AppInfoDto.class, appInfoFields).stream()
-                .peek(c -> {
-                    c.setFeatureCodes(String.join(",", appFeatureCodesMap.get(c.getAppKey())));
-                    c.setAppFeatures(appFeaturesMap.get(c.getAppKey()));
-                }).collect(Collectors.toList());
         long total = uacAppInfoDao.count(c -> c.where(uacAppInfo.del, isNotEqualTo(1)));
         return Page.newOne(echoList, total);
     }
