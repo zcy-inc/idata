@@ -541,7 +541,7 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         if (jobInfoOptional.isPresent()) {
             firstCyclicalJob = jobInfoOptional.get().getName();
         }
-        throw new IllegalArgumentException(String.format("作业依赖配置存在循环依赖，上游末级节点：%s", firstCyclicalJob));
+        throw new IllegalArgumentException(String.format("依赖配置存在循环依赖，上游作业 %s 循环依赖本作业", firstCyclicalJob));
     }
 
     private void checkOutputConfig(JobInfo jobInfo, JobOutputDto outputDto) {
