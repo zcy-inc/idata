@@ -18,20 +18,24 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
 import cn.zhengcaiyun.idata.develop.service.job.JobExecuteConfigService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
-import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoAddRequest;
-import cn.zhengcaiyun.idata.portal.model.request.job.DIJobInfoUpdateRequest;
-import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationExtReq;
-import cn.zhengcaiyun.idata.portal.model.request.job.JobBatchOperationReq;
+import cn.zhengcaiyun.idata.portal.model.request.IdRequest;
+import cn.zhengcaiyun.idata.portal.model.request.PageWrapper;
+import cn.zhengcaiyun.idata.portal.model.request.job.*;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobInfoResponse;
+import cn.zhengcaiyun.idata.portal.model.response.ops.JobHistoryResponse;
+import cn.zhengcaiyun.idata.portal.util.PageUtil;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
+import com.github.pagehelper.PageInfo;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -357,6 +361,31 @@ public class JobInfoController {
     @PostMapping("/extInfo")
     public RestResult<List<JobExtInfoDto>> getExtJobInfo(@RequestBody JobBatchOperationReq batchOperationReq) {
         return RestResult.success(jobInfoService.getJobExtInfo(batchOperationReq.getJobIds()));
+    }
+
+    /**
+     * 查询（临近）过期作业
+     * @return
+     */
+    @PostMapping("/page")
+    public RestResult<Page<JobInfo>> pageOverdueJob(@RequestBody PageWrapper<JobQueryRequest> pageWrapper) {
+        JobQueryRequest condition = pageWrapper.getCondition();
+        String name = condition.getName();
+        String jobType = condition.getJobType();
+        Boolean overdue = condition.getOverdue();
+
+        PageInfo<JobInfo> pageInfo = jobInfoService.page(pageWrapper.getPageNum(), pageWrapper.getPageSize(), name, jobType, overdue);
+        return RestResult.success(PageUtil.covertMine(pageInfo));
+    }
+
+    /**
+     * 延长作业过期时间
+     * @return
+     */
+    @PostMapping("/extend/activityEnd")
+    public RestResult<Boolean> extendActivityEnd(@RequestBody ExtendActivityEndRequest extendActivityEndRequest) {
+        jobInfoService.updateActivityEnd(extendActivityEndRequest.getId(), extendActivityEndRequest.getActivityEnd());
+        return RestResult.success(true);
     }
 
 }
