@@ -40,6 +40,8 @@ public interface SystemConfigService {
 
     List<SysFeature> getFeatures(String urlPath);
 
+    List<SysFeature> getFeaturesByCodes(List<String> featureCodes);
+
     boolean checkConnection(ConnectionDto connection);
 
     Map<String, ConfigValueDto> getXmlConfigValues(MultipartFile xmlFile) throws IOException;

@@ -14,36 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package cn.zhengcaiyun.idata.user.dto;
 
-package cn.zhengcaiyun.idata.develop.dal.repo.job;
-
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobDependence;
-import cn.zhengcaiyun.idata.develop.dto.JobDependencyDto;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
+import cn.zhengcaiyun.idata.system.dto.FeatureDto;
+import cn.zhengcaiyun.idata.user.dal.model.UacAppInfo;
 
 import java.util.List;
 
 /**
- * @description:
- * @author: yangjianhua
- * @create: 2021-11-16 14:36
- **/
-public interface JobDependenceRepo {
+ * @author caizhedong
+ * @date 2022-09-18 下午12:03
+ */
 
-    List<JobDependence> queryPrevJob(Long jobId, String environment);
+public class AppInfoDto extends UacAppInfo {
+    private String featureCodes;
+    private List<SysFeature> appFeatures;
 
-    List<JobDependence> queryPrevJob(List<Long> jobIds, String environment);
+    // GaS
+    public String getFeatureCodes() {
+        return featureCodes;
+    }
 
-    List<JobDependence> queryPrevJob(Long jobId);
+    public void setFeatureCodes(String featureCodes) {
+        this.featureCodes = featureCodes;
+    }
 
-    List<JobDependence> queryPostJob(Long jobId, String environment);
+    public List<SysFeature> getAppFeatures() {
+        return appFeatures;
+    }
 
-    List<JobDependence> queryPostJob(Long jobId);
-
-    Boolean addDependence(List<JobDependence> dependenceList);
-
-    Boolean deleteDependence(Long jobId, String environment);
-
-    List<JobDependencyDto> queryJobs(String env);
-
-    List<JobDependence> queryJobs();
+    public void setAppFeatures(List<SysFeature> appFeatures) {
+        this.appFeatures = appFeatures;
+    }
 }
