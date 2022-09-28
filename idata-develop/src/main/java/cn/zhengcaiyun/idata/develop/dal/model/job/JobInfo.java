@@ -1,5 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dal.model.job;
 
+import org.mybatis.dynamic.sql.SqlColumn;
+
 import java.util.Date;
 import javax.annotation.Generated;
 
@@ -92,6 +94,13 @@ public class JobInfo {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.folder_id")
     private Long folderId;
+
+    /**
+     * Database Column Remarks:
+     *   作业有效截止时间
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.activity_end")
+    private Date activityEnd;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.id")
     public Long getId() {
@@ -211,5 +220,15 @@ public class JobInfo {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.folder_id")
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.activity_end")
+    public Date getActivityEnd() {
+        return activityEnd;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.activity_end")
+    public void setActivityEnd(Date activityEnd) {
+        this.activityEnd = activityEnd;
     }
 }

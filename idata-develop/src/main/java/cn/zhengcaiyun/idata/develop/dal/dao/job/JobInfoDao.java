@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface JobInfoDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, jobType, dwLayerCode, status, remark, folderId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, jobType, dwLayerCode, status, remark, folderId, activityEnd);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -68,7 +68,8 @@ public interface JobInfoDao {
         @Result(column="dw_layer_code", property="dwLayerCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="status", property="status", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
-        @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT)
+        @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT),
+        @Result(column="activity_end", property="activityEnd", jdbcType=JdbcType.TIMESTAMP)
     })
     List<JobInfo> selectMany(SelectStatementProvider selectStatement);
 
@@ -107,6 +108,7 @@ public interface JobInfoDao {
             .map(status).toProperty("status")
             .map(remark).toProperty("remark")
             .map(folderId).toProperty("folderId")
+            .map(activityEnd).toProperty("activityEnd")
         );
     }
 
@@ -124,6 +126,7 @@ public interface JobInfoDao {
             .map(status).toPropertyWhenPresent("status", record::getStatus)
             .map(remark).toPropertyWhenPresent("remark", record::getRemark)
             .map(folderId).toPropertyWhenPresent("folderId", record::getFolderId)
+            .map(activityEnd).toPropertyWhenPresent("activityEnd", record::getActivityEnd)
         );
     }
 
@@ -166,7 +169,8 @@ public interface JobInfoDao {
                 .set(dwLayerCode).equalTo(record::getDwLayerCode)
                 .set(status).equalTo(record::getStatus)
                 .set(remark).equalTo(record::getRemark)
-                .set(folderId).equalTo(record::getFolderId);
+                .set(folderId).equalTo(record::getFolderId)
+                .set(activityEnd).equalTo(record::getActivityEnd);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
@@ -181,7 +185,8 @@ public interface JobInfoDao {
                 .set(dwLayerCode).equalToWhenPresent(record::getDwLayerCode)
                 .set(status).equalToWhenPresent(record::getStatus)
                 .set(remark).equalToWhenPresent(record::getRemark)
-                .set(folderId).equalToWhenPresent(record::getFolderId);
+                .set(folderId).equalToWhenPresent(record::getFolderId)
+                .set(activityEnd).equalToWhenPresent(record::getActivityEnd);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
@@ -198,6 +203,7 @@ public interface JobInfoDao {
             .set(status).equalTo(record::getStatus)
             .set(remark).equalTo(record::getRemark)
             .set(folderId).equalTo(record::getFolderId)
+            .set(activityEnd).equalTo(record::getActivityEnd)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -216,6 +222,7 @@ public interface JobInfoDao {
             .set(status).equalToWhenPresent(record::getStatus)
             .set(remark).equalToWhenPresent(record::getRemark)
             .set(folderId).equalToWhenPresent(record::getFolderId)
+            .set(activityEnd).equalToWhenPresent(record::getActivityEnd)
             .where(id, isEqualTo(record::getId))
         );
     }

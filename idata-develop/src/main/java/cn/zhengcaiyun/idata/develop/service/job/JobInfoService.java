@@ -22,7 +22,9 @@ import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import cn.zhengcaiyun.idata.develop.dto.job.*;
+import com.github.pagehelper.PageInfo;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -98,4 +100,22 @@ public interface JobInfoService {
      * @return
      */
     List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds);
+
+    /**
+     *
+     * @param pageNum
+     * @param pageSize
+     * @param name 作业名称
+     * @param jobType 作业类型
+     * @param overdue 作业是否过期
+     * @return
+     */
+    PageInfo<JobInfo> page(Integer pageNum, Integer pageSize, String name, String jobType, Boolean overdue);
+
+    /**
+     * 延长作业过期时间
+     * @param id 作业id
+     * @param activityEnd 过期时间
+     */
+    void updateActivityEnd(Long id, Date activityEnd);
 }
