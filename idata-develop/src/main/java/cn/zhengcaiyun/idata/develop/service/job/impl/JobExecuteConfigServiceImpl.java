@@ -106,6 +106,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkDependConfig(jobId, dependenceDtoList);
         checkOutputConfig(jobInfoOptional.get(), outputDto);
 
+        // 检查循环依赖
+        checkCyclicalDependence(jobId, environment, dependenceDtoList);
+
         // SPARK_SQL作业校验执行引擎必填
         if (jobInfoOptional.get().getJobType().equals(JobTypeEnum.SQL_SPARK.getCode())) {
             checkArgument(StringUtils.isNotEmpty(dto.getExecuteConfig().getExecEngine()), "SPARK_SQL作业：执行引擎项必填");
@@ -499,6 +502,46 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
             checkArgument(prevJobSet.add(dto.getPrevJobId()), "上游依赖存在重复作业");
             checkArgument(!Objects.equals(currentJobId, dto.getPrevJobId()), "上游依赖作业不能选择当前作业");
         }
+    }
+
+    private void checkCyclicalDependence(Long currentJobId, String environment, List<JobDependenceDto> dependenceDtoList) {
+        if (ObjectUtils.isEmpty(dependenceDtoList)) return;
+
+        List<Long> prevJobIds = dependenceDtoList.stream()
+                .map(JobDependenceDto::getPrevJobId)
+                .collect(Collectors.toList());
+        byte count = 0;
+        Long firstCyclicalJobId = null;
+        do {
+            List<JobDependence> prevJobDependenceList = jobDependenceRepo.queryPrevJob(prevJobIds, environment);
+            if (CollectionUtils.isEmpty(prevJobDependenceList)) {
+                break;
+            }
+            for (JobDependence prevDependence : prevJobDependenceList) {
+                if (currentJobId.equals(prevDependence.getPrevJobId())) {
+                    firstCyclicalJobId = prevDependence.getJobId();
+                    break;
+                }
+            }
+            if (Objects.nonNull(firstCyclicalJobId)) {
+                break;
+            }
+            prevJobIds = prevJobDependenceList.stream()
+                    .map(JobDependence::getPrevJobId)
+                    .distinct()
+                    .collect(Collectors.toList());
+            count++;
+        } while (count < Byte.MAX_VALUE);
+
+        if (Objects.isNull(firstCyclicalJobId)) {
+            return;
+        }
+        String firstCyclicalJob = firstCyclicalJobId.toString();
+        Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(firstCyclicalJobId);
+        if (jobInfoOptional.isPresent()) {
+            firstCyclicalJob = jobInfoOptional.get().getName();
+        }
+        throw new IllegalArgumentException(String.format("依赖配置存在循环依赖，上游作业 %s 循环依赖本作业", firstCyclicalJob));
     }
 
     private void checkOutputConfig(JobInfo jobInfo, JobOutputDto outputDto) {

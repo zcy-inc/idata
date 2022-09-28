@@ -30,8 +30,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDynamicSqlSupport.JOB_DEPENDENCE;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -57,6 +56,13 @@ public class JobDependenceRepoImpl implements JobDependenceRepo {
     @Override
     public List<JobDependence> queryPrevJob(Long jobId, String environment) {
         return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isEqualTo(jobId),
+                and(JOB_DEPENDENCE.environment, isEqualTo(environment)),
+                and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
+    public List<JobDependence> queryPrevJob(List<Long> jobIds, String environment) {
+        return jobDependenceDao.select(dsl -> dsl.where(JOB_DEPENDENCE.jobId, isIn(jobIds),
                 and(JOB_DEPENDENCE.environment, isEqualTo(environment)),
                 and(JOB_DEPENDENCE.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
