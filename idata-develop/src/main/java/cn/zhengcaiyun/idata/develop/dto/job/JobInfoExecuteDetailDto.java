@@ -1,10 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.EngineTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
-import cn.zhengcaiyun.idata.develop.constant.enums.WriteModeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
@@ -498,6 +495,11 @@ public class JobInfoExecuteDetailDto {
 
         private List<ExternalTableDto> externalTableList;
 
+        /**
+         *   写入文件类型 Spark SQL类型：orc、parquet
+         */
+        private TableStoredTypeEnum tableStoredTypeEnum;
+
         public String getDestTable() {
             return destTable;
         }
@@ -552,6 +554,14 @@ public class JobInfoExecuteDetailDto {
 
         public void setExternalTableList(List<ExternalTableDto> externalTableList) {
             this.externalTableList = externalTableList;
+        }
+
+        public TableStoredTypeEnum getTableStoredTypeEnum() {
+            return tableStoredTypeEnum;
+        }
+
+        public void setTableStoredTypeEnum(TableStoredTypeEnum tableStoredTypeEnum) {
+            this.tableStoredTypeEnum = tableStoredTypeEnum;
         }
 
         public static class ExternalTableDto {

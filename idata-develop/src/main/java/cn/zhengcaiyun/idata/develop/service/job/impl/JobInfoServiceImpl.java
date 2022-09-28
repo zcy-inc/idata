@@ -499,8 +499,6 @@ public class JobInfoServiceImpl implements JobInfoService {
         }
         jobInfoExecuteDetailDto.setConfProp(confProp);
 
-        //
-
         switch (jobTypeEnum) {
             case BACK_FLOW:
                 JobInfoExecuteDetailDto.BackFlowDetailDto backFlowResponse = new JobInfoExecuteDetailDto.BackFlowDetailDto(jobInfoExecuteDetailDto);
@@ -724,6 +722,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                     }
                 }
                 sqlResponse.setExternalTableList(externalTableList);
+
+                String destFileType = devJobInfoMyDao.selectDestFileType(id, env);
+                TableStoredTypeEnum tableStoredTypeEnum = TableStoredTypeEnum.myValueOf(destFileType);
+                if (tableStoredTypeEnum == null) {
+                    tableStoredTypeEnum = TableStoredTypeEnum.orc;
+                }
+                sqlResponse.setTableStoredTypeEnum(tableStoredTypeEnum);
 
                 sqlResponse.setOpenDqc(this.needDqc(sqlResponse.getDestTable()));
                 return sqlResponse;

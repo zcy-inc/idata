@@ -28,4 +28,10 @@
             on t1.id = t3.job_id
     </select>
 
+    <select id="selectDestFileType" resultType="java.lang.String">
+        select dest_file_type as destFileType
+        from dev_job_execute_config
+        where environment = #{env} and job_id = #{id}
+    </select>
+
 </mapper>

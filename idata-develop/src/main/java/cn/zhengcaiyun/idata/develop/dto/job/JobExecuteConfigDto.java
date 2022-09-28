@@ -114,6 +114,11 @@ public class JobExecuteConfigDto extends BaseDto {
      */
     public List<KeyValuePair<String, String>> customParams;
 
+    /**
+     *   写入文件类型 Spark SQL类型：orc、parquet
+     */
+    private String destFileType;
+
     public Long getId() {
         return id;
     }
@@ -264,6 +269,14 @@ public class JobExecuteConfigDto extends BaseDto {
 
     public void setCustomParams(List<KeyValuePair<String, String>> customParams) {
         this.customParams = customParams;
+    }
+
+    public String getDestFileType() {
+        return destFileType;
+    }
+
+    public void setDestFileType(String destFileType) {
+        this.destFileType = destFileType;
     }
 
     public static JobExecuteConfigDto from(JobExecuteConfig config) {
