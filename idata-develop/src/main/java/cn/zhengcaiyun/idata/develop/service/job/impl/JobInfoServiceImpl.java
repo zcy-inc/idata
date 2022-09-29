@@ -1131,6 +1131,13 @@ public class JobInfoServiceImpl implements JobInfoService {
         jobInfoDao.updateByPrimaryKey(jobInfo);
     }
 
+    @Override
+    public List<JobInfo> checkAlarmJobList(Date beginDate, Date endDate) {
+        return jobInfoDao.select(dsl -> dsl.where(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(jobInfo.activityEnd, isLessThanOrEqualToWhenPresent(endDate)),
+                        and(jobInfo.activityEnd, isGreaterThanOrEqualToWhenPresent(beginDate))));
+    }
+
     private Map<Long, JobContentVersionDto> fetchJobVersions(JobTypeEnum typeEnum, List<Long> jobIds) {
         if (CollectionUtils.isEmpty(jobIds)) {
             return Maps.newHashMap();

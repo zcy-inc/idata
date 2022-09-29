@@ -73,4 +73,31 @@ public class MyBeanUtils {
                 break;
         }
     }
+
+
+    /**
+     * 通过BeanUtils.copyProperties 拷贝对象，简易封装
+     *
+     * @param source
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> T copy(Object source, Class<T> clazz) {
+        try {
+            T target = clazz.newInstance();
+            BeanUtils.copyProperties(source, target);
+            return target;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static <E, T> List<T> copyList(List<E> list, Class<T> clazz) {
+        return list.stream().map(e -> copy(e, clazz)).collect(Collectors.toList());
+    }
+
 }

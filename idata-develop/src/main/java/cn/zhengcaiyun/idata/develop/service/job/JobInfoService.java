@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.develop.service.job;
 
+import cn.hutool.core.date.DateTime;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobInfoCondition;
@@ -118,4 +119,12 @@ public interface JobInfoService {
      * @param activityEnd 过期时间
      */
     void updateActivityEnd(Long id, Date activityEnd);
+
+    /**
+     * 检查告警作业
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    List<JobInfo> checkAlarmJobList(Date beginDate, Date endDate);
 }
