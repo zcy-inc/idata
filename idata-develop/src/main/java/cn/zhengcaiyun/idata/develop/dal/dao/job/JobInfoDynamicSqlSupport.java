@@ -94,13 +94,6 @@ public final class JobInfoDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.folder_id")
     public static final SqlColumn<Long> folderId = jobInfo.folderId;
 
-    /**
-     * Database Column Remarks:
-     *   作业有效截止时间
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_info.folder_id")
-    public static final SqlColumn<Date> activityEnd = jobInfo.activityEnd;
-
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     public static final class JobInfo extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -126,8 +119,6 @@ public final class JobInfoDynamicSqlSupport {
         public final SqlColumn<String> remark = column("remark", JDBCType.VARCHAR);
 
         public final SqlColumn<Long> folderId = column("folder_id", JDBCType.BIGINT);
-
-        public final SqlColumn<Date> activityEnd = column("activity_end", JDBCType.TIMESTAMP);
 
         public JobInfo() {
             super("dev_job_info");

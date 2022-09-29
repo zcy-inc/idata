@@ -1,9 +1,9 @@
 package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
-import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobInfo;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -32,9 +32,9 @@ import org.mybatis.dynamic.sql.util.SqlProviderAdapter;
 import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 
 @Mapper
-public interface JobInfoDao {
+public interface DevJobInfoDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, jobType, dwLayerCode, status, remark, folderId);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, jobType, jobLanguage, jobExecutionEngine, dwLayerCode, status, remark, folderId);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -47,16 +47,16 @@ public interface JobInfoDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @InsertProvider(type=SqlProviderAdapter.class, method="insert")
     @SelectKey(statement="SELECT LAST_INSERT_ID()", keyProperty="record.id", before=false, resultType=Long.class)
-    int insert(InsertStatementProvider<JobInfo> insertStatement);
+    int insert(InsertStatementProvider<DevJobInfo> insertStatement);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
-    @ResultMap("JobInfoResult")
-    Optional<JobInfo> selectOne(SelectStatementProvider selectStatement);
+    @ResultMap("DevJobInfoResult")
+    Optional<DevJobInfo> selectOne(SelectStatementProvider selectStatement);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
-    @Results(id="JobInfoResult", value = {
+    @Results(id="DevJobInfoResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
         @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
@@ -65,12 +65,14 @@ public interface JobInfoDao {
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
         @Result(column="job_type", property="jobType", jdbcType=JdbcType.VARCHAR),
+        @Result(column="job_language", property="jobLanguage", jdbcType=JdbcType.VARCHAR),
+        @Result(column="job_execution_engine", property="jobExecutionEngine", jdbcType=JdbcType.VARCHAR),
         @Result(column="dw_layer_code", property="dwLayerCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="status", property="status", jdbcType=JdbcType.INTEGER),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR),
         @Result(column="folder_id", property="folderId", jdbcType=JdbcType.BIGINT)
     })
-    List<JobInfo> selectMany(SelectStatementProvider selectStatement);
+    List<DevJobInfo> selectMany(SelectStatementProvider selectStatement);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     @UpdateProvider(type=SqlProviderAdapter.class, method="update")
@@ -78,12 +80,12 @@ public interface JobInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, jobInfo, completer);
+        return MyBatis3Utils.countFrom(this::count, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, jobInfo, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
@@ -94,8 +96,8 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default int insert(JobInfo record) {
-        return MyBatis3Utils.insert(this::insert, record, jobInfo, c ->
+    default int insert(DevJobInfo record) {
+        return MyBatis3Utils.insert(this::insert, record, devJobInfo, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -103,6 +105,8 @@ public interface JobInfoDao {
             .map(editTime).toProperty("editTime")
             .map(name).toProperty("name")
             .map(jobType).toProperty("jobType")
+            .map(jobLanguage).toProperty("jobLanguage")
+            .map(jobExecutionEngine).toProperty("jobExecutionEngine")
             .map(dwLayerCode).toProperty("dwLayerCode")
             .map(status).toProperty("status")
             .map(remark).toProperty("remark")
@@ -111,8 +115,8 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default int insertSelective(JobInfo record) {
-        return MyBatis3Utils.insert(this::insert, record, jobInfo, c ->
+    default int insertSelective(DevJobInfo record) {
+        return MyBatis3Utils.insert(this::insert, record, devJobInfo, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -120,6 +124,8 @@ public interface JobInfoDao {
             .map(editTime).toPropertyWhenPresent("editTime", record::getEditTime)
             .map(name).toPropertyWhenPresent("name", record::getName)
             .map(jobType).toPropertyWhenPresent("jobType", record::getJobType)
+            .map(jobLanguage).toPropertyWhenPresent("jobLanguage", record::getJobLanguage)
+            .map(jobExecutionEngine).toPropertyWhenPresent("jobExecutionEngine", record::getJobExecutionEngine)
             .map(dwLayerCode).toPropertyWhenPresent("dwLayerCode", record::getDwLayerCode)
             .map(status).toPropertyWhenPresent("status", record::getStatus)
             .map(remark).toPropertyWhenPresent("remark", record::getRemark)
@@ -128,22 +134,22 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default Optional<JobInfo> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, jobInfo, completer);
+    default Optional<DevJobInfo> selectOne(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default List<JobInfo> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, jobInfo, completer);
+    default List<DevJobInfo> select(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectList(this::selectMany, selectList, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default List<JobInfo> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, jobInfo, completer);
+    default List<DevJobInfo> selectDistinct(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default Optional<JobInfo> selectByPrimaryKey(Long id_) {
+    default Optional<DevJobInfo> selectByPrimaryKey(Long id_) {
         return selectOne(c ->
             c.where(id, isEqualTo(id_))
         );
@@ -151,11 +157,11 @@ public interface JobInfoDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, jobInfo, completer);
+        return MyBatis3Utils.update(this::update, devJobInfo, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    static UpdateDSL<UpdateModel> updateAllColumns(JobInfo record, UpdateDSL<UpdateModel> dsl) {
+    static UpdateDSL<UpdateModel> updateAllColumns(DevJobInfo record, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalTo(record::getDel)
                 .set(creator).equalTo(record::getCreator)
                 .set(createTime).equalTo(record::getCreateTime)
@@ -163,6 +169,8 @@ public interface JobInfoDao {
                 .set(editTime).equalTo(record::getEditTime)
                 .set(name).equalTo(record::getName)
                 .set(jobType).equalTo(record::getJobType)
+                .set(jobLanguage).equalTo(record::getJobLanguage)
+                .set(jobExecutionEngine).equalTo(record::getJobExecutionEngine)
                 .set(dwLayerCode).equalTo(record::getDwLayerCode)
                 .set(status).equalTo(record::getStatus)
                 .set(remark).equalTo(record::getRemark)
@@ -170,7 +178,7 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    static UpdateDSL<UpdateModel> updateSelectiveColumns(JobInfo record, UpdateDSL<UpdateModel> dsl) {
+    static UpdateDSL<UpdateModel> updateSelectiveColumns(DevJobInfo record, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalToWhenPresent(record::getDel)
                 .set(creator).equalToWhenPresent(record::getCreator)
                 .set(createTime).equalToWhenPresent(record::getCreateTime)
@@ -178,6 +186,8 @@ public interface JobInfoDao {
                 .set(editTime).equalToWhenPresent(record::getEditTime)
                 .set(name).equalToWhenPresent(record::getName)
                 .set(jobType).equalToWhenPresent(record::getJobType)
+                .set(jobLanguage).equalToWhenPresent(record::getJobLanguage)
+                .set(jobExecutionEngine).equalToWhenPresent(record::getJobExecutionEngine)
                 .set(dwLayerCode).equalToWhenPresent(record::getDwLayerCode)
                 .set(status).equalToWhenPresent(record::getStatus)
                 .set(remark).equalToWhenPresent(record::getRemark)
@@ -185,7 +195,7 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default int updateByPrimaryKey(JobInfo record) {
+    default int updateByPrimaryKey(DevJobInfo record) {
         return update(c ->
             c.set(del).equalTo(record::getDel)
             .set(creator).equalTo(record::getCreator)
@@ -194,6 +204,8 @@ public interface JobInfoDao {
             .set(editTime).equalTo(record::getEditTime)
             .set(name).equalTo(record::getName)
             .set(jobType).equalTo(record::getJobType)
+            .set(jobLanguage).equalTo(record::getJobLanguage)
+            .set(jobExecutionEngine).equalTo(record::getJobExecutionEngine)
             .set(dwLayerCode).equalTo(record::getDwLayerCode)
             .set(status).equalTo(record::getStatus)
             .set(remark).equalTo(record::getRemark)
@@ -203,7 +215,7 @@ public interface JobInfoDao {
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_info")
-    default int updateByPrimaryKeySelective(JobInfo record) {
+    default int updateByPrimaryKeySelective(DevJobInfo record) {
         return update(c ->
             c.set(del).equalToWhenPresent(record::getDel)
             .set(creator).equalToWhenPresent(record::getCreator)
@@ -212,6 +224,8 @@ public interface JobInfoDao {
             .set(editTime).equalToWhenPresent(record::getEditTime)
             .set(name).equalToWhenPresent(record::getName)
             .set(jobType).equalToWhenPresent(record::getJobType)
+            .set(jobLanguage).equalToWhenPresent(record::getJobLanguage)
+            .set(jobExecutionEngine).equalToWhenPresent(record::getJobExecutionEngine)
             .set(dwLayerCode).equalToWhenPresent(record::getDwLayerCode)
             .set(status).equalToWhenPresent(record::getStatus)
             .set(remark).equalToWhenPresent(record::getRemark)

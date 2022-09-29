@@ -37,7 +37,10 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.dao.MonitorRuleDao;
-import cn.zhengcaiyun.idata.develop.dal.dao.job.*;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
@@ -114,7 +117,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     private DevJobInfoMyDao devJobInfoMyDao;
     private JobOutputMyDao jobOutputMyDao;
     private final JobInfoRepo jobInfoRepo;
-    private final JobInfoDao jobInfoDao;
     private final JobOutputRepo jobOutputRepo;
     private final DevJobUdfMyDao devJobUdfMyDao;
     private final JobPublishRecordMyDao jobPublishRecordMyDao;
@@ -151,7 +153,6 @@ public class JobInfoServiceImpl implements JobInfoService {
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
                               JobOutputMyDao jobOutputMyDao,
                               JobInfoRepo jobInfoRepo,
-                              JobInfoDao jobInfoDao,
                               JobOutputRepo jobOutputRepo,
                               DevJobUdfMyDao devJobUdfMyDao,
                               JobPublishRecordMyDao jobPublishRecordMyDao,
@@ -180,7 +181,6 @@ public class JobInfoServiceImpl implements JobInfoService {
         this.devJobInfoMyDao = devJobInfoMyDao;
         this.jobOutputMyDao = jobOutputMyDao;
         this.jobInfoRepo = jobInfoRepo;
-        this.jobInfoDao = jobInfoDao;
         this.jobOutputRepo = jobOutputRepo;
         this.devJobUdfMyDao = devJobUdfMyDao;
         this.jobPublishRecordMyDao = jobPublishRecordMyDao;
@@ -1099,43 +1099,6 @@ public class JobInfoServiceImpl implements JobInfoService {
             });
         }
         return extInfoDtoList;
-    }
-
-    @Override
-    public PageInfo<JobInfo> page(Integer pageNum, Integer pageSize, String name, String jobType, Boolean overdue) {
-        PageHelper.startPage(pageNum, pageSize);
-
-        List<JobInfo> list;
-        if (overdue) {
-            list = jobInfoDao.select(dsl -> dsl.where(jobInfo.name, isLikeWhenPresent(name),
-                            and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
-                            and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val)),
-                            and(jobInfo.activityEnd, isLessThan(new Date())))
-                    .orderBy(jobInfo.activityEnd));
-        } else {
-            list = jobInfoDao.select(dsl -> dsl.where(jobInfo.name, isLikeWhenPresent(name),
-                            and(jobInfo.jobType, isEqualToWhenPresent(jobType)),
-                            and(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val)),
-                            and(jobInfo.activityEnd, isGreaterThanOrEqualTo(new Date())))
-                    .orderBy(jobInfo.activityEnd));
-        }
-
-        PageInfo<JobInfo> pageInfo = new PageInfo<>(list);
-        return pageInfo;
-    }
-
-    @Override
-    public void updateActivityEnd(Long id, Date activityEnd) {
-        JobInfo jobInfo = jobInfoRepo.queryJobInfo(id).get();
-        jobInfo.setActivityEnd(activityEnd);
-        jobInfoDao.updateByPrimaryKey(jobInfo);
-    }
-
-    @Override
-    public List<JobInfo> checkAlarmJobList(Date beginDate, Date endDate) {
-        return jobInfoDao.select(dsl -> dsl.where(jobInfo.del, isEqualTo(DeleteEnum.DEL_NO.val),
-                        and(jobInfo.activityEnd, isLessThanOrEqualToWhenPresent(endDate)),
-                        and(jobInfo.activityEnd, isGreaterThanOrEqualToWhenPresent(beginDate))));
     }
 
     private Map<Long, JobContentVersionDto> fetchJobVersions(JobTypeEnum typeEnum, List<Long> jobIds) {

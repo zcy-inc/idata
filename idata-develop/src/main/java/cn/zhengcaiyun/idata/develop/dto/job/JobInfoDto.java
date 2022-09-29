@@ -5,7 +5,6 @@ import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 import org.springframework.beans.BeanUtils;
 
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,10 +42,6 @@ public class JobInfoDto extends BaseDto {
      * 文件夹id
      */
     private Long folderId;
-    /**
-     *   作业有效截止时间
-     */
-    private Date activityEnd;
 
     public Long getId() {
         return id;
@@ -102,14 +97,6 @@ public class JobInfoDto extends BaseDto {
 
     public void setFolderId(Long folderId) {
         this.folderId = folderId;
-    }
-
-    public Date getActivityEnd() {
-        return activityEnd;
-    }
-
-    public void setActivityEnd(Date activityEnd) {
-        this.activityEnd = activityEnd;
     }
 
     public static JobInfoDto from(JobInfo info) {
