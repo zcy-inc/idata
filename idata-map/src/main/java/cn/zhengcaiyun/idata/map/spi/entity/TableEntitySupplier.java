@@ -17,6 +17,7 @@
 
 package cn.zhengcaiyun.idata.map.spi.entity;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.develop.api.TableInfoApi;
 import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableDetailDto;
@@ -24,6 +25,8 @@ import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import cn.zhengcaiyun.idata.map.dal.dao.MapUserFavouriteDao;
+import cn.zhengcaiyun.idata.map.dal.model.MapUserFavourite;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
@@ -35,6 +38,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.map.dal.dao.MapUserFavouriteDynamicSqlSupport.mapUserFavourite;
+import static org.mybatis.dynamic.sql.SqlBuilder.and;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+
 /**
  * @description: 获取表实体数据
  * @author: yangjianhua
@@ -44,6 +51,9 @@ import java.util.stream.Collectors;
 public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, DataEntityDto> {
 
     private final TableInfoApi tableInfoApi;
+
+    @Autowired
+    private MapUserFavouriteDao mapUserFavouriteDao;
 
     @Autowired
     public TableEntitySupplier(TableInfoApi tableInfoApi) {
@@ -71,6 +81,15 @@ public class TableEntitySupplier implements DataEntitySupplier<DataSearchCond, D
         List<Long> tableIds = tableInfoApi.getTableIds(condition.getKeyWords(), Strings.emptyToNull(condition.getCategoryId()),
                 Strings.emptyToNull(condition.getTableLayer()), tableSearchRange == null ? null : tableSearchRange.toUpperCase());
         if (ObjectUtils.isEmpty(tableIds)) return Lists.newArrayList();
+
+        if (condition.isMyFavorite()) {
+            List<MapUserFavourite> list = mapUserFavouriteDao.select(c ->
+                    c.where(mapUserFavourite.userId, isEqualTo(OperatorContext.getCurrentOperator().getId()),
+                            and(mapUserFavourite.del, isEqualTo(0))));
+            List<Long> idList = list.stream().map(e -> Long.parseLong(e.getEntityCode())).collect(Collectors.toList());
+            // 交集
+            tableIds.retainAll(idList);
+        }
 
         return tableIds.stream().map(id -> new DataEntityDto(id.toString())).collect(Collectors.toList());
     }

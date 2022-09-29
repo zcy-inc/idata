@@ -9,13 +9,19 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://mysql-5-7:30106/idata"
+                        connectionURL="jdbc:mysql://172.29.108.184:30106/idata"
                         userId="root" password="123456"/>
 
         <javaModelGenerator targetPackage="cn.zhengcaiyun.idata.map.dal.model" targetProject="src/main/java"/>
         <javaClientGenerator targetPackage="cn.zhengcaiyun.idata.map.dal.dao" targetProject="src/main/java"/>
 
-        <table tableName="map_view_count" mapperName="ViewCountDao">
+<!--        <table tableName="map_view_count" mapperName="ViewCountDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        -->
+
+        <table tableName="map_user_favourite" mapperName="MapUserFavouriteDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>

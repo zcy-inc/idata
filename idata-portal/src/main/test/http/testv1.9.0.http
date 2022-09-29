@@ -1,0 +1,7 @@
+POST http://localhost:8080/api/p1/map/search?limit=10&offset=0
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; redirect=; _gid=GA1.2.897346766.1664423577; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5Y2g5Lm-IiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjEyOCwiYXZhdGFyIjoiTlVMTCIsImV4cCI6MTY2NDUxOTkzOCwiZW1haWwiOiJ6aGFucWlhbkBjYWktaW5jLmNvbSIsInVzZXJuYW1lIjoiemhhbnFpYW4ifQ.rU8A8ZtKqcnwS0hVESkzXlWFGKfC70-pJOHE1DOBm8anIXHn1KYrWDnYef0L2RGHidWK8gvOTAguNPgBjEnczg
+
+{"myFavorite":true,"source":"table","keyWord":"s s s","categoryId":"","categoryType":"property_dir","tableSearchRange":"all"}
+
+###
