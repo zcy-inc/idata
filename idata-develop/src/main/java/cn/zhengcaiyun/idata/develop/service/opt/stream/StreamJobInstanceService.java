@@ -22,8 +22,7 @@ import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
-
-import java.util.List;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobStartParamConfig;
 
 /**
  * @description:
@@ -40,5 +39,5 @@ public interface StreamJobInstanceService {
 
     Boolean destroy(Long id, Operator operator);
 
-    List<String> getForceInitTable(Long id);
+    StreamJobStartParamConfig getStartParamConfig(Long id);
 }

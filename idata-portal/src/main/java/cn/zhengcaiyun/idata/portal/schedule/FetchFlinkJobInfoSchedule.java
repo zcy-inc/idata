@@ -19,9 +19,11 @@ package cn.zhengcaiyun.idata.portal.schedule;
 
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.service.job.FlinkJobCommonService;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,9 @@ public class FetchFlinkJobInfoSchedule {
 
     private final FlinkJobCommonService flinkJobCommonService;
 
+    @Value("${flink.job.info.sync:false}")
+    private Boolean syncFlinkJobInfo;
+
     @Autowired
     public FetchFlinkJobInfoSchedule(FlinkJobCommonService flinkJobCommonService) {
         this.flinkJobCommonService = flinkJobCommonService;
@@ -44,6 +49,9 @@ public class FetchFlinkJobInfoSchedule {
 
     @Scheduled(initialDelay = 15 * 1000, fixedDelay = 10 * 1000)
     public void fetchFlinkJobInfo() {
+        if (BooleanUtils.isNotTrue(syncFlinkJobInfo)) {
+            return;
+        }
         LOGGER.info("Start to fetchAndSetFlinkJobRunningInfo for prod ... ...");
         flinkJobCommonService.fetchAndSetFlinkJobRunningInfo(EnvEnum.prod);
         LOGGER.info("End to fetchAndSetFlinkJobRunningInfo for prod ... ...");
