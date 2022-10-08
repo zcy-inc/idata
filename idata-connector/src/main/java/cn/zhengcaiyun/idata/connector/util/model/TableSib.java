@@ -1,12 +1,15 @@
 package cn.zhengcaiyun.idata.connector.util.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TableSib {
     private SqlTypeEnum sqlType;
     private List<TableObj> inputTables = new ArrayList<>();
     private TableObj outputTable;
+    private Set<ColunmObj> colList = new HashSet<>();
 
     public List<TableObj> getInputTables() {
         return inputTables;
@@ -39,5 +42,13 @@ public class TableSib {
                 ", inputTables=" + inputTables +
                 ", outputTable=" + outputTable +
                 '}';
+    }
+
+    public Set<ColunmObj> getColList() {
+        return colList;
+    }
+
+    public void setColList(Set<ColunmObj> colList) {
+        this.colList = colList;
     }
 }
