@@ -29,6 +29,7 @@ public class SparkSqlHelper {
         parser.addParseListener(new PostProcessor());
         parser.removeErrorListeners();
         parser.addErrorListener(new ParseErrorListener());
+        // first, try parsing with potentially faster SLL mode
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
 
 //        System.out.println(parser.singleStatement().toStringTree(parser));
