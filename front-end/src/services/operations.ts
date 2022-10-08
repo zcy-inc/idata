@@ -336,3 +336,12 @@ export async function getForceList(data: {
     method: 'GET'
   });
 }
+
+// 查询启动参数配置
+export async function startParamConfig(data: {
+  id: number;
+}) {
+  return request(`/api/p1/opt/stream/instances/${data.id}/startParamConfig`, {
+    method: 'GET'
+  });
+}

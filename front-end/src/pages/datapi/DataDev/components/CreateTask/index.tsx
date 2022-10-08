@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ModalForm } from '@ant-design/pro-form';
-import { Form, Input, message, Select } from 'antd';
+import { Form, Input, message, Select, Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useModel } from 'umi';
 import { useRequest } from 'ahooks';
 import type { FC } from 'react';
@@ -63,6 +64,16 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       .catch((err) => {});
   }, []);
 
+  const jobTypeLabel = () => {
+    return (
+      <span>作业类型
+        <Tooltip title={<span>数据回流：将数据从hive ads层同步到MMP数据库。 <br/> 数据抽取：将数据从关系型数据库抽取数据到hive的过程。</span>}>
+          <QuestionCircleOutlined />
+        </Tooltip>
+      </span>
+    )
+  }
+
   return (
     <ModalForm
       className={styles.form}
@@ -84,7 +95,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       }}
       onFinish={handleCreateDI}
     >
-      <Item name="jobType" label="作业类型" rules={rules}>
+      <Item name="jobType" label={jobTypeLabel()} rules={rules}>
         <Select
           size="large"
           style={{ width }}

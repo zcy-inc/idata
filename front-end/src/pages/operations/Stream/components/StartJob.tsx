@@ -1,10 +1,10 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import ProForm, { ProFormSelect } from '@ant-design/pro-form';
 import { Form } from 'antd';
-import { getForceList } from '@/services/operations'
+// import { getForceList } from '@/services/operations'
 import type { FC } from 'react';
 
-const AddMonitor: FC<{id: number}> = ({id}, ref) => {
+const AddMonitor: FC<{id: number, forceInitTableList: any}> = ({id, forceInitTableList}, ref) => {
   const [form] = Form.useForm();
   const [options, setOption] = useState([]);
   useImperativeHandle(ref, () => ({
@@ -12,9 +12,10 @@ const AddMonitor: FC<{id: number}> = ({id}, ref) => {
   }))
 
   useEffect(() => {
-    getForceList({id}).then(res => {
-      setOption(res.data?.map((item: string) => ({label: item, value: item})))
-    })
+    // getForceList({id}).then(res => {
+    //   setOption(res.data?.map((item: string) => ({label: item, value: item})))
+    // })
+    setOption(forceInitTableList?.map((item: string) => ({label: item, value: item})))
   }, []);
 
   const handleSubmit = () => {
