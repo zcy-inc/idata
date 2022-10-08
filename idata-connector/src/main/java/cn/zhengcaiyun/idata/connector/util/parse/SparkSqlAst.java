@@ -10,13 +10,15 @@ import com.google.common.collect.Lists;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SparkSqlAst extends SparkSqlBaseVisitor {
     private TableSib tableSib = new TableSib();
     private SqlTypeEnum curSqlType = SqlTypeEnum.UNKOWN;
-    private List<SqlTypeEnum>  outputTypeList = Lists.newArrayList(SqlTypeEnum.INSERT_VALUES,SqlTypeEnum.CREATE_TABLE);
-    private List<SqlTypeEnum>  inputTypeList = Lists.newArrayList(SqlTypeEnum.INSERT_SELECT,SqlTypeEnum.CREATE_TABLE_AS_SELECT,SqlTypeEnum.SELECT);
+    private List<String> withList = new ArrayList<>();
+    private List<SqlTypeEnum> outputTypeList = Lists.newArrayList(SqlTypeEnum.INSERT_VALUES, SqlTypeEnum.CREATE_TABLE);
+    private List<SqlTypeEnum> inputTypeList = Lists.newArrayList(SqlTypeEnum.INSERT_SELECT, SqlTypeEnum.CREATE_TABLE_AS_SELECT, SqlTypeEnum.SELECT);
 
     @Override
     public TableSib visit(ParseTree tree) {
@@ -84,6 +86,11 @@ public class SparkSqlAst extends SparkSqlBaseVisitor {
         return tableSib;
     }
 
+    @Override
+    public Object visitNamedQuery(SparkSqlParser.NamedQueryContext ctx) {
+        withList.add(ctx.name.getText());
+        return super.visitNamedQuery(ctx);
+    }
 
     /**
      * create table ,from ,insert into, join
@@ -93,13 +100,19 @@ public class SparkSqlAst extends SparkSqlBaseVisitor {
      */
     @Override
     public TableSib visitTableIdentifier(SparkSqlParser.TableIdentifierContext ctx) {
-        String tableName = (ctx.db == null ? "" : ctx.db.getText() + ".") + (ctx.table == null ? "" : ctx.table.getText());
+        String db = ctx.db == null ? "" : ctx.db.getText();
+        String tableName = ctx.table == null ? "" : ctx.table.getText();
+
+        String full = "".equals(db) ? tableName : db + "." + tableName;
+        if (withList.contains(db + full)) {
+            return null;
+        }
 
         if (outputTypeList.contains(curSqlType)) {
-            tableSib.setOutputTable(new TableObj(tableName));
+            tableSib.setOutputTable(new TableObj(db, tableName));
 
         } else if (inputTypeList.contains(curSqlType)) {
-            tableSib.getInputTables().add(new TableObj(tableName));
+            tableSib.getInputTables().add(new TableObj(db, tableName));
         }
         return null;
     }
@@ -126,6 +139,7 @@ public class SparkSqlAst extends SparkSqlBaseVisitor {
         return null;
     }
 
+
     /**
      * insert overwrite …… (as select ……）
      *
@@ -143,10 +157,10 @@ public class SparkSqlAst extends SparkSqlBaseVisitor {
 
     @Override
     public TableSib visitQuerySpecification(SparkSqlParser.QuerySpecificationContext ctx) {
-        if(curSqlType == SqlTypeEnum.INSERT_VALUES){
+        if (curSqlType == SqlTypeEnum.INSERT_VALUES) {
             curSqlType = SqlTypeEnum.INSERT_SELECT;
 
-        } else if (curSqlType == SqlTypeEnum.CREATE_TABLE){
+        } else if (curSqlType == SqlTypeEnum.CREATE_TABLE) {
             curSqlType = SqlTypeEnum.CREATE_TABLE_AS_SELECT;
         }
 

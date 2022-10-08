@@ -37,6 +37,7 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.dao.MonitorRuleDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.TableSibshipDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
@@ -148,6 +149,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Value("${dqc.open:false}")
     private boolean dqcOpen;
+
+    @Autowired
+    private TableSibshipDao tableSibshipDao;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -280,7 +284,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean removeJob(Long id, Operator operator) throws IllegalAccessException {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
@@ -313,6 +317,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
         JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
+
+        //删除数据血缘
+        tableSibshipDao.delByJobId(id);
         return ret;
     }
 

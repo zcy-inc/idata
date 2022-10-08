@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.develop.dal.dao.TableSibshipDao">
+
+    <resultMap type="cn.zhengcaiyun.idata.develop.dto.table.TableSibship" id="TableSibshipMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="jobId" column="job_id" jdbcType="INTEGER"/>
+        <result property="db" column="db" jdbcType="VARCHAR"/>
+        <result property="tableName" column="table_name" jdbcType="VARCHAR"/>
+        <result property="sourceDb" column="source_db" jdbcType="VARCHAR"/>
+        <result property="sourceTableName" column="source_table_name" jdbcType="VARCHAR"/>
+        <result property="del" column="del" jdbcType="INTEGER"/>
+        <result property="creator" column="creator" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="editor" column="editor" jdbcType="VARCHAR"/>
+        <result property="editTime" column="edit_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into table_sibship(job_id, db, table_name, source_db, source_table_name, del, creator, create_time, editor, edit_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.jobId}, #{entity.db}, #{entity.tableName}, #{entity.sourceDb}, #{entity.sourceTableName},0, #{entity.creator}, now(), #{entity.editor}, now())
+        </foreach>
+    </insert>
+
+
+    <update id="update">
+        update table_sibship
+        <set>
+            <if test="jobId != null">
+                job_id = #{jobId},
+            </if>
+            <if test="db != null and db != ''">
+                db = #{db},
+            </if>
+            <if test="tableName != null and tableName != ''">
+                table_name = #{tableName},
+            </if>
+            <if test="sourceDb != null and sourceDb != ''">
+                source_db = #{sourceDb},
+            </if>
+            <if test="sourceTableName != null and sourceTableName != ''">
+                source_table_name = #{sourceTableName},
+            </if>
+            <if test="del != null">
+                del = #{del},
+            </if>
+            <if test="creator != null and creator != ''">
+                creator = #{creator},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="editor != null and editor != ''">
+                editor = #{editor},
+            </if>
+            <if test="editTime != null">
+                edit_time = #{editTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delByJobId" parameterType="java.lang.Long">
+        delete from table_sibship where job_Id = #{jobId}
+    </delete>
+
+    <select id="getPublishedJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord">
+        select job_id jobId,job_content_version jobContentVersion
+        from dev_job_publish_record
+        where job_type_code='SQL_SPARK' and `publish_status`=2 and `environment`='prod'
+        limit #{startIndex},20
+    </select>
+
+    <select id="getParents" resultType="cn.zhengcaiyun.idata.develop.dto.table.TableSibship">
+        select db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
+        from table_sibship
+        where db=#{db} and table_name=#{tableName}
+    </select>
+
+    <select id="getChildren" resultType="cn.zhengcaiyun.idata.develop.dto.table.TableSibship">
+        select db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
+        from table_sibship
+        where source_db=#{db} and source_table_name=#{tableName}
+    </select>
+
+    <select id="getSqlJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
+        select j.id jobId,j.name jobName
+        from table_sibship s
+        left join dev_job_info j on s.job_id=j.id
+        where s.db = #{db} and s.table_name = #{tableName}
+    </select>
+
+    <select id="getDIJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
+        select j.id jobId,j.name jobName
+        from dev_job_content_di s
+        left join dev_job_info j on s.job_id=j.id
+        where s.dest_data_source_type='hive' and s.dest_table=#{tableName}
+    </select>
+
+    <select id="getJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
+        select j.id jobId,j.name jobName
+        from dev_job_output s
+        left join dev_job_info j on s.job_id=j.id
+        where s.dest_data_source_type='hive' and s.dest_table=#{tableName}
+    </select>
+</mapper>
+
