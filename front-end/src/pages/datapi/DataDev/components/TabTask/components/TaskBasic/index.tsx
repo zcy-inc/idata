@@ -163,7 +163,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
       },
     },
   );
-  
+
   // 数据来源-数据源
   const { destOptions, fromOptions, getSourceOptions, fetchSourceList } = useDataSource({jobTypeEnum: basicInfo?.jobTypeEnum});
   const getSrcDSOptions = (type: string) => fetchSourceList(DataSources.SRC, type);
@@ -212,7 +212,7 @@ const TaskBasic: FC<TaskBasicProps> = ({ pane, basicInfo, refreshBasicInfo }) =>
   }));
   const formInitialValues = {
     srcReadMode: SrcReadMode.ALL,
-    destWriteMode: DestWriteMode.INIT,
+    destWriteMode: basicInfo?.jobType === DIJobType.DI ? DestWriteMode.INIT : BackFlowDestWriteMode.UPSERT,
     configMode: DIConfigMode.VISUALIZATION,
     srcShardingNum: 1,
     destShardingNum: 1,
