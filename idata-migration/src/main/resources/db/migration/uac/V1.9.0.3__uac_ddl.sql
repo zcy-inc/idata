@@ -7,7 +7,7 @@ CREATE TABLE `uac_group` (
       `editor` varchar(20) NOT NULL DEFAULT '' COMMENT '修改者',
       `edit_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
       `name` varchar(20) NOT NULL COMMENT '组名称',
-      `owner` varchar(20) NOT NULL COMMENT '组负责人',
+      `owner_id` bigint(20) unsigned NOT NULL COMMENT '组负责人id',
       `remark` varchar(200) NOT NULL COMMENT '备注',
       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4 COMMENT='用户组';

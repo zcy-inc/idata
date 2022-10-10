@@ -61,12 +61,12 @@ public interface GroupUserRelationDao extends CommonCountMapper, CommonDeleteMap
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, groupUserRelation, completer);
+        return MyBatis3Utils.countFrom(this::count, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, groupUserRelation, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
@@ -78,7 +78,7 @@ public interface GroupUserRelationDao extends CommonCountMapper, CommonDeleteMap
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default int insert(GroupUserRelation row) {
-        return MyBatis3Utils.insert(this::insert, row, groupUserRelation, c ->
+        return MyBatis3Utils.insert(this::insert, row, GROUP_USER_RELATION, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -91,7 +91,7 @@ public interface GroupUserRelationDao extends CommonCountMapper, CommonDeleteMap
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default int insertSelective(GroupUserRelation row) {
-        return MyBatis3Utils.insert(this::insert, row, groupUserRelation, c ->
+        return MyBatis3Utils.insert(this::insert, row, GROUP_USER_RELATION, c ->
             c.map(del).toPropertyWhenPresent("del", row::getDel)
             .map(creator).toPropertyWhenPresent("creator", row::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", row::getCreateTime)
@@ -104,17 +104,17 @@ public interface GroupUserRelationDao extends CommonCountMapper, CommonDeleteMap
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default Optional<GroupUserRelation> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, groupUserRelation, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default List<GroupUserRelation> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, groupUserRelation, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default List<GroupUserRelation> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, groupUserRelation, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
@@ -126,7 +126,7 @@ public interface GroupUserRelationDao extends CommonCountMapper, CommonDeleteMap
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, groupUserRelation, completer);
+        return MyBatis3Utils.update(this::update, GROUP_USER_RELATION, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group_user_relation")

@@ -60,10 +60,10 @@ public class Group {
 
     /**
      * Database Column Remarks:
-     *   组负责人
+     *   组负责人id
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner")
-    private String owner;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner_id")
+    private Long ownerId;
 
     /**
      * Database Column Remarks:
@@ -142,14 +142,14 @@ public class Group {
         this.name = name;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner")
-    public String getOwner() {
-        return owner;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner_id")
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner")
-    public void setOwner(String owner) {
-        this.owner = owner;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.owner_id")
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_group.remark")

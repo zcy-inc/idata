@@ -33,7 +33,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonUpdateMapper {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, owner, remark);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, name, ownerId, remark);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     @InsertProvider(type=SqlProviderAdapter.class, method="insert")
@@ -50,7 +50,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
-        @Result(column="owner", property="owner", jdbcType=JdbcType.VARCHAR),
+        @Result(column="owner_id", property="ownerId", jdbcType=JdbcType.BIGINT),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
     List<Group> selectMany(SelectStatementProvider selectStatement);
@@ -62,12 +62,12 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, group, completer);
+        return MyBatis3Utils.countFrom(this::count, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, group, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
@@ -79,45 +79,45 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default int insert(Group row) {
-        return MyBatis3Utils.insert(this::insert, row, group, c ->
+        return MyBatis3Utils.insert(this::insert, row, GROUP, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
             .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(name).toProperty("name")
-            .map(owner).toProperty("owner")
+            .map(ownerId).toProperty("ownerId")
             .map(remark).toProperty("remark")
         );
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default int insertSelective(Group row) {
-        return MyBatis3Utils.insert(this::insert, row, group, c ->
+        return MyBatis3Utils.insert(this::insert, row, GROUP, c ->
             c.map(del).toPropertyWhenPresent("del", row::getDel)
             .map(creator).toPropertyWhenPresent("creator", row::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", row::getCreateTime)
             .map(editor).toPropertyWhenPresent("editor", row::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", row::getEditTime)
             .map(name).toPropertyWhenPresent("name", row::getName)
-            .map(owner).toPropertyWhenPresent("owner", row::getOwner)
+            .map(ownerId).toPropertyWhenPresent("ownerId", row::getOwnerId)
             .map(remark).toPropertyWhenPresent("remark", row::getRemark)
         );
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default Optional<Group> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, group, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default List<Group> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, group, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default List<Group> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, group, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
@@ -129,7 +129,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, group, completer);
+        return MyBatis3Utils.update(this::update, GROUP, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_group")
@@ -140,7 +140,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
                 .set(editor).equalTo(row::getEditor)
                 .set(editTime).equalTo(row::getEditTime)
                 .set(name).equalTo(row::getName)
-                .set(owner).equalTo(row::getOwner)
+                .set(ownerId).equalTo(row::getOwnerId)
                 .set(remark).equalTo(row::getRemark);
     }
 
@@ -152,7 +152,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
                 .set(editor).equalToWhenPresent(row::getEditor)
                 .set(editTime).equalToWhenPresent(row::getEditTime)
                 .set(name).equalToWhenPresent(row::getName)
-                .set(owner).equalToWhenPresent(row::getOwner)
+                .set(ownerId).equalToWhenPresent(row::getOwnerId)
                 .set(remark).equalToWhenPresent(row::getRemark);
     }
 
@@ -165,7 +165,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
             .set(editor).equalTo(row::getEditor)
             .set(editTime).equalTo(row::getEditTime)
             .set(name).equalTo(row::getName)
-            .set(owner).equalTo(row::getOwner)
+            .set(ownerId).equalTo(row::getOwnerId)
             .set(remark).equalTo(row::getRemark)
             .where(id, isEqualTo(row::getId))
         );
@@ -180,7 +180,7 @@ public interface GroupDao extends CommonCountMapper, CommonDeleteMapper, CommonU
             .set(editor).equalToWhenPresent(row::getEditor)
             .set(editTime).equalToWhenPresent(row::getEditTime)
             .set(name).equalToWhenPresent(row::getName)
-            .set(owner).equalToWhenPresent(row::getOwner)
+            .set(ownerId).equalToWhenPresent(row::getOwnerId)
             .set(remark).equalToWhenPresent(row::getRemark)
             .where(id, isEqualTo(row::getId))
         );
