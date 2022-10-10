@@ -31,9 +31,10 @@ export default ({data}: {data : TreeNode []}, ref: React.Ref<unknown> | undefine
     expandedKeys={expandedKeys}
     onExpand={key => setExpandedKeys(key)}
     onSelect={(selectedKeys,) => {
-      if (selectedKeys.length) {
-       setSelectedFolder(selectedKeys[0])
-      }
+      setSelectedFolder(selectedKeys[0])
+      // if (selectedKeys.length) {
+      //  setSelectedFolder(selectedKeys[0])
+      // }
     }}
   />
 }
