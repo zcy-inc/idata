@@ -36,6 +36,7 @@ import cn.zhengcaiyun.idata.portal.model.request.map.UserFavoriteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevEnumValueDynamicSqlSupport.devEnumValue;
@@ -99,6 +100,9 @@ public class DataMapController {
         MapUserFavourite userFavourite = MyBeanUtils.copy(request, MapUserFavourite.class);
         userFavourite.setUserId(OperatorContext.getCurrentOperator().getId());
         userFavourite.setCreator(OperatorContext.getCurrentOperator().getNickname());
+        userFavourite.setEditor(OperatorContext.getCurrentOperator().getNickname());
+        userFavourite.setCreateTime(new Date());
+        userFavourite.setEditTime(new Date());
         userFavourite.setDel(WhetherEnum.NO.val);
         mapUserFavouriteDao.insert(userFavourite);
         return RestResult.success(true);
