@@ -216,7 +216,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
       {
         task.jobType === TaskTypes.SQL_FLINK && (
           <Modal title="作业配置" visible={visible} onCancel={onCancel} footer={footer} forceRender>
-            <Item name="externalTables" label="外部表">
+            {/* <Item name="externalTables" label="外部表">
               <Input placeholder="请输入" />
             </Item>
             <Item name="udfIds" label="自定义函数">
@@ -228,7 +228,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                   value: `${id}`,
                 }))}
               />
-            </Item>
+            </Item> */}
             <Item label="来源数据源" name={['extConfig', 'flinkExtConfig', 'flinkSourceConfigs']}>
               <DataSourceSelect quantityCustom fetchTemplate={fetchSrcTemplate} jobType={task.jobType} isDest={false} />
             </Item>
