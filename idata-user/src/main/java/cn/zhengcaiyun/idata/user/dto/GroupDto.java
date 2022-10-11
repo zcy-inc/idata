@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.user.dto;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.user.dal.model.Group;
+import org.springframework.beans.BeanUtils;
 
 public class GroupDto extends BaseDto {
     /**
@@ -66,5 +68,17 @@ public class GroupDto extends BaseDto {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public static GroupDto from(Group group) {
+        GroupDto dto = new GroupDto();
+        BeanUtils.copyProperties(group, dto);
+        return dto;
+    }
+
+    public Group toModel() {
+        Group group = new Group();
+        BeanUtils.copyProperties(this, group);
+        return group;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.user.dal.dao.GroupDynamicSqlSupport.GROUP;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
@@ -83,5 +84,13 @@ public class GroupRepoImpl implements GroupRepo {
 
         if (DeleteEnum.DEL_YES.val == optional.get().getDel()) return Optional.empty();
         return optional;
+    }
+
+    @Override
+    public Boolean delete(Long id, String operator) {
+        int ret = groupDao.update(dsl -> dsl.set(GROUP.del).equalTo(DEL_YES.val)
+                .set(GROUP.editor).equalTo(operator)
+                .where(GROUP.id, isEqualTo(id)));
+        return ret > 0;
     }
 }

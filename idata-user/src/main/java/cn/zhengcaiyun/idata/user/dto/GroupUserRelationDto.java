@@ -1,6 +1,8 @@
 package cn.zhengcaiyun.idata.user.dto;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.user.dal.model.GroupUserRelation;
+import org.springframework.beans.BeanUtils;
 
 public class GroupUserRelationDto extends BaseDto {
     /**
@@ -17,10 +19,6 @@ public class GroupUserRelationDto extends BaseDto {
      * 用户id
      */
     private Long userId;
-    /**
-     * 用户
-     */
-    private Long userName;
 
     public Long getId() {
         return id;
@@ -46,11 +44,15 @@ public class GroupUserRelationDto extends BaseDto {
         this.userId = userId;
     }
 
-    public Long getUserName() {
-        return userName;
+    public static GroupUserRelationDto from(GroupUserRelation relation) {
+        GroupUserRelationDto dto = new GroupUserRelationDto();
+        BeanUtils.copyProperties(relation, dto);
+        return dto;
     }
 
-    public void setUserName(Long userName) {
-        this.userName = userName;
+    public GroupUserRelation toModel() {
+        GroupUserRelation relation = new GroupUserRelation();
+        BeanUtils.copyProperties(this, relation);
+        return relation;
     }
 }

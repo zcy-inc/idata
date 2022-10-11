@@ -8,9 +8,13 @@ public interface GroupUserRelationRepo {
 
     int save(List<GroupUserRelation> relationList);
 
-    int delete(Long groupId);
+    int saveWithOverride(Long groupId, List<GroupUserRelation> relationList);
+
+    int delete(Long groupId, String operator);
 
     List<GroupUserRelation> queryByGroup(Long groupId);
+
+    List<GroupUserRelation> queryByGroup(List<Long> groupIds);
 
     List<GroupUserRelation> queryByUser(Long userId);
 }

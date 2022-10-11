@@ -22,4 +22,6 @@ public interface GroupRepo {
 
     Optional<Group> query(Long id);
 
+    Boolean delete(Long id, String operator);
+
 }
