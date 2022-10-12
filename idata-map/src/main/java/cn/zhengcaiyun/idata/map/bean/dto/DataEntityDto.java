@@ -75,6 +75,10 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
      * 更多属性，*** 勿用于并发处理 ***
      */
     private Map<String, Object> moreAttrs = null;
+    /**
+     * 是否已经收藏 0：否，1：是
+     */
+    private int hasFavourite;
 
     public DataEntityDto(String entityCode) {
         this.entityCode = entityCode;
@@ -157,6 +161,14 @@ public class DataEntityDto implements Comparable<DataEntityDto> {
         if (Objects.isNull(this.moreAttrs)) this.moreAttrs = Maps.newHashMap();
         this.moreAttrs.put(attrKey, attrVal);
         return this;
+    }
+
+    public int getHasFavourite() {
+        return hasFavourite;
+    }
+
+    public void setHasFavourite(int hasFavourite) {
+        this.hasFavourite = hasFavourite;
     }
 
     /**
