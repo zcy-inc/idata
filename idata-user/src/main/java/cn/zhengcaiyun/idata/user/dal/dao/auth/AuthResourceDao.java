@@ -1,9 +1,9 @@
-package cn.zhengcaiyun.idata.user.dal.dao;
+package cn.zhengcaiyun.idata.user.dal.dao.auth;
 
-import static cn.zhengcaiyun.idata.user.dal.dao.AuthPolicyDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.user.dal.dao.auth.AuthResourceDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
-import cn.zhengcaiyun.idata.user.dal.model.AuthPolicy;
+import cn.zhengcaiyun.idata.user.dal.model.auth.AuthResource;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -31,18 +31,18 @@ import org.mybatis.dynamic.sql.util.mybatis3.CommonUpdateMapper;
 import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 
 @Mapper
-public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, CommonUpdateMapper {
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, authRecordId, effectType, actionType, resourceType, remark);
+public interface AuthResourceDao extends CommonCountMapper, CommonDeleteMapper, CommonUpdateMapper {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, authRecordId, policyRecordId, resourceType, resources);
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     @InsertProvider(type=SqlProviderAdapter.class, method="insert")
     @SelectKey(statement="SELECT LAST_INSERT_ID()", keyProperty="row.id", before=false, resultType=Long.class)
-    int insert(InsertStatementProvider<AuthPolicy> insertStatement);
+    int insert(InsertStatementProvider<AuthResource> insertStatement);
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
-    @Results(id="AuthPolicyResult", value = {
+    @Results(id="AuthResourceResult", value = {
         @Result(column="id", property="id", jdbcType=JdbcType.BIGINT, id=true),
         @Result(column="del", property="del", jdbcType=JdbcType.TINYINT),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
@@ -50,124 +50,119 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="auth_record_id", property="authRecordId", jdbcType=JdbcType.BIGINT),
-        @Result(column="effect_type", property="effectType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="action_type", property="actionType", jdbcType=JdbcType.VARCHAR),
+        @Result(column="policy_record_id", property="policyRecordId", jdbcType=JdbcType.BIGINT),
         @Result(column="resource_type", property="resourceType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
+        @Result(column="resources", property="resources", jdbcType=JdbcType.LONGVARCHAR)
     })
-    List<AuthPolicy> selectMany(SelectStatementProvider selectStatement);
+    List<AuthResource> selectMany(SelectStatementProvider selectStatement);
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
-    @ResultMap("AuthPolicyResult")
-    Optional<AuthPolicy> selectOne(SelectStatementProvider selectStatement);
+    @ResultMap("AuthResourceResult")
+    Optional<AuthResource> selectOne(SelectStatementProvider selectStatement);
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, authPolicy, completer);
+        return MyBatis3Utils.countFrom(this::count, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, authPolicy, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     default int deleteByPrimaryKey(Long id_) {
         return delete(c -> 
             c.where(id, isEqualTo(id_))
         );
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default int insert(AuthPolicy row) {
-        return MyBatis3Utils.insert(this::insert, row, authPolicy, c ->
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default int insert(AuthResource row) {
+        return MyBatis3Utils.insert(this::insert, row, AUTH_RESOURCE, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
             .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(authRecordId).toProperty("authRecordId")
-            .map(effectType).toProperty("effectType")
-            .map(actionType).toProperty("actionType")
+            .map(policyRecordId).toProperty("policyRecordId")
             .map(resourceType).toProperty("resourceType")
-            .map(remark).toProperty("remark")
+            .map(resources).toProperty("resources")
         );
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default int insertSelective(AuthPolicy row) {
-        return MyBatis3Utils.insert(this::insert, row, authPolicy, c ->
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default int insertSelective(AuthResource row) {
+        return MyBatis3Utils.insert(this::insert, row, AUTH_RESOURCE, c ->
             c.map(del).toPropertyWhenPresent("del", row::getDel)
             .map(creator).toPropertyWhenPresent("creator", row::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", row::getCreateTime)
             .map(editor).toPropertyWhenPresent("editor", row::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", row::getEditTime)
             .map(authRecordId).toPropertyWhenPresent("authRecordId", row::getAuthRecordId)
-            .map(effectType).toPropertyWhenPresent("effectType", row::getEffectType)
-            .map(actionType).toPropertyWhenPresent("actionType", row::getActionType)
+            .map(policyRecordId).toPropertyWhenPresent("policyRecordId", row::getPolicyRecordId)
             .map(resourceType).toPropertyWhenPresent("resourceType", row::getResourceType)
-            .map(remark).toPropertyWhenPresent("remark", row::getRemark)
+            .map(resources).toPropertyWhenPresent("resources", row::getResources)
         );
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default Optional<AuthPolicy> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, authPolicy, completer);
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default Optional<AuthResource> selectOne(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default List<AuthPolicy> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, authPolicy, completer);
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default List<AuthResource> select(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectList(this::selectMany, selectList, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default List<AuthPolicy> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, authPolicy, completer);
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default List<AuthResource> selectDistinct(SelectDSLCompleter completer) {
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default Optional<AuthPolicy> selectByPrimaryKey(Long id_) {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default Optional<AuthResource> selectByPrimaryKey(Long id_) {
         return selectOne(c ->
             c.where(id, isEqualTo(id_))
         );
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, authPolicy, completer);
+        return MyBatis3Utils.update(this::update, AUTH_RESOURCE, completer);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    static UpdateDSL<UpdateModel> updateAllColumns(AuthPolicy row, UpdateDSL<UpdateModel> dsl) {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    static UpdateDSL<UpdateModel> updateAllColumns(AuthResource row, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalTo(row::getDel)
                 .set(creator).equalTo(row::getCreator)
                 .set(createTime).equalTo(row::getCreateTime)
                 .set(editor).equalTo(row::getEditor)
                 .set(editTime).equalTo(row::getEditTime)
                 .set(authRecordId).equalTo(row::getAuthRecordId)
-                .set(effectType).equalTo(row::getEffectType)
-                .set(actionType).equalTo(row::getActionType)
+                .set(policyRecordId).equalTo(row::getPolicyRecordId)
                 .set(resourceType).equalTo(row::getResourceType)
-                .set(remark).equalTo(row::getRemark);
+                .set(resources).equalTo(row::getResources);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    static UpdateDSL<UpdateModel> updateSelectiveColumns(AuthPolicy row, UpdateDSL<UpdateModel> dsl) {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    static UpdateDSL<UpdateModel> updateSelectiveColumns(AuthResource row, UpdateDSL<UpdateModel> dsl) {
         return dsl.set(del).equalToWhenPresent(row::getDel)
                 .set(creator).equalToWhenPresent(row::getCreator)
                 .set(createTime).equalToWhenPresent(row::getCreateTime)
                 .set(editor).equalToWhenPresent(row::getEditor)
                 .set(editTime).equalToWhenPresent(row::getEditTime)
                 .set(authRecordId).equalToWhenPresent(row::getAuthRecordId)
-                .set(effectType).equalToWhenPresent(row::getEffectType)
-                .set(actionType).equalToWhenPresent(row::getActionType)
+                .set(policyRecordId).equalToWhenPresent(row::getPolicyRecordId)
                 .set(resourceType).equalToWhenPresent(row::getResourceType)
-                .set(remark).equalToWhenPresent(row::getRemark);
+                .set(resources).equalToWhenPresent(row::getResources);
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default int updateByPrimaryKey(AuthPolicy row) {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default int updateByPrimaryKey(AuthResource row) {
         return update(c ->
             c.set(del).equalTo(row::getDel)
             .set(creator).equalTo(row::getCreator)
@@ -175,16 +170,15 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .set(editor).equalTo(row::getEditor)
             .set(editTime).equalTo(row::getEditTime)
             .set(authRecordId).equalTo(row::getAuthRecordId)
-            .set(effectType).equalTo(row::getEffectType)
-            .set(actionType).equalTo(row::getActionType)
+            .set(policyRecordId).equalTo(row::getPolicyRecordId)
             .set(resourceType).equalTo(row::getResourceType)
-            .set(remark).equalTo(row::getRemark)
+            .set(resources).equalTo(row::getResources)
             .where(id, isEqualTo(row::getId))
         );
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    default int updateByPrimaryKeySelective(AuthPolicy row) {
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_resource")
+    default int updateByPrimaryKeySelective(AuthResource row) {
         return update(c ->
             c.set(del).equalToWhenPresent(row::getDel)
             .set(creator).equalToWhenPresent(row::getCreator)
@@ -192,10 +186,9 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .set(editor).equalToWhenPresent(row::getEditor)
             .set(editTime).equalToWhenPresent(row::getEditTime)
             .set(authRecordId).equalToWhenPresent(row::getAuthRecordId)
-            .set(effectType).equalToWhenPresent(row::getEffectType)
-            .set(actionType).equalToWhenPresent(row::getActionType)
+            .set(policyRecordId).equalToWhenPresent(row::getPolicyRecordId)
             .set(resourceType).equalToWhenPresent(row::getResourceType)
-            .set(remark).equalToWhenPresent(row::getRemark)
+            .set(resources).equalToWhenPresent(row::getResources)
             .where(id, isEqualTo(row::getId))
         );
     }
