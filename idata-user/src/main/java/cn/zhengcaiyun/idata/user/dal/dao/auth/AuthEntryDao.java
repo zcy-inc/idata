@@ -1,9 +1,9 @@
-package cn.zhengcaiyun.idata.user.dal.dao;
+package cn.zhengcaiyun.idata.user.dal.dao.auth;
 
-import static cn.zhengcaiyun.idata.user.dal.dao.AuthEntryDynamicSqlSupport.*;
+import static cn.zhengcaiyun.idata.user.dal.dao.auth.AuthEntryDynamicSqlSupport.*;
 import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
 
-import cn.zhengcaiyun.idata.user.dal.model.AuthEntry;
+import cn.zhengcaiyun.idata.user.dal.model.auth.AuthEntry;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -62,12 +62,12 @@ public interface AuthEntryDao extends CommonCountMapper, CommonDeleteMapper, Com
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, authEntry, completer);
+        return MyBatis3Utils.countFrom(this::count, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, authEntry, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
@@ -79,7 +79,7 @@ public interface AuthEntryDao extends CommonCountMapper, CommonDeleteMapper, Com
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default int insert(AuthEntry row) {
-        return MyBatis3Utils.insert(this::insert, row, authEntry, c ->
+        return MyBatis3Utils.insert(this::insert, row, AUTH_ENTRY, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -93,7 +93,7 @@ public interface AuthEntryDao extends CommonCountMapper, CommonDeleteMapper, Com
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default int insertSelective(AuthEntry row) {
-        return MyBatis3Utils.insert(this::insert, row, authEntry, c ->
+        return MyBatis3Utils.insert(this::insert, row, AUTH_ENTRY, c ->
             c.map(del).toPropertyWhenPresent("del", row::getDel)
             .map(creator).toPropertyWhenPresent("creator", row::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", row::getCreateTime)
@@ -107,17 +107,17 @@ public interface AuthEntryDao extends CommonCountMapper, CommonDeleteMapper, Com
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default Optional<AuthEntry> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, authEntry, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default List<AuthEntry> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, authEntry, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default List<AuthEntry> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, authEntry, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
@@ -129,7 +129,7 @@ public interface AuthEntryDao extends CommonCountMapper, CommonDeleteMapper, Com
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, authEntry, completer);
+        return MyBatis3Utils.update(this::update, AUTH_ENTRY, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_entry")

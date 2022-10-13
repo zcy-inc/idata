@@ -1,4 +1,4 @@
-package cn.zhengcaiyun.idata.user.dal.model;
+package cn.zhengcaiyun.idata.user.dal.model.auth;
 
 import java.util.Date;
 import javax.annotation.Generated;
