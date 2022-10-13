@@ -598,7 +598,17 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.TRY_RUN, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
+        return [
+          Btns.SAVE,
+          Btns.SUBMIT,
+          Btns.TRY_RUN,
+          // Btns.RUN_ONCE,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+          Btns.DIVIDER,
+          Btns.JOB_CONFIG
+        ];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,
