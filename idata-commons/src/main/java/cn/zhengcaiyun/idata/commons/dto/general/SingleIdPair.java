@@ -14,30 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service;
 
-import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
-import cn.zhengcaiyun.idata.commons.pojo.Page;
-import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
-
-import java.util.List;
+package cn.zhengcaiyun.idata.commons.dto.general;
 
 /**
- * @author shiyin
- * @date 2021-03-12 11:14
- */
-public interface UserManagerService {
-    Page<UserInfoDto> findUsers(String name, Integer limit, Integer offset);
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-10-29 10:10
+ **/
+public class SingleIdPair<C> {
+    private C id;
+    private String name;
 
-    UserInfoDto getUserInfo(Long userId);
+    public SingleIdPair() {
+    }
 
-    UserInfoDto create(UserInfoDto userInfoDto, String creator);
+    public SingleIdPair(C id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-    UserInfoDto edit(UserInfoDto userInfoDto, String editor);
+    public C getId() {
+        return id;
+    }
 
-    boolean resetUserPassword(Long userId, String editor);
+    public void setId(C id) {
+        this.id = id;
+    }
 
-    boolean delete(Long userId, String editor);
+    public String getName() {
+        return name;
+    }
 
-    List<SingleIdPair<String>> getUserKeyValList();
+    public void setName(String name) {
+        this.name = name;
+    }
 }

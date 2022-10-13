@@ -1,15 +1,19 @@
 package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.user.condition.GroupCondition;
 import cn.zhengcaiyun.idata.user.dto.GroupCombinedDto;
+import cn.zhengcaiyun.idata.user.dto.GroupDto;
 import cn.zhengcaiyun.idata.user.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * UAC-Group
@@ -85,6 +89,20 @@ public class GroupController {
     @DeleteMapping("/{id}")
     public RestResult<Boolean> deleteGroup(@PathVariable("id") Long id) {
         return RestResult.success(groupService.deleteGroup(id, OperatorContext.getCurrentOperator()));
+    }
+
+    /**
+     * 获取用户组下拉列表
+     *
+     * @return
+     */
+    @GetMapping("/KeyValList")
+    public RestResult<List<SingleIdPair<String>>> getGroupKeyValList() {
+        List<GroupDto> groupDtoList = groupService.getGroupList();
+        List<SingleIdPair<String>> kvList = groupDtoList.stream()
+                .map(groupDto -> new SingleIdPair<String>(groupDto.getId().toString(), groupDto.getName()))
+                .collect(Collectors.toList());
+        return RestResult.success(kvList);
     }
 
 }

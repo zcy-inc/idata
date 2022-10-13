@@ -4,6 +4,9 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.user.condition.GroupCondition;
 import cn.zhengcaiyun.idata.user.dto.GroupCombinedDto;
+import cn.zhengcaiyun.idata.user.dto.GroupDto;
+
+import java.util.List;
 
 public interface GroupService {
 
@@ -16,5 +19,7 @@ public interface GroupService {
     GroupCombinedDto getGroup(Long id);
 
     Boolean deleteGroup(Long id, Operator operator);
+
+    List<GroupDto> getGroupList();
 
 }

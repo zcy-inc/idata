@@ -135,6 +135,14 @@ public class GroupServiceImpl implements GroupService {
         return Boolean.TRUE;
     }
 
+    @Override
+    public List<GroupDto> getGroupList() {
+        List<Group> groupList = groupRepo.queryList(new GroupCondition());
+        return groupList.stream()
+                .map(GroupDto::from)
+                .collect(Collectors.toList());
+    }
+
     private void addOrUpdateGroupUserRelation(Long groupId, List<UserSimpleDto> relatedUsers, Operator operator) {
         List<GroupUserRelation> relationList = null;
         if (!CollectionUtils.isEmpty(relatedUsers)) {
