@@ -17,7 +17,7 @@ import java.util.Set;
  * @since 2022-09-29 10:36:23
  */
 @RestController
-@RequestMapping("tableSibship")
+@RequestMapping("/p1/tableSibship")
 public class TableSibshipController {
     @Autowired
     private TableSibshipService tableSibshipService;
