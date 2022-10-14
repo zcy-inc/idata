@@ -13,6 +13,7 @@ import cn.zhengcaiyun.idata.user.dto.auth.AuthResourceDto;
 import cn.zhengcaiyun.idata.user.dto.auth.TableAuthResourceDto;
 import cn.zhengcaiyun.idata.user.dto.auth.ext.AuthEntryExtDto;
 import cn.zhengcaiyun.idata.user.dto.auth.ext.AuthPolicyExtDto;
+import cn.zhengcaiyun.idata.user.manager.AuthEntryManager;
 import cn.zhengcaiyun.idata.user.service.auth.AuthEntryService;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,14 +35,17 @@ public class AuthEntryServiceImpl implements AuthEntryService {
     private final AuthEntryRepo authEntryRepo;
     private final AuthPolicyRepo authPolicyRepo;
     private final AuthResourceRepo authResourceRepo;
+    private final AuthEntryManager authEntryManager;
 
     @Autowired
     public AuthEntryServiceImpl(AuthEntryRepo authEntryRepo,
                                 AuthPolicyRepo authPolicyRepo,
-                                AuthResourceRepo authResourceRepo) {
+                                AuthResourceRepo authResourceRepo,
+                                AuthEntryManager authEntryManager) {
         this.authEntryRepo = authEntryRepo;
         this.authPolicyRepo = authPolicyRepo;
         this.authResourceRepo = authResourceRepo;
+        this.authEntryManager = authEntryManager;
     }
 
 
@@ -83,7 +86,7 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         AuthEntry authEntry = authEntryOptional.get();
         AuthEntryExtDto authEntryExtDto = (AuthEntryExtDto) AuthEntryExtDto.from(authEntry);
 
-        List<AuthPolicyExtDto> authPolicyList = getAuthPolicyList(id);
+        List<AuthPolicyExtDto> authPolicyList = authEntryManager.getAuthPolicyDtoList(id);
         authEntryExtDto.setAuthPolicyList(authPolicyList);
         return authEntryExtDto;
     }
@@ -97,26 +100,9 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         AuthEntry authEntry = authEntryOptional.get();
         AuthEntryExtDto authEntryExtDto = (AuthEntryExtDto) AuthEntryExtDto.from(authEntry);
 
-        List<AuthPolicyExtDto> authPolicyList = getAuthPolicyList(authEntry.getId());
+        List<AuthPolicyExtDto> authPolicyList = authEntryManager.getAuthPolicyDtoList(authEntry.getId());
         authEntryExtDto.setAuthPolicyList(authPolicyList);
         return authEntryExtDto;
-    }
-
-    private List<AuthPolicyExtDto> getAuthPolicyList(Long authId) {
-        List<AuthPolicy> authPolicies = authPolicyRepo.queryListByAuthId(authId);
-        Map<Long, List<AuthResourceDto>> policyResourceMap = getAuthResourceList(authId);
-        return authPolicies.stream().map(authPolicy -> {
-            AuthPolicyExtDto authPolicyExtDto = (AuthPolicyExtDto) AuthPolicyExtDto.from(authPolicy);
-            authPolicyExtDto.setAuthResourceList(policyResourceMap.get(authPolicy.getId()));
-            return authPolicyExtDto;
-        }).collect(Collectors.toList());
-    }
-
-    private Map<Long, List<AuthResourceDto>> getAuthResourceList(Long authId) {
-        List<AuthResource> authResources = authResourceRepo.queryListByAuthId(authId);
-        return authResources.stream()
-                .map(AuthResourceDto::from)
-                .collect(Collectors.groupingBy(AuthResourceDto::getPolicyRecordId));
     }
 
     private void addAuthPolicy(Long authId, List<AuthPolicyExtDto> authPolicyList, Operator operator) {
@@ -158,8 +144,8 @@ public class AuthEntryServiceImpl implements AuthEntryService {
     }
 
     private void checkAuthPolicy(AuthPolicyExtDto authPolicyExtDto) {
-        checkArgument(Objects.nonNull(authPolicyExtDto.getEffectType()), "授权作用为空");
-        checkArgument(Objects.nonNull(authPolicyExtDto.getActionType()), "授权操作为空");
+        checkArgument(Objects.nonNull(authPolicyExtDto.getEffect()), "授权作用为空");
+        checkArgument(!CollectionUtils.isEmpty(authPolicyExtDto.getActionList()), "授权操作为空");
         checkArgument(Objects.nonNull(authPolicyExtDto.getResourceType()), "授权资源类型不合法");
 
         List<AuthResourceDto> authResourceList = authPolicyExtDto.getAuthResourceList();

@@ -1,11 +1,14 @@
 package cn.zhengcaiyun.idata.user.dto.auth;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
-import cn.zhengcaiyun.idata.user.constant.enums.AuthActionTypeEnum;
-import cn.zhengcaiyun.idata.user.constant.enums.AuthEffectTypeEnum;
+import cn.zhengcaiyun.idata.user.constant.enums.AuthActionEnum;
+import cn.zhengcaiyun.idata.user.constant.enums.AuthEffectEnum;
 import cn.zhengcaiyun.idata.user.constant.enums.AuthResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.dal.model.auth.AuthPolicy;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.BeanUtils;
+
+import java.util.List;
 
 public class AuthPolicyDto extends BaseDto {
     /**
@@ -21,12 +24,12 @@ public class AuthPolicyDto extends BaseDto {
     /**
      * 授权作用：allow：允许，deny：拒绝
      */
-    private AuthEffectTypeEnum effectType;
+    private AuthEffectEnum effect;
 
     /**
      * 授权操作：read：读，write：写
      */
-    private AuthActionTypeEnum actionType;
+    private List<AuthActionEnum> actionList;
 
     /**
      * 资源类型：tables：表
@@ -54,20 +57,20 @@ public class AuthPolicyDto extends BaseDto {
         this.authRecordId = authRecordId;
     }
 
-    public AuthEffectTypeEnum getEffectType() {
-        return effectType;
+    public AuthEffectEnum getEffect() {
+        return effect;
     }
 
-    public void setEffectType(AuthEffectTypeEnum effectType) {
-        this.effectType = effectType;
+    public void setEffect(AuthEffectEnum effect) {
+        this.effect = effect;
     }
 
-    public AuthActionTypeEnum getActionType() {
-        return actionType;
+    public List<AuthActionEnum> getActionList() {
+        return actionList;
     }
 
-    public void setActionType(AuthActionTypeEnum actionType) {
-        this.actionType = actionType;
+    public void setActionList(List<AuthActionEnum> actionList) {
+        this.actionList = actionList;
     }
 
     public AuthResourceTypeEnum getResourceType() {
@@ -89,12 +92,14 @@ public class AuthPolicyDto extends BaseDto {
     public static AuthPolicyDto from(AuthPolicy authPolicy) {
         AuthPolicyDto dto = new AuthPolicyDto();
         BeanUtils.copyProperties(authPolicy, dto);
+        dto.setActionList(JSON.parseArray(authPolicy.getActions(), AuthActionEnum.class));
         return dto;
     }
 
     public AuthPolicy toModel() {
         AuthPolicy authPolicy = new AuthPolicy();
         BeanUtils.copyProperties(this, authPolicy);
+        authPolicy.setActions(JSON.toJSONString(this.actionList));
         return authPolicy;
     }
 }

@@ -62,15 +62,15 @@ public class AuthPolicy {
      * Database Column Remarks:
      *   授权类型：allow：允许，deny：拒绝
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect_type")
-    private String effectType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect")
+    private String effect;
 
     /**
      * Database Column Remarks:
      *   授权类型：read：读，write：写
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.action_type")
-    private String actionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.actions")
+    private String actions;
 
     /**
      * Database Column Remarks:
@@ -156,24 +156,24 @@ public class AuthPolicy {
         this.authRecordId = authRecordId;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect_type")
-    public String getEffectType() {
-        return effectType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect")
+    public String getEffect() {
+        return effect;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect_type")
-    public void setEffectType(String effectType) {
-        this.effectType = effectType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect")
+    public void setEffect(String effect) {
+        this.effect = effect;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.action_type")
-    public String getActionType() {
-        return actionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.actions")
+    public String getActions() {
+        return actions;
     }
 
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.action_type")
-    public void setActionType(String actionType) {
-        this.actionType = actionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.actions")
+    public void setActions(String actions) {
+        this.actions = actions;
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.resource_type")

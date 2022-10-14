@@ -63,15 +63,15 @@ public final class AuthPolicyDynamicSqlSupport {
      * Database Column Remarks:
      *   授权类型：allow：允许，deny：拒绝
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect_type")
-    public static final SqlColumn<String> effectType = AUTH_POLICY.effectType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.effect")
+    public static final SqlColumn<String> effect = AUTH_POLICY.effect;
 
     /**
      * Database Column Remarks:
      *   授权类型：read：读，write：写
      */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.action_type")
-    public static final SqlColumn<String> actionType = AUTH_POLICY.actionType;
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: uac_auth_policy.actions")
+    public static final SqlColumn<String> actions = AUTH_POLICY.actions;
 
     /**
      * Database Column Remarks:
@@ -103,9 +103,9 @@ public final class AuthPolicyDynamicSqlSupport {
 
         public final SqlColumn<Long> authRecordId = column("auth_record_id", JDBCType.BIGINT);
 
-        public final SqlColumn<String> effectType = column("effect_type", JDBCType.VARCHAR);
+        public final SqlColumn<String> effect = column("effect", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> actionType = column("action_type", JDBCType.VARCHAR);
+        public final SqlColumn<String> actions = column("actions", JDBCType.VARCHAR);
 
         public final SqlColumn<String> resourceType = column("resource_type", JDBCType.VARCHAR);
 

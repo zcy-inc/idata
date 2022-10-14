@@ -33,7 +33,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, CommonUpdateMapper {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, authRecordId, effectType, actionType, resourceType, remark);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, authRecordId, effect, actions, resourceType, remark);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: uac_auth_policy")
     @InsertProvider(type=SqlProviderAdapter.class, method="insert")
@@ -50,8 +50,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
         @Result(column="editor", property="editor", jdbcType=JdbcType.VARCHAR),
         @Result(column="edit_time", property="editTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="auth_record_id", property="authRecordId", jdbcType=JdbcType.BIGINT),
-        @Result(column="effect_type", property="effectType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="action_type", property="actionType", jdbcType=JdbcType.VARCHAR),
+        @Result(column="effect", property="effect", jdbcType=JdbcType.VARCHAR),
+        @Result(column="actions", property="actions", jdbcType=JdbcType.VARCHAR),
         @Result(column="resource_type", property="resourceType", jdbcType=JdbcType.VARCHAR),
         @Result(column="remark", property="remark", jdbcType=JdbcType.VARCHAR)
     })
@@ -88,8 +88,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .map(editor).toProperty("editor")
             .map(editTime).toProperty("editTime")
             .map(authRecordId).toProperty("authRecordId")
-            .map(effectType).toProperty("effectType")
-            .map(actionType).toProperty("actionType")
+            .map(effect).toProperty("effect")
+            .map(actions).toProperty("actions")
             .map(resourceType).toProperty("resourceType")
             .map(remark).toProperty("remark")
         );
@@ -104,8 +104,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .map(editor).toPropertyWhenPresent("editor", row::getEditor)
             .map(editTime).toPropertyWhenPresent("editTime", row::getEditTime)
             .map(authRecordId).toPropertyWhenPresent("authRecordId", row::getAuthRecordId)
-            .map(effectType).toPropertyWhenPresent("effectType", row::getEffectType)
-            .map(actionType).toPropertyWhenPresent("actionType", row::getActionType)
+            .map(effect).toPropertyWhenPresent("effect", row::getEffect)
+            .map(actions).toPropertyWhenPresent("actions", row::getActions)
             .map(resourceType).toPropertyWhenPresent("resourceType", row::getResourceType)
             .map(remark).toPropertyWhenPresent("remark", row::getRemark)
         );
@@ -146,8 +146,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
                 .set(editor).equalTo(row::getEditor)
                 .set(editTime).equalTo(row::getEditTime)
                 .set(authRecordId).equalTo(row::getAuthRecordId)
-                .set(effectType).equalTo(row::getEffectType)
-                .set(actionType).equalTo(row::getActionType)
+                .set(effect).equalTo(row::getEffect)
+                .set(actions).equalTo(row::getActions)
                 .set(resourceType).equalTo(row::getResourceType)
                 .set(remark).equalTo(row::getRemark);
     }
@@ -160,8 +160,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
                 .set(editor).equalToWhenPresent(row::getEditor)
                 .set(editTime).equalToWhenPresent(row::getEditTime)
                 .set(authRecordId).equalToWhenPresent(row::getAuthRecordId)
-                .set(effectType).equalToWhenPresent(row::getEffectType)
-                .set(actionType).equalToWhenPresent(row::getActionType)
+                .set(effect).equalToWhenPresent(row::getEffect)
+                .set(actions).equalToWhenPresent(row::getActions)
                 .set(resourceType).equalToWhenPresent(row::getResourceType)
                 .set(remark).equalToWhenPresent(row::getRemark);
     }
@@ -175,8 +175,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .set(editor).equalTo(row::getEditor)
             .set(editTime).equalTo(row::getEditTime)
             .set(authRecordId).equalTo(row::getAuthRecordId)
-            .set(effectType).equalTo(row::getEffectType)
-            .set(actionType).equalTo(row::getActionType)
+            .set(effect).equalTo(row::getEffect)
+            .set(actions).equalTo(row::getActions)
             .set(resourceType).equalTo(row::getResourceType)
             .set(remark).equalTo(row::getRemark)
             .where(id, isEqualTo(row::getId))
@@ -192,8 +192,8 @@ public interface AuthPolicyDao extends CommonCountMapper, CommonDeleteMapper, Co
             .set(editor).equalToWhenPresent(row::getEditor)
             .set(editTime).equalToWhenPresent(row::getEditTime)
             .set(authRecordId).equalToWhenPresent(row::getAuthRecordId)
-            .set(effectType).equalToWhenPresent(row::getEffectType)
-            .set(actionType).equalToWhenPresent(row::getActionType)
+            .set(effect).equalToWhenPresent(row::getEffect)
+            .set(actions).equalToWhenPresent(row::getActions)
             .set(resourceType).equalToWhenPresent(row::getResourceType)
             .set(remark).equalToWhenPresent(row::getRemark)
             .where(id, isEqualTo(row::getId))
