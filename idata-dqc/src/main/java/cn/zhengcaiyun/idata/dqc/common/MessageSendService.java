@@ -88,12 +88,12 @@ public class MessageSendService {
             } else if ("sms".equals(type)) {
                 this.zcyOpenSms(nicknames, tableName, ruleName);
             } else {
-                this.sendToDingDing(nicknames, message);
+                this.sendToDingDing(nicknames,"", message);
             }
         }
     }
 
-    public void sendToDingDing(String[] nicknames, String message) {
+    public void sendToDingDing(String[] nicknames, String title, String message) {
         List<String> mobiles = new ArrayList();
         if (nicknames.length > 0) {
             List<User> mobileList = userDao.getMobilesByNickname(nicknames);
@@ -111,13 +111,13 @@ public class MessageSendService {
         if (mobiles.size() == 0) {
             return;
         }
-        this.sendDingGroup(dingdingWebhook, message, mobiles.toArray(new String[mobiles.size()]));
+        this.sendDingGroup(dingdingWebhook, title, message, mobiles.toArray(new String[mobiles.size()]));
     }
 
-    public void sendDingGroup(String webhook, String message, String[] mobiles) {
+    public void sendDingGroup(String webhook, String title, String message, String[] mobiles) {
         JSONObject body = new JSONObject()
                 .fluentPut("msgtype", "text")
-                .fluentPut("text", new JSONObject().fluentPut("content", "【数据质量】" + message))
+                .fluentPut("text", new JSONObject().fluentPut("content", "【数据质量】" + title + message))
                 .fluentPut("at", new JSONObject().fluentPut("isAtAll", true));
         if (mobiles != null) {
             body.fluentPut("at", new JSONObject().fluentPut("atMobiles", mobiles));
@@ -153,8 +153,8 @@ public class MessageSendService {
 //        this.sengDingding("username", new String[]{username}, message);
 //    }
 
-    public void sengDingdingByNickname(String nickname, String message) {
-        this.sendToDingDing(new String[]{nickname}, message);
+    public void sengDingdingByNickname(String nickname, String title, String message) {
+        this.sendToDingDing(new String[]{nickname}, title, message);
     }
 //
 //    public void sengDingding(String nameType, String[] names, String message) {
