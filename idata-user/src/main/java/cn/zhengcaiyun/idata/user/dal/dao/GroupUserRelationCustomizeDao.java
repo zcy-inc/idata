@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.user.dal.dao;
 
+import cn.zhengcaiyun.idata.user.dal.model.GroupUserRelation;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.dynamic.sql.BasicColumn;

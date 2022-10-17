@@ -1,5 +1,6 @@
 package cn.zhengcaiyun.idata.user.dal.dao.auth;
 
+import cn.zhengcaiyun.idata.user.dal.model.auth.AuthResource;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.dynamic.sql.BasicColumn;
@@ -10,7 +11,6 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static cn.zhengcaiyun.idata.user.dal.dao.GroupUserRelationDynamicSqlSupport.GROUP_USER_RELATION;
 import static cn.zhengcaiyun.idata.user.dal.dao.auth.AuthResourceDynamicSqlSupport.*;
 
 @Mapper
@@ -25,7 +25,7 @@ public interface AuthResourceCustomizeDao {
     }
 
     default int insertMultiple(Collection<AuthResource> records) {
-        return MyBatis3Utils.insertMultiple(this::insertMultiple, records, GROUP_USER_RELATION, c ->
+        return MyBatis3Utils.insertMultiple(this::insertMultiple, records, AUTH_RESOURCE, c ->
                 c.map(del).toProperty("del")
                         .map(creator).toProperty("creator")
                         .map(createTime).toProperty("createTime")
