@@ -16,16 +16,24 @@ public class AuthRet {
         return new AuthRet(denyResources);
     }
 
-    public boolean deny() {
+    public static AuthRet allow() {
+        return new AuthRet(null);
+    }
+
+    public static AuthRet deny(List<String> denyResources) {
+        return new AuthRet(denyResources);
+    }
+
+    public boolean denied() {
         return !CollectionUtils.isEmpty(denyResources);
     }
 
-    public boolean allow() {
-        return !deny();
+    public boolean allowed() {
+        return !denied();
     }
 
     public String getDenyMsg() {
-        if (deny()) {
+        if (denied()) {
             return String.format("没有权限使用【%s】,请申请权限！", Joiner.on(", ").join(denyResources));
         }
         return "";

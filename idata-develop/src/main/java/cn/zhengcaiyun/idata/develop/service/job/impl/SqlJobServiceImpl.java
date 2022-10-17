@@ -16,9 +16,11 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionDto;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlTool;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
@@ -30,6 +32,7 @@ import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.sql.SqlJobExternalTableDto;
 import cn.zhengcaiyun.idata.develop.service.job.SqlJobService;
 import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
+import cn.zhengcaiyun.idata.develop.util.TablePermissionChecker;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import org.apache.commons.collections.CollectionUtils;
@@ -63,6 +66,8 @@ public class SqlJobServiceImpl implements SqlJobService {
     private SqlJobRepo sqlJobRepo;
     @Autowired
     private LivyService livyService;
+    @Autowired
+    private TablePermissionChecker tablePermissionChecker;
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
@@ -146,13 +151,19 @@ public class SqlJobServiceImpl implements SqlJobService {
     }
 
     @Override
-    public LivySessionDto sqlJobDryRun(DryRunDto dryRunDto) {
+    public LivySessionDto sqlJobDryRun(DryRunDto dryRunDto, Operator operator) {
         checkArgument(dryRunDto.getJobId() != null, "作业ID不能为空");
         checkArgument(dryRunDto.getJobVersion() != null, "作业版本不能为空");
         JobInfo existJobInfo = jobInfoRepo.queryJobInfo(dryRunDto.getJobId())
                 .orElseThrow(() -> new IllegalArgumentException("作业不存在"));
         DevJobContentSql existSqlJob = sqlJobRepo.query(dryRunDto.getJobId(), dryRunDto.getJobVersion());
         checkArgument(existSqlJob != null, "作业不存在");
+
+        //验证表权限
+        if (StringUtils.isNotBlank(existSqlJob.getSourceSql())) {
+            List<String> fromTables = SparkSqlTool.parseAndFilterFromTable(existSqlJob.getSourceSql());
+            tablePermissionChecker.checkTableReadPermission(operator, fromTables);
+        }
 
         List<String> args = Arrays.asList(dryRunDto.getJobId().toString(), dryRunDto.getJobVersion().toString());
         return livyService.createBatches(LIVY_DRY_RUN_PY_FILE, args);
