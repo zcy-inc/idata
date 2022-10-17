@@ -35,7 +35,7 @@ public class PolicyEntity {
      *     }
      * </code></pre>
      */
-    private List<String> resources;
+    private List<ResourceEntity> resources;
 
     public AuthEffectEnum getEffect() {
         return effect;
@@ -61,11 +61,11 @@ public class PolicyEntity {
         this.resourceType = resourceType;
     }
 
-    public List<String> getResources() {
+    public List<ResourceEntity> getResources() {
         return resources;
     }
 
-    public void setResources(List<String> resources) {
+    public void setResources(List<ResourceEntity> resources) {
         this.resources = resources;
     }
 }

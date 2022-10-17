@@ -4,14 +4,12 @@ import cn.zhengcaiyun.idata.user.constant.enums.AuthActionEnum;
 import cn.zhengcaiyun.idata.user.constant.enums.AuthResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.constant.enums.AuthSubjectTypeEnum;
 
-import java.util.List;
-
 public class AuthReq {
 
     private AuthSubjectTypeEnum subjectType;
     private String subjectIdentifier;
     private AuthResourceTypeEnum resourceType;
-    private List<String> resourceIdentifiers;
+    private String resourceIdentifier;
     private AuthActionEnum actionType;
 
     private AuthReq() {
@@ -41,12 +39,12 @@ public class AuthReq {
         this.resourceType = resourceType;
     }
 
-    public List<String> getResourceIdentifiers() {
-        return resourceIdentifiers;
+    public String getResourceIdentifier() {
+        return resourceIdentifier;
     }
 
-    public void setResourceIdentifiers(List<String> resourceIdentifiers) {
-        this.resourceIdentifiers = resourceIdentifiers;
+    public void setResourceIdentifier(String resourceIdentifier) {
+        this.resourceIdentifier = resourceIdentifier;
     }
 
     public AuthActionEnum getActionType() {
@@ -74,9 +72,9 @@ public class AuthReq {
             return this;
         }
 
-        public AuthReqBuilder setResources(AuthResourceTypeEnum resourceType, List<String> resourceIdentifiers) {
+        public AuthReqBuilder setResources(AuthResourceTypeEnum resourceType, String resourceIdentifier) {
             authReq.setResourceType(resourceType);
-            authReq.setResourceIdentifiers(resourceIdentifiers);
+            authReq.setResourceIdentifier(resourceIdentifier);
             return this;
         }
 

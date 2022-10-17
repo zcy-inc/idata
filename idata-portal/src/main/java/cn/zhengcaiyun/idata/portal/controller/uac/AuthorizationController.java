@@ -47,13 +47,13 @@ public class AuthorizationController {
      * @return
      */
     @PutMapping("/{id}")
-    public RestResult<AuthEntryExtDto> addGroup(@PathVariable("id") Long id, @RequestBody AuthEntryExtDto dto) {
+    public RestResult<AuthEntryExtDto> addAuthEntry(@PathVariable("id") Long id, @RequestBody AuthEntryExtDto dto) {
         authEntryService.editAuthEntry(id, dto, OperatorContext.getCurrentOperator());
         return RestResult.success(authEntryService.getAuthEntry(id));
     }
 
     /**
-     * 查询授权
+     * 根据编号查询授权
      *
      * @param id 授权编号
      * @return
