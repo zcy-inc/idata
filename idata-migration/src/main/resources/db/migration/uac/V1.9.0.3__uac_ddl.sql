@@ -1,5 +1,5 @@
 
-CREATE TABLE `uac_group` (
+CREATE TABLE if not exists `uac_group` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
       `del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
       `creator` varchar(20) NOT NULL COMMENT '创建者',
@@ -12,7 +12,7 @@ CREATE TABLE `uac_group` (
       PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4 COMMENT='用户组';
 
-CREATE TABLE `uac_group_user_relation` (
+CREATE TABLE if not exists `uac_group_user_relation` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
       `del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
       `creator` varchar(20) NOT NULL COMMENT '创建者',
@@ -26,7 +26,7 @@ CREATE TABLE `uac_group_user_relation` (
       KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4 COMMENT='用户组-用户关联表';
 
-CREATE TABLE `uac_auth_entry` (
+CREATE TABLE if not exists `uac_auth_entry` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
       `del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
       `creator` varchar(20) NOT NULL COMMENT '创建者',
@@ -40,7 +40,7 @@ CREATE TABLE `uac_auth_entry` (
       KEY `idx_subject` (`subject_id`, `subject_type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4 COMMENT='授权记录表';
 
-CREATE TABLE `uac_auth_policy` (
+CREATE TABLE if not exists `uac_auth_policy` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
       `del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
       `creator` varchar(20) NOT NULL COMMENT '创建者',
@@ -56,7 +56,7 @@ CREATE TABLE `uac_auth_policy` (
       KEY `idx_auth_record` (`auth_record_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb4 COMMENT='授权策略表';
 
-CREATE TABLE `uac_auth_resource` (
+CREATE TABLE if not exists `uac_auth_resource` (
       `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
       `del` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0否，1是',
       `creator` varchar(20) NOT NULL COMMENT '创建者',
