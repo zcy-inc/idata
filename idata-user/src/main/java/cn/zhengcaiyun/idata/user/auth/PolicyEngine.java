@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,15 +32,19 @@ public class PolicyEngine {
         }
         Map<AuthEffectEnum, List<PolicyEntity>> effectPolicyListMap = policyList.stream().collect(Collectors.groupingBy(PolicyEntity::getEffect));
         List<PolicyEntity> denyPolicyList = effectPolicyListMap.get(AuthEffectEnum.deny);
-        for (PolicyEntity policyEntity : denyPolicyList) {
-            if (AuthEffectEnum.deny == verify(authReq, context, policyEntity)) {
-                return AuthEffectEnum.deny;
+        if (Objects.nonNull(denyPolicyList)) {
+            for (PolicyEntity policyEntity : denyPolicyList) {
+                if (AuthEffectEnum.deny == verify(authReq, context, policyEntity)) {
+                    return AuthEffectEnum.deny;
+                }
             }
         }
         List<PolicyEntity> allowPolicyList = effectPolicyListMap.get(AuthEffectEnum.allow);
-        for (PolicyEntity policyEntity : allowPolicyList) {
-            if (AuthEffectEnum.allow == verify(authReq, context, policyEntity)) {
-                return AuthEffectEnum.allow;
+        if (Objects.nonNull(allowPolicyList)) {
+            for (PolicyEntity policyEntity : allowPolicyList) {
+                if (AuthEffectEnum.allow == verify(authReq, context, policyEntity)) {
+                    return AuthEffectEnum.allow;
+                }
             }
         }
         return AuthEffectEnum.undecided;

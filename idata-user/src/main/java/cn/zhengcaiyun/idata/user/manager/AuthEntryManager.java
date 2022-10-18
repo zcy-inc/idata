@@ -30,7 +30,7 @@ public class AuthEntryManager {
         List<AuthPolicy> authPolicies = authPolicyRepo.queryListByAuthId(authId);
         Map<Long, List<AuthResourceDto>> policyResourceMap = getAuthResourceDtoList(authId);
         return authPolicies.stream().map(authPolicy -> {
-            AuthPolicyExtDto authPolicyExtDto = (AuthPolicyExtDto) AuthPolicyExtDto.from(authPolicy);
+            AuthPolicyExtDto authPolicyExtDto = AuthPolicyExtDto.from(authPolicy);
             authPolicyExtDto.setAuthResourceList(policyResourceMap.get(authPolicy.getId()));
             return authPolicyExtDto;
         }).collect(Collectors.toList());

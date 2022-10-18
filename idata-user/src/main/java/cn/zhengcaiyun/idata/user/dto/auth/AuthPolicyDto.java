@@ -39,7 +39,7 @@ public class AuthPolicyDto extends BaseDto {
     /**
      * 备注
      */
-    private String remark;
+    private String remark = "";
 
     public Long getId() {
         return id;
@@ -93,6 +93,8 @@ public class AuthPolicyDto extends BaseDto {
         AuthPolicyDto dto = new AuthPolicyDto();
         BeanUtils.copyProperties(authPolicy, dto);
         dto.setActionList(JSON.parseArray(authPolicy.getActions(), AuthActionEnum.class));
+        dto.setEffect(AuthEffectEnum.valueOf(authPolicy.getEffect()));
+        dto.setResourceType(AuthResourceTypeEnum.valueOf(authPolicy.getResourceType()));
         return dto;
     }
 
@@ -100,6 +102,8 @@ public class AuthPolicyDto extends BaseDto {
         AuthPolicy authPolicy = new AuthPolicy();
         BeanUtils.copyProperties(this, authPolicy);
         authPolicy.setActions(JSON.toJSONString(this.actionList));
+        authPolicy.setEffect(this.effect.name());
+        authPolicy.setResourceType(this.resourceType.name());
         return authPolicy;
     }
 }

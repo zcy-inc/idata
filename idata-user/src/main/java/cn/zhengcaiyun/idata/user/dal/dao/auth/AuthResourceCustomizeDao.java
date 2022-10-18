@@ -26,11 +26,8 @@ public interface AuthResourceCustomizeDao {
 
     default int insertMultiple(Collection<AuthResource> records) {
         return MyBatis3Utils.insertMultiple(this::insertMultiple, records, AUTH_RESOURCE, c ->
-                c.map(del).toProperty("del")
-                        .map(creator).toProperty("creator")
-                        .map(createTime).toProperty("createTime")
+                c.map(creator).toProperty("creator")
                         .map(editor).toProperty("editor")
-                        .map(editTime).toProperty("editTime")
                         .map(authRecordId).toProperty("authRecordId")
                         .map(policyRecordId).toProperty("policyRecordId")
                         .map(resourceType).toProperty("resourceType")

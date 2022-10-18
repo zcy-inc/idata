@@ -24,7 +24,7 @@ public class AuthEntryDto extends BaseDto {
     /**
      * 备注
      */
-    private String remark;
+    private String remark = "";
 
     public Long getId() {
         return id;
@@ -61,12 +61,14 @@ public class AuthEntryDto extends BaseDto {
     public static AuthEntryDto from(AuthEntry authEntry) {
         AuthEntryDto dto = new AuthEntryDto();
         BeanUtils.copyProperties(authEntry, dto);
+        dto.setSubjectType(AuthSubjectTypeEnum.valueOf(authEntry.getSubjectType()));
         return dto;
     }
 
     public AuthEntry toModel() {
         AuthEntry authEntry = new AuthEntry();
         BeanUtils.copyProperties(this, authEntry);
+        authEntry.setSubjectType(this.subjectType.name());
         return authEntry;
     }
 }

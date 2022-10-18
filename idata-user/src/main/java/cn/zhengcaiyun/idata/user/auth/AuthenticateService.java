@@ -38,7 +38,7 @@ public class AuthenticateService {
     private final PolicyEngine policyEngine;
     private final GroupUserRelationRepo groupUserRelationRepo;
 
-    @Value("${user.auth.switch:false}")
+    @Value("${user.auth.switch:true}")
     private Boolean authSwitch;
 
     @Autowired
@@ -84,7 +84,7 @@ public class AuthenticateService {
                 groupPolicyList = getPolicyEntity(AuthSubjectTypeEnum.groups, groupIdList.toArray(new String[0]));
             }
             authResult = verify(AuthSubjectTypeEnum.groups, subjectOperator.getId().toString(),
-                    resourceType, resourceIdentifier, actionType, userPolicyList);
+                    resourceType, resourceIdentifier, actionType, groupPolicyList);
             if (AuthEffectEnum.deny == authResult || AuthEffectEnum.undecided == authResult) {
                 denyResources.add(resourceIdentifier);
             }

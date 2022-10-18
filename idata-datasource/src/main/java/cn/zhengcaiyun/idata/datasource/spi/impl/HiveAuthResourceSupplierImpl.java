@@ -36,7 +36,8 @@ public class HiveAuthResourceSupplierImpl implements AuthResourceSupplier {
             statement.execute("use " + dbName);
             try (ResultSet rs = statement.executeQuery("show tables")) {
                 while (rs.next()) {
-                    tableList.add(rs.getString("tab_name"));
+                    String tableName = dbName + "." + rs.getString("tab_name");
+                    tableList.add(tableName.toLowerCase());
                 }
             }
         } catch (SQLException ex) {

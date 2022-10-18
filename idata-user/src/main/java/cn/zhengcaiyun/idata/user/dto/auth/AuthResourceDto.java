@@ -83,12 +83,14 @@ public class AuthResourceDto extends BaseDto {
     public static AuthResourceDto from(AuthResource authResource) {
         AuthResourceDto dto = new AuthResourceDto();
         BeanUtils.copyProperties(authResource, dto);
+        dto.setResourceType(AuthResourceTypeEnum.valueOf(authResource.getResourceType()));
         return dto;
     }
 
     public AuthResource toModel() {
         AuthResource authResource = new AuthResource();
         BeanUtils.copyProperties(this, authResource);
+        authResource.setResourceType(this.resourceType.name());
         return authResource;
     }
 }

@@ -21,10 +21,11 @@ public class TableResourceEntity implements ResourceEntity {
 
     @Override
     public boolean verifyResource(String resourceIdentifier) {
-        if (tables.contains(resourceIdentifier)) {
+        String resource = resourceIdentifier.toLowerCase();
+        if (tables.contains(resource)) {
             return true;
         } else if (tables.contains(SYMBOL_ALL_TABLES)) {
-            return resourceIdentifier.toUpperCase().startsWith(db + ".");
+            return resource.startsWith(db + ".");
         }
         return false;
     }

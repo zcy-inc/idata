@@ -64,9 +64,11 @@ public class AuthEntryServiceImpl implements AuthEntryService {
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public Boolean editAuthEntry(Long id, AuthEntryExtDto authEntryExtDto, Operator operator) {
         checkArgument(Objects.nonNull(id), "授权记录编号为空");
         checkAuthEntryParam(authEntryExtDto);
+        authEntryExtDto.setId(id);
         authEntryExtDto.resetEditor(operator);
         AuthEntry authEntry = authEntryExtDto.toModel();
         authEntryRepo.update(authEntry);
@@ -84,7 +86,7 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         Optional<AuthEntry> authEntryOptional = authEntryRepo.query(id);
         checkArgument(authEntryOptional.isPresent(), "授权记录不存在或已删除");
         AuthEntry authEntry = authEntryOptional.get();
-        AuthEntryExtDto authEntryExtDto = (AuthEntryExtDto) AuthEntryExtDto.from(authEntry);
+        AuthEntryExtDto authEntryExtDto = AuthEntryExtDto.from(authEntry);
 
         List<AuthPolicyExtDto> authPolicyList = authEntryManager.getAuthPolicyDtoList(id);
         authEntryExtDto.setAuthPolicyList(authPolicyList);
@@ -96,9 +98,11 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         checkArgument(Objects.nonNull(subjectType), "授权记录编号为空");
         checkArgument(StringUtils.isNotBlank(subjectId), "授权记录编号为空");
         Optional<AuthEntry> authEntryOptional = authEntryRepo.query(subjectType.name(), subjectId);
-        checkArgument(authEntryOptional.isPresent(), "授权记录不存在或已删除");
+        if (authEntryOptional.isEmpty()) {
+            return null;
+        }
         AuthEntry authEntry = authEntryOptional.get();
-        AuthEntryExtDto authEntryExtDto = (AuthEntryExtDto) AuthEntryExtDto.from(authEntry);
+        AuthEntryExtDto authEntryExtDto = AuthEntryExtDto.from(authEntry);
 
         List<AuthPolicyExtDto> authPolicyList = authEntryManager.getAuthPolicyDtoList(authEntry.getId());
         authEntryExtDto.setAuthPolicyList(authPolicyList);
@@ -119,13 +123,14 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         checkArgument(Objects.nonNull(policyId), "授权保存失败");
 
         List<AuthResourceDto> authResourceList = authPolicyExtDto.getAuthResourceList();
-        addAuthResource(authId, policyId, authResourceList, operator);
+        addAuthResource(authId, policyId, authPolicyExtDto.getResourceType(), authResourceList, operator);
     }
 
-    private void addAuthResource(Long authId, Long policyId, List<AuthResourceDto> authResourceList, Operator operator) {
+    private void addAuthResource(Long authId, Long policyId, AuthResourceTypeEnum resourceType, List<AuthResourceDto> authResourceList, Operator operator) {
         List<AuthResource> authResources = authResourceList.stream().map(authResourceDto -> {
             authResourceDto.setAuthRecordId(authId);
             authResourceDto.setPolicyRecordId(policyId);
+            authResourceDto.setResourceType(resourceType);
             authResourceDto.setOperator(operator);
             return authResourceDto.toModel();
         }).collect(Collectors.toList());
@@ -151,16 +156,15 @@ public class AuthEntryServiceImpl implements AuthEntryService {
         List<AuthResourceDto> authResourceList = authPolicyExtDto.getAuthResourceList();
         checkArgument(!CollectionUtils.isEmpty(authResourceList), "授权资源为空");
         for (AuthResourceDto authResourceDto : authResourceList) {
-            checkAuthResource(authResourceDto);
+            checkAuthResource(authPolicyExtDto.getResourceType(), authResourceDto);
         }
     }
 
-    private void checkAuthResource(AuthResourceDto authResourceDto) {
-        checkArgument(Objects.nonNull(authResourceDto.getResourceType()), "授权资源类型不合法");
+    private void checkAuthResource(AuthResourceTypeEnum resourceType, AuthResourceDto authResourceDto) {
         checkArgument(StringUtils.isNotBlank(authResourceDto.getResources()), "授权资源为空");
 
         try {
-            if (AuthResourceTypeEnum.tables == authResourceDto.getResourceType()) {
+            if (AuthResourceTypeEnum.tables == resourceType) {
                 TableAuthResourceDto tableAuthResourceDto = JSON.parseObject(authResourceDto.getResources(), TableAuthResourceDto.class);
                 checkArgument(Objects.nonNull(tableAuthResourceDto), "授权资源不合法");
                 checkArgument(StringUtils.isNotBlank(tableAuthResourceDto.getDb()), "授权资源-数据库不合法");
