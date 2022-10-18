@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.commons.exception.BizProcessException;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlTool;
 import cn.zhengcaiyun.idata.develop.condition.job.JobExecuteConfigCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
@@ -32,9 +33,11 @@ import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
+import cn.zhengcaiyun.idata.develop.util.TablePermissionChecker;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -68,6 +71,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
     private final KylinJobRepo kylinJobRepo;
     private final JobContentSqlRepo jobContentSqlRepo;
     private final DIStreamJobContentRepo diStreamJobContentRepo;
+    private final TablePermissionChecker tablePermissionChecker;
 
     @Autowired
     public JobContentCommonServiceImpl(DIJobContentRepo diJobContentRepo,
@@ -81,7 +85,8 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
                                        ScriptJobRepo scriptJobRepo,
                                        KylinJobRepo kylinJobRepo,
                                        JobContentSqlRepo jobContentSqlRepo,
-                                       DIStreamJobContentRepo diStreamJobContentRepo) {
+                                       DIStreamJobContentRepo diStreamJobContentRepo,
+                                       TablePermissionChecker tablePermissionChecker) {
         this.diJobContentRepo = diJobContentRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
@@ -94,6 +99,7 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         this.kylinJobRepo = kylinJobRepo;
         this.jobContentSqlRepo = jobContentSqlRepo;
         this.diStreamJobContentRepo = diStreamJobContentRepo;
+        this.tablePermissionChecker = tablePermissionChecker;
     }
 
     @Override
@@ -108,11 +114,26 @@ public class JobContentCommonServiceImpl implements JobContentCommonService {
         checkArgument(envEnumOptional.isPresent(), "提交环境为空");
 
         JobPublishContent publishContent = assemblePublishContent(content);
+        // 验证表权限
+        checkTablePermission(jobInfoDto.get(), publishContent.getVersion(), operator);
         return jobPublishManager.submit(publishContent, envEnumOptional.get(), remark, operator);
     }
 
     private JobPublishContent assemblePublishContent(JobContentBaseDto content) {
         return new JobPublishContent(content.getId(), content.getJobId(), content.getVersion());
+    }
+
+    private void checkTablePermission(JobInfo jobInfo, Integer version, Operator operator) {
+        if (!JobTypeEnum.SQL_SPARK.getCode().equals(jobInfo.getJobType())) {
+            return;
+        }
+        DevJobContentSql contentSql = sqlJobRepo.query(jobInfo.getId(), version);
+        if (Objects.isNull(contentSql)) return;
+        String sql = contentSql.getSourceSql();
+        if (StringUtils.isBlank(sql)) return;
+
+        List<String> fromTables = SparkSqlTool.parseAndFilterFromTable(sql);
+        tablePermissionChecker.checkTableReadPermission(operator, fromTables);
     }
 
     @Override

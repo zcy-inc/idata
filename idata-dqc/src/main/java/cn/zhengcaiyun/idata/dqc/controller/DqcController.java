@@ -31,7 +31,7 @@ public class DqcController {
     public String ok() {
 //        messageSendService.send(new String[]{"sms"},new String[]{"元宿"},"测试消息");
 //        messageSendService.sendDutyPhone();
-        messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", 1, "prod"));
+        messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,"",String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", 1, "prod"));
 //        messageSendService.send(new String[]{"dingding", "phone", "sms"}, new String[]{RuleUtils.DW_DUTY}, "测试消息","tableName","rule");
         return "ok";
     }
@@ -60,7 +60,7 @@ public class DqcController {
         if (!"0".equals(status)) {
             logger.error(String.format("作业%s执行失败", jobId));
             messageSendService.sendDutyPhone();
-            messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", jobId, env));
+            messageSendService.sengDingdingByNickname(RuleUtils.DW_DUTY,"",String.format("您在IData上的作业执行失败，作业id：%s,环境：%s", jobId, env));
             return Result.failureResult("作业执行失败，已经发送语音电话到值班人员");
         }
 

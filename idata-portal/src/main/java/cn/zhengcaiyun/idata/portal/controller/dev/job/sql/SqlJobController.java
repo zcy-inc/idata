@@ -59,6 +59,6 @@ public class SqlJobController {
 
     @PostMapping("/sql/sqlJobDryRun")
     public RestResult<LivySessionDto> sqlJobDryRun(@RequestBody DryRunDto dryRunDto) {
-        return RestResult.success(sqlJobService.sqlJobDryRun(dryRunDto));
+        return RestResult.success(sqlJobService.sqlJobDryRun(dryRunDto, OperatorContext.getCurrentOperator()));
     }
 }

@@ -16,9 +16,11 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job;
 
-import cn.zhengcaiyun.idata.develop.dto.job.*;
-
-import java.io.IOException;
+import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.develop.dto.job.AutocompletionTipDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryRunResultDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryStatementDto;
 
 /**
  * @author caizhedong
@@ -26,8 +28,11 @@ import java.io.IOException;
  */
 
 public interface QueryService {
-    QueryStatementDto runQuery(QueryDto queryDto);
+    QueryStatementDto runQuery(QueryDto queryDto, Operator operator);
+
     QueryRunResultDto runQueryResult(Integer sessionId, Integer statementId, String sessionKind, Integer from, Integer size);
+
     AutocompletionTipDto getAutocompletionTipConfigs(String autocompletionType);
+
     Boolean cancelStatement(QueryStatementDto queryStatementDto);
 }

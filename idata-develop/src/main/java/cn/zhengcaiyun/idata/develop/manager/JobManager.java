@@ -19,8 +19,7 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
-import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
-import cn.zhengcaiyun.idata.connector.util.SqlDynamicParamTool;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlTool;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventStatusEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
@@ -108,24 +107,7 @@ public class JobManager {
         String sql = contentSql.getSourceSql();
         checkArgument(StringUtils.isNotBlank(sql), "作业的SQL脚本为空");
 
-        // 替换动态参数，避免影响SQL解析
-        String replacedSql = SqlDynamicParamTool.replaceDynamicParam(sql, null, (extParam) -> "dummy_param");
-        String[] multiSqlArray = SparkSqlUtil.splitToMultiSql(replacedSql);
-        List<String> totalFromTables = Lists.newArrayList();
-        for (String singleSql : multiSqlArray) {
-            try {
-                List<String> subFromTables = SparkSqlUtil.getFromTables(singleSql.trim(), null);
-                if (CollectionUtils.isNotEmpty(subFromTables)) {
-                    totalFromTables.addAll(subFromTables);
-                }
-            } catch (Exception ex) {
-            }
-        }
-        List<String> finalTables = totalFromTables.stream()
-                .filter(tempTable -> tempTable.contains("."))
-                .distinct()
-                .collect(Collectors.toList());
-
+        List<String> finalTables = SparkSqlTool.parseAndFilterFromTable(sql);
         return deriveJobDependencies(jobInfo, environment, finalTables);
     }
 
