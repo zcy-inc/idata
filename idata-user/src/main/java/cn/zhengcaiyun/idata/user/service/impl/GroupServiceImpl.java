@@ -64,7 +64,7 @@ public class GroupServiceImpl implements GroupService {
             Map<Long, UacUser> userMap = queryUsers(group, relationList);
             List<UserSimpleDto> relatedUsers = buildRelationUserDto(relationList, userMap);
 
-            GroupCombinedDto dto = (GroupCombinedDto) GroupCombinedDto.from(group);
+            GroupCombinedDto dto = GroupCombinedDto.from(group);
             dto.setRelatedUsers(relatedUsers);
             dto.setOwnerName(getGroupOwnerName(group.getOwnerId(), userMap));
             return dto;
@@ -83,9 +83,11 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Long addGroup(GroupCombinedDto dto, Operator operator) {
         checkGroupInfo(dto);
-        GroupDto groupDto = dto;
-        groupDto.setOperator(operator);
-        Group group = groupDto.toModel();
+        Optional<Group> existGroupOptional = groupRepo.queryByName(dto.getName());
+        checkArgument(existGroupOptional.isEmpty(), "已存在同名用户组");
+
+        dto.setOperator(operator);
+        Group group = dto.toModel();
         Long groupId = groupRepo.save(group);
         checkArgument(Objects.nonNull(groupId), "新建用户组失败");
 
@@ -99,9 +101,17 @@ public class GroupServiceImpl implements GroupService {
     public Boolean editGroup(Long id, GroupCombinedDto dto, Operator operator) {
         checkArgument(Objects.nonNull(id), "用户组id为空");
         checkGroupInfo(dto);
-        GroupDto groupDto = dto;
-        groupDto.resetEditor(operator);
-        Group group = groupDto.toModel();
+        Optional<Group> groupOptional = groupRepo.query(id);
+        checkArgument(groupOptional.isPresent(), "用户组不存在或已删除");
+
+        Optional<Group> sameNameGroupOptional = groupRepo.queryByName(dto.getName());
+        if (sameNameGroupOptional.isPresent()) {
+            checkArgument(Objects.equals(id, sameNameGroupOptional.get().getId()), "已存在同名用户组");
+        }
+
+        dto.setId(id);
+        dto.resetEditor(operator);
+        Group group = dto.toModel();
         groupRepo.update(group);
 
         List<UserSimpleDto> relatedUsers = dto.getRelatedUsers();
@@ -120,7 +130,7 @@ public class GroupServiceImpl implements GroupService {
         Map<Long, UacUser> userMap = queryUsers(group, relationList);
         List<UserSimpleDto> relatedUsers = buildRelationUserDto(relationList, userMap);
 
-        GroupCombinedDto dto = (GroupCombinedDto) GroupCombinedDto.from(group);
+        GroupCombinedDto dto = GroupCombinedDto.from(group);
         dto.setRelatedUsers(relatedUsers);
         dto.setOwnerName(getGroupOwnerName(group.getOwnerId(), userMap));
         return dto;
@@ -130,6 +140,9 @@ public class GroupServiceImpl implements GroupService {
     @Transactional
     public Boolean deleteGroup(Long id, Operator operator) {
         checkArgument(Objects.nonNull(id), "用户组id为空");
+        Optional<Group> groupOptional = groupRepo.query(id);
+        checkArgument(groupOptional.isPresent(), "用户组不存在或已删除");
+
         groupRepo.delete(id, operator.getNickname());
         groupUserRelationRepo.delete(id, operator.getNickname());
         return Boolean.TRUE;

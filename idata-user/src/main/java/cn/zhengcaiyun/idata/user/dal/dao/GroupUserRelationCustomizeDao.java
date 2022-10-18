@@ -27,11 +27,8 @@ public interface GroupUserRelationCustomizeDao {
 
     default int insertMultiple(Collection<GroupUserRelation> records) {
         return MyBatis3Utils.insertMultiple(this::insertMultiple, records, GROUP_USER_RELATION, c ->
-                c.map(del).toProperty("del")
-                        .map(creator).toProperty("creator")
-                        .map(createTime).toProperty("createTime")
+                c.map(creator).toProperty("creator")
                         .map(editor).toProperty("editor")
-                        .map(editTime).toProperty("editTime")
                         .map(groupId).toProperty("groupId")
                         .map(userId).toProperty("userId")
         );

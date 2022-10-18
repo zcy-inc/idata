@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_NO;
 import static cn.zhengcaiyun.idata.commons.enums.DeleteEnum.DEL_YES;
 import static cn.zhengcaiyun.idata.user.dal.dao.GroupDynamicSqlSupport.GROUP;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
@@ -41,7 +42,7 @@ public class GroupRepoImpl implements GroupRepo {
     public List<Group> queryList(GroupCondition condition, long limit, long offset) {
         return groupDao.select(dsl -> dsl.where(
                         GROUP.name, isLikeWhenPresent(condition.getNamePattern()).map(MybatisHelper::appendWildCards),
-                        and(GROUP.del, isEqualTo(DeleteEnum.DEL_NO.val))
+                        and(GROUP.del, isEqualTo(DEL_NO.val))
                 ).orderBy(GROUP.editTime.descending())
                 .limit(limit).offset(offset));
     }
@@ -50,7 +51,7 @@ public class GroupRepoImpl implements GroupRepo {
     public long count(GroupCondition condition) {
         return groupDao.count(dsl -> dsl.where(
                 GROUP.name, isLikeWhenPresent(condition.getNamePattern()).map(MybatisHelper::appendWildCards),
-                and(GROUP.del, isEqualTo(DeleteEnum.DEL_NO.val))
+                and(GROUP.del, isEqualTo(DEL_NO.val))
         ));
     }
 
@@ -58,7 +59,7 @@ public class GroupRepoImpl implements GroupRepo {
     public List<Group> queryList(GroupCondition condition) {
         return groupDao.select(dsl -> dsl.where(
                 GROUP.name, isLikeWhenPresent(condition.getNamePattern()).map(MybatisHelper::appendWildCards),
-                and(GROUP.del, isEqualTo(DeleteEnum.DEL_NO.val))
+                and(GROUP.del, isEqualTo(DEL_NO.val))
         ).orderBy(GROUP.id.descending()));
     }
 
@@ -84,6 +85,12 @@ public class GroupRepoImpl implements GroupRepo {
 
         if (DeleteEnum.DEL_YES.val == optional.get().getDel()) return Optional.empty();
         return optional;
+    }
+
+    @Override
+    public Optional<Group> queryByName(String name) {
+        return groupDao.selectOne(dsl -> dsl.where(GROUP.name, isEqualTo(name),
+                and(GROUP.del, isEqualTo(DEL_NO.val))));
     }
 
     @Override
