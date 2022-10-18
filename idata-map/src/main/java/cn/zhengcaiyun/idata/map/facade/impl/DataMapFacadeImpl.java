@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.map.facade.impl;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.WhetherEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.KeywordUtil;
@@ -119,12 +120,16 @@ public class DataMapFacadeImpl implements DataMapFacade {
         // 封装是否已收藏
         List<String> entityCodeList = dtoList.stream().map(e -> e.getEntityCode()).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(entityCodeList)) {
-            List<MapUserFavourite> list = mapUserFavouriteDao.select(c ->
-                    c.where(mapUserFavourite.entityCode, isIn(entityCodeList),
-                            and(mapUserFavourite.userId, isEqualTo(OperatorContext.getCurrentOperator().getId())),
-                            and(mapUserFavourite.del, isEqualTo(0))));
-            Map<String, MapUserFavourite> map = list.stream().collect(Collectors.toMap(MapUserFavourite::getEntityCode, Function.identity()));
-            dtoList.forEach(e -> e.setHasFavourite(map.containsKey(e.getEntityCode()) ? 1 : 0));
+            if (!condition.isMyFavorite()) {
+                List<MapUserFavourite> list = mapUserFavouriteDao.select(c ->
+                        c.where(mapUserFavourite.entityCode, isIn(entityCodeList),
+                                and(mapUserFavourite.userId, isEqualTo(OperatorContext.getCurrentOperator().getId())),
+                                and(mapUserFavourite.del, isEqualTo(0))));
+                Map<String, MapUserFavourite> map = list.stream().collect(Collectors.toMap(MapUserFavourite::getEntityCode, Function.identity()));
+                dtoList.forEach(e -> e.setHasFavourite(map.containsKey(e.getEntityCode()) ? WhetherEnum.YES.val : WhetherEnum.NO.val));
+            } else {
+                dtoList.forEach(e -> e.setHasFavourite(WhetherEnum.YES.val));
+            }
         }
 
         entityPage.setContent(dtoList);
