@@ -102,7 +102,7 @@ public class TableSibshipServiceImpl implements TableSibshipService {
             TableSibshipVO vo = new TableSibshipVO();
             vo.setRelation("prev");
             vo.setTableName(StringUtils.isEmpty(cur.getSourceDb()) ? cur.getSourceTableName() : cur.getSourceDb() + "." + cur.getSourceTableName());
-            vo.setChildren(this.getChildren(cur.getSourceDb(), cur.getSourceTableName(), level, curLevel));
+            vo.setChildren(this.getParents(cur.getSourceDb(), cur.getSourceTableName(), level, curLevel));
             paernts.add(vo);
         }
 
