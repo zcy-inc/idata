@@ -8,9 +8,11 @@ import cn.zhengcaiyun.idata.user.spi.AuthResourceSupplier;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class AuthResourceServiceImpl implements AuthResourceService {
 
     private final ServiceProvidersLoader serviceProvidersLoader;
