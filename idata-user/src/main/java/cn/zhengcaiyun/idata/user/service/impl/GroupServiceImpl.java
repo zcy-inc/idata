@@ -194,11 +194,15 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private Map<Long, UacUser> queryUsers(Group group, List<GroupUserRelation> relationList) {
-        if (CollectionUtils.isEmpty(relationList)) return Maps.newHashMap();
+        List<Long> userIds;
+        if (!CollectionUtils.isEmpty(relationList)) {
+            userIds = relationList.stream()
+                    .map(GroupUserRelation::getUserId)
+                    .collect(Collectors.toList());
+        } else {
+            userIds = Lists.newArrayList();
+        }
 
-        List<Long> userIds = relationList.stream()
-                .map(GroupUserRelation::getUserId)
-                .collect(Collectors.toList());
         userIds.add(group.getOwnerId());
         return queryUsers(userIds);
     }
