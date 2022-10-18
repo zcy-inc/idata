@@ -14,6 +14,7 @@ import cn.zhengcaiyun.idata.user.dto.GroupDto;
 import cn.zhengcaiyun.idata.user.dto.GroupUserRelationDto;
 import cn.zhengcaiyun.idata.user.dto.UserSimpleDto;
 import cn.zhengcaiyun.idata.user.service.GroupService;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -222,14 +223,19 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private List<UserSimpleDto> buildRelationUserDto(List<GroupUserRelation> relationList, Map<Long, UacUser> userMap) {
+        if (CollectionUtils.isEmpty(relationList)) {
+            return Lists.newArrayList();
+        }
         return relationList.stream()
                 .map(GroupUserRelation::getUserId)
                 .map(relationUserId -> {
                     UserSimpleDto userSimpleDto = new UserSimpleDto();
                     userSimpleDto.setId(relationUserId);
-                    UacUser uacUser = userMap.get(relationUserId);
-                    if (Objects.nonNull(uacUser)) {
-                        userSimpleDto.setNickname(uacUser.getNickname());
+                    if (Objects.nonNull(userMap)) {
+                        UacUser uacUser = userMap.get(relationUserId);
+                        if (Objects.nonNull(uacUser)) {
+                            userSimpleDto.setNickname(uacUser.getNickname());
+                        }
                     }
                     return userSimpleDto;
                 }).collect(Collectors.toList());
