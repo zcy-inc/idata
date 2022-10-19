@@ -496,7 +496,7 @@ public class JobInfoExecuteDetailDto {
         private List<ExternalTableDto> externalTableList;
 
         /**
-         *   写入文件类型 Spark SQL类型：orc、parquet
+         * 写入文件类型 Spark SQL类型：orc、parquet
          */
         private TableStoredTypeEnum tableStoredTypeEnum;
 
@@ -1086,6 +1086,80 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
+    public static class StarRocksSQLJobDetail extends JobInfoExecuteDetailDto {
+        public StarRocksSQLJobDetail() {
+
+        }
+
+        public StarRocksSQLJobDetail(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        private String sourceSql;
+        private DriverTypeEnum driverType;
+        private String targetUrlPath;
+        private String username;
+        private String password;
+        private String targetTableName;
+        private WriteModeEnum.SqlEnum destWriteMode;
+
+        public String getSourceSql() {
+            return sourceSql;
+        }
+
+        public void setSourceSql(String sourceSql) {
+            this.sourceSql = sourceSql;
+        }
+
+        public DriverTypeEnum getDriverType() {
+            return driverType;
+        }
+
+        public void setDriverType(DriverTypeEnum driverType) {
+            this.driverType = driverType;
+        }
+
+        public String getTargetUrlPath() {
+            return targetUrlPath;
+        }
+
+        public void setTargetUrlPath(String targetUrlPath) {
+            this.targetUrlPath = targetUrlPath;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getTargetTableName() {
+            return targetTableName;
+        }
+
+        public void setTargetTableName(String targetTableName) {
+            this.targetTableName = targetTableName;
+        }
+
+        public WriteModeEnum.SqlEnum getDestWriteMode() {
+            return destWriteMode;
+        }
+
+        public void setDestWriteMode(WriteModeEnum.SqlEnum destWriteMode) {
+            this.destWriteMode = destWriteMode;
+        }
+    }
+
     public String getJobType() {
         return jobType;
     }
@@ -1165,4 +1239,5 @@ public class JobInfoExecuteDetailDto {
     public void setOpenDqc(boolean openDqc) {
         this.openDqc = openDqc;
     }
+
 }

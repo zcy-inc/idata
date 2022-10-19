@@ -790,6 +790,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             case DI_STREAM:
                 return getFlinkCDCJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
+            case SQL_STARROCKS:
+                return getStarRocksSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
@@ -804,6 +806,39 @@ public class JobInfoServiceImpl implements JobInfoService {
         Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
 
         return (count1 + count2) > 0;
+    }
+
+    private JobInfoExecuteDetailDto getStarRocksSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
+                                                             Integer jobVersion) {
+        // 封装sql_job_content
+        // dryRun不需要发布，正常调用jobVersion > 0
+        DevJobContentSql sqlContent;
+        if (jobVersion != null && jobVersion > 0) {
+            sqlContent = sqlJobRepo.query(jobId, jobVersion);
+        } else {
+            sqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
+        }
+        checkArgument(Objects.nonNull(sqlContent), String.format("未查询到可用的作业内容, jobId:%s，环境:%s", jobId, env));
+
+        JobOutputQuery query = new JobOutputQuery();
+        query.setJobId(jobId);
+        query.setEnvironment(env);
+        JobOutput jobOutput = Optional.ofNullable(jobOutputMyDao.queryOne(query))
+                .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", jobId, env)));
+
+        DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId(), env);
+        String dataSourceType = destSourceDetail.getDataSourceTypeEnum().name();
+        checkArgument(StringUtils.equalsIgnoreCase(dataSourceType, "starrocks"), String.format("作业输出数据源配置不正确, jobId:%s，环境:%s，数据源:%s", jobId, env, dataSourceType));
+
+        JobInfoExecuteDetailDto.StarRocksSQLJobDetail sqlJobDetail = new JobInfoExecuteDetailDto.StarRocksSQLJobDetail(baseJobDetailDto);
+        sqlJobDetail.setSourceSql(sqlContent.getSourceSql());
+        sqlJobDetail.setDriverType(destSourceDetail.getDriverTypeEnum());
+        sqlJobDetail.setTargetUrlPath(destSourceDetail.getJdbcUrl());
+        sqlJobDetail.setUsername(destSourceDetail.getUserName());
+        sqlJobDetail.setPassword(destSourceDetail.getPassword());
+        sqlJobDetail.setTargetTableName(EnvRuleHelper.handlerDbTableName(dataSourceType, jobOutput.getDestTable(), env));
+        sqlJobDetail.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
+        return sqlJobDetail;
     }
 
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,

@@ -101,7 +101,7 @@ public class DataSourceApiImpl implements DataSourceApi {
         res.setUserName(dbConfigDto.getUsername());
         res.setPassword(DesUtil.encrypt(dbConfigDto.getPassword()));
         res.setDbName(dbName);
-        res.setDriverTypeEnum(DriverTypeEnum.ofDataSourceTypeEnum(DataSourceTypeEnum.valueOf(dataSource.getType().name())));
+        res.setDriverTypeEnum(DriverTypeEnum.ofDataSourceTypeEnum(dataSource.getType()));
         res.setHost(dbConfigDto.getHost());
         res.setPort(dbConfigDto.getPort());
         return res;
@@ -117,13 +117,13 @@ public class DataSourceApiImpl implements DataSourceApi {
             protocol = "presto";
         } else if (DataSourceTypeEnum.hive == sourceTypeEnum) {
             protocol = "hive2";
-        }  else if (DataSourceTypeEnum.elasticsearch == sourceTypeEnum) {
+        } else if (DataSourceTypeEnum.elasticsearch == sourceTypeEnum) {
             // es直接返回ip+port，不拼接jdbc，用于给htool
             return host + ":" + port;
-        }  else if (DataSourceTypeEnum.kafka == sourceTypeEnum) {
+        } else if (DataSourceTypeEnum.kafka == sourceTypeEnum) {
             // kafka直接返回ip+port，不拼接jdbc，用于给htool
             return host + ":" + port;
-        }  else if (DataSourceTypeEnum.mssql == sourceTypeEnum) {
+        } else if (DataSourceTypeEnum.mssql == sourceTypeEnum) {
             // es直接返回ip+port，不拼接jdbc，用于给htool
             return String.format("jdbc:sqlserver://%s:%d;databasename=%s", host, port, dbName);
         }
