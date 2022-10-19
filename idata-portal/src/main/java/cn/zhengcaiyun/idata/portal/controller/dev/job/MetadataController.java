@@ -29,8 +29,9 @@ public class MetadataController {
 
     /**
      * 作业类型
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     *
      * @return
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
      */
     @GetMapping("/di/meta/job-type")
     public RestResult<List<NameValueResponse<String>>> loadJobType() {
@@ -43,8 +44,9 @@ public class MetadataController {
 
     /**
      * 同步方式
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     *
      * @return
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
      */
     @GetMapping("/di/meta/sync-mode")
     public RestResult<List<NameValueResponse<String>>> loadSyncMode(@RequestParam("jobType") String jobType) {
@@ -59,35 +61,38 @@ public class MetadataController {
 
     /**
      * 加载执行引擎
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     *
      * @return
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
      */
     @GetMapping("/engine-type")
     public RestResult<List<String>> loadEngineType(@RequestParam("jobType") String jobType) {
         JobTypeEnum jobTypeEnum = JobTypeEnum.getEnum(jobType).get();
         switch (jobTypeEnum) {
             case DI_BATCH:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name()}));
+                return RestResult.success(Arrays.asList(EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name()));
             case DI_STREAM:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.FLINK.name()}));
-            case BACK_FLOW:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name(), EngineTypeEnum.STARROCKS.name()}));
-            case KYLIN:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.KYLIN.name()}));
             case SQL_FLINK:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.FLINK.name()}));
+                return RestResult.success(Arrays.asList(EngineTypeEnum.FLINK.name()));
+            case BACK_FLOW:
+                return RestResult.success(Arrays.asList(EngineTypeEnum.SQOOP.name(), EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name(), EngineTypeEnum.STARROCKS.name()));
+            case KYLIN:
+                return RestResult.success(Arrays.asList(EngineTypeEnum.KYLIN.name()));
+            case SQL_STARROCKS:
+                return RestResult.success(Arrays.asList(EngineTypeEnum.STARROCKS.name()));
             case SQL_SPARK:
             case SPARK_PYTHON:
             case SPARK_JAR:
-                return RestResult.success(Arrays.asList(new String[]{EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name()}));
+                return RestResult.success(Arrays.asList(EngineTypeEnum.SPARK.name(), EngineTypeEnum.SPARK3.name()));
         }
         return RestResult.success(new ArrayList<>());
     }
 
     /**
      * 加载数据源
-     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
+     *
      * @return
+     * @see cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum DI_BATCH/DI_STREAM/BACK_FLOW
      */
     @GetMapping("/meta/datasource-type")
     public RestResult<DIJobDatasourceResponse> loadDIDatasourceType(@RequestParam("jobType") String jobType) {
@@ -95,27 +100,30 @@ public class MetadataController {
         DIJobDatasourceResponse response = new DIJobDatasourceResponse();
         switch (jobTypeEnum) {
             case DI_STREAM:
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name()}));
-                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()}));
+                response.setFromList(Arrays.asList(DataSourceTypeEnum.mysql.name()));
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()));
                 break;
             case DI_BATCH:
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name()}));
-                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.hive.name()}));
+                response.setFromList(Arrays.asList(DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name()));
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.hive.name()));
                 break;
             case BACK_FLOW:
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.hive.name()}));
-                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(),
-                        DataSourceTypeEnum.elasticsearch.name(), DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()}));
+                response.setFromList(Arrays.asList(DataSourceTypeEnum.hive.name()));
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(),
+                        DataSourceTypeEnum.elasticsearch.name(), DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.kafka.name()));
                 break;
             case SQL_SPARK:
-                response.setExternalList(Arrays.asList(new String[]{DataSourceTypeEnum.starrocks.name()}));
-                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.hive.name(), DataSourceTypeEnum.presto.name(),
+                response.setExternalList(Arrays.asList(DataSourceTypeEnum.starrocks.name()));
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.hive.name(), DataSourceTypeEnum.presto.name(),
                         DataSourceTypeEnum.kylin.name(), DataSourceTypeEnum.phoenix.name(), DataSourceTypeEnum.elasticsearch.name(), DataSourceTypeEnum.mssql.name(), DataSourceTypeEnum.kafka.name(),
-                        DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.csv.name(), }));
+                        DataSourceTypeEnum.starrocks.name(), DataSourceTypeEnum.csv.name()));
+                break;
+            case SQL_STARROCKS:
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.starrocks.name()));
                 break;
             case SQL_FLINK:
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()}));
-                response.setDestList(Arrays.asList(new String[]{DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()}));
+                response.setFromList(Arrays.asList(DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()));
+                response.setDestList(Arrays.asList(DataSourceTypeEnum.mysql.name(), DataSourceTypeEnum.postgresql.name(), DataSourceTypeEnum.kafka.name(), DataSourceTypeEnum.starrocks.name()));
                 break;
             case SPARK_PYTHON:
             case SPARK_JAR:
@@ -123,7 +131,7 @@ public class MetadataController {
             case SCRIPT_SHELL:
             case KYLIN:
                 response.setExternalList(new ArrayList<>());
-                response.setFromList(Arrays.asList(new String[]{DataSourceTypeEnum.hive.name()}));
+                response.setFromList(Arrays.asList(DataSourceTypeEnum.hive.name()));
                 response.setDestList(DataSourceTypeEnum.getAllNames());
                 break;
         }

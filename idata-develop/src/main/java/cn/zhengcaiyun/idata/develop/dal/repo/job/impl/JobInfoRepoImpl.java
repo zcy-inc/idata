@@ -161,7 +161,8 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                     .where(DI_STREAM_JOB_CONTENT.jobId, isEqualTo(jobId)));
             diStreamJobTableDao.delete(dsl -> dsl.where(DI_STREAM_JOB_TABLE.jobId, isEqualTo(jobId)));
         } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
-                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_STARROCKS.getCode().equals(jobType)) {
             devJobContentSqlDao.update(dsl -> dsl.set(devJobContentSql.del).equalTo(DeleteEnum.DEL_YES.val)
                     .set(devJobContentSql.editor).equalTo(operator)
                     .where(devJobContentSql.jobId, isEqualTo(jobId)));

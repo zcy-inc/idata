@@ -248,6 +248,7 @@ public class JobGenericServiceImpl implements JobGenericService {
                 contentJson = getDIJobContentJson(jobInfoDto, version);
                 break;
             case SQL_SPARK:
+            case SQL_STARROCKS:
             case SQL_FLINK:
                 contentJson = getSQLJobContentJson(jobInfoDto, version);
                 break;

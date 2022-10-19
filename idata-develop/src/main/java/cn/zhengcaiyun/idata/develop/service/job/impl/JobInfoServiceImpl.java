@@ -19,7 +19,10 @@ package cn.zhengcaiyun.idata.develop.service.job.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
-import cn.zhengcaiyun.idata.commons.enums.*;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
+import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.commons.filter.KeywordFilter;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
@@ -71,8 +74,6 @@ import cn.zhengcaiyun.idata.develop.util.FlinkSqlUtil;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import cn.zhengcaiyun.idata.develop.util.MyBeanUtils;
 import com.alibaba.fastjson.JSON;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -99,11 +100,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDynamicSqlSupport.jobInfo;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.mybatis.dynamic.sql.SqlBuilder.*;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
 
 /**
  * @description:
@@ -1161,7 +1159,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     jobVersionMap.put(content.getJobId(), versionDto);
                 }
             }
-        } else if (JobTypeEnum.SQL_SPARK == typeEnum || JobTypeEnum.SQL_FLINK == typeEnum) {
+        } else if (JobTypeEnum.SQL_SPARK == typeEnum || JobTypeEnum.SQL_FLINK == typeEnum || JobTypeEnum.SQL_STARROCKS == typeEnum) {
             List<DevJobContentSql> contentList = sqlJobRepo.queryList(jobPublishContentIds);
             for (DevJobContentSql content : contentList) {
                 if (!jobVersionMap.containsKey(content.getJobId())) {

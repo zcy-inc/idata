@@ -110,8 +110,9 @@ public class JobExecuteConfigServiceImpl implements JobExecuteConfigService {
         checkCyclicalDependence(jobId, environment, dependenceDtoList);
 
         // SPARK_SQL作业校验执行引擎必填
-        if (jobInfoOptional.get().getJobType().equals(JobTypeEnum.SQL_SPARK.getCode())) {
-            checkArgument(StringUtils.isNotEmpty(dto.getExecuteConfig().getExecEngine()), "SPARK_SQL作业：执行引擎项必填");
+        if (jobInfoOptional.get().getJobType().equals(JobTypeEnum.SQL_SPARK.getCode())
+                || jobInfoOptional.get().getJobType().equals(JobTypeEnum.SQL_STARROCKS.getCode())) {
+            checkArgument(StringUtils.isNotEmpty(dto.getExecuteConfig().getExecEngine()), "执行引擎为空");
         }
 
         Optional<JobConfigCombination> configCombinationOptional = jobConfigCombinationManager.getCombineConfig(jobId, environment);
