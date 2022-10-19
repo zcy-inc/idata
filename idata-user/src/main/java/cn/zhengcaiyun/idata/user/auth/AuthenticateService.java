@@ -38,7 +38,7 @@ public class AuthenticateService {
     private final PolicyEngine policyEngine;
     private final GroupUserRelationRepo groupUserRelationRepo;
 
-    @Value("${user.auth.switch:true}")
+    @Value("${user.auth.switch:false}")
     private Boolean authSwitch;
 
     @Autowired
