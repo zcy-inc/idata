@@ -104,13 +104,13 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   const saveDevSetting = () => {
     const values = form.getFieldsValue();
     const {srcDataSourceId, srcDataSourceType, srcTableNamse} = values;
-    if (!srcDataSourceId) {
+    if (srcDataSourceType && !srcDataSourceId) {
       message.error('请选择数据源名称');
       return;
-    } else if (!srcDataSourceType) {
-      message.error('请选择数据源名称');
+    } else if (srcDataSourceId && !srcDataSourceType) {
+      message.error('请选择数据源类型');
       return;
-    } else if (!srcTableNamse.length) {
+    } else if (srcDataSourceId && !srcTableNamse[0]?.name) {
       message.error('请输入表名');
       return;
     }
