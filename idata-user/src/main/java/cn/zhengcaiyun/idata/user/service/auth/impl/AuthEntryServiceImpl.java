@@ -53,6 +53,9 @@ public class AuthEntryServiceImpl implements AuthEntryService {
     @Transactional(rollbackFor = Throwable.class)
     public Long addAuthEntry(AuthEntryExtDto authEntryExtDto, Operator operator) {
         checkAuthEntryParam(authEntryExtDto);
+        Optional<AuthEntry> authEntryOptional = authEntryRepo.query(authEntryExtDto.getSubjectType().name(), authEntryExtDto.getSubjectId());
+        checkArgument(authEntryOptional.isEmpty(), "授权主体已有授权记录，请勿重复新建授权");
+
         authEntryExtDto.setOperator(operator);
         AuthEntry authEntry = authEntryExtDto.toModel();
         Long authId = authEntryRepo.save(authEntry);
