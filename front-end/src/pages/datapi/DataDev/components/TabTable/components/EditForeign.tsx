@@ -29,6 +29,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
   const [str, setStr] = useState<any[][]>([]);
 
   useImperativeHandle(ref, () => ({ data }));
+  console.log('>>>>>>', data);
+  
 
   useEffect(() => {
     getTableReferDbs()
@@ -83,7 +85,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
   const addData = () => {
     const key = Date.now();
     const item = { key };
-    setData([...data, item]);
+    const copyD = data ?? [];
+    setData([...copyD, item]);
     setKeys([...keys, key]);
   };
 
@@ -203,8 +206,8 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
 
   // 外键表的操作
   const onAction = (row: any, _: any) => {
-    const i = data.findIndex((_) => _.key === row.key);
-    data.splice(i, 1);
+    const i = data?.findIndex((_) => _.key === row.key);
+    data?.splice(i, 1);
     keys.splice(i, 1);
     setData([...data]);
     setKeys([...keys]);
@@ -215,7 +218,7 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
       <EditableProTable
         rowKey="key"
         columns={fkColumns}
-        value={data}
+        value={data ?? []}
         bordered
         scroll={{ x: 'max-content' }}
         style={{ paddingTop: 24 }}
