@@ -101,6 +101,7 @@ export enum TaskTypes {
   SCRIPT_PYTHON = 'SCRIPT_PYTHON',
   SCRIPT_SHELL = 'SCRIPT_SHELL',
   KYLIN = 'KYLIN',
+  SQL_STARROCKS = 'SQL_STARROCKS',
 }
 
 export enum SrcReadMode {
