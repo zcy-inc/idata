@@ -164,6 +164,22 @@ export default [
               },
             ],
           },
+          {
+            path: '/configuration/authority/group',
+            hideInMenu: true,
+            routes: [
+              {
+                path: '/configuration/authority/group',
+                redirect: '/configuration/authority/group/list',
+              },
+              {
+                path: '/configuration/authority/group/list',
+                name: '用户组管理',
+                hideInMenu: true,
+                component: './authority/group/List',
+              },
+            ],
+          },
         ],
       },
       {

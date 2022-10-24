@@ -20,6 +20,10 @@ const tabList = [
   {
     key: 'user',
     tab: '用户管理',
+  },
+  {
+    key: 'group',
+    tab: '用户组管理',
   }
 ];
 
@@ -33,6 +37,9 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
         break;
       case 'user':
         history.push(`${url}/user`);
+        break;
+      case 'group':
+        history.push(`${url}/group`);
         break;
       default:
         break;
