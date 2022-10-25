@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.folder.DevelopFolderTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.DimTableDto;
@@ -23,17 +24,17 @@ import cn.zhengcaiyun.idata.develop.dto.measure.MeasureDto;
 import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.measure.MetricService;
 import cn.zhengcaiyun.idata.user.service.TokenService;
-import javolution.io.Struct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
+ * Metric-Controller
+ *
  * @author caizhedong
  * @date 2021-05-26 21:34
  */
@@ -87,8 +88,7 @@ public class MetricController {
         MeasureDto echoMetric;
         if (isEmpty(metric.getLabelCode())) {
             echoMetric = metricService.create(metric, tokenService.getNickname(request));
-        }
-        else {
+        } else {
             echoMetric = metricService.edit(metric, tokenService.getNickname(request));
         }
         return RestResult.success(echoMetric);
@@ -101,9 +101,58 @@ public class MetricController {
         return RestResult.success(metricService.disableOrAble(metricCode, labelTag, tokenService.getNickname(request)));
     }
 
+    /**
+     * 发布
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("metric/publish")
+    public RestResult publish(@RequestBody MetricOptParam param) {
+        return RestResult.success(metricService.publish(param.getMetricCode(), param.getRemark(), OperatorContext.getCurrentOperator().getNickname()));
+    }
+
+    /**
+     * 撤销
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("metric/retreat")
+    public RestResult retreat(@RequestBody MetricOptParam param) {
+        return RestResult.success(metricService.retreat(param.getMetricCode(), OperatorContext.getCurrentOperator().getNickname()));
+    }
+
     @DeleteMapping("metric")
     public RestResult deleteMetric(@RequestParam("metricCode") String metricCode,
                                    HttpServletRequest request) {
         return RestResult.success(metricService.delete(metricCode, tokenService.getNickname(request)));
+    }
+
+    public static class MetricOptParam {
+        /**
+         * 指标code
+         */
+        private String metricCode;
+        /**
+         * 备注
+         */
+        private String remark;
+
+        public String getMetricCode() {
+            return metricCode;
+        }
+
+        public void setMetricCode(String metricCode) {
+            this.metricCode = metricCode;
+        }
+
+        public String getRemark() {
+            return remark;
+        }
+
+        public void setRemark(String remark) {
+            this.remark = remark;
+        }
     }
 }

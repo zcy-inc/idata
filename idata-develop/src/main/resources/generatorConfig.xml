@@ -150,5 +150,10 @@
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
 
+        <table tableName="dev_metric_approval_record" domainObjectName="MetricApprovalRecord" mapperName="MetricApprovalRecordDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+        </table>
+
     </context>
 </generatorConfiguration>
