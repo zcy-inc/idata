@@ -281,6 +281,12 @@ export default [
         component: './Measure/Modifier',
         featureCode: 'F_MENU_MEASURE_MODIFIER',
       },
+      {
+        path: '/measure/approval',
+        name: '指标审批',
+        component: './Measure/Approval',
+        featureCode: 'F_MENU_MEASURE_APPROVAL',
+      },
     ]
   },
   {

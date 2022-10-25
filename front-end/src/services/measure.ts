@@ -1,5 +1,9 @@
 import { LabelTag, TreeNodeType } from '@/constants/datapi';
 import { request } from 'umi';
+import type { VersionStatus } from '@/constants/datadev';
+import type { Environments } from '@/constants/datasource';
+import type { ApprovalListItem } from '@/types/measure';
+import type { DefaultResponse } from './global';
 
 // 树 获取
 export async function getFolderTree(params: { devTreeType: TreeNodeType; treeNodeName?: string }) {
@@ -116,4 +120,62 @@ export async function generateSQL(params: { metricCode: string }, data: any) {
 // 获取指标列表
 export async function getMeasures(params: any) {
   return request(`/api/p1/dev/measures`, { method: 'GET', params });
+}
+
+/* ========== 指标审批 ========== */
+/**
+ * 查询版本发布记录
+ */
+ export async function getTasks(params: {
+  offset: number;
+  limit: number;
+  jobId?: number; // 作业id
+  jobContentId?: string; // 作业内容id
+  jobContentVersion?: string; // 作业内容版本号
+  environment?: Environments; // 环境
+  publishStatus?: VersionStatus; // 任务状态
+  jobTypeCode?: string; // 作业类型
+  dwLayerCode?: string; // 数仓分层
+  submitOperator?: string; // 提交人
+}) {
+  return request<
+    DefaultResponse & {
+      data: { total: number; content: ApprovalListItem[] };
+    }
+  >('/api/p1/dev/jobs/publishRecords/page', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 查询版本发布记录
+ */
+ export async function deleteTasks(data: {
+  id: number
+}) {
+  return request('/api/p1/dev/jobs/publishRecords/delete', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 发布版本
+ */
+export async function publishTask(data: { recordIds: number[] }) {
+  return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/approve', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 驳回版本
+ */
+export async function rejectTask(data: { recordIds: number[] }) {
+  return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/reject', {
+    method: 'POST',
+    data,
+  });
 }

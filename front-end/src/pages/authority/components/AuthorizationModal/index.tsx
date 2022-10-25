@@ -98,7 +98,7 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
   // 切换库 清空对应表数据
    const handleChangeDB = async (name: number) => {
     const formRes = await form.getFieldsValue();
-    console.log('handleChangeDB>>>', name, formRes, formRes?.authPolicyList?.[name]);
+    console.log('handleChangeDB>>>', name, formRes);
     form.setFields([{
       name: ['authPolicyList', name, 'tables'],
       value: []

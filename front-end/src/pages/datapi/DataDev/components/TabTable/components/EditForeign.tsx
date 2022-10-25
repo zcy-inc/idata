@@ -29,7 +29,6 @@ const EditForeign: ForwardRefRenderFunction<unknown, EditForeignProps> = (
   const [str, setStr] = useState<any[][]>([]);
 
   useImperativeHandle(ref, () => ({ data }));
-  console.log('>>>>>>', data);
   
 
   useEffect(() => {
