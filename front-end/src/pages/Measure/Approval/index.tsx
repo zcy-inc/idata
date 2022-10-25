@@ -10,13 +10,17 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 import styles from './index.less';
 import { ApprovalListItem } from '@/types/measure';
 import { getTasks, publishTask, rejectTask } from '@/services/measure';
-import { Environments } from '@/constants/datasource';
 import { publishListStatusMode, publishListStatus } from '@/constants/datadev';
 import { defaultWaitColumns, defaultColumns } from './utils';
 
 const { confirm } = Modal;
 const { TabPane } = Tabs;
 type ActionType = 'approve' | 'reject';
+
+const MetricTypeOps = [
+  { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
+  { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
+];
 
 const DataSource: FC = () => {
   const [data, setData] = useState<ApprovalListItem[]>([]);
@@ -108,12 +112,11 @@ const DataSource: FC = () => {
 
   useEffect(() => {
     getTasksWrapped(0);
-    // 判断activeTabKey,拼接操作栏目,已处理tab下不需要操作栏
     // 待处理
     if (activeTabKey === publishListStatusMode.WAITINGTASK && !columnHasOperate()) {
       setColumns([...defaultWaitColumns, operateColumn])
     }
-    // 已处理
+    // 已处理 已处理tab下不需要操作栏
     if (activeTabKey === publishListStatusMode.FINISHTASK && columnHasOperate()) {
       setColumns(defaultColumns)
     }
@@ -151,10 +154,7 @@ const DataSource: FC = () => {
           label="指标类型"
           placeholder="请选择"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
-          options={[
-            { label: 'stag', value: Environments.STAG },
-            { label: 'prod', value: Environments.PROD },
-          ]}
+          options={MetricTypeOps}
         />
         <ProFormText
           name="submitOperator"
