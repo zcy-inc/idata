@@ -1,6 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import type { FC } from 'react';
 import { history } from 'umi';
+import styles from './index.less';
 
 type TAuthorityProps = {
   match: {
@@ -60,6 +61,7 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
 
   return (
     <PageContainer
+      className={styles.tabStyle}
       tabList={tabList}
       tabActiveKey={getTabKey()}
       onTabChange={handleTabChange}
