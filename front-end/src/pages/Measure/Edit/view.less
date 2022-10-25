@@ -53,6 +53,25 @@
       }
     }
   }
+  .status-waited {
+    :global {
+      .ant-descriptions-item-content {
+        color: #f69b24;
+        padding-left: 6px;
+        display: flex;
+        align-items: center;
+        &::before {
+          display: inline-block;
+          background-color: #f69b24;
+          transform: translateX(-6px);
+          content: '';
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
   
 }
 

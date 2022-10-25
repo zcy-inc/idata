@@ -5,7 +5,7 @@ import { useParams, history } from 'umi';
 import MonacoEditor from 'react-monaco-editor';
 import { PageContainer } from '@ant-design/pro-layout';
 import { getMetric, switchMetric, generateSQL } from '@/services/measure';
-import type  { MetricListItem, MetricDetail } from '@/types/measure';
+import type { MetricListItem, MetricDetail } from '@/types/measure';
 import Title from '@/components/Title';
 import { LabelTag, timeDimOptions, AggregatorCodeOptions, degradeDimOptions } from '@/constants/datapi';
 import style from './view.less';
@@ -35,7 +35,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
   const params = useParams<{ id: string; }>();
   const [data, setData] = useState<MetricDetail>();
   const [getLoading, setGetLoading] = useState<boolean>(false);
-  const [sql , setSql] = useState('');
+  const [sql, setSql] = useState('');
   useEffect(() => {
     getMetricInfo();
   }, [])
@@ -54,7 +54,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
   };
 
   const transformOriginData = (data: { atomicMetric: [], creator: string; metricId: string; labelName: string; labelTag: string; labelAttributes: any; measureLabels: any; specialAttribute: any; }) => {
-    const { metricId, labelName, atomicMetric, creator, labelTag,labelAttributes, measureLabels,  specialAttribute} = data;
+    const { metricId, labelName, atomicMetric, creator, labelTag, labelAttributes, measureLabels, specialAttribute } = data;
     const labelParams: {
       metricId?: string;
       enName?: string;
@@ -65,9 +65,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       comment?: string;
       metricDeadline?: string;
     } = {};
-    labelAttributes.forEach((attribute: {enumValue: string; attributeKey: string; attributeValue: string | number; }) => {
+    labelAttributes.forEach((attribute: { enumValue: string; attributeKey: string; attributeValue: string | number; }) => {
       labelParams[attribute.attributeKey] = attribute.attributeValue;
-      if(attribute.enumValue) {
+      if (attribute.enumValue) {
         labelParams[`${attribute.attributeKey}Name`] = attribute.enumValue;
       }
     });
@@ -83,14 +83,14 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       dimTables: specialAttribute.dimTables,
       aggregatorCode: specialAttribute.aggregatorCode,
       timeAttribute:
-      (!specialAttribute.timeAttribute?.columnName && !specialAttribute.timeAttribute?.timeDim) ?
-      [] : [specialAttribute.timeAttribute],
+        (!specialAttribute.timeAttribute?.columnName && !specialAttribute.timeAttribute?.timeDim) ?
+          [] : [specialAttribute.timeAttribute],
       calculableType: specialAttribute.calculableType
     }
   }
 
   const copy = () => {
-    const  copy = function (e: any) {
+    const copy = function (e: any) {
       e.preventDefault();
       e.clipboardData.setData('text/plain', sql);
     }
@@ -108,7 +108,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
       modalProps: {
       },
       formProps: {
-        dimTables: tableList.map(item => ({label: item.tableName, value: item.tableId})),
+        dimTables: tableList.map(item => ({ label: item.tableName, value: item.tableId })),
         metricCode: params.id
       },
       btns: {
@@ -122,7 +122,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             ...item,
             columnName: item.columnName.join()
           }))
-          return generateSQL({metricCode: params.id}, dimTables).then(res => {
+          return generateSQL({ metricCode: params.id }, dimTables).then(res => {
             setSql(res.data);
             done();
           })
@@ -131,6 +131,34 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
         })
       },
     }, DimensionSelect)
+  }
+
+  // 渲染指标状态
+  const renderLabelTag = (labelTag: string) => {
+    switch (true) {
+      case labelTag?.endsWith('DISABLE'):
+        return '停用';
+      case labelTag?.endsWith('DRAFT'):
+        return '草稿';
+      case labelTag?.endsWith('APPROVE'):
+        return '待审批';
+      default:
+        return '启用';
+    }
+  }
+
+  // 渲染指标状态颜色
+  const renderLabelTagColor = (labelTag: string) => {
+    switch (true) {
+      case labelTag?.endsWith('DISABLE'):
+        return style['status-disable'];
+      case labelTag?.endsWith('DRAFT'):
+        return style['status-waited'];
+      case labelTag?.endsWith('APPROVE'):
+        return style['status-waited'];
+      default:
+        return style['status-enable'];
+    }
   }
 
   const transformLabelTag = (labelTag: LabelTag) => {
@@ -151,6 +179,7 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
     }
   };
 
+  // 停用/启用
   const switchStatus = () => {
     switchMetric({ metricCode: params.id, labelTag: transformLabelTag(data?.labelTag as LabelTag) })
       .then((res) => {
@@ -159,8 +188,47 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
           getMetricInfo();
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
+
+  /**
+   * 不同状态 操作按钮不同
+   * 启用: 返回、停用
+   * 停用: 返回、编辑、启用
+   * 草稿: 返回、编辑
+   * 待审批: 返回
+   * **/
+  const renderBtn = (labelTag: string) => {
+    switch (true) {
+      case labelTag?.endsWith('DISABLE'):
+        return (
+          <>
+            <a
+              className={style['plain-default-btn']}
+              onClick={() => history.push(`/measure/edit/${params.id}`)}
+            >编 辑</a>
+            <Button onClick={switchStatus} danger>
+              启用
+            </Button>
+          </>
+        );
+      case labelTag?.endsWith('DRAFT'):
+        return (
+          <a
+            className={style['plain-default-btn']}
+            onClick={() => history.push(`/measure/edit/${params.id}`)}
+          >编 辑</a>
+        );
+      case labelTag?.endsWith('APPROVE'):
+        return null;
+      default:
+        return (
+          <Button onClick={switchStatus} danger ghost>
+            停用
+          </Button>
+        );
+    }
+  }
 
   return (
     <PageContainer
@@ -188,15 +256,18 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
           <Item label="数据域">{data?.domainCodeName}</Item>
           <Item label="业务过程">{data?.bizProcessCodeName}</Item>
           <Item label="指标类型">{TagMap(data?.labelTag as LabelTag)}</Item>
-          <Item label="指标状态" className={data?.labelTag.endsWith('DISABLE') ? style['status-disable'] : style['status-enable']}>
+          {/* <Item label="指标状态" className={data?.labelTag.endsWith('DISABLE') ? style['status-disable'] : style['status-enable']}>
             {data?.labelTag.endsWith('DISABLE') ? '已停用' : '使用中'}
+          </Item> */}
+          <Item label="指标状态" className={renderLabelTagColor(data?.labelTag || '')}>
+            {renderLabelTag(data?.labelTag || '')}
           </Item>
           <Item label="创建人">{data?.creator}</Item>
           <Item label="截止生效日期">{data?.metricDeadline}</Item>
         </Descriptions>
         <Title>指标定义</Title>
         <p>{data?.metricDefine}</p>
-        <Title style={{marginTop: 32}}>技术口径</Title>
+        <Title style={{ marginTop: 32 }}>技术口径</Title>
         <p className={style['part-title']}>指标来源</p>
         <Table
           bordered
@@ -299,9 +370,9 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
               ]}
             />
           </> :
-        null}
-       
-       
+          null}
+
+
         <p className={style['part-title']}>其他信息</p>
         <Descriptions column={2} colon={false} style={{ margin: '16px 0' }}>
           <Item label="计算方式">
@@ -311,13 +382,13 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             {degradeDimOptions.find(item => item.value === data?.calculableType)?.label || '-'}
           </Item>
         </Descriptions>
-        <p className={style['part-title']} style={{lineHeight: '32px'}}>
+        <p className={style['part-title']} style={{ lineHeight: '32px' }}>
           SQL界面
           <span className={style['btn-list']}>
-          {data?.labelTag === LabelTag.DERIVE_METRIC_LABEL ?
-            <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a> : null  
-          }
-            
+            {data?.labelTag === LabelTag.DERIVE_METRIC_LABEL ?
+              <a className={style['plain-default-btn']} onClick={showDimensionSelect}>维度选择</a> : null
+            }
+
             <Button type="primary" onClick={copy}>复制内容</Button>
           </span>
         </p>
@@ -333,13 +404,14 @@ const ViewModifier: FC<ViewModifierProps> = ({ }) => {
             className={style['plain-default-btn']}
             onClick={() => history.push('/measure/list')}
           >返 回</a>
-          <a
+          {renderBtn(data?.labelTag || '')}
+          {/* <a
             className={style['plain-default-btn']}
             onClick={() => history.push(`/measure/edit/${params.id}`)}
           >编 辑</a>
           <Button onClick={switchStatus} danger ghost={!data?.labelTag.endsWith('DISABLE')}>
             {data?.labelTag.endsWith('DISABLE') ? '启用' : '停用'}
-          </Button>
+          </Button> */}
         </div>
       </Spin>
     </PageContainer>
