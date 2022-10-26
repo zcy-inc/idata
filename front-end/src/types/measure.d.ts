@@ -1,3 +1,5 @@
+import { Environments } from '@/constants/datasource';
+import { PublishStatus } from '@/constants/task';
 export interface MetricListItem {
   metricId?: string; // 指标id
   modifierId?: string; // 修饰词id
@@ -39,4 +41,21 @@ export interface MetricDetail {
   atomicMetric: Record<string, any> [];
   timeAttribute: Record<string, any> [];
   calculableType?: string;
+}
+
+export interface ApprovalListItem {
+  id: number;
+  jobId: number;
+  jobName: string;
+  jobContentId: number;
+  jobContentVersion: number;
+  jobTypeCode: string;
+  dwLayerCode: string;
+  dwLayerValue: string;
+  environment: Environments;
+  publishStatus: PublishStatus;
+  submitRemark: string;
+  approveOperator?: string;
+  approveTime?: string;
+  approveRemark?: string;
 }

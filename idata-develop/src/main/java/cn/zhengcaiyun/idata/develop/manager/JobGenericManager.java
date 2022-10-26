@@ -95,6 +95,7 @@ public class JobGenericManager {
                 break;
             case SQL_SPARK:
             case SQL_FLINK:
+            case SQL_STARROCKS:
                 version = saveSQLJobContent(jobId, jobType, contentJson, fromImport, operator);
                 break;
             case SPARK_JAR:

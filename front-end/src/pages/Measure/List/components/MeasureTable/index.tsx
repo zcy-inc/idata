@@ -4,7 +4,7 @@ import { Form, Space, Table, Button } from 'antd';
 import type { FC } from 'react';
 import { history, Link } from 'umi';
 import type { ColumnsType } from 'antd/lib/table/Table';
-import type  { MetricFloderItem, MetricListItem } from '@/types/measure';
+import type { MetricFloderItem, MetricListItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
 import { getMeasures } from '@/services/measure';
@@ -17,13 +17,13 @@ const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
 ];
-const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
+const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
   const [data, setData] = useState<MetricListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [bizProcessEnum, setBizProcessEnum] = useState<{label: string; value: string} []>([]);
-  const [dataSetOptions, setDataSetOptions] = useState<{label: string; value: string} []>([]);
+  const [bizProcessEnum, setBizProcessEnum] = useState<{ label: string; value: string }[]>([]);
+  const [dataSetOptions, setDataSetOptions] = useState<{ label: string; value: string }[]>([]);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -35,19 +35,19 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         }));
         setBizProcessEnum(options);
       })
-      .catch((err) => {});
+      .catch((err) => { });
 
-      getEnumValues({ enumCode: 'domainIdEnum:ENUM' }).then(res => {
-        const dataSetOptions = res.data?.map((enumValue: {enumValue: string; valueCode: string}) => ({
-          label: enumValue.enumValue,
-          value: enumValue.valueCode,
-        }));
-        setDataSetOptions(dataSetOptions);
-      })
+    getEnumValues({ enumCode: 'domainIdEnum:ENUM' }).then(res => {
+      const dataSetOptions = res.data?.map((enumValue: { enumValue: string; valueCode: string }) => ({
+        label: enumValue.enumValue,
+        value: enumValue.valueCode,
+      }));
+      setDataSetOptions(dataSetOptions);
+    })
   }, []);
 
   useEffect(() => {
-    if(currentNode.folderId) {
+    if (currentNode.folderId) {
       getTableData(10 * (current - 1));
     }
   }, [currentNode, current])
@@ -66,10 +66,10 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
   };
 
   const getTableData = (offset: number) => {
-    const {measureDeadline, ...params} = form.getFieldsValue();
-    if(params.enable === 0) {
+    const { measureDeadline, ...params } = form.getFieldsValue();
+    if (params.enable === 0) {
       params.enable = false;
-    } else if(params.enable === 1) {
+    } else if (params.enable === 1) {
       params.enable = true;
     }
     setLoading(true);
@@ -85,7 +85,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         setTotal(res.data.total);
         setData(res.data.content);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setLoading(false));
   };
 
@@ -98,16 +98,16 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     onFinish({});
   }
 
-  const addTreeItem = (node: {folderId: string} = { folderId: ''}) => {
+  const addTreeItem = (node: { folderId: string } = { folderId: '' }) => {
     const isEdit = !!node.folderId;
     showDialog(`${isEdit ? '编辑指标' : '新建指标'}`, {
       modalProps: {
         width: 540
       },
       formProps: {
-         node: {
+        node: {
           folderId: currentNode.pos
-         }
+        }
       },
       beforeConfirm: (dialog, form, done) => {
         form.handleSubmit().then((values: any) => {
@@ -121,10 +121,74 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     }, CreateMeasure)
   }
 
+  // 渲染指标状态
+  const renderLabelTag = (labelTag: string) => {
+    switch (true) {
+      case labelTag.endsWith('DISABLE'):
+        return <span className={styles.disabled}>停用</span>;
+      case labelTag.endsWith('DRAFT'):
+        return <span className={styles.waited}>草稿</span>;
+      case labelTag.endsWith('APPROVE'):
+        return <span className={styles.waited}>待审批</span>;
+      default:
+        return <span className={styles.enabled}>启用</span>;
+    }
+  }
+  
+  // TODO 发布
+  const handlePublish = () => {
+    alert('发布')
+  }
+
+  // TODO 撤销
+  const handleRevoke = () => {
+    alert('撤销')
+  }
+
+  // 渲染操作按钮
+  const renderOps = (record: any) => {
+    const { labelTag } = record
+    switch (true) {
+      case labelTag.endsWith('DISABLE'):
+        // 禁用
+        return (
+          <Space size={16}>
+            <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+            <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
+          </Space>
+        )
+      case labelTag.endsWith('DRAFT'):
+        // 草稿
+        return (
+          <Space size={16}>
+            <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+            <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
+            <Button type="link" onClick={() => handlePublish()}>发布</Button>
+          </Space>
+        )
+      case labelTag.endsWith('APPROVE'):
+        // 待审批
+        return (
+          <Space size={16}>
+            <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+            <Button type="link" onClick={() => handleRevoke()}>撤销</Button>
+          </Space>
+        )
+      default:
+        // 启用
+        return (
+          <Space size={16}>
+            <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+            <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
+          </Space>
+        )
+    }
+  }
+
   const columns: ColumnsType<MetricListItem> = [
     { title: '指标ID', key: 'metricId', dataIndex: 'metricId' },
     { title: '指标名称', key: 'labelName', dataIndex: 'labelName' },
-    { 
+    {
       title: '指标类型',
       key: 'labelTag',
       dataIndex: 'labelTag',
@@ -132,13 +196,11 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
     },
     { title: '主题域', key: 'domain', dataIndex: 'domain' },
     { title: '业务过程', key: 'bizProcessValue', dataIndex: 'bizProcessValue' },
-    { 
+    {
       title: '指标状态',
       key: 'labelTag',
       dataIndex: 'labelTag',
-      render: (t) => t.endsWith('DISABLE') ?
-      <span className={styles.disabled}>停用</span> :
-      <span className={styles.enabled}>启用</span>
+      render: (t) => renderLabelTag(t)
     },
     { title: '截止生效日期', key: 'metricDeadline', dataIndex: 'metricDeadline' },
     { title: '创建人', key: 'creator', dataIndex: 'creator' },
@@ -150,12 +212,13 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
       key: 'ops',
       dataIndex: 'ops',
       fixed: 'right',
-      render: (value, record) => (
-        <Space size={16}>
-          <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
-          <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
-        </Space>
-      ),
+      // render: (value, record) => (
+      //   <Space size={16}>
+      //     <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
+      //     <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
+      //   </Space>
+      // ),
+      render: (value, record) => renderOps(record),
     },
   ];
 
@@ -167,7 +230,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
         layout="horizontal"
         onFinish={onFinish}
         onReset={onReset}
-        labelCol={{span: 6}}
+        labelCol={{ span: 6 }}
         labelWidth={96}
       >
         <ProFormText
@@ -196,7 +259,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           name="enable"
           label="指标状态"
           placeholder="请选择"
-          options={[{label: '停用', value: 0},{label: '启用', value: 1}]}
+          options={[{ label: '停用', value: 0 }, { label: '启用', value: 1 }]}
         />
         <ProFormText
           name="creator"
@@ -207,14 +270,14 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           label="截止生效日期"
           name="measureDeadline"
         />
-         <ProFormSelect
+        <ProFormSelect
           name="domain"
           label="主题域"
           placeholder="请选择"
           options={dataSetOptions}
         />
       </QueryFilter>
-      <div style={{textAlign: 'right'}}>
+      <div style={{ textAlign: 'right' }}>
         <Button key="edit" onClick={() => addTreeItem()}>
           新增
         </Button>
@@ -230,7 +293,7 @@ const DataSource: FC<{currentNode: MetricFloderItem}> = ({currentNode}) => {
           total,
           current,
           showTotal: (t) => `共${t}条`,
-          onChange: (page) => {setCurrent(page);},
+          onChange: (page) => { setCurrent(page); },
         }}
       />
     </div>

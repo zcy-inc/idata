@@ -12,6 +12,7 @@ import type { ColumnsType } from 'antd/es/table';
 import RoleSelect from '../../components/RoleSelect';
 import AuthSetting from '../../components/AuthSetting';
 import useAuthSetting from '../../hooks/useAuthSetting';
+import AuthorizationModal from '../../components/AuthorizationModal'
 
 const List: React.FC = () => {
   const [name, setName] = useState();
@@ -20,6 +21,7 @@ const List: React.FC = () => {
   const { fetchData, authSettingProps } = useAuthSetting();
   const [editVisible, setEditVisible] = useState(false);
   const [authVisible, setAuthVisible] = useState(false);
+  const [authorizeVisible, setAuthorizeVisible] = useState(false); // 授权弹窗
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const { tableProps, refresh } = usePaginated((params) => getUserList({ ...params, name }), {
@@ -60,6 +62,12 @@ const List: React.FC = () => {
     setEditVisible(true);
   };
 
+  // 授权
+  const onAuthorize = (row: Tuser) => {
+    setCurrentRecord(row);
+    setAuthorizeVisible(true);
+  };
+
   const onSearch = (e: React.KeyboardEvent<HTMLInputElement>) => setName((e.target as any).value);
 
   const onDelete = getDeleteFn(deleteUser, refresh);
@@ -97,12 +105,13 @@ const List: React.FC = () => {
     { title: '最近编辑人', dataIndex: 'editor', render: (_) => _ || '-' },
     {
       title: '操作',
-      width: 200,
+      width: 240,
       fixed: 'right',
       render: (_, row) => (
         <Operation.Group>
           <Operation label="权限查看" onClick={() => onShowAuth(row)} />
           <Operation label="编辑" onClick={() => onEditClick(row)} />
+          <Operation label="授权" onClick={() => onAuthorize(row)} />
           <Operation label="删除" onClick={() => onDelete(row.id)} />
         </Operation.Group>
       ),
@@ -198,6 +207,14 @@ const List: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* 授权 */}
+      <AuthorizationModal
+        subjectType="users"
+        subjectId={currentRecord?.id}
+        authorizeVisible={authorizeVisible}
+        setAuthorizeVisible={setAuthorizeVisible}
+      />
     </>
   );
 };

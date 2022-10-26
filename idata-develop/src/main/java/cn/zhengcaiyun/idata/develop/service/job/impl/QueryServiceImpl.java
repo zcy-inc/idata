@@ -16,11 +16,13 @@
  */
 package cn.zhengcaiyun.idata.develop.service.job.impl;
 
+import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivySessionKindEnum;
 import cn.zhengcaiyun.idata.connector.spi.livy.enums.LivyStatementStateEnum;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlTool;
 import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
 import cn.zhengcaiyun.idata.connector.util.SqlDynamicParamTool;
 import cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDao;
@@ -36,6 +38,7 @@ import cn.zhengcaiyun.idata.develop.dto.table.TableInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.QueryService;
 import cn.zhengcaiyun.idata.develop.service.table.ColumnInfoService;
 import cn.zhengcaiyun.idata.develop.service.table.TableInfoService;
+import cn.zhengcaiyun.idata.develop.util.TablePermissionChecker;
 import cn.zhengcaiyun.idata.system.api.SystemConfigApi;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
 import org.apache.commons.lang3.StringUtils;
@@ -76,9 +79,11 @@ public class QueryServiceImpl implements QueryService {
     private ColumnInfoService columnInfoService;
     @Autowired
     private DevTableInfoDao devTableInfoDao;
+    @Autowired
+    private TablePermissionChecker tablePermissionChecker;
 
     @Override
-    public QueryStatementDto runQuery(QueryDto queryDto) {
+    public QueryStatementDto runQuery(QueryDto queryDto, Operator operator) {
         if (StringUtils.isBlank(queryDto.getQuerySource())) return null;
         checkArgument(!queryDto.getQuerySource().toUpperCase().contains(DROP_QUERY), "不能执行DROP操作");
         checkArgument(queryDto.getSessionKind() != null, "执行类型不能为空");
@@ -86,6 +91,10 @@ public class QueryServiceImpl implements QueryService {
             // sql调试默认参数替换
             queryDto.setQuerySource(SqlDynamicParamTool.replaceParam(queryDto.getQuerySource()));
         }
+
+        //验证表权限
+        List<String> fromTables = SparkSqlTool.parseAndFilterFromTable(queryDto.getQuerySource());
+        tablePermissionChecker.checkTableReadPermission(operator, fromTables);
         return PojoUtil.copyOne(livyService.createStatement(queryDto), QueryStatementDto.class);
     }
 
@@ -202,8 +211,7 @@ public class QueryServiceImpl implements QueryService {
                     String nextSql = sourceSqlList.get(i + 1);
                     if (bizList.contains(nextSql)) {
                         bizChangeMap.put(i + 1, paramMap.get(nextSql));
-                    }
-                    else if (nextSql.contains("+") || nextSql.contains("-")) {
+                    } else if (nextSql.contains("+") || nextSql.contains("-")) {
                         bizChangeMap.put(i + 1, getParsedDate(nextSql, paramMap));
                     }
                 }
@@ -213,8 +221,7 @@ public class QueryServiceImpl implements QueryService {
             if (!"".equals(sourceSqlList.get(i))) {
                 if (bizChangeMap.containsKey(i)) {
                     sqlList.add(bizChangeMap.get(i));
-                }
-                else {
+                } else {
                     sqlList.add(sourceSqlList.get(i));
                 }
             }

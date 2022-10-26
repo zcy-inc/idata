@@ -1,7 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dal.model.job;
 
-import java.util.Date;
 import javax.annotation.Generated;
+import java.util.Date;
 
 /**
  *
@@ -176,6 +176,13 @@ public class JobExecuteConfig {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
     private String customParams;
+
+    /**
+     * Database Column Remarks:
+     *   写入文件类型 Spark SQL类型：orc、parquet
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    private String destFileType;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
@@ -415,5 +422,15 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
     public void setCustomParams(String customParams) {
         this.customParams = customParams;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    public String getDestFileType() {
+        return destFileType;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    public void setDestFileType(String destFileType) {
+        this.destFileType = destFileType;
     }
 }

@@ -100,6 +100,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
+      case TaskTypes.SQL_STARROCKS:
         return getSqlSpark({ jobId, version }).then((res) => res.data);
       case TaskTypes.SPARK_JAR:
       case TaskTypes.SPARK_PYTHON:
@@ -173,6 +174,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     form.validateFields().then(() => {
       const values = form.getFieldsValue();
       switch (task?.jobType) {
+        case TaskTypes.SQL_STARROCKS:
         case TaskTypes.SQL_SPARK:
           const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds, sourceSql } = values;
           const param = {
@@ -423,6 +425,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       }
       handleExpandChange(true);
       switch (task?.jobType) {
+        case TaskTypes.SQL_STARROCKS:
         case TaskTypes.SQL_SPARK: {
           const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
           setEnableStop(true);
@@ -572,6 +575,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
   const getBtnNames = () => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
+      case TaskTypes.SQL_STARROCKS:
         return [
           Btns.SAVE,
           Btns.DEBUG,
@@ -598,7 +602,17 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
           Btns.JOB_CONFIG
         ];
       case TaskTypes.SQL_FLINK:
-        return [Btns.SAVE, Btns.SUBMIT, Btns.TRY_RUN, Btns.RUN_ONCE, Btns.DELETE, Btns.DIVIDER, Btns.JOB_CONFIG];
+        return [
+          Btns.SAVE,
+          Btns.SUBMIT,
+          Btns.TRY_RUN,
+          // Btns.RUN_ONCE,
+          Btns.ONLINE,
+          Btns.OFFLINE,
+          Btns.DELETE,
+          Btns.DIVIDER,
+          Btns.JOB_CONFIG
+        ];
       case TaskTypes.KYLIN:
         return [
           Btns.SAVE,
@@ -620,6 +634,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     switch (task?.jobType) {
       case TaskTypes.SQL_SPARK:
       case TaskTypes.SQL_FLINK:
+      case TaskTypes.SQL_STARROCKS:
         return (
           <SqlContent
             editorRef={editorRef}

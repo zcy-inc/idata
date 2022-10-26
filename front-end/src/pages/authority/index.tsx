@@ -1,6 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import type { FC } from 'react';
 import { history } from 'umi';
+import styles from './index.less';
 
 type TAuthorityProps = {
   match: {
@@ -20,6 +21,10 @@ const tabList = [
   {
     key: 'user',
     tab: '用户管理',
+  },
+  {
+    key: 'group',
+    tab: '用户组管理',
   }
 ];
 
@@ -33,6 +38,9 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
         break;
       case 'user':
         history.push(`${url}/user`);
+        break;
+      case 'group':
+        history.push(`${url}/group`);
         break;
       default:
         break;
@@ -53,6 +61,7 @@ const ListSearch: FC<TAuthorityProps> = (props) => {
 
   return (
     <PageContainer
+      className={styles.tabStyle}
       tabList={tabList}
       tabActiveKey={getTabKey()}
       onTabChange={handleTabChange}

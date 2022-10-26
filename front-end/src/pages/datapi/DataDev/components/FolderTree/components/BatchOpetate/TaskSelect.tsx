@@ -10,8 +10,9 @@ import Iconfont from '@/components/IconFont'
 import { getRequestUrl } from '@/utils/utils';
 import showDialog from '@/utils/showDialog';
 import FolderTreeItem from '../FolderTreeItem';
+import FolderTreeUploadItem from '../FolderTreeUploadItem';
 import { TreeTitle } from '@/components';
-import type { UploadFile } from 'antd/lib/upload/interface';
+import type { RcFile, UploadFile } from 'antd/lib/upload/interface';
 import ImportResult from './ImportResult';
 
 export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belongFunctions: string [], getTreeWrapped: any, setLoading: any, dialog:any}) => {
@@ -171,20 +172,6 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
     },FolderTreeItem);
   }
 
-  const beforeUpload = (e: React.MouseEvent) => {
-    if(!selectedKeys.length) {
-      message.warning('请在左侧选择要导入的目标文件夹')
-      e.stopPropagation();
-      return;
-    }
-    const exist = plaingTree.find(item => item.id === selectedKeys[0]);
-    if(exist?.type === 'RECORD') {
-      message.warning('请选择文件夹类型')
-      e.stopPropagation();
-      return;
-    }
-  }
-
   const onCopy = () => {
     if(!jobInfo.length) {
       message.warning('请选择要操作的作业！');
@@ -237,6 +224,20 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
         }
       }
     },FolderTreeItem);
+  }
+
+  const beforeUpload = (e: React.MouseEvent) => {
+    if(!selectedKeys.length) {
+      message.warning('请在左侧选择要导入的目标文件夹')
+      e.stopPropagation();
+      return;
+    }
+    const exist = plaingTree.find(item => item.id === selectedKeys[0]);
+    if(exist?.type === 'RECORD') {
+      message.warning('请选择文件夹类型')
+      e.stopPropagation();
+      return;
+    }
   }
 
   const onImport = ({file}: {file: UploadFile}) => {
@@ -295,12 +296,31 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
     },
   ];
 
+  // 导入
+  const handleUpload = () => {
+    showDialog('导入', {
+      modalProps: {
+        width: 560,
+      },
+      formProps: {
+        data: tree,
+        setLoading,
+        getTreeWrapped,
+        dialog,
+      },
+      btns: {
+        positive:'关闭',
+        negetive: false
+      }
+    },FolderTreeUploadItem);
+  }
+
   return <div className={styles['task-select']}>
     <div className={styles['operation-list']}> 
       <Button icon={<Iconfont type="icon-daochu" />} onClick={onExport}>导出</Button>
       <Button icon={<Iconfont type="icon-yidong" />} onClick={onMove}>移动</Button>
       <Button icon={<Iconfont type="icon-fuzhi1" />} onClick={onCopy}>复制</Button>
-      <Upload
+      {/* <Upload
         action={getRequestUrl(`/api/p1/dev/jobs/import?destFolderId=${selectedKeys[0]}`)}
         style={{display: 'inline-block'}}
         showUploadList={false}
@@ -315,7 +335,8 @@ export default ({ belongFunctions, getTreeWrapped, setLoading, dialog }: {belong
         }}
       >
         <Button icon={<Iconfont type="icon-daoru" />} onClick={beforeUpload}>导入</Button>
-      </Upload>
+      </Upload> */}
+      <Button icon={<Iconfont type="icon-daoru" />} onClick={handleUpload}>导入</Button>
       已选中{jobInfo.length}个文件
     </div>
     <SplitPane defaultSize={240} style={{height: 370}}>

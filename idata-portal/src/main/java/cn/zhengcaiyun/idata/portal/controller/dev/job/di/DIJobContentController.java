@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.constant.enums.WriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
@@ -68,7 +69,10 @@ public class DIJobContentController {
         if (srcShardingNum != null && srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
             throw new GeneralException("分片数大于1时，切分键必填");
         }
-
+        String destDataSourceType = contentRequest.getDestDataSourceType();
+        if (StringUtils.equalsIgnoreCase(destDataSourceType, DataSourceTypeEnum.kafka.name())) {
+            contentRequest.setDestWriteMode(WriteModeEnum.BackFlowEnum.INSERT.name());
+        }
 
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);

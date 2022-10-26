@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.uac;
 
+import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
@@ -29,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author shiyin
@@ -115,6 +114,16 @@ public class UserManagerController {
         }
         userManagerService.delete(userId, tokenService.getNickname(request));
         return RestResult.success();
+    }
+
+    /**
+     * 获取用户下拉列表
+     *
+     * @return
+     */
+    @GetMapping("/users/KeyValList")
+    public RestResult<List<SingleIdPair<String>>> getUserKeyValList() {
+        return RestResult.success(userManagerService.getUserKeyValList());
     }
 
 }

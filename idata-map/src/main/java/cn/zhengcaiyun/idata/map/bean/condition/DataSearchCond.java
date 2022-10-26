@@ -57,6 +57,10 @@ public class DataSearchCond {
      * 搜索范围选项，全部(all)、表(table)、字段(column)，仅数仓表搜索使用
      */
     private String tableSearchRange;
+    /**
+     * 是否是我收藏的
+     */
+    private boolean myFavorite = false;
 
     public String getSource() {
         return source;
@@ -120,5 +124,13 @@ public class DataSearchCond {
 
     public boolean searchFromIndicator() {
         return EntitySourceEnum.INDICATOR.getCode().equals(this.source);
+    }
+
+    public boolean isMyFavorite() {
+        return myFavorite;
+    }
+
+    public void setMyFavorite(boolean myFavorite) {
+        this.myFavorite = myFavorite;
     }
 }

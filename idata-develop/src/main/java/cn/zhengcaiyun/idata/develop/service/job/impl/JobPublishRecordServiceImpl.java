@@ -35,6 +35,7 @@ import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobContentCommonService;
 import cn.zhengcaiyun.idata.develop.service.job.JobPublishRecordService;
 import cn.zhengcaiyun.idata.develop.service.label.EnumService;
+import cn.zhengcaiyun.idata.develop.service.table.TableSibshipService;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -63,6 +64,9 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
     private final JobPublishManager jobPublishManager;
     private final EnumService enumService;
     private final JobContentCommonService jobContentCommonService;
+
+    @Autowired
+    private TableSibshipService tableSibshipService;
 
     @Autowired
     public JobPublishRecordServiceImpl(JobInfoRepo jobInfoRepo,
@@ -119,6 +123,9 @@ public class JobPublishRecordServiceImpl implements JobPublishRecordService {
         record.setApproveRemark(Strings.nullToEmpty(remark));
         record.setApproveTime(new Date());
         jobPublishManager.publish(record, operator);
+
+        // 解析数据血缘
+        tableSibshipService.sibParse(record.getJobId(),record.getJobContentVersion(),record.getJobTypeCode(),record.getEnvironment(),operator.getNickname());
         return Boolean.TRUE;
     }
 

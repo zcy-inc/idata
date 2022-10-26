@@ -18,11 +18,13 @@
 package cn.zhengcaiyun.idata.develop.service.opt.stream.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
+import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobContent;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIStreamJobTable;
 import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobFlinkInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
@@ -32,6 +34,7 @@ import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobFlinkInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobInstanceRepo;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobStartParamConfig;
 import cn.zhengcaiyun.idata.develop.manager.FlinkJobManager;
 import cn.zhengcaiyun.idata.develop.manager.JobPublishManager;
 import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
@@ -195,13 +198,26 @@ public class StreamJobInstanceServiceImpl implements StreamJobInstanceService {
     }
 
     @Override
-    public List<String> getForceInitTable(Long id) {
+    public StreamJobStartParamConfig getStartParamConfig(Long id) {
         Optional<StreamJobInstance> instanceOptional = streamJobInstanceRepo.query(id);
         checkArgument(instanceOptional.isPresent(), "编号：%s 的实例不存在", id);
         StreamJobInstance jobInstance = instanceOptional.get();
-        if (!JobTypeEnum.DI_STREAM.getCode().equals(jobInstance.getJobTypeCode())) {
-            return Lists.newArrayList();
+        StreamJobStartParamConfig startParamConfig = new StreamJobStartParamConfig();
+        startParamConfig.setNeedInitTable(Boolean.FALSE);
+        if (JobTypeEnum.DI_STREAM.getCode().equals(jobInstance.getJobTypeCode())) {
+            Optional<DIStreamJobContent> jobContentOptional = diStreamJobContentRepo.query(jobInstance.getJobId(), jobInstance.getJobContentVersion());
+            checkArgument(jobContentOptional.isPresent(), "编号：%s 的实例，对应作业内容不存在", id);
+
+            DIStreamJobContent jobContent = jobContentOptional.get();
+            if (DataSourceTypeEnum.starrocks.name().equals(jobContent.getDestDataSourceType())) {
+                startParamConfig.setNeedInitTable(Boolean.TRUE);
+                startParamConfig.setForceInitTableList(getForceInitTable(jobInstance));
+            }
         }
+        return startParamConfig;
+    }
+
+    private List<String> getForceInitTable(StreamJobInstance jobInstance) {
         List<DIStreamJobTable> jobTableList = diStreamJobTableRepo.query(jobInstance.getJobId(), jobInstance.getJobContentVersion());
         if (CollectionUtils.isEmpty(jobTableList)) {
             return Lists.newArrayList();

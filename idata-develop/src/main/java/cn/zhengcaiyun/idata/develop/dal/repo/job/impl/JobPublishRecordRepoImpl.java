@@ -195,7 +195,8 @@ public class JobPublishRecordRepoImpl implements JobPublishRecordRepo {
             } else if (JobTypeEnum.DI_STREAM.getCode().equals(jobType)) {
                 diStreamJobContentRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
             } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
-                    || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)) {
+                    || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
+                    || JobTypeEnum.SQL_STARROCKS.getCode().equals(jobType)) {
                 sqlJobRepo.updateEditable(record.getJobContentId(), EditableEnum.NO, operator);
             } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
                     || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {

@@ -5,11 +5,12 @@ import type { FC } from 'react';
 import { useAntdTable } from 'ahooks';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import styles from './index.less';
-import { getStreamJobs, startJob, stopJob, destoryJob } from '@/services/operations';
+import { getStreamJobs, startJob, stopJob, destoryJob, startParamConfig } from '@/services/operations';
 import { statusList } from '@/constants/operations';
 import { PageContainer } from '@/components';
 import type { StreamListItem } from '@/types/operations';
 import StartJob from './components/StartJob';
+import StartSwitchJob from './components/StartSwitchJob';
 import Detail from './components/Detail';
 import showDialog from '@/utils/showDialog';
 import showDrawer from '@/utils/showDrawer';
@@ -33,35 +34,70 @@ const Stream: FC<{}> = ({}) => {
   // 启动/停止
   const toggleState = (row: StreamListItem, isStop: boolean) => {
     if(isStop) {
+      // 停止
       stopJob({id: row.id}).then(() => {
         message.success("操作成功！");
         refresh();
       })
     } else {
-      showDialog('启动任务',{
-        formProps: {
-          id: row.id
-        },
-        modalProps: {
-          width: 500
-        },
-        beforeConfirm: (dialog, formInstance, done) => {
-          dialog.showLoading();
-          formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
-            return startJob({
+      // 启动
+      startParamConfig({id: row.id}).then(res => {
+        const { data: { needInitTable, forceInitTableList = [] } } = res
+        if(needInitTable){
+          // true 显示forceInitTableList 选择
+          showDialog('启动任务',{
+            formProps: {
               id: row.id,
-              initDITables: res.forceInitTables,
-              forceInit: !!res.forceInitTables?.length
-            })
-          }).then(() => {
-            message.success("操作成功！");
-            done();
-            refresh();
-          }).finally(() => {
-            dialog.hideLoading();
-          })
+              forceInitTableList: forceInitTableList
+            },
+            modalProps: {
+              width: 500
+            },
+            beforeConfirm: (dialog, formInstance, done) => {
+              dialog.showLoading();
+              formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
+                return startJob({
+                  id: row.id,
+                  forceInit: true,
+                  initDITables: res.forceInitTables,
+                })
+              }).then(() => {
+                message.success("操作成功！");
+                done();
+                refresh();
+              }).finally(() => {
+                dialog.hideLoading();
+              })
+            }
+          }, StartJob)
+        }else{
+          // false 显示初始化开关
+          showDialog('启动任务',{
+            formProps: {
+              id: row.id,
+            },
+            modalProps: {
+              width: 500
+            },
+            beforeConfirm: (dialog, formInstance, done) => {
+              dialog.showLoading();
+              formInstance.handleSubmit().then((res: {forceInit: boolean}) => {
+                return startJob({
+                  id: row.id,
+                  forceInit: res.forceInit === undefined ? true : res.forceInit,
+                  initDITables: [],
+                })
+              }).then(() => {
+                message.success("操作成功！");
+                done();
+                refresh();
+              }).finally(() => {
+                dialog.hideLoading();
+              })
+            }
+          }, StartSwitchJob)
         }
-      }, StartJob)
+      })
     }
   }
 
@@ -114,6 +150,7 @@ const Stream: FC<{}> = ({}) => {
       }
     },
     { title: '版本', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay', width: 150, },
+    { title: '作业类型', key: 'jobTypeCode', dataIndex: 'jobTypeCode', width: 150, },
     { title: '环境', key: 'environment', dataIndex: 'environment', width: 100, },
     { title: '责任人', key: 'owner', dataIndex: 'owner', width: 90 },
     {

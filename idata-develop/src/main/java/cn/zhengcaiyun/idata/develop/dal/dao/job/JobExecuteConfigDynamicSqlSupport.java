@@ -1,10 +1,11 @@
 package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-import java.sql.JDBCType;
-import java.util.Date;
-import javax.annotation.Generated;
 import org.mybatis.dynamic.sql.SqlColumn;
 import org.mybatis.dynamic.sql.SqlTable;
+
+import javax.annotation.Generated;
+import java.sql.JDBCType;
+import java.util.Date;
 
 public final class JobExecuteConfigDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -178,6 +179,13 @@ public final class JobExecuteConfigDynamicSqlSupport {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
     public static final SqlColumn<String> customParams = JOB_EXECUTE_CONFIG.customParams;
 
+    /**
+     * Database Column Remarks:
+     *   写入文件类型 Spark SQL类型：ORC、Parquet
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    public static final SqlColumn<String> destFileType = JOB_EXECUTE_CONFIG.destFileType;
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     public static final class JobExecuteConfig extends SqlTable {
         public final SqlColumn<Long> id = column("id", JDBCType.BIGINT);
@@ -227,6 +235,8 @@ public final class JobExecuteConfigDynamicSqlSupport {
         public final SqlColumn<Integer> isOpenMergeFile = column("is_open_merge_file", JDBCType.INTEGER);
 
         public final SqlColumn<String> customParams = column("custom_params", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> destFileType = column("dest_file_type", JDBCType.VARCHAR);
 
         public JobExecuteConfig() {
             super("dev_job_execute_config");

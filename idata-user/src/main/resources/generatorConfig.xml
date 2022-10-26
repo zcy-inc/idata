@@ -36,11 +36,33 @@
 <!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
 <!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
 <!--        </table>-->
-        <table tableName="uac_app_info" mapperName="UacAppInfoDao">
+<!--        <table tableName="uac_app_info" mapperName="UacAppInfoDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="uac_app_feature" mapperName="UacAppFeatureDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+<!--        <table tableName="uac_group" domainObjectName="Group" mapperName="GroupDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+<!--        <table tableName="uac_group_user_relation" domainObjectName="GroupUserRelation" mapperName="GroupUserRelationDao">-->
+<!--            <generatedKey column="id" sqlStatement="MySql" identity="true" />-->
+<!--            <columnOverride column="del" javaType="java.lang.Integer"/>-->
+<!--        </table>-->
+
+        <table tableName="uac_auth_entry" domainObjectName="AuthEntry" mapperName="AuthEntryDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>
-        <table tableName="uac_app_feature" mapperName="UacAppFeatureDao">
+        <table tableName="uac_auth_policy" domainObjectName="AuthPolicy" mapperName="AuthPolicyDao">
+            <generatedKey column="id" sqlStatement="MySql" identity="true" />
+            <columnOverride column="del" javaType="java.lang.Integer"/>
+        </table>
+        <table tableName="uac_auth_resource" domainObjectName="AuthResource" mapperName="AuthResourceDao">
             <generatedKey column="id" sqlStatement="MySql" identity="true" />
             <columnOverride column="del" javaType="java.lang.Integer"/>
         </table>

@@ -17,11 +17,14 @@
 
 package cn.zhengcaiyun.idata.map.facade.impl;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.WhetherEnum;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.commons.util.KeywordUtil;
 import cn.zhengcaiyun.idata.commons.util.PaginationInMemory;
 import cn.zhengcaiyun.idata.commons.util.TreeNodeGenerator;
+import cn.zhengcaiyun.idata.develop.dto.table.ColumnInfoDto;
 import cn.zhengcaiyun.idata.map.bean.condition.CategoryCond;
 import cn.zhengcaiyun.idata.map.bean.condition.DataSearchCond;
 import cn.zhengcaiyun.idata.map.bean.condition.ViewCountCond;
@@ -29,6 +32,9 @@ import cn.zhengcaiyun.idata.map.bean.dto.CategoryTreeNodeDto;
 import cn.zhengcaiyun.idata.map.bean.dto.ColumnAttrDto;
 import cn.zhengcaiyun.idata.map.bean.dto.DataEntityDto;
 import cn.zhengcaiyun.idata.map.bean.dto.ViewCountDto;
+import cn.zhengcaiyun.idata.map.constant.enums.EntitySourceEnum;
+import cn.zhengcaiyun.idata.map.dal.dao.MapUserFavouriteDao;
+import cn.zhengcaiyun.idata.map.dal.model.MapUserFavourite;
 import cn.zhengcaiyun.idata.map.facade.DataMapFacade;
 import cn.zhengcaiyun.idata.map.manager.CategoryManager;
 import cn.zhengcaiyun.idata.map.manager.DataEntityManager;
@@ -36,6 +42,7 @@ import cn.zhengcaiyun.idata.map.service.ViewCountService;
 import cn.zhengcaiyun.idata.map.util.DataEntityUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +54,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.zhengcaiyun.idata.map.dal.dao.MapUserFavouriteDynamicSqlSupport.mapUserFavourite;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @description:
@@ -61,17 +70,25 @@ public class DataMapFacadeImpl implements DataMapFacade {
     private final DataEntityManager dataEntityManager;
     private final CategoryManager categoryManager;
     private final ViewCountService viewCountService;
+    private final MapUserFavouriteDao mapUserFavouriteDao;
 
     @Autowired
-    public DataMapFacadeImpl(DataEntityManager dataEntityManager, CategoryManager categoryManager, ViewCountService viewCountService) {
+    public DataMapFacadeImpl(DataEntityManager dataEntityManager,
+                             CategoryManager categoryManager,
+                             ViewCountService viewCountService,
+                             MapUserFavouriteDao mapUserFavouriteDao) {
         this.dataEntityManager = dataEntityManager;
         this.categoryManager = categoryManager;
         this.viewCountService = viewCountService;
+        this.mapUserFavouriteDao = mapUserFavouriteDao;
     }
 
     @Override
     public Page<DataEntityDto> searchEntity(DataSearchCond condition, PageParam pageParam) {
         checkArgument(StringUtils.isNotBlank(condition.getSource()), "需指定搜索数据类型");
+        if (condition.isMyFavorite()) {
+            condition.setSource(EntitySourceEnum.TABLE.getCode());
+        }
         String keyword = condition.getKeyWord();
         if (Objects.nonNull(keyword) && keyword.length() > 1000) return Page.newOne(Lists.newArrayList(), 0);
         condition.setKeyWords(KeywordUtil.parseKeyword(keyword));
@@ -98,7 +115,24 @@ public class DataMapFacadeImpl implements DataMapFacade {
         }
         // entityWholeInfoList 中为分页后重新查询的数据对象，需要再次加上浏览次数排序（只排当页数据）
         List<DataEntityDto> seqEntityWholeInfoList = assembleSequence(entityWholeInfoList, seqMap);
-        entityPage.setContent(seqEntityWholeInfoList.stream().sorted().collect(Collectors.toList()));
+        List<DataEntityDto> dtoList = seqEntityWholeInfoList.stream().sorted().collect(Collectors.toList());
+
+        // 封装是否已收藏
+        List<String> entityCodeList = dtoList.stream().map(e -> e.getEntityCode()).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(entityCodeList)) {
+            if (!condition.isMyFavorite()) {
+                List<MapUserFavourite> list = mapUserFavouriteDao.select(c ->
+                        c.where(mapUserFavourite.entityCode, isIn(entityCodeList),
+                                and(mapUserFavourite.userId, isEqualTo(OperatorContext.getCurrentOperator().getId())),
+                                and(mapUserFavourite.del, isEqualTo(0))));
+                Map<String, MapUserFavourite> map = list.stream().collect(Collectors.toMap(MapUserFavourite::getEntityCode, Function.identity()));
+                dtoList.forEach(e -> e.setHasFavourite(map.containsKey(e.getEntityCode()) ? WhetherEnum.YES.val : WhetherEnum.NO.val));
+            } else {
+                dtoList.forEach(e -> e.setHasFavourite(WhetherEnum.YES.val));
+            }
+        }
+
+        entityPage.setContent(dtoList);
         return entityPage;
     }
 

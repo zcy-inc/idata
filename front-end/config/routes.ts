@@ -164,6 +164,22 @@ export default [
               },
             ],
           },
+          {
+            path: '/configuration/authority/group',
+            hideInMenu: true,
+            routes: [
+              {
+                path: '/configuration/authority/group',
+                redirect: '/configuration/authority/group/list',
+              },
+              {
+                path: '/configuration/authority/group/list',
+                name: '用户组管理',
+                hideInMenu: true,
+                component: './authority/group/List',
+              },
+            ],
+          },
         ],
       },
       {
@@ -264,6 +280,12 @@ export default [
         name: '修饰词',
         component: './Measure/Modifier',
         featureCode: 'F_MENU_MEASURE_MODIFIER',
+      },
+      {
+        path: '/measure/approval',
+        name: '指标审批',
+        component: './Measure/Approval',
+        featureCode: 'F_MENU_MEASURE_APPROVAL',
       },
     ]
   },

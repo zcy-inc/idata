@@ -16,10 +16,14 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
+import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.connector.spi.livy.LivyService;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.LivySessionLogDto;
-import cn.zhengcaiyun.idata.develop.dto.job.*;
+import cn.zhengcaiyun.idata.develop.dto.job.AutocompletionTipDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryRunResultDto;
+import cn.zhengcaiyun.idata.develop.dto.job.QueryStatementDto;
 import cn.zhengcaiyun.idata.develop.service.job.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +44,7 @@ public class QueryController {
 
     @PostMapping("/runQuery")
     public RestResult<QueryStatementDto> runQuery(@RequestBody QueryDto queryDto) {
-        return RestResult.success(queryService.runQuery(queryDto));
+        return RestResult.success(queryService.runQuery(queryDto, OperatorContext.getCurrentOperator()));
     }
 
     @GetMapping("/runQueryResult")

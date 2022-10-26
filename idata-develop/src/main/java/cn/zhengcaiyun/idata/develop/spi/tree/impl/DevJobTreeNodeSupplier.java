@@ -55,7 +55,7 @@ public class DevJobTreeNodeSupplier implements BizTreeNodeSupplier<JobInfo> {
         JobInfoCondition condition = new JobInfoCondition();
         condition.setJobTypeCodes(Lists.newArrayList(JobTypeEnum.SQL_SPARK.getCode(), JobTypeEnum.SPARK_PYTHON.getCode(),
                 JobTypeEnum.SPARK_JAR.getCode(), JobTypeEnum.SCRIPT_PYTHON.getCode(), JobTypeEnum.SCRIPT_SHELL.getCode(),
-                JobTypeEnum.KYLIN.getCode(), JobTypeEnum.SQL_FLINK.getCode()));
+                JobTypeEnum.KYLIN.getCode(), JobTypeEnum.SQL_FLINK.getCode(), JobTypeEnum.SQL_STARROCKS.getCode()));
         List<JobInfo> jobInfoList = jobInfoRepo.queryJobInfo(condition);
         return jobInfoList.stream()
                 .map(jobInfo -> assemble(moduleEnum, jobInfo))

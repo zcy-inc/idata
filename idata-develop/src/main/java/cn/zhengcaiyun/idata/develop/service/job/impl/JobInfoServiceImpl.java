@@ -40,6 +40,7 @@ import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
 import cn.zhengcaiyun.idata.develop.dal.dao.MonitorRuleDao;
+import cn.zhengcaiyun.idata.develop.dal.dao.TableSibshipDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobInfoMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobUdfMyDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputMyDao;
@@ -146,6 +147,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
     @Value("${dqc.open:false}")
     private boolean dqcOpen;
+
+    @Autowired
+    private TableSibshipDao tableSibshipDao;
 
     @Autowired
     public JobInfoServiceImpl(DevJobInfoMyDao devJobInfoMyDao,
@@ -278,7 +282,7 @@ public class JobInfoServiceImpl implements JobInfoService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean removeJob(Long id, Operator operator) throws IllegalAccessException {
         JobInfo jobInfo = tryFetchJobInfo(id);
         List<JobExecuteConfig> executeConfigs = jobExecuteConfigRepo.queryList(id, new JobExecuteConfigCondition());
@@ -311,6 +315,9 @@ public class JobInfoServiceImpl implements JobInfoService {
 
         Boolean ret = jobInfoRepo.deleteJobAndSubInfo(jobInfo, operator.getNickname());
         JobTypeEnum.getEnum(jobInfo.getJobType()).ifPresent(jobTypeEnum -> devTreeNodeLocalCache.invalidate(jobTypeEnum.belong()));
+
+        //删除数据血缘
+        tableSibshipDao.delByJobId(id);
         return ret;
     }
 
@@ -496,8 +503,6 @@ public class JobInfoServiceImpl implements JobInfoService {
                     .forEach(keyValPair -> confProp.put(keyValPair.getKey(), keyValPair.getValue()));
         }
         jobInfoExecuteDetailDto.setConfProp(confProp);
-
-        //
 
         switch (jobTypeEnum) {
             case BACK_FLOW:
@@ -723,6 +728,13 @@ public class JobInfoServiceImpl implements JobInfoService {
                 }
                 sqlResponse.setExternalTableList(externalTableList);
 
+                String destFileType = devJobInfoMyDao.selectDestFileType(id, env);
+                TableStoredTypeEnum tableStoredTypeEnum = TableStoredTypeEnum.myValueOf(destFileType);
+                if (tableStoredTypeEnum == null) {
+                    tableStoredTypeEnum = TableStoredTypeEnum.orc;
+                }
+                sqlResponse.setTableStoredTypeEnum(tableStoredTypeEnum);
+
                 sqlResponse.setOpenDqc(this.needDqc(sqlResponse.getDestTable()));
                 return sqlResponse;
             case SPARK_PYTHON:
@@ -778,6 +790,8 @@ public class JobInfoServiceImpl implements JobInfoService {
                 return getFlinkSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             case DI_STREAM:
                 return getFlinkCDCJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
+            case SQL_STARROCKS:
+                return getStarRocksSqlJobDetail(id, env, jobInfoExecuteDetailDto, jobVersion);
             default:
                 throw new IllegalArgumentException(String.format("不支持该任务类型, jobType:%s", jobType));
 
@@ -792,6 +806,39 @@ public class JobInfoServiceImpl implements JobInfoService {
         Integer count2 = monitorRuleDao.getBaselineRulesByTableName(tableName);
 
         return (count1 + count2) > 0;
+    }
+
+    private JobInfoExecuteDetailDto getStarRocksSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
+                                                             Integer jobVersion) {
+        // 封装sql_job_content
+        // dryRun不需要发布，正常调用jobVersion > 0
+        DevJobContentSql sqlContent;
+        if (jobVersion != null && jobVersion > 0) {
+            sqlContent = sqlJobRepo.query(jobId, jobVersion);
+        } else {
+            sqlContent = jobPublishRecordMyDao.getPublishedSqlJobContent(jobId, env);
+        }
+        checkArgument(Objects.nonNull(sqlContent), String.format("未查询到可用的作业内容, jobId:%s，环境:%s", jobId, env));
+
+        JobOutputQuery query = new JobOutputQuery();
+        query.setJobId(jobId);
+        query.setEnvironment(env);
+        JobOutput jobOutput = Optional.ofNullable(jobOutputMyDao.queryOne(query))
+                .orElseThrow(() -> new IllegalArgumentException(String.format("任务输出表不存在，jobId:%d，环境:%s", jobId, env)));
+
+        DataSourceDetailDto destSourceDetail = dataSourceApi.getDataSourceDetail(jobOutput.getDestDataSourceId(), env);
+        String dataSourceType = destSourceDetail.getDataSourceTypeEnum().name();
+        checkArgument(StringUtils.equalsIgnoreCase(dataSourceType, "starrocks"), String.format("作业输出数据源配置不正确, jobId:%s，环境:%s，数据源:%s", jobId, env, dataSourceType));
+
+        JobInfoExecuteDetailDto.StarRocksSQLJobDetail sqlJobDetail = new JobInfoExecuteDetailDto.StarRocksSQLJobDetail(baseJobDetailDto);
+        sqlJobDetail.setSourceSql(sqlContent.getSourceSql());
+        sqlJobDetail.setDriverType(destSourceDetail.getDriverTypeEnum());
+        sqlJobDetail.setTargetUrlPath(destSourceDetail.getJdbcUrl());
+        sqlJobDetail.setUsername(destSourceDetail.getUserName());
+        sqlJobDetail.setPassword(destSourceDetail.getPassword());
+        sqlJobDetail.setTargetTableName(EnvRuleHelper.handlerDbTableName(dataSourceType, jobOutput.getDestTable(), env));
+        sqlJobDetail.setDestWriteMode(WriteModeEnum.SqlEnum.valueOf(jobOutput.getDestWriteMode()));
+        return sqlJobDetail;
     }
 
     private JobInfoExecuteDetailDto getFlinkSqlJobDetail(Long jobId, String env, JobInfoExecuteDetailDto baseJobDetailDto,
@@ -1147,7 +1194,7 @@ public class JobInfoServiceImpl implements JobInfoService {
                     jobVersionMap.put(content.getJobId(), versionDto);
                 }
             }
-        } else if (JobTypeEnum.SQL_SPARK == typeEnum || JobTypeEnum.SQL_FLINK == typeEnum) {
+        } else if (JobTypeEnum.SQL_SPARK == typeEnum || JobTypeEnum.SQL_FLINK == typeEnum || JobTypeEnum.SQL_STARROCKS == typeEnum) {
             List<DevJobContentSql> contentList = sqlJobRepo.queryList(jobPublishContentIds);
             for (DevJobContentSql content : contentList) {
                 if (!jobVersionMap.containsKey(content.getJobId())) {

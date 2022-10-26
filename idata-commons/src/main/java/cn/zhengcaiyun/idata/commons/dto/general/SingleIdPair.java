@@ -14,9 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.zhengcaiyun.idata.user.service.impl;
+
+package cn.zhengcaiyun.idata.commons.dto.general;
+
 /**
- * 业务层实现类
- * @author shiyin
- * @date 2021-02-04 23:07
- */
+ * @description:
+ * @author: yangjianhua
+ * @create: 2021-10-29 10:10
+ **/
+public class SingleIdPair<C> {
+    private C id;
+    private String name;
+
+    public SingleIdPair() {
+    }
+
+    public SingleIdPair(C id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public C getId() {
+        return id;
+    }
+
+    public void setId(C id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}

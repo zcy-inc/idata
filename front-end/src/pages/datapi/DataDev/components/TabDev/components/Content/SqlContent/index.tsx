@@ -104,13 +104,13 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
   const saveDevSetting = () => {
     const values = form.getFieldsValue();
     const {srcDataSourceId, srcDataSourceType, srcTableNamse} = values;
-    if (!srcDataSourceId) {
+    if (srcDataSourceType && !srcDataSourceId) {
       message.error('请选择数据源名称');
       return;
-    } else if (!srcDataSourceType) {
-      message.error('请选择数据源名称');
+    } else if (srcDataSourceId && !srcDataSourceType) {
+      message.error('请选择数据源类型');
       return;
-    } else if (!srcTableNamse.length) {
+    } else if (srcDataSourceId && !srcTableNamse[0]?.name) {
       message.error('请输入表名');
       return;
     }
@@ -216,7 +216,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
       {
         task.jobType === TaskTypes.SQL_FLINK && (
           <Modal title="作业配置" visible={visible} onCancel={onCancel} footer={footer} forceRender>
-            <Item name="externalTables" label="外部表">
+            {/* <Item name="externalTables" label="外部表">
               <Input placeholder="请输入" />
             </Item>
             <Item name="udfIds" label="自定义函数">
@@ -228,7 +228,7 @@ const SqlContent: ForwardRefRenderFunction<unknown, SparkSqlProps> = (
                   value: `${id}`,
                 }))}
               />
-            </Item>
+            </Item> */}
             <Item label="来源数据源" name={['extConfig', 'flinkExtConfig', 'flinkSourceConfigs']}>
               <DataSourceSelect quantityCustom fetchTemplate={fetchSrcTemplate} jobType={task.jobType} isDest={false} />
             </Item>

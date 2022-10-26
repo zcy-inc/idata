@@ -24,11 +24,10 @@ import cn.zhengcaiyun.idata.develop.condition.opt.stream.StreamJobInstanceCondit
 import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobInstanceDto;
 import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobRunParamDto;
+import cn.zhengcaiyun.idata.develop.dto.opt.stream.StreamJobStartParamConfig;
 import cn.zhengcaiyun.idata.develop.service.opt.stream.StreamJobInstanceService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Stream-Instance-Controller
@@ -51,8 +50,6 @@ public class StreamJobInstanceController {
      * 分页查询运行实例
      *
      * @param condition 查询条件
-     * @param limit
-     * @param offset
      * @return
      * @throws IllegalAccessException
      */
@@ -107,13 +104,13 @@ public class StreamJobInstanceController {
     }
 
     /**
-     * 查询强制初始化表集合
+     * 查询启动参数配置
      *
      * @param id 运行实例id
      * @return
      */
-    @GetMapping("/{id}/forceInitTables")
-    public RestResult<List<String>> getForceInitTable(@PathVariable Long id) {
-        return RestResult.success(streamJobInstanceService.getForceInitTable(id));
+    @GetMapping("/{id}/startParamConfig")
+    public RestResult<StreamJobStartParamConfig> getStartParamConfig(@PathVariable Long id) {
+        return RestResult.success(streamJobInstanceService.getStartParamConfig(id));
     }
 }
