@@ -294,7 +294,7 @@ public class MetricServiceImpl implements MetricService {
                         and(devLabelDefine.labelCode, isEqualTo(metricCode)),
                         and(devLabelDefine.labelTag, isEqualTo(existLabelTag))))
                 .orElse(null);
-        checkArgument(existMetric != null, "当前指标状态不可以执行启用停用或指标不存在");
+        checkArgument(existMetric != null, "指标不存在或当前指标状态不能执行启用停用");
 
         // 原子指标校验是否被派生指标依赖
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(existMetric.getLabelTag())
@@ -320,7 +320,8 @@ public class MetricServiceImpl implements MetricService {
         String oldLabelTag = existMetric.getLabelTag();
         checkArgument(oldLabelTag.endsWith("_METRIC_LABEL" + MetricStatusEnum.DRAFT.getSuffix()), "非草稿状态不能发布");
 
-        String newLabelTag = oldLabelTag.substring(0, oldLabelTag.lastIndexOf(MetricStatusEnum.DRAFT.getSuffix())) + MetricStatusEnum.APPROVE.getSuffix();
+        String metricTag = oldLabelTag.substring(0, oldLabelTag.lastIndexOf(MetricStatusEnum.DRAFT.getSuffix()));
+        String newLabelTag = metricTag + MetricStatusEnum.APPROVE.getSuffix();
         devLabelDefineDao.update(c -> c.set(devLabelDefine.labelTag).equalTo(newLabelTag)
                 .set(devLabelDefine.editor).equalTo(operator)
                 .where(devLabelDefine.del, isEqualTo(DeleteEnum.DEL_NO.val),
@@ -328,9 +329,11 @@ public class MetricServiceImpl implements MetricService {
                         and(devLabelDefine.labelTag, isEqualTo(oldLabelTag))));
 
         MetricApprovalRecord record = new MetricApprovalRecord();
+        record.setCreator(operator);
+        record.setEditor(operator);
         record.setMetricId(existMetric.getLabelCode());
         record.setMetricName(existMetric.getLabelName());
-        record.setMetricTag(existMetric.getLabelTag());
+        record.setMetricTag(metricTag);
         record.setBizDomain("");
         record.setBizProcess("");
         record.setApprovalStatus(MetricApprovalStatusEnum.WAIT_APPROVE.getVal());

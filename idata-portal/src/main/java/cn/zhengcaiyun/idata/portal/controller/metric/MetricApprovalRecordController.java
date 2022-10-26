@@ -18,7 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Metric-Approval
  */
 @RestController
-@RequestMapping(path = "/p1/opt/metric/approvals")
+@RequestMapping(path = "/p1/dev/metric/approvals")
 public class MetricApprovalRecordController {
 
     private final MetricApprovalRecordService metricApprovalRecordService;
@@ -45,7 +45,7 @@ public class MetricApprovalRecordController {
      * @param id 记录id
      * @return
      */
-    @PostMapping("/{id}/approve")
+    @PutMapping("/{id}/approve")
     public RestResult<Boolean> approve(@PathVariable Long id) {
         return RestResult.success(metricApprovalRecordService.approve(id, null, OperatorContext.getCurrentOperator()));
     }
@@ -56,7 +56,7 @@ public class MetricApprovalRecordController {
      * @param param 参数
      * @return
      */
-    @PostMapping("/approve")
+    @PutMapping("/approve")
     public RestResult<Boolean> approve(@RequestBody ApprovalParam param) {
         List<Long> ids = param.getIds();
         checkArgument(!CollectionUtils.isEmpty(ids), "审批记录id不能为空");
@@ -72,7 +72,7 @@ public class MetricApprovalRecordController {
      * @param id 记录id
      * @return
      */
-    @PostMapping("/{id}/reject")
+    @PutMapping("/{id}/reject")
     public RestResult<Boolean> reject(@PathVariable Long id) {
         return RestResult.success(metricApprovalRecordService.reject(id, null, OperatorContext.getCurrentOperator()));
     }

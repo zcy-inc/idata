@@ -204,11 +204,11 @@ public class MetricApprovalRecordDto extends BaseDto {
         MetricApprovalRecordDto dto = new MetricApprovalRecordDto();
         BeanUtils.copyProperties(record, dto);
 
-        if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equals(record.getMetricTag())) {
+        if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equalsIgnoreCase(record.getMetricTag())) {
             dto.setMetricTagName("原子指标");
-        } else if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equals(record.getMetricTag())) {
+        } else if (LabelTagEnum.DERIVE_METRIC_LABEL.name().equalsIgnoreCase(record.getMetricTag())) {
             dto.setMetricTagName("派生指标");
-        } else if (LabelTagEnum.COMPLEX_METRIC_LABEL.name().equals(record.getMetricTag())) {
+        } else if (LabelTagEnum.COMPLEX_METRIC_LABEL.name().equalsIgnoreCase(record.getMetricTag())) {
             dto.setMetricTagName("复合指标");
         }
         return dto;
