@@ -27,7 +27,7 @@ const AddMonitor: FC<{id: number, forceInitTableList: any}> = ({id, forceInitTab
     <ProForm form={form} colon={false}  submitter={false} layout="horizontal">
      <ProFormSelect
         name="forceInitTables"
-        label="表强制初始化"
+        label="初始化"
         placeholder="请选择"
         options={options}
         fieldProps={{
