@@ -122,60 +122,62 @@ export async function getMeasures(params: any) {
   return request(`/api/p1/dev/measures`, { method: 'GET', params });
 }
 
+// 指标 发布
+export async function indexPublish(params: { metricCode: string; remark?: string }) {
+  return request(`/api/p1/dev/metric/publish`, { 
+    method: 'POST',
+    data: params
+  });
+}
+
+// 指标 撤销
+export async function indexRetreat(params: { metricCode: string; remark?: string }) {
+  return request(`/api/p1/dev/metric/retreat`, { 
+    method: 'POST',
+    data: params
+  });
+}
+
+
 /* ========== 指标审批 ========== */
 /**
- * 查询版本发布记录
+ * 指标审批列表
  */
- export async function getTasks(params: {
+ export async function getIndexList(params: {
   offset: number;
   limit: number;
-  jobId?: number; // 作业id
-  jobContentId?: string; // 作业内容id
-  jobContentVersion?: string; // 作业内容版本号
-  environment?: Environments; // 环境
-  publishStatus?: VersionStatus; // 任务状态
-  jobTypeCode?: string; // 作业类型
-  dwLayerCode?: string; // 数仓分层
-  submitOperator?: string; // 提交人
+  statusList: string[];
+  metricNamePattern?: string;
+  metricTag?: string;
+  submitOperatorName?: string;
 }) {
   return request<
     DefaultResponse & {
       data: { total: number; content: ApprovalListItem[] };
     }
-  >('/api/p1/dev/jobs/publishRecords/page', {
-    method: 'GET',
-    params,
+  >('/api/p1/dev/metric/approvals/paging', {
+    method: 'POST',
+    data: params,
   });
 }
 
 /**
- * 查询版本发布记录
+ * 指标发布
  */
- export async function deleteTasks(data: {
-  id: number
+export async function publishIndex(data: { ids: number[] }) {
+  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/metric/approvals/approve`, {
+    method: 'PUT',
+    data,
+  });
+}
+
+/**
+ * 指标驳回
+ */
+export async function rejectIndex(data: {
+  recordIds: number[]
 }) {
-  return request('/api/p1/dev/jobs/publishRecords/delete', {
-    method: 'POST',
-    data,
-  });
-}
-
-/**
- * 发布版本
- */
-export async function publishTask(data: { recordIds: number[] }) {
-  return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/approve', {
-    method: 'POST',
-    data,
-  });
-}
-
-/**
- * 驳回版本
- */
-export async function rejectTask(data: { recordIds: number[] }) {
-  return request<DefaultResponse & { data: boolean }>('/api/p1/dev/jobs/publishRecords/reject', {
-    method: 'POST',
-    data,
+  return request<DefaultResponse & { data: boolean }>(`/api/p1/dev/metric/approvals/${data?.recordIds[0]}/reject`, {
+    method: 'PUT',
   });
 }

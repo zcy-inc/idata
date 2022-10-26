@@ -20,12 +20,18 @@ const TagMap = (labelTag: LabelTag) => {
   switch (labelTag) {
     case LabelTag.ATOMIC_METRIC_LABEL:
     case LabelTag.ATOMIC_METRIC_LABEL_DISABLE:
+    case LabelTag.ATOMIC_METRIC_LABEL_DRAFT:
+    case LabelTag.ATOMIC_METRIC_LABEL_APPROVE:
       return '原子指标';
     case LabelTag.DERIVE_METRIC_LABEL:
     case LabelTag.DERIVE_METRIC_LABEL_DISABLE:
+    case LabelTag.DERIVE_METRIC_LABEL_DRAFT:
+    case LabelTag.DERIVE_METRIC_LABEL_APPROVE:
       return '派生指标';
     case LabelTag.COMPLEX_METRIC_LABEL:
     case LabelTag.COMPLEX_METRIC_LABEL_DISABLE:
+    case LabelTag.COMPLEX_METRIC_LABEL_DRAFT:
+    case LabelTag.COMPLEX_METRIC_LABEL_APPROVE:
     default:
       return '';
   }

@@ -4,10 +4,10 @@ import moment from 'moment';
 
 // 已处理表格
 export const defaultColumns: ColumnsType<ApprovalListItem> = [
-  { title: '指标名称', key: 'dwLayerValue', dataIndex: 'dwLayerValue' },
-  { title: '指标类型', key: 'jobName', dataIndex: 'jobName' },
-  // { title: '主题域', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay' },
-  // { title: '业务过程', key: 'environment', dataIndex: 'environment' },
+  { title: '指标名称', key: 'metricName', dataIndex: 'metricName' },
+  { title: '指标类型', key: 'metricTagName', dataIndex: 'metricTagName' },
+  // { title: '主题域', key: 'bizDomainName', dataIndex: 'bizDomainName' },
+  // { title: '业务过程', key: 'bizProcessName', dataIndex: 'bizProcessName' },
   { title: '提交人', key: 'creator', dataIndex: 'creator' },
   {
     title: '提交备注',
@@ -25,11 +25,13 @@ export const defaultColumns: ColumnsType<ApprovalListItem> = [
     title: '审批人',
     key: 'approveOperator',
     dataIndex: 'approveOperator',
+    render: (_) => _ || '-',
   },
   {
     title: '审批结果',
-    key: 'approveResult',
-    dataIndex: 'approveResult',
+    key: 'approvalStatusName',
+    dataIndex: 'approvalStatusName',
+    render: (_) => _ || '-',
   },
   {
     title: '审批时间',
@@ -41,10 +43,10 @@ export const defaultColumns: ColumnsType<ApprovalListItem> = [
 
 // 待处理表格
 export const defaultWaitColumns: ColumnsType<ApprovalListItem> = [
-  { title: '指标名称', key: 'dwLayerValue', dataIndex: 'dwLayerValue' },
-  { title: '指标类型', key: 'jobName', dataIndex: 'jobName' },
-  // { title: '主题域', key: 'jobContentVersionDisplay', dataIndex: 'jobContentVersionDisplay' },
-  // { title: '业务过程', key: 'environment', dataIndex: 'environment' },
+  { title: '指标名称', key: 'metricName', dataIndex: 'metricName' },
+  { title: '指标类型', key: 'metricTagName', dataIndex: 'metricTagName' },
+  // { title: '主题域', key: 'bizDomainName', dataIndex: 'bizDomainName' },
+  // { title: '业务过程', key: 'bizProcessName', dataIndex: 'bizProcessName' },
   { title: '提交人', key: 'creator', dataIndex: 'creator' },
   {
     title: '提交备注',
