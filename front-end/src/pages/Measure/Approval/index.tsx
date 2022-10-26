@@ -9,8 +9,8 @@ import type { ColumnsType } from 'antd/lib/table/Table';
 
 import styles from './index.less';
 import { ApprovalListItem } from '@/types/measure';
-import { getTasks, publishTask, rejectTask } from '@/services/measure';
-import { publishListStatusMode, publishListStatus } from '@/constants/datadev';
+import { getIndexList, publishIndex, rejectIndex } from '@/services/measure';
+import { publishListStatusMode } from '@/constants/datadev';
 import { defaultWaitColumns, defaultColumns } from './utils';
 
 const { confirm } = Modal;
@@ -21,6 +21,11 @@ const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
 ];
+
+const publishIndexStatus = {
+  [publishListStatusMode.FINISHTASK]:[2,3,4], // 已处理
+  [publishListStatusMode.WAITINGTASK]:[1], // 待处理
+}
 
 const DataSource: FC = () => {
   const [data, setData] = useState<ApprovalListItem[]>([]);
@@ -35,12 +40,12 @@ const DataSource: FC = () => {
 
   const limit = useRef(10);
 
-  const getTasksWrapped = (offset: number) => {
+  const getIndexWrapped = (offset: number) => {
     setActionRecords([]); // 清空选中
     setSelectedRowKeys([]);
     const params = form.getFieldsValue();
     setLoading(true);
-    getTasks({ ...params, limit: limit.current, offset, publishStatusList: publishListStatus[activeTabKey] })
+    getIndexList({ ...params, limit: limit.current, offset, statusList: publishIndexStatus[activeTabKey] })
       .then((res) => {
         setTotal(res.data.total);
         setData(res.data.content);
@@ -53,26 +58,28 @@ const DataSource: FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // 发布
   const onPublish = async (records?: ApprovalListItem[]) => {
     const list = records || actionRecords;
-    const recordIds = list.map((_) => _.id);
-    publishTask({ recordIds })
+    const ids = list.map((_) => _.id);
+    publishIndex({ ids })
       .then((res) => {
         if (res.success) {
           message.success('发布成功');
-          getTasksWrapped(0);
+          getIndexWrapped(0);
         }
       })
   };
 
+  // 驳回
   const onReject = async (records?: ApprovalListItem[]) => {
     const list = records || actionRecords;
     const recordIds = list.map((_) => _.id);
-    rejectTask({ recordIds })
+    rejectIndex({ recordIds })
       .then((res) => {
         if (res.success) {
           message.success('驳回成功');
-          getTasksWrapped(0);
+          getIndexWrapped(0);
         }
       })
   };
@@ -110,8 +117,9 @@ const DataSource: FC = () => {
     return columns[columns.length - 1].key === 'ops'
   }
 
+  // 动态处理表格Columns数据
   useEffect(() => {
-    getTasksWrapped(0);
+    getIndexWrapped(0);
     // 待处理
     if (activeTabKey === publishListStatusMode.WAITINGTASK && !columnHasOperate()) {
       setColumns([...defaultWaitColumns, operateColumn])
@@ -144,20 +152,20 @@ const DataSource: FC = () => {
     <PageContainer>
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
         <ProFormText
-          name="name"
+          name="metricNamePattern"
           label="指标名称"
           placeholder="请输入"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
         />
         <ProFormSelect
-          name="environment"
+          name="metricTag"
           label="指标类型"
           placeholder="请选择"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
           options={MetricTypeOps}
         />
         <ProFormText
-          name="submitOperator"
+          name="submitOperatorName"
           label="提交人"
           placeholder="请输入"
           fieldProps={{ style: { width: 200 }, size: 'large' }}
@@ -168,7 +176,7 @@ const DataSource: FC = () => {
           style={{ margin: '0 0 24px 14px' }}
           onClick={() => {
             form.resetFields();
-            getTasksWrapped(0);
+            getIndexWrapped(0);
           }}
         >
           重置
@@ -178,7 +186,7 @@ const DataSource: FC = () => {
           size="large"
           icon={<SearchOutlined />}
           style={{ margin: '0 0 24px 16px' }}
-          onClick={() => getTasksWrapped(0)}
+          onClick={() => getIndexWrapped(0)}
         >
           查询
         </Button>
@@ -219,7 +227,7 @@ const DataSource: FC = () => {
           showTotal: (t) => `共${t}条`,
           onChange: (page, pageSize) => {
             limit.current = pageSize;
-            getTasksWrapped(10 * (page - 1))
+            getIndexWrapped(10 * (page - 1))
           },
         }}
         {

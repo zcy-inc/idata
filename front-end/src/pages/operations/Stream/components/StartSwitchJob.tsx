@@ -15,7 +15,7 @@ const AddMonitor: FC<{ id: number }> = ({ id }, ref) => {
 
   return (
     <ProForm form={form} colon={false} submitter={false} layout="horizontal">
-      <ProFormSwitch name="forceInit" label="表强制初始化" fieldProps={{ defaultChecked: true }} />
+      <ProFormSwitch name="forceInit" label="初始化" fieldProps={{ defaultChecked: true }} />
     </ProForm>
   );
 };
