@@ -123,7 +123,7 @@ const Modifier: FC = () => {
   }
 
   return (
-    <PageContainer contentClassName={styles.container}>
+    <PageContainer contentClassName={styles.container} title="修饰词">
       <QueryFilter
         form={form}
         className='meaure-list-wrap'

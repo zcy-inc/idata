@@ -5,11 +5,13 @@ import styles from './index.less';
 
 interface PageContainerProps {
   className?: string;
+  title?: string;
   contentClassName?: string;
   extra?: React.ReactNode;
 }
 
 const PageContainer: React.FC<PageContainerProps> = ({
+  title,
   children,
   className,
   contentClassName,
@@ -44,7 +46,7 @@ const PageContainer: React.FC<PageContainerProps> = ({
         </dt>
         <dd>{extra}</dd>
       </dl> */}
-      <h1 className={styles.title}>{value.title}</h1>
+      <h1 className={styles.title}>{title || value.title}</h1>
       <div className={contentCls}>
         { children }
       </div>

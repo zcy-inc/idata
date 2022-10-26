@@ -167,7 +167,7 @@ const Template: FC<{history: any}> = ({ history }) => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="模板管理">
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
         <ProFormText
           name="name"
