@@ -1,6 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dto.measure;
 
 import cn.zhengcaiyun.idata.commons.dto.BaseDto;
+import cn.zhengcaiyun.idata.develop.constant.enums.MetricApprovalStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.metric.MetricApprovalRecord;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelTagEnum;
 import org.springframework.beans.BeanUtils;
@@ -201,7 +202,7 @@ public class MetricApprovalRecordDto extends BaseDto {
     }
 
     public static MetricApprovalRecordDto from(MetricApprovalRecord record) {
-        MetricApprovalRecordDto dto = new MetricApprovalRecordDto();
+        final MetricApprovalRecordDto dto = new MetricApprovalRecordDto();
         BeanUtils.copyProperties(record, dto);
 
         if (LabelTagEnum.ATOMIC_METRIC_LABEL.name().equalsIgnoreCase(record.getMetricTag())) {
@@ -211,6 +212,9 @@ public class MetricApprovalRecordDto extends BaseDto {
         } else if (LabelTagEnum.COMPLEX_METRIC_LABEL.name().equalsIgnoreCase(record.getMetricTag())) {
             dto.setMetricTagName("复合指标");
         }
+
+        MetricApprovalStatusEnum.getEnum(record.getApprovalStatus())
+                .ifPresent(statusEnum -> dto.setApprovalStatusName(statusEnum.getDesc()));
         return dto;
     }
 }
