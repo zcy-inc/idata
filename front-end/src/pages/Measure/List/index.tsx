@@ -14,7 +14,7 @@ const Measure: FC = () => {
   }
 
   return (
-    <PageContainer contentClassName="split-panel">
+    <PageContainer contentClassName="split-panel" title="指标">
       <SplitPane
         className="board"
         defaultSize={266}

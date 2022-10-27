@@ -96,14 +96,13 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
   }
 
   // 切换库 清空对应表数据
-   const handleChangeDB = async (name: number) => {
+  const handleChangeDB = async (name: number) => {
     const formRes = await form.getFieldsValue();
-    console.log('handleChangeDB>>>', name, formRes);
     form.setFields([{
       name: ['authPolicyList', name, 'tables'],
       value: []
-  }])
-   }
+    }])
+  }
 
   // 聚焦表 通过库获取表数据
   const handleFocusTales = async (name: number) => {
@@ -144,6 +143,7 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
           }]
         }))
       }
+      // console.log('confirmParams>>>', confirmParams, formRes);
 
       if (!confirmParams.authPolicyList || !confirmParams.authPolicyList.length) {
         message.error("请先设置授权规则");
@@ -182,7 +182,11 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
       ]}
       onCancel={handleCancel}
     >
-      <Form form={form} name="dynamic_form_content" autoComplete="off">
+      <Form
+        form={form}
+        name="dynamic_form_content"
+        autoComplete="off"
+      >
         <Form.Item name="subjectType" label="被授权主体类型">
           <span>{subjectType === "users" ? "用户" : "用户组"}</span>
         </Form.Item>
@@ -193,87 +197,102 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
         <Form.List name="authPolicyList">
           {(fields, { add, remove }) => (
             <>
-              {fields.map(({ key, name, ...restField }) => (
-                <div className={styles.dynamic}>
-                  <Space key={`${key}_${name}`} direction="vertical" align="baseline" size={0}>
-                    <Form.Item
-                      {...restField}
-                      label="授权作用"
-                      name={[name, "effect"]}
-                      rules={[{ required: true, message: "请选择授权作用" }]}
-                    >
-                      <Radio.Group>
-                        <Radio value="allow">允许</Radio>
-                        <Radio value="deny">拒绝</Radio>
-                      </Radio.Group>
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      label="授权操作"
-                      name={[name, "actionList"]}
-                      rules={[{ required: true, message: "请选择授权操作" }]}
-                    >
-                      <Checkbox.Group>
-                        <Checkbox value="read">读取</Checkbox>
-                        <Checkbox value="write">写入</Checkbox>
-                      </Checkbox.Group>
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      label="授权资源"
-                      name={[name]}
-                    >
-                      <Form.Item
-                        name={[name, "resourceType"]}
-                        noStyle
-                        rules={[{ required: true, message: "请选择资源" }]}
-                      >
-                        <Select style={{ width: 130 }} placeholder="请选择资源">
-                          {
-                            resourceTypeMap?.map((i,idx) => (
-                              <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
-                            ))
-                          }
-                        </Select>
-                      </Form.Item>
-                      <div>
-                        <Form.Item
-                          name={[name, "db"]}
-                          noStyle
-                          rules={[{ required: true, message: "请选择库" }]}
-                        >
-                          <Select style={{ width: 130 }} placeholder="请选择库" onChange={() => handleChangeDB(name)}>
-                            {
-                              dbMap?.map((i, idx) => (
-                                <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
-                              ))
-                            }
-                          </Select>
-                        </Form.Item>
-                        <Form.Item
-                          name={[name, "tables"]}
-                          noStyle
-                          rules={[{ required: true, message: "请选择表" }]}
-                        >
-                          <Select style={{ width: 300, marginTop: 3 }} placeholder="请选择表" mode="multiple" onFocus={() => handleFocusTales(name)}>
-                            <Option key="*" value="*">所有表</Option>
-                            {
-                              dynamicTableList?.map((i: any, idx) => (
-                                <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
-                              ))
-                            }
-                          </Select>
-                        </Form.Item>
-                      </div>
-                    </Form.Item>
+              {fields.map(({ key, name, ...restField }) => {
 
-                    <CloseOutlined onClick={() => remove(name)} className={styles.iconDelete} />
-                  </Space>
-                </div>
-              ))}
+                return (
+                  <div className={styles.dynamic}>
+                    <Space key={`${key}_${name}`} direction="vertical" align="baseline" size={0}>
+                      <Form.Item
+                        {...restField}
+                        label="授权作用"
+                        name={[name, "effect"]}
+                        rules={[{ required: true, message: "请选择授权作用" }]}
+                      >
+                        {/* <Radio.Group defaultValue="allow"> */}
+                        <Radio.Group>
+                          <Radio value="allow">允许</Radio>
+                          <Radio value="deny">拒绝</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        label="授权操作"
+                        name={[name, "actionList"]}
+                        rules={[{ required: true, message: "请选择授权操作" }]}
+                      >
+                        {/* <Checkbox.Group defaultValue={['read']}> */}
+                        <Checkbox.Group>
+                          <Checkbox value="read">读取</Checkbox>
+                          <Checkbox value="write">写入</Checkbox>
+                        </Checkbox.Group>
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        label="授权资源"
+                        name={[name]}
+                      >
+                        <Form.Item
+                          name={[name, "resourceType"]}
+                          noStyle
+                          rules={[{ required: true, message: "请选择资源" }]}
+                        >
+                          <Select style={{ width: 130 }} placeholder="请选择资源">
+                            {
+                              resourceTypeMap?.map((i, idx) => (
+                                <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
+                              ))
+                            }
+                          </Select>
+                        </Form.Item>
+                        <div>
+                          <Form.Item
+                            name={[name, "db"]}
+                            noStyle
+                            rules={[{ required: true, message: "请选择库" }]}
+                          >
+                            <Select style={{ width: 130 }} placeholder="请选择库" onChange={() => handleChangeDB(name)}>
+                              {
+                                dbMap?.map((i, idx) => (
+                                  <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
+                                ))
+                              }
+                            </Select>
+                          </Form.Item>
+                          <Form.Item
+                            name={[name, "tables"]}
+                            noStyle
+                            rules={[{ required: true, message: "请选择表" }]}
+                          >
+                            <Select style={{ width: 300, marginTop: 3 }} placeholder="请选择表" mode="multiple" onFocus={() => handleFocusTales(name)}>
+                              <Option key="*" value="*">所有表</Option>
+                              {
+                                dynamicTableList?.map((i: any, idx) => (
+                                  <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
+                                ))
+                              }
+                            </Select>
+                          </Form.Item>
+                        </div>
+                      </Form.Item>
+
+                      <CloseOutlined onClick={() => remove(name)} className={styles.iconDelete} />
+                    </Space>
+                  </div>
+                )
+              })}
 
               <Form.Item>
-                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                <Button
+                  block
+                  type="dashed"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    add({
+                      effect: "allow",
+                      actionList: ['read']
+                    });
+                  }}
+                >
                   增加授权规则
                 </Button>
               </Form.Item>

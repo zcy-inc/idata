@@ -39,6 +39,24 @@ npm run dev # 不使用mock数据
 npm run build
 ```
 
+### 镜像
+
+1.登录docker
+
+```bash
+docker login docker-image.cai-inc.com
+```
+2.打镜像
+
+```bash
+sh ./bin/frontend_build.sh  
+```
+3.推镜像
+
+```bash
+docker push docker-image.cai-inc.com/bigdata/idata-portal-front
+```
+
 ### 检查代码风格
 
 ```bash

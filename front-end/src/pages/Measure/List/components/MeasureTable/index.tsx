@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { ProFormSelect, ProFormText, ProFormDatePicker, QueryFilter } from '@ant-design/pro-form';
-import { Form, Space, Table, Button } from 'antd';
+import { Form, Space, Table, Button, Modal, Input, message } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import type { FC } from 'react';
 import { history, Link } from 'umi';
 import type { ColumnsType } from 'antd/lib/table/Table';
 import type { MetricFloderItem, MetricListItem } from '@/types/measure';
 import showDialog from '@/utils/showDialog';
 import styles from './index.less';
-import { getMeasures } from '@/services/measure';
+import { getMeasures, indexPublish, indexRetreat } from '@/services/measure';
 import { getEnumValues } from '@/services/datadev';
 import CreateMeasure from './components/CreateMeasure';
 import { LabelTag } from '@/constants/datapi';
-
 import moment from 'moment';
+
+const { confirm } = Modal;
+
 const MetricTypeOps = [
   { label: '原子指标', value: 'ATOMIC_METRIC_LABEL' },
   { label: '派生指标', value: 'DERIVE_METRIC_LABEL' },
@@ -24,7 +27,10 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
   const [loading, setLoading] = useState(false);
   const [bizProcessEnum, setBizProcessEnum] = useState<{ label: string; value: string }[]>([]);
   const [dataSetOptions, setDataSetOptions] = useState<{ label: string; value: string }[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 确认发布弹窗
+  const [currentIndex, setCurrentIndex] = useState({}); // 当前要发布/撤销的指标数据
   const [form] = Form.useForm();
+  const [publishForm] = Form.useForm();
 
   useEffect(() => {
     getEnumValues({ enumCode: 'bizProcessEnum:ENUM' })
@@ -56,9 +62,13 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
     switch (labelTag) {
       case LabelTag.ATOMIC_METRIC_LABEL:
       case LabelTag.ATOMIC_METRIC_LABEL_DISABLE:
+      case LabelTag.ATOMIC_METRIC_LABEL_DRAFT:
+      case LabelTag.ATOMIC_METRIC_LABEL_APPROVE:
         return '原子指标';
       case LabelTag.DERIVE_METRIC_LABEL:
       case LabelTag.DERIVE_METRIC_LABEL_DISABLE:
+      case LabelTag.DERIVE_METRIC_LABEL_DRAFT:
+      case LabelTag.DERIVE_METRIC_LABEL_APPROVE:
         return '派生指标';
       default:
         return '';
@@ -134,15 +144,60 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
         return <span className={styles.enabled}>启用</span>;
     }
   }
-  
-  // TODO 发布
-  const handlePublish = () => {
-    alert('发布')
+
+  // 发布
+  const handlePublish = (record: any) => {
+    setIsModalOpen(true);
+    setCurrentIndex(record)
   }
 
-  // TODO 撤销
-  const handleRevoke = () => {
-    alert('撤销')
+  // 确认发布 metricCode = labelCode
+  const handlePublishConfirm = () => {
+    const params = {
+      metricCode: currentIndex?.labelCode,
+      remark: publishForm.getFieldsValue()?.remark
+    }
+    indexPublish(params).then(res => {
+      if (+res.code) {
+        getTableData(0);
+        setIsModalOpen(false);
+        publishForm.resetFields();
+        message.success("发布成功")
+      } else {
+        message.success(res.msg)
+      }
+    }).catch(err => { })
+  };
+
+  // 取消发布
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    publishForm.resetFields();
+  };
+
+  // 撤销 metricCode = labelCode
+  const handleRevoke = (record: any) => {
+    const params = {
+      metricCode: record?.labelCode
+    }
+    confirm({
+      title: '提示',
+      icon: <ExclamationCircleOutlined />,
+      content: '你确定要撤销审批吗？',
+      onOk() {
+        indexRetreat(params).then(res => {
+          if (+res.code) {
+            getTableData(0);
+            message.success("撤销成功")
+          } else {
+            message.success(res.msg)
+          }
+        }).catch(err => { })
+      },
+      onCancel() {
+        console.log('取消');
+      },
+    });
   }
 
   // 渲染操作按钮
@@ -163,7 +218,7 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
           <Space size={16}>
             <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
             <Link to={`/measure/edit/${record.labelCode}`}>编辑</Link>
-            <Button type="link" onClick={() => handlePublish()}>发布</Button>
+            <Button type="link" onClick={() => handlePublish(record)}>发布</Button>
           </Space>
         )
       case labelTag.endsWith('APPROVE'):
@@ -171,7 +226,7 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
         return (
           <Space size={16}>
             <Link to={`/measure/view/${record.labelCode}`}>查看</Link>
-            <Button type="link" onClick={() => handleRevoke()}>撤销</Button>
+            <Button type="link" onClick={() => handleRevoke(record)}>撤销</Button>
           </Space>
         )
       default:
@@ -221,6 +276,11 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
       render: (value, record) => renderOps(record),
     },
   ];
+
+  const layout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 16 },
+  };
 
   return (
     <div className={styles.container}>
@@ -296,6 +356,22 @@ const DataSource: FC<{ currentNode: MetricFloderItem }> = ({ currentNode }) => {
           onChange: (page) => { setCurrent(page); },
         }}
       />
+
+      <Modal
+        title="提交发布"
+        open={isModalOpen}
+        onOk={handlePublishConfirm}
+        onCancel={handleCancel}>
+        <Form
+          {...layout}
+          form={publishForm}
+          name="control-hooks"
+        >
+          <Form.Item name="remark" label="提交说明">
+            <Input placeholder="请输入说明" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

@@ -149,7 +149,7 @@ const Baseline: FC<{history: any}> = ({ history }) => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer title="基线管理">
       <ProForm form={form} className={styles.form} layout="inline" colon={false} submitter={false}>
         <ProFormText
           name="name"
