@@ -2,13 +2,19 @@
 
 ### Release Note 1.9.2
 
+--- 
+
 **New Features**
 
 - 数据指标，增加指标审批流程，指标编辑后需要审批后才能启用。
 
 
 
+<br>
+
 ### Release Note 1.9.1
+
+--- 
 
 **New Features**
 
@@ -16,7 +22,11 @@
 
 
 
+<br>
+
 ### Release Note 1.9.0
+
+---
 
 **New Features**
 
@@ -58,7 +68,11 @@
 
 
 
+<br>
+
 ### Release Note 1.8.0
+
+--- 
 
 **New Features**
 
