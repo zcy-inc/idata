@@ -16,9 +16,9 @@ import showDialog from '@/utils/showDialog';
 import showDrawer from '@/utils/showDrawer';
 import moment from 'moment';
 
-const Stream: FC<{}> = ({}) => {
+const Stream: FC<{}> = ({ }) => {
   const [form] = Form.useForm();
-  const { tableProps, search, refresh }= useAntdTable((params, formParams) => {
+  const { tableProps, search, refresh } = useAntdTable((params, formParams) => {
     return getStreamJobs({
       ...formParams,
       limit: params.pageSize,
@@ -29,23 +29,23 @@ const Stream: FC<{}> = ({}) => {
     }))
   }, {
     form
-  }); 
+  });
 
   // 启动/停止
   const toggleState = (row: StreamListItem, isStop: boolean) => {
-    if(isStop) {
+    if (isStop) {
       // 停止
-      stopJob({id: row.id}).then(() => {
+      stopJob({ id: row.id }).then(() => {
         message.success("操作成功！");
         refresh();
       })
     } else {
       // 启动
-      startParamConfig({id: row.id}).then(res => {
+      startParamConfig({ id: row.id }).then(res => {
         const { data: { needInitTable, forceInitTableList = [] } } = res
-        if(needInitTable){
+        if (needInitTable) {
           // true 显示forceInitTableList 选择
-          showDialog('启动任务',{
+          showDialog('启动任务', {
             formProps: {
               id: row.id,
               forceInitTableList: forceInitTableList
@@ -55,10 +55,11 @@ const Stream: FC<{}> = ({}) => {
             },
             beforeConfirm: (dialog, formInstance, done) => {
               dialog.showLoading();
-              formInstance.handleSubmit().then((res: {forceInitTables: string []}) => {
+              formInstance.handleSubmit().then((res: { forceInitTables: string[] }) => {
+                // 选择了表则forceInit=true 反之false
                 return startJob({
                   id: row.id,
-                  forceInit: true,
+                  forceInit: res?.forceInitTables?.length ? true : false,
                   initDITables: res.forceInitTables,
                 })
               }).then(() => {
@@ -70,9 +71,9 @@ const Stream: FC<{}> = ({}) => {
               })
             }
           }, StartJob)
-        }else{
+        } else {
           // false 显示初始化开关
-          showDialog('启动任务',{
+          showDialog('启动任务', {
             formProps: {
               id: row.id,
             },
@@ -81,7 +82,7 @@ const Stream: FC<{}> = ({}) => {
             },
             beforeConfirm: (dialog, formInstance, done) => {
               dialog.showLoading();
-              formInstance.handleSubmit().then((res: {forceInit: boolean}) => {
+              formInstance.handleSubmit().then((res: { forceInit: boolean }) => {
                 return startJob({
                   id: row.id,
                   forceInit: res.forceInit === undefined ? true : res.forceInit,
@@ -103,7 +104,7 @@ const Stream: FC<{}> = ({}) => {
 
   // 下线
   const offLine = (row: StreamListItem) => {
-    destoryJob({id: row.id}).then(() => {
+    destoryJob({ id: row.id }).then(() => {
       message.success("操作成功！");
       refresh();
     })
@@ -139,7 +140,7 @@ const Stream: FC<{}> = ({}) => {
         return <Button onClick={() => showDetail(row)} type="link">{text}</Button>
       }
     },
-    { 
+    {
       title: '任务状态',
       key: 'status',
       dataIndex: 'status',
@@ -157,17 +158,17 @@ const Stream: FC<{}> = ({}) => {
       title: '运行开始时间',
       key: 'runStartTime',
       dataIndex: 'runStartTime',
-      width:180,
+      width: 180,
       render: (text) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : ''
     },
     {
       title: '最近操作时间',
       key: 'editTime',
       dataIndex: 'editTime',
-      width:180,
+      width: 180,
       render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss')
     },
-    { title: '最近操作人', key: 'editor', dataIndex: 'editor',  width: 110 },
+    { title: '最近操作人', key: 'editor', dataIndex: 'editor', width: 110 },
     {
       title: '操作',
       key: 'status',
@@ -175,7 +176,7 @@ const Stream: FC<{}> = ({}) => {
       fixed: 'right',
       width: 160,
       render: (text, row) => {
-        if(text !== 9) {
+        if (text !== 9) {
           return <>
             {[2, 7].includes(text) ?
               <Popconfirm
@@ -187,20 +188,20 @@ const Stream: FC<{}> = ({}) => {
                   停止
                 </Button>
               </Popconfirm>
-               :
+              :
               <Button type="link" disabled={text === 1} onClick={() => toggleState(row, false)}>
                 启动
               </Button>}
-              <Popconfirm
-                title="再次上线，需要重新提交审批。你确定要下线该任务吗？"
-                onConfirm={() => offLine(row)}
-                disabled={[1, 2, 7].includes(text)}
-              >
-                 <Button type="link" disabled={[1, 2, 7].includes(text)}>
+            <Popconfirm
+              title="再次上线，需要重新提交审批。你确定要下线该任务吗？"
+              onConfirm={() => offLine(row)}
+              disabled={[1, 2, 7].includes(text)}
+            >
+              <Button type="link" disabled={[1, 2, 7].includes(text)}>
                 下线
               </Button>
-              </Popconfirm>
-            
+            </Popconfirm>
+
             {row.externalUrl && <Button
               type="link"
               onClick={() => window.open(row.externalUrl)}
@@ -219,9 +220,9 @@ const Stream: FC<{}> = ({}) => {
       <QueryFilter
         form={form}
         layout="horizontal"
-        onFinish={async ()=> search.submit()}
+        onFinish={async () => search.submit()}
         onReset={search.reset}
-        labelCol={{span: 6}}
+        labelCol={{ span: 6 }}
         labelWidth={96}
       >
         <ProFormText
