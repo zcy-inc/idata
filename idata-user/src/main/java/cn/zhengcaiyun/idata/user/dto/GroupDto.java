@@ -28,7 +28,7 @@ public class GroupDto extends BaseDto {
     /**
      * 备注
      */
-    private String remark;
+    private String remark = "";
 
     public Long getId() {
         return id;
