@@ -5,6 +5,7 @@ import cn.zhengcaiyun.idata.connector.parser.spark.SparkSqlParser;
 import cn.zhengcaiyun.idata.connector.util.model.TableSib;
 import cn.zhengcaiyun.idata.connector.util.model.UpperCaseCharStream;
 import cn.zhengcaiyun.idata.connector.util.parse.ParseErrorListener;
+import cn.zhengcaiyun.idata.connector.util.parse.ParseException;
 import cn.zhengcaiyun.idata.connector.util.parse.PostProcessor;
 import cn.zhengcaiyun.idata.connector.util.parse.SparkSqlAst;
 import org.antlr.v4.runtime.CharStreams;
@@ -38,7 +39,7 @@ public class SparkSqlHelper {
 
         try {
             return visitor.visit(parser.singleStatement());
-        } catch (ParseCancellationException e) {
+        } catch (ParseCancellationException | ParseException e) {
             tokenStream.seek(0);
             parser.reset();
 
