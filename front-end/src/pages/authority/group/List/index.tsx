@@ -182,14 +182,22 @@ const List: React.FC = () => {
         onCancel={onCloseAddModal}
         onOk={onAdd}
       >
-        <Form form={addForm} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        <Form
+          form={addForm}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 18 }}
+        >
           <Form.Item label="用户组名称" name="name" rules={[{ required: true }]}>
             <Input style={{ width: 300 }} />
           </Form.Item>
           <Form.Item label="负责人" name="ownerId" rules={[{ required: true }]}>
-            <Select style={{ width: 300 }} showSearch filterOption={(input, option) =>
-              (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
-            }>
+            <Select
+              style={{ width: 300 }}
+              showSearch
+              filterOption={(input, option) =>
+                (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+              }
+            >
               {
                 userList?.map(item => {
                   return <Option value={item.id} key={item.id}>{item.name}</Option>
@@ -198,7 +206,14 @@ const List: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item label="成员" name="relatedUsers" rules={[{ required: false }]}>
-            <Select mode="multiple" style={{ width: 300 }}>
+            <Select
+              mode="multiple"
+              style={{ width: 300 }}
+              showSearch
+              filterOption={(input, option) =>
+                (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+              }
+            >
               {
                 userList?.map(item => {
                   return <Option value={item.id} key={item.id}>{item.name}</Option>
@@ -220,14 +235,22 @@ const List: React.FC = () => {
         onCancel={onCloseEditModal}
         onOk={onEdit}
       >
-        <Form form={editForm} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+        <Form
+          form={editForm}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 18 }}
+        >
           <Form.Item label="用户组名称" name="name" rules={[{ required: true }]}>
             <Input style={{ width: 300 }} />
           </Form.Item>
           <Form.Item label="负责人" name="ownerId" rules={[{ required: true }]}>
-            <Select style={{ width: 300 }} showSearch filterOption={(input, option) =>
-              (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
-            }>
+            <Select
+              style={{ width: 300 }}
+              showSearch
+              filterOption={(input, option) =>
+                (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+              }
+            >
               {
                 userList?.map(item => {
                   return <Option value={item.id} key={item.id}>{item.name}</Option>
@@ -236,7 +259,14 @@ const List: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item label="成员" name="relatedUsers" rules={[{ required: false }]}>
-            <Select mode="multiple" style={{ width: 300 }}>
+            <Select
+              mode="multiple"
+              style={{ width: 300 }}
+              showSearch
+              filterOption={(input, option) =>
+                (option!.children as unknown as string).toLowerCase().includes(input.toLowerCase())
+              }
+            >
               {
                 userList?.map(item => {
                   return <Option value={item.id} key={item.id}>{item.name}</Option>
