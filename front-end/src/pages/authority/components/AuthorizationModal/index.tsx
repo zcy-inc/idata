@@ -124,6 +124,26 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
     }).catch(err => { })
   }
 
+  // 切换表 
+  const handleChangeTable = async (name: number) => {
+    const formRes = await form.getFieldsValue();
+    const { authPolicyList } = formRes
+    const currentTableArr = authPolicyList?.[name]?.tables || []
+    let restArr:string[] = currentTableArr
+    if(restArr.length > 1 && restArr[restArr.length - 1] === "*"){
+      // 最后一个是所有表 -> 删除其他表 只留所有表
+      restArr = currentTableArr?.filter((i:string) => i === "*")
+    }
+    if(restArr.length > 1 && restArr[1] !== "*"){
+      // 第一个表是全部表 && 第二个表是其他表 -> 删除所有表 只留其他表
+      restArr = currentTableArr?.filter((i:string) => i !== "*")
+    }
+    form.setFields([{
+      name: ['authPolicyList', name, 'tables'],
+      value: restArr
+    }])
+  }
+
   // 确认授权
   const handleAuthorize = async () => {
     try {
@@ -272,6 +292,7 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
                               placeholder="请选择表"
                               mode="multiple"
                               onFocus={() => handleFocusTales(name)}
+                              onChange={() => handleChangeTable(name)}
                             >
                               <Option key="*" value="*">所有表</Option>
                               {
