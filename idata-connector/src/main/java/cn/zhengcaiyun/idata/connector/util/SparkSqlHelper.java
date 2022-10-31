@@ -39,7 +39,7 @@ public class SparkSqlHelper {
 
         try {
             return visitor.visit(parser.singleStatement());
-        } catch (ParseCancellationException | ParseException e) {
+        } catch (ParseCancellationException e) {
             tokenStream.seek(0);
             parser.reset();
 
