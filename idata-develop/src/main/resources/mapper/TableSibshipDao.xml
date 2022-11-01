@@ -74,13 +74,13 @@
     </select>
 
     <select id="getParents" resultType="cn.zhengcaiyun.idata.develop.dto.table.TableSibship">
-        select distinct db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
+        select db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
         from table_sibship
         where db=#{db} and table_name=#{tableName} and source_db!='tmp'
     </select>
 
     <select id="getChildren" resultType="cn.zhengcaiyun.idata.develop.dto.table.TableSibship">
-        select distinct db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
+        select db,table_name tableName,source_db sourceDb,source_table_name sourceTableName
         from table_sibship
         where source_db=#{db} and source_table_name=#{tableName} and db !='tmp'
     </select>
