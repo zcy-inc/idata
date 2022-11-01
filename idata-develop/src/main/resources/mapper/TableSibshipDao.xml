@@ -88,22 +88,25 @@
     <select id="getSqlJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
         select j.id jobId,j.name jobName
         from table_sibship s
-        left join dev_job_info j on s.job_id=j.id
-        where s.db = #{db} and s.table_name = #{tableName}
+        inner join dev_job_info j on s.job_id=j.id
+        inner join dev_job_publish_record r on r.job_id=s.job_id
+        where s.db = #{db} and s.table_name = #{tableName}  and publish_status=2
     </select>
 
     <select id="getDIJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
         select j.id jobId,j.name jobName
         from dev_job_content_di s
         left join dev_job_info j on s.job_id=j.id
-        where s.dest_data_source_type='hive' and s.dest_table=#{tableName}
+        inner join dev_job_publish_record r on r.job_id=s.job_id
+        where s.dest_data_source_type='hive' and s.dest_table=#{tableName} and publish_status=2
     </select>
 
     <select id="getJobs" resultType="cn.zhengcaiyun.idata.develop.dal.model.TableSibshipVO">
         select j.id jobId,j.name jobName
         from dev_job_output s
-        left join dev_job_info j on s.job_id=j.id
-        where s.dest_data_source_type='hive' and s.dest_table=#{tableName}
+        inner join dev_job_info j on s.job_id=j.id
+        inner join dev_job_publish_record r on r.job_id=s.job_id
+        where s.dest_data_source_type='hive' and s.dest_table=#{tableName} and publish_status=2
     </select>
 </mapper>
 
