@@ -66,6 +66,8 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
             tables: JSON.parse(i.authResourceList[0].resources)?.tables,
           }))
           form.setFieldValue("authPolicyList", params)
+        }else {
+          form.setFieldValue("authPolicyList", [])
         }
       }).catch(err => { })
     }
@@ -120,6 +122,26 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
       const list = res.data?.map((i: any) => ({ label: i, value: i }))
       setDynamicTableList(list)
     }).catch(err => { })
+  }
+
+  // 切换表 
+  const handleChangeTable = async (name: number) => {
+    const formRes = await form.getFieldsValue();
+    const { authPolicyList } = formRes
+    const currentTableArr = authPolicyList?.[name]?.tables || []
+    let restArr:string[] = currentTableArr
+    if(restArr.length > 1 && restArr[restArr.length - 1] === "*"){
+      // 最后一个是所有表 -> 删除其他表 只留所有表
+      restArr = currentTableArr?.filter((i:string) => i === "*")
+    }
+    if(restArr.length > 1 && restArr[1] !== "*"){
+      // 第一个表是全部表 && 第二个表是其他表 -> 删除所有表 只留其他表
+      restArr = currentTableArr?.filter((i:string) => i !== "*")
+    }
+    form.setFields([{
+      name: ['authPolicyList', name, 'tables'],
+      value: restArr
+    }])
   }
 
   // 确认授权
@@ -208,7 +230,6 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
                         name={[name, "effect"]}
                         rules={[{ required: true, message: "请选择授权作用" }]}
                       >
-                        {/* <Radio.Group defaultValue="allow"> */}
                         <Radio.Group>
                           <Radio value="allow">允许</Radio>
                           <Radio value="deny">拒绝</Radio>
@@ -220,7 +241,6 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
                         name={[name, "actionList"]}
                         rules={[{ required: true, message: "请选择授权操作" }]}
                       >
-                        {/* <Checkbox.Group defaultValue={['read']}> */}
                         <Checkbox.Group>
                           <Checkbox value="read">读取</Checkbox>
                           <Checkbox value="write">写入</Checkbox>
@@ -250,7 +270,11 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
                             noStyle
                             rules={[{ required: true, message: "请选择库" }]}
                           >
-                            <Select style={{ width: 130 }} placeholder="请选择库" onChange={() => handleChangeDB(name)}>
+                            <Select
+                              style={{ width: 130 }}
+                              placeholder="请选择库"
+                              onChange={() => handleChangeDB(name)}
+                            >
                               {
                                 dbMap?.map((i, idx) => (
                                   <Option key={`${i.value}_${idx}`} value={i.value}>{i.label}</Option>
@@ -263,7 +287,13 @@ const AuthorizationModal: React.FC<AuthorizationModalProps> = ({
                             noStyle
                             rules={[{ required: true, message: "请选择表" }]}
                           >
-                            <Select style={{ width: 300, marginTop: 3 }} placeholder="请选择表" mode="multiple" onFocus={() => handleFocusTales(name)}>
+                            <Select
+                              style={{ width: 300, marginTop: 3 }}
+                              placeholder="请选择表"
+                              mode="multiple"
+                              onFocus={() => handleFocusTales(name)}
+                              onChange={() => handleChangeTable(name)}
+                            >
                               <Option key="*" value="*">所有表</Option>
                               {
                                 dynamicTableList?.map((i: any, idx) => (

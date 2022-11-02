@@ -163,7 +163,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
               getTreeWrapped();
             }
           })
-          .catch((err) => {}),
+          .catch((err) => { }),
     });
   };
 
@@ -176,7 +176,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       switch (task?.jobType) {
         case TaskTypes.SQL_STARROCKS:
         case TaskTypes.SQL_SPARK:
-          const  { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds, sourceSql } = values;
+          const { srcDataSourceId, srcDataSourceType, srcTableNamse, udfIds, sourceSql } = values;
           const param = {
             extTables: srcDataSourceType && [{
               dataSourceType: srcDataSourceType,
@@ -199,7 +199,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.SQL_FLINK:
           const dataSql = {
@@ -215,7 +215,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.SPARK_JAR:
           const dataSparkJar = {
@@ -236,7 +236,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.SPARK_PYTHON:
           const dataSparkPython = {
@@ -257,7 +257,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.SCRIPT_SHELL:
           const dataScriptShell = {
@@ -273,7 +273,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.SCRIPT_PYTHON:
           const dataScriptPython = {
@@ -293,7 +293,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         case TaskTypes.KYLIN:
           const dataKylin = {
@@ -312,7 +312,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 refreshTask();
               }
             })
-            .catch((err) => {});
+            .catch((err) => { });
           break;
         default:
           break;
@@ -328,35 +328,35 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     sessionId: number;
     statementId: number;
   }, isStop = !enableStopRef.current) => {
-    if(isStop) {
-      cancelQuery({sessionId,statementId}).then(() => {
+    if (isStop) {
+      cancelQuery({ sessionId, statementId }).then(() => {
         message.success('已停止调试');
         setIsDebuging(false);
       })
     } else {
       runQueryResult({ sessionId, sessionKind: 'pyspark', statementId })
-      .then((res) => {
-        if (
-          res.data.statementState !== StatementState.AVAILABLE &&
-          res.data.statementState !== StatementState.CANCELED
-        ) {
-          setTimeout(() => {
-            fetchPysparkQueryResult({
-              sessionId,
-              statementId,
-            });
-          }, 2000);
-        } else {
-          setIsDebuging(false);
-          setEnableStop(false);
-          enableStopRef.current = false;
-          const logs = get(res, 'data.pythonResults', '');
-          setLog([logs]);
-        }
-      })
-      .catch((err) => {});
+        .then((res) => {
+          if (
+            res.data.statementState !== StatementState.AVAILABLE &&
+            res.data.statementState !== StatementState.CANCELED
+          ) {
+            setTimeout(() => {
+              fetchPysparkQueryResult({
+                sessionId,
+                statementId,
+              });
+            }, 2000);
+          } else {
+            setIsDebuging(false);
+            setEnableStop(false);
+            enableStopRef.current = false;
+            const logs = get(res, 'data.pythonResults', '');
+            setLog([logs]);
+          }
+        })
+        .catch((err) => { });
     }
- 
+
   };
 
   // 轮询 spark 调试结果
@@ -367,8 +367,8 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     sessionId: number;
     statementId: number;
   }, isStop = !enableStopRef.current) => {
-    if(isStop) {
-      cancelQuery({sessionId,statementId}).then(() => {
+    if (isStop) {
+      cancelQuery({ sessionId, statementId }).then(() => {
         message.success('已停止调试');
         setIsDebuging(false);
       })
@@ -405,18 +405,18 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
             setResultHeader((pre) => [...pre, resultHeader]);
           }
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
-  
+
   };
 
   /**
    * 调试选中代码段
    */
   const onDebug = async () => {
-    if(enableStop) {
-     setEnableStop(false);
-     enableStopRef.current = false;
+    if (enableStop) {
+      setEnableStop(false);
+      enableStopRef.current = false;
     } else {
       setIsDebuging(true);
       const value = getDebugCode();
@@ -427,23 +427,47 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
       switch (task?.jobType) {
         case TaskTypes.SQL_STARROCKS:
         case TaskTypes.SQL_SPARK: {
-          const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
-          setEnableStop(true);
-          enableStopRef.current = true;
-          fetchSparkQueryResult(data);
+          // const { data } = await runQuery({ querySource: value as string, sessionKind: 'spark' });
+          // setEnableStop(true);
+          // enableStopRef.current = true;
+          // fetchSparkQueryResult(data);
+          await runQuery({ querySource: value as string, sessionKind: 'spark' }).then(res => {
+            const { data } = res
+            setEnableStop(true);
+            enableStopRef.current = true;
+            fetchSparkQueryResult(data);
+          })
+            .catch(err => { })
+            .finally(() => {
+              setIsDebuging(false);
+              setEnableStop(false);
+              enableStopRef.current = false;
+            })
           break;
         }
         case TaskTypes.SPARK_PYTHON:
         case TaskTypes.SCRIPT_PYTHON: {
-          const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
-          setEnableStop(true);
-          enableStopRef.current = true;
-          fetchPysparkQueryResult(data);
+          // const { data } = await runQuery({ querySource: value as string, sessionKind: 'pyspark' });
+          // setEnableStop(true);
+          // enableStopRef.current = true;
+          // fetchPysparkQueryResult(data);
+          await runQuery({ querySource: value as string, sessionKind: 'pyspark' }).then(res => {
+            const { data } = res
+            setEnableStop(true);
+            enableStopRef.current = true;
+            fetchPysparkQueryResult(data);
+          })
+            .catch(err => { })
+            .finally(() => {
+              setIsDebuging(false);
+              setEnableStop(false);
+              enableStopRef.current = false;
+            })
           break;
         }
       }
     }
-  
+
   };
 
   const tryRun = () => {
@@ -464,7 +488,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     }).then(res => {
       setLog(res.data?.log || []);
       const endSign = ['shutting_down', 'error', 'dead', 'killed', 'success'];
-      if(!endSign.includes(res.data.state)) {
+      if (!endSign.includes(res.data.state)) {
         setTimeout(() => {
           genTryRunLog(sessionId, res.data.from);
         }, 1000)
@@ -481,7 +505,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
     ],
     [
       Btns.DEBUG,
-      <Tooltip title={`${enableStop ? '停止': '开始'}调试`} key="8">
+      <Tooltip title={`${enableStop ? '停止' : '开始'}调试`} key="8">
         <Button
           className={styles.btn}
           loading={isDebuging && !enableStop}
@@ -777,7 +801,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                   setVisibleAction(false);
                 }
               })
-              .catch((err) => {})
+              .catch((err) => { })
               .finally(() => setLoadingAction(false));
           }
           if (actionType === 'resume') {
@@ -789,7 +813,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                   setVisibleAction(false);
                 }
               })
-              .catch((err) => {})
+              .catch((err) => { })
               .finally(() => setLoadingAction(false));
           }
           if (actionType === 'run') {
@@ -801,7 +825,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                   setVisibleAction(false);
                 }
               })
-              .catch((err) => {})
+              .catch((err) => { })
               .finally(() => setLoadingAction(false));
           }
         }}
@@ -848,7 +872,7 @@ const TabDev: FC<TabTaskProps> = ({ pane }) => {
                 return false;
               }
             })
-            .catch((err) => {})
+            .catch((err) => { })
             .finally(() => setLoadingSubmit(false));
         }}
       >
