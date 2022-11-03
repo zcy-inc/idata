@@ -108,7 +108,9 @@ public class TokenService {
                         .setSigningKey(jwtSecurity)
                         .parseClaimsJws(token)
                         .getBody();
-                isExpired = new Date().after(claims.getExpiration());
+                Date expiration = claims.getExpiration();
+                Date issuedAt = claims.getIssuedAt();
+                isExpired = new Date().after(expiration);
             } catch (Exception e) {
                 // expired token
                 isExpired = true;
@@ -116,7 +118,7 @@ public class TokenService {
             if (!isExpired) {
                 return true;
             }
-            // 统一凌晨5点token失效，并且不再"顶号"
+            // 不再"顶号"
             return true;
 //            // 防止一直在使用，token过期的问题
 //            if (System.currentTimeMillis() - userToken.getEditTime().getTime() < 6 * 3600 * 1000) {
@@ -136,7 +138,8 @@ public class TokenService {
                         .setSigningKey(jwtSecurity)
                         .parseClaimsJws(token)
                         .getBody();
-                boolean isExpired = new Date().after(claims.getExpiration());
+                Date expiration = claims.getExpiration();
+                boolean isExpired = new Date().after(expiration);
                 if (isExpired) {
                     return false;
                 }

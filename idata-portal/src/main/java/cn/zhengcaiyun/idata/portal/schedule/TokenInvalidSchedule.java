@@ -16,8 +16,7 @@ import static org.mybatis.dynamic.sql.SqlBuilder.*;
 @Component
 public class TokenInvalidSchedule {
 
-//    private static final String COLUMN_SECURITY_CRON = "0 0 1 * * ?";
-    private static final String COLUMN_SECURITY_CRON = "0 0/30 17-18 * * ?";
+    private static final String COLUMN_SECURITY_CRON = "0 0 1 * * ?";
 
     @Autowired
     private UacUserTokenDao uacUserTokenDao;
