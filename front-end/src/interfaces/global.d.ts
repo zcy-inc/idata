@@ -1,8 +1,8 @@
 import type { folderTreeNodeType } from '@/constants/common';
 import { DataNode } from 'antd/es/tree';
 
-export interface TreeNode {
-  children?: TreeItem[];
+export interface TreeNode<T extends TreeNode = TreeNode> {
+  children?: T[];
   [index: string]: any;
 }
 

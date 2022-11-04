@@ -82,6 +82,11 @@ public class DSDependenceNodeRepoImpl implements DSDependenceNodeRepo {
     }
 
     @Override
+    public List<DSDependenceNode> queryDepNodeByPrevTask(Long prevTaskCode) {
+        return dsDependenceNodeDao.select(dsl -> dsl.where(DS_DEPENDENCE_NODE.prevTaskCode, isEqualTo(prevTaskCode)));
+    }
+
+    @Override
     public List<DSDependenceNode> queryDependenceNodeInWorkflow(Long taskCode, Long workflowCode, Long prevTaskCode) {
         return dsDependenceNodeDao.select(dsl -> dsl.where(DS_DEPENDENCE_NODE.workflowCode, isEqualTo(workflowCode),
                 and(DS_DEPENDENCE_NODE.prevTaskCode, isEqualTo(prevTaskCode)),

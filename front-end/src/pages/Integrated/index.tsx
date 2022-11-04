@@ -11,16 +11,16 @@ export default () => (
     header={{
       title: '集成配置',
       breadcrumb: {
-        routes: [
-          {
-            path: '',
-            breadcrumbName: '系统配置',
-          },
-          {
-            path: '',
-            breadcrumbName: '集成配置',
-          }
-        ],
+        // routes: [
+        //   {
+        //     path: '',
+        //     breadcrumbName: '系统配置',
+        //   },
+        //   {
+        //     path: '',
+        //     breadcrumbName: '集成配置',
+        //   }
+        // ],
       },
     }}
   >

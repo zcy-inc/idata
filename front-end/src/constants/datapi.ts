@@ -14,6 +14,23 @@ export enum LabelRequired {
   REQUIRED = 1,
 }
 
+// 累加方式
+export const degradeDimOptions = [
+  { label: '可累加', value: 'ACCUMULATE' },
+  { label: '不可累加', value: 'HALF_ACCUMULATE' },
+  { label: '半累加', value: 'NON_ACCUMULATE' },
+];
+
+// 时间周期
+export const timeDimOptions = [
+  { label: '近7天', value: 'SEVEN_DAYS' },
+  { label: '近30天', value: 'THIRTY_DAS' },
+  { label: '近1个月', value: 'ONE_MONTH' },
+  { label: '近3个月', value: 'THREE_MONTHS' },
+  { label: '近半年', value: 'SIX_MONTHS' },
+  { label: '近1年', value: 'ONE_YEAR' },
+];
+
 export enum LabelTag {
   STRING_LABEL = 'STRING_LABEL',
   BOOLEAN_LABEL = 'BOOLEAN_LABEL',
@@ -31,6 +48,12 @@ export enum LabelTag {
   DERIVE_METRIC_LABEL_DISABLE = 'DERIVE_METRIC_LABEL_DISABLE',
   COMPLEX_METRIC_LABEL = 'COMPLEX_METRIC_LABEL',
   COMPLEX_METRIC_LABEL_DISABLE = 'COMPLEX_METRIC_LABEL_DISABLE',
+  ATOMIC_METRIC_LABEL_DRAFT = 'ATOMIC_METRIC_LABEL_DRAFT',
+  DERIVE_METRIC_LABEL_DRAFT = 'DERIVE_METRIC_LABEL_DRAFT',
+  COMPLEX_METRIC_LABEL_DRAFT = 'COMPLEX_METRIC_LABEL_DRAFT',
+  ATOMIC_METRIC_LABEL_APPROVE = 'ATOMIC_METRIC_LABEL_APPROVE',
+  DERIVE_METRIC_LABEL_APPROVE = 'DERIVE_METRIC_LABEL_APPROVE',
+  COMPLEX_METRIC_LABEL_APPROVE = 'COMPLEX_METRIC_LABEL_APPROVE',
 }
 
 export enum ERType {

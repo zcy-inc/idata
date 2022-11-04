@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.label;
 
+import cn.zhengcaiyun.idata.develop.dto.measure.DimTableDto;
 import cn.zhengcaiyun.idata.develop.dto.measure.ModifierDto;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -36,7 +37,11 @@ public class SpecialAttributeDto {
     private String atomicMetricCode;
     private String atomicMetricName;
     private String complexMetricFormula;
+    @ApiModelProperty(value = "ACCUMULATE | HALF_ACCUMULATE | NON_ACCUMULATE")
+    private String calculableType;
     private List<ModifierDto> modifiers;
+    private List<DimTableDto> dimTables;
+    private TimeAttributeDto timeAttribute;
 
     // GaS
     public String getAggregatorCode() {
@@ -93,5 +98,29 @@ public class SpecialAttributeDto {
 
     public void setAggregate(String aggregate) {
         this.aggregate = aggregate;
+    }
+
+    public String getCalculableType() {
+        return calculableType;
+    }
+
+    public void setCalculableType(String calculableType) {
+        this.calculableType = calculableType;
+    }
+
+    public List<DimTableDto> getDimTables() {
+        return dimTables;
+    }
+
+    public void setDimTables(List<DimTableDto> dimTables) {
+        this.dimTables = dimTables;
+    }
+
+    public TimeAttributeDto getTimeAttribute() {
+        return timeAttribute;
+    }
+
+    public void setTimeAttribute(TimeAttributeDto timeAttribute) {
+        this.timeAttribute = timeAttribute;
     }
 }

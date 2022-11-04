@@ -4,15 +4,19 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.connector.bean.dto.ClusterAppDto;
 import cn.zhengcaiyun.idata.connector.resourcemanager.ResourceManagerService;
+import cn.zhengcaiyun.idata.develop.condition.job.JobAnotherHistoryCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.YarnJobStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDao;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryMyDao;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryGanttDto;
 import cn.zhengcaiyun.idata.develop.dto.JobHistoryTableGanttDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobHistoryDto;
+import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.system.common.constant.SystemConfigConstant;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
@@ -23,13 +27,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.mybatis.dynamic.sql.render.RenderingStrategies;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobHistoryDynamicSqlSupport.devJobHistory;
-import static org.mybatis.dynamic.sql.SqlBuilder.*;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.select;
 
 @Service
 public class JobHistoryServiceImpl implements JobHistoryService {
@@ -46,6 +50,9 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Autowired
     private ResourceManagerService resourceManagerService;
 
+    @Autowired
+    private JobScheduleManager jobScheduleManager;
+
     @Override
     public void batchUpsert(List<DevJobHistory> devJobHistoryList) {
         if (CollectionUtils.isEmpty(devJobHistoryList)) {
@@ -57,7 +64,10 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Override
     public PageInfo<DevJobHistory> pagingJobHistoryByJobId(Long jobId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
-        var builder = select(devJobHistory.allColumns()).from(devJobHistory).where(devJobHistory.jobId, isEqualTo(jobId));
+        var builder = select(devJobHistory.allColumns())
+                .from(devJobHistory)
+                .where(devJobHistory.jobId, isEqualTo(jobId))
+                .orderBy(devJobHistory.startTime.descending());
         List<DevJobHistory> list = devJobHistoryDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
         PageInfo<DevJobHistory> pageInfo = new PageInfo<>(list);
         return pageInfo;
@@ -219,6 +229,12 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         ArrayList<JobHistoryTableGanttDto> jobHistoryTableGanttDtos = new ArrayList<>(map.values());
         Collections.sort(jobHistoryTableGanttDtos);
         return jobHistoryTableGanttDtos;
+    }
+
+    @Override
+    public Page<JobAnotherHistoryDto> pagingJobHistory(JobAnotherHistoryCondition condition) {
+        return jobScheduleManager.pagingJobHistory(condition.getJobId(), condition.getEnvironment(), condition.getStartTime(), condition.getEndTime(),
+                condition.getPageNum(), condition.getPageSize());
     }
 
 }

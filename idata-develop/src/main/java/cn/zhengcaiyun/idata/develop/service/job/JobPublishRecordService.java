@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PageParam;
 import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
+import cn.zhengcaiyun.idata.develop.dal.model.job.JobPublishRecord;
 import cn.zhengcaiyun.idata.develop.dto.job.JobPublishRecordDto;
 
 import java.util.List;
@@ -41,4 +42,12 @@ public interface JobPublishRecordService {
     Boolean reject(Long id, String remark, Operator operator);
 
     Boolean reject(List<Long> ids, String remark, Operator operator);
+
+    List<JobPublishRecord> findJobs(JobPublishRecordCondition condition);
+
+    /**
+     * 删除发布版本
+     * @param id
+     */
+    boolean delete(Long id);
 }

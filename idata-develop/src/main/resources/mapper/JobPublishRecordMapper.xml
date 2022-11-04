@@ -56,7 +56,6 @@
                   and del = 0
                   and job_id = #{jobId}
                   and environment = #{env}
-                  and job_type_code = 'SQL_SPARK'
             ) as t1
         join dev_job_content_sql as t2
         on t1.job_content_id = t2.id

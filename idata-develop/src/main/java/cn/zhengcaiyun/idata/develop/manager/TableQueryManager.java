@@ -142,7 +142,7 @@ public class TableQueryManager {
         return Long.parseLong(resultDto.getData().get(0).get(0));
     }
 
-    private ConnectionCfg getConnectionInfo() {
+    public ConnectionCfg getConnectionInfo() {
         SysConfig trinoConfig = sysConfigDao.selectOne(dsl -> dsl.where(sysConfig.keyOne, isEqualTo("trino-info")))
                 .orElse(null);
         ConnectionCfg cfg = null;

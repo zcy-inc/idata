@@ -16,8 +16,11 @@
  */
 package cn.zhengcaiyun.idata.user.service;
 
+import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
+
+import java.util.List;
 
 /**
  * @author shiyin
@@ -25,9 +28,16 @@ import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
  */
 public interface UserManagerService {
     Page<UserInfoDto> findUsers(String name, Integer limit, Integer offset);
+
     UserInfoDto getUserInfo(Long userId);
+
     UserInfoDto create(UserInfoDto userInfoDto, String creator);
+
     UserInfoDto edit(UserInfoDto userInfoDto, String editor);
+
     boolean resetUserPassword(Long userId, String editor);
+
     boolean delete(Long userId, String editor);
+
+    List<SingleIdPair<String>> getUserKeyValList();
 }

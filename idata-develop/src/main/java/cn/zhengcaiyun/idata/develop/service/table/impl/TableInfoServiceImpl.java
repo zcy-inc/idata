@@ -60,6 +60,7 @@ import static cn.zhengcaiyun.idata.develop.dal.dao.DevForeignKeyDynamicSqlSuppor
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDefineDynamicSqlSupport.devLabelDefine;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevLabelDynamicSqlSupport.devLabel;
 import static cn.zhengcaiyun.idata.develop.dal.dao.DevTableInfoDynamicSqlSupport.devTableInfo;
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserDynamicSqlSupport.uacUser;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -120,6 +121,7 @@ public class TableInfoServiceImpl implements TableInfoService {
     private final String COLUMN_PT_LABEL = "partitionedCol:LABEL";
     private final String COLUMN_DESCRIPTION_LABEL = "columnDescription:LABEL";
     private final String COLUMN_PK_LABEL = "pk:LABEL";
+    private final String DW_LAYER_LABEL = "dwLayer:LABEL";
 
     @Override
     public TableInfoDto getTableInfo(Long tableId) {
@@ -146,6 +148,44 @@ public class TableInfoServiceImpl implements TableInfoService {
                         .build().render(RenderingStrategies.MYBATIS3)),
                 LabelDto.class, "labelCode", "labelParamValue");
         return dbLabelDtoList;
+    }
+
+    @Override
+    public List<DevTableInfo> getForeignKeyTables(Long tableId) {
+        List<DevForeignKey> foreignKeyList = devForeignKeyDao.select(c -> c.where(devForeignKey.del, isNotEqualTo(1),
+                and(devForeignKey.tableId, isEqualTo(tableId))));
+        if (foreignKeyList.size() == 0) return new ArrayList<>();
+        List<Long> referTableIdList = foreignKeyList.stream().map(DevForeignKey::getReferTableId).collect(Collectors.toList());
+        return devTableInfoDao.select(c -> c.where(devTableInfo.del, isNotEqualTo(1), and(devTableInfo.id, isIn(referTableIdList))));
+    }
+
+    @Override
+    public List<DevTableInfo> getTablesByCondition(String tableName) {
+        var builder = select(devTableInfo.allColumns()).from(devTableInfo).where(devTableInfo.del, isNotEqualTo(1));
+        if (StringUtils.isNotEmpty(tableName)) {
+            builder.and(devTableInfo.tableName, isLike(tableName));
+        }
+        return devTableInfoDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
+    }
+
+    @Override
+    public TableInfoDto getTableInfoByName(String tableName) {
+        DevTableInfo existTableInfo = devTableInfoDao.selectOne(c -> c.where(devTableInfo.del, isNotEqualTo(1),
+                and(devTableInfo.tableName, isEqualTo(tableName)))).orElse(null);
+        if (existTableInfo == null) return new TableInfoDto();
+
+        return getTableInfoById(existTableInfo.getId());
+    }
+
+    @Override
+    public List<TableInfoDto> getRequiredTablesInfoByDataBase(String dwLayerCode) {
+        List<Long> tableIdList = devLabelDao.selectMany(select(devLabel.tableId)
+                .from(devLabel)
+                .where(devLabel.del, isNotEqualTo(1), and(devLabel.labelCode, isEqualTo(DW_LAYER_LABEL)), 
+                        and(devLabel.labelParamValue, isEqualTo(dwLayerCode)))
+                .build().render(RenderingStrategies.MYBATIS3))
+                .stream().map(DevLabel::getTableId).collect(Collectors.toList());
+        return tableIdList.stream().map(this::getTableInfoById).collect(Collectors.toList());
     }
 
     @Override
@@ -249,7 +289,9 @@ public class TableInfoServiceImpl implements TableInfoService {
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public TableInfoDto create(TableInfoDto tableInfoDto, String operator) throws IllegalAccessException {
-        devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId());
+        if (!"系统管理员".equals(operator)) {
+            devAccessService.checkAddAccess(OperatorContext.getCurrentOperator().getId(), tableInfoDto.getFolderId());
+        }
 
         checkArgument(isNotEmpty(operator), "创建者不能为空");
         checkArgument(isNotEmpty(tableInfoDto.getTableName()), "表名称不能为空");
@@ -527,6 +569,9 @@ public class TableInfoServiceImpl implements TableInfoService {
         }).collect(Collectors.toList());
         List<LabelDto> tableLabelList = labelService.findLabels(tableId, null);
         List<ColumnInfoDto> columnInfoDtoList = columnInfoService.getColumns(tableId);
+        List<String> pkColumnNameList = columnInfoDtoList.stream()
+                .filter(columnInfoDto -> columnInfoDto.getPk() != null && columnInfoDto.getPk()).collect(Collectors.toList())
+                .stream().map(ColumnInfoDto::getColumnName).collect(Collectors.toList());
 
         echoTableInfo.setTableLabels(tableLabelList);
         echoTableInfo.setColumnInfos(columnInfoDtoList);
@@ -534,6 +579,7 @@ public class TableInfoServiceImpl implements TableInfoService {
         echoTableInfo.setDbName(tableLabelList
                 .stream().filter(tableLabel -> DB_NAME_LABEL.equals(tableLabel.getLabelCode()))
                 .findAny().get().getLabelParamValue());
+        echoTableInfo.setPkColumnNames(pkColumnNameList.size() > 0 ? String.join(",", pkColumnNameList) : "");
         return echoTableInfo;
     }
 

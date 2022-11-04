@@ -40,6 +40,7 @@ public class TableInfoDto {
     private List<ColumnInfoDto> columnInfos;
     private List<ForeignKeyDto> foreignKeys;
     private String dbName;
+    private String pkColumnNames;
 
     // GaS
     public Long getId() {
@@ -144,5 +145,13 @@ public class TableInfoDto {
 
     public void setHiveTableName(String hiveTableName) {
         this.hiveTableName = hiveTableName;
+    }
+
+    public String getPkColumnNames() {
+        return pkColumnNames;
+    }
+
+    public void setPkColumnNames(String pkColumnNames) {
+        this.pkColumnNames = pkColumnNames;
     }
 }

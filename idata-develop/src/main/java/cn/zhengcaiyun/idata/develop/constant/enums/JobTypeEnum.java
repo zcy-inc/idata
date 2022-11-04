@@ -37,7 +37,8 @@ public enum JobTypeEnum {
     BACK_FLOW("BACK_FLOW", "DI", "数据回流-离线", "", ""),
 
     SQL_SPARK("SQL_SPARK", "SQL", "Sql作业", "SQL", "SPARK"),
-    SQL_DORIS("SQL_DORIS", "SQL", "Sql作业", "SQL", "DORIS"),
+    SQL_FLINK("SQL_FLINK", "SQL", "Sql作业", "SQL", "FLINK"),
+    SQL_STARROCKS("SQL_STARROCKS", "SQL", "Sql作业", "SQL", "STARROCKS"),
 
     SPARK_PYTHON("SPARK_PYTHON", "SPARK", "Spark作业", "PYTHON", "SPARK"),
     SPARK_JAR("SPARK_JAR", "SPARK", "Spark作业", "JAR", "SPARK"),

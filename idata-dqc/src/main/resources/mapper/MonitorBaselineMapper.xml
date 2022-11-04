@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhengcaiyun.idata.dqc.dao.MonitorBaselineDao">
+
+    <resultMap type="cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline" id="MonitorBaselineMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="del" column="del" jdbcType="INTEGER"/>
+        <result property="creator" column="creator" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="editor" column="editor" jdbcType="VARCHAR"/>
+        <result property="editTime" column="edit_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="getById" resultMap="MonitorBaselineMap">
+        select
+          id, name, status, del, creator, create_time, editor, edit_time
+        from dqc_monitor_baseline
+        where del=0 and id = #{id}
+    </select>
+
+    <select id="getByPage" resultMap="MonitorBaselineMap" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline">
+        select
+          id, name, status, del, creator, create_time, editor, edit_time
+        from dqc_monitor_baseline
+        where del=0
+            <if test="name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        order by edit_time desc
+        limit #{startIndex}, #{pageSize}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer"  parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline">
+        select count(1)
+        from dqc_monitor_baseline
+        where del=0
+        <if test="name != null and name != ''">
+            and name like concat('%',#{name},'%')
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+    </select>
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline">
+        insert into dqc_monitor_baseline(name, status, del, creator, create_time, editor, edit_time)
+        values (#{name}, #{status}, 0, #{creator}, now(), #{editor}, now())
+    </insert>
+
+    <update id="update" parameterType="cn.zhengcaiyun.idata.dqc.model.entity.MonitorBaseline">
+        update dqc_monitor_baseline
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="del != null">
+                del = #{del},
+            </if>
+                editor = #{editor},
+                edit_time = now(),
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="getByRuleId" resultMap="MonitorBaselineMap">
+        select id,status from dqc_monitor_baseline
+        where id in(select baseline_id from dqc_monitor_rule where id = #{ruleId})
+    </select>
+
+    <select id="getByTemplateId" resultMap="MonitorBaselineMap">
+        select id,status,name from dqc_monitor_baseline
+        where id in(select  baseline_id from dqc_monitor_rule where template_id=#{templateId})
+        and status=#{status}
+    </select>
+
+</mapper>
+

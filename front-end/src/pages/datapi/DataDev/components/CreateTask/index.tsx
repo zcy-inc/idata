@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ModalForm } from '@ant-design/pro-form';
-import { Form, Input, message, Select } from 'antd';
+import { Form, Input, message, Select, Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useModel } from 'umi';
 import { useRequest } from 'ahooks';
 import type { FC } from 'react';
@@ -9,13 +10,12 @@ import styles from './index.less';
 
 import {
   getEnumValues,
-  getFolders,
   createDIJob,
   getDIJobTypes,
   getDISyncMode,
 } from '@/services/datadev';
-import { FolderBelong } from '@/constants/datadev';
-import { Folder } from '@/types/datadev';
+import { FolderBelong, ContentBelong } from '@/constants/datadev';
+import { DIFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
 
@@ -26,26 +26,30 @@ const rules = [{ required: true, message: '请选择' }];
 
 const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [form] = Form.useForm();
-  const { visibleTask, setVisibleTask, getTreeWrapped } = useModel('datadev', (_) => ({
-    visibleTask: _.visibleTask,
-    setVisibleTask: _.setVisibleTask,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { visibleTask, setVisibleTask, getTreeWrapped, curNode, onSelectNewTab } = useModel('datadev');
+
+  useEffect(() => {
+    const folderId = curNode?.id;
+    form.setFieldsValue({ folderId });
+  }, [curNode])
+
   const { data: jobTypeOptions } = useRequest(getDIJobTypes);
   const { data: syncModeOptions = [], run: getSyncModeOptions } = useRequest(getDISyncMode, {
     manual: true,
   });
 
   const handleCreateDI = async (values: CreateDIJobDto) => {
-    const { success, msg } = await createDIJob(values);
+    const { success, data, msg } = await createDIJob(values);
     if (success) {
-      message.success('创建任务成功');
+      message.success('创建作业成功');
       setVisibleTask(false);
-      getTreeWrapped();
+      getTreeWrapped().then(_ => {
+        const concreteBelong = values.syncMode === 'STREAM' ? ContentBelong.STREAM : ContentBelong.BATCH;
+        onSelectNewTab(FolderBelong.DI, concreteBelong, data)
+      });
     } else {
-      message.success(`创建任务失败: ${msg}`);
+      message.success(`创建作业失败: ${msg}`);
     }
   };
 
@@ -58,15 +62,22 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
       .catch((err) => {});
-    getFolders({ belong: FolderBelong.DI })
-      .then((res) => setFolders(res.data))
-      .catch((err) => {});
   }, []);
+
+  const jobTypeLabel = () => {
+    return (
+      <span>作业类型
+        <Tooltip title={<span>数据回流：将数据从hive ads层同步到MMP数据库。 <br/> 数据抽取：将数据从关系型数据库抽取数据到hive的过程。</span>}>
+          <QuestionCircleOutlined />
+        </Tooltip>
+      </span>
+    )
+  }
 
   return (
     <ModalForm
       className={styles.form}
-      title="新建任务"
+      title="新建作业"
       layout="horizontal"
       width={536}
       labelCol={{ span: 6 }}
@@ -84,7 +95,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       }}
       onFinish={handleCreateDI}
     >
-      <Item name="jobType" label="任务类型" rules={rules}>
+      <Item name="jobType" label={jobTypeLabel()} rules={rules}>
         <Select
           size="large"
           style={{ width }}
@@ -105,7 +116,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="name" label="任务名称" rules={rules}>
+      <Item name="name" label="作业名称" rules={rules}>
         <Input size="large" style={{ width }} placeholder="请输入" />
       </Item>
       <Item name="dwLayerCode" label="数仓分层" rules={rules}>
@@ -118,16 +129,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="folderId" label="目标文件夹" rules={rules}>
-        <Select
-          size="large"
-          style={{ width }}
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          showSearch
-          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-        />
-      </Item>
+      <DIFolderFormItem style={{ width }} />
       <Item name="remark" label="备注说明">
         <TextArea placeholder="请输入" style={{ width }} />
       </Item>

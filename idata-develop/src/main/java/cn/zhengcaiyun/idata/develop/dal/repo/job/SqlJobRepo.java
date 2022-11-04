@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author caizhedong
@@ -28,9 +29,18 @@ import java.util.List;
 
 public interface SqlJobRepo {
     DevJobContentSql query(Long jobId, Integer version);
+
     List<DevJobContentSql> queryList(Long jobId);
+
+    Optional<DevJobContentSql> queryLatest(Long jobId);
+
     boolean add(DevJobContentSql jobContentSql);
+
     boolean update(DevJobContentSql jobContentSql);
+
     Integer newVersion(Long jobId);
+
     Boolean updateEditable(Long id, EditableEnum editable, String operator);
+
+    List<DevJobContentSql> queryList(List<Long> ids);
 }

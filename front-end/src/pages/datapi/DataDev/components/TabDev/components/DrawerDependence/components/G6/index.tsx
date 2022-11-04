@@ -247,7 +247,7 @@ const Mapping: ForwardRefRenderFunction<unknown, MapProps> = ({ data, env }, ref
    * 重跑 / 重跑下游
    */
   const rerunTaskWrapped = (runPost: boolean) => {
-    rerunTask({ id: data?.id as number, env, runPost })
+    rerunTask({ id: current?.jobId as number, env, runPost })
       .then((res) => {
         if (res.data) {
           message.success('重跑成功');

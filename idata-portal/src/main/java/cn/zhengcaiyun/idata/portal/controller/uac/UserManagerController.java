@@ -16,6 +16,7 @@
  */
 package cn.zhengcaiyun.idata.portal.controller.uac;
 
+import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.system.dto.FeatureTreeNodeDto;
@@ -29,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author shiyin
@@ -72,9 +71,10 @@ public class UserManagerController {
     @GetMapping("userFolderTree/{userId}")
     public RestResult<List<FolderTreeNodeDto>> getUserFolderTree(@PathVariable("userId") Long userId,
                                                                  HttpServletRequest request) throws IllegalAccessException {
-        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
-            throw new IllegalAccessException("没有用户管理权限");
-        }
+        // 浑仪接入的数据权限依赖此接口，线上IDATA激活了此校验无法跳过下面的鉴权判断，故注释，后面考虑迁移
+//        if (!userAccessService.checkAccess(tokenService.getUserId(request), accessCode)) {
+//            throw new IllegalAccessException("没有用户管理权限");
+//        }
         return RestResult.success(userAccessService.getUserFolderTree(userId));
     }
 
@@ -114,6 +114,16 @@ public class UserManagerController {
         }
         userManagerService.delete(userId, tokenService.getNickname(request));
         return RestResult.success();
+    }
+
+    /**
+     * 获取用户下拉列表
+     *
+     * @return
+     */
+    @GetMapping("/users/KeyValList")
+    public RestResult<List<SingleIdPair<String>>> getUserKeyValList() {
+        return RestResult.success(userManagerService.getUserKeyValList());
     }
 
 }

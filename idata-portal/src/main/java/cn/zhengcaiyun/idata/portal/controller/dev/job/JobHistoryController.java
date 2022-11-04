@@ -2,7 +2,9 @@ package cn.zhengcaiyun.idata.portal.controller.dev.job;
 
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.condition.job.JobAnotherHistoryCondition;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobHistory;
+import cn.zhengcaiyun.idata.develop.dto.job.JobAnotherHistoryDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobInfoDto;
 import cn.zhengcaiyun.idata.develop.service.job.JobHistoryService;
 import cn.zhengcaiyun.idata.develop.service.job.JobInfoService;
@@ -16,7 +18,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Api("历史作业")
 @RestController
@@ -57,4 +62,8 @@ public class JobHistoryController {
         return RestResult.success(true);
     }
 
+    @PostMapping("/anotherPage")
+    public RestResult<Page<JobAnotherHistoryDto>> pagingJobHistory(@RequestBody JobAnotherHistoryCondition condition) {
+        return RestResult.success(jobHistoryService.pagingJobHistory(condition));
+    }
 }

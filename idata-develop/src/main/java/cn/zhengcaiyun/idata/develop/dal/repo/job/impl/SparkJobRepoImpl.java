@@ -19,19 +19,16 @@ package cn.zhengcaiyun.idata.develop.dal.repo.job.impl;
 import cn.zhengcaiyun.idata.commons.enums.DeleteEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.EditableEnum;
 import cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDao;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentScript;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSpark;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.SparkJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
@@ -46,9 +43,9 @@ public class SparkJobRepoImpl implements SparkJobRepo {
     @Override
     public DevJobContentSpark query(Long jobId, Integer version) {
         return devJobContentSparkDao.selectOne(c ->
-                c.where(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val),
-                        and(devJobContentSpark.jobId, isEqualTo(jobId)),
-                        and(devJobContentSpark.version, isEqualTo(version))))
+                        c.where(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                                and(devJobContentSpark.jobId, isEqualTo(jobId)),
+                                and(devJobContentSpark.version, isEqualTo(version))))
                 .orElse(null);
     }
 
@@ -84,5 +81,20 @@ public class SparkJobRepoImpl implements SparkJobRepo {
                 .set(devJobContentSpark.editor).equalTo(operator)
                 .where(devJobContentSpark.id, isEqualTo(id)));
         return Boolean.TRUE;
+    }
+
+    @Override
+    public Optional<DevJobContentSpark> queryLatest(Long jobId) {
+        return devJobContentSparkDao.selectOne(dsl -> dsl.where(devJobContentSpark.jobId, isEqualTo(jobId),
+                        and(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(devJobContentSpark.version.descending())
+                .limit(1));
+    }
+
+    @Override
+    public List<DevJobContentSpark> queryList(List<Long> ids) {
+        return devJobContentSparkDao.select(c ->
+                c.where(devJobContentSpark.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentSpark.id, isIn(ids))));
     }
 }

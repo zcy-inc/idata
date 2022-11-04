@@ -34,7 +34,7 @@ import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 @Mapper
 public interface DevJobContentSqlDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_sql")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, udfIds, externalTables, sourceSql);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, editable, version, udfIds, externalTables, extendConfigs, sourceSql);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_content_sql")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -68,6 +68,7 @@ public interface DevJobContentSqlDao {
         @Result(column="version", property="version", jdbcType=JdbcType.INTEGER),
         @Result(column="udf_ids", property="udfIds", jdbcType=JdbcType.VARCHAR),
         @Result(column="external_tables", property="externalTables", jdbcType=JdbcType.VARCHAR),
+        @Result(column="extend_configs", property="extendConfigs", jdbcType=JdbcType.VARCHAR),
         @Result(column="source_sql", property="sourceSql", jdbcType=JdbcType.LONGVARCHAR)
     })
     List<DevJobContentSql> selectMany(SelectStatementProvider selectStatement);
@@ -106,6 +107,7 @@ public interface DevJobContentSqlDao {
             .map(version).toProperty("version")
             .map(udfIds).toProperty("udfIds")
             .map(externalTables).toProperty("externalTables")
+            .map(extendConfigs).toProperty("extendConfigs")
             .map(sourceSql).toProperty("sourceSql")
         );
     }
@@ -123,6 +125,7 @@ public interface DevJobContentSqlDao {
             .map(version).toPropertyWhenPresent("version", record::getVersion)
             .map(udfIds).toPropertyWhenPresent("udfIds", record::getUdfIds)
             .map(externalTables).toPropertyWhenPresent("externalTables", record::getExternalTables)
+            .map(extendConfigs).toPropertyWhenPresent("extendConfigs", record::getExtendConfigs)
             .map(sourceSql).toPropertyWhenPresent("sourceSql", record::getSourceSql)
         );
     }
@@ -166,6 +169,7 @@ public interface DevJobContentSqlDao {
                 .set(version).equalTo(record::getVersion)
                 .set(udfIds).equalTo(record::getUdfIds)
                 .set(externalTables).equalTo(record::getExternalTables)
+                .set(extendConfigs).equalTo(record::getExtendConfigs)
                 .set(sourceSql).equalTo(record::getSourceSql);
     }
 
@@ -181,6 +185,7 @@ public interface DevJobContentSqlDao {
                 .set(version).equalToWhenPresent(record::getVersion)
                 .set(udfIds).equalToWhenPresent(record::getUdfIds)
                 .set(externalTables).equalToWhenPresent(record::getExternalTables)
+                .set(extendConfigs).equalToWhenPresent(record::getExtendConfigs)
                 .set(sourceSql).equalToWhenPresent(record::getSourceSql);
     }
 
@@ -197,6 +202,7 @@ public interface DevJobContentSqlDao {
             .set(version).equalTo(record::getVersion)
             .set(udfIds).equalTo(record::getUdfIds)
             .set(externalTables).equalTo(record::getExternalTables)
+            .set(extendConfigs).equalTo(record::getExtendConfigs)
             .set(sourceSql).equalTo(record::getSourceSql)
             .where(id, isEqualTo(record::getId))
         );
@@ -215,6 +221,7 @@ public interface DevJobContentSqlDao {
             .set(version).equalToWhenPresent(record::getVersion)
             .set(udfIds).equalToWhenPresent(record::getUdfIds)
             .set(externalTables).equalToWhenPresent(record::getExternalTables)
+            .set(extendConfigs).equalToWhenPresent(record::getExtendConfigs)
             .set(sourceSql).equalToWhenPresent(record::getSourceSql)
             .where(id, isEqualTo(record::getId))
         );

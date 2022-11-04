@@ -3,6 +3,7 @@ package cn.zhengcaiyun.idata.portal.model.request.udf;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.annotation.Generated;
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
@@ -34,6 +35,11 @@ public class UdfUpdateRequest {
     @ApiModelProperty("文件名称")
     @NotEmpty(message = "fileName 不能为空")
     private String fileName;
+
+    /**
+     * 自动推荐文件名称 当为true时候，fileName无效
+     */
+    private boolean autoRecommendFileName = true;
 
     /**
      * Database Column Remarks:
@@ -85,6 +91,16 @@ public class UdfUpdateRequest {
      */
     @ApiModelProperty("示例")
     private String udfSample;
+
+    /**
+     * "java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）"
+     */
+    private String sourceName;
+
+    /**
+     *   是否是全局类型函数，1：是，0：否
+     */
+    private Integer globalFun = 1;
 
     public Long getId() {
         return id;
@@ -172,5 +188,29 @@ public class UdfUpdateRequest {
 
     public void setUdfSample(String udfSample) {
         this.udfSample = udfSample;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public Integer getGlobalFun() {
+        return globalFun;
+    }
+
+    public void setGlobalFun(Integer globalFun) {
+        this.globalFun = globalFun;
+    }
+
+    public boolean isAutoRecommendFileName() {
+        return autoRecommendFileName;
+    }
+
+    public void setAutoRecommendFileName(boolean autoRecommendFileName) {
+        this.autoRecommendFileName = autoRecommendFileName;
     }
 }

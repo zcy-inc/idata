@@ -61,6 +61,7 @@ public class TableDataServiceImpl implements TableDataService {
     private TableInfoService tableInfoService;
 
     private final String DB_NAME_LABEL = "dbName:LABEL";
+    private final String ODS_DB_NAME = "ods";
 
     @Override
     public QueryResultDto getTableData(Long tableId, PageParam pageParam) {
@@ -70,7 +71,9 @@ public class TableDataServiceImpl implements TableDataService {
         TableInfoDto tableInfoDto = tableInfoService.getTableInfo(tableId);
         checkState(Objects.nonNull(tableInfoDto), "表不存在");
 
-        QueryResultDto resultDto = dataQueryApi.queryData(getDbName(tableId), tableInfo.getTableName(), pageParam.getLimit(), pageParam.getOffset());
+        String dbName = getDbName(tableId);
+        QueryResultDto resultDto = ODS_DB_NAME.equals(dbName) ? new QueryResultDto()
+        : dataQueryApi.queryData(dbName, tableInfo.getTableName(), pageParam.getLimit(), pageParam.getOffset());
         Map<String, String> columnAliasMap = extractColumnAlias(tableInfoDto);
         resultDto.setMeta(injectColumnAlias(resultDto.getMeta(), columnAliasMap));
         return resultDto;

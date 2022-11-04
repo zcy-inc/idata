@@ -21,11 +21,13 @@ public class OpenJobController {
      */
     @GetMapping("/execute-detail")
     public RestResult<JobInfoExecuteDetailDto> getJobInfoDetail(@RequestParam("jobId") Long jobId,
-                                                                @RequestParam("env") String env) {
+                                                                @RequestParam("env") String env,
+                                                                @RequestParam(value = "jobVersion", required = false) Integer jobVersion) {
         if (EnvEnum.getEnum(env).isEmpty()) {
             return RestResult.error("env is invalid : " + env, "invalid params");
         }
-        return RestResult.success(jobInfoService.getJobInfoExecuteDetail(jobId, env));
+        JobInfoExecuteDetailDto jobInfoExecuteDetail = jobInfoService.getJobInfoExecuteDetail(jobId, env, jobVersion);
+        return RestResult.success(jobInfoExecuteDetail);
     }
 
 

@@ -20,6 +20,7 @@ package cn.zhengcaiyun.idata.develop.service.job;
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.develop.dto.job.JobAndDagDto;
 import cn.zhengcaiyun.idata.develop.dto.job.JobConfigCombinationDto;
+import cn.zhengcaiyun.idata.develop.dto.job.JobDependenceDto;
 
 import java.util.List;
 
@@ -33,6 +34,8 @@ public interface JobExecuteConfigService {
     JobConfigCombinationDto save(Long jobId, String environment, JobConfigCombinationDto dto, Operator operator);
 
     JobConfigCombinationDto getCombineConfig(Long jobId, String environment);
+
+    List<JobDependenceDto> deriveDependencies(Long jobId, String environment, Integer version);
 
     List<JobAndDagDto> getConfiguredJobList(String environment);
 }

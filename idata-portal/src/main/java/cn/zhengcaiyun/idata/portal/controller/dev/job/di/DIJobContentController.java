@@ -18,15 +18,18 @@
 package cn.zhengcaiyun.idata.portal.controller.dev.job.di;
 
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
+import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
+import cn.zhengcaiyun.idata.commons.exception.GeneralException;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.develop.constant.enums.WriteModeEnum;
 import cn.zhengcaiyun.idata.develop.dto.job.di.DIJobContentContentDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import cn.zhengcaiyun.idata.portal.model.request.job.DIJobContentRequest;
 import cn.zhengcaiyun.idata.portal.model.response.job.DIJobContentResponse;
-import org.springframework.beans.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,13 +57,23 @@ public class DIJobContentController {
     /**
      * 保存DI作业内容
      *
-     * @param jobId      作业id
+     * @param jobId          作业id
      * @param contentRequest 作业内容信息
      * @return
      */
     @PostMapping("/contents")
     public RestResult<DIJobContentResponse> saveContent(@PathVariable("jobId") Long jobId,
-                                                          @RequestBody @Valid DIJobContentRequest contentRequest) {
+                                                        @RequestBody @Valid DIJobContentRequest contentRequest) {
+        Integer srcShardingNum = contentRequest.getSrcShardingNum();
+        String srcReadShardKey = contentRequest.getSrcReadShardKey();
+        if (srcShardingNum != null && srcShardingNum > 1 && StringUtils.isEmpty(srcReadShardKey)) {
+            throw new GeneralException("分片数大于1时，切分键必填");
+        }
+        String destDataSourceType = contentRequest.getDestDataSourceType();
+        if (StringUtils.equalsIgnoreCase(destDataSourceType, DataSourceTypeEnum.kafka.name())) {
+            contentRequest.setDestWriteMode(WriteModeEnum.BackFlowEnum.INSERT.name());
+        }
+
         DIJobContentContentDto contentDto = new DIJobContentContentDto();
         BeanUtils.copyProperties(contentRequest, contentDto);
 
@@ -89,7 +102,8 @@ public class DIJobContentController {
         BeanUtils.copyProperties(dto, response);
 
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), ".")) {
+        String srcDataSourceType = response.getSrcDataSourceType();
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }
@@ -103,16 +117,35 @@ public class DIJobContentController {
      * @param version 作业版本号
      * @return
      */
-    @GetMapping("/adapt/contents/{version}")
-    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
-                                                            @PathVariable("version") Integer version) {
+    @GetMapping("/contents/{version}")
+    public RestResult<DIJobContentResponse> getContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
         DIJobContentContentDto dto = diJobContentService.get(jobId, version);
 
         DIJobContentResponse response = new DIJobContentResponse();
         BeanUtils.copyProperties(dto, response);
 
+        String srcDataSourceType = response.getSrcDataSourceType();
         // 1个字段拆成2个返回
-        if (StringUtils.contains(dto.getSrcTables(), ".")) {
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
+            response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
+            response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
+        }
+
+        return RestResult.success(response);
+    }
+
+    @GetMapping("/adapt/contents/{version}")
+    public RestResult<DIJobContentResponse> getAdaptContent(@PathVariable("jobId") Long jobId,
+                                                       @PathVariable("version") Integer version) {
+        DIJobContentContentDto dto = diJobContentService.get(jobId, version);
+
+        DIJobContentResponse response = new DIJobContentResponse();
+        BeanUtils.copyProperties(dto, response);
+
+        String srcDataSourceType = response.getSrcDataSourceType();
+        // 1个字段拆成2个返回
+        if (StringUtils.contains(dto.getSrcTables(), ".") && StringUtils.equalsIgnoreCase(srcDataSourceType, DataSourceTypeEnum.hive.name())) {
             response.setSrcDbName(dto.getSrcTables().split("\\.")[0]);
             response.setSrcTables(dto.getSrcTables().split("\\.")[1]);
         }

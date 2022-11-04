@@ -1,5 +1,10 @@
 package cn.zhengcaiyun.idata.develop.dto.label;
 
+import com.google.common.collect.Sets;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * @author caizhedong
  * @date 2021-05-18 21:01
@@ -23,5 +28,29 @@ public enum LabelTagEnum {
     ATOMIC_METRIC_LABEL_DISABLE,
     DERIVE_METRIC_LABEL_DISABLE,
     COMPLEX_METRIC_LABEL_DISABLE,
+    ATOMIC_METRIC_LABEL_DRAFT,
+    DERIVE_METRIC_LABEL_DRAFT,
+    COMPLEX_METRIC_LABEL_DRAFT,
+    ATOMIC_METRIC_LABEL_APPROVE,
+    DERIVE_METRIC_LABEL_APPROVE,
+    COMPLEX_METRIC_LABEL_APPROVE,
     MODIFIER_LABEL_DISABLE;
+
+    public static final Set<LabelTagEnum> metric_tags = Sets.newHashSet(
+            ATOMIC_METRIC_LABEL,
+            DERIVE_METRIC_LABEL,
+            COMPLEX_METRIC_LABEL,
+            ATOMIC_METRIC_LABEL_DISABLE,
+            DERIVE_METRIC_LABEL_DISABLE,
+            COMPLEX_METRIC_LABEL_DISABLE,
+            ATOMIC_METRIC_LABEL_DRAFT,
+            DERIVE_METRIC_LABEL_DRAFT,
+            COMPLEX_METRIC_LABEL_DRAFT,
+            ATOMIC_METRIC_LABEL_APPROVE,
+            DERIVE_METRIC_LABEL_APPROVE,
+            COMPLEX_METRIC_LABEL_APPROVE);
+
+    public static final Set<String> metric_tag_names = metric_tags.stream()
+            .map(LabelTagEnum::name)
+            .collect(Collectors.toSet());
 }

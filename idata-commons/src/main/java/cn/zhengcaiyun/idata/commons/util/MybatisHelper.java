@@ -26,4 +26,12 @@ public class MybatisHelper {
     public static String appendWildCards(String in) {
         return "%" + in + "%";
     }
+
+    public static String appendLeftWildCards(String in) {
+        return "%" + in;
+    }
+
+    public static String appendRightWildCards(String in) {
+        return in + "%";
+    }
 }

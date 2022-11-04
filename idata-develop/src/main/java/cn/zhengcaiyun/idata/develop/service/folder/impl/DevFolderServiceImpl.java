@@ -81,28 +81,29 @@ public class DevFolderServiceImpl implements DevFolderService {
 
     @Override
     public List<DevelopFolderTreeNodeDto> getDevelopFolderTree(String devTreeType, String treeNodeName) {
-        treeNodeName = isNotEmpty(treeNodeName) ? treeNodeName : null;
-        Set<String> accessFolderIdList = getUserMeasureFolderIds(OperatorContext.getCurrentOperator().getId(), devTreeType);
+        Set<Long> accessFolderIdList = getUserMeasureFolderIds(OperatorContext.getCurrentOperator().getId(), devTreeType);
         if (accessFolderIdList.size() == 0) return Lists.newArrayList();
-        List<DevelopFolderTreeNodeDto> folderTreeList = devFolderMyDao.getDevelopFolders(devTreeType,
-                String.join(",", accessFolderIdList), treeNodeName);
-        List<Long> folderIdList = folderTreeList
-                .stream().filter(folderTree -> "FOLDER".equals(folderTree.getType())).collect(Collectors.toList())
-                .stream().map(DevelopFolderTreeNodeDto::getFolderId).collect(Collectors.toList());
-        List<DevFolder> folderList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
-                and(devFolder.id, isIn(accessFolderIdList.stream().map(Long::valueOf).collect(Collectors.toList())))));
-        folderList.forEach(folder -> {
-            if (!folderIdList.contains(folder.getId())) {
-                DevelopFolderTreeNodeDto folderTreeNode = new DevelopFolderTreeNodeDto();
-                folderTreeNode.setName(folder.getFolderName());
-                folderTreeNode.setParentId(folder.getParentId());
-                folderTreeNode.setFolderId(folder.getId());
-                folderTreeNode.setType("FOLDER");
-                folderTreeNode.setCid("F_" + folder.getId());
-                folderTreeNode.setFolderType(folder.getFolderType());
-                folderTreeList.add(folderTreeNode);
-            }
-        });
+
+        var builder = select(devFolder.allColumns()).from(devFolder)
+                .where(devFolder.del, isNotEqualTo(1), and(devFolder.id, isIn(accessFolderIdList)));
+        if (StringUtils.isNotEmpty(devTreeType)) {
+            builder.and(devFolder.folderType, isEqualTo(devTreeType));
+        }
+        if (StringUtils.isNotEmpty(treeNodeName)) {
+            builder.and(devFolder.folderName, isLike(treeNodeName));
+        }
+        // 取用户的上下级所有folderId
+        List<DevFolder> folderList = devFolderDao.selectMany(builder.build().render(RenderingStrategies.MYBATIS3));
+        List<DevelopFolderTreeNodeDto> folderTreeList = folderList.stream().map(folder -> {
+            DevelopFolderTreeNodeDto folderTreeNode = new DevelopFolderTreeNodeDto();
+            folderTreeNode.setName(folder.getFolderName());
+            folderTreeNode.setParentId(folder.getParentId());
+            folderTreeNode.setFolderId(folder.getId());
+            folderTreeNode.setType("FOLDER");
+            folderTreeNode.setCid("F_" + folder.getId());
+            folderTreeNode.setFolderType(folder.getFolderType());
+            return folderTreeNode;
+        }).collect(Collectors.toList());
 
         return getFolderTreeNodeList(0L, true, treeNodeName, folderTreeList).stream()
                 .filter(record -> record.getFolderType() == null || record.getFolderType().equals(devTreeType))
@@ -122,6 +123,8 @@ public class DevFolderServiceImpl implements DevFolderService {
                     }
                     return echoFolderTreeNode;
                 }).collect(Collectors.toList());
+        if (echo.size() == 0) return null;
+
         if (StringUtils.isEmpty(treeNodeName)) {
             return echo;
         }
@@ -222,7 +225,7 @@ public class DevFolderServiceImpl implements DevFolderService {
     }
 
     @Override
-    public Set<String> getUserTableFolderIds(Long userId) {
+    public Set<Long> getUserTableFolderIds(Long userId) {
         UserInfoDto user = userManagerService.getUserInfo(userId);
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllTableFolderIds();
 
@@ -233,11 +236,12 @@ public class DevFolderServiceImpl implements DevFolderService {
         folderIdList.addAll(userAccessService.getAccessKeys(OperatorContext.getCurrentOperator().getId(),
                 ResourceTypeEnum.R_DATA_DEVELOP_DIR.name() + "_D"));
         if (folderIdList.size() == 0) return new HashSet<>();
-        return new HashSet<>(folderIdList);
+
+        return folderIdList.stream().map(Long::valueOf).collect(Collectors.toSet());
     }
 
     @Override
-    public Set<String> getUserMeasureFolderIds(Long userId, String folderType) {
+    public Set<Long> getUserMeasureFolderIds(Long userId, String folderType) {
         UserInfoDto user = userManagerService.getUserInfo(userId);
         if (1 == user.getSysAdmin() || 2 == user.getSysAdmin()) return getAllMeasureFolderIds(folderType);
 
@@ -250,18 +254,18 @@ public class DevFolderServiceImpl implements DevFolderService {
         return getSubMeasureFolderIds(new HashSet<>(folderIdList), folderType);
     }
 
-    private Set<String> getAllTableFolderIds() {
+    private Set<Long> getAllTableFolderIds() {
         return compositeFolderRepo.queryAllFolder()
-                .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
+                .stream().map(CompositeFolder::getId).collect(Collectors.toSet());
     }
 
-    private Set<String> getAllMeasureFolderIds(String folderType) {
+    private Set<Long> getAllMeasureFolderIds(String folderType) {
         return devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
                 and(devFolder.folderType, isEqualTo(folderType))))
-                .stream().map(folder -> String.valueOf(folder.getId())).collect(Collectors.toSet());
+                .stream().map(DevFolder::getId).collect(Collectors.toSet());
     }
 
-    private Set<String> getSubMeasureFolderIds(Set<String> folderIds, String folderType) {
+    private Set<Long> getSubMeasureFolderIds(Set<String> folderIds, String folderType) {
         Set<Long> folderIdList = folderIds.stream().map(Long::valueOf).collect(Collectors.toSet());
         // 判断folderIds符合指标类型
         Set<Long> echoFolderIdList = devFolderDao.select(c -> c.where(devFolder.del, isNotEqualTo(1),
@@ -273,10 +277,11 @@ public class DevFolderServiceImpl implements DevFolderService {
         Set<Long> childFolderIdList = getChildFolderIds(echoFolderIdList, folderType);
         echoList.addAll(childFolderIdList);
         echoList.addAll(parentFolderIdList);
-        return echoList.stream().map(String::valueOf).collect(Collectors.toSet());
+        return echoList;
     }
 
-    private Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType) {
+    @Override
+    public Set<Long> getChildFolderIds(Set<Long> folderIds, String folderType) {
         Set<Long> childFolderIdList = devFolderDao.selectMany(select(devFolder.allColumns())
                 .from(devFolder)
                 .where(devFolder.del, isNotEqualTo(1), and(devFolder.parentId, isIn(folderIds)),
@@ -285,7 +290,7 @@ public class DevFolderServiceImpl implements DevFolderService {
                 .stream().map(DevFolder::getId).collect(Collectors.toSet());
         folderIds.addAll(childFolderIdList);
         if (childFolderIdList.size() > 0) {
-            return getChildFolderIds(childFolderIdList, folderType);
+            folderIds.addAll(getChildFolderIds(childFolderIdList, folderType));
         }
         return folderIds;
     }

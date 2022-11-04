@@ -9,16 +9,16 @@ export default () => (
     header={{
       title: '元数据属性配置',
       breadcrumb: {
-        routes: [
-          {
-            path: '',
-            breadcrumbName: '系统配置',
-          },
-          {
-            path: '',
-            breadcrumbName: '元数据属性配置',
-          }
-        ],
+        // routes: [
+        //   {
+        //     path: '',
+        //     breadcrumbName: '系统配置',
+        //   },
+        //   {
+        //     path: '',
+        //     breadcrumbName: '元数据属性配置',
+        //   }
+        // ],
       },
     }}
   >

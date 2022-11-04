@@ -1,10 +1,11 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 import moment from 'moment';
-import { DatePicker, Form, Input, Select } from 'antd';
+import { DatePicker, Form, FormInstance, Input, Select } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import Title from '@/components/Title';
 
 interface KylinProps {
+  form: FormInstance<any>;
   data: any;
 }
 
@@ -12,12 +13,7 @@ const { Item } = Form;
 const width = 200;
 const ruleSlct = [{ required: true, message: '请选择' }];
 
-const Kylin: ForwardRefRenderFunction<unknown, KylinProps> = ({ data }, ref) => {
-  const [form] = Form.useForm();
-
-  useImperativeHandle(ref, () => ({
-    form: form,
-  }));
+const Kylin: ForwardRefRenderFunction<unknown, KylinProps> = ({ data, form }, ref) => {
 
   useEffect(() => {
     if (data) {

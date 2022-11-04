@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>idata-parent</artifactId>
+        <groupId>cn.zhengcaiyun.idata</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>idata-dqc</artifactId>
+
+    <name>idata-dqc</name>
+    <!-- FIXME change it to the project's website -->
+    <url>http://www.example.com</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.zhengcaiyun.idata</groupId>
+            <artifactId>idata-connector</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.servlet</artifactId>
+                    <groupId>org.eclipse.jetty.orbit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-annotations</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-core-asl</artifactId>
+                    <groupId>org.codehaus.jackson</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.zhengcaiyun.idata</groupId>
+            <artifactId>idata-user</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-web</artifactId>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.2.Final</version>
+        </dependency>
+        <!--mapstruct编译-->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.2.Final</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>cn.gov.zcy.ipaas</groupId>-->
+<!--            <artifactId>ipaas-common</artifactId>-->
+<!--            <version>1.2-RELEASE</version>-->
+<!--        </dependency>-->
+
+
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.11</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>zookeeper</artifactId>
+                    <groupId>org.apache.zookeeper</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba.spring.boot</groupId>-->
+<!--            <artifactId>dubbo-spring-boot-starter</artifactId>-->
+<!--            <version>1.0.3-SNAPSHOT</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>dubbo</artifactId>-->
+<!--            <version>2.5.3</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework</groupId>-->
+<!--                    <artifactId>spring</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        短信、电话-->
+        <dependency>
+            <groupId>cn.gov.zcy.infrastructure</groupId>
+            <artifactId>zcy-communication-api</artifactId>
+            <version>1.0.2-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.gov.zcy.bigdata</groupId>
+            <artifactId>zcy-open-sdk</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.gov.zcy</groupId>
+            <artifactId>zcy-httpclient</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+<!--        钉钉-->
+        <dependency>
+            <groupId>cn.gov.zcy</groupId>
+            <artifactId>message-platform-api</artifactId>
+            <version>1.0.2-RELEASE</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>com.ctrip.framework.apollo</groupId>-->
+<!--            <artifactId>apollo-client</artifactId>-->
+<!--            <version>1.1.0</version>-->
+<!--        </dependency>-->
+
+
+    </dependencies>
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>prod</id>-->
+<!--            <url>http://mvn.cai-inc.com/content/groups/public/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+<!--    <build>-->
+<!--        <pluginManagement>&lt;!&ndash; lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) &ndash;&gt;-->
+<!--            <plugins>-->
+<!--                &lt;!&ndash; clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle &ndash;&gt;-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-clean-plugin</artifactId>-->
+<!--                    <version>3.1.0</version>-->
+<!--                </plugin>-->
+<!--                &lt;!&ndash; default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging &ndash;&gt;-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-resources-plugin</artifactId>-->
+<!--                    <version>3.0.2</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                    <version>3.8.0</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                    <version>2.22.1</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-jar-plugin</artifactId>-->
+<!--                    <version>3.0.2</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-install-plugin</artifactId>-->
+<!--                    <version>2.5.2</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-deploy-plugin</artifactId>-->
+<!--                    <version>2.8.2</version>-->
+<!--                </plugin>-->
+<!--                &lt;!&ndash; site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle &ndash;&gt;-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-site-plugin</artifactId>-->
+<!--                    <version>3.7.1</version>-->
+<!--                </plugin>-->
+<!--                <plugin>-->
+<!--                    <artifactId>maven-project-info-reports-plugin</artifactId>-->
+<!--                    <version>3.0.0</version>-->
+<!--                </plugin>-->
+<!--            </plugins>-->
+<!--        </pluginManagement>-->
+<!--    </build>-->
+</project>

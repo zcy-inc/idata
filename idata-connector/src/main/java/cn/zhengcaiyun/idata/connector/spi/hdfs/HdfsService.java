@@ -5,9 +5,12 @@ import cn.zhengcaiyun.idata.system.common.constant.SystemConfigConstant;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import java.net.URI;
 
 @Service
 public class HdfsService {
+    private static final Logger log = LoggerFactory.getLogger(HdfsService.class);
 
     @Value("${hdfs.basePath}")
     private String HDFS_BASE_PATH;
@@ -121,5 +125,21 @@ public class HdfsService {
         }
         return fs;
     }
+
+    public HiveTable getHiveTableInfo(String tableName, String hdfsPath){
+        Path path = new Path(hdfsPath);
+        try (FileSystem fs = createFileSystem()) {
+            if (!fs.exists(path)) {
+                return null;
+            }
+            FileStatus status = fs.getFileStatus(path);
+
+            return new HiveTable(tableName, status.getAccessTime(),status.getModificationTime(),status.getBlockSize());
+        } catch (IOException e) {
+            log.error(e.getMessage(),e);
+        }
+        return null;
+    }
+
 
 }

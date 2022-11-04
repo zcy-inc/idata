@@ -21,9 +21,7 @@ package cn.zhengcaiyun.idata.commons.enums;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @description: 数据源类型
@@ -40,7 +38,8 @@ public enum DataSourceTypeEnum {
     elasticsearch,
     mssql,
     kafka,
-    doris,
+//    doris,
+    starrocks,
     csv,
     ;
 
@@ -54,5 +53,13 @@ public enum DataSourceTypeEnum {
     public static Optional<DataSourceTypeEnum> getEnum(String enumName) {
         if (StringUtils.isEmpty(enumName)) return Optional.empty();
         return Optional.ofNullable(map.get(enumName));
+    }
+
+    public static List<String> getAllNames() {
+        List<String> list = new ArrayList<>();
+        for (DataSourceTypeEnum value : DataSourceTypeEnum.values()) {
+            list.add(value.name());
+        }
+        return list;
     }
 }

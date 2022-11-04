@@ -4,16 +4,15 @@ import { Form, Input, message, Select } from 'antd';
 import { useModel } from 'umi';
 import type { FC } from 'react';
 import styles from './index.less';
-
 import {
   createTask,
   getDataDevTypes,
   getEnumValues,
-  getFolders,
   getTaskTypes,
 } from '@/services/datadev';
-import { FolderBelong, TaskCategory, TaskTypes } from '@/constants/datadev';
-import { Folder, TaskType } from '@/types/datadev';
+import { TaskCategory, TaskTypes, FolderBelong, ContentBelong } from '@/constants/datadev';
+import { TaskType } from '@/types/datadev';
+import { DEVJOBFolderFormItem } from '../../../components/FolderFormItem';
 
 interface CreateTaskProps {}
 
@@ -25,15 +24,15 @@ const rules = [{ required: true, message: '请选择' }];
 const CreateTask: FC<CreateTaskProps> = ({}) => {
   const [taskTypes, setTaskTypes] = useState<TaskCategory[]>([]);
   const [layers, setLayers] = useState<{ enumValue: string; valueCode: string }[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [taskType, setTaskType] = useState<TaskCategory>();
   const [languages, setLanguages] = useState<TaskType[]>([]);
   const [form] = Form.useForm();
-  const { visibleDev, setVisibleDev, getTreeWrapped } = useModel('datadev', (_) => ({
-    visibleDev: _.visibleDev,
-    setVisibleDev: _.setVisibleDev,
-    getTreeWrapped: _.getTreeWrapped,
-  }));
+  const { visibleDev, setVisibleDev, getTreeWrapped, curNode, onSelectNewTab } = useModel('datadev');
+
+  useEffect(() => {
+    const folderId = curNode?.id;
+    form.setFieldsValue({ folderId });
+  }, [curNode])
 
   useEffect(() => {
     getDataDevTypes()
@@ -41,9 +40,6 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
       .catch((err) => {});
     getEnumValues({ enumCode: 'dwLayerEnum:ENUM' })
       .then((res) => setLayers(res.data))
-      .catch((err) => {});
-    getFolders({ belong: FolderBelong.DEVJOB })
-      .then((res) => setFolders(res.data))
       .catch((err) => {});
   }, []);
 
@@ -84,7 +80,8 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
             if (res.success) {
               message.success('创建作业成功');
               setVisibleDev(false);
-              getTreeWrapped();
+              const concreteBelong = values.syncMode === 'STREAM' ? ContentBelong.STREAM : ContentBelong.BATCH;
+              getTreeWrapped().then(treeRes => onSelectNewTab(FolderBelong.DEVJOB, concreteBelong, res.data));
             } else {
               message.success(`创建作业失败: ${res.msg}`);
             }
@@ -100,7 +97,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           options={taskTypes.map((_) => ({ label: _, value: _ }))}
           onChange={(v) => {
             setTaskType(v);
-            if (v === TaskCategory.SPARK || v === TaskCategory.SCRIPT) {
+            if ([TaskCategory.SCRIPT, TaskCategory.SPARK, TaskCategory.SQL].includes(v)) {
               getDataDevTypesWrapped(v);
             }
           }}
@@ -108,21 +105,21 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      {(taskType === TaskCategory.SPARK || taskType === TaskCategory.SCRIPT) && (
+      <Item name="name" label="作业名称" rules={rules}>
+        <Input size="large" style={{ width }} placeholder="请输入" />
+      </Item>
+      {taskType && [TaskCategory.SPARK, TaskCategory.SCRIPT, TaskCategory.SQL].includes(taskType) && (
         <Item name="language" label="运行方式" rules={rules}>
           <Select
             size="large"
             style={{ width }}
             placeholder="请选择"
-            options={languages.map((_) => ({ label: _.language, value: _.code }))}
+            options={languages.map((_) => ({ label: _.code, value: _.code }))}
             showSearch
             filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
           />
         </Item>
       )}
-      <Item name="name" label="作业名称" rules={rules}>
-        <Input size="large" style={{ width }} placeholder="请输入" />
-      </Item>
       <Item name="dwLayerCode" label="数仓分层" rules={rules}>
         <Select
           size="large"
@@ -133,16 +130,7 @@ const CreateTask: FC<CreateTaskProps> = ({}) => {
           filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
         />
       </Item>
-      <Item name="folderId" label="目标文件夹" rules={rules}>
-        <Select
-          size="large"
-          style={{ width }}
-          placeholder="请选择"
-          options={folders.map((_) => ({ label: _.name, value: _.id }))}
-          showSearch
-          filterOption={(input: string, option: any) => option.label.indexOf(input) >= 0}
-        />
-      </Item>
+      <DEVJOBFolderFormItem style={{ width }} />
       <Item name="remark" label="备注说明">
         <TextArea placeholder="请输入" style={{ width }} />
       </Item>

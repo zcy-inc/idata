@@ -21,6 +21,7 @@ import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.constant.enums.SrcReadModeEnum;
+import cn.zhengcaiyun.idata.develop.helper.rule.DIRuleHelper;
 import cn.zhengcaiyun.idata.develop.service.job.DIJobContentService;
 import cn.zhengcaiyun.idata.portal.model.request.job.GenerateMergeSqlRequest;
 import com.alibaba.fastjson.JSON;
@@ -69,8 +70,11 @@ public class DISqlGenerateController {
         String dataSourceType = request.getDataSourceType();
         String sourceTable = request.getSourceTable();
         String keyColumns = request.getKeyColumns();
+        if (StringUtils.isEmpty(keyColumns)) {
+            keyColumns = "id";
+        }
         List<String> columnList = Arrays.asList(request.getSelectColumns().replaceAll(" ", "").replaceAll("\n", "").split(","));
-        return RestResult.success(diJobContentService.generateMergeSql(columnList, keyColumns, sourceTable, destTable, DataSourceTypeEnum.valueOf(dataSourceType), request.getDays()));
+        return RestResult.success(DIRuleHelper.generateMergeSql(columnList, keyColumns, sourceTable, destTable, DataSourceTypeEnum.valueOf(dataSourceType), request.getDays()));
     }
 
 }

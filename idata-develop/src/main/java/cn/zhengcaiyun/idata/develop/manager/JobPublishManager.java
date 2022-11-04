@@ -19,21 +19,28 @@ package cn.zhengcaiyun.idata.develop.manager;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
 import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.develop.condition.job.JobPublishRecordCondition;
 import cn.zhengcaiyun.idata.develop.constant.enums.EventTypeEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.PublishStatusEnum;
+import cn.zhengcaiyun.idata.develop.constant.enums.StreamJobInstanceStatusEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.job.*;
+import cn.zhengcaiyun.idata.develop.dal.model.opt.stream.StreamJobInstance;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobInfoRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobPublishRecordRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.opt.stream.StreamJobInstanceRepo;
 import cn.zhengcaiyun.idata.develop.event.job.publisher.JobEventPublisher;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -44,16 +51,13 @@ import static com.google.common.base.Preconditions.checkArgument;
  **/
 @Component
 public class JobPublishManager {
-
-    @Value("${dev.job.publish.whitelist}")
-    public String publishWhitelist;
-
     private final JobInfoRepo jobInfoRepo;
     private final JobPublishRecordRepo jobPublishRecordRepo;
     private final JobExecuteConfigRepo jobExecuteConfigRepo;
     private final DAGRepo dagRepo;
     private final JobManager jobManager;
     private final JobEventPublisher jobEventPublisher;
+    private final StreamJobInstanceRepo streamJobInstanceRepo;
 
     @Autowired
     public JobPublishManager(JobInfoRepo jobInfoRepo,
@@ -61,13 +65,15 @@ public class JobPublishManager {
                              JobExecuteConfigRepo jobExecuteConfigRepo,
                              DAGRepo dagRepo,
                              JobManager jobManager,
-                             JobEventPublisher jobEventPublisher) {
+                             JobEventPublisher jobEventPublisher,
+                             StreamJobInstanceRepo streamJobInstanceRepo) {
         this.jobManager = jobManager;
         this.jobEventPublisher = jobEventPublisher;
         this.jobInfoRepo = jobInfoRepo;
         this.jobPublishRecordRepo = jobPublishRecordRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.dagRepo = dagRepo;
+        this.streamJobInstanceRepo = streamJobInstanceRepo;
     }
 
     @Transactional
@@ -107,6 +113,23 @@ public class JobPublishManager {
         return true;
     }
 
+    public boolean isJobPublished(Long jobId, String environment) {
+        JobPublishRecordCondition condition = new JobPublishRecordCondition();
+        condition.setJobId(jobId);
+        condition.setEnvironment(environment);
+        condition.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+        return jobPublishRecordRepo.count(condition) > 0;
+    }
+
+    public boolean isJobPublished(Long jobId, Integer version, String environment) {
+        JobPublishRecordCondition condition = new JobPublishRecordCondition();
+        condition.setJobId(jobId);
+        condition.setJobContentVersion(version);
+        condition.setEnvironment(environment);
+        condition.setPublishStatus(PublishStatusEnum.PUBLISHED.val);
+        return jobPublishRecordRepo.count(condition) > 0;
+    }
+
     private void preSubmit(JobPublishContent content, EnvEnum envEnum) {
         checkExecuteConfig(content, envEnum);
     }
@@ -127,6 +150,56 @@ public class JobPublishManager {
         // 保存后发布job更新事件（优化点：如果之前存在发布的版本，所属环境未暂停运行，则不用同步DS）
         JobEventLog eventLog = jobManager.logEvent(publishRecord.getJobId(), EventTypeEnum.JOB_PUBLISH, publishRecord.getEnvironment(), operator);
         jobEventPublisher.whenPublished(eventLog);
+
+        // 实时作业发布后创建运行实例
+        if (JobTypeEnum.DI_STREAM.getCode().equals(publishRecord.getJobTypeCode())
+                || JobTypeEnum.SQL_FLINK.getCode().equals(publishRecord.getJobTypeCode())) {
+            createStreamJobInstance(publishRecord);
+        }
+    }
+
+    private Long createStreamJobInstance(JobPublishRecord publishRecord) {
+        // 设置所有待运行实例状态为下线
+        List<StreamJobInstance> waitStartInstances = streamJobInstanceRepo.queryList(publishRecord.getJobId(), publishRecord.getEnvironment(),
+                StreamJobInstanceStatusEnum.WAIT_START);
+        if (CollectionUtils.isNotEmpty(waitStartInstances)) {
+            List<Long> instanceIds = waitStartInstances.stream()
+                    .map(StreamJobInstance::getId)
+                    .collect(Collectors.toList());
+            streamJobInstanceRepo.updateStatus(instanceIds, StreamJobInstanceStatusEnum.DESTROYED,
+                    StreamJobInstanceStatusEnum.WAIT_START.val, publishRecord.getCreator());
+        }
+
+        List<Integer> queryStatusList = StreamJobInstanceStatusEnum.getStartToStopStatusValList();
+        List<StreamJobInstance> afterStartInstances = streamJobInstanceRepo.queryList(publishRecord.getJobId(), publishRecord.getJobContentVersion(), publishRecord.getEnvironment(), queryStatusList);
+        // 查询当前作业版本是否已经存在非待运行和下线状态的实例，有则沿用原来的实例，没有则新增实例
+        if (CollectionUtils.isEmpty(afterStartInstances)) {
+            Optional<JobInfo> jobInfoOptional = jobInfoRepo.queryJobInfo(publishRecord.getJobId());
+            checkArgument(jobInfoOptional.isPresent(), "作业不存在或已删除");
+            JobInfo jobInfo = jobInfoOptional.get();
+            StreamJobInstance jobInstance = buildStreamJobInstance(jobInfo, publishRecord);
+            return streamJobInstanceRepo.save(jobInstance);
+        } else {
+            return afterStartInstances.get(0).getId();
+        }
+    }
+
+    private StreamJobInstance buildStreamJobInstance(JobInfo jobInfo, JobPublishRecord publishRecord) {
+        StreamJobInstance jobInstance = new StreamJobInstance();
+        jobInstance.setCreator(publishRecord.getCreator());
+        jobInstance.setEditor("");
+        jobInstance.setJobId(jobInfo.getId());
+        jobInstance.setJobName(jobInfo.getName());
+        jobInstance.setJobContentId(publishRecord.getJobContentId());
+        jobInstance.setJobContentVersion(publishRecord.getJobContentVersion());
+        jobInstance.setJobTypeCode(jobInfo.getJobType());
+        jobInstance.setDwLayerCode(jobInfo.getDwLayerCode());
+        jobInstance.setOwner(jobInfo.getCreator());
+        jobInstance.setEnvironment(publishRecord.getEnvironment());
+        jobInstance.setStatus(StreamJobInstanceStatusEnum.WAIT_START.val);
+        jobInstance.setExternalUrl("");
+        jobInstance.setRunParams("");
+        return jobInstance;
     }
 
     private void checkExecuteConfig(JobPublishContent content, EnvEnum envEnum) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MenuDataItem, PageLoading } from '@ant-design/pro-layout';
-import { history, Link } from 'umi';
+import { history, Link, ErrorShowType } from 'umi';
 import { cloneDeep } from 'lodash';
 import { RightContent } from '@/components';
 import { skip2Login } from '@zcy-data/idata-utils';
@@ -78,6 +78,18 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         const clone = cloneDeep(defaultMenuData);
         const res = await getSideMenu();
         const { data } = res;
+        // console.error(`left side data before`, data);
+        // let obj = {
+        //   type: "F_MENU",
+        //   name: "数据地图",
+        //   featureCode: "F_MENU_DATA_MAP",
+        //   enable: true,
+        //   children: [],
+        // }
+        // data.push(obj);
+        // console.error(`left side data before`, data);
+
+        // debugger
         const renderMenuRouter = (config: MenuDataItem[], list: IMenuItem[] = []) => {
           config.forEach((item) => {
             if (item.featureCode) {
@@ -119,7 +131,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     menuItemRender: (item, defaultDom) => {
       const path = item.path || '';
       let icon = null;
-      if (path === '/objectLabel') {
+      const iconMenus = ['/objectLabel', '/outLink'];//需要icon的menu集合
+      if (iconMenus.includes(path)) {
         icon = location.hash.includes(path)
           ? renderIcon(item.iconActive)
           : renderIcon(item.iconDefault);
@@ -131,7 +144,12 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           }
         >
           {icon}
-          <Link to={item.path as string}>{defaultDom}</Link>
+          {
+            item.outLink ?
+              <a href={item.outLink} target="_blank">{defaultDom}</a> :
+              <Link to={item.path as string}>{defaultDom}</Link>
+          }
+
         </div>
       );
     },
@@ -142,8 +160,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
 const middleware = async (ctx: Context, next: () => void) => {
   await next();
   const { code } = ctx.res;
+
   if (code === '401') {
-    skip2Login({ redirect: true, redirectUrl: window.location.href });
+    let currentUrl = window.location.href;
+    skip2Login({ redirect: true, redirectUrl: currentUrl });//每次都推入完整的url
     return;
   }
   if (code === '403') {
@@ -180,6 +200,7 @@ export const request: RequestConfig = {
       return {
         ...resData,
         errorMessage: resData.msg,
+        // showType: resData.success ? ErrorShowType.SILENT : ErrorShowType.ERROR_MESSAGE, // 错误提示方式.0 silent; 1 message.warn; 2 message.error; 4 notification; 9 page
         showType: 0, // 错误提示方式.0 silent; 1 message.warn; 2 message.error; 4 notification; 9 page
       };
     },

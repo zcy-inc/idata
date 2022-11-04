@@ -25,7 +25,6 @@ import cn.zhengcaiyun.idata.develop.dto.job.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @description:
@@ -52,6 +51,8 @@ public interface JobInfoService {
 
     JobDryRunDto dryRunJob(Long jobId, Integer version);
 
+    Boolean moveJob(List<Long> jobIds, Long destFolderId, Operator operator);
+
     /**
      * jobName模糊匹配
      *
@@ -66,15 +67,16 @@ public interface JobInfoService {
      * @param accessIdSet
      * @return
      */
-    Map<Long, String> getNameMapByIds(Set<Long> accessIdSet);
+    Map<Long, String> getNameMapByIds(List<Long> accessIdSet);
 
     OverhangJobWrapperDto pagingOverhangJob(JobInfoCondition condition, PageParam pageParam);
 
     /**
      * 填充JobName
-     * @param list 填充的集合
-     * @param klass 范型类型
-     * @param jobIdFieldName 对应的jobId
+     *
+     * @param list             填充的集合
+     * @param klass            范型类型
+     * @param jobIdFieldName   对应的jobId
      * @param jobNameFieldName 对应的jobName
      * @param <T>
      */
@@ -82,9 +84,18 @@ public interface JobInfoService {
 
     /**
      * 获取任务详情
+     *
      * @param id
      * @param env
      * @return
      */
-    JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env);
+    JobInfoExecuteDetailDto getJobInfoExecuteDetail(Long id, String env, Integer jobVersion);
+
+    /**
+     * 获取作业扩展信息
+     *
+     * @param jobIds
+     * @return
+     */
+    List<JobExtInfoDto> getJobExtInfo(List<Long> jobIds);
 }

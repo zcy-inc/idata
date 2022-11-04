@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { Drawer, Modal, Table } from 'antd';
+import { Drawer, Modal, Table, Spin } from 'antd';
 import type { FC } from 'react';
 import styles from './index.less';
 import { Task } from '@/types/datadev';
 import { getTasks } from '@/services/task';
+import { getSqlSpark } from '@/services/datadev'
 import { TaskListItem } from '@/types/tasks';
 import moment from 'moment';
 import { VersionStatusDisplayMap } from '@/constants/datadev';
@@ -20,6 +21,7 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
   const [total, setTotal] = useState<number>(-1);
   const [visibleLog, setVisibleLog] = useState(false);
   const [log, setLog] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -35,6 +37,16 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
       })
       .catch((err) => {});
   };
+
+  const getVersionSql = (row: TaskListItem) => {
+    setLoading(true);
+    setVisibleLog(true);
+    getSqlSpark({ jobId: (data?.id as number), version: row.jobContentVersion })
+    .then((res: { data: any; }) => setLog(res.data.sourceSql))
+    .finally(() => {
+      setLoading(false);
+    });
+  }
 
   return (
     <Drawer
@@ -89,12 +101,9 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
             title: '操作',
             key: 'options',
             fixed: 'right',
-            render: (_) => (
+            render: (_, r) => (
               <a
-                onClick={() => {
-                  setLog('');
-                  setVisibleLog(true);
-                }}
+                onClick={() => getVersionSql(r)}
               >
                 查看
               </a>
@@ -110,13 +119,15 @@ const DrawerVersion: FC<DrawerConfigProps> = ({ visible, onClose, data }) => {
         }}
       />
       <Modal title="日志" visible={visibleLog} footer={null} onCancel={() => setVisibleLog(false)}>
-        <MonacoEditor
-          height="400"
-          language="sql"
-          theme="vs-dark"
-          value={log}
-          options={{ readOnly: true }}
-        />
+        <Spin spinning={loading}>
+          <MonacoEditor
+            height="400"
+            language="sql"
+            theme="vs-dark"
+            value={log}
+            options={{ readOnly: true }}
+          />
+        </Spin>
       </Modal>
     </Drawer>
   );

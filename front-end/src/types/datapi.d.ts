@@ -98,6 +98,20 @@ export interface Table {
   foreignKeys: ForeignKey[];
 }
 
+export const HivechangeType = {
+  1:'字段新增',
+  2:'字段删除',
+  3:'字段修改'
+}
+
+export interface HivechangeContentInfo {
+  // id: number;
+  columnNameBefore: string;
+  changeDescription: string;
+  columnNameAfter: string;
+  changeType: HivechangeType;
+}
+
 /* ========== measure ========== */
 export interface MetricModifier {
   modifierName: string;

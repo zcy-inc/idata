@@ -26,9 +26,12 @@ import cn.zhengcaiyun.idata.datasource.bean.condition.DataSourceCondition;
 import cn.zhengcaiyun.idata.datasource.dal.dao.DataSourceDao;
 import cn.zhengcaiyun.idata.datasource.dal.model.DataSource;
 import cn.zhengcaiyun.idata.datasource.dal.repo.DataSourceRepo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,8 +67,11 @@ public class DataSourceRepoImpl implements DataSourceRepo {
 
     @Override
     public List<DataSource> queryDataSource(DataSourceCondition condition, long limit, long offset) {
+        List<String> typeList = condition.getTypes() == null ? null : Arrays.asList(condition.getTypes().split(","));
+
         return dataSourceDao.select(dsl -> dsl.where(
                                 dataSource.type, isEqualToWhenPresent(condition.getType()).map(DataSourceTypeEnum::name),
+                                and(dataSource.type, isInCaseInsensitiveWhenPresent(typeList)),
                                 and(dataSource.environments, isLikeWhenPresent(condition.getEnv()).map(EnvEnum::name).map(MybatisHelper::appendWildCards)),
                                 and(dataSource.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                                 and(dataSource.del, isEqualTo(DEL_NO.val))
@@ -76,8 +82,11 @@ public class DataSourceRepoImpl implements DataSourceRepo {
 
     @Override
     public long countDataSource(DataSourceCondition condition) {
+        List<String> typeList = condition.getTypes() == null ? null : Arrays.asList(condition.getTypes().split(","));
+
         return dataSourceDao.count(dsl -> dsl.where(
                 dataSource.type, isEqualToWhenPresent(condition.getType()).map(DataSourceTypeEnum::name),
+                and(dataSource.type, isInCaseInsensitiveWhenPresent(typeList)),
                 and(dataSource.environments, isLikeWhenPresent(condition.getEnv()).map(EnvEnum::name).map(MybatisHelper::appendWildCards)),
                 and(dataSource.name, isLikeWhenPresent(condition.getName()).map(MybatisHelper::appendWildCards)),
                 and(dataSource.del, isEqualTo(DEL_NO.val))
@@ -114,5 +123,10 @@ public class DataSourceRepoImpl implements DataSourceRepo {
     public List<DataSource> queryDataSource(String name) {
         return dataSourceDao.select(dsl -> dsl.where(dataSource.name, isEqualTo(name),
                 and(dataSource.del, isEqualTo(DEL_NO.val))));
+    }
+
+    @Override
+    public List<DataSource> getDataSources() {
+        return dataSourceDao.select(dsl -> dsl.where(dataSource.del, isEqualTo(DEL_NO.val)));
     }
 }

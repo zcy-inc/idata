@@ -20,6 +20,8 @@ public class DAGInfoCondition {
      */
     private Integer status;
 
+    private String namePattern;
+
     public String getDwLayerCode() {
         return dwLayerCode;
     }
@@ -42,5 +44,13 @@ public class DAGInfoCondition {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public String getNamePattern() {
+        return namePattern;
+    }
+
+    public void setNamePattern(String namePattern) {
+        this.namePattern = namePattern;
     }
 }

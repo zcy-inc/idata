@@ -19,6 +19,7 @@ package cn.zhengcaiyun.idata.develop.service.label;
 import cn.zhengcaiyun.idata.develop.dal.model.DevLabel;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDto;
+import cn.zhengcaiyun.idata.develop.dto.label.TimeDimEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public interface LabelService {
     List<LabelDto> findLabelsByCode(String labelCode);
     Map<String, List<LabelDto>> findColumnLabelMap(Long tableId, List<String> columnNames);
     boolean removeLabel(LabelDto labelDto, String operator);
+    List<TimeDimEnum> findTimeDimEnums();
 
     /**
      * 根据tableId查询

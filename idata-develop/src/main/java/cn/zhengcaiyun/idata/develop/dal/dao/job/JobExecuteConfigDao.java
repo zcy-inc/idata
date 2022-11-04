@@ -1,21 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dal.dao.job;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.*;
-import static org.mybatis.dynamic.sql.SqlBuilder.*;
-
 import cn.zhengcaiyun.idata.develop.dal.model.job.JobExecuteConfig;
-import java.util.List;
-import java.util.Optional;
-import javax.annotation.Generated;
-import org.apache.ibatis.annotations.DeleteProvider;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.ResultMap;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.SelectKey;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 import org.mybatis.dynamic.sql.BasicColumn;
 import org.mybatis.dynamic.sql.delete.DeleteDSLCompleter;
@@ -31,10 +17,17 @@ import org.mybatis.dynamic.sql.update.render.UpdateStatementProvider;
 import org.mybatis.dynamic.sql.util.SqlProviderAdapter;
 import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 
+import javax.annotation.Generated;
+import java.util.List;
+import java.util.Optional;
+
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.*;
+import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+
 @Mapper
 public interface JobExecuteConfigDao {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
-    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, runningState, execEngine);
+    BasicColumn[] selectList = BasicColumn.columnList(id, del, creator, createTime, editor, editTime, jobId, environment, schDagId, schRerunMode, schTimeOut, schDryRun, execQueue, execWarnLevel, schTimeOutStrategy, schPriority, execDriverMem, execWorkerMem, execCores, runningState, execEngine, extProperties, isOpenMergeFile, customParams, destFileType);
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     @SelectProvider(type=SqlProviderAdapter.class, method="select")
@@ -75,8 +68,13 @@ public interface JobExecuteConfigDao {
         @Result(column="sch_priority", property="schPriority", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_driver_mem", property="execDriverMem", jdbcType=JdbcType.INTEGER),
         @Result(column="exec_worker_mem", property="execWorkerMem", jdbcType=JdbcType.INTEGER),
+        @Result(column="exec_cores", property="execCores", jdbcType=JdbcType.INTEGER),
         @Result(column="running_state", property="runningState", jdbcType=JdbcType.INTEGER),
-        @Result(column="exec_engine", property="execEngine", jdbcType=JdbcType.VARCHAR)
+        @Result(column="exec_engine", property="execEngine", jdbcType=JdbcType.VARCHAR),
+        @Result(column="ext_properties", property="extProperties", jdbcType=JdbcType.VARCHAR),
+        @Result(column="is_open_merge_file", property="isOpenMergeFile", jdbcType=JdbcType.INTEGER),
+        @Result(column="custom_params", property="customParams", jdbcType=JdbcType.VARCHAR),
+        @Result(column="dest_file_type", property="destFileType", jdbcType=JdbcType.VARCHAR)
     })
     List<JobExecuteConfig> selectMany(SelectStatementProvider selectStatement);
 
@@ -86,12 +84,12 @@ public interface JobExecuteConfigDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default long count(CountDSLCompleter completer) {
-        return MyBatis3Utils.countFrom(this::count, jobExecuteConfig, completer);
+        return MyBatis3Utils.countFrom(this::count, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default int delete(DeleteDSLCompleter completer) {
-        return MyBatis3Utils.deleteFrom(this::delete, jobExecuteConfig, completer);
+        return MyBatis3Utils.deleteFrom(this::delete, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -103,7 +101,7 @@ public interface JobExecuteConfigDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default int insert(JobExecuteConfig record) {
-        return MyBatis3Utils.insert(this::insert, record, jobExecuteConfig, c ->
+        return MyBatis3Utils.insert(this::insert, record, JOB_EXECUTE_CONFIG, c ->
             c.map(del).toProperty("del")
             .map(creator).toProperty("creator")
             .map(createTime).toProperty("createTime")
@@ -121,14 +119,19 @@ public interface JobExecuteConfigDao {
             .map(schPriority).toProperty("schPriority")
             .map(execDriverMem).toProperty("execDriverMem")
             .map(execWorkerMem).toProperty("execWorkerMem")
+            .map(execCores).toProperty("execCores")
             .map(runningState).toProperty("runningState")
             .map(execEngine).toProperty("execEngine")
+            .map(extProperties).toProperty("extProperties")
+            .map(isOpenMergeFile).toProperty("isOpenMergeFile")
+            .map(customParams).toProperty("customParams")
+            .map(destFileType).toProperty("destFileType")
         );
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default int insertSelective(JobExecuteConfig record) {
-        return MyBatis3Utils.insert(this::insert, record, jobExecuteConfig, c ->
+        return MyBatis3Utils.insert(this::insert, record, JOB_EXECUTE_CONFIG, c ->
             c.map(del).toPropertyWhenPresent("del", record::getDel)
             .map(creator).toPropertyWhenPresent("creator", record::getCreator)
             .map(createTime).toPropertyWhenPresent("createTime", record::getCreateTime)
@@ -146,24 +149,29 @@ public interface JobExecuteConfigDao {
             .map(schPriority).toPropertyWhenPresent("schPriority", record::getSchPriority)
             .map(execDriverMem).toPropertyWhenPresent("execDriverMem", record::getExecDriverMem)
             .map(execWorkerMem).toPropertyWhenPresent("execWorkerMem", record::getExecWorkerMem)
+            .map(execCores).toPropertyWhenPresent("execCores", record::getExecCores)
             .map(runningState).toPropertyWhenPresent("runningState", record::getRunningState)
             .map(execEngine).toPropertyWhenPresent("execEngine", record::getExecEngine)
+            .map(extProperties).toPropertyWhenPresent("extProperties", record::getExtProperties)
+            .map(isOpenMergeFile).toPropertyWhenPresent("isOpenMergeFile", record::getIsOpenMergeFile)
+            .map(customParams).toPropertyWhenPresent("customParams", record::getCustomParams)
+            .map(destFileType).toPropertyWhenPresent("destFileType", record::getDestFileType)
         );
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default Optional<JobExecuteConfig> selectOne(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectOne(this::selectOne, selectList, jobExecuteConfig, completer);
+        return MyBatis3Utils.selectOne(this::selectOne, selectList, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default List<JobExecuteConfig> select(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectList(this::selectMany, selectList, jobExecuteConfig, completer);
+        return MyBatis3Utils.selectList(this::selectMany, selectList, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default List<JobExecuteConfig> selectDistinct(SelectDSLCompleter completer) {
-        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, jobExecuteConfig, completer);
+        return MyBatis3Utils.selectDistinct(this::selectMany, selectList, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -175,7 +183,7 @@ public interface JobExecuteConfigDao {
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
     default int update(UpdateDSLCompleter completer) {
-        return MyBatis3Utils.update(this::update, jobExecuteConfig, completer);
+        return MyBatis3Utils.update(this::update, JOB_EXECUTE_CONFIG, completer);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -197,8 +205,13 @@ public interface JobExecuteConfigDao {
                 .set(schPriority).equalTo(record::getSchPriority)
                 .set(execDriverMem).equalTo(record::getExecDriverMem)
                 .set(execWorkerMem).equalTo(record::getExecWorkerMem)
+                .set(execCores).equalTo(record::getExecCores)
                 .set(runningState).equalTo(record::getRunningState)
-                .set(execEngine).equalTo(record::getExecEngine);
+                .set(execEngine).equalTo(record::getExecEngine)
+                .set(extProperties).equalTo(record::getExtProperties)
+                .set(isOpenMergeFile).equalTo(record::getIsOpenMergeFile)
+                .set(customParams).equalTo(record::getCustomParams)
+                .set(destFileType).equalTo(record::getDestFileType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -220,8 +233,13 @@ public interface JobExecuteConfigDao {
                 .set(schPriority).equalToWhenPresent(record::getSchPriority)
                 .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
                 .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
+                .set(execCores).equalToWhenPresent(record::getExecCores)
                 .set(runningState).equalToWhenPresent(record::getRunningState)
-                .set(execEngine).equalToWhenPresent(record::getExecEngine);
+                .set(execEngine).equalToWhenPresent(record::getExecEngine)
+                .set(extProperties).equalToWhenPresent(record::getExtProperties)
+                .set(isOpenMergeFile).equalToWhenPresent(record::getIsOpenMergeFile)
+                .set(customParams).equalToWhenPresent(record::getCustomParams)
+                .set(destFileType).equalToWhenPresent(record::getDestFileType);
     }
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source Table: dev_job_execute_config")
@@ -244,8 +262,13 @@ public interface JobExecuteConfigDao {
             .set(schPriority).equalTo(record::getSchPriority)
             .set(execDriverMem).equalTo(record::getExecDriverMem)
             .set(execWorkerMem).equalTo(record::getExecWorkerMem)
+            .set(execCores).equalTo(record::getExecCores)
             .set(runningState).equalTo(record::getRunningState)
             .set(execEngine).equalTo(record::getExecEngine)
+            .set(extProperties).equalTo(record::getExtProperties)
+            .set(isOpenMergeFile).equalTo(record::getIsOpenMergeFile)
+            .set(customParams).equalTo(record::getCustomParams)
+            .set(destFileType).equalTo(record::getDestFileType)
             .where(id, isEqualTo(record::getId))
         );
     }
@@ -270,8 +293,13 @@ public interface JobExecuteConfigDao {
             .set(schPriority).equalToWhenPresent(record::getSchPriority)
             .set(execDriverMem).equalToWhenPresent(record::getExecDriverMem)
             .set(execWorkerMem).equalToWhenPresent(record::getExecWorkerMem)
+            .set(execCores).equalToWhenPresent(record::getExecCores)
             .set(runningState).equalToWhenPresent(record::getRunningState)
             .set(execEngine).equalToWhenPresent(record::getExecEngine)
+            .set(extProperties).equalToWhenPresent(record::getExtProperties)
+            .set(isOpenMergeFile).equalToWhenPresent(record::getIsOpenMergeFile)
+            .set(customParams).equalToWhenPresent(record::getCustomParams)
+            .set(destFileType).equalToWhenPresent(record::getDestFileType)
             .where(id, isEqualTo(record::getId))
         );
     }

@@ -17,11 +17,14 @@
 package cn.zhengcaiyun.idata.portal.controller.uac;
 
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
+import cn.zhengcaiyun.idata.user.dal.dao.UacUserTokenDao;
 import cn.zhengcaiyun.idata.user.dto.SignInDto;
 import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static cn.zhengcaiyun.idata.user.dal.dao.UacUserTokenDynamicSqlSupport.uacUserToken;
+import static org.mybatis.dynamic.sql.SqlBuilder.isNotEqualTo;
 
 /**
  * @author shiyin
@@ -41,6 +47,9 @@ public class UserController {
     private UserService userService;
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private UacUserTokenDao uacUserTokenDao;
 
     @PostMapping("/p0/uac/register")
     public RestResult<UserInfoDto> register(@RequestBody UserInfoDto userInfoDto,
@@ -65,6 +74,13 @@ public class UserController {
     @PostMapping("/p1/uac/signOut")
     public RestResult signOut(HttpServletRequest request) {
         userService.signOut(tokenService.getToken(request));
+        return RestResult.success();
+    }
+
+    @GetMapping("/p0/tokenInvalid")
+    public RestResult tokenValid() {
+        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
+                .where(uacUserToken.del, isNotEqualTo(1)));
         return RestResult.success();
     }
 }
