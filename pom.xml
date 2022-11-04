@@ -63,7 +63,7 @@
         <presto-jdbc.version>346</presto-jdbc.version>
         <hive-jdbc.version>2.1.1</hive-jdbc.version>
         <antlr.version>4.7.2</antlr.version>
-        <postgresql.version>42.2.10</postgresql.version>
+        <postgresql.version>42.3.3</postgresql.version>
         <caffeine.version>2.9.1</caffeine.version>
         <cron-utils.version>9.1.5</cron-utils.version>
         <guava.version>28.2-jre</guava.version>
