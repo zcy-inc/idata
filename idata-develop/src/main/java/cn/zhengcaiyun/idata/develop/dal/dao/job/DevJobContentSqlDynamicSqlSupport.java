@@ -89,6 +89,13 @@ public final class DevJobContentSqlDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   扩展配置
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.extend_configs")
+    public static final SqlColumn<String> extendConfigs = devJobContentSql.extendConfigs;
+
+    /**
+     * Database Column Remarks:
      *   数据来源SQL
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_sql.source_sql")
@@ -117,6 +124,8 @@ public final class DevJobContentSqlDynamicSqlSupport {
         public final SqlColumn<String> udfIds = column("udf_ids", JDBCType.VARCHAR);
 
         public final SqlColumn<String> externalTables = column("external_tables", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> extendConfigs = column("extend_configs", JDBCType.VARCHAR);
 
         public final SqlColumn<String> sourceSql = column("source_sql", JDBCType.LONGVARCHAR);
 

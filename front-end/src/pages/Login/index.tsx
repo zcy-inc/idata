@@ -86,12 +86,35 @@ const Login = () => {
       });
       return;
     }
+    //解决跳转总是到dashboard的bug
+    let map = new Map();
+    let currentUrl = window.location.href;
 
-    // if (redirect) {
-    //   window.location.href = redirect;
-    //   return;
-    // }
-    window.location.href = mainPublicPath;
+    for (let i = 0; i < 3; i++) {//对skip2Login的encodeComponentURI编码的uri进行解码
+      currentUrl = decodeURIComponent(currentUrl);
+    }
+    let currentUrlArray = currentUrl.split('?redirect=');//根据?redirect=进行拆分
+    for (let i = 0; i < currentUrlArray.length; i++) {
+      if (map.has(currentUrlArray[i]) !== true) {
+        map.set(currentUrlArray[i], true);
+      }
+    }
+    let arrayTemp = [];
+    for (const [key, value] of map) {
+      arrayTemp.push(key);
+    }
+    currentUrlArray = arrayTemp;
+    if (currentUrlArray.length >= 2) {//currentUrlArray.length>=2则表明有相应跳转
+      currentUrlArray.shift();
+      if (currentUrlArray.length >= 1) {
+        currentUrl = currentUrlArray.join('?redirect=');
+        console.error(`1234 currentUrl`, currentUrl);
+      }
+    } else {//currentUrlArray.length===1则表明无相应跳转，则直接跳转到默认目录
+      currentUrl = mainPublicPath;
+    }
+    window.location.href = currentUrl;
+
   };
 
   const onRegister = async () => {

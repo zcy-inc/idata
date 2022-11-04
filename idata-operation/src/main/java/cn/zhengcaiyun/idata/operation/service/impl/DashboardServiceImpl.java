@@ -156,7 +156,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<RankTimeConsumeDto> pastRankTimeConsumeDtoList = new ArrayList<>();
 
         // 包含过去
-        boolean pastTime = DateUtil.compare(startDate, today) < 0;
+        boolean pastTime = !DateUtil.isSameDay(startDate, today);
         // 包含当天
         boolean isToday = DateUtil.isSameDay(today, endDate);
         if (pastTime) {

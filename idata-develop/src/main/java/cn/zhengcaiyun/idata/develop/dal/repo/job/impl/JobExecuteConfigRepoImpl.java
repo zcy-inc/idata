@@ -29,7 +29,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.JOB_EXECUTE_CONFIG;
 import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
@@ -62,43 +62,50 @@ public class JobExecuteConfigRepoImpl implements JobExecuteConfigRepo {
 
     @Override
     public Boolean switchRunningState(Long id, RunningStateEnum runningState, String operator) {
-        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.runningState).equalTo(runningState.val)
-                .set(jobExecuteConfig.editor).equalTo(operator)
-                .where(jobExecuteConfig.id, isEqualTo(id)));
+        jobExecuteConfigDao.update(dsl -> dsl.set(JOB_EXECUTE_CONFIG.runningState).equalTo(runningState.val)
+                .set(JOB_EXECUTE_CONFIG.editor).equalTo(operator)
+                .where(JOB_EXECUTE_CONFIG.id, isEqualTo(id)));
         return Boolean.TRUE;
     }
 
     @Override
     public Optional<JobExecuteConfig> query(Long jobId, String environment) {
-        return jobExecuteConfigDao.selectOne(dsl -> dsl.where(jobExecuteConfig.jobId, isEqualTo(jobId),
-                and(jobExecuteConfig.environment, isEqualTo(environment)),
-                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+        return jobExecuteConfigDao.selectOne(dsl -> dsl.where(JOB_EXECUTE_CONFIG.jobId, isEqualTo(jobId),
+                and(JOB_EXECUTE_CONFIG.environment, isEqualTo(environment)),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public List<JobExecuteConfig> queryList(Long jobId, JobExecuteConfigCondition condition) {
-        return jobExecuteConfigDao.select(dsl -> dsl.where(jobExecuteConfig.jobId, isEqualTo(jobId),
-                and(jobExecuteConfig.environment, isEqualToWhenPresent(condition.getEnvironment())),
-                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+        return jobExecuteConfigDao.select(dsl -> dsl.where(JOB_EXECUTE_CONFIG.jobId, isEqualTo(jobId),
+                and(JOB_EXECUTE_CONFIG.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public Long countDagJob(Long dagId) {
-        return jobExecuteConfigDao.count(dsl -> dsl.where(jobExecuteConfig.schDagId, isEqualTo(dagId),
-                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+        return jobExecuteConfigDao.count(dsl -> dsl.where(JOB_EXECUTE_CONFIG.schDagId, isEqualTo(dagId),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public List<JobExecuteConfig> queryDagJobList(Long dagId, JobExecuteConfigCondition condition) {
-        return jobExecuteConfigDao.select(dsl -> dsl.where(jobExecuteConfig.schDagId, isEqualTo(dagId),
-                and(jobExecuteConfig.environment, isEqualToWhenPresent(condition.getEnvironment())),
-                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+        return jobExecuteConfigDao.select(dsl -> dsl.where(JOB_EXECUTE_CONFIG.schDagId, isEqualTo(dagId),
+                and(JOB_EXECUTE_CONFIG.environment, isEqualToWhenPresent(condition.getEnvironment())),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
     @Override
     public List<JobExecuteConfig> queryList(JobExecuteConfigCondition condition) {
-        return jobExecuteConfigDao.select(dsl -> dsl.where(jobExecuteConfig.environment, isEqualToWhenPresent(condition.getEnvironment()),
-                and(jobExecuteConfig.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+        return jobExecuteConfigDao.select(dsl -> dsl.where(JOB_EXECUTE_CONFIG.environment, isEqualToWhenPresent(condition.getEnvironment()),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
+    }
+
+    @Override
+    public List<JobExecuteConfig> queryList(List<Long> jobIds, String environment) {
+        return jobExecuteConfigDao.select(dsl -> dsl.where(JOB_EXECUTE_CONFIG.jobId, isIn(jobIds),
+                and(JOB_EXECUTE_CONFIG.environment, isEqualTo(environment)),
+                and(JOB_EXECUTE_CONFIG.del, isEqualTo(DeleteEnum.DEL_NO.val))));
     }
 
 }

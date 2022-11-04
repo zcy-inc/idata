@@ -31,14 +31,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIJobContentDynamicSqlSupport.DI_JOB_CONTENT;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIStreamJobContentDynamicSqlSupport.DI_STREAM_JOB_CONTENT;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.DIStreamJobTableDynamicSqlSupport.DI_STREAM_JOB_TABLE;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentKylinDynamicSqlSupport.devJobContentKylin;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSqlDynamicSqlSupport.devJobContentSql;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.jobExecuteConfig;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobDependenceDynamicSqlSupport.JOB_DEPENDENCE;
+import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobExecuteConfigDynamicSqlSupport.JOB_EXECUTE_CONFIG;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobInfoDynamicSqlSupport.jobInfo;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobOutputDynamicSqlSupport.JOB_OUTPUT;
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.JobPublishRecordDynamicSqlSupport.jobPublishRecord;
@@ -61,6 +63,9 @@ public class JobInfoRepoImpl implements JobInfoRepo {
     private final DevJobContentScriptDao devJobContentScriptDao;
     private final DevJobContentKylinDao devJobContentKylinDao;
     private final JobOutputDao jobOutputDao;
+    private final JobDependenceDao jobDependenceDao;
+    private final DIStreamJobContentDao diStreamJobContentDao;
+    private final DIStreamJobTableDao diStreamJobTableDao;
 
 
     @Autowired
@@ -72,7 +77,10 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                            DevJobContentSparkDao devJobContentSparkDao,
                            DevJobContentScriptDao devJobContentScriptDao,
                            DevJobContentKylinDao devJobContentKylinDao,
-                           JobOutputDao jobOutputDao) {
+                           JobOutputDao jobOutputDao,
+                           JobDependenceDao jobDependenceDao,
+                           DIStreamJobContentDao diStreamJobContentDao,
+                           DIStreamJobTableDao diStreamJobTableDao) {
         this.jobInfoDao = jobInfoDao;
         this.jobExecuteConfigDao = jobExecuteConfigDao;
         this.jobPublishRecordDao = jobPublishRecordDao;
@@ -82,6 +90,9 @@ public class JobInfoRepoImpl implements JobInfoRepo {
         this.devJobContentScriptDao = devJobContentScriptDao;
         this.devJobContentKylinDao = devJobContentKylinDao;
         this.jobOutputDao = jobOutputDao;
+        this.jobDependenceDao = jobDependenceDao;
+        this.diStreamJobContentDao = diStreamJobContentDao;
+        this.diStreamJobTableDao = diStreamJobTableDao;
     }
 
     @Override
@@ -122,48 +133,54 @@ public class JobInfoRepoImpl implements JobInfoRepo {
                 .set(jobInfo.editor).equalTo(operator)
                 .where(jobInfo.id, isEqualTo(jobId)));
 
-        jobExecuteConfigDao.update(dsl -> dsl.set(jobExecuteConfig.del).equalTo(DeleteEnum.DEL_YES.val)
-                .set(jobExecuteConfig.editor).equalTo(operator)
-                .where(jobExecuteConfig.jobId, isEqualTo(jobId)));
+        jobExecuteConfigDao.update(dsl -> dsl.set(JOB_EXECUTE_CONFIG.del).equalTo(DeleteEnum.DEL_YES.val)
+                .set(JOB_EXECUTE_CONFIG.editor).equalTo(operator)
+                .where(JOB_EXECUTE_CONFIG.jobId, isEqualTo(jobId)));
 
         jobPublishRecordDao.update(dsl -> dsl.set(jobPublishRecord.del).equalTo(DeleteEnum.DEL_YES.val)
                 .set(jobPublishRecord.editor).equalTo(operator)
                 .where(jobPublishRecord.jobId, isEqualTo(jobId)));
 
-        // 不同类型作业删除
-        String jobType = job.getJobType();
-        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
-                || JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
-            diJobContentDao.update(dsl -> dsl.set(DI_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
-                    .set(DI_JOB_CONTENT.editor).equalTo(operator)
-                    .where(DI_JOB_CONTENT.jobId, isEqualTo(jobId)));
-        }
-        else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)) {
-            devJobContentSqlDao.update(dsl -> dsl.set(devJobContentSql.del).equalTo(DeleteEnum.DEL_YES.val)
-                    .set(devJobContentSql.editor).equalTo(operator)
-                    .where(devJobContentSql.jobId, isEqualTo(jobId)));
-        }
-        else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
-                || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
-            devJobContentSparkDao.update(dsl -> dsl.set(devJobContentSpark.del).equalTo(DeleteEnum.DEL_YES.val)
-                    .set(devJobContentSpark.editor).equalTo(operator)
-                    .where(devJobContentSpark.jobId, isEqualTo(jobId)));
-        }
-        else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
-                || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
-            devJobContentScriptDao.update(dsl -> dsl.set(devJobContentScript.del).equalTo(DeleteEnum.DEL_YES.val)
-                    .set(devJobContentScript.editor).equalTo(operator)
-                    .where(devJobContentScript.jobId, isEqualTo(jobId)));
-        }
-        else if (JobTypeEnum.KYLIN.getCode().equals(jobType)) {
-            devJobContentKylinDao.update(dsl -> dsl.set(devJobContentKylin.del).equalTo(DeleteEnum.DEL_YES.val)
-                    .set(devJobContentKylin.editor).equalTo(operator)
-                    .where(devJobContentKylin.jobId, isEqualTo(jobId)));
-        }
+        jobDependenceDao.update(dsl -> dsl.set(JOB_DEPENDENCE.del).equalTo(DeleteEnum.DEL_YES.val)
+                .where(JOB_DEPENDENCE.jobId, isEqualTo(jobId)));
 
         // 删除作业输出
         jobOutputDao.update(dsl -> dsl.set(JOB_OUTPUT.del).equalTo(DeleteEnum.DEL_YES.val)
                 .where(JOB_OUTPUT.jobId, isEqualTo(jobId)));
+
+        // 不同类型作业删除
+        String jobType = job.getJobType();
+        if (JobTypeEnum.DI_BATCH.getCode().equals(jobType)
+                || JobTypeEnum.BACK_FLOW.getCode().equals(job.getJobType())) {
+            diJobContentDao.update(dsl -> dsl.set(DI_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(DI_JOB_CONTENT.editor).equalTo(operator)
+                    .where(DI_JOB_CONTENT.jobId, isEqualTo(jobId)));
+        } else if (JobTypeEnum.DI_STREAM.getCode().equals(job.getJobType())) {
+            diStreamJobContentDao.update(dsl -> dsl.set(DI_STREAM_JOB_CONTENT.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(DI_STREAM_JOB_CONTENT.editor).equalTo(operator)
+                    .where(DI_STREAM_JOB_CONTENT.jobId, isEqualTo(jobId)));
+            diStreamJobTableDao.delete(dsl -> dsl.where(DI_STREAM_JOB_TABLE.jobId, isEqualTo(jobId)));
+        } else if (JobTypeEnum.SQL_SPARK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_FLINK.getCode().equals(jobType)
+                || JobTypeEnum.SQL_STARROCKS.getCode().equals(jobType)) {
+            devJobContentSqlDao.update(dsl -> dsl.set(devJobContentSql.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(devJobContentSql.editor).equalTo(operator)
+                    .where(devJobContentSql.jobId, isEqualTo(jobId)));
+        } else if (JobTypeEnum.SPARK_PYTHON.getCode().equals(jobType)
+                || JobTypeEnum.SPARK_JAR.getCode().equals(jobType)) {
+            devJobContentSparkDao.update(dsl -> dsl.set(devJobContentSpark.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(devJobContentSpark.editor).equalTo(operator)
+                    .where(devJobContentSpark.jobId, isEqualTo(jobId)));
+        } else if (JobTypeEnum.SCRIPT_PYTHON.getCode().equals(jobType)
+                || JobTypeEnum.SCRIPT_SHELL.getCode().equals(jobType)) {
+            devJobContentScriptDao.update(dsl -> dsl.set(devJobContentScript.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(devJobContentScript.editor).equalTo(operator)
+                    .where(devJobContentScript.jobId, isEqualTo(jobId)));
+        } else if (JobTypeEnum.KYLIN.getCode().equals(jobType)) {
+            devJobContentKylinDao.update(dsl -> dsl.set(devJobContentKylin.del).equalTo(DeleteEnum.DEL_YES.val)
+                    .set(devJobContentKylin.editor).equalTo(operator)
+                    .where(devJobContentKylin.jobId, isEqualTo(jobId)));
+        }
 
         return Boolean.TRUE;
     }
@@ -230,7 +247,10 @@ public class JobInfoRepoImpl implements JobInfoRepo {
     }
 
     @Override
-    public List<JobInfo> queryJobInfoByIds(Set<Long> accessIdSet) {
-        return jobInfoDao.select(dsl -> dsl.where(jobInfo.id, isIn(accessIdSet)));
+    public Boolean updateJobFolder(List<Long> jobIds, Long destFolderId, String operator) {
+        jobInfoDao.update(dsl -> dsl.set(jobInfo.folderId).equalTo(destFolderId)
+                .set(jobInfo.editor).equalTo(operator)
+                .where(jobInfo.id, isIn(jobIds)));
+        return Boolean.TRUE;
     }
 }

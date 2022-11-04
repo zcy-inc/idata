@@ -56,7 +56,7 @@ public class TokenService {
 
     @Value("${auth.jwt.security}")
     private String jwtSecurity;
-    private final int TOKEN_TTL_SECOND = 3600 * 24;
+    private final int TOKEN_TTL_SECOND = 3600 * 48;
 
     @Value("${zcy.is-cloud:true}")
     private String isCloud;
@@ -87,9 +87,10 @@ public class TokenService {
                 .signWith(SignatureAlgorithm.HS512, jwtSecurity)
                 .compact();
         userToken.setToken(DigestUtil.md5(token));
-        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
-                .where(uacUserToken.userId, isEqualTo(userInfo.getId()),
-                        and(uacUserToken.del, isNotEqualTo(1))));
+        // 统一凌晨5点token失效，并且不再"顶号"
+//        uacUserTokenDao.update(c -> c.set(uacUserToken.del).equalTo(1)
+//                .where(uacUserToken.userId, isEqualTo(userInfo.getId()),
+//                        and(uacUserToken.del, isNotEqualTo(1))));
         uacUserTokenDao.insertSelective(userToken);
         return token;
     }
@@ -107,7 +108,9 @@ public class TokenService {
                         .setSigningKey(jwtSecurity)
                         .parseClaimsJws(token)
                         .getBody();
-                isExpired = new Date().after(claims.getExpiration());
+                Date expiration = claims.getExpiration();
+                Date issuedAt = claims.getIssuedAt();
+                isExpired = new Date().after(expiration);
             } catch (Exception e) {
                 // expired token
                 isExpired = true;
@@ -115,19 +118,19 @@ public class TokenService {
             if (!isExpired) {
                 return true;
             }
-            // 防止一直在使用，token过期的问题
-            if (System.currentTimeMillis() - userToken.getEditTime().getTime() < 6 * 3600 * 1000) {
-                return true;
-            }
-            else if (System.currentTimeMillis() - userToken.getEditTime().getTime() >= 6 * 3600 * 1000
-                    && System.currentTimeMillis() - userToken.getEditTime().getTime() <= 12 * 3600 * 1000) {
-                uacUserTokenDao.update(c -> c.set(uacUserToken.editTime).equalTo(new Date())
-                        .where(uacUserToken.id, isEqualTo(userToken.getId())));
-                return true;
-            }
-            else {
-                return false;
-            }
+            // 不再"顶号"
+            return true;
+//            // 防止一直在使用，token过期的问题
+//            if (System.currentTimeMillis() - userToken.getEditTime().getTime() < 6 * 3600 * 1000) {
+//                return true;
+//            } else if (System.currentTimeMillis() - userToken.getEditTime().getTime() >= 6 * 3600 * 1000
+//                    && System.currentTimeMillis() - userToken.getEditTime().getTime() <= 12 * 3600 * 1000) {
+//                uacUserTokenDao.update(c -> c.set(uacUserToken.editTime).equalTo(new Date())
+//                        .where(uacUserToken.id, isEqualTo(userToken.getId())));
+//                return true;
+//            } else {
+//                return false;
+//            }
         } else {
             // 本地验证
             try {
@@ -135,7 +138,8 @@ public class TokenService {
                         .setSigningKey(jwtSecurity)
                         .parseClaimsJws(token)
                         .getBody();
-                boolean isExpired = new Date().after(claims.getExpiration());
+                Date expiration = claims.getExpiration();
+                boolean isExpired = new Date().after(expiration);
                 if (isExpired) {
                     return false;
                 }

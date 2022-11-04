@@ -113,17 +113,9 @@ public class JobContentVersionDto implements Comparable<JobContentVersionDto> {
 
     @Override
     public int compareTo(@NotNull JobContentVersionDto o) {
-        int ret = 0;
-        if (this.versionStatus == 0 && o.getVersionStatus() != 0)
-            ret = -1;
-        if (this.versionStatus != 0 && o.getVersionStatus() == 0)
-            ret = 1;
-
+        int ret = Integer.compare(o.getVersion(), this.version);
         if (ret == 0) {
-            ret = Integer.compare(o.getVersion(), this.version);
-        }
-        if (ret == 0) {
-            ret = o.getEnvironment().compareTo(this.environment);
+            ret = this.environment.compareTo(o.getEnvironment());
         }
         return ret;
     }

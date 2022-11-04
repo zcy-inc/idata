@@ -43,7 +43,6 @@ public class BaseTreeNodeServiceImpl implements BaseTreeNodeService {
     @Autowired
     private CompositeFolderService compositeFolderService;
 
-
     @Override
     public List<BaseTreeNodeDto> getBaseTree() {
         List<String> treeTypeList = new ArrayList<>(FunctionModuleEnum.map.keySet());

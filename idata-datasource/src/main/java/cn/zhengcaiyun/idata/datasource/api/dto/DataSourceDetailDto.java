@@ -2,13 +2,18 @@ package cn.zhengcaiyun.idata.datasource.api.dto;
 
 import cn.zhengcaiyun.idata.commons.enums.DataSourceTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
-import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 
 public class DataSourceDetailDto {
 
     private DataSourceTypeEnum dataSourceTypeEnum;
 
+    private String name; //数据源名称
+
     private String dbName;
+
+    private String host;
+
+    private Integer port;
 
     private String jdbcUrl;
 
@@ -24,6 +29,14 @@ public class DataSourceDetailDto {
 
     public void setDataSourceTypeEnum(DataSourceTypeEnum dataSourceTypeEnum) {
         this.dataSourceTypeEnum = dataSourceTypeEnum;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDbName() {
@@ -66,4 +79,19 @@ public class DataSourceDetailDto {
         this.driverTypeEnum = driverTypeEnum;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
 }

@@ -43,6 +43,7 @@ public class ColumnInfoDto {
     private String partitionedColumn;
     private boolean enableCompare;// 当此字段为ture时，isDiff字段有效
     private boolean isHiveDiff; // 字段和hive表是否存在不同
+    private String columnAttributeCode; // 字段属性(维度或指标)
 
     // GaS
     public Long getId() {
@@ -171,5 +172,13 @@ public class ColumnInfoDto {
 
     public void setHiveDiff(boolean hiveDiff) {
         isHiveDiff = hiveDiff;
+    }
+
+    public String getColumnAttributeCode() {
+        return columnAttributeCode;
+    }
+
+    public void setColumnAttributeCode(String columnAttributeCode) {
+        this.columnAttributeCode = columnAttributeCode;
     }
 }

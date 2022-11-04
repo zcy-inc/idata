@@ -142,17 +142,22 @@ const TableRelation: FC<TableRelationProps> = ({ id }) => {
         modifiers: ['ctrl', 'meta'],
       },
     });
-    getTableRelations({ tableId: id })
-      .then((res) => {
-        const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
-        const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
-        graph.data(handleDataTransform(tables, edges));
-        graph.render();
-        graph.fitCenter();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (id) {
+      getTableRelations({ tableId: id })
+        .then((res) => {
+          const tables = Array.isArray(res.data.tables) ? res.data.tables : [];
+          const edges = Array.isArray(res.data.edges) ? res.data.edges : [];
+          graph.data(handleDataTransform(tables, edges));
+          graph.render();
+          graph.fitCenter();
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }else{
+      setLoading(false);
+    }
+
   }, []);
 
   return (

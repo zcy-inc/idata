@@ -1,6 +1,5 @@
 package cn.zhengcaiyun.idata.develop.constant.enums;
 
 public enum EngineTypeEnum {
-
-    SPARK,SQOOP,KYLIN,DORIS;
+    SPARK, SPARK3, SQOOP, KYLIN, FLINK, STARROCKS
 }

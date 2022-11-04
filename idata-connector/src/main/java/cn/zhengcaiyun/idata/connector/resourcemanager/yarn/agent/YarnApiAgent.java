@@ -55,7 +55,7 @@ public class YarnApiAgent {
             });
             return result.getClusterMetrics();
         } catch (Exception ex) {
-            throw new RemoteServiceException("调用Yarn服务失败", ex);
+            throw new RemoteServiceException("调用Yarn服务失败：" + reqUrl, ex);
         }
     }
 
@@ -70,7 +70,7 @@ public class YarnApiAgent {
             });
             return result.getApps().getApp();
         } catch (Exception ex) {
-            throw new RemoteServiceException("调用Yarn服务失败", ex);
+            throw new RemoteServiceException("调用Yarn服务失败：" + reqUrl, ex);
         }
     }
 
@@ -87,7 +87,7 @@ public class YarnApiAgent {
             });
             return result.getApp();
         } catch (Exception ex) {
-            throw new RemoteServiceException("调用Yarn服务失败", ex);
+            throw new RemoteServiceException("调用Yarn服务失败：" + reqUrl, ex);
         }
     }
 
@@ -101,7 +101,7 @@ public class YarnApiAgent {
             });
             return Boolean.TRUE;
         } catch (Exception ex) {
-            throw new RemoteServiceException("调用Yarn服务失败", ex);
+            throw new RemoteServiceException("调用Yarn服务失败：" + reqUrl, ex);
         }
     }
 

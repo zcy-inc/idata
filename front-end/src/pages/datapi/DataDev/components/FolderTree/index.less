@@ -1,9 +1,29 @@
+.operation-list {
+  text-align: right;
+  margin-bottom: 8px;
+}
 .tree {
   height: 100%;
   margin-top: 16px;
   :global {
     .ant-tree {
-      height: calc(100% - 52px) !important;
+      height: calc(100% - 72px) !important;
+      .ant-tree-node-content-wrapper {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+.batch-operate-modal {
+  :global {
+    .ant-modal-body {
+      padding: 16px 20px 20px;
+      .ant-tabs-tab {
+        padding: 9px 0;
+      }
     }
   }
 }

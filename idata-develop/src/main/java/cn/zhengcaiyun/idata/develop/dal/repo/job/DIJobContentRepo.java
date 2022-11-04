@@ -40,9 +40,15 @@ public interface DIJobContentRepo {
 
     Optional<DIJobContent> query(Long jobId, Integer version);
 
+    Optional<DIJobContent> queryLatest(Long jobId);
+
     List<DIJobContent> queryList(Long jobId);
 
+    List<DIJobContent> queryList(List<Long> ids);
+
     List<DIJobContent> queryList(String destTable);
+
+    List<DIJobContent> queryListByDestTable(List<String> destTable);
 
     long countByDataSource(Long dataSourceId);
 }

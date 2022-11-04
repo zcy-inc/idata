@@ -33,6 +33,11 @@ public class UdfAddRequest {
     private String fileName;
 
     /**
+     * 自动推荐文件名称 当为true时候，fileName无效
+     */
+    private boolean autoRecommendFileName = true;
+
+    /**
      * Database Column Remarks:
      *   hdfs文件路径
      */
@@ -83,6 +88,16 @@ public class UdfAddRequest {
      */
     @ApiModelProperty("示例")
     private String udfSample;
+
+    /**
+     * java类名称（JavaFunction、JavaUDAF）或module（PythonFunction）
+     */
+    private String sourceName;
+
+    /**
+     *   是否是全局类型函数，1：是，0：否
+     */
+    private Integer globalFun = 1;
 
     public String getUdfName() {
         return udfName;
@@ -162,5 +177,29 @@ public class UdfAddRequest {
 
     public void setUdfSample(String udfSample) {
         this.udfSample = udfSample;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public Integer getGlobalFun() {
+        return globalFun;
+    }
+
+    public void setGlobalFun(Integer globalFun) {
+        this.globalFun = globalFun;
+    }
+
+    public boolean isAutoRecommendFileName() {
+        return autoRecommendFileName;
+    }
+
+    public void setAutoRecommendFileName(boolean autoRecommendFileName) {
+        this.autoRecommendFileName = autoRecommendFileName;
     }
 }

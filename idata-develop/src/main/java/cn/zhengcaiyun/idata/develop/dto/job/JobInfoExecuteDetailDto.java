@@ -2,7 +2,6 @@ package cn.zhengcaiyun.idata.develop.dto.job;
 
 import cn.zhengcaiyun.idata.commons.enums.DriverTypeEnum;
 import cn.zhengcaiyun.idata.develop.constant.enums.*;
-import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobUdf;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.BeanUtils;
@@ -39,11 +38,22 @@ public class JobInfoExecuteDetailDto {
      * 作业执行引擎，可传SPARK/SQOOP/KYLIN
      */
     private EngineTypeEnum execEngine;
+    /**
+     * 扩展配置参数，数据库json string格式，转化为confProp
+     */
+    private String extProperties;
+    /**
+     * 扩展参数配置
+     */
+    private Map<String, String> confProp;
+
+    private boolean openDqc;
 
     public static class DiJobDetailsDto extends JobInfoExecuteDetailDto {
         public DiJobDetailsDto() {
 
         }
+
         public DiJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -56,38 +66,39 @@ public class JobInfoExecuteDetailDto {
         private DriverTypeEnum srcDriverType;// driverType
         private String srcDbName; //dbName
         /**
-         *   数据来源-来源表
+         * 数据来源-来源表
          */
         private String srcTables;//sourceTableName
         /**
-         *   数据去向-目标表
+         * 数据去向-目标表
          */
         private String destTable;//带库名 targetTableName
 
         /**
          * 数据去向-写入模式，init: 新建表，overwrite: 覆盖表，append：追加表
-//         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+         * //         * @see cn.zhengcaiyun.idata.develop.constant.enums.DestWriteModeEnum
+         *
          * @see WriteModeEnum.DiEnum
          */
         private WriteModeEnum.DiEnum destWriteMode; // isRecreate
         /**
-         *   数据来源-读取模式，all：全量，incremental：增量
+         * 数据来源-读取模式，all：全量，incremental：增量
          */
         private SrcReadModeEnum srcReadMode;
         /**
-         *   数据来源-切分键 srcShardingNum>1 必填
+         * 数据来源-切分键 srcShardingNum>1 必填
          */
         private String srcReadShardKey;
         /**
-         *   数据来源-分片数量（并行度） 必填
+         * 数据来源-分片数量（并行度） 必填
          */
         private Integer srcShardingNum;
         /**
-         *   TODO
+         * 合并SQL
          */
         private String mergeSql;
         /**
-         *   数据来源-过滤条件
+         * 数据来源-过滤条件
          */
         private String srcReadFilter; // diCondition
         /**
@@ -98,6 +109,18 @@ public class JobInfoExecuteDetailDto {
          * 数据来源-字段信息
          */
         private List<MappingColumnDto> srcCols; // diColumns
+        /**
+         * 数据去向-写入前语句
+         *
+         * @return
+         */
+        private String destBeforeWrite;
+        /**
+         * 数据去向-写入后语句
+         *
+         * @return
+         */
+        private String destAfterWrite;
 
         public String getSrcDataType() {
             return srcDataType;
@@ -227,6 +250,22 @@ public class JobInfoExecuteDetailDto {
         public void setSrcReadMode(SrcReadModeEnum srcReadMode) {
             this.srcReadMode = srcReadMode;
         }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
+        }
     }
 
     public static class BackFlowDetailDto extends JobInfoExecuteDetailDto {
@@ -235,23 +274,49 @@ public class JobInfoExecuteDetailDto {
          */
         private String srcSql;//sourceSql;
         private WriteModeEnum.BackFlowEnum destWriteMode; //DestWriteModeEnum destWriteMode;
-        private List<DevJobUdf> udfList; // udfs; 老版本使用，新版本不会关联
+        private List<JobUdfDto> udfList; // udfs; 老版本使用，新版本不会关联
         private DriverTypeEnum destDriverType;//;targetDriverType;
         private String destUrlPath;//targetUrlPath;
         private String destUserName;//username;
         private String destPassword;//password;
         private String destTable;//targetTableName;
+        private boolean destDRDS = false; // 是否是分布式数据库
         private String srcTable;
         private String destColumnNames; // dbColumnNames src数据源的列
         private String updateKey; //新版本
         private Integer parallelism; //新版本
         private Map<String, String> destPropMap; //其余属性定义map
 
+        // 这俩个字段目前仅针对 hive -> doris 回流
+        private String srcTablePt; // 回流数据源（hive）的分区目录信息 例如pt=20220801
+        private String destTablePt; //目标数据源（doris）的分区别名，例如p20220801
+
+        /**
+         * 数据去向-写入前语句
+         *
+         * @return
+         */
+        private String destBeforeWrite;
+        /**
+         * 数据去向-写入后语句
+         *
+         * @return
+         */
+        private String destAfterWrite;
+
         public BackFlowDetailDto() {
         }
 
         public BackFlowDetailDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
+        }
+
+        public boolean isDestDRDS() {
+            return destDRDS;
+        }
+
+        public void setDestDRDS(boolean destDRDS) {
+            this.destDRDS = destDRDS;
         }
 
         public String getUpdateKey() {
@@ -310,11 +375,11 @@ public class JobInfoExecuteDetailDto {
             this.destDriverType = destDriverType;
         }
 
-        public List<DevJobUdf> getUdfList() {
+        public List<JobUdfDto> getUdfList() {
             return udfList;
         }
 
-        public void setUdfList(List<DevJobUdf> udfList) {
+        public void setUdfList(List<JobUdfDto> udfList) {
             this.udfList = udfList;
         }
 
@@ -357,28 +422,61 @@ public class JobInfoExecuteDetailDto {
         public void setParallelism(Integer parallelism) {
             this.parallelism = parallelism;
         }
+
+        public String getSrcTablePt() {
+            return srcTablePt;
+        }
+
+        public void setSrcTablePt(String srcTablePt) {
+            this.srcTablePt = srcTablePt;
+        }
+
+        public String getDestTablePt() {
+            return destTablePt;
+        }
+
+        public void setDestTablePt(String destTablePt) {
+            this.destTablePt = destTablePt;
+        }
+
+        public String getDestBeforeWrite() {
+            return destBeforeWrite;
+        }
+
+        public void setDestBeforeWrite(String destBeforeWrite) {
+            this.destBeforeWrite = destBeforeWrite;
+        }
+
+        public String getDestAfterWrite() {
+            return destAfterWrite;
+        }
+
+        public void setDestAfterWrite(String destAfterWrite) {
+            this.destAfterWrite = destAfterWrite;
+        }
     }
 
     public static class SqlJobDetailsDto extends JobInfoExecuteDetailDto {
         public SqlJobDetailsDto() {
 
         }
+
         public SqlJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
 
         /**
-         *   数据去向-目标表
+         * 数据去向-目标表
          */
         private String destTable; // targetTableName
 
         /**
-         *   数据去向-写入模式，overwrite，upsert
+         * 数据去向-写入模式，overwrite，upsert
          */
         private WriteModeEnum.SqlEnum destWriteMode; // saveMode
 
         /**
-         *   数据来源表主键(写入模式为upsert时必填)
+         * 数据来源表主键(写入模式为upsert时必填)
          */
         private String jobTargetTablePk;
 
@@ -393,7 +491,14 @@ public class JobInfoExecuteDetailDto {
         /**
          * 函数
          */
-        private List<DevJobUdf> udfList; // udfs
+        private List<JobUdfDto> udfList; // udfs
+
+        private List<ExternalTableDto> externalTableList;
+
+        /**
+         * 写入文件类型 Spark SQL类型：orc、parquet
+         */
+        private TableStoredTypeEnum tableStoredTypeEnum;
 
         public String getDestTable() {
             return destTable;
@@ -427,11 +532,11 @@ public class JobInfoExecuteDetailDto {
             isOpenMergeFile = openMergeFile;
         }
 
-        public List<DevJobUdf> getUdfList() {
+        public List<JobUdfDto> getUdfList() {
             return udfList;
         }
 
-        public void setUdfList(List<DevJobUdf> udfList) {
+        public void setUdfList(List<JobUdfDto> udfList) {
             this.udfList = udfList;
         }
 
@@ -442,12 +547,81 @@ public class JobInfoExecuteDetailDto {
         public void setSourceSql(String sourceSql) {
             this.sourceSql = sourceSql;
         }
+
+        public List<ExternalTableDto> getExternalTableList() {
+            return externalTableList;
+        }
+
+        public void setExternalTableList(List<ExternalTableDto> externalTableList) {
+            this.externalTableList = externalTableList;
+        }
+
+        public TableStoredTypeEnum getTableStoredTypeEnum() {
+            return tableStoredTypeEnum;
+        }
+
+        public void setTableStoredTypeEnum(TableStoredTypeEnum tableStoredTypeEnum) {
+            this.tableStoredTypeEnum = tableStoredTypeEnum;
+        }
+
+        public static class ExternalTableDto {
+            /**
+             * StarRocks
+             */
+            private String extSrcType;
+            private String extSrcUrl;
+            private String extSrcUsername;
+            private String extSrcPassword;
+
+            private List<String> extSrcTables;
+
+            public String getExtSrcType() {
+                return extSrcType;
+            }
+
+            public void setExtSrcType(String extSrcType) {
+                this.extSrcType = extSrcType;
+            }
+
+            public String getExtSrcUrl() {
+                return extSrcUrl;
+            }
+
+            public void setExtSrcUrl(String extSrcUrl) {
+                this.extSrcUrl = extSrcUrl;
+            }
+
+            public String getExtSrcUsername() {
+                return extSrcUsername;
+            }
+
+            public void setExtSrcUsername(String extSrcUsername) {
+                this.extSrcUsername = extSrcUsername;
+            }
+
+            public String getExtSrcPassword() {
+                return extSrcPassword;
+            }
+
+            public void setExtSrcPassword(String extSrcPassword) {
+                this.extSrcPassword = extSrcPassword;
+            }
+
+            public List<String> getExtSrcTables() {
+                return extSrcTables;
+            }
+
+            public void setExtSrcTables(List<String> extSrcTables) {
+                this.extSrcTables = extSrcTables;
+            }
+        }
     }
 
     public static class SparkJobDetailsDto extends JobInfoExecuteDetailDto {
         public SparkJobDetailsDto() {
 
         }
+
         public SparkJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -483,13 +657,15 @@ public class JobInfoExecuteDetailDto {
         }
     }
 
-    public static class KylinDetailJob extends JobInfoExecuteDetailDto {
-        public KylinDetailJob() {
+    public static class KylinDetailJobDto extends JobInfoExecuteDetailDto {
+        public KylinDetailJobDto() {
 
         }
-        public KylinDetailJob(JobInfoExecuteDetailDto parent) {
+
+        public KylinDetailJobDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
+
         private String cubeName;
         private String buildType;
 
@@ -514,6 +690,7 @@ public class JobInfoExecuteDetailDto {
         public ScriptJobDetailsDto() {
 
         }
+
         public ScriptJobDetailsDto(JobInfoExecuteDetailDto parent) {
             BeanUtils.copyProperties(parent, this);
         }
@@ -542,6 +719,444 @@ public class JobInfoExecuteDetailDto {
 
         public void setScriptArguments(String scriptArguments) {
             this.scriptArguments = scriptArguments;
+        }
+    }
+
+    public static class FlinkSqlJobDetailsDto extends JobInfoExecuteDetailDto {
+
+        public FlinkSqlJobDetailsDto() {
+
+        }
+
+        public FlinkSqlJobDetailsDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        /**
+         * 作业版本
+         */
+        private String jobVersion;
+        /**
+         * 数据来源SQL
+         */
+        private String sourceSql; // sourceSql
+        /**
+         * 函数
+         */
+        private List<JobUdfDto> udfList; // udfs
+        /**
+         * 作业私有信息
+         */
+        private Map<String, String> jobPrivacyProp;
+        /**
+         * 是否已发布作业，未发布作业走调试流程
+         */
+        private Boolean published;
+        /**
+         * flink版本
+         */
+        private String flinkVersion;
+        /**
+         * 是否从SavePoint启动
+         */
+        private Boolean startFromSavePoint;
+        /**
+         * flink job id
+         */
+        private String flinkJobId;
+        /**
+         * 目标表
+         */
+        private String destTableName;
+
+        public String getJobVersion() {
+            return jobVersion;
+        }
+
+        public void setJobVersion(String jobVersion) {
+            this.jobVersion = jobVersion;
+        }
+
+        public String getSourceSql() {
+            return sourceSql;
+        }
+
+        public void setSourceSql(String sourceSql) {
+            this.sourceSql = sourceSql;
+        }
+
+        public List<JobUdfDto> getUdfList() {
+            return udfList;
+        }
+
+        public void setUdfList(List<JobUdfDto> udfList) {
+            this.udfList = udfList;
+        }
+
+        public Map<String, String> getJobPrivacyProp() {
+            return jobPrivacyProp;
+        }
+
+        public void setJobPrivacyProp(Map<String, String> jobPrivacyProp) {
+            this.jobPrivacyProp = jobPrivacyProp;
+        }
+
+        public Boolean getPublished() {
+            return published;
+        }
+
+        public void setPublished(Boolean published) {
+            this.published = published;
+        }
+
+        public String getFlinkVersion() {
+            return flinkVersion;
+        }
+
+        public void setFlinkVersion(String flinkVersion) {
+            this.flinkVersion = flinkVersion;
+        }
+
+        public Boolean getStartFromSavePoint() {
+            return startFromSavePoint;
+        }
+
+        public void setStartFromSavePoint(Boolean startFromSavePoint) {
+            this.startFromSavePoint = startFromSavePoint;
+        }
+
+        public String getFlinkJobId() {
+            return flinkJobId;
+        }
+
+        public void setFlinkJobId(String flinkJobId) {
+            this.flinkJobId = flinkJobId;
+        }
+
+        public String getDestTableName() {
+            return destTableName;
+        }
+
+        public void setDestTableName(String destTableName) {
+            this.destTableName = destTableName;
+        }
+    }
+
+    public static final class FlinkCDCJobDetailDto extends JobInfoExecuteDetailDto {
+
+        public FlinkCDCJobDetailDto() {
+        }
+
+        public FlinkCDCJobDetailDto(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        private String srcDbType;
+        private String srcHost;
+        private Integer srcPort;
+        private String srcUsername;
+        private String srcPassword;
+        private String srcDbName;
+
+        /**
+         * pgsql抽数时
+         */
+        private String srcSchema;
+
+        private List<CDCTableConfig> srcTableConfigs;
+
+        private Integer tableNum;
+
+        /**
+         * cdc目标数据源，目前用字符串，后续可以改成和HTool一直的枚举
+         * StarRocks, Kafka, Iceberg
+         */
+        private String destType;
+        private List<HostAndPort> destHostPorts;
+        private String destUsername;
+        private String destPassword;
+
+        private String jobVersion;
+
+        private Boolean published;
+
+        public static final class CDCTableConfig {
+            /**
+             * 可以传正则表达式：table_*，
+             * 或单表名：table_1，
+             * 或分表：table_[0-9]
+             */
+            private String tablePattern;
+            private Map<String, String> tableProp;
+
+            /**
+             * 初始化目标表，会删表重建
+             */
+            private Boolean initDestTable;
+            /**
+             * 从SavePoint启动flink job
+             */
+            private Boolean startFromSavePoint;
+
+            /**
+             * 当initFromSavePoint为true时，flinkJobId不为空则从savePoint启动flink job
+             */
+            private String flinkJobId;
+
+            public String getTablePattern() {
+                return tablePattern;
+            }
+
+            public void setTablePattern(String tablePattern) {
+                this.tablePattern = tablePattern;
+            }
+
+            public Map<String, String> getTableProp() {
+                return tableProp;
+            }
+
+            public void setTableProp(Map<String, String> tableProp) {
+                this.tableProp = tableProp;
+            }
+
+            public Boolean getInitDestTable() {
+                return initDestTable;
+            }
+
+            public void setInitDestTable(Boolean initDestTable) {
+                this.initDestTable = initDestTable;
+            }
+
+            public Boolean getStartFromSavePoint() {
+                return startFromSavePoint;
+            }
+
+            public void setStartFromSavePoint(Boolean startFromSavePoint) {
+                this.startFromSavePoint = startFromSavePoint;
+            }
+
+            public String getFlinkJobId() {
+                return flinkJobId;
+            }
+
+            public void setFlinkJobId(String flinkJobId) {
+                this.flinkJobId = flinkJobId;
+            }
+        }
+
+        public String getSrcDbType() {
+            return srcDbType;
+        }
+
+        public void setSrcDbType(String srcDbType) {
+            this.srcDbType = srcDbType;
+        }
+
+        public String getSrcHost() {
+            return srcHost;
+        }
+
+        public void setSrcHost(String srcHost) {
+            this.srcHost = srcHost;
+        }
+
+        public Integer getSrcPort() {
+            return srcPort;
+        }
+
+        public void setSrcPort(Integer srcPort) {
+            this.srcPort = srcPort;
+        }
+
+        public String getSrcUsername() {
+            return srcUsername;
+        }
+
+        public void setSrcUsername(String srcUsername) {
+            this.srcUsername = srcUsername;
+        }
+
+        public String getSrcPassword() {
+            return srcPassword;
+        }
+
+        public void setSrcPassword(String srcPassword) {
+            this.srcPassword = srcPassword;
+        }
+
+        public String getSrcDbName() {
+            return srcDbName;
+        }
+
+        public void setSrcDbName(String srcDbName) {
+            this.srcDbName = srcDbName;
+        }
+
+        public List<CDCTableConfig> getSrcTableConfigs() {
+            return srcTableConfigs;
+        }
+
+        public void setSrcTableConfigs(List<CDCTableConfig> srcTableConfigs) {
+            this.srcTableConfigs = srcTableConfigs;
+        }
+
+        public String getDestType() {
+            return destType;
+        }
+
+        public void setDestType(String destType) {
+            this.destType = destType;
+        }
+
+        public List<HostAndPort> getDestHostPorts() {
+            return destHostPorts;
+        }
+
+        public void setDestHostPorts(List<HostAndPort> destHostPorts) {
+            this.destHostPorts = destHostPorts;
+        }
+
+        public String getDestUsername() {
+            return destUsername;
+        }
+
+        public void setDestUsername(String destUsername) {
+            this.destUsername = destUsername;
+        }
+
+        public String getDestPassword() {
+            return destPassword;
+        }
+
+        public void setDestPassword(String destPassword) {
+            this.destPassword = destPassword;
+        }
+
+        public String getJobVersion() {
+            return jobVersion;
+        }
+
+        public void setJobVersion(String jobVersion) {
+            this.jobVersion = jobVersion;
+        }
+
+        public String getSrcSchema() {
+            return srcSchema;
+        }
+
+        public void setSrcSchema(String srcSchema) {
+            this.srcSchema = srcSchema;
+        }
+
+        public Integer getTableNum() {
+            return tableNum;
+        }
+
+        public void setTableNum(Integer tableNum) {
+            this.tableNum = tableNum;
+        }
+
+        public Boolean getPublished() {
+            return published;
+        }
+
+        public void setPublished(Boolean published) {
+            this.published = published;
+        }
+    }
+
+    public static class HostAndPort {
+        private String host;
+        private Integer port;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
+            return port;
+        }
+
+        public void setPort(Integer port) {
+            this.port = port;
+        }
+    }
+
+    public static class StarRocksSQLJobDetail extends JobInfoExecuteDetailDto {
+        public StarRocksSQLJobDetail() {
+
+        }
+
+        public StarRocksSQLJobDetail(JobInfoExecuteDetailDto parent) {
+            BeanUtils.copyProperties(parent, this);
+        }
+
+        private String sourceSql;
+        private DriverTypeEnum driverType;
+        private String targetUrlPath;
+        private String username;
+        private String password;
+        private String targetTableName;
+        private WriteModeEnum.SqlEnum destWriteMode;
+
+        public String getSourceSql() {
+            return sourceSql;
+        }
+
+        public void setSourceSql(String sourceSql) {
+            this.sourceSql = sourceSql;
+        }
+
+        public DriverTypeEnum getDriverType() {
+            return driverType;
+        }
+
+        public void setDriverType(DriverTypeEnum driverType) {
+            this.driverType = driverType;
+        }
+
+        public String getTargetUrlPath() {
+            return targetUrlPath;
+        }
+
+        public void setTargetUrlPath(String targetUrlPath) {
+            this.targetUrlPath = targetUrlPath;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getTargetTableName() {
+            return targetTableName;
+        }
+
+        public void setTargetTableName(String targetTableName) {
+            this.targetTableName = targetTableName;
+        }
+
+        public WriteModeEnum.SqlEnum getDestWriteMode() {
+            return destWriteMode;
+        }
+
+        public void setDestWriteMode(WriteModeEnum.SqlEnum destWriteMode) {
+            this.destWriteMode = destWriteMode;
         }
     }
 
@@ -601,5 +1216,28 @@ public class JobInfoExecuteDetailDto {
         this.execEngine = execEngine;
     }
 
+    public String getExtProperties() {
+        return extProperties;
+    }
+
+    public void setExtProperties(String extProperties) {
+        this.extProperties = extProperties;
+    }
+
+    public Map<String, String> getConfProp() {
+        return confProp;
+    }
+
+    public void setConfProp(Map<String, String> confProp) {
+        this.confProp = confProp;
+    }
+
+    public boolean isOpenDqc() {
+        return openDqc;
+    }
+
+    public void setOpenDqc(boolean openDqc) {
+        this.openDqc = openDqc;
+    }
 
 }

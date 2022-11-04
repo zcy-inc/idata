@@ -32,9 +32,10 @@ public interface DataSourceApi {
     /**
      * bo返回
      * @param id
+     * @param env env为null默认取第一条
      * @return
      */
-    DataSourceDetailDto getDataSourceDetail(Long id);
+    DataSourceDetailDto getDataSourceDetail(Long id, String env);
 
     /**
      * 获取表主键，逗号分隔

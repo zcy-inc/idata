@@ -16,16 +16,18 @@
  */
 package cn.zhengcaiyun.idata.user.service.impl;
 
+import cn.zhengcaiyun.idata.commons.dto.general.SingleIdPair;
 import cn.zhengcaiyun.idata.commons.encrypt.DigestUtil;
 import cn.zhengcaiyun.idata.commons.pojo.Page;
 import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
-import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.dal.dao.UacRoleDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserDao;
 import cn.zhengcaiyun.idata.user.dal.dao.UacUserRoleDao;
 import cn.zhengcaiyun.idata.user.dal.model.UacRole;
 import cn.zhengcaiyun.idata.user.dal.model.UacUser;
 import cn.zhengcaiyun.idata.user.dal.model.UacUserRole;
+import cn.zhengcaiyun.idata.user.dal.repo.UserRepo;
+import cn.zhengcaiyun.idata.user.dto.UserInfoDto;
 import cn.zhengcaiyun.idata.user.service.TokenService;
 import cn.zhengcaiyun.idata.user.service.UserManagerService;
 import cn.zhengcaiyun.idata.user.service.UserService;
@@ -66,6 +68,8 @@ public class UserManagerServiceImpl implements UserManagerService {
     private UacUserRoleDao uacUserRoleDao;
     @Autowired
     private UacRoleDao uacRoleDao;
+    @Autowired
+    private UserRepo userRepo;
 
     private final String[] userInfoFields = {"id", "del", "createTime", "creator", "editTime", "editor",
             "username", "sysAdmin", "authType", "nickname", "employeeId", "department", "realName", "email",
@@ -203,6 +207,14 @@ public class UserManagerServiceImpl implements UserManagerService {
                 .where(uacUserRole.userId, isEqualTo(userId),
                         and(uacUserRole.del, isNotEqualTo(1))));
         return true;
+    }
+
+    @Override
+    public List<SingleIdPair<String>> getUserKeyValList() {
+        return userRepo.queryList()
+                .stream()
+                .map(user -> new SingleIdPair<String>(user.getId().toString(),user.getNickname()))
+                .collect(Collectors.toList());
     }
 
 }

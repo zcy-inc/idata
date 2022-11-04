@@ -1,29 +1,41 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
-import { Button, Form, Input, message, Upload } from 'antd';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { Button, Form, FormInstance, Input, Upload } from 'antd';
 import type { ForwardRefRenderFunction } from 'react';
 import Title from '@/components/Title';
 import ParamList from '../../ParamList';
 import { uploadJar } from '@/services/datadev';
-
+import { UploadFile } from 'antd/lib/upload/interface';
 interface SparkJavaProps {
   data: any;
+  form: FormInstance<any>;
   jobId: number;
 }
 
 const { Item } = Form;
 const width = 200;
 
-const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jobId }, ref) => {
-  const [form] = Form.useForm();
+const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = (
+  { data, jobId, form },
+  ref,
+) => {
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   useImperativeHandle(ref, () => ({
     form: form,
   }));
 
   useEffect(() => {
-    if (data) {
+    if (data?.resourceHdfsPath) {
+      const resourceHdfsPaths = data.resourceHdfsPath?.split('/') || [];
+      setFileList([
+        {
+          uid: '1',
+          name: resourceHdfsPaths[resourceHdfsPaths.length - 1],
+          status: 'done',
+        },
+      ]);
       form.setFieldsValue({
-        // upload: data.resourceHdfsPath,
+        upload: data.resourceHdfsPath,
         resourceHdfsPath: data.resourceHdfsPath,
         appArguments: data.appArguments,
         mainClass: data.mainClass,
@@ -40,18 +52,32 @@ const SparkJava: ForwardRefRenderFunction<unknown, SparkJavaProps> = ({ data, jo
             style={{ marginTop: 16 }}
             accept="*"
             maxCount={1}
+            fileList={fileList}
+            showUploadList={{
+              showRemoveIcon: false,
+              showPreviewIcon: false
+            }
+            }
             customRequest={({ file, onSuccess, onError }) => {
               const formData = new FormData();
               formData.append('file', file);
               uploadJar({ jobId }, formData)
                 .then((res) => {
                   if (res.success) {
-                    onSuccess?.(res, file as unknown as XMLHttpRequest);
+                    onSuccess?.(res, (file as unknown) as XMLHttpRequest);
                     form.setFieldsValue({ resourceHdfsPath: res.data });
+                    const resourceHdfsPaths = res.data?.split('/') || [];
+                    setFileList([
+                      {
+                        uid: '1',
+                        name: resourceHdfsPaths[resourceHdfsPaths.length - 1],
+                        status: 'done',
+                      },
+                    ]);
                   }
                 })
                 .catch((err) => {
-                  onError?.(err, file as unknown as XMLHttpRequest);
+                  onError?.(err, (file as unknown) as XMLHttpRequest);
                 });
             }}
           >

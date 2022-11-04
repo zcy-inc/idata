@@ -1,9 +1,11 @@
+// 节点类型
 export enum FolderTypes {
   FUNCTION = 'FUNCTION', // 功能性文件夹
   FOLDER = 'FOLDER', // 普通文件夹
   RECORD = 'RECORD', // 业务数据
 }
 
+// 功能性文件夹枚举
 export enum FolderBelong {
   DESIGN = 'DESIGN', // 数仓设计
   DESIGNTABLE = 'DESIGN.TABLE', // 数仓设计-表
@@ -15,6 +17,26 @@ export enum FolderBelong {
   DEVJOB = 'DEV.JOB', // 数据开发-作业
   DEVFUN = 'DEV.FUN', // 数据开发-函数
 }
+
+export enum ContentBelong {
+  STREAM = 'DI_STREAM', // 实时作业
+  BATCH = 'DI_BATCH', // 离线作业
+  SQLFLINK = 'SQL_FLINK', // SQL_FLINK
+}
+
+// 功能性文件夹icon
+export const funcFolderIconMap = {
+  [FolderBelong.DESIGN]: 'icon-shujukaifa-shucangsheji',
+  [FolderBelong.DESIGNTABLE]: 'icon-shujukaifa-biao',
+  // [FolderBelong.DESIGNLABEL]: 'icon-shujukaifa-biaoqian',
+  // [FolderBelong.DESIGNENUM]: 'icon-shujukaifa-meijuleixing',
+  [FolderBelong.DAG]: 'icon-shujukaifa-dag',
+  [FolderBelong.DI]: 'icon-shujukaifa-shujujicheng',
+  [FolderBelong.DEV]: 'icon-shujukaifa-shujukaifa',
+  [FolderBelong.DEVJOB]: 'icon-shujukaifa-zuoye',
+  [FolderBelong.DEVFUN]: 'icon-shujukaifa-hanshu',
+  // [FolderTypes.FOLDER]: 'icon-wenjianjia',
+};
 
 export enum PeriodRange {
   YEAR = 'year',
@@ -73,11 +95,13 @@ export enum TaskTypes {
   DI_BATCH = 'DI_BATCH', // 离线同步
   DI_STREAM = 'DI_STREAM', // 实时同步
   SQL_SPARK = 'SQL_SPARK',
+  SQL_FLINK = 'SQL_FLINK',
   SPARK_PYTHON = 'SPARK_PYTHON',
   SPARK_JAR = 'SPARK_JAR',
   SCRIPT_PYTHON = 'SCRIPT_PYTHON',
   SCRIPT_SHELL = 'SCRIPT_SHELL',
   KYLIN = 'KYLIN',
+  SQL_STARROCKS = 'SQL_STARROCKS',
 }
 
 export enum SrcReadMode {
@@ -97,11 +121,6 @@ export enum BackFlowDestWriteMode {
   OVERWRITE = 'OVERWRITE',
 }
 
-export const backFlowDestWriteModeOptions = [
-  { label: 'Overwrite', value: BackFlowDestWriteMode.OVERWRITE },
-  { label: 'Upsert', value: BackFlowDestWriteMode.UPSERT },
-  // { label: 'Insert', value: BackFlowDestWriteMode.INSERT },
-];
 
 export enum VersionStatus {
   EDITING = 0, // 编辑中
@@ -118,6 +137,16 @@ export const VersionStatusDisplayMap = {
   [VersionStatus.REJECTED]: '已驳回',
   [VersionStatus.ARCHIVED]: '已归档',
 };
+
+export enum publishListStatusMode {
+  FINISHTASK = 'finishTask', // 已处理
+  WAITINGTASK = 'waitingTask', // 待处理
+}
+
+export const publishListStatus = {
+  [publishListStatusMode.FINISHTASK]:[2,4,9], // 已处理
+  [publishListStatusMode.WAITINGTASK]:[1], // 待处理
+}
 
 export enum EnvRunningState {
   PAUSED = 0,
@@ -168,6 +197,7 @@ export enum ExecEngine {
   SQOOP = 'SQOOP',
   KYLIN = 'KYLIN',
   DORIS = 'DORIS',
+  FLINK = 'FLINK',
 }
 
 export const execEngineOptions = [
@@ -187,5 +217,18 @@ export enum DataSourceType {
   POSTGRESQL = 'postgresql',
   PHOENIX = 'phoenix',
   DORIS = 'doris',
+  STARROCKS = 'starrocks',
   ELASTICSEARCH = 'elasticsearch',
 }
+
+export enum DAGStatus {
+  ON = 1, // 上线
+  OFF = 0, // 下线
+}
+
+export const execCoresOptions = new Array(16).fill(0).map((_, index) => ({
+  label: index + 1,
+  value: index + 1,
+}));
+
+export const defaultExecCores = 2;

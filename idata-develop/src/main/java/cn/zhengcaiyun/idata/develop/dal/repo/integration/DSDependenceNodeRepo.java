@@ -40,6 +40,8 @@ public interface DSDependenceNodeRepo {
 
     List<DSDependenceNode> queryDependenceNodeInWorkflow(Long workflowCode, Long prevTaskCode);
 
+    List<DSDependenceNode> queryDepNodeByPrevTask(Long prevTaskCode);
+
     List<DSDependenceNode> queryDependenceNodeInWorkflow(Long taskCode, Long workflowCode, Long prevTaskCode);
 
     List<DSDependenceNode> queryByDependenceNode(Long dependenceNodeCode);

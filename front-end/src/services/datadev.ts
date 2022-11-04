@@ -24,10 +24,20 @@ import type {
   CreateDIJobDto,
   DIJobBasicInfo,
   MergeSqlParamDto,
+  DependenciesJob,
+  Job
 } from '@/types/datadev';
-import type { PeriodRange, StatementState, TaskCategory, TaskTypes } from '@/constants/datadev';
+import { formatTreeData } from '@/utils/utils';
+import type {
+  PeriodRange,
+  StatementState,
+  TaskCategory,
+  TaskTypes,
+  FolderBelong,
+} from '@/constants/datadev';
 import type { DefaultResponse } from './global';
 import type { DataSourceTypes, Environments } from '@/constants/datasource';
+import { getRequestUrl } from '@/utils/utils';
 
 /**
  * 标签 创建
@@ -123,9 +133,16 @@ export async function getTableReferTbs(params: { labelValue?: string }) {
 }
 
 /**
+ * 表 维度选择 获取字段
+ */
+export async function getDimensionColumnInfos(tableId: any, params: any) {
+  return request(`/api/p1/dev/dimensionColumnInfos/${tableId}`, { method: 'GET', params });
+}
+
+/**
  * 表 获取参考字段
  */
-export async function getTableReferStr(params: { tableId: string }) {
+export async function getTableReferStr(params: any) {
   return request(`/api/p1/dev/columnInfos/${params.tableId}`, { method: 'GET', params });
 }
 
@@ -184,7 +201,20 @@ export async function syncHive(data: { tableId: number }) {
     data,
   });
 }
-
+// 表 比较hive不同的相关信息提示
+export async function compareHiveChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/info`, {
+    method: 'POST',
+    data,
+  });
+}
+// 表 拉取hive信息
+export async function hiveTableChange(data) {
+  return request<DefaultResponse>(`/api/p1/dev/pull/hive/columns`, {
+    method: 'POST',
+    data,
+  });
+}
 /* ==================== DataDev ==================== */
 /**
  * 获取功能性文件树
@@ -198,6 +228,26 @@ export async function getFunctionTree() {
   );
 }
 
+// 获取指定的功能性文件夹树
+export async function getSpecifiedFunctionTree(data?: {
+  belongFunctions: FolderBelong[];
+  includeFunFolders?:	boolean;
+  keyWord?: string;
+}) {
+  return request('/api/p1/dev/compositeFolders/folders/tree', {
+    method: 'POST',
+    data,
+  }).then(({ data }) =>
+    formatTreeData(data, (node) => ({
+      ...node,
+      key: node.id,
+      title: node.name,
+      label: node.name,
+      value: node.id,
+    })),
+  );
+}
+
 /**
  * 获取完整的文件树
  */
@@ -205,6 +255,58 @@ export async function getTree(data?: { belongFunctions?: string[]; keyWord?: str
   return request<DefaultResponse & { data: TreeNode[] }>('/api/p1/dev/compositeFolders/tree', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 获取作业扩展信息
+ */
+ export async function getJobInfo(data: {jobIds: number []}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/extInfo', {
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导出作业
+ */
+ export async function jobExport(params: {jobIds: string}) {
+   window.open(getRequestUrl(`/api/p1/dev/jobs/export?jobIds=${params.jobIds}`))
+  }
+
+/**
+ * 复制作业
+ */
+ export async function jobCopy(data: {jobIds: number [], destFolderId: number | undefined}) {
+  return request('/api/p1/dev/jobs/copy', {
+    data,
+    method: 'POST',
+  });
+}
+
+/**
+ * 导入作业
+ */
+ export async function jobImport(data: {destFolderId: number | string, file: string | Blob}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/import', {
+    data: {
+      file: data.file
+    },
+    params: {
+      destFolderId: data.destFolderId
+    },
+    method: 'POST',
+  });
+}
+
+/**
+ * 移动作业
+ */
+ export async function jobMove(data: {jobIds: number [], destFolderId: number}) {
+  return request<DefaultResponse & { data: Job[] }>('/api/p1/dev/jobs/move', {
+    data,
+    method: 'POST',
   });
 }
 
@@ -332,7 +434,7 @@ export async function offlineDAG(params: { id: Key }) {
 /**
  * 获取作业类型
  */
-export async function getTaskTypes(params: { catalog: TaskCategory }) {
+export async function getTaskTypes(params?: { catalog: TaskCategory }) {
   return request<DefaultResponse & { data: TaskType[] }>('/api/p1/dev/jobs/types', {
     method: 'GET',
     params,
@@ -474,8 +576,8 @@ export async function submitTask(
 /**
  * 获取DAG列表
  */
-export async function getDAGList(params: { environment: Environments; dwLayerCode?: string }) {
-  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/dags/info', {
+export async function getDAGList(params: { environment: Environments; jobType: string }) {
+  return request<DefaultResponse & { data: DAGListItem[] }>('/api/p1/dev/jobs/assistance/dags/list', {
     method: 'GET',
     params,
   });
@@ -484,11 +586,25 @@ export async function getDAGList(params: { environment: Environments; dwLayerCod
 /**
  * 获取运行队列
  */
-export async function getExecuteQueues() {
+export async function getExecuteQueues(params: {jobType: string}) {
   return request<DefaultResponse & { data: { name: string; code: string }[] }>(
-    '/api/p1/dev/executeQueues',
+    '/api/p1/dev/jobs/assistance/executeQueues',
     {
       method: 'GET',
+      params
+    },
+  );
+}
+
+/**
+ * 获取执行引擎联动
+ */
+ export async function getEngineType(params: {jobType: string}) {
+  return request<DefaultResponse & { data: string[] }>(
+    '/api/p1/dev/jobs/engine-type',
+    {
+      method: 'GET',
+      params
     },
   );
 }
@@ -504,13 +620,31 @@ export async function getDataDevTypes() {
 }
 
 /**
- * 获取已配置的作业列表（依赖的上游任务）
+ * 获取已配置的作业列表
  */
 export async function getConfiguredTaskList(params: { environment: Environments }) {
   return request<DefaultResponse & { data: ConfiguredTaskListItem[] }>(
     `/api/p1/dev/jobs/environments/${params.environment}/jobs`,
     {
       method: 'GET',
+    },
+  );
+}
+
+// 获取自动推荐依赖作业
+export async function getRecommendJob({
+  jobId,
+  environment,
+  version,
+}: {
+  jobId: number;
+  environment: Environments;
+  version?: string | null;
+}) {
+  return request<Tresponse<DependenciesJob[]>>(
+    `/api/p1/dev/jobs/${jobId}/environments/${environment}/dependencies/derive`,
+    {
+      params: { version },
     },
   );
 }
@@ -523,6 +657,19 @@ export async function getDataDevConfig(params: { jobId: number; environment: Env
     `/api/p1/dev/jobs/${params.jobId}/environments/${params.environment}/configs`,
     {
       method: 'GET',
+    },
+  );
+}
+
+/**
+ * 获取加载执行引擎
+ */
+ export async function getExecEngineOptions(params: { jobType: string }) {
+  return request<DefaultResponse & { data: any }>(
+    `/api/p1/dev/jobs/engine-type`,
+    {
+      method: 'GET',
+      params,
     },
   );
 }
@@ -580,6 +727,25 @@ export async function runTask(params: { id: number; environment: Environments })
       params,
     },
   );
+}
+
+/**
+ * 试运行作业
+ */
+export async function tyrRun(data: any) {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/sql/sqlJobDryRun', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 获取试运行日志
+ */
+ export async function getTyrRunLog(params: any) {
+  return request<DefaultResponse & { data: any }>('/api/p1/dev/jobs/batchesLog', {
+    params,
+  });
 }
 
 /**
@@ -723,6 +889,26 @@ export async function runQuery(data: {
 }
 
 /**
+ * 停止调试
+ */
+ export async function cancelQuery(data: {
+  sessionId: number;
+  statementId: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        sessionId: number;
+        statementId: number;
+      };
+    }
+  >('/api/p1/dev/jobs/cancelQuery', {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
  * 查询结果runQueryResult
  */
 export async function runQueryResult(params: {
@@ -747,6 +933,7 @@ export async function runQueryResult(params: {
         statementState: StatementState;
         outputStatus: string;
         resultSet: { [key: string]: string }[];
+        resultHeader: string [];
         pythonResults?: string;
       };
     }
@@ -757,7 +944,54 @@ export async function runQueryResult(params: {
 }
 
 /**
- * 获取作业历史
+ * 数据开发-作业：获取作业历史
+ */
+ export async function getDevHistory(data: {
+  environment: string,
+  jobId: number;
+  startTime: number;
+  endTime: number;
+  pageNum: number;
+  pageSize: number;
+}) {
+  return request<
+    DefaultResponse & {
+      data: {
+        content: TaskHistoryItem[];
+        pageNum: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+      };
+    }
+  >(`/api/p1/dev/jobs/history/anotherPage`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 数据开发-作业：查看作业日志
+ */
+ export async function getDevLog(params: {
+  jobId: number;
+  env: string;
+  lineNum: number;
+  skipLineNum: number;
+  taskId: number;
+ }) {
+  return request<
+    DefaultResponse & {
+      data: string;
+    }
+  >(`/api/p1/dev/jobs/dependency/${params.jobId}/running/log`, {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 数据集成：获取作业历史
  */
 export async function getTaskHistory(data: {
   condition: {
@@ -962,7 +1196,7 @@ export async function getDISyncMode(params: { jobType: string }) {
  * 新增DI
  */
 export async function createDIJob(data: CreateDIJobDto) {
-  return request<Tresponse>('/api/p1/dev/jobs/di', { method: 'POST', data });
+  return request<Tresponse<Task>>('/api/p1/dev/jobs/di', { method: 'POST', data });
 }
 
 /**
@@ -970,6 +1204,26 @@ export async function createDIJob(data: CreateDIJobDto) {
  */
 export async function getDIJobBasicInfo(jobId: number) {
   return request<Tresponse<DIJobBasicInfo>>(`/api/p1/dev/jobs/di/${jobId}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取实时抽数作业内容
+ */
+ export async function getStreamJobBasicInfo({jobId, version} : {jobId: number; version: number}) {
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents/${version}`).then(
+    ({ data }) => data,
+  );
+}
+
+/**
+ * 获取转换目标表表名
+ */
+ export async function getDestTableName(params: any) {
+  return request('/api/p1/dev/jobs/assistance/DIStreamDestTable', {
+    params
+  }).then(
     ({ data }) => data,
   );
 }
@@ -988,7 +1242,7 @@ export async function saveDIJobBasicInfo(data: unknown) {
  * 获取DI作业内容
  */
 export async function getDIJobContent({ jobId, version }: { jobId: number; version: number }) {
-  return request(`/api/p1/dev/jobs/${jobId}/di/adapt/contents/${version}`);
+  return request(`/api/p1/dev/jobs/${jobId}/di/contents/${version}`);
 }
 
 /**
@@ -997,6 +1251,17 @@ export async function getDIJobContent({ jobId, version }: { jobId: number; versi
 export async function saveDIJobContent(data: any) {
   const { jobId } = data;
   return request(`/api/p1/dev/jobs/${jobId}/di/contents`, {
+    method: 'POST',
+    data,
+  });
+}
+
+/**
+ * 保存实时抽数作业内容
+ */
+ export async function saveStreamJobContent(data: any) {
+  const { jobId } = data;
+  return request(`/api/p1/dev/jobs/${jobId}/stream/di/contents`, {
     method: 'POST',
     data,
   });
@@ -1048,6 +1313,29 @@ export async function getColumns(params: {
   tableName: string;
 }) {
   return request('/api/p1/das/columns', {
+    params,
+  });
+}
+
+/**
+ * 生成 SQL_FLINK 模板
+ * @param params
+ * @returns
+ */
+export async function genFlinkTemplate(data: {
+  flinkSourceConfigs?: unknown[];
+  flinkSinkConfigs?: unknown[];
+}) {
+  return request('/api/p1/dev/jobs/sql/flink/template', {
+    method: 'POST',
+    data,
+  }).then(({ data }) => data);
+}
+
+export async function getWriteModeEnum(params: {
+  writeMode: 'DiEnum' | 'BackFlowEnum' | 'SqlEnum';
+}) {
+  return request<Tresponse<string[]>>('/api/p1/dictionary/enum/writeMode', {
     params,
   });
 }

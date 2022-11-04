@@ -9,4 +9,5 @@ public interface DevJobInfoMyDao {
 
     JobInfoExecuteDetailDto selectJobInfoExecuteDetail(Long id, String env);
 
+    String selectDestFileType(Long id, String env);
 }

@@ -42,12 +42,13 @@ mybatis:
     map-underscore-to-camel-case: true
   mapper-locations: classpath*:mapper/*.xml # 配置 Mapper XML 地址
 
-auth:
-  jwt:
-    security:
-
 hdfs:
   basePath: /tmp/shiyin/
+
+dev:
+  job:
+    publish:
+      whitelist:
 
 pagehelper:
   helperDialect: mysql
@@ -58,8 +59,10 @@ pagehelper:
 #access:
 #  mode : idata-merge
 
-zcy:
-  is-cloud: ture # 是否是云端，ture：云端，false：本地化
+idataEtl:
+  checkToken:
 
+dqc:
+  open: false
 
 

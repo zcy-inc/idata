@@ -81,6 +81,7 @@ public class DevTreeNodeCacheValue {
         dto.setParentId(old.getParentId());
         dto.setType(old.getType());
         dto.setBelong(old.getBelong());
+        dto.setConcreteBelong(old.getConcreteBelong());
         return dto;
     }
 }

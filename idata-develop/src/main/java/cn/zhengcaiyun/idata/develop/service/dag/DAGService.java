@@ -18,6 +18,7 @@
 package cn.zhengcaiyun.idata.develop.service.dag;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
@@ -39,6 +40,8 @@ public interface DAGService {
 
     Boolean removeDag(Long id, Operator operator) throws IllegalAccessException;
 
+    Boolean cleanDagHistory(Long id, Operator operator);
+
     Boolean online(Long id, Operator operator);
 
     Boolean offline(Long id, Operator operator);
@@ -46,5 +49,7 @@ public interface DAGService {
     Boolean saveDependence(Long id, List<Long> dependenceIds, Operator operator);
 
     List<DAGInfoDto> getDAGInfoList(DAGInfoCondition condition);
+
+    List<Integer> cleanDagExecutionHistory(EnvEnum envEnum);
 
 }

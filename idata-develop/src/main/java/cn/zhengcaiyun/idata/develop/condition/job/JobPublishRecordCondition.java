@@ -1,5 +1,7 @@
 package cn.zhengcaiyun.idata.develop.condition.job;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: yangjianhua
@@ -33,6 +35,11 @@ public class JobPublishRecordCondition {
     private Integer publishStatus;
 
     /**
+     * 发布状态，1：待发布，2：已发布，4：已驳回，9：已归档
+     */
+    private List<Integer> publishStatusList;
+
+    /**
      * 作业类型
      */
     private String jobTypeCode;
@@ -46,6 +53,11 @@ public class JobPublishRecordCondition {
      * 提交人
      */
     private String submitOperator;
+
+    /**
+     * 作业id集合
+     */
+    private List<Long> jobIds;
 
     public Long getJobId() {
         return jobId;
@@ -109,5 +121,21 @@ public class JobPublishRecordCondition {
 
     public void setSubmitOperator(String submitOperator) {
         this.submitOperator = submitOperator;
+    }
+
+    public List<Long> getJobIds() {
+        return jobIds;
+    }
+
+    public void setJobIds(List<Long> jobIds) {
+        this.jobIds = jobIds;
+    }
+
+    public List<Integer> getPublishStatusList() {
+        return publishStatusList;
+    }
+
+    public void setPublishStatusList(List<Integer> publishStatusList) {
+        this.publishStatusList = publishStatusList;
     }
 }

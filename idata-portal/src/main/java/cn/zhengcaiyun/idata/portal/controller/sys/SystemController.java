@@ -20,6 +20,7 @@ import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.dto.BaseTreeNodeDto;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.dto.label.LabelDefineDto;
+import cn.zhengcaiyun.idata.system.dal.model.SysFeature;
 import cn.zhengcaiyun.idata.system.dto.*;
 import cn.zhengcaiyun.idata.system.service.SystemConfigService;
 import cn.zhengcaiyun.idata.system.service.SystemService;
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +72,7 @@ public class SystemController {
 
     @GetMapping("/p1/sys/folderTree")
     public RestResult<List<FolderTreeNodeDto>> getSystemFolderTree() {
-        return RestResult.success(systemService.getDevFolderTree(new HashMap<>()));
+        return RestResult.success(systemService.getFolderTree(new HashMap<>()));
     }
 
     @GetMapping("/p1/sys/configTypes")
@@ -97,6 +99,12 @@ public class SystemController {
             throw new IllegalAccessException("没有LDAP配置权限");
         }
         return RestResult.success(systemConfigService.getSystemConfigs(ConfigTypeEnum.LDAP.name()));
+    }
+
+    @GetMapping("/p1/sys/features")
+    public RestResult<List<SysFeature>> getFeaturesByCodes(@RequestParam(value = "featureCodes", required = false) String featureCodes) {
+        List<String> featureCodeList = featureCodes != null ? Arrays.asList(featureCodes.split(",")) : null;
+        return RestResult.success(systemConfigService.getFeaturesByCodes(featureCodeList));
     }
 
     @PostMapping("/p1/sys/xmlConfigValue")

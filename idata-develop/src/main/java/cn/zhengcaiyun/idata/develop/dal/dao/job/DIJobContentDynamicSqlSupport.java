@@ -96,6 +96,13 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   来源表方式，S：下拉选择；E：手动编辑
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables_fashion")
+    public static final SqlColumn<String> srcTablesFashion = DI_JOB_CONTENT.srcTablesFashion;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-读取模式，all：全量，incremental：增量
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_read_mode")
@@ -201,13 +208,6 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
-     *   DI作业增量模式的mergeSql
-     */
-    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
-    public static final SqlColumn<String> mergeSql = DI_JOB_CONTENT.mergeSql;
-
-    /**
-     * Database Column Remarks:
      *   脚本模式，作用同可视化src_columns
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.script_select_columns")
@@ -236,6 +236,20 @@ public final class DIJobContentDynamicSqlSupport {
 
     /**
      * Database Column Remarks:
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_table_pt")
+    public static final SqlColumn<String> srcTablePt = DI_JOB_CONTENT.srcTablePt;
+
+    /**
+     * Database Column Remarks:
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_table_pt")
+    public static final SqlColumn<String> destTablePt = DI_JOB_CONTENT.destTablePt;
+
+    /**
+     * Database Column Remarks:
      *   数据来源-来源表
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.src_tables")
@@ -261,6 +275,13 @@ public final class DIJobContentDynamicSqlSupport {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.dest_columns")
     public static final SqlColumn<String> destColumns = DI_JOB_CONTENT.destColumns;
+
+    /**
+     * Database Column Remarks:
+     *   DI作业增量模式的mergeSql
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_content_di.merge_sql")
+    public static final SqlColumn<String> mergeSql = DI_JOB_CONTENT.mergeSql;
 
     /**
      * Database Column Remarks:
@@ -302,6 +323,8 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> srcTopic = column("src_topic", JDBCType.VARCHAR);
 
+        public final SqlColumn<String> srcTablesFashion = column("src_tables_fashion", JDBCType.VARCHAR);
+
         public final SqlColumn<String> srcReadMode = column("src_read_mode", JDBCType.VARCHAR);
 
         public final SqlColumn<String> srcReadFilter = column("src_read_filter", JDBCType.VARCHAR);
@@ -332,8 +355,6 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<String> contentHash = column("content_hash", JDBCType.VARCHAR);
 
-        public final SqlColumn<String> mergeSql = column("merge_sql", JDBCType.VARCHAR);
-
         public final SqlColumn<String> scriptSelectColumns = column("script_select_columns", JDBCType.VARCHAR);
 
         public final SqlColumn<String> scriptKeyColumns = column("script_key_columns", JDBCType.VARCHAR);
@@ -342,6 +363,10 @@ public final class DIJobContentDynamicSqlSupport {
 
         public final SqlColumn<Integer> configMode = column("config_mode", JDBCType.TINYINT);
 
+        public final SqlColumn<String> srcTablePt = column("src_table_pt", JDBCType.VARCHAR);
+
+        public final SqlColumn<String> destTablePt = column("dest_table_pt", JDBCType.VARCHAR);
+
         public final SqlColumn<String> srcTables = column("src_tables", JDBCType.LONGVARCHAR);
 
         public final SqlColumn<String> srcColumns = column("src_columns", JDBCType.LONGVARCHAR);
@@ -349,6 +374,8 @@ public final class DIJobContentDynamicSqlSupport {
         public final SqlColumn<String> srcQuery = column("src_query", JDBCType.LONGVARCHAR);
 
         public final SqlColumn<String> destColumns = column("dest_columns", JDBCType.LONGVARCHAR);
+
+        public final SqlColumn<String> mergeSql = column("merge_sql", JDBCType.LONGVARCHAR);
 
         public final SqlColumn<String> scriptMergeSql = column("script_merge_sql", JDBCType.LONGVARCHAR);
 

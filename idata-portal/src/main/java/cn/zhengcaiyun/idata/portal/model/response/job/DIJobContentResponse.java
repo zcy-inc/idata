@@ -1,7 +1,9 @@
 package cn.zhengcaiyun.idata.portal.model.response.job;
 
+import cn.zhengcaiyun.idata.commons.dto.general.KeyValuePair;
 import cn.zhengcaiyun.idata.develop.constant.enums.JobTypeEnum;
 import cn.zhengcaiyun.idata.develop.dal.model.job.DIJobContent;
+import cn.zhengcaiyun.idata.develop.dto.job.di.DITableFashionConfig;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
 import cn.zhengcaiyun.idata.develop.dto.job.di.ScriptMergeSqlParamDto;
 import cn.zhengcaiyun.idata.develop.util.JobVersionHelper;
@@ -106,6 +108,11 @@ public class DIJobContentResponse {
     private String srcTables;
 
     /**
+     * 数据来源-表模式
+     */
+    private DITableFashionConfig srcTableConfig;
+
+    /**
      * 数据来源-字段信息
      */
     private List<MappingColumnDto> srcCols;
@@ -183,7 +190,17 @@ public class DIJobContentResponse {
     /**
      *   目标库中间件的内置属性
      */
-    private Map<String, String> destPropertyMap;
+    private List<KeyValuePair<String, String>> destPropertyMap;
+
+    /**
+     *   回流数据源（hive）的分区目录信息 例如pt=20220801
+     */
+    private String srcTablePt;
+
+    /**
+     *   目标数据源（doris）的分区别名，例如p20220801
+     */
+    private String destTablePt;
 
 
     public String getSrcDbName() {
@@ -458,11 +475,11 @@ public class DIJobContentResponse {
         this.scriptMergeSqlParamDto = scriptMergeSqlParamDto;
     }
 
-    public Map<String, String> getDestPropertyMap() {
+    public List<KeyValuePair<String, String>> getDestPropertyMap() {
         return destPropertyMap;
     }
 
-    public void setDestPropertyMap(Map<String, String> destPropertyMap) {
+    public void setDestPropertyMap(List<KeyValuePair<String, String>> destPropertyMap) {
         this.destPropertyMap = destPropertyMap;
     }
 
@@ -480,5 +497,29 @@ public class DIJobContentResponse {
 
     public void setJobTypeCode(String jobTypeCode) {
         this.jobTypeCode = jobTypeCode;
+    }
+
+    public DITableFashionConfig getSrcTableConfig() {
+        return srcTableConfig;
+    }
+
+    public void setSrcTableConfig(DITableFashionConfig srcTableConfig) {
+        this.srcTableConfig = srcTableConfig;
+    }
+
+    public String getSrcTablePt() {
+        return srcTablePt;
+    }
+
+    public void setSrcTablePt(String srcTablePt) {
+        this.srcTablePt = srcTablePt;
+    }
+
+    public String getDestTablePt() {
+        return destTablePt;
+    }
+
+    public void setDestTablePt(String destTablePt) {
+        this.destTablePt = destTablePt;
     }
 }

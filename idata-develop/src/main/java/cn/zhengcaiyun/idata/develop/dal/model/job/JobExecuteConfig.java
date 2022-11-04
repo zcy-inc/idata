@@ -1,7 +1,7 @@
 package cn.zhengcaiyun.idata.develop.dal.model.job;
 
-import java.util.Date;
 import javax.annotation.Generated;
+import java.util.Date;
 
 /**
  *
@@ -137,6 +137,13 @@ public class JobExecuteConfig {
 
     /**
      * Database Column Remarks:
+     *   executor cores
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    private Integer execCores;
+
+    /**
+     * Database Column Remarks:
      *   作业运行状态（环境级），0：暂停运行；1：恢复运行
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
@@ -148,6 +155,34 @@ public class JobExecuteConfig {
      */
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
     private String execEngine;
+
+    /**
+     * Database Column Remarks:
+     *   自定义参数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    private String extProperties;
+
+    /**
+     * Database Column Remarks:
+     *   开启小文件合并 0:否，1:是
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    private Integer isOpenMergeFile;
+
+    /**
+     * Database Column Remarks:
+     *   DS自定义参数
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    private String customParams;
+
+    /**
+     * Database Column Remarks:
+     *   写入文件类型 Spark SQL类型：orc、parquet
+     */
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    private String destFileType;
 
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.id")
     public Long getId() {
@@ -329,6 +364,16 @@ public class JobExecuteConfig {
         this.execWorkerMem = execWorkerMem;
     }
 
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    public Integer getExecCores() {
+        return execCores;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_cores")
+    public void setExecCores(Integer execCores) {
+        this.execCores = execCores;
+    }
+
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.running_state")
     public Integer getRunningState() {
         return runningState;
@@ -347,5 +392,45 @@ public class JobExecuteConfig {
     @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.exec_engine")
     public void setExecEngine(String execEngine) {
         this.execEngine = execEngine;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    public String getExtProperties() {
+        return extProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.ext_properties")
+    public void setExtProperties(String extProperties) {
+        this.extProperties = extProperties;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    public Integer getIsOpenMergeFile() {
+        return isOpenMergeFile;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.is_open_merge_file")
+    public void setIsOpenMergeFile(Integer isOpenMergeFile) {
+        this.isOpenMergeFile = isOpenMergeFile;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    public String getCustomParams() {
+        return customParams;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.custom_params")
+    public void setCustomParams(String customParams) {
+        this.customParams = customParams;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    public String getDestFileType() {
+        return destFileType;
+    }
+
+    @Generated(value="org.mybatis.generator.api.MyBatisGenerator", comments="Source field: dev_job_execute_config.dest_file_type")
+    public void setDestFileType(String destFileType) {
+        this.destFileType = destFileType;
     }
 }

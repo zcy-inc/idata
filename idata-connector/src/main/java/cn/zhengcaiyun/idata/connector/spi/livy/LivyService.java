@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.connector.spi.livy;
 
 import cn.zhengcaiyun.idata.commons.exception.GeneralException;
+import cn.zhengcaiyun.idata.commons.pojo.PojoUtil;
+import cn.zhengcaiyun.idata.connector.util.SparkSqlUtil;
 import cn.zhengcaiyun.idata.core.http.HttpInput;
 import cn.zhengcaiyun.idata.core.http.HttpClientUtil;
 import cn.zhengcaiyun.idata.connector.spi.livy.dto.*;
@@ -52,6 +54,7 @@ public class LivyService {
     }};
     private final String DEFAULT_DRIVER_MEMORY = "1G";
     private final String DEFAULT_EXECUTOR_MEMORY = "2G";
+    private final String YARN_QUEUE = "root.offline";
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -82,6 +85,7 @@ public class LivyService {
         body.put("driverMemory", DEFAULT_DRIVER_MEMORY);
         body.put("executorMemory", DEFAULT_EXECUTOR_MEMORY);
         body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
         Map<String, Object> session = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {
                 },
@@ -125,8 +129,7 @@ public class LivyService {
     public void cancelStatement(LivyStatementDto statement) {
         sendToLivy(new HttpInput().setMethod("POST"),
                 new TypeReference<String>() {
-                },
-                "/sessions/%d/statements/%d/cancel", statement.getSessionId(), statement.getStatementId());
+                }, "/sessions/%d/statements/%d/cancel", statement.getSessionId(), statement.getStatementId());
     }
 
     public LivySqlResultDto queryResult(Integer sessionId, Integer statementId, LivySessionKindEnum sessionKind) {
@@ -213,15 +216,11 @@ public class LivyService {
         }
     }
 
-    public LivySessionDto createBatches(String file, List<String> args, String driverMemory, String executorMemory) {
+    public LivySessionDto createBatches(String file, List<String> args) {
         Map<String, Object> body = new HashMap<>();
-        driverMemory = isNotEmpty(driverMemory) ? driverMemory : DEFAULT_DRIVER_MEMORY;
-        executorMemory = isNotEmpty(executorMemory) ? executorMemory : DEFAULT_EXECUTOR_MEMORY;
         body.put("file", file);
         body.put("args", args);
-        body.put("driverMemory", driverMemory);
-        body.put("executorMemory", executorMemory);
-        body.put("conf", DEFAULT_MAX_EXECUTORS);
+        body.put("queue", YARN_QUEUE);
 
         Map<String, Object> response = sendToLivy(new HttpInput().setMethod("POST").setObjectBody(body),
                 new TypeReference<Map<String, Object>>() {

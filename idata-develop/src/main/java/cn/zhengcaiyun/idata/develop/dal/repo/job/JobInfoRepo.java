@@ -22,7 +22,6 @@ import cn.zhengcaiyun.idata.develop.dal.model.job.JobInfo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @description:
@@ -53,5 +52,6 @@ public interface JobInfoRepo {
 
     List<JobInfo> queryList(JobInfoCondition condition, long limit, long offset);
 
-    List<JobInfo> queryJobInfoByIds(Set<Long> accessIdSet);
+    Boolean updateJobFolder(List<Long> jobIds, Long destFolderId, String operator);
+
 }

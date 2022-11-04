@@ -1,0 +1,74 @@
+.task {
+  :global {
+    .ant-form-item-no-colon {
+      width: 148px;
+    }
+  }
+  .toolbar {
+    :global {
+      .ant-select-arrow {
+        color: #304ffe;
+      }
+    }
+  }
+  .form-box {
+    display: flex;
+    margin-top: 52px;
+    .form-box-item {
+      flex: 1;
+      &:first-child {
+        margin-right: 80px;
+      }
+      .refresh {
+        position: relative;
+        &::after {
+          position: absolute;
+          top: -4px;
+          left: 8px;
+          width: 56px;
+          content: '\5237\65b0\89c6\56fe' //刷新视图;
+        }
+      }
+    }
+  }
+  .string-map-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+.form {
+  :global {
+    .ant-form-item {
+      flex-direction: column;
+    }
+    .ant-form-item-label {
+      padding: 0px 0px 8px;
+      color: #15172f;
+      font-weight: 600;
+      > label {
+        justify-content: unset;
+      }
+    }
+  }
+  .tip {
+    height: 64px;
+    margin-top: -16px;
+    margin-bottom: 24px;
+    padding: 8px 12px;
+    color: #737b96;
+    font-size: 12px;
+    background-color: #f7f8fa;
+    &-title {
+      display: inline-block;
+      width: 36px;
+      color: #545c75;
+      font-weight: 500;
+    }
+    &-second {
+      padding-left: 36px;
+    }
+  }
+}

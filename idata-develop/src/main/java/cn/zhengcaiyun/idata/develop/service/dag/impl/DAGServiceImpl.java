@@ -18,6 +18,8 @@
 package cn.zhengcaiyun.idata.develop.service.dag.impl;
 
 import cn.zhengcaiyun.idata.commons.context.Operator;
+import cn.zhengcaiyun.idata.commons.enums.EnvEnum;
+import cn.zhengcaiyun.idata.commons.enums.FolderTypeEnum;
 import cn.zhengcaiyun.idata.commons.enums.UsingStatusEnum;
 import cn.zhengcaiyun.idata.develop.cache.DevTreeNodeLocalCache;
 import cn.zhengcaiyun.idata.develop.condition.dag.DAGInfoCondition;
@@ -28,18 +30,19 @@ import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGDependence;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGEventLog;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGInfo;
 import cn.zhengcaiyun.idata.develop.dal.model.dag.DAGSchedule;
+import cn.zhengcaiyun.idata.develop.dal.model.folder.CompositeFolder;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGEventLogRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.dag.DAGRepo;
+import cn.zhengcaiyun.idata.develop.dal.repo.folder.CompositeFolderRepo;
 import cn.zhengcaiyun.idata.develop.dal.repo.job.JobExecuteConfigRepo;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGInfoDto;
 import cn.zhengcaiyun.idata.develop.dto.dag.DAGScheduleDto;
 import cn.zhengcaiyun.idata.develop.event.dag.publisher.DagEventPublisher;
+import cn.zhengcaiyun.idata.develop.manager.JobScheduleManager;
 import cn.zhengcaiyun.idata.develop.service.access.DevAccessService;
 import cn.zhengcaiyun.idata.develop.service.dag.DAGService;
 import cn.zhengcaiyun.idata.develop.util.CronExpressionUtil;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
-import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -69,6 +72,9 @@ public class DAGServiceImpl implements DAGService {
     private final DevTreeNodeLocalCache devTreeNodeLocalCache;
     private final DagEventPublisher dagEventPublisher;
     private final DevAccessService devAccessService;
+    private final CompositeFolderRepo compositeFolderRepo;
+
+    private final JobScheduleManager jobScheduleManager;
 
     @Autowired
     public DAGServiceImpl(DAGRepo dagRepo,
@@ -76,13 +82,17 @@ public class DAGServiceImpl implements DAGService {
                           JobExecuteConfigRepo jobExecuteConfigRepo,
                           DevTreeNodeLocalCache devTreeNodeLocalCache,
                           DagEventPublisher dagEventPublisher,
-                          DevAccessService devAccessService) {
+                          DevAccessService devAccessService,
+                          CompositeFolderRepo compositeFolderRepo,
+                          JobScheduleManager jobScheduleManager) {
         this.dagRepo = dagRepo;
         this.dagEventLogRepo = dagEventLogRepo;
         this.jobExecuteConfigRepo = jobExecuteConfigRepo;
         this.devTreeNodeLocalCache = devTreeNodeLocalCache;
         this.dagEventPublisher = dagEventPublisher;
         this.devAccessService = devAccessService;
+        this.compositeFolderRepo = compositeFolderRepo;
+        this.jobScheduleManager = jobScheduleManager;
     }
 
     @Override
@@ -93,6 +103,11 @@ public class DAGServiceImpl implements DAGService {
 
         DAGScheduleDto dagScheduleDto = dto.getDagScheduleDto();
         checkDag(dagInfoDto, dagScheduleDto);
+
+        Optional<CompositeFolder> folderOptional = compositeFolderRepo.queryFolder(dagInfoDto.getFolderId());
+        checkArgument(folderOptional.isPresent(), "DAG所属文件夹不存在");
+        checkArgument(!FolderTypeEnum.FUNCTION.name().equals(folderOptional.get().getType()), "DAG不能建在模块根目录下");
+
         List<DAGInfo> dupNameDag = dagRepo.queryDAGInfo(dagInfoDto.getName());
         checkArgument(ObjectUtils.isEmpty(dupNameDag), "DAG名称已存在");
 
@@ -193,6 +208,13 @@ public class DAGServiceImpl implements DAGService {
 
         devTreeNodeLocalCache.invalidate(FunctionModuleEnum.DAG);
         return ret;
+    }
+
+    @Override
+    public Boolean cleanDagHistory(Long id, Operator operator) {
+        DAGEventLog eventLog = logDagEvent(id, EventTypeEnum.DAG_CLEAN_HISTORY, operator);
+        dagEventPublisher.whenToCleanHistory(eventLog);
+        return Boolean.TRUE;
     }
 
     @Override
@@ -311,6 +333,11 @@ public class DAGServiceImpl implements DAGService {
         return dagInfoList.stream()
                 .map(DAGInfoDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Integer> cleanDagExecutionHistory(EnvEnum envEnum) {
+        return jobScheduleManager.cleanDagExecutionHistory(envEnum);
     }
 
     private List<DAGDependence> buildDependenceList(final Long currentDagId, List<Long> dependenceIds, Operator operator) {

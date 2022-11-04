@@ -104,6 +104,10 @@ public class MetadataQueryApiImpl implements MetadataQueryApi {
                 String tableName = rs.getString("TABLE_NAME");  //表名
                 String tableType = rs.getString("TABLE_TYPE");  //表类型
                 String remarks = rs.getString("REMARKS");       //表备注
+                if (DataSourceTypeEnum.postgresql == sourceTypeEnum) {
+                    String tableSchema = rs.getString("TABLE_SCHEM");
+                    tableName = tableSchema + "." + tableName;
+                }
                 tableNames.add(tableName);
             }
         } catch (SQLException ex) {

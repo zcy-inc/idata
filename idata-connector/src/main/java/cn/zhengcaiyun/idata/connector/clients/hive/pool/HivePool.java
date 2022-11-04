@@ -13,8 +13,8 @@ public class HivePool extends HivePoolAbstract {
 
     public static final int DEFAULT_TIMEOUT = 2000;
 
-    public HivePool(ConnectInfo connectInfo) {
-        this(new GenericObjectPoolConfig(), connectInfo);
+    public HivePool(ConnectInfo connectInfo, GenericObjectPoolConfig genericObjectPoolConfig) {
+        this(genericObjectPoolConfig, connectInfo);
     }
 
     public HivePool(final GenericObjectPoolConfig poolConfig, ConnectInfo connectInfo) {

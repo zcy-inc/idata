@@ -3,25 +3,32 @@ import { IconFont } from '@/components';
 import type { FC } from 'react';
 
 interface IconCreateProps {
-  onClick: () => void;
+  onClick?: (e: any) => void;
+  onMouseEnter?: (e: any) => void;
+  onMouseLeave?: (e: any) => void;
+  onFocus?: (e: any) => void;
 }
 
-const IconCreate: FC<IconCreateProps> = ({ onClick }) => {
+const IconCreate: FC<IconCreateProps> = ({  onClick, onFocus, onMouseEnter, onMouseLeave }) => {
   const [isHover, setIsHover] = useState(false);
+  const hadnleMouseEnter = (e: any) => {
+    setIsHover(true);
+    onMouseEnter && onMouseEnter(e);
+  }
 
+  const handleMouseLeave = (e: any) => {
+    setIsHover(false);
+    onMouseLeave && onMouseLeave(e);
+  }
   return (
-    <div
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
+    <IconFont
+      onMouseEnter={hadnleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1 }}
-    >
-      {isHover ? (
-        <IconFont type="icon-tianjia" style={{ fontSize: 18 }} />
-      ) : (
-        <IconFont type="icon-xinjian1" style={{ fontSize: 18 }} />
-      )}
-    </div>
+      onFocus={onFocus}
+      style={{ marginLeft: 8, cursor: 'pointer', lineHeight: 1,  fontSize: 18 }}
+      type={isHover ? 'icon-tianjia' : 'icon-xinjian1'}
+    />
   );
 };
 

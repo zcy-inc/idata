@@ -16,8 +16,14 @@
  */
 package cn.zhengcaiyun.idata.develop.dto.job.sql;
 
+import cn.zhengcaiyun.idata.develop.dal.model.job.DevJobContentSql;
 import cn.zhengcaiyun.idata.develop.dto.job.JobContentBaseDto;
+import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,7 +34,11 @@ import java.util.Objects;
 public class SqlJobContentDto extends JobContentBaseDto {
     private String sourceSql;
     private String udfIds;
-    private String externalTables;
+    /**
+     * 外部表配置
+     */
+    private List<SqlJobExternalTableDto> extTables;
+    private SqlJobExtendConfigDto extConfig;
 
     // GaS
     public String getSourceSql() {
@@ -47,12 +57,48 @@ public class SqlJobContentDto extends JobContentBaseDto {
         this.udfIds = udfIds;
     }
 
-    public String getExternalTables() {
-        return externalTables;
+    public List<SqlJobExternalTableDto> getExtTables() {
+        return extTables;
     }
 
-    public void setExternalTables(String externalTables) {
-        this.externalTables = externalTables;
+    public void setExtTables(List<SqlJobExternalTableDto> extTables) {
+        this.extTables = extTables;
+    }
+
+    public SqlJobExtendConfigDto getExtConfig() {
+        return extConfig;
+    }
+
+    public void setExtConfig(SqlJobExtendConfigDto extConfig) {
+        this.extConfig = extConfig;
+    }
+
+    public DevJobContentSql toModel() {
+        DevJobContentSql contentSql = new DevJobContentSql();
+        BeanUtils.copyProperties(this, contentSql);
+        if (!Objects.isNull(this.extConfig)) {
+            contentSql.setExtendConfigs(new Gson().toJson(this.extConfig));
+        } else {
+            contentSql.setExtendConfigs("");
+        }
+        if (Objects.nonNull(this.extTables)) {
+            contentSql.setExternalTables(JSON.toJSONString(this.extTables));
+        } else {
+            contentSql.setExternalTables("");
+        }
+        return contentSql;
+    }
+
+    public static SqlJobContentDto from(DevJobContentSql contentSql) {
+        SqlJobContentDto contentDto = new SqlJobContentDto();
+        BeanUtils.copyProperties(contentSql, contentDto);
+        if (StringUtils.isNotBlank(contentSql.getExtendConfigs())) {
+            contentDto.setExtConfig(new Gson().fromJson(contentSql.getExtendConfigs(), SqlJobExtendConfigDto.class));
+        }
+        if (StringUtils.isNotBlank(contentSql.getExternalTables())) {
+            contentDto.setExtTables(JSON.parseArray(contentSql.getExternalTables(), SqlJobExternalTableDto.class));
+        }
+        return contentDto;
     }
 
     @Override
@@ -60,14 +106,12 @@ public class SqlJobContentDto extends JobContentBaseDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        SqlJobContentDto sqlJobDto = (SqlJobContentDto) o;
-        return Objects.equals(sourceSql, sqlJobDto.sourceSql) &&
-                Objects.equals(udfIds, sqlJobDto.udfIds) &&
-                Objects.equals(externalTables, sqlJobDto.externalTables);
+        SqlJobContentDto that = (SqlJobContentDto) o;
+        return Objects.equals(sourceSql, that.sourceSql) && Objects.equals(udfIds, that.udfIds) && Objects.equals(extTables, that.extTables) && Objects.equals(extConfig, that.extConfig);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), sourceSql, udfIds, externalTables);
+        return Objects.hash(super.hashCode(), sourceSql, udfIds, extTables, extConfig);
     }
 }

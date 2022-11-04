@@ -14,6 +14,7 @@ import {
   JobStatus,
   DIJobType,
   DISyncMode,
+  ContentBelong
 } from '@/constants/datadev';
 import { DataSourceTypes, Environments } from '@/constants/datasource';
 
@@ -27,10 +28,18 @@ export interface TreeNode {
   parentCid?: string;
   parentId?: number;
   children?: TreeNode[];
+  concreteBelong?: ContentBelong;
   // 以下是Antd树组件需要的属性
   className?: string;
   title?: any;
   key?: string;
+}
+
+export interface Job {
+  id: number;
+  name: string;
+  jobType: string;
+  displayVersion?: string;
 }
 
 // 平铺文件夹的类型
@@ -80,6 +89,7 @@ export interface Task {
   folderId: number;
   creator: string;
   language?: TaskTypes;
+  syncMode?: string;
 }
 
 export interface TaskVersion {
@@ -134,7 +144,7 @@ export interface TaskConfig {
     schDagId: number; // 调度配置-dag编号
     schRerunMode: SchRerunMode; // 调度配置-重跑配置
     schTimeOut: number; // 调度配置-超时时间
-    schDryRun: number; // 调度配置-是否空跑
+    schDryRun: number | string[]; // 调度配置-是否空跑
     execQueue: string; // 运行配置-队列
     execMaxParallelism: number; // 运行配置-作业最大并发数，配置为0时表示使用默认并发数
     execWarnLevel: string; // 运行配置-告警等级 时光的接口获取
@@ -180,11 +190,20 @@ export interface ConfiguredTaskListItem {
   dagName: string;
 }
 
+export interface DependenciesJob extends ConfiguredTaskListItem {
+  prevJobId: number;
+  prevJobDagId: number;
+  prevJobDagName: string;
+  prevJobName: string;
+  environment: Environments;
+}
+
 export interface SqlSparkContent {
   jobId: number;
   jobType: TaskTypes;
-  sourceSql: string;
-  externalTables: string;
+  sourceSql?: string;
+  externalTables?: object;
+  extTables?: Array;
   id?: number;
   editable?: number;
   version?: number;
@@ -257,7 +276,9 @@ export interface DependenceTreeNode {
 }
 
 export interface UDF {
+  globalFun: any;
   commandFormat: string;
+  sourceName?: string;
   description: string;
   fileName: string;
   folderId: number;
@@ -289,6 +310,7 @@ export interface DIJobBasicInfo {
   creator: string;
   status: 0 | 1; // 0 停用，1 启用
   remark?: string;
+  jobTypeEnum: string;
 }
 
 export interface MergeSqlParamDto {

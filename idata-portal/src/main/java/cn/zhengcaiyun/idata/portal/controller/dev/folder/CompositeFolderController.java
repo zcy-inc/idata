@@ -20,18 +20,16 @@ package cn.zhengcaiyun.idata.portal.controller.dev.folder;
 import cn.zhengcaiyun.idata.commons.context.OperatorContext;
 import cn.zhengcaiyun.idata.commons.pojo.RestResult;
 import cn.zhengcaiyun.idata.develop.condition.tree.DevTreeCondition;
+import cn.zhengcaiyun.idata.develop.condition.tree.FolderTreeCondition;
 import cn.zhengcaiyun.idata.develop.dto.folder.CompositeFolderDto;
 import cn.zhengcaiyun.idata.develop.dto.tree.DevTreeNodeDto;
 import cn.zhengcaiyun.idata.develop.service.folder.CompositeFolderService;
-import cn.zhengcaiyun.idata.system.dto.ResourceTypeEnum;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * composite-folder-controller
@@ -66,6 +64,17 @@ public class CompositeFolderController {
     @PostMapping("/tree")
     public RestResult<List<DevTreeNodeDto>> searchDevTree(@RequestBody DevTreeCondition condition) {
         return RestResult.success(compositeFolderService.searchDevTree(condition, OperatorContext.getCurrentOperator().getId()));
+    }
+
+    /**
+     * 搜索文件夹树
+     *
+     * @param condition
+     * @return
+     */
+    @PostMapping("/folders/tree")
+    public RestResult<List<DevTreeNodeDto>> searchFolderTree(@RequestBody FolderTreeCondition condition) {
+        return RestResult.success(compositeFolderService.searchFolderTree(condition, OperatorContext.getCurrentOperator().getId()));
     }
 
     /**

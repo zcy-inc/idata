@@ -26,6 +26,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
   // 表结构的列与数据
   const [data, setData] = useState<any[]>([]);
   const [keys, setKeys] = useState<Key[]>([]);
+  const [compKey, setCompKey] = useState('');
 
   useImperativeHandle(ref, () => ({ data }));
 
@@ -51,6 +52,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
       });
       setData(tmpData);
       setKeys(tmpKeys);
+      setCompKey(Date.now().toString());
     }
   }, [initial]);
 
@@ -109,12 +111,16 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
           case 'BOOLEAN_LABEL':
             Object.assign(column, {
               width: 'auto',
-              renderFormItem: (schema: any) => (
-                <Switch
-                  checked={data[schema.index][schema.dataIndex]}
-                  onChange={(checked) => setValue(schema, checked)}
-                />
-              ),
+              renderFormItem: (schema: any) => {
+                const value = data[schema.index][schema.dataIndex];
+                const checked = value === 'true' || value === true;
+                return (
+                  <Switch
+                    checked={checked}
+                    onChange={(checked) => setValue(schema, checked)}
+                  />
+                )
+              },
             });
             break;
           case 'ENUM_VALUE_LABEL':
@@ -159,6 +165,7 @@ const EditColsInfo: ForwardRefRenderFunction<unknown, EditColsInfoProps> = (
     <>
       <EditableProTable
         rowKey="key"
+        key={compKey}
         columns={renderColumns()}
         value={data}
         bordered

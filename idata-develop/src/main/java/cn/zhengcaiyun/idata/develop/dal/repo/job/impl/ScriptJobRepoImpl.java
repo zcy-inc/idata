@@ -25,11 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentScriptDynamicSqlSupport.devJobContentScript;
-import static cn.zhengcaiyun.idata.develop.dal.dao.job.DevJobContentSparkDynamicSqlSupport.devJobContentSpark;
-import static org.mybatis.dynamic.sql.SqlBuilder.and;
-import static org.mybatis.dynamic.sql.SqlBuilder.isEqualTo;
+import static org.mybatis.dynamic.sql.SqlBuilder.*;
 
 /**
  * @author caizhedong
@@ -45,9 +44,9 @@ public class ScriptJobRepoImpl implements ScriptJobRepo {
     @Override
     public DevJobContentScript query(Long jobId, Integer version) {
         DevJobContentScript echo = devJobContentScriptDao.selectOne(c ->
-                c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
-                        and(devJobContentScript.jobId, isEqualTo(jobId)),
-                        and(devJobContentScript.version, isEqualTo(version))))
+                        c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                                and(devJobContentScript.jobId, isEqualTo(jobId)),
+                                and(devJobContentScript.version, isEqualTo(version))))
                 .orElse(null);
         return echo;
     }
@@ -84,5 +83,20 @@ public class ScriptJobRepoImpl implements ScriptJobRepo {
                 .set(devJobContentScript.editor).equalTo(operator)
                 .where(devJobContentScript.id, isEqualTo(id)));
         return Boolean.TRUE;
+    }
+
+    @Override
+    public Optional<DevJobContentScript> queryLatest(Long jobId) {
+        return devJobContentScriptDao.selectOne(dsl -> dsl.where(devJobContentScript.jobId, isEqualTo(jobId),
+                        and(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val)))
+                .orderBy(devJobContentScript.version.descending())
+                .limit(1));
+    }
+
+    @Override
+    public List<DevJobContentScript> queryList(List<Long> ids) {
+        return devJobContentScriptDao.select(c ->
+                c.where(devJobContentScript.del, isEqualTo(DeleteEnum.DEL_NO.val),
+                        and(devJobContentScript.id, isIn(ids))));
     }
 }

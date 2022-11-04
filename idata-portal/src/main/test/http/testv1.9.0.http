@@ -1,0 +1,11 @@
+GET http://localhost:8080/api/p1/das/kafka/topics?dataSourceId=359
+Accept: application/json
+Cookie: Idea-765bca37=bd56c8f8-8ec5-410c-b7a9-960703db3fd6; Idea-765bca38=01cf15f7-8449-4318-8caa-6fc826acbf9f; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjY1NDU4NzcwLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.Iqzlkk1VNpxNv8WT82b3d5XgDqNr-63bL8nIGbY4l_QECQOPmyqrdK0vNeHb6Zgs4lF3Whpho6n6yIOYEX-n5Q
+
+###
+POST http://localhost:8080/api/p1/map/search?limit=10&offset=0
+Content-Type: application/json
+Cookie: _zcy_log_client_uuid=53bfb4f0-45e6-11ec-9d71-57b6b6ff67b3; _ga_ND5YVJWTCT=GS1.1.1654048201.2.0.1654048201.0; _ga=GA1.2.1266048430.1640225432; Authorization=eyJhbGciOiJIUzUxMiJ9.eyJyZWFsTmFtZSI6IuWNoOS5viIsIm5pY2tuYW1lIjoi5YyX56yZIiwibW9iaWxlIjoiMTg2NTc5NzA2ODUiLCJlbXBsb3llZUlkIjoiQzAxMDMzIiwiaWQiOjE4LCJhdmF0YXIiOiJOVUxMIiwiZXhwIjoxNjY1NjQwMjcyLCJlbWFpbCI6InpoYW5xaWFuQGNhaS1pbmMuY29tIiwidXNlcm5hbWUiOiJ6aGFucWlhbiJ9.0ifSvgHa9NavpE1kikEcJh7bmGi3vekwKZartVIGqvWnU-Ds2Ri1b9e7GQcfiRIS5HzRaMXjqYlHpEb_AVZmiw; redirect=
+
+{"myFavorite":true,"source":"table","keyWord":"s s s","categoryId":"","categoryType":"property_dir","tableSearchRange":"all"}
+###

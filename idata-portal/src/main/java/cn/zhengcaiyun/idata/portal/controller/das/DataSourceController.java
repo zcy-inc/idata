@@ -28,7 +28,6 @@ import cn.zhengcaiyun.idata.datasource.bean.dto.DataSourceDto;
 import cn.zhengcaiyun.idata.datasource.bean.dto.DbConfigDto;
 import cn.zhengcaiyun.idata.datasource.service.DataSourceService;
 import cn.zhengcaiyun.idata.develop.dto.job.di.MappingColumnDto;
-import cn.zhengcaiyun.idata.portal.controller.dev.job.JobTableController;
 import cn.zhengcaiyun.idata.user.service.UserAccessService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -73,15 +71,15 @@ public class DataSourceController {
     }
 
     /**
-     * 加载数据源的数据库
+     * 加载数据源的数据库 目前仅hive
      */
     @GetMapping("/dbNames")
     public RestResult<List<String>> getDbNames(@RequestParam("dataSourceId") Long dataSourceId) {
-        return RestResult.success(dataSourceService.getDbNames(dataSourceId));
+        return RestResult.success(dataSourceService.getHiveDbNames(dataSourceId));
     }
 
     /**
-     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName
+     * 查询数据源下的表，如果没指定dbName，则用数据源配置的默认dbName  目前仅hive
      *
      * @param dataSourceId
      * @param dbName
@@ -94,11 +92,11 @@ public class DataSourceController {
         if (dataSource.getType() == DataSourceTypeEnum.hive && StringUtils.isEmpty(dbName)) {
             return RestResult.success(new ArrayList<>());
         }
-        return RestResult.success(dataSourceService.getTableNames(dataSourceId, dbName));
+        return RestResult.success(dataSourceService.getHiveTableNames(dataSourceId, dbName));
     }
 
     /**
-     * 获取表字段
+     * 获取表字段  目前仅hive
      *
      * @param dataSourceId
      * @return

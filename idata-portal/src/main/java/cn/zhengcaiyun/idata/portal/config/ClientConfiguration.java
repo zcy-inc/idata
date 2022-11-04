@@ -6,6 +6,7 @@ import cn.zhengcaiyun.idata.system.api.SystemConfigApi;
 import cn.zhengcaiyun.idata.system.dal.dao.SysConfigDao;
 import cn.zhengcaiyun.idata.system.dal.model.SysConfig;
 import cn.zhengcaiyun.idata.system.dto.ConfigDto;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,12 @@ public class ClientConfiguration {
         String jdbcUrl = systemConfigByKey.getValueOne().get("hive-info").getConfigValue();
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setJdbc(jdbcUrl);
-        return new HivePool(connectInfo);
+
+        GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
+        genericObjectPoolConfig.setTestOnBorrow(true);
+        genericObjectPoolConfig.setTestOnReturn(true);
+        genericObjectPoolConfig.setTestOnCreate(true);
+        return new HivePool(connectInfo, genericObjectPoolConfig);
     }
 
 }
